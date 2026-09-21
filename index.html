@@ -425,7 +425,12 @@
     </div>
     <div class="field">
       <label>Password</label>
-      <input class="text-input" id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+      <div style="position:relative;">
+        <input class="text-input" id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px;">
+        <button type="button" id="authPasswordToggle" aria-label="Show password" style="position:absolute; right:4px; top:50%; transform:translateY(-50%); background:none; border:none; padding:8px; cursor:pointer; color:var(--muted-2); display:flex; align-items:center; justify-content:center;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+      </div>
     </div>
 
     <div id="authError" class="auth-error" style="display:none;"></div>
@@ -3048,6 +3053,17 @@
   }
   document.getElementById('authTabSignin').addEventListener('click', () => setAuthMode('signin'));
   document.getElementById('authTabSignup').addEventListener('click', () => setAuthMode('signup'));
+
+  document.getElementById('authPasswordToggle').addEventListener('click', () => {
+    const input = document.getElementById('authPassword');
+    const btn = document.getElementById('authPasswordToggle');
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    btn.innerHTML = showing
+      ? '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+      : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.7 19.7 0 0 1 4.22-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a19.86 19.86 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+  });
 
   function showAuthError(message) {
     const el = document.getElementById('authError');
