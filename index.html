@@ -3107,6 +3107,14 @@
     renderAvatar();
 
     try {
+      const profileSnap = await db.doc('profile/' + firebaseUser.uid).get();
+      const profileData = profileSnap.data();
+      if (firebaseUser.displayName && (!profileData || profileData.name !== firebaseUser.displayName)) {
+        await db.doc('profile/' + firebaseUser.uid).set({ name: firebaseUser.displayName }, { merge: true });
+      }
+    } catch (err) { /* best effort */ }
+
+    try {
       const adminSnap = await db.doc('admins/' + firebaseUser.uid).get();
       state.canAdmin = adminSnap.exists;
     } catch (err) { state.canAdmin = false; }
