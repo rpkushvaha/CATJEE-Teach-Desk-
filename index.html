@@ -721,7 +721,12 @@
 
       <div class="panel">
         <div class="panel-title">Institute-Wide Report</div>
-        <div class="admin-sub">Combines every teacher's activity for the selected date above into one file.</div>
+        <div class="admin-sub" id="adminReportRangeSub">Combines every teacher's activity for the selected date above into one file.</div>
+        <div class="chips" id="adminReportRangeChips">
+          <button class="chip active" data-report-range="day">Day</button>
+          <button class="chip" data-report-range="week">Week</button>
+          <button class="chip" data-report-range="month">Month</button>
+        </div>
         <button class="btn-secondary" id="downloadAdminPdfBtn" style="border-color: var(--line);">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15l3 3 3-3"></path></svg>
           Download Combined PDF Report
@@ -846,6 +851,7 @@
     campusLocation: null,
     batches: DEFAULT_BATCHES.slice(),
     adminDate: todayStr(),
+    adminReportRange: 'day',
     adminClasses: [],
     adminCampus: {},
     adminNames: {},
@@ -1938,10 +1944,27 @@
     downloadHistoryCsv(document.getElementById('historyReportMsg'));
   });
   document.getElementById('downloadAdminPdfBtn').addEventListener('click', () => {
-    downloadAdminCombinedReport(document.getElementById('adminReportMsg'));
+    downloadAdminReport(document.getElementById('adminReportMsg'));
   });
   document.getElementById('downloadAdminCsvBtn').addEventListener('click', () => {
-    downloadAdminCombinedCsv(document.getElementById('adminReportMsg'));
+    downloadAdminCsv(document.getElementById('adminReportMsg'));
+  });
+  document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      state.adminReportRange = chip.getAttribute('data-report-range');
+      document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((c) => {
+        c.classList.toggle('active', c === chip);
+      });
+      const subEl = document.getElementById('adminReportRangeSub');
+      if (state.adminReportRange === 'day') {
+        subEl.textContent = "Combines every teacher's activity for the selected date above into one file.";
+      } else if (state.adminReportRange === 'week') {
+        subEl.textContent = "Combines every teacher's activity for the week containing the selected date into one file.";
+      } else {
+        subEl.textContent = "Combines every teacher's activity for the month containing the selected date into one file.";
+      }
+      document.getElementById('adminReportMsg').textContent = '';
+    });
   });
 
   async function showSelectedDay(date) {
@@ -2650,6 +2673,165 @@
 
     try {
       saveFile(`CATJEE-Institute-Report-${date}.csv`, csv, 'text/csv');
+      msgEl.textContent = 'CSV saved.';
+      showToast('CSV saved');
+    } catch (err) {
+      msgEl.textContent = 'Could not save the CSV. Please try again.';
+    }
+  }
+
+  async function fetchAdminDayData(date) {
+    const [classesSnap, campusSnap] = await Promise.all([
+      state.db.collection('classes').where('date', '==', date).limit(500).get(),
+      state.db.collection('campusLogs/' + date + '/teachers').limit(200).get()
+    ]);
+    const classes = classesSnap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+    const campusMap = {};
+    campusSnap.docs.forEach((d) => { campusMap[d.id] = d.data(); });
+    return { date, classes, campus: campusMap };
+  }
+
+  function adminReportRangeDates() {
+    const range = state.adminReportRange || 'day';
+    if (range === 'day') return { dates: [state.adminDate], label: formatStepperDateLabel(state.adminDate), fileTag: state.adminDate };
+    if (range === 'week') {
+      const monday = mondayOf(state.adminDate);
+      const [y, m, d] = monday.split('-').map(Number);
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const dt = new Date(y, m - 1, d + i);
+        dates.push(`${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`);
+      }
+      return { dates, label: weekLabel(monday), fileTag: `Week-${monday}` };
+    }
+    const key = monthKeyOf(state.adminDate);
+    const [y, m] = state.adminDate.split('-').map(Number);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const dates = [];
+    for (let d = 1; d <= daysInMonth; d++) dates.push(`${y}-${pad(m)}-${pad(d)}`);
+    return { dates, label: monthLabel(key), fileTag: `Month-${key}` };
+  }
+
+  async function downloadAdminReport(msgEl) {
+    if (!state.adminReportRange || state.adminReportRange === 'day') {
+      return downloadAdminCombinedReport(msgEl);
+    }
+    msgEl.textContent = 'Preparing combined report…';
+    const { dates, label, fileTag } = adminReportRangeDates();
+    const results = await Promise.all(dates.map((dt) => fetchAdminDayData(dt)));
+
+    const byTeacher = {};
+    results.forEach(({ classes, campus }) => {
+      classes.forEach((c) => {
+        const tid = c.teacherId || 'unknown';
+        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0 };
+        if (c.entryType === 'activity') {
+          byTeacher[tid].activityCount++;
+        } else {
+          byTeacher[tid].classCount++;
+          if (c.worksheet) byTeacher[tid].worksheet++;
+          if (c.material) byTeacher[tid].material++;
+          if (c.test) byTeacher[tid].test++;
+          if (c.homework) byTeacher[tid].homework++;
+        }
+      });
+      Object.keys(campus).forEach((tid) => {
+        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0 };
+        let s = campus[tid].totalSeconds || 0;
+        if (campus[tid].checkedIn && campus[tid].checkInAt) s += (Date.now() - campus[tid].checkInAt) / 1000;
+        byTeacher[tid].totalSeconds += s;
+      });
+    });
+
+    const teacherIds = Object.keys(byTeacher);
+    if (teacherIds.length === 0) {
+      msgEl.textContent = 'No activity to report for this range.';
+      return;
+    }
+
+    try { await resolveAdminNames(teacherIds); } catch (err) { /* best effort */ }
+
+    teacherIds.sort((a, b) => {
+      const na = (state.adminNames[a] && state.adminNames[a].name) || 'zzz';
+      const nb = (state.adminNames[b] && state.adminNames[b].name) || 'zzz';
+      return na.localeCompare(nb);
+    });
+
+    const w = createPdfWriter();
+    w.heading('CATJEE Teach Desk', 18);
+    w.bodyLine('Institute-Wide Report', { size: 11 });
+    w.addSpace(4);
+    w.bodyLine(`Range: ${label}`, { bold: true, size: 11 });
+    w.bodyLine(`Teachers active: ${teacherIds.length}`);
+    w.addSpace(6);
+    w.rule();
+
+    teacherIds.forEach((tid) => {
+      const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
+      const t = byTeacher[tid];
+      w.heading(name, 13);
+      w.bodyLine(`Total campus time: ${formatDuration(t.totalSeconds)}`, { bold: true });
+      w.bodyLine(`Classes: ${t.classCount}   Activities: ${t.activityCount}`);
+      if (t.classCount > 0) {
+        w.bodyLine(`Worksheet: ${t.worksheet}/${t.classCount}   Material: ${t.material}/${t.classCount}   Test: ${t.test}/${t.classCount}   Homework: ${t.homework}/${t.classCount}`);
+      }
+      w.addSpace(6);
+      w.rule();
+    });
+
+    const blob = w.finishBlob();
+    try {
+      saveFile(`CATJEE-Institute-Report-${fileTag}.pdf`, blob);
+      msgEl.textContent = 'Combined report saved.';
+      showToast('Combined report saved');
+    } catch (err) {
+      msgEl.textContent = 'Could not save the report. Please try again.';
+    }
+  }
+
+  async function downloadAdminCsv(msgEl) {
+    if (!state.adminReportRange || state.adminReportRange === 'day') {
+      return downloadAdminCombinedCsv(msgEl);
+    }
+    msgEl.textContent = 'Preparing CSV…';
+    const { dates, fileTag } = adminReportRangeDates();
+    const results = await Promise.all(dates.map((dt) => fetchAdminDayData(dt)));
+    const allClasses = [];
+    results.forEach(({ classes }) => allClasses.push(...classes));
+
+    if (allClasses.length === 0) {
+      msgEl.textContent = 'No activity to export for this range.';
+      return;
+    }
+
+    try {
+      const teacherIds = allClasses.map((c) => c.teacherId).filter((v, i, a) => v && a.indexOf(v) === i);
+      await resolveAdminNames(teacherIds);
+    } catch (err) { /* best effort */ }
+
+    const header = ['Teacher', 'Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
+    const rows = [header];
+    const sorted = allClasses.slice().sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return (a.startTimeStr || '').localeCompare(b.startTimeStr || '');
+    });
+    sorted.forEach((c) => {
+      const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
+      if (c.entryType === 'activity') {
+        rows.push([name, c.date, 'Activity', '', c.activityType || '', '', '', '', '', '', '', c.note || '']);
+      } else {
+        rows.push([
+          name, c.date, 'Class', c.batch || '', c.topic || '',
+          c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
+          c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
+          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No', ''
+        ]);
+      }
+    });
+    const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
+
+    try {
+      saveFile(`CATJEE-Institute-Report-${fileTag}.csv`, csv, 'text/csv');
       msgEl.textContent = 'CSV saved.';
       showToast('CSV saved');
     } catch (err) {
