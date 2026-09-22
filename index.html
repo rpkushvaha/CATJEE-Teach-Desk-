@@ -234,6 +234,15 @@
   .switch.on { background: var(--green); }
   .knob { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: left .15s; }
   .switch.on .knob { left: 19px; }
+  .checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .toggle-row.checklist-item {
+    flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; width: auto; transition: background .15s, border-color .15s;
+  }
+  .toggle-row.checklist-item:has(.switch.on) { background: var(--green-soft); border-color: var(--green); }
+  .checklist-item-top { display: flex; align-items: center; gap: 7px; width: 100%; }
+  .checklist-icon { font-size: 17px; line-height: 1; flex-shrink: 0; }
+  .checklist-item .toggle-label { font-size: 12.5px; line-height: 1.3; flex: 1; }
+  .checklist-item .switch { align-self: flex-end; }
   .save-btn { width: 100%; padding: 14px 0; border-radius: 12px; background: var(--gold); color: var(--navy); font-size: 14.5px; font-weight: 700; border: none; cursor: pointer; margin: 4px 0 4px 0; }
   .save-btn:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -568,22 +577,36 @@
 
         <div class="field">
           <label>Class Checklist</label>
-          <button class="toggle-row" data-key="worksheet">
-            <span class="toggle-label">Worksheet Given</span>
-            <span class="switch"><span class="knob"></span></span>
-          </button>
-          <button class="toggle-row" data-key="material">
-            <span class="toggle-label">Study Material Given</span>
-            <span class="switch"><span class="knob"></span></span>
-          </button>
-          <button class="toggle-row" data-key="test">
-            <span class="toggle-label">Test / Exam Conducted</span>
-            <span class="switch"><span class="knob"></span></span>
-          </button>
-          <button class="toggle-row" data-key="homework">
-            <span class="toggle-label">Homework Checked</span>
-            <span class="switch"><span class="knob"></span></span>
-          </button>
+          <div class="checklist-grid">
+            <button class="toggle-row checklist-item" data-key="worksheet">
+              <div class="checklist-item-top">
+                <span class="checklist-icon">📄</span>
+                <span class="toggle-label">Worksheet Given</span>
+              </div>
+              <span class="switch"><span class="knob"></span></span>
+            </button>
+            <button class="toggle-row checklist-item" data-key="material">
+              <div class="checklist-item-top">
+                <span class="checklist-icon">📚</span>
+                <span class="toggle-label">Study Material Given</span>
+              </div>
+              <span class="switch"><span class="knob"></span></span>
+            </button>
+            <button class="toggle-row checklist-item" data-key="test">
+              <div class="checklist-item-top">
+                <span class="checklist-icon">📝</span>
+                <span class="toggle-label">Test / Exam Conducted</span>
+              </div>
+              <span class="switch"><span class="knob"></span></span>
+            </button>
+            <button class="toggle-row checklist-item" data-key="homework">
+              <div class="checklist-item-top">
+                <span class="checklist-icon">✅</span>
+                <span class="toggle-label">Homework</span>
+              </div>
+              <span class="switch"><span class="knob"></span></span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1211,9 +1234,9 @@
     const time = (cls.startTimeStr && cls.endTimeStr) ? `${formatTimeStr(cls.startTimeStr)} – ${formatTimeStr(cls.endTimeStr)}` : '';
     const badges = [
       badgeHtml('Worksheet Given', 'No Worksheet', !!cls.worksheet),
-      badgeHtml('Material Given', 'Material Pending', !!cls.material),
+      badgeHtml('Material Given', 'No Material', !!cls.material),
       badgeHtml('Test Conducted', 'No Test', !!cls.test, 'test'),
-      badgeHtml('Homework Checked', 'Homework Not Checked', !!cls.homework)
+      badgeHtml('Homework Given', 'No Homework Given', !!cls.homework)
     ].join('');
     const actions = showDelete
       ? `<button class="del-btn" data-edit="${cls.id}" aria-label="Edit class">${svgEdit()}</button><button class="del-btn" data-del="${cls.id}" aria-label="Delete class">${svgTrash()}</button>`
