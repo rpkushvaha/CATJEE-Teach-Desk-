@@ -188,6 +188,7 @@
   .activity-row-text { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0; }
   .activity-row-title { font-size: 13.5px; font-weight: 700; }
   .activity-row-note { font-size: 13px; color: var(--muted-2); }
+  .class-checklist-notes { font-size: 11.5px; color: var(--muted-2); margin-top: 6px; line-height: 1.4; }
   .activity-row-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
   .badges { display: flex; gap: 5px; flex-wrap: wrap; }
   .badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
@@ -238,13 +239,19 @@
   .switch.on .knob { left: 19px; }
   .checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .toggle-row.checklist-item {
-    flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; width: auto; transition: background .15s, border-color .15s;
+    flex-direction: column; align-items: stretch; gap: 0; padding: 12px 14px; width: auto; cursor: default;
+    transition: background .15s, border-color .15s;
   }
   .toggle-row.checklist-item:has(.switch.on) { background: var(--switch-on-soft); border-color: var(--switch-on); }
-  .checklist-item-top { display: flex; align-items: center; gap: 7px; width: 100%; }
+  .checklist-toggle-trigger { display: flex; align-items: center; gap: 7px; width: 100%; cursor: pointer; }
   .checklist-icon { font-size: 17px; line-height: 1; flex-shrink: 0; }
   .checklist-item .toggle-label { font-size: 12.5px; line-height: 1.3; flex: 1; }
-  .checklist-item .switch { align-self: flex-end; }
+  .checklist-item .switch { flex-shrink: 0; }
+  .checklist-note-input {
+    display: none; margin-top: 8px; width: 100%; font-size: 11.5px; padding: 7px 9px;
+    border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: inherit;
+  }
+  .checklist-note-input.show { display: block; }
   .save-btn { width: 100%; padding: 14px 0; border-radius: 12px; background: var(--gold); color: var(--navy); font-size: 14.5px; font-weight: 700; border: none; cursor: pointer; margin: 4px 0 4px 0; }
   .save-btn:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -580,34 +587,38 @@
         <div class="field">
           <label>Class Checklist</label>
           <div class="checklist-grid">
-            <button class="toggle-row checklist-item" data-key="worksheet">
-              <div class="checklist-item-top">
+            <div class="toggle-row checklist-item" data-key="worksheet">
+              <div class="checklist-toggle-trigger">
                 <span class="checklist-icon">📄</span>
                 <span class="toggle-label">Worksheet Given</span>
+                <span class="switch"><span class="knob"></span></span>
               </div>
-              <span class="switch"><span class="knob"></span></span>
-            </button>
-            <button class="toggle-row checklist-item" data-key="material">
-              <div class="checklist-item-top">
+              <input type="text" class="checklist-note-input" id="worksheetNoteInput" placeholder="Which worksheet? (optional)">
+            </div>
+            <div class="toggle-row checklist-item" data-key="material">
+              <div class="checklist-toggle-trigger">
                 <span class="checklist-icon">📚</span>
                 <span class="toggle-label">Study Material Given</span>
+                <span class="switch"><span class="knob"></span></span>
               </div>
-              <span class="switch"><span class="knob"></span></span>
-            </button>
-            <button class="toggle-row checklist-item" data-key="test">
-              <div class="checklist-item-top">
+              <input type="text" class="checklist-note-input" id="materialNoteInput" placeholder="Which chapter? (optional)">
+            </div>
+            <div class="toggle-row checklist-item" data-key="test">
+              <div class="checklist-toggle-trigger">
                 <span class="checklist-icon">📝</span>
                 <span class="toggle-label">Test / Exam Conducted</span>
+                <span class="switch"><span class="knob"></span></span>
               </div>
-              <span class="switch"><span class="knob"></span></span>
-            </button>
-            <button class="toggle-row checklist-item" data-key="homework">
-              <div class="checklist-item-top">
+              <input type="text" class="checklist-note-input" id="testNoteInput" placeholder="Test on which topic? (optional)">
+            </div>
+            <div class="toggle-row checklist-item" data-key="homework">
+              <div class="checklist-toggle-trigger">
                 <span class="checklist-icon">✅</span>
                 <span class="toggle-label">Homework</span>
+                <span class="switch"><span class="knob"></span></span>
               </div>
-              <span class="switch"><span class="knob"></span></span>
-            </button>
+              <input type="text" class="checklist-note-input" id="homeworkNoteInput" placeholder="What homework? (optional)">
+            </div>
           </div>
         </div>
       </div>
@@ -1240,6 +1251,12 @@
       badgeHtml('Test Conducted', 'No Test', !!cls.test, 'test'),
       badgeHtml('Homework Given', 'No Homework Given', !!cls.homework)
     ].join('');
+    const noteParts = [];
+    if (cls.worksheet && cls.worksheetNote) noteParts.push(`Worksheet: ${cls.worksheetNote}`);
+    if (cls.material && cls.materialNote) noteParts.push(`Material: ${cls.materialNote}`);
+    if (cls.test && cls.testNote) noteParts.push(`Test: ${cls.testNote}`);
+    if (cls.homework && cls.homeworkNote) noteParts.push(`Homework: ${cls.homeworkNote}`);
+    const notesLine = noteParts.length ? `<div class="class-checklist-notes">${escapeHtml(noteParts.join(' · '))}</div>` : '';
     const actions = showDelete
       ? `<button class="del-btn" data-edit="${cls.id}" aria-label="Edit class">${svgEdit()}</button><button class="del-btn" data-del="${cls.id}" aria-label="Delete class">${svgTrash()}</button>`
       : '';
@@ -1254,6 +1271,7 @@
         </div>
         ${topic ? `<div class="class-topic">${escapeHtml(topic)}</div>` : ''}
         <div class="badges">${badges}</div>
+        ${notesLine}
       </div>`;
   }
 
@@ -1590,6 +1608,8 @@
       const row = document.querySelector(`#view-add .toggle-row[data-key="${key}"]`);
       const sw = row.querySelector('.switch');
       if (state.form[key]) sw.classList.add('on'); else sw.classList.remove('on');
+      const noteInput = document.getElementById(key + 'NoteInput');
+      if (noteInput) noteInput.classList.toggle('show', !!state.form[key]);
     });
 
     document.getElementById('saveClassBtn').disabled = state.saving;
@@ -2086,11 +2106,24 @@
     });
   });
 
-  document.querySelectorAll('#view-add .toggle-row').forEach((row) => {
+  document.querySelectorAll('#view-add .toggle-row:not(.checklist-item)').forEach((row) => {
     row.addEventListener('click', () => {
       const key = row.getAttribute('data-key');
       state.form[key] = !state.form[key];
       renderForm();
+    });
+  });
+
+  document.querySelectorAll('#view-add .checklist-item .checklist-toggle-trigger').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const row = trigger.closest('.checklist-item');
+      const key = row.getAttribute('data-key');
+      state.form[key] = !state.form[key];
+      renderForm();
+      if (state.form[key]) {
+        const input = document.getElementById(key + 'NoteInput');
+        if (input) input.focus();
+      }
     });
   });
 
@@ -2467,6 +2500,12 @@
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
         w.bodyLine(`  ${i + 1}. ${c.batch || ''} - ${c.topic || 'No topic noted'} (${time})`, { bold: true });
         w.bodyLine(`     Worksheet: ${c.worksheet ? 'Yes' : 'No'}   Material: ${c.material ? 'Yes' : 'No'}   Test: ${c.test ? 'Yes' : 'No'}   Homework: ${c.homework ? 'Yes' : 'No'}`);
+        const noteParts = [];
+        if (c.worksheet && c.worksheetNote) noteParts.push(`Worksheet: ${c.worksheetNote}`);
+        if (c.material && c.materialNote) noteParts.push(`Material: ${c.materialNote}`);
+        if (c.test && c.testNote) noteParts.push(`Test: ${c.testNote}`);
+        if (c.homework && c.homeworkNote) noteParts.push(`Homework: ${c.homeworkNote}`);
+        if (noteParts.length) w.bodyLine(`     ${noteParts.join(' · ')}`);
       });
     }
 
@@ -2590,7 +2629,8 @@
           c.date, 'Class', c.batch || '', c.topic || '',
           c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
           c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
-          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No', ''
+          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No',
+          [c.worksheet && c.worksheetNote ? ('Worksheet: ' + c.worksheetNote) : '', c.material && c.materialNote ? ('Material: ' + c.materialNote) : '', c.test && c.testNote ? ('Test: ' + c.testNote) : '', c.homework && c.homeworkNote ? ('Homework: ' + c.homeworkNote) : ''].filter(Boolean).join(' | ')
         ]);
       }
     });
@@ -2690,7 +2730,8 @@
           name, c.date, 'Class', c.batch || '', c.topic || '',
           c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
           c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
-          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No', ''
+          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No',
+          [c.worksheet && c.worksheetNote ? ('Worksheet: ' + c.worksheetNote) : '', c.material && c.materialNote ? ('Material: ' + c.materialNote) : '', c.test && c.testNote ? ('Test: ' + c.testNote) : '', c.homework && c.homeworkNote ? ('Homework: ' + c.homeworkNote) : ''].filter(Boolean).join(' | ')
         ]);
       }
     });
@@ -2849,7 +2890,8 @@
           name, c.date, 'Class', c.batch || '', c.topic || '',
           c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
           c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
-          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No', ''
+          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No',
+          [c.worksheet && c.worksheetNote ? ('Worksheet: ' + c.worksheetNote) : '', c.material && c.materialNote ? ('Material: ' + c.materialNote) : '', c.test && c.testNote ? ('Test: ' + c.testNote) : '', c.homework && c.homeworkNote ? ('Homework: ' + c.homeworkNote) : ''].filter(Boolean).join(' | ')
         ]);
       }
     });
@@ -2889,6 +2931,10 @@
     document.getElementById('topicInput').value = '';
     document.getElementById('startTimeInput').value = '';
     document.getElementById('endTimeInput').value = '';
+    document.getElementById('worksheetNoteInput').value = '';
+    document.getElementById('materialNoteInput').value = '';
+    document.getElementById('testNoteInput').value = '';
+    document.getElementById('homeworkNoteInput').value = '';
   }
 
   function resetActivityForm() {
@@ -2959,6 +3005,10 @@
     document.getElementById('topicInput').value = cls.topic || '';
     document.getElementById('startTimeInput').value = cls.startTimeStr || '';
     document.getElementById('endTimeInput').value = cls.endTimeStr || '';
+    document.getElementById('worksheetNoteInput').value = cls.worksheetNote || '';
+    document.getElementById('materialNoteInput').value = cls.materialNote || '';
+    document.getElementById('testNoteInput').value = cls.testNote || '';
+    document.getElementById('homeworkNoteInput').value = cls.homeworkNote || '';
     switchTab('add');
   }
 
@@ -3046,7 +3096,11 @@
         worksheet: state.form.worksheet,
         material: state.form.material,
         test: state.form.test,
-        homework: state.form.homework
+        homework: state.form.homework,
+        worksheetNote: document.getElementById('worksheetNoteInput').value.trim(),
+        materialNote: document.getElementById('materialNoteInput').value.trim(),
+        testNote: document.getElementById('testNoteInput').value.trim(),
+        homeworkNote: document.getElementById('homeworkNoteInput').value.trim()
       };
       if (editingId) {
         await state.db.collection('classes').doc(editingId).update(payload);
