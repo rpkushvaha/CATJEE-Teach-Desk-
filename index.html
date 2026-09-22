@@ -68,6 +68,8 @@
     --muted-2: #555555;
     --green: #C62839;
     --green-soft: #FCE4E7;
+    --switch-on: #2E9E52;
+    --switch-on-soft: #E3F5E9;
     --amber: #FFFFFF;
     --amber-soft: #171717;
     --neutral-soft: #F0F0F0;
@@ -79,14 +81,14 @@
       --navy: #000000; --navy-2: #1E1E1E; --gold: #FF5C6C; --gold-soft: #3A1418;
       --paper: #121212; --card: #1C1C1C; --line: #2E2E2E; --muted: #9A9A9A;
       --muted-2: #C2C2C2; --green: #FF8A94; --green-soft: #3A1418; --amber: #000000;
-      --amber-soft: #FFFFFF; --neutral-soft: #262626; --neutral-text: #9A9A9A; --ink: #F2F2F2;
+      --amber-soft: #FFFFFF; --neutral-soft: #262626; --neutral-text: #9A9A9A; --ink: #F2F2F2; --switch-on: #3FBE6C; --switch-on-soft: #12301C;
     }
   }
   :root[data-theme="dark"] {
     --navy: #000000; --navy-2: #1E1E1E; --gold: #FF5C6C; --gold-soft: #3A1418;
     --paper: #121212; --card: #1C1C1C; --line: #2E2E2E; --muted: #9A9A9A;
     --muted-2: #C2C2C2; --green: #FF8A94; --green-soft: #3A1418; --amber: #000000;
-    --amber-soft: #FFFFFF; --neutral-soft: #262626; --neutral-text: #9A9A9A; --ink: #F2F2F2;
+    --amber-soft: #FFFFFF; --neutral-soft: #262626; --neutral-text: #9A9A9A; --ink: #F2F2F2; --switch-on: #3FBE6C; --switch-on-soft: #12301C;
   }
   * { box-sizing: border-box; }
   body {
@@ -231,14 +233,14 @@
   }
   .toggle-label { font-size: 13.5px; font-weight: 500; text-align: left; }
   .switch { width: 40px; height: 23px; border-radius: 999px; position: relative; flex-shrink: 0; background: var(--line); transition: background .15s; }
-  .switch.on { background: var(--green); }
+  .switch.on { background: var(--switch-on); }
   .knob { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: left .15s; }
   .switch.on .knob { left: 19px; }
   .checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .toggle-row.checklist-item {
     flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; width: auto; transition: background .15s, border-color .15s;
   }
-  .toggle-row.checklist-item:has(.switch.on) { background: var(--green-soft); border-color: var(--green); }
+  .toggle-row.checklist-item:has(.switch.on) { background: var(--switch-on-soft); border-color: var(--switch-on); }
   .checklist-item-top { display: flex; align-items: center; gap: 7px; width: 100%; }
   .checklist-icon { font-size: 17px; line-height: 1; flex-shrink: 0; }
   .checklist-item .toggle-label { font-size: 12.5px; line-height: 1.3; flex: 1; }
