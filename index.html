@@ -624,7 +624,7 @@
             </div>
             <div class="toggle-row checklist-item" data-key="homework">
               <div class="checklist-toggle-trigger">
-                <span class="checklist-icon">✅</span>
+                <span class="checklist-icon">🗒️</span>
                 <span class="toggle-label">Homework</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
@@ -802,9 +802,12 @@
           <button class="chip active" data-batch-wing="Pre-Foundation">Pre-Foundation</button>
           <button class="chip" data-batch-wing="Foundation">Foundation</button>
         </div>
-        <div class="activity-rows" id="batchListRows"></div>
-        <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:14.5px; padding:13px 14px;">
-        <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:12.5px;">+ Add</button>
+        <div class="admin-sub" id="adminBatchListHint">Tap a wing above to see and manage its classes.</div>
+        <div id="adminBatchListExpandedBox" style="display:none; flex-direction:column; gap:10px;">
+          <div class="activity-rows" id="batchListRows"></div>
+          <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:14.5px; padding:13px 14px;">
+          <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:12.5px;">+ Add</button>
+        </div>
       </div>
 
       <div class="panel">
@@ -919,6 +922,7 @@
     batchesByWing: { 'Pre-Foundation': DEFAULT_BATCHES_BY_WING['Pre-Foundation'].slice(), 'Foundation': DEFAULT_BATCHES_BY_WING['Foundation'].slice() },
     formWing: 'Pre-Foundation',
     adminBatchWing: 'Pre-Foundation',
+    adminBatchListExpanded: null,
     adminReportWing: 'all',
     adminDate: todayStr(),
     adminReportRange: 'day',
@@ -1944,7 +1948,10 @@
     document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-batch-wing') === state.adminBatchWing);
     });
-    renderBatchListInto('batchListRows', state.adminBatchWing);
+    const expanded = !!state.adminBatchListExpanded;
+    document.getElementById('adminBatchListExpandedBox').style.display = expanded ? 'flex' : 'none';
+    document.getElementById('adminBatchListHint').style.display = expanded ? 'none' : 'block';
+    if (expanded) renderBatchListInto('batchListRows', state.adminBatchWing);
     renderBatchListInto('inlineBatchListRows', state.formWing);
   }
 
@@ -3492,7 +3499,13 @@
 
   document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      state.adminBatchWing = btn.getAttribute('data-batch-wing');
+      const wing = btn.getAttribute('data-batch-wing');
+      if (state.adminBatchWing === wing && state.adminBatchListExpanded) {
+        state.adminBatchListExpanded = null;
+      } else {
+        state.adminBatchWing = wing;
+        state.adminBatchListExpanded = wing;
+      }
       renderBatchList();
     });
   });
