@@ -2712,11 +2712,11 @@
     if (activityItems.length === 0) {
       w.bodyLine('  None logged.');
     } else {
-      activityItems.forEach((a, i) => {
+      activityItems.forEach((a) => {
         const line = a.activityType === 'Other Activity'
           ? (a.note || 'No details noted')
           : `${a.activityType || 'Activity'}${a.note ? ' - ' + a.note : ''}`;
-        w.bodyLine(`  ${i + 1}. ${line}`);
+        w.bodyLine(`  - ${line}`);
       });
     }
   }
@@ -2808,11 +2808,11 @@
     if (activityItems.length === 0) {
       lines.push('None logged.');
     } else {
-      activityItems.forEach((a, i) => {
+      activityItems.forEach((a) => {
         const line = a.activityType === 'Other Activity'
           ? (a.note || 'No details noted')
           : `${a.activityType || 'Activity'}${a.note ? ' - ' + a.note : ''}`;
-        lines.push(`${i + 1}. ${line}`);
+        lines.push(`- ${line}`);
       });
     }
 
