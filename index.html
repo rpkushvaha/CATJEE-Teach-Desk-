@@ -2499,13 +2499,17 @@
       classItems.forEach((c, i) => {
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
         w.bodyLine(`  ${i + 1}. ${c.batch || ''} - ${c.topic || 'No topic noted'} (${time})`, { bold: true });
-        w.bodyLine(`     Worksheet: ${c.worksheet ? 'Yes' : 'No'}   Material: ${c.material ? 'Yes' : 'No'}   Test: ${c.test ? 'Yes' : 'No'}   Homework: ${c.homework ? 'Yes' : 'No'}`);
-        const noteParts = [];
-        if (c.worksheet && c.worksheetNote) noteParts.push(`Worksheet: ${c.worksheetNote}`);
-        if (c.material && c.materialNote) noteParts.push(`Material: ${c.materialNote}`);
-        if (c.test && c.testNote) noteParts.push(`Test: ${c.testNote}`);
-        if (c.homework && c.homeworkNote) noteParts.push(`Homework: ${c.homeworkNote}`);
-        if (noteParts.length) w.bodyLine(`     ${noteParts.join(' · ')}`);
+        const checklistItems = [
+          { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
+          { label: 'Study Material', given: c.material, note: c.materialNote },
+          { label: 'Test / Exam', given: c.test, note: c.testNote },
+          { label: 'Homework', given: c.homework, note: c.homeworkNote }
+        ];
+        checklistItems.forEach((it) => {
+          const status = it.given ? (it.note ? it.note : 'Given') : 'Not given';
+          w.bodyLine(`     - ${it.label}: ${status}`);
+        });
+        w.addSpace(3);
       });
     }
 
