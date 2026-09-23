@@ -262,6 +262,7 @@
   .day-date { font-size: 14px; font-weight: 700; }
   .day-time { font-size: 12.5px; font-weight: 700; color: var(--gold); }
   .day-count { font-size: 11.5px; color: var(--muted-2); margin-bottom: 9px; }
+  .day-card-hint { font-size: 11px; color: var(--gold); font-weight: 700; margin-top: 6px; }
 
   /* Admin tab */
   .admin-sub { font-size: 12px; color: var(--muted); }
@@ -1401,7 +1402,7 @@
     return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
-  function dayCardHtml(date, itemsOverride, campusOverride) {
+  function dayCardHtml(date, itemsOverride, campusOverride, clickable) {
     const source = (itemsOverride !== undefined ? itemsOverride : (state.historyByDate[date] || [])).filter((c) => !state.pendingDeleteIds.has(c.id));
     const items = source.filter((c) => c.entryType !== 'activity');
     const activities = source.filter((c) => c.entryType === 'activity');
@@ -1416,8 +1417,9 @@
     const sessionN = campus && campus.sessions ? campus.sessions.length : (campus ? campus.sessionCount || 0 : 0);
     const sessions = sessionN > 1 ? ` &middot; ${sessionN} check-ins` : '';
     const onLeave = activities.some((a) => a.activityType === 'Leave / Holiday');
+    const clickAttrs = clickable ? ` data-jump-date="${date}" style="cursor:pointer;"` : '';
     return `
-      <div class="day-card">
+      <div class="day-card"${clickAttrs}>
         <div class="day-top">
           <div class="day-date">${formatDayLabel(date)}</div>
           <div class="day-time num">${seconds > 0 ? formatShort(seconds) : '—'}</div>
@@ -1430,6 +1432,7 @@
           <span class="badge test">Test ${test}/${n}</span>
           <span class="badge on">Homework ${hw}/${n}</span>
         </div>` : ''}
+        ${clickable ? `<div class="day-card-hint">Tap to see full detail</div>` : ''}
         <div style="display:flex; gap:16px; margin-top:8px;">
           <button class="link-btn" data-report-date="${date}">📄 Download PDF</button>
           <button class="link-btn" data-whatsapp-date="${date}">💬 Share on WhatsApp</button>
@@ -1530,15 +1533,24 @@
     }
 
     if (state.historyRange === 'day') {
-      el.innerHTML = allDates.slice(0, 30).map((d) => dayCardHtml(d)).join('');
+      const todayD = todayStr();
+      const yesterdayD = shiftDateStr(todayD, -1);
+      el.innerHTML = dayCardHtml(todayD, undefined, undefined, true) + dayCardHtml(yesterdayD, undefined, undefined, true);
       el.querySelectorAll('[data-report-date]').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'));
         });
       });
       el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'));
+        });
+      });
+      el.querySelectorAll('[data-jump-date]').forEach((card) => {
+        card.addEventListener('click', () => {
+          showSelectedDay(card.getAttribute('data-jump-date'));
         });
       });
       return;
