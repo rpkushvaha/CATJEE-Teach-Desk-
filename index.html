@@ -524,7 +524,7 @@
 
       <div>
         <div class="section-head">
-          <div class="section-title" id="todayHeading">Today's Activity (0)</div>
+          <div class="section-title" id="todayHeading">Today's Activity</div>
           <div style="display:flex; gap:10px;">
             <button class="link-btn" id="addActivityLink">+ Activity</button>
             <button class="link-btn" id="addClassLink">+ Class</button>
@@ -1295,7 +1295,7 @@
     return `
       <div class="class-card">
         <div class="class-top">
-          <div class="class-title">🗓️ Activities (${items.length})</div>
+          <div class="class-title">🗓️ Activities</div>
         </div>
         <div class="activity-rows">${rows}</div>
       </div>`;
@@ -1372,8 +1372,6 @@
 
   function renderTodayList() {
     const el = document.getElementById('todayClassList');
-    const heading = document.getElementById('todayHeading');
-    heading.textContent = `Today's Activity (${state.classesToday.length})`;
     el.innerHTML = entryListHtml(state.classesToday);
     wireEntryListEvents(el, () => state.classesToday, 'today');
   }
@@ -1424,7 +1422,7 @@
           <div class="day-date">${formatDayLabel(date)}</div>
           <div class="day-time num">${seconds > 0 ? formatShort(seconds) : '—'}</div>
         </div>
-        <div class="day-count">${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; ${activities.length} other ${activities.length === 1 ? 'activity' : 'activities'}` : ''}${sessions}</div>
+        <div class="day-count">${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Activity` : ''}${sessions}</div>
         ${onLeave ? `<div class="badges"><span class="badge leave">🌴 On Leave / Holiday</span></div>` : ''}
         ${n > 0 ? `<div class="badges">
           <span class="badge on">Worksheet ${ws}/${n}</span>
@@ -1459,7 +1457,7 @@
           <div class="day-date">${label}</div>
           <div class="day-time num">${seconds > 0 ? formatShort(seconds) : '—'}</div>
         </div>
-        <div class="day-count">${daysWithActivity} day${daysWithActivity === 1 ? '' : 's'} on campus &middot; ${classCount} class${classCount === 1 ? '' : 'es'}${activityCount ? ` &middot; ${activityCount} other ${activityCount === 1 ? 'activity' : 'activities'}` : ''}</div>
+        <div class="day-count">${daysWithActivity} day${daysWithActivity === 1 ? '' : 's'} on campus &middot; ${classCount} class${classCount === 1 ? '' : 'es'}${activityCount ? ` &middot; Other Activity` : ''}</div>
         ${weekMonday ? `<button class="link-btn" data-week-report="${weekMonday}" style="margin-top:8px;">📄 Download Weekly PDF Report</button>` : ''}
       </div>`;
   }
@@ -1720,7 +1718,7 @@
       if (campus && campus.checkedIn && campus.checkInAt) seconds += (Date.now() - campus.checkInAt) / 1000;
       const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
       const subject = items[0] ? items[0].subject : '';
-      const countLine = `${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; ${activities.length} other ${activities.length === 1 ? 'activity' : 'activities'}` : ''}`;
+      const countLine = `${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Activity` : ''}`;
       return `
         <div class="teacher-card">
           <div class="teacher-top">
@@ -2545,7 +2543,7 @@
     }
 
     const activityItems = allForDate.filter((c) => c.entryType === 'activity');
-    w.bodyLine(`Other activities (${activityItems.length}):`, { bold: true });
+    w.bodyLine('Activities:', { bold: true });
     if (activityItems.length === 0) {
       w.bodyLine('  None logged.');
     } else {
@@ -2638,7 +2636,7 @@
     lines.push('');
 
     const activityItems = allForDate.filter((c) => c.entryType === 'activity');
-    lines.push(`*Other activities (${activityItems.length}):*`);
+    lines.push('*Activities:*');
     if (activityItems.length === 0) {
       lines.push('None logged.');
     } else {
