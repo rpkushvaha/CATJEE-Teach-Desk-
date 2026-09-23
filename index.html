@@ -896,7 +896,7 @@
     adminClasses: [],
     adminCampus: {},
     adminNames: {},
-    form: { batch: DEFAULT_BATCHES[0], topic: '', worksheet: false, material: false, test: false, homework: false },
+    form: { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false },
     entryMode: 'class',
     editingId: null,
     editingSourceTab: null,
@@ -1616,8 +1616,7 @@
     }).join('');
     chipsEl.querySelectorAll('[data-batch]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        state.form.batch = btn.getAttribute('data-batch');
-        renderForm();
+        selectBatch(btn.getAttribute('data-batch'));
       });
     });
 
@@ -3059,7 +3058,7 @@
   }
 
   function resetClassForm() {
-    state.form = { batch: currentBatches()[0], topic: '', worksheet: false, material: false, test: false, homework: false };
+    state.form = { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false };
     document.getElementById('topicInput').value = '';
     document.getElementById('startTimeInput').value = '';
     document.getElementById('endTimeInput').value = '';
@@ -3078,15 +3077,23 @@
     return state.historyClasses.find((c) => c.entryType !== 'activity') || null;
   }
 
+  function findLastClassForBatch(batch) {
+    return state.historyClasses.find((c) => c.entryType !== 'activity' && c.batch === batch) || null;
+  }
+
   function findLastActivity() {
     return state.historyClasses.find((c) => c.entryType === 'activity') || null;
   }
 
   function prefillClassFromLast() {
-    const last = findLastClass();
+    resetClassForm();
+  }
+
+  function selectBatch(batch) {
+    const last = findLastClassForBatch(batch);
     if (last) {
       state.form = {
-        batch: last.batch || currentBatches()[0],
+        batch,
         topic: last.topic || '',
         worksheet: !!last.worksheet,
         material: !!last.material,
@@ -3094,10 +3101,14 @@
         homework: !!last.homework
       };
     } else {
-      state.form = { batch: currentBatches()[0], topic: '', worksheet: false, material: false, test: false, homework: false };
+      state.form = { batch, topic: '', worksheet: false, material: false, test: false, homework: false };
     }
     renderForm();
     document.getElementById('topicInput').value = state.form.topic;
+    document.getElementById('worksheetNoteInput').value = (last && last.worksheetNote) || '';
+    document.getElementById('materialNoteInput').value = (last && last.materialNote) || '';
+    document.getElementById('testNoteInput').value = (last && last.testNote) || '';
+    document.getElementById('homeworkNoteInput').value = (last && last.homeworkNote) || '';
     if (last && last.startTimeStr && last.endTimeStr) {
       document.getElementById('startTimeInput').value = last.startTimeStr;
       document.getElementById('endTimeInput').value = last.endTimeStr;
@@ -3208,6 +3219,7 @@
       showFormMsg('Please set your subject first (tap "Subject" at the top).');
       return;
     }
+    if (!state.form.batch) { showFormMsg('Please select a batch.'); return; }
     const topic = document.getElementById('topicInput').value.trim();
     if (!topic) { showFormMsg('Please enter the chapter / topic.'); document.getElementById('topicInput').focus(); return; }
     const startTimeStr = document.getElementById('startTimeInput').value;
