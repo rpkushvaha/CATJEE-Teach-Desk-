@@ -217,12 +217,26 @@
   .form-title { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; }
   .field { display: flex; flex-direction: column; gap: 8px; }
   .field label { font-size: 12px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }
+  .micro-label { font-size: 10.5px; font-weight: 600; color: var(--muted-2); margin-bottom: 4px; }
   .chips { display: flex; gap: 7px; flex-wrap: wrap; }
   .chip {
     padding: 8px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 700; cursor: pointer;
-    border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
+    border: 1px solid var(--line); background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(23,23,23,0.03);
   }
   .chip.active { background: linear-gradient(155deg, var(--gold), color-mix(in srgb, var(--gold) 78%, black)); color: #fff; border-color: transparent; box-shadow: 0 2px 8px color-mix(in srgb, var(--gold) 30%, transparent); }
+  .nested-box {
+    background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--gold);
+    border-radius: 12px; padding: 14px; margin-top: -2px;
+  }
+  .batch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .batch-grid .chip { width: 100%; box-sizing: border-box; text-align: center; white-space: normal; line-height: 1.3; }
+  .icon-link-btn {
+    display: flex; align-items: center; gap: 5px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 12px; font-size: 11.5px; font-weight: 700; color: var(--gold); cursor: pointer;
+  }
+  #classFields > .field:not(:last-child):not(.nested-box), #activityFields > .field:not(:last-child) {
+    padding-bottom: 16px; border-bottom: 1px solid var(--line);
+  }
   .text-input {
     padding: 12px 14px; border-radius: 11px; border: 1px solid var(--line); background: var(--card);
     font-size: 13.5px; color: var(--ink); width: 100%;
@@ -569,12 +583,15 @@
           <label>Wing</label>
           <div class="chips" id="wingChips"></div>
         </div>
-        <div class="field">
+        <div class="field nested-box">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <label style="margin-bottom:0;">Select Class / Batch</label>
-            <button class="link-btn" id="toggleManageBatchesBtn" style="font-size:11.5px;">Manage</button>
+            <button class="icon-link-btn" id="toggleManageBatchesBtn" aria-label="Manage batches">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              <span>Manage</span>
+            </button>
           </div>
-          <div class="chips" id="batchChips"></div>
+          <div class="chips batch-grid" id="batchChips"></div>
           <div id="inlineManageBatches" style="display:none; flex-direction:column; gap:10px; margin-top:8px;">
             <div class="activity-rows" id="inlineBatchListRows"></div>
             <input class="text-input" id="inlineNewBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="font-size:14.5px; padding:13px 14px;">
@@ -585,8 +602,14 @@
         <div class="field">
           <label>Class Timing</label>
           <div style="display:flex; gap:10px;">
-            <input class="text-input" id="startTimeInput" type="time" style="flex:1;">
-            <input class="text-input" id="endTimeInput" type="time" style="flex:1;">
+            <div style="flex:1;">
+              <div class="micro-label">Start</div>
+              <input class="text-input" id="startTimeInput" type="time" style="width:100%;">
+            </div>
+            <div style="flex:1;">
+              <div class="micro-label">End</div>
+              <input class="text-input" id="endTimeInput" type="time" style="width:100%;">
+            </div>
           </div>
         </div>
 
@@ -1746,7 +1769,7 @@
     chipsEl.innerHTML = wingBatches.length
       ? wingBatches.map((b) => {
           const active = b === state.form.batch;
-          return `<button class="chip${active ? ' active' : ''}" data-batch="${escapeHtml(b)}">${escapeHtml(b)}</button>`;
+          return `<button class="chip${active ? ' active' : ''}" data-batch="${escapeHtml(b)}">🎓 ${escapeHtml(b)}</button>`;
         }).join('')
       : `<div class="admin-sub" style="margin:0;">No batches yet in ${escapeHtml(state.formWing)}. Tap "Manage" to add one.</div>`;
     chipsEl.querySelectorAll('[data-batch]').forEach((btn) => {
@@ -3534,7 +3557,7 @@
     const panel = document.getElementById('inlineManageBatches');
     const opening = panel.style.display === 'none' || !panel.style.display;
     panel.style.display = opening ? 'flex' : 'none';
-    document.getElementById('toggleManageBatchesBtn').textContent = opening ? 'Done' : 'Manage';
+    document.getElementById('toggleManageBatchesBtn').querySelector('span').textContent = opening ? 'Done' : 'Manage';
     if (opening) renderBatchListInto('inlineBatchListRows');
   });
 
