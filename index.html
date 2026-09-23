@@ -566,6 +566,10 @@
 
       <div id="classFields">
         <div class="field">
+          <label>Wing</label>
+          <div class="chips" id="wingChips"></div>
+        </div>
+        <div class="field">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <label style="margin-bottom:0;">Select Class / Batch</label>
             <button class="link-btn" id="toggleManageBatchesBtn" style="font-size:11.5px;">Manage</button>
@@ -744,6 +748,15 @@
         <button class="btn-secondary" id="adminDateClearBtn" style="display:none; border-color: var(--line);">Show Recent</button>
       </div>
 
+      <div class="field" style="margin-bottom:0;">
+        <label>Wing</label>
+        <div class="chips" id="adminWingChips">
+          <button class="chip active" data-admin-wing="all">All</button>
+          <button class="chip" data-admin-wing="Pre-Foundation">Pre-Foundation</button>
+          <button class="chip" data-admin-wing="Foundation">Foundation</button>
+        </div>
+      </div>
+
       <div class="admin-summary">
         <div class="stat-box">
           <div class="stat-box-icon">
@@ -785,6 +798,10 @@
       <div class="panel">
         <div class="panel-title">Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
+        <div class="chips" id="adminBatchWingChips">
+          <button class="chip active" data-batch-wing="Pre-Foundation">Pre-Foundation</button>
+          <button class="chip" data-batch-wing="Foundation">Foundation</button>
+        </div>
         <div class="activity-rows" id="batchListRows"></div>
         <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:14.5px; padding:13px 14px;">
         <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:12.5px;">+ Add</button>
@@ -869,7 +886,12 @@
 
 <script>
 (function () {
-  const DEFAULT_BATCHES = ['Class 9 - Batch 1', 'Class 9 - Batch 2', 'Class 10 - Batch 1', 'Class 10 - Batch 2', 'Remedial - Class 9', 'Remedial - Class 10', 'Extra Class'];
+  const WINGS = ['Pre-Foundation', 'Foundation'];
+  const DEFAULT_BATCHES_BY_WING = {
+    'Pre-Foundation': ['Class 9 - Batch 1', 'Class 9 - Batch 2', 'Class 10 - Batch 1', 'Class 10 - Batch 2', 'Remedial - Class 9', 'Remedial - Class 10', 'Extra Class'],
+    'Foundation': []
+  };
+  const DEFAULT_BATCHES = DEFAULT_BATCHES_BY_WING['Pre-Foundation'];
   const ACTIVITY_TYPES = ['Other Activity', 'Leave / Holiday'];
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const REMINDER_PREF_KEY = 'catjee_reminders_enabled';
@@ -894,6 +916,10 @@
     selectedDayCampus: null,
     campusLocation: null,
     batches: DEFAULT_BATCHES.slice(),
+    batchesByWing: { 'Pre-Foundation': DEFAULT_BATCHES_BY_WING['Pre-Foundation'].slice(), 'Foundation': DEFAULT_BATCHES_BY_WING['Foundation'].slice() },
+    formWing: 'Pre-Foundation',
+    adminBatchWing: 'Pre-Foundation',
+    adminReportWing: 'all',
     adminDate: todayStr(),
     adminReportRange: 'day',
     adminExpandedTeacher: null,
@@ -916,8 +942,33 @@
     saving: false
   };
 
-  function currentBatches() {
-    return (state.batches && state.batches.length) ? state.batches : DEFAULT_BATCHES;
+  function currentBatches(wing) {
+    const w = wing || state.formWing;
+    const list = state.batchesByWing && state.batchesByWing[w];
+    return (list && list.length) ? list : (DEFAULT_BATCHES_BY_WING[w] || []);
+  }
+
+  function allBatchesFlat() {
+    const seen = new Set();
+    const out = [];
+    WINGS.forEach((w) => {
+      currentBatches(w).forEach((b) => {
+        if (!seen.has(b)) { seen.add(b); out.push(b); }
+      });
+    });
+    return out.length ? out : DEFAULT_BATCHES;
+  }
+
+  function wingOfBatch(batch) {
+    for (const w of WINGS) {
+      if (currentBatches(w).includes(batch)) return w;
+    }
+    return 'Pre-Foundation';
+  }
+
+  function filterByAdminWing(classes) {
+    if (state.adminReportWing === 'all') return classes;
+    return classes.filter((c) => c.entryType === 'activity' || wingOfBatch(c.batch) === state.adminReportWing);
   }
 
   function todayStr() {
@@ -1670,11 +1721,30 @@
       dateLabelEl.style.display = 'none';
     }
 
-    const chipsEl = document.getElementById('batchChips');
-    chipsEl.innerHTML = currentBatches().map((b) => {
-      const active = b === state.form.batch;
-      return `<button class="chip${active ? ' active' : ''}" data-batch="${escapeHtml(b)}">${escapeHtml(b)}</button>`;
+    const wingChipsEl = document.getElementById('wingChips');
+    wingChipsEl.innerHTML = WINGS.map((w) => {
+      const active = w === state.formWing;
+      return `<button class="chip${active ? ' active' : ''}" data-wing="${escapeHtml(w)}">${escapeHtml(w)}</button>`;
     }).join('');
+    wingChipsEl.querySelectorAll('[data-wing]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const newWing = btn.getAttribute('data-wing');
+        if (newWing === state.formWing) return;
+        state.formWing = newWing;
+        state.form.batch = null;
+        document.getElementById('inlineManageBatches').style.display = 'none';
+        renderForm();
+      });
+    });
+
+    const chipsEl = document.getElementById('batchChips');
+    const wingBatches = currentBatches(state.formWing);
+    chipsEl.innerHTML = wingBatches.length
+      ? wingBatches.map((b) => {
+          const active = b === state.form.batch;
+          return `<button class="chip${active ? ' active' : ''}" data-batch="${escapeHtml(b)}">${escapeHtml(b)}</button>`;
+        }).join('')
+      : `<div class="admin-sub" style="margin:0;">No batches yet in ${escapeHtml(state.formWing)}. Tap "Manage" to add one.</div>`;
     chipsEl.querySelectorAll('[data-batch]').forEach((btn) => {
       btn.addEventListener('click', () => {
         selectBatch(btn.getAttribute('data-batch'));
@@ -1747,8 +1817,14 @@
   function renderAdmin() {
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
     document.getElementById('adminDateClearBtn').style.display = state.adminDate === todayStr() ? 'none' : 'inline-flex';
+    document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-admin-wing') === state.adminReportWing);
+    });
+    const wingFilteredClasses = state.adminReportWing === 'all'
+      ? state.adminClasses
+      : state.adminClasses.filter((c) => c.entryType === 'activity' || wingOfBatch(c.batch) === state.adminReportWing);
     const byTeacher = {};
-    state.adminClasses.forEach((c) => {
+    wingFilteredClasses.forEach((c) => {
       const tid = c.teacherId || 'unknown';
       if (!byTeacher[tid]) byTeacher[tid] = [];
       byTeacher[tid].push(c);
@@ -1756,7 +1832,7 @@
     const teacherIds = Object.keys(state.adminCampus).concat(Object.keys(byTeacher))
       .filter((v, i, a) => a.indexOf(v) === i);
 
-    document.getElementById('adminClassCount').textContent = state.adminClasses.filter((c) => c.entryType !== 'activity').length;
+    document.getElementById('adminClassCount').textContent = wingFilteredClasses.filter((c) => c.entryType !== 'activity').length;
     document.getElementById('adminTeacherCount').textContent = teacherIds.filter((tid) => {
       const c = state.adminCampus[tid];
       return (c && (c.totalSeconds > 0 || c.checkedIn)) || byTeacher[tid];
@@ -1838,10 +1914,14 @@
     } catch (err) { /* ignore */ }
   }
 
-  function renderBatchListInto(elId) {
+  function renderBatchListInto(elId, wing) {
     const el = document.getElementById(elId);
     if (!el) return;
-    const list = currentBatches();
+    const list = currentBatches(wing);
+    if (list.length === 0) {
+      el.innerHTML = '<div class="admin-sub" style="margin:0;">No batches yet in this wing. Add one below.</div>';
+      return;
+    }
     el.innerHTML = list.map((b, i) => `
       <div class="activity-row">
         <div class="activity-row-text"><span class="activity-row-title">${escapeHtml(b)}</span></div>
@@ -1850,26 +1930,32 @@
     el.querySelectorAll('[data-del-batch]').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const idx = parseInt(btn.getAttribute('data-del-batch'), 10);
-        const list2 = currentBatches();
-        if (list2.length <= 1) { showToast("Keep at least one batch", 'error'); return; }
+        const list2 = currentBatches(wing);
         const ok = await showConfirm('This batch will be removed from the picker for all teachers.', 'Remove this batch?', 'Remove');
         if (!ok) return;
         const newList = list2.slice();
         newList.splice(idx, 1);
-        await saveBatchList(newList);
+        await saveBatchList(wing, newList);
       });
     });
   }
 
   function renderBatchList() {
-    renderBatchListInto('batchListRows');
-    renderBatchListInto('inlineBatchListRows');
+    document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-batch-wing') === state.adminBatchWing);
+    });
+    renderBatchListInto('batchListRows', state.adminBatchWing);
+    renderBatchListInto('inlineBatchListRows', state.formWing);
   }
 
-  async function saveBatchList(list) {
+  async function saveBatchList(wing, list) {
     if (!state.db) { flashOffline(); return; }
     try {
-      await state.db.doc('settings/batches').set({ list });
+      const wings = {
+        'Pre-Foundation': wing === 'Pre-Foundation' ? list : currentBatches('Pre-Foundation'),
+        'Foundation': wing === 'Foundation' ? list : currentBatches('Foundation')
+      };
+      await state.db.doc('settings/batches').set({ wings });
       showToast('Batch list updated');
     } catch (err) { flashOffline(); }
   }
@@ -1899,7 +1985,7 @@
 
   function renderScheduleBatchChips() {
     const el = document.getElementById('scheduleBatchChips');
-    el.innerHTML = currentBatches().map((b) => {
+    el.innerHTML = allBatchesFlat().map((b) => {
       const active = b === state.scheduleBatch;
       return `<button class="chip${active ? ' active' : ''}" data-sbatch="${escapeHtml(b)}">${escapeHtml(b)}</button>`;
     }).join('');
@@ -2858,7 +2944,7 @@
 
     const date = state.adminDate;
     const byTeacher = {};
-    state.adminClasses.forEach((c) => {
+    filterByAdminWing(state.adminClasses).forEach((c) => {
       const tid = c.teacherId || 'unknown';
       if (!byTeacher[tid]) byTeacher[tid] = [];
       byTeacher[tid].push(c);
@@ -2889,6 +2975,7 @@
     w.bodyLine('Institute-Wide Daily Report', { size: 11 });
     w.addSpace(4);
     w.bodyLine(`Date: ${dateLabel}`, { bold: true, size: 11 });
+    if (state.adminReportWing !== 'all') w.bodyLine(`Wing: ${state.adminReportWing}`, { bold: true, size: 11 });
     w.bodyLine(`Teachers reporting: ${teacherIds.length}`);
     w.addSpace(6);
     w.rule();
@@ -2904,8 +2991,9 @@
     });
 
     const blob = w.finishBlob();
+    const wingTag = state.adminReportWing === 'all' ? '' : `-${state.adminReportWing}`;
     try {
-      saveFile(`CATJEE-Institute-Report-${date}.pdf`, blob);
+      saveFile(`CATJEE-Institute-Report-${date}${wingTag}.pdf`, blob);
       msgEl.textContent = 'Combined report saved.';
       showToast('Combined report saved');
     } catch (err) {
@@ -2914,21 +3002,22 @@
   }
 
   async function downloadAdminCombinedCsv(msgEl) {
-    if (state.adminClasses.length === 0) {
+    const filtered = filterByAdminWing(state.adminClasses);
+    if (filtered.length === 0) {
       msgEl.textContent = 'No activity to export for this date.';
       return;
     }
     msgEl.textContent = 'Preparing CSV…';
 
     try {
-      const teacherIds = state.adminClasses.map((c) => c.teacherId).filter((v, i, a) => v && a.indexOf(v) === i);
+      const teacherIds = filtered.map((c) => c.teacherId).filter((v, i, a) => v && a.indexOf(v) === i);
       await resolveAdminNames(teacherIds);
     } catch (err) { /* best effort */ }
 
     const date = state.adminDate;
     const header = ['Teacher', 'Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
     const rows = [header];
-    const sorted = state.adminClasses.slice().sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
+    const sorted = filtered.slice().sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
     sorted.forEach((c) => {
       const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
       if (c.entryType === 'activity') {
@@ -2945,8 +3034,9 @@
     });
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
+    const wingTag = state.adminReportWing === 'all' ? '' : `-${state.adminReportWing}`;
     try {
-      saveFile(`CATJEE-Institute-Report-${date}.csv`, csv, 'text/csv');
+      saveFile(`CATJEE-Institute-Report-${date}${wingTag}.csv`, csv, 'text/csv');
       msgEl.textContent = 'CSV saved.';
       showToast('CSV saved');
     } catch (err) {
@@ -2996,7 +3086,7 @@
 
     const byTeacher = {};
     results.forEach(({ classes, campus }) => {
-      classes.forEach((c) => {
+      filterByAdminWing(classes).forEach((c) => {
         const tid = c.teacherId || 'unknown';
         if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0 };
         if (c.entryType === 'activity') {
@@ -3036,6 +3126,7 @@
     w.bodyLine('Institute-Wide Report', { size: 11 });
     w.addSpace(4);
     w.bodyLine(`Range: ${label}`, { bold: true, size: 11 });
+    if (state.adminReportWing !== 'all') w.bodyLine(`Wing: ${state.adminReportWing}`, { bold: true, size: 11 });
     w.bodyLine(`Teachers active: ${teacherIds.length}`);
     w.addSpace(6);
     w.rule();
@@ -3054,8 +3145,9 @@
     });
 
     const blob = w.finishBlob();
+    const wingTag = state.adminReportWing === 'all' ? '' : `-${state.adminReportWing}`;
     try {
-      saveFile(`CATJEE-Institute-Report-${fileTag}.pdf`, blob);
+      saveFile(`CATJEE-Institute-Report-${fileTag}${wingTag}.pdf`, blob);
       msgEl.textContent = 'Combined report saved.';
       showToast('Combined report saved');
     } catch (err) {
@@ -3071,7 +3163,7 @@
     const { dates, fileTag } = adminReportRangeDates();
     const results = await Promise.all(dates.map((dt) => fetchAdminDayData(dt)));
     const allClasses = [];
-    results.forEach(({ classes }) => allClasses.push(...classes));
+    results.forEach(({ classes }) => allClasses.push(...filterByAdminWing(classes)));
 
     if (allClasses.length === 0) {
       msgEl.textContent = 'No activity to export for this range.';
@@ -3105,8 +3197,9 @@
     });
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
+    const wingTag = state.adminReportWing === 'all' ? '' : `-${state.adminReportWing}`;
     try {
-      saveFile(`CATJEE-Institute-Report-${fileTag}.csv`, csv, 'text/csv');
+      saveFile(`CATJEE-Institute-Report-${fileTag}${wingTag}.csv`, csv, 'text/csv');
       msgEl.textContent = 'CSV saved.';
       showToast('CSV saved');
     } catch (err) {
@@ -3383,14 +3476,28 @@
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
     subscribeAdminDate(state.adminDate);
   });
+  document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.adminReportWing = btn.getAttribute('data-admin-wing');
+      state.adminExpandedTeacher = null;
+      renderAdmin();
+    });
+  });
+
+  document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.adminBatchWing = btn.getAttribute('data-batch-wing');
+      renderBatchList();
+    });
+  });
 
   document.getElementById('addBatchBtn').addEventListener('click', async () => {
     const input = document.getElementById('newBatchInput');
     const val = input.value.trim();
     if (!val) return;
-    const list = currentBatches();
+    const list = currentBatches(state.adminBatchWing);
     if (list.includes(val)) { showToast('That batch already exists', 'error'); return; }
-    await saveBatchList(list.concat([val]));
+    await saveBatchList(state.adminBatchWing, list.concat([val]));
     input.value = '';
   });
 
@@ -3398,9 +3505,9 @@
     const input = document.getElementById('inlineNewBatchInput');
     const val = input.value.trim();
     if (!val) return;
-    const list = currentBatches();
+    const list = currentBatches(state.formWing);
     if (list.includes(val)) { showToast('That batch already exists', 'error'); return; }
-    await saveBatchList(list.concat([val]));
+    await saveBatchList(state.formWing, list.concat([val]));
     input.value = '';
   });
 
@@ -3671,7 +3778,18 @@
 
     unsubscribers.push(db.doc('settings/batches').onSnapshot((snap) => {
       const data = snap.data();
-      state.batches = (data && Array.isArray(data.list) && data.list.length) ? data.list : DEFAULT_BATCHES.slice();
+      if (data && data.wings && typeof data.wings === 'object') {
+        state.batchesByWing = {
+          'Pre-Foundation': (Array.isArray(data.wings['Pre-Foundation']) && data.wings['Pre-Foundation'].length) ? data.wings['Pre-Foundation'] : DEFAULT_BATCHES_BY_WING['Pre-Foundation'].slice(),
+          'Foundation': Array.isArray(data.wings['Foundation']) ? data.wings['Foundation'] : []
+        };
+      } else if (data && Array.isArray(data.list) && data.list.length) {
+        // migrate legacy flat list into Pre-Foundation wing
+        state.batchesByWing = { 'Pre-Foundation': data.list, 'Foundation': [] };
+      } else {
+        state.batchesByWing = { 'Pre-Foundation': DEFAULT_BATCHES_BY_WING['Pre-Foundation'].slice(), 'Foundation': [] };
+      }
+      state.batches = currentBatches('Pre-Foundation');
       renderBatchList();
       if (!state.editingId) renderForm();
       renderScheduleBatchChips();
