@@ -2692,16 +2692,16 @@
     } else {
       classItems.forEach((c, i) => {
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
-        w.bodyLine(`  ${i + 1}. ${c.batch || ''} - ${c.topic || 'No topic noted'} (${time})`, { bold: true });
+        w.bodyLine(`  ${i + 1}. ${c.batch || ''} (${time})`, { bold: true });
+        w.bodyLine(`     Chapter / Topic: ${c.topic || 'No topic noted'}`);
         const checklistItems = [
           { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
           { label: 'Study Material', given: c.material, note: c.materialNote },
           { label: 'Test / Exam', given: c.test, note: c.testNote },
           { label: 'Homework', given: c.homework, note: c.homeworkNote }
         ];
-        checklistItems.forEach((it) => {
-          const status = it.given ? (it.note ? it.note : 'Given') : 'Not given';
-          w.bodyLine(`     - ${it.label}: ${status}`);
+        checklistItems.filter((it) => it.given).forEach((it) => {
+          w.bodyLine(`     - ${it.label}: ${it.note ? it.note : 'Given'}`);
         });
         w.addSpace(3);
       });
@@ -2785,16 +2785,16 @@
       classItems.forEach((c, i) => {
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
         lines.push('');
-        lines.push(`*${i + 1}. ${c.batch || ''} - ${c.topic || 'No topic noted'}* (${time})`);
+        lines.push(`*${i + 1}. ${c.batch || ''}* (${time})`);
+        lines.push(`Chapter / Topic: ${c.topic || 'No topic noted'}`);
         const checklistItems = [
           { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
           { label: 'Study Material', given: c.material, note: c.materialNote },
           { label: 'Test / Exam', given: c.test, note: c.testNote },
           { label: 'Homework', given: c.homework, note: c.homeworkNote }
         ];
-        checklistItems.forEach((it) => {
-          const status = it.given ? (it.note ? it.note : 'Given') : 'Not given';
-          lines.push(`- ${it.label}: ${status}`);
+        checklistItems.filter((it) => it.given).forEach((it) => {
+          lines.push(`- ${it.label}: ${it.note ? it.note : 'Given'}`);
         });
       });
     }
