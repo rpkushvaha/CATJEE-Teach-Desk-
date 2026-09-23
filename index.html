@@ -741,6 +741,7 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
           </button>
         </div>
+        <button class="btn-secondary" id="adminDateClearBtn" style="display:none; border-color: var(--line);">Show Recent</button>
       </div>
 
       <div class="admin-summary">
@@ -896,6 +897,7 @@
     adminDate: todayStr(),
     adminReportRange: 'day',
     adminExpandedTeacher: null,
+    historyTodayExpanded: false,
     adminClasses: [],
     adminCampus: {},
     adminNames: {},
@@ -1316,7 +1318,7 @@
 
   function wireEntryListEvents(el, sourceGetter, editSourceTab) {
     const rerender = () => {
-      if (editSourceTab === 'history') { renderHistory(); } else { renderTodayList(); }
+      if (editSourceTab === 'history' || editSourceTab === 'history-today') { renderHistory(); } else { renderTodayList(); }
     };
     const onFinalDelete = (id) => {
       if (editSourceTab === 'history') {
@@ -1532,8 +1534,55 @@
 
     if (state.historyRange === 'day') {
       const todayD = todayStr();
-      const yesterdayD = shiftDateStr(todayD, -1);
-      el.innerHTML = dayCardHtml(todayD, undefined, undefined, true) + dayCardHtml(yesterdayD, undefined, undefined, true);
+
+      if (!state.historyTodayExpanded) {
+        el.innerHTML = dayCardHtml(todayD, undefined, undefined, true);
+        el.querySelectorAll('[data-report-date]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'));
+          });
+        });
+        el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'));
+          });
+        });
+        const card = el.querySelector('[data-jump-date]');
+        if (card) {
+          card.addEventListener('click', () => {
+            state.historyTodayExpanded = true;
+            renderHistory();
+          });
+        }
+        return;
+      }
+
+      const items = (state.historyByDate[todayD] || []).filter((c) => !state.pendingDeleteIds.has(c.id));
+      const campus = state.historyCampus[todayD];
+      const addRow = `
+        <div style="display:flex; gap:16px; margin: 10px 0 14px;">
+          <button class="link-btn" id="historyAddClassBtn">+ Class</button>
+          <button class="link-btn" id="historyAddActivityBtn">+ Activity</button>
+        </div>`;
+      el.innerHTML = dayCardHtml(todayD, items, campus, false)
+        + `<div class="day-card-hint" id="historyTodayCollapseHint" style="cursor:pointer; margin: -6px 0 12px;">Tap to collapse</div>`
+        + addRow
+        + entryListHtml(items, false);
+
+      const summaryCard = el.querySelector('.day-card');
+      if (summaryCard) {
+        summaryCard.addEventListener('click', (e) => {
+          if (e.target.closest('[data-report-date]') || e.target.closest('[data-whatsapp-date]')) return;
+          state.historyTodayExpanded = false;
+          renderHistory();
+        });
+      }
+      document.getElementById('historyTodayCollapseHint').addEventListener('click', () => {
+        state.historyTodayExpanded = false;
+        renderHistory();
+      });
       el.querySelectorAll('[data-report-date]').forEach((btn) => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1546,10 +1595,24 @@
           shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'));
         });
       });
-      el.querySelectorAll('[data-jump-date]').forEach((card) => {
-        card.addEventListener('click', () => {
-          showSelectedDay(card.getAttribute('data-jump-date'));
-        });
+      wireEntryListEvents(el, () => (state.historyByDate[todayD] || []).filter((c) => !state.pendingDeleteIds.has(c.id)), 'history-today');
+      document.getElementById('historyAddClassBtn').addEventListener('click', () => {
+        state.editingId = null;
+        state.editingSourceTab = 'history-today';
+        state.addTargetDate = todayD;
+        state.entryMode = 'class';
+        resetClassForm();
+        renderForm();
+        switchTab('add');
+      });
+      document.getElementById('historyAddActivityBtn').addEventListener('click', () => {
+        state.editingId = null;
+        state.editingSourceTab = 'history-today';
+        state.addTargetDate = todayD;
+        state.entryMode = 'activity';
+        resetActivityForm();
+        renderForm();
+        switchTab('add');
       });
       return;
     }
@@ -1683,6 +1746,7 @@
 
   function renderAdmin() {
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
+    document.getElementById('adminDateClearBtn').style.display = state.adminDate === todayStr() ? 'none' : 'inline-flex';
     const byTeacher = {};
     state.adminClasses.forEach((c) => {
       const tid = c.teacherId || 'unknown';
@@ -2131,7 +2195,7 @@
     shareReportOnWhatsApp(todayStr(), document.getElementById('reportMsg'));
   });
   document.getElementById('backFromAdd').addEventListener('click', () => {
-    const wasHistory = state.editingSourceTab === 'history';
+    const wasHistory = state.editingSourceTab === 'history' || state.editingSourceTab === 'history-today';
     state.editingId = null;
     state.editingSourceTab = null;
     state.addTargetDate = null;
@@ -3211,6 +3275,9 @@
         if (returnTab === 'history') {
           switchTab('history');
           await showSelectedDay(state.historySelectedDate);
+        } else if (returnTab === 'history-today') {
+          switchTab('history');
+          renderHistory();
         } else {
           switchTab('today');
         }
@@ -3274,6 +3341,9 @@
       if (returnTab === 'history') {
         switchTab('history');
         await showSelectedDay(state.historySelectedDate);
+      } else if (returnTab === 'history-today') {
+        switchTab('history');
+        renderHistory();
       } else {
         switchTab('today');
       }
@@ -3306,6 +3376,12 @@
       document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(dateStr);
       subscribeAdminDate(dateStr);
     });
+  });
+  document.getElementById('adminDateClearBtn').addEventListener('click', () => {
+    state.adminDate = todayStr();
+    state.adminExpandedTeacher = null;
+    document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
+    subscribeAdminDate(state.adminDate);
   });
 
   document.getElementById('addBatchBtn').addEventListener('click', async () => {
