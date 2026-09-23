@@ -177,10 +177,10 @@
 
   .class-list { display: flex; flex-direction: column; gap: 10px; }
   .class-card { border-radius: 16px; background: var(--card); border: 1px solid var(--line); padding: 15px; overflow: hidden; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
-  .class-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; gap: 8px; }
-  .class-title { font-size: 13.5px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .class-meta { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-  .class-time { font-size: 11px; color: var(--muted); flex-shrink: 0; margin-right: 2px; }
+  .class-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 3px; gap: 8px; }
+  .class-title { font-size: 13.5px; font-weight: 700; flex: 1; min-width: 0; line-height: 1.35; }
+  .class-meta { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .class-time { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
   .class-topic { font-size: 12px; color: var(--muted-2); margin-bottom: 9px; }
   .activity-rows { display: flex; flex-direction: column; }
   .activity-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
@@ -188,14 +188,17 @@
   .activity-row-text { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0; }
   .activity-row-title { font-size: 13.5px; font-weight: 700; }
   .activity-row-note { font-size: 13px; color: var(--muted-2); }
-  .class-checklist-notes { font-size: 11.5px; color: var(--muted-2); margin-top: 6px; line-height: 1.4; }
+  .class-checklist-notes {
+    font-size: 11.5px; color: var(--ink); margin-top: 8px; line-height: 1.4;
+    background: var(--neutral-soft); border-radius: 10px; padding: 7px 10px;
+  }
   .activity-row-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-  .badges { display: flex; gap: 5px; flex-wrap: wrap; }
-  .badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .badges { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .badge { font-size: 10.5px; font-weight: 700; padding: 5px 9px; border-radius: 999px; text-align: center; }
   .badge.on { background: var(--green-soft); color: var(--green); }
   .badge.off { background: var(--neutral-soft); color: var(--neutral-text); font-weight: 600; }
   .badge.test { background: var(--green-soft); color: var(--green); }
-  .badge.leave { background: var(--gold); color: #fff; }
+  .badge.leave { background: var(--gold); color: #fff; grid-column: 1 / -1; text-align: left; }
   .empty {
     font-size: 13px; color: var(--muted); padding: 28px 16px; text-align: center;
     border: 1.5px dashed var(--line); border-radius: 16px; background: var(--neutral-soft);
@@ -204,8 +207,17 @@
   .empty-icon { font-size: 26px; line-height: 1; opacity: 0.85; }
   .empty-hint { font-size: 11.5px; color: var(--muted); opacity: 0.85; }
   .del-btn {
-    background: none; border: none; cursor: pointer; color: var(--muted); flex-shrink: 0;
-    padding: 4px; display: flex; align-items: center;
+    background: var(--neutral-soft); border: none; cursor: pointer; color: var(--muted); flex-shrink: 0;
+    padding: 7px; display: flex; align-items: center; border-radius: 999px; margin-left: 4px;
+  }
+  .action-btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .action-btn {
+    display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: var(--gold);
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; cursor: pointer;
+  }
+  .add-entry-btn {
+    display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--gold);
+    background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 999px; padding: 7px 13px; cursor: pointer;
   }
 
   /* Add Class tab */
@@ -271,7 +283,7 @@
 
   /* History tab */
   .history-sub { font-size: 12px; color: var(--muted); }
-  .day-card { border-radius: 16px; background: var(--card); border: 1px solid var(--line); padding: 15px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
+  .day-card { border-radius: 16px; background: var(--neutral-soft); border: 1px solid var(--line); padding: 15px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
   .day-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
   .day-date { font-size: 14px; font-weight: 700; }
   .day-time { font-size: 12.5px; font-weight: 700; color: var(--gold); }
@@ -292,7 +304,7 @@
   }
   .stat-box .n { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; }
   .stat-box .l { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; font-weight: 700; margin-top: 3px; }
-  .teacher-card { border-radius: 16px; background: var(--card); border: 1px solid var(--line); padding: 15px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
+  .teacher-card { border-radius: 16px; background: var(--neutral-soft); border: 1px solid var(--line); padding: 15px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
   .teacher-detail { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 10px; cursor: default; }
   .teacher-detail .class-card { box-shadow: none; }
   .teacher-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
@@ -542,8 +554,8 @@
         <div class="section-head">
           <div class="section-title" id="todayHeading">Today's Activity</div>
           <div style="display:flex; gap:10px;">
-            <button class="link-btn" id="addActivityLink">+ Activity</button>
-            <button class="link-btn" id="addClassLink">+ Class</button>
+            <button class="add-entry-btn" id="addActivityLink">+ Activity</button>
+            <button class="add-entry-btn" id="addClassLink">+ Class</button>
           </div>
         </div>
         <div class="class-list" id="todayClassList" style="margin-top:10px;">
@@ -1344,7 +1356,7 @@
     if (cls.material && cls.materialNote) noteParts.push(`Material: ${cls.materialNote}`);
     if (cls.test && cls.testNote) noteParts.push(`Test: ${cls.testNote}`);
     if (cls.homework && cls.homeworkNote) noteParts.push(`Homework: ${cls.homeworkNote}`);
-    const notesLine = noteParts.length ? `<div class="class-checklist-notes">${escapeHtml(noteParts.join(' · '))}</div>` : '';
+    const notesLine = noteParts.length ? `<div class="class-checklist-notes">📝 ${escapeHtml(noteParts.join(' · '))}</div>` : '';
     const actions = showDelete
       ? `<button class="del-btn" data-edit="${cls.id}" aria-label="Edit class">${svgEdit()}</button><button class="del-btn" data-del="${cls.id}" aria-label="Delete class">${svgTrash()}</button>`
       : '';
@@ -1353,10 +1365,10 @@
         <div class="class-top">
           <div class="class-title">${escapeHtml(title)}</div>
           <div class="class-meta">
-            <div class="class-time">${time}</div>
             ${actions}
           </div>
         </div>
+        ${time ? `<div class="class-time">${time}</div>` : ''}
         ${topic ? `<div class="class-topic">${escapeHtml(topic)}</div>` : ''}
         <div class="badges">${badges}</div>
         ${notesLine}
@@ -1511,9 +1523,9 @@
           <span class="badge on">Homework ${hw}/${n}</span>
         </div>` : ''}
         ${clickable ? `<div class="day-card-hint">Tap to see full detail</div>` : ''}
-        <div style="display:flex; gap:16px; margin-top:8px;">
-          <button class="link-btn" data-report-date="${date}">📄 Download PDF</button>
-          <button class="link-btn" data-whatsapp-date="${date}">💬 Share on WhatsApp</button>
+        <div class="action-btn-row">
+          <button class="action-btn" data-report-date="${date}">📄 PDF</button>
+          <button class="action-btn" data-whatsapp-date="${date}">💬 WhatsApp</button>
         </div>
       </div>`;
   }
@@ -1549,9 +1561,9 @@
 
     if (state.historyRange === 'day' && state.historySelectedDate) {
       const addRow = `
-        <div style="display:flex; gap:14px; padding: 2px 2px 4px 2px;">
-          <button class="link-btn" id="historyAddActivityBtn">+ Activity</button>
-          <button class="link-btn" id="historyAddClassBtn">+ Class</button>
+        <div class="action-btn-row" style="padding: 2px 2px 4px 2px;">
+          <button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button>
+          <button class="add-entry-btn" id="historyAddClassBtn">+ Class</button>
         </div>`;
       el.innerHTML = dayCardHtml(state.historySelectedDate, state.selectedDayClasses, state.selectedDayCampus)
         + addRow
@@ -1640,9 +1652,9 @@
       const items = (state.historyByDate[todayD] || []).filter((c) => !state.pendingDeleteIds.has(c.id));
       const campus = state.historyCampus[todayD];
       const addRow = `
-        <div style="display:flex; gap:16px; margin: 10px 0 14px;">
-          <button class="link-btn" id="historyAddClassBtn">+ Class</button>
-          <button class="link-btn" id="historyAddActivityBtn">+ Activity</button>
+        <div class="action-btn-row" style="margin: 10px 0 14px;">
+          <button class="add-entry-btn" id="historyAddClassBtn">+ Class</button>
+          <button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button>
         </div>`;
       el.innerHTML = dayCardHtml(todayD, items, campus, false)
         + `<div class="day-card-hint" id="historyTodayCollapseHint" style="cursor:pointer; margin: -6px 0 12px;">Tap to collapse</div>`
