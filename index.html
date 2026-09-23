@@ -279,6 +279,8 @@
   .stat-box .n { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; }
   .stat-box .l { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; font-weight: 700; margin-top: 3px; }
   .teacher-card { border-radius: 16px; background: var(--card); border: 1px solid var(--line); padding: 15px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
+  .teacher-detail { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 10px; cursor: default; }
+  .teacher-detail .class-card { box-shadow: none; }
   .teacher-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .teacher-name { font-size: 13.5px; font-weight: 700; flex-grow: 1; }
   .teacher-time { font-size: 12px; font-weight: 700; color: var(--gold); }
@@ -893,6 +895,7 @@
     batches: DEFAULT_BATCHES.slice(),
     adminDate: todayStr(),
     adminReportRange: 'day',
+    adminExpandedTeacher: null,
     adminClasses: [],
     adminCampus: {},
     adminNames: {},
@@ -1280,28 +1283,25 @@
       </div>`;
   }
 
-  function mergedActivitiesCardHtml(items) {
+  function mergedActivitiesCardHtml(items, readonly) {
     const rows = items.map((item) => `
         <div class="activity-row">
           <div class="activity-row-text">
             <span class="activity-row-title">${escapeHtml(item.activityType || 'Activity')}</span>
             ${item.note ? `<span class="activity-row-note">${escapeHtml(item.note)}</span>` : ''}
           </div>
-          <div class="activity-row-actions">
+          ${readonly ? '' : `<div class="activity-row-actions">
             <button class="del-btn" data-edit-activity="${item.id}" aria-label="Edit activity">${svgEdit()}</button>
             <button class="del-btn" data-del-btn="${item.id}" aria-label="Delete activity">${svgTrash()}</button>
-          </div>
+          </div>`}
         </div>`).join('');
     return `
       <div class="class-card">
-        <div class="class-top">
-          <div class="class-title">🗓️ Activities</div>
-        </div>
         <div class="activity-rows">${rows}</div>
       </div>`;
   }
 
-  function entryListHtml(entries) {
+  function entryListHtml(entries, readonly) {
     entries = entries.filter((c) => !state.pendingDeleteIds.has(c.id));
     if (entries.length === 0) return '<div class="empty"><span class="empty-icon">📋</span>No classes or activities logged.<span class="empty-hint">Tap + Class or + Activity above to add one.</span></div>';
     const classItems = entries
@@ -1309,8 +1309,8 @@
       .slice()
       .sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
     const activityItems = entries.filter((c) => c.entryType === 'activity');
-    let html = classItems.map((c) => classCardHtml(c, true)).join('');
-    if (activityItems.length > 0) html += mergedActivitiesCardHtml(activityItems);
+    let html = classItems.map((c) => classCardHtml(c, !readonly)).join('');
+    if (activityItems.length > 0) html += mergedActivitiesCardHtml(activityItems, readonly);
     return html;
   }
 
@@ -1719,8 +1719,13 @@
       const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
       const subject = items[0] ? items[0].subject : '';
       const countLine = `${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Activity` : ''}`;
+      const expanded = state.adminExpandedTeacher === tid;
+      const hasDetail = all.length > 0;
+      const detailHtml = expanded
+        ? `<div class="teacher-detail">${entryListHtml(all, true)}</div>`
+        : '';
       return `
-        <div class="teacher-card">
+        <div class="teacher-card"${hasDetail ? ` data-teacher-id="${tid}" style="cursor:pointer;"` : ''}>
           <div class="teacher-top">
             <div class="teacher-name">${escapeHtml(name)}</div>
             <div class="teacher-time num">${seconds > 0 ? formatShort(seconds) : '—'}</div>
@@ -1732,8 +1737,18 @@
             <span class="badge test">Test ${test}/${n}</span>
             <span class="badge on">Homework ${hw}/${n}</span>
           </div>` : ''}
+          ${hasDetail ? `<div class="day-card-hint">${expanded ? 'Tap to collapse' : 'Tap to see full detail'}</div>` : ''}
+          ${detailHtml}
         </div>`;
     }).join('');
+
+    listEl.querySelectorAll('[data-teacher-id]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const tid = card.getAttribute('data-teacher-id');
+        state.adminExpandedTeacher = state.adminExpandedTeacher === tid ? null : tid;
+        renderAdmin();
+      });
+    });
 
     resolveAdminNames(teacherIds);
   }
@@ -3274,17 +3289,20 @@
   document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
   document.getElementById('adminDatePrev').addEventListener('click', () => {
     state.adminDate = shiftDateStr(state.adminDate, -1);
+    state.adminExpandedTeacher = null;
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
     subscribeAdminDate(state.adminDate);
   });
   document.getElementById('adminDateNext').addEventListener('click', () => {
     state.adminDate = shiftDateStr(state.adminDate, 1);
+    state.adminExpandedTeacher = null;
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
     subscribeAdminDate(state.adminDate);
   });
   document.getElementById('adminDateCalIcon').addEventListener('click', () => {
     openCalendar(state.adminDate, (dateStr) => {
       state.adminDate = dateStr;
+      state.adminExpandedTeacher = null;
       document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(dateStr);
       subscribeAdminDate(dateStr);
     });
