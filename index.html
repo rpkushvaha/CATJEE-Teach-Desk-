@@ -799,7 +799,7 @@
         <div class="panel-title">Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
         <div class="chips" id="adminBatchWingChips">
-          <button class="chip active" data-batch-wing="Pre-Foundation">Pre-Foundation</button>
+          <button class="chip" data-batch-wing="Pre-Foundation">Pre-Foundation</button>
           <button class="chip" data-batch-wing="Foundation">Foundation</button>
         </div>
         <div class="admin-sub" id="adminBatchListHint">Tap a wing above to see and manage its classes.</div>
@@ -1946,7 +1946,7 @@
 
   function renderBatchList() {
     document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
-      btn.classList.toggle('active', btn.getAttribute('data-batch-wing') === state.adminBatchWing);
+      btn.classList.toggle('active', btn.getAttribute('data-batch-wing') === state.adminBatchListExpanded);
     });
     const expanded = !!state.adminBatchListExpanded;
     document.getElementById('adminBatchListExpandedBox').style.display = expanded ? 'flex' : 'none';
