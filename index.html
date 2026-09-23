@@ -3091,24 +3091,20 @@
 
   function selectBatch(batch) {
     const last = findLastClassForBatch(batch);
-    if (last) {
-      state.form = {
-        batch,
-        topic: last.topic || '',
-        worksheet: !!last.worksheet,
-        material: !!last.material,
-        test: !!last.test,
-        homework: !!last.homework
-      };
-    } else {
-      state.form = { batch, topic: '', worksheet: false, material: false, test: false, homework: false };
-    }
+    state.form = {
+      batch,
+      topic: (last && last.topic) || '',
+      worksheet: false,
+      material: false,
+      test: false,
+      homework: false
+    };
     renderForm();
     document.getElementById('topicInput').value = state.form.topic;
-    document.getElementById('worksheetNoteInput').value = (last && last.worksheetNote) || '';
-    document.getElementById('materialNoteInput').value = (last && last.materialNote) || '';
-    document.getElementById('testNoteInput').value = (last && last.testNote) || '';
-    document.getElementById('homeworkNoteInput').value = (last && last.homeworkNote) || '';
+    document.getElementById('worksheetNoteInput').value = '';
+    document.getElementById('materialNoteInput').value = '';
+    document.getElementById('testNoteInput').value = '';
+    document.getElementById('homeworkNoteInput').value = '';
     if (last && last.startTimeStr && last.endTimeStr) {
       document.getElementById('startTimeInput').value = last.startTimeStr;
       document.getElementById('endTimeInput').value = last.endTimeStr;
