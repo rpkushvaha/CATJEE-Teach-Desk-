@@ -739,9 +739,9 @@
       </div>
 
       <div class="panel" id="scheduleNoticePanel">
-        <div class="panel-title">📸 My Timetable Photos</div>
-        <div class="admin-sub">Personal — only you can see these. Save a photo of your schedule (handwritten, printed, or from anywhere) for quick reference.</div>
-        <div id="scheduleNoticeGallery" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <div class="panel-title">📸 My Saved Photos</div>
+        <div class="admin-sub">Personal — only you can see these. Save any photo for quick reference (schedule, notes, anything). Tap a photo to view it full size.</div>
+        <div id="scheduleNoticeGallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;"></div>
         <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
         <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line); margin-top:4px;">📷 Add Photo</button>
       </div>
@@ -927,6 +927,16 @@
     <div class="modal-actions">
       <button class="modal-btn-cancel" id="confirmCancelBtn">Cancel</button>
       <button class="modal-btn-danger" id="confirmOkBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="photoLightboxModal">
+  <div class="modal-card" style="max-width:480px; padding:14px; align-items:center;">
+    <img id="photoLightboxImg" src="" alt="Photo" style="width:100%; border-radius:12px; display:block;">
+    <div class="modal-actions" style="width:100%;">
+      <button class="modal-btn-cancel" id="photoLightboxCloseBtn">Close</button>
+      <button class="modal-btn-danger" id="photoLightboxDeleteBtn">Delete</button>
     </div>
   </div>
 </div>
@@ -2252,6 +2262,8 @@
     }
   }
 
+  let lightboxPhotoId = null;
+
   function renderScheduleNotice() {
     const gallery = document.getElementById('scheduleNoticeGallery');
     const uploadBtn = document.getElementById('scheduleNoticeUploadBtn');
@@ -2259,15 +2271,32 @@
 
     const photos = state.scheduleNoticePhotos || [];
     gallery.innerHTML = photos.map((p) => `
-      <div style="position:relative;">
-        <img src="${p.imageBase64}" alt="My schedule photo" style="width:100%; border-radius:12px; display:block;">
-        <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); color:#fff;">${svgTrash()}</button>
+      <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+        <img data-open-photo="${p.id}" src="${p.imageBase64}" alt="Saved photo" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:pointer; display:block;">
+        <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="padding:4px;">${svgTrash()}</button>
       </div>`).join('');
+    gallery.querySelectorAll('[data-open-photo]').forEach((img) => {
+      img.addEventListener('click', () => openPhotoLightbox(img.getAttribute('data-open-photo')));
+    });
     gallery.querySelectorAll('[data-remove-photo]').forEach((btn) => {
       btn.addEventListener('click', () => removeScheduleNoticePhoto(btn.getAttribute('data-remove-photo')));
     });
 
     uploadBtn.style.display = photos.length >= MAX_SCHEDULE_PHOTOS ? 'none' : 'block';
+  }
+
+  function openPhotoLightbox(photoId) {
+    const photo = (state.scheduleNoticePhotos || []).find((p) => p.id === photoId);
+    if (!photo) return;
+    lightboxPhotoId = photoId;
+    document.getElementById('photoLightboxImg').src = photo.imageBase64;
+    document.getElementById('photoLightboxModal').classList.add('active');
+  }
+
+  function closePhotoLightbox() {
+    lightboxPhotoId = null;
+    document.getElementById('photoLightboxModal').classList.remove('active');
+    document.getElementById('photoLightboxImg').src = '';
   }
 
   function daysUntil(dayAbbr) {
@@ -4050,6 +4079,16 @@
     const file = e.target.files && e.target.files[0];
     if (file) handleScheduleNoticeUpload(file);
     e.target.value = '';
+  });
+  document.getElementById('photoLightboxCloseBtn').addEventListener('click', closePhotoLightbox);
+  document.getElementById('photoLightboxModal').addEventListener('click', (e) => {
+    if (e.target.id === 'photoLightboxModal') closePhotoLightbox();
+  });
+  document.getElementById('photoLightboxDeleteBtn').addEventListener('click', async () => {
+    if (!lightboxPhotoId) return;
+    const id = lightboxPhotoId;
+    closePhotoLightbox();
+    await removeScheduleNoticePhoto(id);
   });
 
   // ---------- Auth screen ----------
