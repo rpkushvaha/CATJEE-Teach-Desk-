@@ -1593,9 +1593,20 @@
           <button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button>
           <button class="add-entry-btn" id="historyAddClassBtn">+ Class</button>
         </div>`;
+      const selDate = state.historySelectedDate;
+      const sdSessions = ((state.selectedDayCampus && state.selectedDayCampus.sessions) || []).filter((s) => !state.pendingDeleteIds.has(s.id));
+      const sessionsBlock = sdSessions.length > 0
+        ? `<div class="section-title" style="font-size:13px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
+           <div class="class-list" id="historySessionsList">${sessionsCardsHtml(sdSessions)}</div>`
+        : '';
       el.innerHTML = dayCardHtml(state.historySelectedDate, state.selectedDayClasses, state.selectedDayCampus)
+        + sessionsBlock
         + addRow
         + entryListHtml(state.selectedDayClasses);
+      const historySessionsListEl = document.getElementById('historySessionsList');
+      if (historySessionsListEl) {
+        wireSessionsEvents(historySessionsListEl, selDate, sdSessions, () => showSelectedDay(selDate));
+      }
       el.querySelectorAll('[data-report-date]').forEach((btn) => {
         btn.addEventListener('click', () => {
           downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'));
@@ -1684,11 +1695,21 @@
           <button class="add-entry-btn" id="historyAddClassBtn">+ Class</button>
           <button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button>
         </div>`;
+      const htSessions = ((campus && campus.sessions) || []).filter((s) => !state.pendingDeleteIds.has(s.id));
+      const htSessionsBlock = htSessions.length > 0
+        ? `<div class="section-title" style="font-size:13px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
+           <div class="class-list" id="historySessionsList">${sessionsCardsHtml(htSessions)}</div>`
+        : '';
       el.innerHTML = dayCardHtml(todayD, items, campus, false)
         + `<div class="day-card-hint" id="historyTodayCollapseHint" style="cursor:pointer; margin: -6px 0 12px;">Tap to collapse</div>`
+        + htSessionsBlock
         + addRow
         + entryListHtml(items, false);
 
+      const historySessionsListEl = document.getElementById('historySessionsList');
+      if (historySessionsListEl) {
+        wireSessionsEvents(historySessionsListEl, todayD, htSessions, () => renderHistory());
+      }
       const summaryCard = el.querySelector('.day-card');
       if (summaryCard) {
         summaryCard.addEventListener('click', (e) => {
@@ -2579,20 +2600,45 @@
     checkLocationOnce();
   }
 
-  async function editSession(sessionId, field, hhmm) {
+  async function pushSessionUpdateForDate(date, sessions) {
+    const totalSeconds = sumSessions(sessions);
+    const activeSession = sessions.find((s) => s.out == null);
+    const payload = {
+      sessions,
+      totalSeconds,
+      checkedIn: !!activeSession,
+      checkInAt: activeSession ? activeSession.in : null,
+      sessionCount: sessions.length
+    };
+    const historyRef = state.db.doc('campusHistory/' + state.teacherId).collection('days').doc(date);
+    const logRef = state.db.doc('campusLogs/' + date).collection('teachers').doc(state.teacherId);
+    try {
+      await historyRef.set(payload);
+      try { await logRef.set(payload); } catch (err) { /* admin mirror is best-effort */ }
+    } catch (err) { flashOffline(); }
+  }
+
+  async function editSessionForDate(date, sessions, sessionId, field, hhmm) {
     if (!state.db || !state.teacherId || !hhmm) return;
-    const date = todayStr();
     const [y, m, d] = date.split('-').map(Number);
     const [hh, mm] = hhmm.split(':').map(Number);
     const newTs = new Date(y, m - 1, d, hh, mm, 0, 0).getTime();
-    const sessions = (state.campusToday.sessions || []).map((s) => (s.id === sessionId ? Object.assign({}, s, { [field]: newTs }) : s));
-    await pushSessionUpdate(sessions);
+    const updated = sessions.map((s) => (s.id === sessionId ? Object.assign({}, s, { [field]: newTs }) : s));
+    await pushSessionUpdateForDate(date, updated);
+  }
+
+  async function deleteSessionForDate(date, sessions, sessionId) {
+    if (!state.db || !state.teacherId) return;
+    const updated = sessions.filter((s) => s.id !== sessionId);
+    await pushSessionUpdateForDate(date, updated);
+  }
+
+  async function editSession(sessionId, field, hhmm) {
+    await editSessionForDate(todayStr(), state.campusToday.sessions || [], sessionId, field, hhmm);
   }
 
   async function deleteSession(sessionId) {
-    if (!state.db || !state.teacherId) return;
-    const sessions = (state.campusToday.sessions || []).filter((s) => s.id !== sessionId);
-    await pushSessionUpdate(sessions);
+    await deleteSessionForDate(todayStr(), state.campusToday.sessions || [], sessionId);
   }
 
   function toHHMM(ts) {
@@ -2600,13 +2646,8 @@
     return pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
-  function renderSessions() {
-    const section = document.getElementById('sessionsSection');
-    const list = document.getElementById('sessionsList');
-    const sessions = (state.campusToday.sessions || []).filter((s) => !state.pendingDeleteIds.has(s.id));
-    if (sessions.length === 0) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
-    list.innerHTML = sessions.map((s, i) => {
+  function sessionsCardsHtml(sessions) {
+    return sessions.map((s, i) => {
       const inVal = toHHMM(s.in);
       const outVal = s.out != null ? toHHMM(s.out) : '';
       return `
@@ -2627,28 +2668,41 @@
           </div>
         </div>`;
     }).join('');
+  }
 
-    list.querySelectorAll('[data-session-field]').forEach((input) => {
-      input.addEventListener('change', (e) => {
+  function wireSessionsEvents(container, date, sessions, rerender) {
+    container.querySelectorAll('[data-session-field]').forEach((input) => {
+      input.addEventListener('change', async (e) => {
         const id = e.target.getAttribute('data-session-id');
         const field = e.target.getAttribute('data-session-field');
         if (!e.target.value) return;
-        editSession(id, field, e.target.value);
+        await editSessionForDate(date, sessions, id, field, e.target.value);
+        rerender();
       });
     });
-    list.querySelectorAll('[data-del-session]').forEach((btn) => {
+    container.querySelectorAll('[data-del-session]').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-del-session');
         await confirmAndDeleteWithUndo(
           id,
-          () => deleteSession(id),
-          'This check-in/check-out session will be removed from today.',
+          () => deleteSessionForDate(date, sessions, id),
+          'This check-in/check-out session will be removed from this date.',
           'Delete this session?',
           'Session deleted',
-          renderSessions
+          rerender
         );
       });
     });
+  }
+
+  function renderSessions() {
+    const section = document.getElementById('sessionsSection');
+    const list = document.getElementById('sessionsList');
+    const sessions = (state.campusToday.sessions || []).filter((s) => !state.pendingDeleteIds.has(s.id));
+    if (sessions.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    list.innerHTML = sessionsCardsHtml(sessions);
+    wireSessionsEvents(list, todayStr(), sessions, renderSessions);
   }
 
   document.getElementById('checkBtn').addEventListener('click', performCheckToggle);
