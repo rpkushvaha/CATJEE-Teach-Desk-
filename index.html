@@ -3015,8 +3015,7 @@
     if (campusForDate.checkedIn && campusForDate.checkInAt) campusSeconds += (Date.now() - campusForDate.checkInAt) / 1000;
 
     const lines = [];
-    lines.push('*CATJEE Teach Desk*');
-    lines.push('_Daily Activity Report_');
+    lines.push('*Daily Activity Report*');
     lines.push('');
     lines.push(`👤 *Teacher:* ${teacherName}`);
     if (state.teacherSubject) lines.push(`📘 *Subject:* ${state.teacherSubject}`);
@@ -3031,12 +3030,12 @@
       const s = sessions[0];
       const inStr = formatTimeStr(toHHMM(s.in));
       const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-      lines.push(`${inStr} - ${outStr}`);
+      lines.push(`   In: ${inStr}   →   Out: ${outStr}`);
     } else {
       sessions.forEach((s, i) => {
         const inStr = formatTimeStr(toHHMM(s.in));
         const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-        lines.push(`${i + 1}. ${inStr} - ${outStr}`);
+        lines.push(`   ${i + 1}) In: ${inStr}   →   Out: ${outStr}`);
       });
     }
     lines.push('');
@@ -3061,7 +3060,7 @@
           { label: 'Homework', given: c.homework, note: c.homeworkNote }
         ];
         checklistItems.filter((it) => it.given).forEach((it) => {
-          lines.push(`- ${it.label}: ${it.note ? it.note : 'Given'}`);
+          lines.push(`   • ${it.label}: ${it.note ? it.note : 'Given'}`);
         });
         lines.push('');
       });
@@ -3076,7 +3075,7 @@
         const line = a.activityType === 'Other Activity'
           ? (a.note || 'No details noted')
           : `${a.activityType || 'Activity'}${a.note ? ' - ' + a.note : ''}`;
-        lines.push(`- ${line}`);
+        lines.push(`   ${line}`);
       });
     }
 
