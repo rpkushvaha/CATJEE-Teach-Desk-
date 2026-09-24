@@ -797,6 +797,15 @@
         </div>
       </div>
 
+      <div class="teacher-card" id="onCampusNowCard" style="display:none; cursor:pointer; margin-bottom:14px; border-color: var(--switch-on); background: var(--switch-on-soft);">
+        <div class="teacher-top">
+          <div class="teacher-name">🟢 On Campus Right Now</div>
+          <div class="teacher-time num" id="onCampusNowCount">0</div>
+        </div>
+        <div class="day-card-hint" id="onCampusNowHint" style="color: var(--switch-on);">Tap to see names</div>
+        <div id="onCampusNowNames" style="display:none; flex-direction:column; gap:8px; margin-top:8px;"></div>
+      </div>
+
       <div class="admin-summary">
         <div class="stat-box">
           <div class="stat-box-icon">
@@ -973,6 +982,7 @@
     adminDate: todayStr(),
     adminReportRange: 'day',
     adminExpandedTeacher: null,
+    adminOnCampusExpanded: false,
     historyTodayExpanded: false,
     adminClasses: [],
     adminCampus: {},
@@ -1878,6 +1888,34 @@
     } else {
       wingTagEl.textContent = state.adminReportWing;
       wingTagEl.style.display = 'inline-block';
+    }
+
+    const onCampusCard = document.getElementById('onCampusNowCard');
+    if (state.adminDate === todayStr()) {
+      const checkedInIds = Object.keys(state.adminCampus).filter((tid) => state.adminCampus[tid] && state.adminCampus[tid].checkedIn);
+      if (checkedInIds.length > 0) {
+        onCampusCard.style.display = 'block';
+        document.getElementById('onCampusNowCount').textContent = checkedInIds.length;
+        document.getElementById('onCampusNowHint').textContent = state.adminOnCampusExpanded ? 'Tap to collapse' : 'Tap to see names';
+        const namesEl = document.getElementById('onCampusNowNames');
+        namesEl.style.display = state.adminOnCampusExpanded ? 'flex' : 'none';
+        if (state.adminOnCampusExpanded) {
+          namesEl.innerHTML = checkedInIds.map((tid) => {
+            const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
+            const checkInAt = state.adminCampus[tid].checkInAt;
+            const since = checkInAt ? formatTimeStr(toHHMM(checkInAt)) : '';
+            return `<div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; font-weight:700;">
+              <span>${escapeHtml(name)}</span>
+              <span style="color:var(--muted); font-weight:600;">${since ? 'Since ' + since : ''}</span>
+            </div>`;
+          }).join('');
+          resolveAdminNames(checkedInIds);
+        }
+      } else {
+        onCampusCard.style.display = 'none';
+      }
+    } else {
+      onCampusCard.style.display = 'none';
     }
     const wingFilteredClasses = state.adminReportWing === 'all'
       ? state.adminClasses
@@ -3598,6 +3636,10 @@
     state.adminExpandedTeacher = null;
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
     subscribeAdminDate(state.adminDate);
+  });
+  document.getElementById('onCampusNowCard').addEventListener('click', () => {
+    state.adminOnCampusExpanded = !state.adminOnCampusExpanded;
+    renderAdmin();
   });
   document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((btn) => {
     btn.addEventListener('click', () => {
