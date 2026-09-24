@@ -2928,15 +2928,20 @@
     lines.push('*CATJEE Teach Desk*');
     lines.push('_Daily Activity Report_');
     lines.push('');
-    lines.push(`*Teacher:* ${teacherName}`);
-    if (state.teacherSubject) lines.push(`*Subject:* ${state.teacherSubject}`);
-    lines.push(`*Date:* ${dateLabel}`);
+    lines.push(`👤 *Teacher:* ${teacherName}`);
+    if (state.teacherSubject) lines.push(`📘 *Subject:* ${state.teacherSubject}`);
+    lines.push(`📅 *Date:* ${dateLabel}`);
     lines.push('');
-    lines.push(`*Campus time:* ${formatDuration(campusSeconds)}`);
+    lines.push(`🕐 *Campus time:* ${formatDuration(campusSeconds)}`);
 
     const sessions = campusForDate.sessions || [];
     if (sessions.length === 0) {
       lines.push('No check-in recorded.');
+    } else if (sessions.length === 1) {
+      const s = sessions[0];
+      const inStr = formatTimeStr(toHHMM(s.in));
+      const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
+      lines.push(`${inStr} - ${outStr}`);
     } else {
       sessions.forEach((s, i) => {
         const inStr = formatTimeStr(toHHMM(s.in));
@@ -2950,7 +2955,7 @@
       .filter((c) => c.entryType !== 'activity')
       .slice()
       .sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
-    lines.push(`*Classes (${classItems.length}):*`);
+    lines.push(`📚 *Classes (${classItems.length}):*`);
     if (classItems.length === 0) {
       lines.push('No classes logged.');
     } else {
@@ -2958,7 +2963,7 @@
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
         lines.push('');
         lines.push(`*${i + 1}. ${c.batch || ''}* (${time})`);
-        lines.push(`Chapter / Topic: ${c.topic || 'No topic noted'}`);
+        lines.push(`_Chapter / Topic:_ ${c.topic || 'No topic noted'}`);
         const checklistItems = [
           { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
           { label: 'Study Material', given: c.material, note: c.materialNote },
@@ -2968,12 +2973,12 @@
         checklistItems.filter((it) => it.given).forEach((it) => {
           lines.push(`- ${it.label}: ${it.note ? it.note : 'Given'}`);
         });
+        lines.push('');
       });
     }
-    lines.push('');
 
     const activityItems = allForDate.filter((c) => c.entryType === 'activity');
-    lines.push('*Activities:*');
+    lines.push(`📝 *Activities:*`);
     if (activityItems.length === 0) {
       lines.push('None logged.');
     } else {
