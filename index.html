@@ -813,11 +813,14 @@
       </div>
 
       <div class="class-list" id="adminTeacherList">
-        <div class="empty"><span class="empty-icon">👥</span>No activity for this date yet.<span class="empty-hint">Try a different date, or check back later.</span></div>
+        <div class="empty"><span class="empty-icon" style="color:var(--gold);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>No activity for this date yet.<span class="empty-hint">Try a different date, or check back later.</span></div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Institute-Wide Report</div>
+        <div class="panel-title" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>📊 Institute-Wide Report</span>
+          <span class="current-period-tag" id="adminReportWingTag" style="display:none;"></span>
+        </div>
         <div class="admin-sub" id="adminReportRangeSub">Combines every teacher's activity for the selected date above into one file.</div>
         <div class="chips" id="adminReportRangeChips">
           <button class="chip active" data-report-range="day">Day</button>
@@ -836,7 +839,7 @@
       </div>
 
       <div class="panel">
-        <div class="panel-title">Class / Batch List</div>
+        <div class="panel-title">🎓 Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
         <div class="chips" id="adminBatchWingChips">
           <button class="chip" data-batch-wing="Pre-Foundation">Pre-Foundation</button>
@@ -851,15 +854,18 @@
       </div>
 
       <div class="panel">
-        <div class="panel-title">Campus Location (for location check)</div>
+        <div class="panel-title">📍 Campus Location (for location check)</div>
         <div class="admin-sub" id="campusLocText">Not set yet.</div>
         <button class="btn-secondary" id="setLocationBtn" style="border-color: var(--line);">Use My Current Location</button>
-        <div class="admin-sub" style="margin-top:2px;">If that doesn't work (common inside embedded apps), enter coordinates manually — open Google Maps, long-press your campus location, and copy the numbers shown.</div>
-        <div style="display:flex; gap:8px;">
-          <input class="text-input" id="manualLat" type="text" inputmode="decimal" placeholder="Latitude" style="flex:1;">
-          <input class="text-input" id="manualLng" type="text" inputmode="decimal" placeholder="Longitude" style="flex:1;">
+        <button class="action-btn" id="toggleManualLocBtn" style="margin-top:4px;">Enter coordinates manually</button>
+        <div id="manualLocBox" style="display:none; flex-direction:column; gap:10px; margin-top:6px;">
+          <div class="admin-sub" style="margin-top:2px;">If that doesn't work (common inside embedded apps), enter coordinates manually — open Google Maps, long-press your campus location, and copy the numbers shown.</div>
+          <div style="display:flex; gap:8px;">
+            <input class="text-input" id="manualLat" type="text" inputmode="decimal" placeholder="Latitude" style="flex:1;">
+            <input class="text-input" id="manualLng" type="text" inputmode="decimal" placeholder="Longitude" style="flex:1;">
+          </div>
+          <button class="btn-secondary" id="saveManualLocBtn" style="border-color: var(--line);">Save Coordinates</button>
         </div>
-        <button class="btn-secondary" id="saveManualLocBtn" style="border-color: var(--line);">Save Coordinates</button>
       </div>
     </div>
 
@@ -1866,6 +1872,13 @@
     document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-admin-wing') === state.adminReportWing);
     });
+    const wingTagEl = document.getElementById('adminReportWingTag');
+    if (state.adminReportWing === 'all') {
+      wingTagEl.style.display = 'none';
+    } else {
+      wingTagEl.textContent = state.adminReportWing;
+      wingTagEl.style.display = 'inline-block';
+    }
     const wingFilteredClasses = state.adminReportWing === 'all'
       ? state.adminClasses
       : state.adminClasses.filter((c) => c.entryType === 'activity' || wingOfBatch(c.batch) === state.adminReportWing);
@@ -1878,15 +1891,24 @@
     const teacherIds = Object.keys(state.adminCampus).concat(Object.keys(byTeacher))
       .filter((v, i, a) => a.indexOf(v) === i);
 
+    const allByTeacher = {};
+    state.adminClasses.forEach((c) => {
+      const tid = c.teacherId || 'unknown';
+      if (!allByTeacher[tid]) allByTeacher[tid] = [];
+      allByTeacher[tid].push(c);
+    });
+    const allTeacherIds = Object.keys(state.adminCampus).concat(Object.keys(allByTeacher))
+      .filter((v, i, a) => a.indexOf(v) === i);
+
     document.getElementById('adminClassCount').textContent = wingFilteredClasses.filter((c) => c.entryType !== 'activity').length;
-    document.getElementById('adminTeacherCount').textContent = teacherIds.filter((tid) => {
+    document.getElementById('adminTeacherCount').textContent = allTeacherIds.filter((tid) => {
       const c = state.adminCampus[tid];
-      return (c && (c.totalSeconds > 0 || c.checkedIn)) || byTeacher[tid];
+      return (c && (c.totalSeconds > 0 || c.checkedIn)) || allByTeacher[tid];
     }).length;
 
     const listEl = document.getElementById('adminTeacherList');
     if (teacherIds.length === 0) {
-      listEl.innerHTML = '<div class="empty"><span class="empty-icon">👥</span>No activity for this date yet.<span class="empty-hint">Try a different date, or check back later.</span></div>';
+      listEl.innerHTML = '<div class="empty"><span class="empty-icon" style="color:var(--gold);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>No activity for this date yet.<span class="empty-hint">Try a different date, or check back later.</span></div>';
       return;
     }
 
@@ -1907,6 +1929,7 @@
       const countLine = `${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Activity` : ''}`;
       const expanded = state.adminExpandedTeacher === tid;
       const hasDetail = all.length > 0;
+      const stuckCheckedIn = !!(campus && campus.checkedIn);
       const detailHtml = expanded
         ? `<div class="teacher-detail">${entryListHtml(all, true)}</div>`
         : '';
@@ -1923,10 +1946,18 @@
             <span class="badge test">Test ${test}/${n}</span>
             <span class="badge on">Homework ${hw}/${n}</span>
           </div>` : ''}
+          ${stuckCheckedIn ? `<div class="action-btn-row"><button class="action-btn" data-force-checkout="${tid}" style="color:#B91C1C; border-color:#B91C1C;">⚠️ Still checked in — Force Check-out</button></div>` : ''}
           ${hasDetail ? `<div class="day-card-hint">${expanded ? 'Tap to collapse' : 'Tap to see full detail'}</div>` : ''}
           ${detailHtml}
         </div>`;
     }).join('');
+
+    listEl.querySelectorAll('[data-force-checkout]').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await adminForceCheckout(btn.getAttribute('data-force-checkout'), state.adminDate);
+      });
+    });
 
     listEl.querySelectorAll('[data-teacher-id]').forEach((card) => {
       card.addEventListener('click', () => {
@@ -1941,6 +1972,10 @@
 
   const resolvedAdminNameIds = new Set();
 
+  function titleCaseName(str) {
+    return str.replace(/\S+/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  }
+
   async function resolveAdminNames(ids) {
     if (!state.db || ids.length === 0) return;
     const missing = ids.filter((id) => !resolvedAdminNameIds.has(id));
@@ -1952,7 +1987,7 @@
       const newNames = {};
       results.forEach(({ id, data }) => {
         resolvedAdminNameIds.add(id);
-        newNames[id] = { name: (data && data.name) || 'Unnamed teacher' };
+        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher' };
       });
       state.adminNames = Object.assign({}, state.adminNames, newNames);
       const listEl = document.getElementById('adminTeacherList');
@@ -2446,6 +2481,39 @@
       await historyRef.set(payload);
       try { await logRef.set(payload); } catch (err) { /* admin mirror is best-effort */ }
     } catch (err) { flashOffline(); }
+  }
+
+  async function adminForceCheckout(tid, date) {
+    const ok = await showConfirm(
+      "This will close their currently open check-in for this date, using the current time as check-out. Use this only if a teacher forgot to check out.",
+      'Force check-out this teacher?',
+      'Force Check-out'
+    );
+    if (!ok) return;
+    try {
+      const historyRef = state.db.doc('campusHistory/' + tid).collection('days').doc(date);
+      const snap = await historyRef.get();
+      const data = snap.data() || {};
+      const sessions = (data.sessions || []).slice();
+      for (let i = sessions.length - 1; i >= 0; i--) {
+        if (sessions[i].out == null) { sessions[i] = Object.assign({}, sessions[i], { out: Date.now() }); break; }
+      }
+      const totalSeconds = sumSessions(sessions);
+      const payload = {
+        sessions,
+        totalSeconds,
+        checkedIn: false,
+        checkInAt: null,
+        sessionCount: sessions.length
+      };
+      await historyRef.set(payload, { merge: true });
+      try {
+        await state.db.doc('campusLogs/' + date).collection('teachers').doc(tid).set(payload, { merge: true });
+      } catch (err) { /* admin mirror is best-effort */ }
+      showToast('Checked out');
+    } catch (err) {
+      showToast('Could not check them out. Please try again.', 'error');
+    }
   }
 
   async function performCheckToggle() {
@@ -3580,6 +3648,10 @@
     if (opening) renderBatchListInto('inlineBatchListRows');
   });
 
+  document.getElementById('toggleManualLocBtn').addEventListener('click', () => {
+    const box = document.getElementById('manualLocBox');
+    box.style.display = (box.style.display === 'none' || !box.style.display) ? 'flex' : 'none';
+  });
   document.getElementById('setLocationBtn').addEventListener('click', () => {
     const msgEl = document.getElementById('campusLocText');
     if (!('geolocation' in navigator)) { msgEl.textContent = 'Location is not available on this device/browser.'; return; }
