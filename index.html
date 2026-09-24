@@ -738,15 +738,12 @@
         <div class="history-sub">Add this week's class times to get a reminder 5 minutes before each one. Each slot clears itself once its time passes — add fresh ones next week.</div>
       </div>
 
-      <div class="panel" id="scheduleNoticePanel" style="display:none;">
-        <div class="panel-title">📋 Schedule Notice</div>
-        <div class="admin-sub" id="scheduleNoticeSub">Institute-wide timetable posted by admin.</div>
-        <img id="scheduleNoticeImg" src="" alt="Schedule notice" style="width:100%; border-radius:12px; display:none; margin-top:4px;">
+      <div class="panel" id="scheduleNoticePanel">
+        <div class="panel-title">📸 My Timetable Photos</div>
+        <div class="admin-sub">Personal — only you can see these. Save a photo of your schedule (handwritten, printed, or from anywhere) for quick reference.</div>
+        <div id="scheduleNoticeGallery" style="display:flex; flex-direction:column; gap:10px;"></div>
         <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
-        <div id="scheduleNoticeAdminBtns" style="display:none; gap:8px; margin-top:10px;">
-          <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line); flex:1;">📷 Upload Photo</button>
-          <button class="btn-secondary" id="scheduleNoticeRemoveBtn" style="border-color:#B91C1C; color:#B91C1C; display:none;">Remove</button>
-        </div>
+        <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line); margin-top:4px;">📷 Add Photo</button>
       </div>
 
       <div class="panel">
@@ -1014,7 +1011,7 @@
     scheduleDay: 'Mon',
     scheduleWing: 'Pre-Foundation',
     scheduleBatch: DEFAULT_BATCHES[0],
-    scheduleNoticeImage: null,
+    scheduleNoticePhotos: [],
     editingScheduleId: null,
     firedScheduleReminders: {},
     saving: false
@@ -2216,8 +2213,14 @@
     });
   }
 
+  const MAX_SCHEDULE_PHOTOS = 6;
+
   async function handleScheduleNoticeUpload(file) {
-    if (!file || !state.db) return;
+    if (!file || !state.db || !state.teacherId) return;
+    if (state.scheduleNoticePhotos.length >= MAX_SCHEDULE_PHOTOS) {
+      showToast(`You can keep up to ${MAX_SCHEDULE_PHOTOS} photos. Remove one first.`, 'error');
+      return;
+    }
     showToast('Uploading photo…');
     try {
       let dataUrl = await resizeImageFile(file, 1200, 0.7);
@@ -2227,23 +2230,22 @@
         showToast('This photo is too large even after compressing. Try a simpler or smaller photo.', 'error');
         return;
       }
-      await state.db.doc('settings/scheduleNotice').set({
+      await state.db.collection('scheduleNotices/' + state.teacherId + '/photos').add({
         imageBase64: dataUrl,
-        uploadedBy: (state.user && state.user.name) || 'Admin',
-        updatedAt: Date.now()
+        uploadedAt: Date.now()
       });
-      showToast('Schedule notice posted');
+      showToast('Photo saved');
     } catch (err) {
       showToast('Could not upload the photo. Please try again.', 'error');
     }
   }
 
-  async function removeScheduleNotice() {
-    if (!state.db) return;
-    const ok = await showConfirm('This will remove the timetable photo for every teacher.', 'Remove schedule notice?', 'Remove');
+  async function removeScheduleNoticePhoto(photoId) {
+    if (!state.db || !state.teacherId) return;
+    const ok = await showConfirm('This photo will be removed.', 'Remove this photo?', 'Remove');
     if (!ok) return;
     try {
-      await state.db.doc('settings/scheduleNotice').delete();
+      await state.db.doc('scheduleNotices/' + state.teacherId + '/photos/' + photoId).delete();
       showToast('Removed');
     } catch (err) {
       showToast('Could not remove it. Please try again.', 'error');
@@ -2251,37 +2253,21 @@
   }
 
   function renderScheduleNotice() {
-    const panel = document.getElementById('scheduleNoticePanel');
-    const img = document.getElementById('scheduleNoticeImg');
-    const sub = document.getElementById('scheduleNoticeSub');
-    const adminBtns = document.getElementById('scheduleNoticeAdminBtns');
-    const removeBtn = document.getElementById('scheduleNoticeRemoveBtn');
+    const gallery = document.getElementById('scheduleNoticeGallery');
     const uploadBtn = document.getElementById('scheduleNoticeUploadBtn');
-    if (!panel) return;
+    if (!gallery) return;
 
-    const notice = state.scheduleNoticeImage;
-    adminBtns.style.display = state.canAdmin ? 'flex' : 'none';
+    const photos = state.scheduleNoticePhotos || [];
+    gallery.innerHTML = photos.map((p) => `
+      <div style="position:relative;">
+        <img src="${p.imageBase64}" alt="My schedule photo" style="width:100%; border-radius:12px; display:block;">
+        <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); color:#fff;">${svgTrash()}</button>
+      </div>`).join('');
+    gallery.querySelectorAll('[data-remove-photo]').forEach((btn) => {
+      btn.addEventListener('click', () => removeScheduleNoticePhoto(btn.getAttribute('data-remove-photo')));
+    });
 
-    if (notice && notice.imageBase64) {
-      panel.style.display = 'block';
-      img.src = notice.imageBase64;
-      img.style.display = 'block';
-      const dateStr = notice.updatedAt ? new Date(notice.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-      sub.textContent = `Posted by ${notice.uploadedBy || 'Admin'}${dateStr ? ' · ' + dateStr : ''}`;
-      removeBtn.style.display = state.canAdmin ? 'block' : 'none';
-      uploadBtn.textContent = '📷 Replace Photo';
-    } else {
-      img.style.display = 'none';
-      img.src = '';
-      removeBtn.style.display = 'none';
-      if (state.canAdmin) {
-        panel.style.display = 'block';
-        sub.textContent = 'Upload a photo of the institute timetable — every teacher will see it here.';
-        uploadBtn.textContent = '📷 Upload Photo';
-      } else {
-        panel.style.display = 'none';
-      }
-    }
+    uploadBtn.style.display = photos.length >= MAX_SCHEDULE_PHOTOS ? 'none' : 'block';
   }
 
   function daysUntil(dayAbbr) {
@@ -4065,9 +4051,6 @@
     if (file) handleScheduleNoticeUpload(file);
     e.target.value = '';
   });
-  document.getElementById('scheduleNoticeRemoveBtn').addEventListener('click', () => {
-    removeScheduleNotice();
-  });
 
   // ---------- Auth screen ----------
 
@@ -4240,8 +4223,8 @@
       renderCampusLocationText();
     }, () => {}));
 
-    unsubscribers.push(db.doc('settings/scheduleNotice').onSnapshot((snap) => {
-      state.scheduleNoticeImage = snap.exists ? snap.data() : null;
+    unsubscribers.push(db.collection('scheduleNotices/' + tid + '/photos').orderBy('uploadedAt', 'desc').limit(MAX_SCHEDULE_PHOTOS).onSnapshot((snap) => {
+      state.scheduleNoticePhotos = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       renderScheduleNotice();
     }, () => {}));
 
