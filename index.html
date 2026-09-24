@@ -545,6 +545,7 @@
           <div class="timer-label" id="sessionCountLabel" style="text-transform:none; letter-spacing:0; margin-top:3px; font-weight:500;"></div>
         </div>
         <button class="btn btn-checkin" id="checkBtn">Check In</button>
+        <div id="stuckCheckinWarning" style="display:none; background:#FEE2E2; border:1px solid #B91C1C; color:#B91C1C; border-radius:10px; padding:10px 12px; font-size:12px; font-weight:700; margin-top:10px; text-align:center; line-height:1.4;">⚠️ You've been checked in for over 24 hours. If you forgot to check out, please check out now.</div>
         <div class="loc-line" id="locLine"></div>
       </div>
 
@@ -1338,6 +1339,12 @@
       btn.className = 'btn btn-checkin';
       btn.innerHTML = svgLogin() + 'Check In';
     }
+
+    const stuckWarning = document.getElementById('stuckCheckinWarning');
+    if (stuckWarning) {
+      const stuckNow = c.checkedIn && c.checkInAt && (Date.now() - c.checkInAt) >= 24 * 60 * 60 * 1000;
+      stuckWarning.style.display = stuckNow ? 'block' : 'none';
+    }
   }
 
   function svgLogin() {
@@ -1971,7 +1978,7 @@
       const countLine = `${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Activity` : ''}`;
       const expanded = state.adminExpandedTeacher === tid;
       const hasDetail = all.length > 0;
-      const stuckCheckedIn = !!(campus && campus.checkedIn);
+      const stuckCheckedIn = !!(campus && campus.checkedIn && campus.checkInAt && (Date.now() - campus.checkInAt) >= 24 * 60 * 60 * 1000);
       const detailHtml = expanded
         ? `<div class="teacher-detail">${entryListHtml(all, true)}</div>`
         : '';
@@ -3767,7 +3774,7 @@
   }
 
   // live timer tick + reminder check
-  let reminderFiredLong = false;
+  let reminderFired24h = false;
   const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   setInterval(() => { pruneExpiredScheduleSlots(); }, 60000);
   setInterval(() => {
@@ -3775,13 +3782,14 @@
     if (state.tab === 'admin') renderAdmin();
 
     const remindersOn = localStorage.getItem(REMINDER_PREF_KEY) === '1';
-    if (remindersOn && state.campusToday.checkedIn && state.campusToday.checkInAt) {
-      const hoursIn = (Date.now() - state.campusToday.checkInAt) / 3600000 + state.campusToday.totalSeconds / 3600;
-      if (hoursIn > 6 && !reminderFiredLong) {
-        reminderFiredLong = true;
-        showReminderAlert("You've been checked in for over 6 hours. Don't forget to check out.");
+
+    if (state.campusToday.checkedIn && state.campusToday.checkInAt) {
+      const hoursSinceCheckIn = (Date.now() - state.campusToday.checkInAt) / 3600000;
+      if (hoursSinceCheckIn >= 24 && !reminderFired24h) {
+        reminderFired24h = true;
+        showReminderAlert("You've been checked in for over 24 hours. This looks like a forgotten check-out — please check out now.");
       }
-      if (hoursIn <= 6) reminderFiredLong = false;
+      if (hoursSinceCheckIn < 24) reminderFired24h = false;
     }
 
     if (remindersOn && state.scheduleSlots.length > 0) {
