@@ -2618,11 +2618,16 @@
     } catch (err) { flashOffline(); }
   }
 
-  async function editSessionForDate(date, sessions, sessionId, field, hhmm) {
+  async function editSessionForDate(date, sessions, sessionId, field, hhmm, dayOffset) {
     if (!state.db || !state.teacherId || !hhmm) return;
     const [y, m, d] = date.split('-').map(Number);
     const [hh, mm] = hhmm.split(':').map(Number);
-    const newTs = new Date(y, m - 1, d, hh, mm, 0, 0).getTime();
+    const session = sessions.find((s) => s.id === sessionId);
+    const offset = field === 'out' ? (dayOffset || 0) : 0;
+    let newTs = new Date(y, m - 1, d + offset, hh, mm, 0, 0).getTime();
+    if (field === 'out' && session && !dayOffset && newTs <= session.in) {
+      newTs = new Date(y, m - 1, d + 1, hh, mm, 0, 0).getTime();
+    }
     const updated = sessions.map((s) => (s.id === sessionId ? Object.assign({}, s, { [field]: newTs }) : s));
     await pushSessionUpdateForDate(date, updated);
   }
@@ -2650,6 +2655,7 @@
     return sessions.map((s, i) => {
       const inVal = toHHMM(s.in);
       const outVal = s.out != null ? toHHMM(s.out) : '';
+      const isOvernight = s.out != null && new Date(s.out).toDateString() !== new Date(s.in).toDateString();
       return `
         <div class="class-card" style="padding:12px 14px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
@@ -2662,21 +2668,40 @@
               <input class="text-input" type="time" data-session-field="in" data-session-id="${s.id}" value="${inVal}" style="margin-top:4px; padding:9px 10px;">
             </div>
             <div style="flex:1;">
-              <label style="font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase;">Check-out</label>
+              <label style="font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase;">Check-out${isOvernight ? ' <span style="color:var(--gold);">(next day)</span>' : ''}</label>
               <input class="text-input" type="time" data-session-field="out" data-session-id="${s.id}" value="${outVal}" style="margin-top:4px; padding:9px 10px;">
             </div>
           </div>
+          ${s.out != null ? `
+          <label style="display:flex; align-items:center; gap:7px; margin-top:10px; font-size:11.5px; font-weight:600; color:var(--muted-2); cursor:pointer;">
+            <input type="checkbox" data-session-field="overnight" data-session-id="${s.id}" ${isOvernight ? 'checked' : ''} style="width:16px; height:16px; accent-color: var(--gold); flex-shrink:0;">
+            Checked out the next day
+          </label>` : ''}
         </div>`;
     }).join('');
   }
 
   function wireSessionsEvents(container, date, sessions, rerender) {
-    container.querySelectorAll('[data-session-field]').forEach((input) => {
+    container.querySelectorAll('[data-session-field="in"], [data-session-field="out"]').forEach((input) => {
       input.addEventListener('change', async (e) => {
         const id = e.target.getAttribute('data-session-id');
         const field = e.target.getAttribute('data-session-field');
         if (!e.target.value) return;
-        await editSessionForDate(date, sessions, id, field, e.target.value);
+        let dayOffset = 0;
+        if (field === 'out') {
+          const checkbox = container.querySelector(`[data-session-field="overnight"][data-session-id="${id}"]`);
+          dayOffset = (checkbox && checkbox.checked) ? 1 : 0;
+        }
+        await editSessionForDate(date, sessions, id, field, e.target.value, dayOffset);
+        rerender();
+      });
+    });
+    container.querySelectorAll('[data-session-field="overnight"]').forEach((checkbox) => {
+      checkbox.addEventListener('change', async (e) => {
+        const id = e.target.getAttribute('data-session-id');
+        const outInput = container.querySelector(`[data-session-field="out"][data-session-id="${id}"]`);
+        if (!outInput || !outInput.value) return;
+        await editSessionForDate(date, sessions, id, 'out', outInput.value, e.target.checked ? 1 : 0);
         rerender();
       });
     });
