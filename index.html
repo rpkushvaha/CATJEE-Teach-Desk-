@@ -738,11 +738,26 @@
         <div class="history-sub">Add this week's class times to get a reminder 5 minutes before each one. Each slot clears itself once its time passes — add fresh ones next week.</div>
       </div>
 
+      <div class="panel" id="scheduleNoticePanel" style="display:none;">
+        <div class="panel-title">📋 Schedule Notice</div>
+        <div class="admin-sub" id="scheduleNoticeSub">Institute-wide timetable posted by admin.</div>
+        <img id="scheduleNoticeImg" src="" alt="Schedule notice" style="width:100%; border-radius:12px; display:none; margin-top:4px;">
+        <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
+        <div id="scheduleNoticeAdminBtns" style="display:none; gap:8px; margin-top:10px;">
+          <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line); flex:1;">📷 Upload Photo</button>
+          <button class="btn-secondary" id="scheduleNoticeRemoveBtn" style="border-color:#B91C1C; color:#B91C1C; display:none;">Remove</button>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="panel-title" id="schedulePanelTitle">Add a Weekly Slot</div>
         <div class="field">
           <label>Day</label>
           <div class="chips" id="scheduleDayChips"></div>
+        </div>
+        <div class="field">
+          <label>Wing</label>
+          <div class="chips" id="scheduleWingChips"></div>
         </div>
         <div class="field">
           <label>Class / Batch</label>
@@ -997,7 +1012,9 @@
     activityForm: { activityType: ACTIVITY_TYPES[0], note: '' },
     scheduleSlots: [],
     scheduleDay: 'Mon',
+    scheduleWing: 'Pre-Foundation',
     scheduleBatch: DEFAULT_BATCHES[0],
+    scheduleNoticeImage: null,
     editingScheduleId: null,
     firedScheduleReminders: {},
     saving: false
@@ -2137,18 +2154,134 @@
     });
   }
 
+  function renderScheduleWingChips() {
+    const el = document.getElementById('scheduleWingChips');
+    el.innerHTML = WINGS.map((w) => {
+      const active = w === state.scheduleWing;
+      return `<button class="chip${active ? ' active' : ''}" data-swing="${escapeHtml(w)}">${escapeHtml(w)}</button>`;
+    }).join('');
+    el.querySelectorAll('[data-swing]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const newWing = btn.getAttribute('data-swing');
+        if (newWing === state.scheduleWing) return;
+        state.scheduleWing = newWing;
+        const wingBatches = currentBatches(newWing);
+        state.scheduleBatch = wingBatches[0] || '';
+        renderScheduleWingChips();
+        renderScheduleBatchChips();
+      });
+    });
+  }
+
   function renderScheduleBatchChips() {
     const el = document.getElementById('scheduleBatchChips');
-    el.innerHTML = allBatchesFlat().map((b) => {
-      const active = b === state.scheduleBatch;
-      return `<button class="chip${active ? ' active' : ''}" data-sbatch="${escapeHtml(b)}">${escapeHtml(b)}</button>`;
-    }).join('');
+    const wingBatches = currentBatches(state.scheduleWing);
+    el.innerHTML = wingBatches.length
+      ? wingBatches.map((b) => {
+          const active = b === state.scheduleBatch;
+          return `<button class="chip${active ? ' active' : ''}" data-sbatch="${escapeHtml(b)}">🎓 ${escapeHtml(b)}</button>`;
+        }).join('')
+      : `<div class="admin-sub" style="margin:0;">No batches yet in ${escapeHtml(state.scheduleWing)}.</div>`;
     el.querySelectorAll('[data-sbatch]').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.scheduleBatch = btn.getAttribute('data-sbatch');
         renderScheduleBatchChips();
       });
     });
+  }
+
+  function resizeImageFile(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; } else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => reject(new Error('Could not read image'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleScheduleNoticeUpload(file) {
+    if (!file || !state.db) return;
+    showToast('Uploading photo…');
+    try {
+      let dataUrl = await resizeImageFile(file, 1200, 0.7);
+      if (dataUrl.length > 900000) dataUrl = await resizeImageFile(file, 900, 0.55);
+      if (dataUrl.length > 900000) dataUrl = await resizeImageFile(file, 700, 0.45);
+      if (dataUrl.length > 950000) {
+        showToast('This photo is too large even after compressing. Try a simpler or smaller photo.', 'error');
+        return;
+      }
+      await state.db.doc('settings/scheduleNotice').set({
+        imageBase64: dataUrl,
+        uploadedBy: (state.user && state.user.name) || 'Admin',
+        updatedAt: Date.now()
+      });
+      showToast('Schedule notice posted');
+    } catch (err) {
+      showToast('Could not upload the photo. Please try again.', 'error');
+    }
+  }
+
+  async function removeScheduleNotice() {
+    if (!state.db) return;
+    const ok = await showConfirm('This will remove the timetable photo for every teacher.', 'Remove schedule notice?', 'Remove');
+    if (!ok) return;
+    try {
+      await state.db.doc('settings/scheduleNotice').delete();
+      showToast('Removed');
+    } catch (err) {
+      showToast('Could not remove it. Please try again.', 'error');
+    }
+  }
+
+  function renderScheduleNotice() {
+    const panel = document.getElementById('scheduleNoticePanel');
+    const img = document.getElementById('scheduleNoticeImg');
+    const sub = document.getElementById('scheduleNoticeSub');
+    const adminBtns = document.getElementById('scheduleNoticeAdminBtns');
+    const removeBtn = document.getElementById('scheduleNoticeRemoveBtn');
+    const uploadBtn = document.getElementById('scheduleNoticeUploadBtn');
+    if (!panel) return;
+
+    const notice = state.scheduleNoticeImage;
+    adminBtns.style.display = state.canAdmin ? 'flex' : 'none';
+
+    if (notice && notice.imageBase64) {
+      panel.style.display = 'block';
+      img.src = notice.imageBase64;
+      img.style.display = 'block';
+      const dateStr = notice.updatedAt ? new Date(notice.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      sub.textContent = `Posted by ${notice.uploadedBy || 'Admin'}${dateStr ? ' · ' + dateStr : ''}`;
+      removeBtn.style.display = state.canAdmin ? 'block' : 'none';
+      uploadBtn.textContent = '📷 Replace Photo';
+    } else {
+      img.style.display = 'none';
+      img.src = '';
+      removeBtn.style.display = 'none';
+      if (state.canAdmin) {
+        panel.style.display = 'block';
+        sub.textContent = 'Upload a photo of the institute timetable — every teacher will see it here.';
+        uploadBtn.textContent = '📷 Upload Photo';
+      } else {
+        panel.style.display = 'none';
+      }
+    }
   }
 
   function daysUntil(dayAbbr) {
@@ -2263,8 +2396,10 @@
     if (!slot) return;
     state.editingScheduleId = id;
     state.scheduleDay = slot.day;
+    state.scheduleWing = wingOfBatch(slot.label);
     state.scheduleBatch = slot.label;
     renderScheduleDayChips();
+    renderScheduleWingChips();
     renderScheduleBatchChips();
     document.getElementById('scheduleTimeInput').value = slot.time;
     document.getElementById('schedulePanelTitle').textContent = 'Edit Slot';
@@ -3919,7 +4054,20 @@
   renderBatchList();
   renderCampusLocationText();
   renderScheduleDayChips();
+  renderScheduleWingChips();
   renderScheduleBatchChips();
+
+  document.getElementById('scheduleNoticeUploadBtn').addEventListener('click', () => {
+    document.getElementById('scheduleNoticeFileInput').click();
+  });
+  document.getElementById('scheduleNoticeFileInput').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) handleScheduleNoticeUpload(file);
+    e.target.value = '';
+  });
+  document.getElementById('scheduleNoticeRemoveBtn').addEventListener('click', () => {
+    removeScheduleNotice();
+  });
 
   // ---------- Auth screen ----------
 
@@ -4030,6 +4178,7 @@
       state.canAdmin = adminSnap.exists;
     } catch (err) { state.canAdmin = false; }
     document.getElementById('navAdmin').style.display = state.canAdmin ? 'flex' : 'none';
+    renderScheduleNotice();
 
     const today = todayStr();
     const tid = state.teacherId;
@@ -4089,6 +4238,11 @@
       const data = snap.data();
       state.campusLocation = data && typeof data.lat === 'number' ? { lat: data.lat, lng: data.lng } : null;
       renderCampusLocationText();
+    }, () => {}));
+
+    unsubscribers.push(db.doc('settings/scheduleNotice').onSnapshot((snap) => {
+      state.scheduleNoticeImage = snap.exists ? snap.data() : null;
+      renderScheduleNotice();
     }, () => {}));
 
     unsubscribers.push(db.collection('schedule/' + tid + '/slots').limit(100).onSnapshot((snap) => {
