@@ -2792,12 +2792,15 @@
     function bodyLine(text, opts) {
       opts = opts || {};
       const size = opts.size || 10.5;
-      const safe = toAsciiSafe(text);
-      const lines = wrapAscii(safe, contentWidth, size);
-      lines.forEach((line) => {
-        ensure(14);
-        currentOps.push({ x: marginX, y, size, bold: !!opts.bold, text: line });
-        y -= 14;
+      const rawLines = String(text).split(/\r\n|\r|\n/);
+      rawLines.forEach((rawLine) => {
+        const safe = toAsciiSafe(rawLine);
+        const lines = wrapAscii(safe, contentWidth, size);
+        (lines.length ? lines : ['']).forEach((line) => {
+          ensure(14);
+          currentOps.push({ x: marginX, y, size, bold: !!opts.bold, text: line });
+          y -= 14;
+        });
       });
     }
     function rule() {
@@ -2818,7 +2821,9 @@
     const dateLabel = new Date(yy, mm - 1, dd).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     if (includeHeader) {
-      w.heading(dateLabel, 13);
+      w.heading(dateLabel, 15);
+      w.rule();
+      w.addSpace(2);
     }
 
     let campusSeconds = campusForDate.totalSeconds || 0;
@@ -2829,6 +2834,11 @@
     const sessions = campusForDate.sessions || [];
     if (sessions.length === 0) {
       w.bodyLine('No check-in recorded.');
+    } else if (sessions.length === 1) {
+      const s = sessions[0];
+      const inStr = formatTimeStr(toHHMM(s.in));
+      const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
+      w.bodyLine(`  ${inStr} - ${outStr}`);
     } else {
       sessions.forEach((s, i) => {
         const inStr = formatTimeStr(toHHMM(s.in));
@@ -2859,6 +2869,8 @@
           w.bodyLine(`     - ${it.label}: ${it.note ? it.note : 'Given'}`);
         });
         w.addSpace(3);
+        w.rule();
+        w.addSpace(3);
       });
     }
 
@@ -2886,9 +2898,11 @@
     w.heading('CATJEE Teach Desk', 18);
     w.bodyLine('Daily Activity Report', { size: 11 });
     w.addSpace(4);
+    w.rule();
+    w.addSpace(4);
     w.bodyLine(`Teacher: ${teacherName}`, { bold: true, size: 11 });
-    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`);
-    w.addSpace(6);
+    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { bold: true, size: 11 });
+    w.addSpace(4);
     w.rule();
 
     writeDayReportBody(w, date, allForDate, campusForDate, true);
@@ -3031,10 +3045,12 @@
     w.heading('CATJEE Teach Desk', 18);
     w.bodyLine('Weekly Activity Report', { size: 11 });
     w.addSpace(4);
+    w.rule();
+    w.addSpace(4);
     w.bodyLine(`Teacher: ${teacherName}`, { bold: true, size: 11 });
-    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`);
-    w.bodyLine(`Week: ${weekLabel(mondayStr)}`);
-    w.addSpace(6);
+    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { bold: true, size: 11 });
+    w.bodyLine(`Week: ${weekLabel(mondayStr)}`, { bold: true, size: 11 });
+    w.addSpace(4);
     w.rule();
 
     w.heading('Week Summary', 13);
