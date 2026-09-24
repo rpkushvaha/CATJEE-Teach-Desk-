@@ -1927,7 +1927,11 @@
       byTeacher[tid].push(c);
     });
     const teacherIds = Object.keys(state.adminCampus).concat(Object.keys(byTeacher))
-      .filter((v, i, a) => a.indexOf(v) === i);
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .filter((tid) => {
+        const c = state.adminCampus[tid];
+        return (c && (c.totalSeconds > 0 || c.checkedIn)) || (byTeacher[tid] && byTeacher[tid].length > 0);
+      });
 
     const allByTeacher = {};
     state.adminClasses.forEach((c) => {
@@ -3132,7 +3136,11 @@
       byTeacher[tid].push(c);
     });
     const teacherIds = Object.keys(state.adminCampus).concat(Object.keys(byTeacher))
-      .filter((v, i, a) => a.indexOf(v) === i);
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .filter((tid) => {
+        const c = state.adminCampus[tid];
+        return (c && (c.totalSeconds > 0 || c.checkedIn)) || (byTeacher[tid] && byTeacher[tid].length > 0);
+      });
 
     if (teacherIds.length === 0) {
       msgEl.textContent = 'No activity to report for this date.';
