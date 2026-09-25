@@ -205,6 +205,7 @@
     display: flex; flex-direction: column; align-items: center; gap: 6px; line-height: 1.5;
   }
   .empty-icon { font-size: 20px; line-height: 1; opacity: 0.85; }
+  @keyframes pulse-fade { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
   .empty-hint { font-size: 11.5px; color: var(--muted); opacity: 0.85; }
   .del-btn {
     background: var(--neutral-soft); border: none; cursor: pointer; color: var(--muted); flex-shrink: 0;
@@ -739,11 +740,17 @@
       </div>
 
       <div class="panel" id="scheduleNoticePanel">
-        <div class="panel-title">📸 My Saved Photos</div>
-        <div class="admin-sub">Personal — only you can see these. Save any photo for quick reference (schedule, notes, anything). Tap a photo to view it full size.</div>
-        <div id="scheduleNoticeGallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;"></div>
-        <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
-        <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line); margin-top:4px;">📷 Add Photo</button>
+        <div id="scheduleNoticeHeader" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+          <div class="panel-title" style="margin-bottom:0;">📸 My Saved Photos</div>
+          <span id="scheduleNoticeCount" style="font-size:12px; color:var(--muted); font-weight:700;">0/6</span>
+        </div>
+        <div class="day-card-hint" id="scheduleNoticeHint" style="cursor:pointer;">Tap to expand</div>
+        <div id="scheduleNoticeBody" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
+          <div class="admin-sub" style="margin-top:0;">Personal — only you can see these. Save any photo for quick reference (schedule, notes, anything). Tap a photo to view it full size.</div>
+          <div id="scheduleNoticeGallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px 12px;"></div>
+          <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
+          <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line);">📷 Add Photo</button>
+        </div>
       </div>
 
       <div class="panel">
@@ -1022,6 +1029,8 @@
     scheduleWing: 'Pre-Foundation',
     scheduleBatch: DEFAULT_BATCHES[0],
     scheduleNoticePhotos: [],
+    scheduleNoticeExpanded: false,
+    scheduleNoticeUploading: false,
     editingScheduleId: null,
     firedScheduleReminders: {},
     saving: false
@@ -2231,7 +2240,8 @@
       showToast(`You can keep up to ${MAX_SCHEDULE_PHOTOS} photos. Remove one first.`, 'error');
       return;
     }
-    showToast('Uploading photo…');
+    state.scheduleNoticeUploading = true;
+    renderScheduleNotice();
     try {
       let dataUrl = await resizeImageFile(file, 1200, 0.7);
       if (dataUrl.length > 900000) dataUrl = await resizeImageFile(file, 900, 0.55);
@@ -2247,6 +2257,9 @@
       showToast('Photo saved');
     } catch (err) {
       showToast('Could not upload the photo. Please try again.', 'error');
+    } finally {
+      state.scheduleNoticeUploading = false;
+      renderScheduleNotice();
     }
   }
 
@@ -2267,14 +2280,27 @@
   function renderScheduleNotice() {
     const gallery = document.getElementById('scheduleNoticeGallery');
     const uploadBtn = document.getElementById('scheduleNoticeUploadBtn');
+    const body = document.getElementById('scheduleNoticeBody');
+    const hint = document.getElementById('scheduleNoticeHint');
+    const countEl = document.getElementById('scheduleNoticeCount');
     if (!gallery) return;
 
     const photos = state.scheduleNoticePhotos || [];
+    countEl.textContent = `${photos.length}/${MAX_SCHEDULE_PHOTOS}`;
+    body.style.display = state.scheduleNoticeExpanded ? 'flex' : 'none';
+    hint.textContent = state.scheduleNoticeExpanded ? 'Tap to collapse' : 'Tap to expand';
+
+    const placeholderTile = state.scheduleNoticeUploading
+      ? `<div style="width:100%; aspect-ratio:1; border-radius:10px; background: var(--neutral-soft); display:flex; align-items:center; justify-content:center; animation: pulse-fade 1.1s ease-in-out infinite;">
+           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+         </div>`
+      : '';
+
     gallery.innerHTML = photos.map((p) => `
       <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
         <img data-open-photo="${p.id}" src="${p.imageBase64}" alt="Saved photo" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:pointer; display:block;">
         <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="padding:4px;">${svgTrash()}</button>
-      </div>`).join('');
+      </div>`).join('') + placeholderTile;
     gallery.querySelectorAll('[data-open-photo]').forEach((img) => {
       img.addEventListener('click', () => openPhotoLightbox(img.getAttribute('data-open-photo')));
     });
@@ -2282,7 +2308,7 @@
       btn.addEventListener('click', () => removeScheduleNoticePhoto(btn.getAttribute('data-remove-photo')));
     });
 
-    uploadBtn.style.display = photos.length >= MAX_SCHEDULE_PHOTOS ? 'none' : 'block';
+    uploadBtn.style.display = (photos.length >= MAX_SCHEDULE_PHOTOS || state.scheduleNoticeUploading) ? 'none' : 'block';
   }
 
   function openPhotoLightbox(photoId) {
@@ -4071,6 +4097,13 @@
   renderScheduleDayChips();
   renderScheduleWingChips();
   renderScheduleBatchChips();
+
+  const toggleScheduleNotice = () => {
+    state.scheduleNoticeExpanded = !state.scheduleNoticeExpanded;
+    renderScheduleNotice();
+  };
+  document.getElementById('scheduleNoticeHeader').addEventListener('click', toggleScheduleNotice);
+  document.getElementById('scheduleNoticeHint').addEventListener('click', toggleScheduleNotice);
 
   document.getElementById('scheduleNoticeUploadBtn').addEventListener('click', () => {
     document.getElementById('scheduleNoticeFileInput').click();
