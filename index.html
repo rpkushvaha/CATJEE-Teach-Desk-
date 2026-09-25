@@ -1593,6 +1593,7 @@
 
   function groupedCardHtml(label, dateKeys, weekMonday, isCurrent) {
     let seconds = 0, classCount = 0, activityCount = 0;
+    const batchCounts = {};
     dateKeys.forEach((date) => {
       const campus = state.historyCampus[date];
       if (campus) {
@@ -1600,10 +1601,23 @@
         if (campus.checkedIn && campus.checkInAt) seconds += (Date.now() - campus.checkInAt) / 1000;
       }
       (state.historyByDate[date] || []).forEach((c) => {
-        if (c.entryType === 'activity') activityCount++; else classCount++;
+        if (c.entryType === 'activity') {
+          activityCount++;
+        } else {
+          classCount++;
+          const b = c.batch || 'Unknown';
+          batchCounts[b] = (batchCounts[b] || 0) + 1;
+        }
       });
     });
     const daysWithActivity = dateKeys.filter((d) => (state.historyCampus[d] && (state.historyCampus[d].totalSeconds > 0 || state.historyCampus[d].checkedIn)) || (state.historyByDate[d] && state.historyByDate[d].length)).length;
+    const batchLines = Object.keys(batchCounts)
+      .sort((a, b) => batchCounts[b] - batchCounts[a])
+      .map((b) => `<div style="display:flex; justify-content:space-between;"><span>${escapeHtml(b)}</span><span style="font-weight:700;">${batchCounts[b]}</span></div>`)
+      .join('');
+    const batchBreakdownBlock = classCount > 0
+      ? `<div class="class-checklist-notes" style="display:flex; flex-direction:column; gap:3px; margin-top:8px;">${batchLines}</div>`
+      : '';
     return `
       <div class="day-card"${isCurrent ? ' style="border: 1.5px solid var(--gold);"' : ''}>
         <div class="day-top">
@@ -1611,6 +1625,7 @@
           <div class="day-time num">${seconds > 0 ? formatShort(seconds) : '—'}</div>
         </div>
         <div class="day-count">${daysWithActivity} day${daysWithActivity === 1 ? '' : 's'} on campus &middot; ${classCount} class${classCount === 1 ? '' : 'es'}${activityCount ? ` &middot; Other Activity` : ''}</div>
+        ${batchBreakdownBlock}
         ${weekMonday ? `<div class="action-btn-row"><button class="action-btn" data-week-report="${weekMonday}">📄 Weekly PDF Report</button></div>` : ''}
       </div>`;
   }
@@ -2033,9 +2048,22 @@
       const expanded = state.adminExpandedTeacher === tid;
       const hasDetail = all.length > 0;
       const stuckCheckedIn = !!(campus && campus.checkedIn && campus.checkInAt && (Date.now() - campus.checkInAt) >= 24 * 60 * 60 * 1000);
-      const detailHtml = expanded
-        ? `<div class="teacher-detail">${entryListHtml(all, true)}</div>`
-        : '';
+      let detailHtml = '';
+      if (expanded) {
+        const batchCounts = {};
+        items.forEach((c) => {
+          const b = c.batch || 'Unknown';
+          batchCounts[b] = (batchCounts[b] || 0) + 1;
+        });
+        const batchLines = Object.keys(batchCounts)
+          .sort((a, b) => batchCounts[b] - batchCounts[a])
+          .map((b) => `<div style="display:flex; justify-content:space-between;"><span>${escapeHtml(b)}</span><span style="font-weight:700;">${batchCounts[b]}</span></div>`)
+          .join('');
+        const batchBlock = n > 0
+          ? `<div class="class-checklist-notes" style="display:flex; flex-direction:column; gap:3px;"><div style="font-weight:700; margin-bottom:2px;">Batch-wise:</div>${batchLines}</div>`
+          : '';
+        detailHtml = `<div class="teacher-detail">${batchBlock}${entryListHtml(all, true)}</div>`;
+      }
       return `
         <div class="teacher-card"${hasDetail ? ` data-teacher-id="${tid}" style="cursor:pointer;"` : ''}>
           <div class="teacher-top">
@@ -3303,12 +3331,20 @@
     const teacherName = (state.user && state.user.name) || 'Teacher';
 
     let totalSeconds = 0, totalClasses = 0, totalActivities = 0;
+    const batchCounts = {};
     results.forEach(({ classes, campus }) => {
       let s = campus.totalSeconds || 0;
       if (campus.checkedIn && campus.checkInAt) s += (Date.now() - campus.checkInAt) / 1000;
       totalSeconds += s;
-      totalClasses += classes.filter((c) => c.entryType !== 'activity').length;
-      totalActivities += classes.filter((c) => c.entryType === 'activity').length;
+      classes.forEach((c) => {
+        if (c.entryType === 'activity') {
+          totalActivities++;
+        } else {
+          totalClasses++;
+          const b = c.batch || 'Unknown';
+          batchCounts[b] = (batchCounts[b] || 0) + 1;
+        }
+      });
     });
 
     const w = createPdfWriter();
@@ -3327,6 +3363,13 @@
     w.bodyLine(`Total campus time: ${formatDuration(totalSeconds)}`, { bold: true });
     w.bodyLine(`Total classes: ${totalClasses}`);
     w.bodyLine(`Total other activities: ${totalActivities}`);
+    if (Object.keys(batchCounts).length > 0) {
+      w.addSpace(3);
+      w.bodyLine('Batch-wise:', { bold: true });
+      Object.keys(batchCounts)
+        .sort((a, b) => batchCounts[b] - batchCounts[a])
+        .forEach((b) => w.bodyLine(`  ${b}: ${batchCounts[b]}`));
+    }
     w.addSpace(6);
     w.rule();
 
@@ -3539,7 +3582,7 @@
     results.forEach(({ classes, campus }) => {
       filterByAdminWing(classes).forEach((c) => {
         const tid = c.teacherId || 'unknown';
-        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0 };
+        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0, batchCounts: {} };
         if (c.entryType === 'activity') {
           byTeacher[tid].activityCount++;
         } else {
@@ -3548,10 +3591,12 @@
           if (c.material) byTeacher[tid].material++;
           if (c.test) byTeacher[tid].test++;
           if (c.homework) byTeacher[tid].homework++;
+          const b = c.batch || 'Unknown';
+          byTeacher[tid].batchCounts[b] = (byTeacher[tid].batchCounts[b] || 0) + 1;
         }
       });
       Object.keys(campus).forEach((tid) => {
-        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0 };
+        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0, batchCounts: {} };
         let s = campus[tid].totalSeconds || 0;
         if (campus[tid].checkedIn && campus[tid].checkInAt) s += (Date.now() - campus[tid].checkInAt) / 1000;
         byTeacher[tid].totalSeconds += s;
@@ -3590,6 +3635,10 @@
       w.bodyLine(`Classes: ${t.classCount}   Activities: ${t.activityCount}`);
       if (t.classCount > 0) {
         w.bodyLine(`Worksheet: ${t.worksheet}/${t.classCount}   Material: ${t.material}/${t.classCount}   Test: ${t.test}/${t.classCount}   Homework: ${t.homework}/${t.classCount}`);
+        w.bodyLine('Batch-wise:');
+        Object.keys(t.batchCounts)
+          .sort((a, b) => t.batchCounts[b] - t.batchCounts[a])
+          .forEach((b) => w.bodyLine(`  ${b}: ${t.batchCounts[b]}`));
       }
       w.addSpace(6);
       w.rule();
