@@ -64,7 +64,7 @@
     --paper: #FFFFFF;
     --card: #FFFFFF;
     --line: #E6E6E6;
-    --muted: #8A8A8A;
+    --muted: #6F6F6F;
     --muted-2: #555555;
     --green: #C62839;
     --green-soft: #FCE4E7;
@@ -125,7 +125,7 @@
     width: 38px; height: 38px; border-radius: 999px; background: var(--gold-soft);
     border: 1.5px solid var(--gold);
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0;
+    font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700; color: var(--gold); flex-shrink: 0;
     overflow: hidden;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -140,7 +140,7 @@
   .bell-btn.active { background: var(--gold); border-color: transparent; color: #fff; }
   .subject-btn {
     background: none; border: none; cursor: pointer; padding: 0; font-family: inherit;
-    font-size: 12px; color: var(--muted-2); display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--muted-2); display: flex; align-items: center; gap: 6px;
   }
   .subject-btn strong { color: var(--ink); font-weight: 700; }
   .subject-btn .edit-icon { color: var(--gold); }
@@ -157,75 +157,75 @@
   .status-card.in { background: var(--navy); color: var(--paper); border-color: var(--navy); box-shadow: 0 6px 20px rgba(23,23,23,0.28), 0 2px 6px rgba(23,23,23,0.2); }
   .status-row { display: flex; align-items: center; gap: 8px; }
   .status-dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; }
-  .status-text { font-size: 14px; font-weight: 700; }
+  .status-text { font-size: 15px; font-weight: 700; }
   .timer { text-align: center; padding: 2px 0; }
   .timer-num { font-family: 'Poppins', sans-serif; font-size: 42px; font-weight: 600; line-height: 1; }
-  .timer-label { font-size: 11px; opacity: .65; margin-top: 6px; letter-spacing: .03em; text-transform: uppercase; font-weight: 600; }
-  .loc-line { font-size: 11px; opacity: .75; text-align: center; min-height: 14px; }
+  .timer-label { font-size: 13px; opacity: .7; margin-top: 6px; font-weight: 500; }
+  .loc-line { font-size: 12px; opacity: .75; text-align: center; min-height: 14px; }
   .btn {
     width: 100%; padding: 14px 0; border-radius: 12px; border: none; cursor: pointer;
-    font-size: 14.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   .btn-checkin { background: linear-gradient(155deg, var(--gold), color-mix(in srgb, var(--gold) 78%, black)); color: #fff; box-shadow: 0 4px 12px color-mix(in srgb, var(--gold) 35%, transparent); }
   .btn-checkout { background: transparent; color: var(--paper); border: 1.5px solid var(--paper); }
   .btn-secondary {
     width: 100%; padding: 12px 0; border-radius: 12px; cursor: pointer;
-    font-size: 13.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 7px;
+    font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 7px;
     background: transparent; border: 1.5px solid currentColor; opacity: .9;
   }
 
   .section-head { display: flex; align-items: baseline; justify-content: space-between; }
-  .section-title { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; }
-  .link-btn { background: none; border: none; font-size: 12.5px; font-weight: 700; color: var(--gold); cursor: pointer; padding: 0; }
+  .section-title { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 600; }
+  .link-btn { background: none; border: none; font-size: 13px; font-weight: 700; color: var(--gold); cursor: pointer; padding: 0; }
 
   .class-list { display: flex; flex-direction: column; gap: 10px; }
   .class-card { border-radius: 16px; background: var(--card); border: 1px solid var(--line); padding: 15px; overflow: hidden; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
   .class-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 3px; gap: 8px; }
-  .class-title { font-size: 13.5px; font-weight: 700; flex: 1; min-width: 0; line-height: 1.35; }
+  .class-title { font-size: 14px; font-weight: 700; flex: 1; min-width: 0; line-height: 1.35; }
   .class-meta { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-  .class-time { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-  .class-topic { font-size: 12px; color: var(--muted-2); margin-bottom: 9px; }
+  .class-time { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .class-topic { font-size: 13px; color: var(--muted-2); margin-bottom: 9px; }
   .activity-rows { display: flex; flex-direction: column; }
   .activity-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
   .activity-row:first-child { border-top: none; padding-top: 4px; }
   .activity-row-text { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0; }
-  .activity-row-title { font-size: 13.5px; font-weight: 700; }
-  .activity-row-note { font-size: 13px; color: var(--muted-2); }
+  .activity-row-title { font-size: 14px; font-weight: 700; }
+  .activity-row-note { font-size: 14px; color: var(--muted-2); }
   .class-checklist-notes {
-    font-size: 11.5px; color: var(--ink); margin-top: 8px; line-height: 1.4;
+    font-size: 12px; color: var(--ink); margin-top: 8px; line-height: 1.4;
     background: var(--neutral-soft); border-radius: 10px; padding: 7px 10px;
   }
   .activity-row-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
   .badges { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .badge { font-size: 10.5px; font-weight: 700; padding: 5px 9px; border-radius: 999px; text-align: center; }
+  .badge { font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: 999px; text-align: center; }
   .badge.on { background: var(--green-soft); color: var(--green); }
   .badge.off { background: var(--neutral-soft); color: var(--neutral-text); font-weight: 600; }
   .badge.test { background: var(--green-soft); color: var(--green); }
   .badge.leave { background: var(--gold); color: #fff; grid-column: 1 / -1; text-align: left; }
   .empty {
-    font-size: 13px; color: var(--muted); padding: 18px 16px; text-align: center;
+    font-size: 14px; color: var(--muted); padding: 18px 16px; text-align: center;
     border: 1.5px dashed var(--line); border-radius: 16px; background: var(--neutral-soft);
     display: flex; flex-direction: column; align-items: center; gap: 6px; line-height: 1.5;
   }
   .empty-icon { font-size: 20px; line-height: 1; opacity: 0.85; }
   @keyframes pulse-fade { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-  .empty-hint { font-size: 11.5px; color: var(--muted); opacity: 0.85; }
+  .empty-hint { font-size: 12px; color: var(--muted); opacity: 0.85; }
   .del-btn {
     background: var(--neutral-soft); border: none; cursor: pointer; color: var(--muted); flex-shrink: 0;
     padding: 7px; display: flex; align-items: center; border-radius: 999px; margin-left: 4px;
   }
   .action-btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
   .action-btn {
-    display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: var(--gold);
+    display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: var(--gold);
     background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; cursor: pointer;
   }
   .current-period-tag {
-    display: inline-block; font-size: 9.5px; font-weight: 800; color: #fff; background: var(--gold);
+    display: inline-block; font-size: 11px; font-weight: 700; color: #fff; background: var(--gold);
     border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: middle; text-transform: uppercase;
   }
   .whatsapp-accent { color: #1DA851 !important; border-color: #1DA851 !important; }
   .add-entry-btn {
-    display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--gold);
+    display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--gold);
     background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 999px; padding: 7px 13px; cursor: pointer;
   }
 
@@ -235,13 +235,13 @@
     width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--line); background: var(--card);
     display: flex; align-items: center; justify-content: center; color: var(--ink); flex-shrink: 0; cursor: pointer;
   }
-  .form-title { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; }
+  .form-title { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; }
   .field { display: flex; flex-direction: column; gap: 8px; }
-  .field label { font-size: 12px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }
-  .micro-label { font-size: 10.5px; font-weight: 600; color: var(--muted-2); margin-bottom: 4px; }
+  .field label { font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  .micro-label { font-size: 12px; font-weight: 600; color: var(--muted-2); margin-bottom: 4px; }
   .chips { display: flex; gap: 7px; flex-wrap: wrap; }
   .chip {
-    padding: 8px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    padding: 8px 13px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer;
     border: 1px solid var(--line); background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(23,23,23,0.03);
   }
   .chip.active { background: linear-gradient(155deg, var(--gold), color-mix(in srgb, var(--gold) 78%, black)); color: #fff; border-color: transparent; box-shadow: 0 2px 8px color-mix(in srgb, var(--gold) 30%, transparent); }
@@ -253,21 +253,21 @@
   .batch-grid .chip { width: 100%; box-sizing: border-box; text-align: center; white-space: normal; line-height: 1.3; }
   .icon-link-btn {
     display: flex; align-items: center; gap: 5px; background: var(--card); border: 1px solid var(--line);
-    border-radius: 999px; padding: 6px 12px; font-size: 11.5px; font-weight: 700; color: var(--gold); cursor: pointer;
+    border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--gold); cursor: pointer;
   }
   #classFields > .field:not(:last-child):not(.nested-box), #activityFields > .field:not(:last-child) {
     padding-bottom: 10px; border-bottom: 1px solid var(--line);
   }
   .text-input {
     padding: 12px 14px; border-radius: 11px; border: 1px solid var(--line); background: var(--card);
-    font-size: 13.5px; color: var(--ink); width: 100%;
+    font-size: 14px; color: var(--ink); width: 100%;
   }
   .text-input::placeholder { color: var(--muted); opacity: .7; }
   .toggle-row {
     display: flex; align-items: center; justify-content: space-between; padding: 13px 15px;
     border-radius: 13px; border: 1px solid var(--line); background: var(--card); cursor: pointer; width: 100%;
   }
-  .toggle-label { font-size: 13.5px; font-weight: 500; text-align: left; }
+  .toggle-label { font-size: 14px; font-weight: 500; text-align: left; }
   .switch { width: 40px; height: 23px; border-radius: 999px; position: relative; flex-shrink: 0; background: var(--line); transition: background .15s; }
   .switch.on { background: var(--switch-on); }
   .knob { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: left .15s; }
@@ -280,30 +280,30 @@
   .toggle-row.checklist-item:has(.switch.on) { background: var(--switch-on-soft); border-color: var(--switch-on); }
   .checklist-toggle-trigger { display: flex; align-items: center; gap: 7px; width: 100%; cursor: pointer; }
   .checklist-icon { font-size: 17px; line-height: 1; flex-shrink: 0; }
-  .checklist-item .toggle-label { font-size: 12.5px; line-height: 1.3; flex: 1; }
+  .checklist-item .toggle-label { font-size: 13px; line-height: 1.3; flex: 1; }
   .checklist-item .switch { flex-shrink: 0; }
   .checklist-note-input {
-    display: none; margin-top: 8px; width: 100%; font-size: 11.5px; padding: 7px 9px;
+    display: none; margin-top: 8px; width: 100%; font-size: 12px; padding: 7px 9px;
     border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: inherit;
   }
   .checklist-note-input.show { display: block; }
-  .save-btn { width: 100%; padding: 14px 0; border-radius: 12px; background: var(--gold); color: var(--navy); font-size: 14.5px; font-weight: 700; border: none; cursor: pointer; margin: 4px 0 4px 0; }
+  .save-btn { width: 100%; padding: 14px 0; border-radius: 12px; background: var(--gold); color: var(--navy); font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin: 4px 0 4px 0; }
   .save-btn:disabled { opacity: .5; cursor: not-allowed; }
 
   /* History tab */
-  .history-sub { font-size: 12px; color: var(--muted); }
+  .history-sub { font-size: 13px; color: var(--muted); }
   .day-card { border-radius: 16px; background: var(--neutral-soft); border: 1px solid var(--line); padding: 15px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
   .day-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
-  .day-date { font-size: 14px; font-weight: 700; }
-  .day-time { font-size: 12.5px; font-weight: 700; color: var(--gold); }
-  .day-count { font-size: 11.5px; color: var(--muted-2); margin-bottom: 9px; }
-  .day-card-hint { font-size: 11px; color: var(--gold); font-weight: 700; margin-top: 6px; }
+  .day-date { font-size: 15px; font-weight: 700; }
+  .day-time { font-size: 13px; font-weight: 700; color: var(--gold); }
+  .day-count { font-size: 12px; color: var(--muted-2); margin-bottom: 9px; }
+  .day-card-hint { font-size: 12px; color: var(--gold); font-weight: 700; margin-top: 6px; }
 
   /* Admin tab */
-  .admin-sub { font-size: 12px; color: var(--muted); }
+  .admin-sub { font-size: 13px; color: var(--muted); }
   .date-input {
     padding: 10px 13px; border-radius: 11px; border: 1px solid var(--line); background: var(--card);
-    font-size: 13px; color: var(--ink); font-family: inherit;
+    font-size: 14px; color: var(--ink); font-family: inherit;
   }
   .admin-summary { display: flex; gap: 10px; }
   .stat-box { flex: 1; border-radius: 14px; background: var(--card); border: 1px solid var(--line); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
@@ -312,20 +312,20 @@
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .stat-box .n { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; }
-  .stat-box .l { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; font-weight: 700; margin-top: 3px; }
+  .stat-box .l { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 3px; }
   .teacher-card { border-radius: 16px; background: var(--neutral-soft); border: 1px solid var(--line); padding: 15px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
   .teacher-detail { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 10px; cursor: default; }
   .teacher-detail .class-card { box-shadow: none; }
   .teacher-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .teacher-name { font-size: 13.5px; font-weight: 700; flex-grow: 1; }
-  .teacher-time { font-size: 12px; font-weight: 700; color: var(--gold); }
-  .teacher-subject { font-size: 11.5px; color: var(--muted-2); margin-bottom: 8px; }
+  .teacher-name { font-size: 14px; font-weight: 700; flex-grow: 1; }
+  .teacher-time { font-size: 13px; font-weight: 700; color: var(--gold); }
+  .teacher-subject { font-size: 12px; color: var(--muted-2); margin-bottom: 8px; }
   .panel { border-radius: 16px; background: var(--card); border: 1px solid var(--line); padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 4px rgba(23,23,23,0.05); }
-  .panel-title { font-size: 13.5px; font-weight: 700; }
+  .panel-title { font-size: 14px; font-weight: 700; }
 
   /* Reminder toggle */
   .reminder-row { padding: 0 20px; }
-  .modal-msg { font-size: 12.5px; color: var(--muted-2); text-align: center; min-height: 16px; }
+  .modal-msg { font-size: 13px; color: var(--muted-2); text-align: center; min-height: 16px; }
 
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
@@ -358,17 +358,17 @@
   .davatar {
     width: 54px; height: 54px; border-radius: 999px; background: #fff; color: var(--gold);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 19px; overflow: hidden;
+    font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 20px; overflow: hidden;
   }
   .davatar img { width: 100%; height: 100%; object-fit: cover; }
   .dname { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .demail { font-size: 12.5px; opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demail { font-size: 13px; opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .dhead {
     display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line);
     padding: calc(12px + env(safe-area-inset-top, 0px)) 10px 12px;
   }
-  .dtitle { font-family: 'Poppins', sans-serif; font-size: 16.5px; font-weight: 700; color: var(--ink); }
+  .dtitle { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 700; color: var(--ink); }
   .dicon-btn { background: none; border: none; cursor: pointer; color: var(--ink); padding: 8px; border-radius: 999px; line-height: 0; }
   .dicon-btn:active { background: var(--neutral-soft); }
   .dhead-main .dicon-btn:active { background: rgba(255,255,255,.18); }
@@ -386,29 +386,29 @@
   }
   .dtile svg, .dchev, .dhero-icon svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .dtile svg { width: 18px; height: 18px; }
-  .dlabel { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; display: flex; flex-direction: column; }
-  .dlabel small { font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 1px; }
+  .dlabel { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; display: flex; flex-direction: column; }
+  .dlabel small { font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 1px; }
   .dchev { width: 18px; height: 18px; color: var(--muted); flex-shrink: 0; }
   .drow-danger { background: var(--card); border: 1px solid var(--line); border-radius: 16px; color: #C62839; }
   .drow-danger .dtile { background: rgba(198,40,57,.1); color: #C62839; }
 
   .dcard { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
   .dfield-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .dfield-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .dfield-label { font-size: 13px; color: var(--muted); font-weight: 600; }
   .dfield-value { font-weight: 700; font-size: 15px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
-  .dedit-btn { background: var(--gold-soft); color: var(--gold); border: none; border-radius: 999px; padding: 7px 14px; font-weight: 700; font-size: 12.5px; cursor: pointer; flex-shrink: 0; }
-  .dbtn-primary { background: var(--gold); color: #fff; border: none; border-radius: 12px; padding: 13px 16px; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .dedit-btn { background: var(--gold-soft); color: var(--gold); border: none; border-radius: 999px; padding: 7px 14px; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+  .dbtn-primary { background: var(--gold); color: #fff; border: none; border-radius: 12px; padding: 13px 16px; font-weight: 700; font-size: 15px; cursor: pointer; }
   .dbtn-primary:disabled { opacity: .6; }
   .dbtn-block { width: 100%; }
-  .dtext { font-size: 13.5px; color: var(--muted-2); line-height: 1.6; margin: 0; }
-  .dnote { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .dtext { font-size: 14px; color: var(--muted-2); line-height: 1.6; margin: 0; }
+  .dnote { font-size: 13px; color: var(--muted); font-weight: 400; }
   .dhero-icon { width: 64px; height: 64px; border-radius: 20px; background: var(--gold-soft); color: var(--gold); display: flex; align-items: center; justify-content: center; margin: 8px auto 14px; }
   .dhero-icon svg { width: 30px; height: 30px; }
   .dhero-ok { background: var(--switch-on-soft); color: var(--switch-on); }
   #pwdAsk, #pwdDone { display: flex; flex-direction: column; gap: 12px; }
   .dhelp { display: flex; flex-direction: column; gap: 4px; }
-  .dhelp strong { font-size: 14px; color: var(--ink); }
-  .dhelp span { font-size: 13px; color: var(--muted-2); line-height: 1.55; }
+  .dhelp strong { font-size: 15px; color: var(--ink); }
+  .dhelp span { font-size: 14px; color: var(--muted-2); line-height: 1.55; }
 
   /* Items glide in one after another when the drawer opens */
   .drawer-root.open .dpanel-main .drow { animation: drowIn .38s cubic-bezier(.22,.8,.26,1) both; animation-delay: calc(80ms + var(--i, 0) * 35ms); }
@@ -426,30 +426,30 @@
     background: var(--card); border-radius: 18px; padding: 20px; width: 100%; max-width: 340px;
     display: flex; flex-direction: column; gap: 14px;
   }
-  .modal-title { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700; }
-  .modal-body { font-size: 13px; color: var(--muted-2); }
+  .modal-title { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 700; }
+  .modal-body { font-size: 14px; color: var(--muted-2); }
   .modal-actions { display: flex; gap: 10px; }
   .modal-btn-cancel {
     flex: 1; padding: 11px 0; border-radius: 11px; border: 1px solid var(--line); background: var(--paper);
-    font-size: 13px; font-weight: 700; cursor: pointer; color: var(--ink);
+    font-size: 14px; font-weight: 700; cursor: pointer; color: var(--ink);
   }
   .modal-btn-danger {
     flex: 1; padding: 11px 0; border-radius: 11px; border: none; background: var(--gold);
-    font-size: 13px; font-weight: 700; cursor: pointer; color: #fff;
+    font-size: 14px; font-weight: 700; cursor: pointer; color: #fff;
   }
 
   .cal-weekday-row {
     display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
-    font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    font-size: 12px; font-weight: 600; color: var(--muted);
   }
   .cal-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .cal-day {
     aspect-ratio: 1 / 1; border-radius: 10px; border: none; background: var(--paper);
-    font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
-  .cal-day.today { border: 1.5px solid var(--gold); font-weight: 800; }
-  .cal-day.selected { background: var(--gold); color: #fff; font-weight: 800; }
+  .cal-day.today { border: 1.5px solid var(--gold); font-weight: 700; }
+  .cal-day.selected { background: var(--gold); color: #fff; font-weight: 700; }
   .cal-day-blank { visibility: hidden; }
 
   .date-nav { display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -460,10 +460,10 @@
   .date-nav-pill {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     padding: 10px 20px; border-radius: 999px; border: 1.5px solid var(--gold);
-    background: var(--gold-soft); color: var(--gold); font-size: 13px; font-weight: 700;
+    background: var(--gold-soft); color: var(--gold); font-size: 14px; font-weight: 700;
     cursor: pointer; flex: 1; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .cal-today-link { font-size: 11.5px; font-weight: 700; color: var(--gold); background: none; border: none; cursor: pointer; }
+  .cal-today-link { font-size: 12px; font-weight: 700; color: var(--gold); background: none; border: none; cursor: pointer; }
 
   #toastContainer {
     position: fixed; left: 0; right: 0; bottom: 84px; display: flex; flex-direction: column;
@@ -471,7 +471,7 @@
   }
   .toast {
     background: var(--navy); color: #fff; padding: 10px 18px; border-radius: 999px;
-    font-size: 12.5px; font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    font-size: 13px; font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,.25);
     max-width: 100%; text-align: center; opacity: 0; transform: translateY(8px);
     transition: opacity .2s, transform .2s; pointer-events: auto;
   }
@@ -485,11 +485,11 @@
     box-shadow: 0 4px 14px rgba(0,0,0,.25);
   }
   .reminder-alert.active { display: flex; }
-  .reminder-alert-icon { font-size: 22px; flex-shrink: 0; }
-  .reminder-alert-text { flex-grow: 1; font-size: 13px; font-weight: 700; line-height: 1.35; }
+  .reminder-alert-icon { font-size: 24px; flex-shrink: 0; }
+  .reminder-alert-text { flex-grow: 1; font-size: 14px; font-weight: 700; line-height: 1.35; }
   .reminder-alert-close {
     background: rgba(255,255,255,0.25); border: none; color: #fff; width: 30px; height: 30px;
-    border-radius: 999px; font-size: 16px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+    border-radius: 999px; font-size: 17px; font-weight: 700; cursor: pointer; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
   }
 
@@ -500,9 +500,9 @@
   }
   .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px 8px; }
   .nav-item.active { color: var(--gold); }
-  .nav-item span { font-size: 10px; font-weight: 500; }
+  .nav-item span { font-size: 12px; font-weight: 500; letter-spacing: .01em; }
   .nav-item.active span { font-weight: 700; }
-  .offline-note { font-size: 11px; color: var(--muted); text-align: center; padding: 6px 20px 0 20px; }
+  .offline-note { font-size: 12px; color: var(--muted); text-align: center; padding: 6px 20px 0 20px; }
 
   .auth-screen {
     display: none; position: fixed; inset: 0; z-index: 50; background: var(--paper);
@@ -523,24 +523,24 @@
   }
   .auth-tab {
     flex: 1; padding: 10px 0; border-radius: 9px; border: none; background: none;
-    font-size: 13px; font-weight: 700; color: var(--muted-2); cursor: pointer;
+    font-size: 14px; font-weight: 700; color: var(--muted-2); cursor: pointer;
   }
   .auth-tab.active { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(23,23,23,0.08); }
   .auth-screen .field { width: 100%; }
   .auth-error {
     width: 100%; background: var(--gold-soft); color: var(--gold); border-radius: 10px;
-    padding: 10px 12px; font-size: 12.5px; font-weight: 600; text-align: center;
+    padding: 10px 12px; font-size: 13px; font-weight: 600; text-align: center;
   }
-  .auth-forgot { background: none; border: none; color: var(--muted-2); font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px; }
+  .auth-forgot { background: none; border: none; color: var(--muted-2); font-size: 13px; font-weight: 700; cursor: pointer; padding: 4px; }
 </style>
 </head>
 <body>
 <div id="fatalErrorBanner" style="display:none; position:fixed; inset:0; z-index:999; background:#FFFFFF; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; text-align:center; font-family:'Work Sans', system-ui, sans-serif;">
   <div style="font-size:40px; margin-bottom:14px;">⚠️</div>
-  <div style="font-family:'Poppins', sans-serif; font-weight:800; font-size:18px; color:#171717; margin-bottom:10px;">Something went wrong</div>
-  <div id="fatalErrorMsg" style="font-size:12.5px; color:#555555; margin-bottom:22px; word-break:break-word; max-width:320px; background:#F5F5F5; padding:10px 14px; border-radius:10px;"></div>
-  <div style="font-size:12px; color:#8A8A8A; margin-bottom:18px;">Please screenshot this message and share it — it will help fix the issue.</div>
-  <button onclick="location.reload()" style="background:#E63946; color:#fff; border:none; padding:13px 28px; border-radius:12px; font-weight:700; font-size:14px; cursor:pointer;">Reload</button>
+  <div style="font-family:'Poppins', sans-serif; font-weight:700; font-size:20px; color:#171717; margin-bottom:10px;">Something went wrong</div>
+  <div id="fatalErrorMsg" style="font-size:13px; color:#555555; margin-bottom:22px; word-break:break-word; max-width:320px; background:#F5F5F5; padding:10px 14px; border-radius:10px;"></div>
+  <div style="font-size:13px; color:#8A8A8A; margin-bottom:18px;">Please screenshot this message and share it — it will help fix the issue.</div>
+  <button onclick="location.reload()" style="background:#E63946; color:#fff; border:none; padding:13px 28px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer;">Reload</button>
 </div>
 <div class="reminder-alert" id="reminderAlert">
   <div class="reminder-alert-icon">🔔</div>
@@ -599,11 +599,11 @@
       </div>
     </div>
     <div style="display:flex; align-items:center; gap:9px; min-width:0;">
-      <button id="menuOpenBtn" aria-label="Menu" style="background: var(--gold-soft); border:1px solid var(--gold); width:32px; height:32px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:var(--gold); cursor:pointer; flex-shrink:0; padding:0;">
+      <button id="menuOpenBtn" aria-label="Menu" style="background: var(--gold-soft); border:1px solid var(--gold); width:40px; height:40px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:var(--gold); cursor:pointer; flex-shrink:0; padding:0;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
       <div class="avatar" id="avatarBox">--</div>
-      <div id="teacherNameLabel" style="font-size:12.5px; font-weight:700; color:var(--ink); text-align:left; max-width:130px;"></div>
+      <div id="teacherNameLabel" style="font-size:13px; font-weight:700; color:var(--ink); text-align:left; max-width:130px;"></div>
     </div>
   </div>
 
@@ -622,13 +622,13 @@
           <div class="timer-label" id="sessionCountLabel" style="text-transform:none; letter-spacing:0; margin-top:3px; font-weight:500;"></div>
         </div>
         <button class="btn btn-checkin" id="checkBtn">Check In</button>
-        <div id="stuckCheckinWarning" style="display:none; background:#FEE2E2; border:1px solid #B91C1C; color:#B91C1C; border-radius:10px; padding:10px 12px; font-size:12px; font-weight:700; margin-top:10px; text-align:center; line-height:1.4;">⚠️ You've been checked in for over 24 hours. If you forgot to check out, please check out now.</div>
+        <div id="stuckCheckinWarning" style="display:none; background:#FEE2E2; border:1px solid #B91C1C; color:#B91C1C; border-radius:10px; padding:10px 12px; font-size:13px; font-weight:700; margin-top:10px; text-align:center; line-height:1.4;">⚠️ You've been checked in for over 24 hours. If you forgot to check out, please check out now.</div>
         <div class="loc-line" id="locLine"></div>
       </div>
 
       <div id="sessionsSection" style="display:none;">
         <div class="section-head">
-          <div class="section-title" style="font-size:14px;">Today's Sessions</div>
+          <div class="section-title" style="font-size:15px;">Today's Sessions</div>
         </div>
         <div class="class-list" id="sessionsList" style="margin-top:8px;"></div>
       </div>
@@ -689,8 +689,8 @@
           <div class="chips batch-grid" id="batchChips"></div>
           <div id="inlineManageBatches" style="display:none; flex-direction:column; gap:10px; margin-top:8px;">
             <div class="activity-rows" id="inlineBatchListRows"></div>
-            <input class="text-input" id="inlineNewBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="font-size:14.5px; padding:13px 14px;">
-            <button class="btn-secondary" id="inlineAddBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:12.5px;">+ Add</button>
+            <input class="text-input" id="inlineNewBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="font-size:15px; padding:13px 14px;">
+            <button class="btn-secondary" id="inlineAddBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button>
           </div>
         </div>
 
@@ -818,7 +818,7 @@
       <div class="panel" id="scheduleNoticePanel">
         <div id="scheduleNoticeHeader" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
           <div class="panel-title" style="margin-bottom:0;">📸 My Saved Photos</div>
-          <span id="scheduleNoticeCount" style="font-size:12px; color:var(--muted); font-weight:700;">0/6</span>
+          <span id="scheduleNoticeCount" style="font-size:13px; color:var(--muted); font-weight:700;">0/6</span>
         </div>
         <div class="day-card-hint" id="scheduleNoticeHint" style="cursor:pointer;">Tap to expand</div>
         <div id="scheduleNoticeBody" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
@@ -953,8 +953,8 @@
         <div class="admin-sub" id="adminBatchListHint">Tap a wing above to see and manage its classes.</div>
         <div id="adminBatchListExpandedBox" style="display:none; flex-direction:column; gap:10px;">
           <div class="activity-rows" id="batchListRows"></div>
-          <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:14.5px; padding:13px 14px;">
-          <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:12.5px;">+ Add</button>
+          <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:15px; padding:13px 14px;">
+          <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button>
         </div>
       </div>
 
@@ -1249,7 +1249,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
       </button>
       <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-        <div id="calMonthYearLabel" style="font-family:'Poppins', sans-serif; font-weight:700; font-size:14.5px;"></div>
+        <div id="calMonthYearLabel" style="font-family:'Poppins', sans-serif; font-weight:700; font-size:15px;"></div>
         <button class="cal-today-link" id="calTodayBtn">Jump to Today</button>
       </div>
       <button class="date-nav-arrow" id="calNextMonth" aria-label="Next month">
@@ -1558,7 +1558,7 @@
     if (action) {
       const btn = document.createElement('button');
       btn.textContent = action.label;
-      btn.style.cssText = 'background:none; border:none; color:#fff; font-weight:800; text-decoration:underline; cursor:pointer; font-size:12.5px; flex-shrink:0; padding:0;';
+      btn.style.cssText = 'background:none; border:none; color:#fff; font-weight:700; text-decoration:underline; cursor:pointer; font-size:13px; flex-shrink:0; padding:0;';
       btn.addEventListener('click', () => {
         action.onClick();
         dismiss();
@@ -1939,7 +1939,7 @@
       const selDate = state.historySelectedDate;
       const sdSessions = ((state.selectedDayCampus && state.selectedDayCampus.sessions) || []).filter((s) => !state.pendingDeleteIds.has(s.id));
       const sessionsBlock = sdSessions.length > 0
-        ? `<div class="section-title" style="font-size:13px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
+        ? `<div class="section-title" style="font-size:14px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
            <div class="class-list" id="historySessionsList">${sessionsCardsHtml(sdSessions)}</div>`
         : '';
       el.innerHTML = dayCardHtml(state.historySelectedDate, state.selectedDayClasses, state.selectedDayCampus)
@@ -2040,7 +2040,7 @@
         </div>`;
       const htSessions = ((campus && campus.sessions) || []).filter((s) => !state.pendingDeleteIds.has(s.id));
       const htSessionsBlock = htSessions.length > 0
-        ? `<div class="section-title" style="font-size:13px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
+        ? `<div class="section-title" style="font-size:14px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
            <div class="class-list" id="historySessionsList">${sessionsCardsHtml(htSessions)}</div>`
         : '';
       el.innerHTML = dayCardHtml(todayD, items, campus, false)
@@ -2275,7 +2275,7 @@
             const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
             const checkInAt = state.adminCampus[tid].checkInAt;
             const since = checkInAt ? formatTimeStr(toHHMM(checkInAt)) : '';
-            return `<div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; font-weight:700;">
+            return `<div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700;">
               <span>${escapeHtml(name)}</span>
               <span style="color:var(--muted); font-weight:600;">${since ? 'Since ' + since : ''}</span>
             </div>`;
@@ -3339,21 +3339,21 @@
       return `
         <div class="class-card" style="padding:12px 14px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-            <div class="class-title" style="font-size:12.5px;">Session ${i + 1}${s.out == null ? ' · In progress' : ''}</div>
+            <div class="class-title" style="font-size:13px;">Session ${i + 1}${s.out == null ? ' · In progress' : ''}</div>
             <button class="del-btn" data-del-session="${s.id}" aria-label="Delete session">${svgTrash()}</button>
           </div>
           <div style="display:flex; gap:8px;">
             <div style="flex:1;">
-              <label style="font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase;">Check-in</label>
+              <label style="font-size:13px; font-weight:600; color:var(--muted-2);">Check-in</label>
               <input class="text-input" type="time" data-session-field="in" data-session-id="${s.id}" value="${inVal}" style="margin-top:4px; padding:9px 10px;">
             </div>
             <div style="flex:1;">
-              <label style="font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase;">Check-out${isOvernight ? ' <span style="color:var(--gold);">(next day)</span>' : ''}</label>
+              <label style="font-size:13px; font-weight:600; color:var(--muted-2);">Check-out${isOvernight ? ' <span style="color:var(--gold);">(next day)</span>' : ''}</label>
               <input class="text-input" type="time" data-session-field="out" data-session-id="${s.id}" value="${outVal}" style="margin-top:4px; padding:9px 10px;">
             </div>
           </div>
           ${s.out != null ? `
-          <label style="display:flex; align-items:center; gap:7px; margin-top:10px; font-size:11.5px; font-weight:600; color:var(--muted-2); cursor:pointer;">
+          <label style="display:flex; align-items:center; gap:7px; margin-top:10px; font-size:12px; font-weight:600; color:var(--muted-2); cursor:pointer;">
             <input type="checkbox" data-session-field="overnight" data-session-id="${s.id}" ${isOvernight ? 'checked' : ''} style="width:16px; height:16px; accent-color: var(--gold); flex-shrink:0;">
             Checked out the next day
           </label>` : ''}
