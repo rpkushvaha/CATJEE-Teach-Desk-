@@ -457,7 +457,7 @@
   .tl-tag { font-size: 11px; font-weight: 500; color: var(--muted-2); background: var(--neutral-soft); padding: 1px 6px; border-radius: 5px; }
   .tl-tags { gap: 4px; }
   .tl-card { position: relative; }
-  .tl-bottom { display: flex; flex-direction: column; gap: 5px; padding-right: 60px; min-height: 26px; }
+  .tl-bottom { display: flex; flex-direction: column; gap: 5px; }
   .tl-actions { display: flex; gap: 0; position: absolute; right: 6px; bottom: 6px; }
   .tl-actions .del-btn { padding: 4px; width: 28px; height: 28px; background: none; }
   .tl-actions .del-btn svg { width: 15px; height: 15px; }
@@ -1659,7 +1659,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 1.6 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 1.7 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2384,7 +2384,7 @@
     if (c.material) tags.push('Material');
     if (c.test) tags.push('Test');
     if (c.homework) tags.push('Homework');
-    return `<div class="tl-item">${tlTimeHtml(it.min)}
+    return `<div class="tl-item hv-rec" data-today-rec="${escapeHtml(c.id)}" role="button" tabindex="0">${tlTimeHtml(it.min)}
       <div class="tl-card ${it.status}">
         <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div>${pill}</div>
         ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
@@ -2392,10 +2392,6 @@
         <div class="tl-bottom">
           ${range ? `<div class="tl-meta">${range}</div>` : ''}
           ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
-        </div>
-        <div class="tl-actions">
-          <button class="del-btn" data-edit="${c.id}" aria-label="Edit class">${svgEdit()}</button>
-          <button class="del-btn" data-del="${c.id}" aria-label="Delete class">${svgTrash()}</button>
         </div>
       </div></div>`;
   }
@@ -2447,19 +2443,22 @@
     el.querySelectorAll('[data-log-slot]').forEach((btn) => {
       btn.addEventListener('click', () => openAddForSlot(btn.getAttribute('data-log-slot')));
     });
+    el.querySelectorAll('[data-today-act], [data-today-rec]').forEach((row) => {
+      row.addEventListener('click', () => {
+        const id = row.getAttribute('data-today-act') || row.getAttribute('data-today-rec');
+        const rec = (state.classesToday || []).find((x) => x.id === id);
+        if (rec) openHvSheet(id, rec, 'today');
+      });
+    });
     el.querySelectorAll('[data-empty-add]').forEach((btn) => {
       btn.addEventListener('click', () => document.getElementById('addClassLink').click());
     });
   }
   function todayActivityRowHtml(a) {
     const isLeave = a.activityType === 'Leave / Holiday';
-    return `<div class="tl-item"><div class="tl-time"></div>
+    return `<div class="tl-item hv-rec" data-today-act="${escapeHtml(a.id)}" role="button" tabindex="0"><div class="tl-time"></div>
       <div class="hv-act-card${isLeave ? ' leave' : ''}">
-        <div class="hv-act-top"><span class="hv-act-title">${escapeHtml(activityLabel(a.activityType))}</span>
-          <span class="act-actions">
-            <button class="del-btn" data-edit-activity="${a.id}" aria-label="Edit activity">${svgEdit()}</button>
-            <button class="del-btn" data-del-btn="${a.id}" aria-label="Delete activity">${svgTrash()}</button>
-          </span></div>
+        <div class="hv-act-top"><span class="hv-act-title">${escapeHtml(activityLabel(a.activityType))}</span></div>
         ${a.note ? `<div class="hv-act-note">${escapeHtml(a.note)}</div>` : ''}
       </div></div>`;
   }
@@ -2928,9 +2927,10 @@
       : '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
     return `<div class="hv-d-check ${on ? 'yes' : 'no'}">${icon}<div>${on ? yesText : noText}${on && note ? `<small>${escapeHtml(note)}</small>` : ''}</div></div>`;
   }
-  function openHvSheet(id) {
-    const c = hvRecordIndex[id];
+  function openHvSheet(id, rec, from) {
+    const c = rec || hvRecordIndex[id];
     if (!c) return;
+    const fromToday = from === 'today';
     hvSheetId = id;
     const body = document.getElementById('hvSheetBody');
     const dObj = dateObj(c.date || todayStr());
@@ -2961,8 +2961,8 @@
     }
     document.getElementById('hvEdit').addEventListener('click', () => {
       closeHvSheet();
-      const list = Object.values(hvRecordIndex);
-      const tab = state.historySelectedDate ? 'history' : 'history-today';
+      const list = fromToday ? (state.classesToday || []) : Object.values(hvRecordIndex);
+      const tab = fromToday ? null : (state.historySelectedDate ? 'history' : 'history-today');
       if (c.entryType === 'activity') startEditActivity(c.id, list, tab); else startEditClass(c.id, list, tab);
     });
     document.getElementById('hvDelete').addEventListener('click', async () => {
@@ -2975,11 +2975,12 @@
         'This entry will be permanently removed.',
         'Delete this entry?',
         isAct ? 'Activity deleted' : 'Class deleted',
-        () => renderHistory(),
+        () => (fromToday ? renderTodayList() : renderHistory()),
         () => {
           state.selectedDayClasses = (state.selectedDayClasses || []).filter((x) => x.id !== c.id);
           Object.keys(state.hvFetched || {}).forEach((k) => { state.hvFetched[k].classes = state.hvFetched[k].classes.filter((x) => x.id !== c.id); });
           if (state.tab === 'history') renderHistory();
+          if (state.tab === 'today') renderTodayList();
         }
       );
     });
