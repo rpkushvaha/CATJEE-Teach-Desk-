@@ -439,8 +439,8 @@
   .tl-card.live { border-left-color: var(--gold); }
   .tl-card.upcoming { border-left-color: var(--line); }
   .tl-card.missed { border-left-color: #D97706; }
-  .tl-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .tl-batch { font-size: 14.5px; font-weight: 700; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tl-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .tl-batch { font-size: 14.5px; font-weight: 700; color: var(--ink); min-width: 0; flex: 1; overflow-wrap: anywhere; line-height: 1.3; }
   .tl-pill { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; flex-shrink: 0; }
   .tl-pill.done { background: rgba(22,163,74,.12); color: #15803D; }
   .tl-pill.live { background: var(--gold-soft); color: var(--gold); }
@@ -451,9 +451,14 @@
   .tl-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .tl-meta { font-size: 12px; color: var(--muted); }
   .tl-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-  .tl-tag { font-size: 11px; font-weight: 600; color: var(--muted-2); background: var(--neutral-soft); padding: 2px 7px; border-radius: 6px; }
-  .tl-actions { display: flex; gap: 2px; margin-left: auto; }
-  .tl-actions .del-btn { padding: 6px; }
+  .tl-tag { font-size: 11px; font-weight: 500; color: var(--muted-2); background: var(--neutral-soft); padding: 1px 6px; border-radius: 5px; }
+  .tl-tags { gap: 4px; }
+  .tl-card { position: relative; }
+  .tl-bottom { display: flex; flex-direction: column; gap: 5px; padding-right: 60px; min-height: 26px; }
+  .tl-actions { display: flex; gap: 0; position: absolute; right: 6px; bottom: 6px; }
+  .tl-actions .del-btn { padding: 4px; width: 28px; height: 28px; background: none; }
+  .tl-actions .del-btn svg { width: 15px; height: 15px; }
+  .tl-filled { color: #15803D; font-weight: 600; }
   .tl-log { align-self: flex-start; background: none; border: 1px solid var(--line); color: var(--ink); font-weight: 600; font-size: 12.5px;
     padding: 6px 12px; border-radius: 8px; cursor: pointer; }
   .tl-card.live .tl-log { background: var(--gold); border-color: var(--gold); color: #fff; }
@@ -508,7 +513,10 @@
   #classFields > .field:not(:last-child):not(.nested-box), #activityFields > .field:not(:last-child) { padding-bottom: 0; border-bottom: none; }
   #view-add .field label { font-size: 13px; font-weight: 600; color: var(--muted-2); }
   #recentChips .chip { padding: 9px 14px; }
-  .ab-toggle { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: 1px dashed var(--line); border-radius: 10px;
+  #view-add .batch-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  #view-add .batch-grid .chip { width: auto; padding: 9px 14px; white-space: nowrap; }
+  #view-add textarea { resize: none !important; }
+  .ab-toggle { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: 1px solid var(--line); border-radius: 10px;
     padding: 9px 12px; cursor: pointer; color: var(--muted-2); font-size: 13px; font-weight: 600; text-align: left; margin-top: -6px; }
   .ab-cur { flex: 1; color: var(--muted); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ab-chev { transition: transform .2s ease; flex-shrink: 0; }
@@ -937,7 +945,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
         </button>
         <div style="display:flex; flex-direction:column;">
-          <div class="form-title" id="addFormTitle">Add New Class</div>
+          <div class="form-title" id="addFormTitle">Add Class</div>
           <div class="admin-sub" id="addForDateLabel" style="display:none;"></div>
         </div>
       </div>
@@ -950,11 +958,11 @@
       <div id="classFields">
         <div class="sched-hint" id="schedHint"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span id="schedHintText"></span></div>
         <div class="field" id="recentField">
-          <label>Recent classes</label>
+          <label>Recent Classes</label>
           <div class="chips" id="recentChips"></div>
         </div>
         <button type="button" class="ab-toggle" id="allBatchesToggle" aria-expanded="false">
-          <span>All batches</span><span class="ab-cur" id="allBatchesCur"></span><svg class="ic ab-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          <span>All Batches</span><span class="ab-cur" id="allBatchesCur"></span><svg class="ic ab-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div id="allBatchesPanel" class="ab-panel">
         <div class="field">
@@ -1035,7 +1043,7 @@
             <div class="toggle-row checklist-item" data-key="homework">
               <div class="checklist-toggle-trigger">
                 <span class="checklist-icon"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5z"/><polyline points="15 3 15 9 21 9"/></svg></span>
-                <span class="toggle-label">Homework</span>
+                <span class="toggle-label">Homework Given</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
               <input type="text" class="checklist-note-input" id="homeworkNoteInput" placeholder="What homework? (optional)">
@@ -1577,6 +1585,8 @@
   };
   const DEFAULT_BATCHES = DEFAULT_BATCHES_BY_WING['Pre-Foundation'];
   const ACTIVITY_TYPES = ['Other Activity', 'Leave / Holiday'];
+  // Saved value stays 'Other Activity' (older records use it); it is shown as 'Other Work'.
+  function activityLabel(t) { return t === 'Other Activity' ? 'Other Work' : (t || 'Activity'); }
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const REMINDER_PREF_KEY = 'catjee_reminders_enabled';
 
@@ -2062,7 +2072,7 @@
     const rows = items.map((item) => `
         <div class="activity-row">
           <div class="activity-row-text">
-            <span class="activity-row-title">${escapeHtml(item.activityType || 'Activity')}</span>
+            <span class="activity-row-title">${escapeHtml(activityLabel(item.activityType))}</span>
             ${item.note ? `<span class="activity-row-note">${escapeHtml(item.note)}</span>` : ''}
           </div>
           ${readonly ? '' : `<div class="activity-row-actions">
@@ -2256,15 +2266,14 @@
       <div class="tl-card ${it.status}">
         <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div>${pill}</div>
         ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
-        <div class="tl-foot">
-          <div style="display:flex; flex-direction:column; gap:5px; min-width:0;">
-            ${range ? `<div class="tl-meta">${range}</div>` : ''}
-            ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
-          </div>
-          <div class="tl-actions">
-            <button class="del-btn" data-edit="${c.id}" aria-label="Edit class">${svgEdit()}</button>
-            <button class="del-btn" data-del="${c.id}" aria-label="Delete class">${svgTrash()}</button>
-          </div>
+        ${it.status === 'upcoming' ? '<div class="tl-meta"><span class="tl-filled">✓ Details filled</span></div>' : ''}
+        <div class="tl-bottom">
+          ${range ? `<div class="tl-meta">${range}</div>` : ''}
+          ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="tl-actions">
+          <button class="del-btn" data-edit="${c.id}" aria-label="Edit class">${svgEdit()}</button>
+          <button class="del-btn" data-del="${c.id}" aria-label="Delete class">${svgTrash()}</button>
         </div>
       </div></div>`;
   }
@@ -2294,7 +2303,8 @@
     renderHello();
     if (!state.todayClassesLoaded) return;
     const { items, classes, activities } = buildTodayTimeline();
-    renderTodaySummary(classes);
+    const startedIds = new Set(items.filter((it) => it.kind === 'class' && it.status !== 'upcoming').map((it) => it.cls.id));
+    renderTodaySummary(classes.filter((c) => startedIds.has(c.id)));
     const meta = document.getElementById('todayClassesMeta');
     const doneCount = items.filter((it) => it.status === 'done').length;
     if (meta) meta.textContent = items.length ? `${doneCount} of ${items.length} done` : '';
@@ -2378,7 +2388,7 @@
           <div class="day-date">${formatDayLabel(date)}</div>
           <div class="day-time num">${seconds > 0 ? formatShort(seconds) : '—'}</div>
         </div>
-        <div class="day-count">${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Activity` : ''}${sessions}</div>
+        <div class="day-count">${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Work` : ''}${sessions}</div>
         ${onLeave ? `<div class="badges"><span class="badge leave"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.9" y1="4.9" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.1" y2="19.1"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.9" y1="19.1" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.1" y2="4.9"/></svg>On Leave / Holiday</span></div>` : ''}
         ${n > 0 ? `<div class="badges">
           <span class="badge on">Worksheet ${ws}/${n}</span>
@@ -2427,7 +2437,7 @@
           <div class="day-date">${label}${isCurrent ? ' <span class="current-period-tag">Current</span>' : ''}</div>
           <div class="day-time num">${seconds > 0 ? formatShort(seconds) : '—'}</div>
         </div>
-        <div class="day-count">${daysWithActivity} day${daysWithActivity === 1 ? '' : 's'} on campus &middot; ${classCount} class${classCount === 1 ? '' : 'es'}${activityCount ? ` &middot; Other Activity` : ''}</div>
+        <div class="day-count">${daysWithActivity} day${daysWithActivity === 1 ? '' : 's'} on campus &middot; ${classCount} class${classCount === 1 ? '' : 'es'}${activityCount ? ` &middot; Other Work` : ''}</div>
         ${batchBreakdownBlock}
         ${weekMonday ? `<div class="action-btn-row"><button class="action-btn" data-week-report="${weekMonday}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>Weekly PDF Report</button></div>` : ''}
       </div>`;
@@ -2651,7 +2661,7 @@
       document.getElementById('addFormTitle').textContent = state.entryMode === 'activity' ? 'Edit Activity' : 'Edit Class';
       document.getElementById('saveClassBtn').textContent = state.entryMode === 'activity' ? 'Update Activity' : 'Update Class';
     } else {
-      document.getElementById('addFormTitle').textContent = state.entryMode === 'activity' ? 'Log an Activity' : 'Add New Class';
+      document.getElementById('addFormTitle').textContent = state.entryMode === 'activity' ? 'Add Activity' : 'Add Class';
       document.getElementById('saveClassBtn').textContent = state.entryMode === 'activity' ? 'Save Activity' : 'Save Class';
     }
     const dateLabelEl = document.getElementById('addForDateLabel');
@@ -2674,6 +2684,7 @@
         state.formWing = newWing;
         state.form.batch = null;
         document.getElementById('inlineManageBatches').style.display = 'none';
+        document.getElementById('toggleManageBatchesBtn').querySelector('span').textContent = 'Manage';
         renderForm();
       });
     });
@@ -2695,7 +2706,7 @@
     const actChipsEl = document.getElementById('activityChips');
     actChipsEl.innerHTML = ACTIVITY_TYPES.map((t) => {
       const active = t === state.activityForm.activityType;
-      return `<button class="chip${active ? ' active' : ''}" data-activity-type="${escapeHtml(t)}">${escapeHtml(t)}</button>`;
+      return `<button class="chip${active ? ' active' : ''}" data-activity-type="${escapeHtml(t)}">${escapeHtml(activityLabel(t))}</button>`;
     }).join('');
     actChipsEl.querySelectorAll('[data-activity-type]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -2911,7 +2922,7 @@
       if (campus && campus.checkedIn && campus.checkInAt) seconds += (Date.now() - campus.checkInAt) / 1000;
       const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
       const subject = items[0] ? items[0].subject : '';
-      const countLine = `${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Activity` : ''}`;
+      const countLine = `${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Work` : ''}`;
       const expanded = state.adminExpandedTeacher === tid;
       const hasDetail = all.length > 0;
       const stuckCheckedIn = !!(campus && campus.checkedIn && campus.checkInAt && (Date.now() - campus.checkInAt) >= 24 * 60 * 60 * 1000);
@@ -4540,7 +4551,7 @@
     });
     sorted.forEach((c) => {
       if (c.entryType === 'activity') {
-        rows.push([c.date, 'Activity', '', c.activityType || '', '', '', '', '', '', '', c.note || '']);
+        rows.push([c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', c.note || '']);
       } else {
         rows.push([
           c.date, 'Class', c.batch || '', c.topic || '',
@@ -4648,7 +4659,7 @@
     sorted.forEach((c) => {
       const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
       if (c.entryType === 'activity') {
-        rows.push([name, c.date, 'Activity', '', c.activityType || '', '', '', '', '', '', '', c.note || '']);
+        rows.push([name, c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', c.note || '']);
       } else {
         rows.push([
           name, c.date, 'Class', c.batch || '', c.topic || '',
@@ -4817,7 +4828,7 @@
     sorted.forEach((c) => {
       const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
       if (c.entryType === 'activity') {
-        rows.push([name, c.date, 'Activity', '', c.activityType || '', '', '', '', '', '', '', c.note || '']);
+        rows.push([name, c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', c.note || '']);
       } else {
         rows.push([
           name, c.date, 'Class', c.batch || '', c.topic || '',
@@ -4925,7 +4936,7 @@
     setSchedHint('');
     if (state.addTargetDate && state.addTargetDate !== todayStr()) return;
     const match = findCurrentScheduleSlot();
-    if (!match) return;
+    if (!match) { prefillClassTiming(); syncDurChips(); return; }
     fillClassFromSlot(match.slot, match.startMin);
   }
 
