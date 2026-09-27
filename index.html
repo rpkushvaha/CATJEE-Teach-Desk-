@@ -541,6 +541,81 @@
   #view-add .checklist-note-input { margin: 8px 0 2px 28px; width: calc(100% - 28px); font-size: 13px; }
   #view-add .save-btn { margin-top: 2px; }
   #view-add .save-btn:disabled { opacity: .75; }
+
+  /* ---------- History redesign ---------- */
+  #view-history { gap: 12px; }
+  .hv-head { display: flex; align-items: center; justify-content: space-between; }
+  .hv-title { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 600; color: var(--ink); }
+  .hv-icons { display: flex; gap: 6px; }
+  .hv-icon { position: relative; width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted-2);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .hv-icon[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+  .hv-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 99px; background: var(--gold); }
+  .hv-dot[hidden] { display: none; }
+  .hv-search[hidden], .hv-filters[hidden], .hv-custom[hidden] { display: none; }
+  .hv-search input { font-size: 15px; }
+  .hv-filters { display: flex; flex-direction: column; gap: 6px; background: var(--neutral-soft); border-radius: 12px; padding: 10px 12px; }
+  .hv-flbl { font-size: 12.5px; font-weight: 600; color: var(--muted-2); }
+  .hv-filters select { font-size: 14px; padding: 9px 10px; }
+  .hv-filters .chip { padding: 6px 12px; font-size: 12.5px; }
+  .hv-period { display: flex; flex-direction: column; gap: 8px; }
+  .hv-range .chip { padding: 7px 14px; font-size: 13px; }
+  .hv-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .hv-arrow { width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .hv-arrow:disabled { opacity: .35; cursor: default; }
+  .hv-label { flex: 1; text-align: center; font-size: 14.5px; font-weight: 600; color: var(--ink); }
+  .hv-custom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hv-custom label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--muted-2); }
+  .hv-custom input { font-size: 14px; padding: 9px 10px; }
+  .hv-sum { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 4px; }
+  .hv-sum .sum-tile:nth-child(3n+1) { border-left: none; }
+  .hv-sum .sum-num { font-size: 17px; }
+  .hv-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .hv-actions .btn-secondary { padding: 10px 14px; font-size: 13.5px; }
+  #historyReportMsg:empty { display: none; }
+  .hv-list { display: flex; flex-direction: column; gap: 8px; }
+  .hv-note { font-size: 12.5px; color: var(--muted); text-align: center; padding: 4px 0; }
+  .hv-day { display: flex; align-items: baseline; gap: 6px; width: 100%; background: none; border: none; padding: 10px 0 2px; cursor: pointer; text-align: left; color: var(--ink); }
+  .hv-day-date { font-size: 13.5px; font-weight: 700; }
+  .hv-day-meta { flex: 1; font-size: 12.5px; color: var(--muted); font-weight: 500; line-height: 1.35; }
+  .hv-day .ic { color: var(--muted); flex-shrink: 0; }
+  .hv-rec { cursor: pointer; }
+  .hv-rec .tl-card { border-left-width: 1px; }
+  .hv-rec:active .tl-card { background: var(--neutral-soft); }
+  .hv-act-card { flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .hv-act-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .hv-act-note { font-size: 13px; color: var(--muted-2); line-height: 1.45; margin-top: 2px; white-space: pre-line; overflow-wrap: anywhere; }
+  .hv-back { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; background: none; border: none; color: var(--gold); font-weight: 600; font-size: 13.5px; padding: 4px 0; cursor: pointer; }
+  .hv-daybtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hv-daybtns .btn-secondary { padding: 10px 6px; font-size: 13px; }
+  .hv-sub { font-size: 13px; font-weight: 600; color: var(--muted-2); margin-top: 6px; gap: 8px; }
+  .hv-sub .add-entry-btn { padding: 5px 11px; font-size: 12.5px; background: none; border: 1px solid var(--line); color: var(--gold); white-space: nowrap; box-shadow: none; }
+
+  .hv-sheet-root { position: fixed; inset: 0; z-index: 90; pointer-events: none; visibility: hidden; transition: visibility 0s linear .28s; }
+  .hv-sheet-root.open { pointer-events: auto; visibility: visible; transition: none; }
+  .hv-sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.45); opacity: 0; transition: opacity .25s ease; }
+  .hv-sheet-root.open .hv-sheet-backdrop { opacity: 1; }
+  .hv-sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 86vh; overflow-y: auto; background: var(--paper); border-radius: 18px 18px 0 0;
+    padding: 10px 18px calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateY(100%); transition: transform .28s cubic-bezier(.22,.8,.26,1); }
+  .hv-sheet-root.open .hv-sheet { transform: translateY(0); }
+  .hv-grab { width: 38px; height: 4px; border-radius: 99px; background: var(--line); margin: 0 auto 10px; }
+  .hv-sheet-x { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 99px; border: none; background: var(--neutral-soft); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .hv-d-title { font-size: 18px; font-weight: 700; color: var(--ink); padding-right: 40px; }
+  .hv-d-wing { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .hv-d-topic { font-size: 15px; color: var(--ink); margin: 10px 0 6px; line-height: 1.45; overflow-wrap: anywhere; }
+  .hv-d-rows { border-top: 1px solid var(--line); margin-top: 6px; }
+  .hv-d-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .hv-d-row span:first-child { color: var(--muted); }
+  .hv-d-row span:last-child { color: var(--ink); font-weight: 500; text-align: right; }
+  .hv-d-check { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; font-size: 14px; color: var(--ink); }
+  .hv-d-check.no { color: var(--muted); }
+  .hv-d-check .ic { flex-shrink: 0; margin-top: 1px; }
+  .hv-d-check.yes .ic { color: #16A34A; }
+  .hv-d-check small { display: block; color: var(--muted-2); font-size: 12.5px; }
+  .hv-d-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .hv-d-btns .btn-secondary { padding: 11px 0; }
+  .hv-d-btns .hv-del { color: var(--gold); }
+  @media (prefers-reduced-motion: reduce) { .hv-sheet, .hv-sheet-backdrop { transition: none; } }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
   .drawer-root.open { pointer-events: auto; visibility: visible; transition: none; }
@@ -1069,43 +1144,63 @@
 
     <!-- HISTORY -->
     <div class="tab-view" id="view-history">
-      <div>
-        <div class="section-title" style="margin-bottom:2px;">History</div>
-        <div class="history-sub">Past campus &amp; class records</div>
-      </div>
-      <div class="chips" id="historyRangeChips">
-        <button class="chip active" data-range="day">Day</button>
-        <button class="chip" data-range="week">Week</button>
-        <button class="chip" data-range="month">Month</button>
-      </div>
-      <div class="field" id="historyDateJump">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <label style="margin:0; color: var(--ink);">Jump to a date</label>
-          <button id="historyDateCalIcon" aria-label="Open calendar" style="background: var(--gold-soft); border:1px solid var(--gold); width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--gold); cursor:pointer; padding:0;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
-          </button>
+      <div class="hv-head">
+        <div class="hv-title">History</div>
+        <div class="hv-icons">
+          <button class="hv-icon" id="hvSearchBtn" aria-label="Search" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+          <button class="hv-icon" id="hvFilterBtn" aria-label="Filters" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg><span class="hv-dot" id="hvFilterDot" hidden></span></button>
         </div>
-        <div class="date-nav">
-          <button class="date-nav-arrow" id="historyDatePrev" aria-label="Previous day">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
-          </button>
-          <div class="date-nav-pill" style="cursor: default;">
-            <span id="historyDateLabelText">Today</span>
-          </div>
-          <button class="date-nav-arrow" id="historyDateNext" aria-label="Next day">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
-          </button>
-        </div>
-        <button class="btn-secondary" id="historyDateClearBtn" style="display:none; border-color: var(--line);">Show Recent</button>
       </div>
-      <div class="class-list" id="historyList">
+      <div class="hv-search" id="hvSearchRow" hidden>
+        <input class="text-input" id="hvSearch" type="search" placeholder="Search batch, topic or date" autocomplete="off">
+      </div>
+      <div class="hv-filters" id="hvFilterRow" hidden>
+        <div class="hv-flbl">Class / Batch</div>
+        <select class="text-input" id="hvBatch"></select>
+        <div class="hv-flbl">Show</div>
+        <div class="chips" id="hvKind">
+          <button type="button" class="chip active" data-kind="all">All</button>
+          <button type="button" class="chip" data-kind="classes">Classes</button>
+          <button type="button" class="chip" data-kind="tests">Tests</button>
+          <button type="button" class="chip" data-kind="worksheets">Worksheets</button>
+          <button type="button" class="chip" data-kind="other">Other Work</button>
+        </div>
+      </div>
+      <div id="hvPeriodBlock" class="hv-period">
+        <div class="chips hv-range" id="hvRange">
+          <button type="button" class="chip" data-hrange="day">Day</button>
+          <button type="button" class="chip active" data-hrange="week">Week</button>
+          <button type="button" class="chip" data-hrange="month">Month</button>
+          <button type="button" class="chip" data-hrange="custom">Custom</button>
+        </div>
+        <div class="hv-nav" id="hvNav">
+          <button type="button" class="hv-arrow" id="hvPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <div class="hv-label" id="hvLabel"></div>
+          <button type="button" class="hv-arrow" id="hvNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="hv-custom" id="hvCustom" hidden>
+          <label>From<input class="text-input" type="date" id="hvFrom"></label>
+          <label>To<input class="text-input" type="date" id="hvTo"></label>
+        </div>
+      </div>
+      <div class="sum-grid hv-sum" id="hvSum"></div>
+      <div class="hv-actions" id="hvActions">
+        <button type="button" class="btn-secondary" id="hvReportBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--gold);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>Generate Report</button>
+        <button type="button" class="btn-secondary" id="downloadCsvBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>CSV</button>
+      </div>
+      <div class="admin-sub" id="historyReportMsg" style="text-align:center;"></div>
+      <div id="historyList" class="hv-list">
         <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
       </div>
-      <button class="btn-secondary" id="downloadCsvBtn" style="border-color: var(--line); margin-top: 4px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M8 13h8M8 17h8M8 9h2"></path></svg>
-        Download CSV (Recent Records)
-      </button>
-      <div class="admin-sub" id="historyReportMsg" style="text-align:center;"></div>
+    </div>
+
+    <div class="hv-sheet-root" id="hvSheet" aria-hidden="true">
+      <div class="hv-sheet-backdrop" id="hvSheetBackdrop"></div>
+      <div class="hv-sheet" role="dialog" aria-modal="true" aria-label="Class details">
+        <div class="hv-grab"></div>
+        <button type="button" class="hv-sheet-x" id="hvSheetClose" aria-label="Close"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <div id="hvSheetBody"></div>
+      </div>
     </div>
 
     <!-- SCHEDULE -->
@@ -2443,209 +2538,466 @@
       </div>`;
   }
 
-  function renderHistory() {
-    const el = document.getElementById('historyList');
-
-    document.getElementById('historyDateJump').style.display = state.historyRange === 'day' ? 'flex' : 'none';
-
-    if (state.historyRange === 'day' && state.historySelectedDate) {
-      const addRow = `
-        <div class="action-btn-row" style="padding: 2px 2px 4px 2px;">
-          <button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button>
-          <button class="add-entry-btn" id="historyAddClassBtn">+ Class</button>
-        </div>`;
-      const selDate = state.historySelectedDate;
-      const sdSessions = ((state.selectedDayCampus && state.selectedDayCampus.sessions) || []).filter((s) => !state.pendingDeleteIds.has(s.id));
-      const sessionsBlock = sdSessions.length > 0
-        ? `<div class="section-title" style="font-size:14px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
-           <div class="class-list" id="historySessionsList">${sessionsCardsHtml(sdSessions)}</div>`
-        : '';
-      el.innerHTML = dayCardHtml(state.historySelectedDate, state.selectedDayClasses, state.selectedDayCampus)
-        + sessionsBlock
-        + addRow
-        + entryListHtml(state.selectedDayClasses);
-      const historySessionsListEl = document.getElementById('historySessionsList');
-      if (historySessionsListEl) {
-        wireSessionsEvents(historySessionsListEl, selDate, sdSessions, () => showSelectedDay(selDate));
-      }
-      el.querySelectorAll('[data-report-date]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'));
-        });
-      });
-      el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'));
-        });
-      });
-      wireEntryListEvents(el, () => state.selectedDayClasses, 'history');
-      const addClassBtn = document.getElementById('historyAddClassBtn');
-      const addActivityBtn = document.getElementById('historyAddActivityBtn');
-      if (addClassBtn) {
-        addClassBtn.addEventListener('click', () => {
-          state.editingId = null;
-          state.editingSourceTab = 'history';
-          state.addTargetDate = state.historySelectedDate;
-          state.entryMode = 'class';
-          resetClassForm();
-          renderForm();
-          switchTab('add');
-        });
-      }
-      if (addActivityBtn) {
-        addActivityBtn.addEventListener('click', () => {
-          state.editingId = null;
-          state.editingSourceTab = 'history';
-          state.addTargetDate = state.historySelectedDate;
-          state.entryMode = 'activity';
-          resetActivityForm();
-          renderForm();
-          switchTab('add');
-        });
-      }
-      return;
+  // ---------- History: period, summary, filters, search, timeline ----------
+  function hvState() {
+    if (!state.hv) state.hv = { range: 'week', anchor: todayStr(), from: '', to: '', batch: 'all', kind: 'all', q: '', searchOpen: false, filterOpen: false };
+    return state.hv;
+  }
+  function dateObj(ds) { const [y, m, d] = ds.split('-').map(Number); return new Date(y, m - 1, d); }
+  function dateKey(dt) { return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`; }
+  function datesBetween(a, b) {
+    const out = [];
+    let d = dateObj(a);
+    const end = dateObj(b);
+    while (d <= end && out.length < 400) { out.push(dateKey(d)); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1); }
+    return out;
+  }
+  function hvBounds() {
+    const h = hvState();
+    const t = todayStr();
+    if (h.range === 'day') return { start: h.anchor, end: h.anchor };
+    if (h.range === 'week') { const mon = mondayOf(h.anchor); return { start: mon, end: shiftDateStr(mon, 6) }; }
+    if (h.range === 'month') {
+      const d = dateObj(h.anchor);
+      return { start: dateKey(new Date(d.getFullYear(), d.getMonth(), 1)), end: dateKey(new Date(d.getFullYear(), d.getMonth() + 1, 0)) };
     }
+    let from = h.from || shiftDateStr(t, -6);
+    let to = h.to || t;
+    if (from > to) { const x = from; from = to; to = x; }
+    return { start: from, end: to };
+  }
+  function hvLabelText() {
+    const h = hvState();
+    const b = hvBounds();
+    const fmt = (ds, opt) => dateObj(ds).toLocaleDateString('en-GB', opt);
+    if (h.range === 'day') {
+      if (b.start === todayStr()) return 'Today';
+      if (b.start === shiftDateStr(todayStr(), -1)) return 'Yesterday';
+      return fmt(b.start, { weekday: 'short', day: 'numeric', month: 'long' });
+    }
+    if (h.range === 'week') return `${fmt(b.start, { day: 'numeric', month: 'short' })} – ${fmt(b.end, { day: 'numeric', month: 'short' })}`;
+    if (h.range === 'month') return fmt(b.start, { month: 'long', year: 'numeric' });
+    return `${fmt(b.start, { day: 'numeric', month: 'short' })} – ${fmt(b.end, { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  }
+  function dayHeading(ds) {
+    const d = dateObj(ds);
+    return `${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'long' })}`;
+  }
 
-    const byDate = {};
-    state.historyClasses.forEach((c) => {
-      if (!byDate[c.date]) byDate[c.date] = [];
-      byDate[c.date].push(c);
+  // Records for a date: live data for today, loaded history when it covers the date, otherwise fetched on demand.
+  function hvClassesCovered(ds) {
+    if (!state.historyClassesLoaded) return false;
+    const list = state.historyClasses || [];
+    if (list.length < 300) return true;
+    let oldest = null;
+    list.forEach((c) => { if (c.date && (!oldest || c.date < oldest)) oldest = c.date; });
+    return !oldest || ds > oldest;
+  }
+  function hvCampusCovered(ds) {
+    const keys = Object.keys(state.historyCampus || {});
+    if (keys.length < 120) return true;
+    return ds > keys.sort()[0];
+  }
+  function campusSeconds(c) {
+    if (!c) return 0;
+    let s = c.totalSeconds || 0;
+    if (c.checkedIn && c.checkInAt) s += (Date.now() - c.checkInAt) / 1000;
+    return s;
+  }
+  function hvDay(ds) {
+    if (ds === todayStr()) return { classes: state.classesToday || [], campus: state.campusToday, ready: !!state.todayClassesLoaded };
+    const f = state.hvFetched && state.hvFetched[ds];
+    const cc = hvClassesCovered(ds);
+    const pc = hvCampusCovered(ds);
+    if (cc && pc) return { classes: (state.historyClasses || []).filter((c) => c.date === ds), campus: (state.historyCampus || {})[ds] || null, ready: true };
+    if (f) return { classes: cc ? (state.historyClasses || []).filter((c) => c.date === ds) : f.classes, campus: pc ? ((state.historyCampus || {})[ds] || null) : f.campus, ready: true };
+    return { classes: [], campus: null, ready: false };
+  }
+  let hvLoading = false;
+  async function hvLoadMissing(dates) {
+    if (hvLoading || !state.db || !state.teacherId) return;
+    hvLoading = true;
+    if (!state.hvFetched) state.hvFetched = {};
+    try {
+      const res = await Promise.all(dates.map((d) => fetchDayData(d)));
+      dates.forEach((d, i) => { state.hvFetched[d] = res[i]; });
+    } catch (err) { /* keep what we have */ }
+    hvLoading = false;
+    if (state.tab === 'history') renderHistory();
+  }
+  function hvStartedOrPast(c) {
+    if (c.date !== todayStr()) return true;
+    const st = hhmmToMin(c.startTimeStr);
+    if (st == null) return true;
+    const n = new Date();
+    return st <= n.getHours() * 60 + n.getMinutes();
+  }
+  function hvPeriodRecords() {
+    const b = hvBounds();
+    const out = [];
+    datesBetween(b.start, b.end).forEach((d) => { hvDay(d).classes.forEach((c) => { if (!state.pendingDeleteIds.has(c.id)) out.push(c); }); });
+    return out;
+  }
+  function hvMatchesFilters(c) {
+    const h = hvState();
+    const isAct = c.entryType === 'activity';
+    if (h.batch !== 'all' && (isAct || c.batch !== h.batch)) return false;
+    if (h.kind === 'classes' && isAct) return false;
+    if (h.kind === 'tests' && (isAct || !c.test)) return false;
+    if (h.kind === 'worksheets' && (isAct || !c.worksheet)) return false;
+    if (h.kind === 'other' && !isAct) return false;
+    return true;
+  }
+  function hvMatchesSearch(c, q) {
+    if (!q) return true;
+    const d = dateObj(c.date || todayStr());
+    const hay = [
+      c.batch, c.topic, c.note, c.entryType === 'activity' ? activityLabel(c.activityType) : '',
+      c.date, d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+      d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), d.toLocaleDateString('en-GB', { weekday: 'long' }),
+      `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`, `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
+    ].join(' ').toLowerCase();
+    return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.indexOf(w) !== -1);
+  }
+  function hvRecordHtml(c) {
+    if (c.entryType === 'activity') {
+      return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}"><div class="tl-time">—</div>
+        <div class="hv-act-card"><div class="hv-act-title">${escapeHtml(activityLabel(c.activityType))}</div>
+        ${c.note ? `<div class="hv-act-note">${escapeHtml(c.note)}</div>` : ''}</div></div>`;
+    }
+    const st = hhmmToMin(c.startTimeStr);
+    const range = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)}` : '';
+    const tags = [];
+    if (c.worksheet) tags.push('Worksheet');
+    if (c.material) tags.push('Material');
+    if (c.test) tags.push('Test');
+    if (c.homework) tags.push('Homework');
+    return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}">${tlTimeHtml(st)}
+      <div class="tl-card">
+        <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div></div>
+        ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
+        ${range ? `<div class="tl-meta">${range}</div>` : ''}
+        ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
+      </div></div>`;
+  }
+  function hvSortRecords(list) {
+    return list.slice().sort((x, y) => {
+      const xa = x.entryType === 'activity' ? 1 : 0;
+      const ya = y.entryType === 'activity' ? 1 : 0;
+      if (xa !== ya) return xa - ya;
+      return (x.startTimeStr || '99').localeCompare(y.startTimeStr || '99');
     });
-    state.historyByDate = byDate;
-
-    const allDates = Object.keys(byDate).concat(Object.keys(state.historyCampus))
-      .filter((v, i, a) => a.indexOf(v) === i)
-      .sort().reverse();
-
-    if (allDates.length === 0) {
-      el.innerHTML = '<div class="empty"><span class="empty-icon"><svg class="ic" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>No records yet.<span class="empty-hint">Check in or add a class to start your history.</span></div>';
-      return;
-    }
-
-    if (state.historyRange === 'day') {
-      const todayD = todayStr();
-
-      if (!state.historyTodayExpanded) {
-        el.innerHTML = dayCardHtml(todayD, undefined, undefined, true);
-        el.querySelectorAll('[data-report-date]').forEach((btn) => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'));
-          });
-        });
-        el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'));
-          });
-        });
-        const card = el.querySelector('[data-jump-date]');
-        if (card) {
-          card.addEventListener('click', () => {
-            state.historyTodayExpanded = true;
-            renderHistory();
-          });
-        }
-        return;
-      }
-
-      const items = (state.historyByDate[todayD] || []).filter((c) => !state.pendingDeleteIds.has(c.id));
-      const campus = state.historyCampus[todayD];
-      const addRow = `
-        <div class="action-btn-row" style="margin: 10px 0 14px;">
-          <button class="add-entry-btn" id="historyAddClassBtn">+ Class</button>
-          <button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button>
-        </div>`;
-      const htSessions = ((campus && campus.sessions) || []).filter((s) => !state.pendingDeleteIds.has(s.id));
-      const htSessionsBlock = htSessions.length > 0
-        ? `<div class="section-title" style="font-size:14px; margin-top:14px; margin-bottom:8px;">Check-in Sessions</div>
-           <div class="class-list" id="historySessionsList">${sessionsCardsHtml(htSessions)}</div>`
-        : '';
-      el.innerHTML = dayCardHtml(todayD, items, campus, false)
-        + `<div class="day-card-hint" id="historyTodayCollapseHint" style="cursor:pointer; margin: -6px 0 12px;">Tap to collapse</div>`
-        + htSessionsBlock
-        + addRow
-        + entryListHtml(items, false);
-
-      const historySessionsListEl = document.getElementById('historySessionsList');
-      if (historySessionsListEl) {
-        wireSessionsEvents(historySessionsListEl, todayD, htSessions, () => renderHistory());
-      }
-      const summaryCard = el.querySelector('.day-card');
-      if (summaryCard) {
-        summaryCard.addEventListener('click', (e) => {
-          if (e.target.closest('[data-report-date]') || e.target.closest('[data-whatsapp-date]')) return;
-          state.historyTodayExpanded = false;
-          renderHistory();
-        });
-      }
-      document.getElementById('historyTodayCollapseHint').addEventListener('click', () => {
-        state.historyTodayExpanded = false;
-        renderHistory();
-      });
-      el.querySelectorAll('[data-report-date]').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'));
-        });
-      });
-      el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'));
-        });
-      });
-      wireEntryListEvents(el, () => (state.historyByDate[todayD] || []).filter((c) => !state.pendingDeleteIds.has(c.id)), 'history-today');
-      document.getElementById('historyAddClassBtn').addEventListener('click', () => {
-        state.editingId = null;
-        state.editingSourceTab = 'history-today';
-        state.addTargetDate = todayD;
-        state.entryMode = 'class';
+  }
+  let hvRecordIndex = {};
+  function hvWireRecords(el) {
+    el.querySelectorAll('[data-hv-open]').forEach((row) => row.addEventListener('click', () => openHvSheet(row.getAttribute('data-hv-open'))));
+    el.querySelectorAll('[data-hv-day]').forEach((btn) => btn.addEventListener('click', () => showSelectedDay(btn.getAttribute('data-hv-day'))));
+    el.querySelectorAll('[data-hv-add]').forEach((btn) => btn.addEventListener('click', () => {
+      const d = btn.getAttribute('data-hv-add');
+      state.editingId = null;
+      state.entryMode = 'class';
+      if (d && d !== todayStr()) {
+        state.editingSourceTab = 'history';
+        state.addTargetDate = d;
+        state.historySelectedDate = d;
         resetClassForm();
         renderForm();
         switchTab('add');
-      });
-      document.getElementById('historyAddActivityBtn').addEventListener('click', () => {
-        state.editingId = null;
-        state.editingSourceTab = 'history-today';
-        state.addTargetDate = todayD;
-        state.entryMode = 'activity';
-        resetActivityForm();
-        renderForm();
-        switchTab('add');
-      });
-      return;
-    }
-
-    if (state.historyRange === 'week') {
-      const groups = {};
-      allDates.forEach((d) => {
-        const wk = mondayOf(d);
-        if (!groups[wk]) groups[wk] = [];
-        groups[wk].push(d);
-      });
-      const weekKeys = Object.keys(groups).sort().reverse().slice(0, 12);
-      const currentWeekKey = mondayOf(todayStr());
-      el.innerHTML = weekKeys.map((wk) => groupedCardHtml(weekLabel(wk), groups[wk], wk, wk === currentWeekKey)).join('');
-      el.querySelectorAll('[data-week-report]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          downloadWeeklyReport(btn.getAttribute('data-week-report'), document.getElementById('historyReportMsg'));
-        });
-      });
-      return;
-    }
-
-    // month
-    const groups = {};
-    allDates.forEach((d) => {
-      const mk = monthKeyOf(d);
-      if (!groups[mk]) groups[mk] = [];
-      groups[mk].push(d);
-    });
-    const monthKeys = Object.keys(groups).sort().reverse().slice(0, 12);
-    const currentMonthKey = monthKeyOf(todayStr());
-    el.innerHTML = monthKeys.map((mk) => groupedCardHtml(monthLabel(mk), groups[mk], undefined, mk === currentMonthKey)).join('');
+      } else {
+        document.getElementById('addClassLink').click();
+      }
+    }));
   }
+  const HV_SUM_CELLS = [['hvsClasses', 'Classes'], ['hvsTeaching', 'Teaching'], ['hvsCampus', 'On Campus'], ['hvsWorksheets', 'Worksheets'], ['hvsTests', 'Tests'], ['hvsHomework', 'Homework']];
+  function renderHvSummary(dates) {
+    const h = hvState();
+    const el = document.getElementById('hvSum');
+    if (!el.children.length) el.innerHTML = HV_SUM_CELLS.map(([id, l]) => `<div class="sum-tile"><div class="sum-num" id="${id}">0</div><div class="sum-lbl">${l}</div></div>`).join('');
+    let classes = 0, mins = 0, ws = 0, tests = 0, hw = 0, campus = 0;
+    dates.forEach((d) => {
+      const day = hvDay(d);
+      campus += campusSeconds(day.campus);
+      day.classes.forEach((c) => {
+        if (c.entryType === 'activity' || state.pendingDeleteIds.has(c.id) || !hvStartedOrPast(c)) return;
+        if (h.batch !== 'all' && c.batch !== h.batch) return;
+        classes++; mins += classDuration(c);
+        if (c.worksheet) ws++;
+        if (c.test) tests++;
+        if (c.homework) hw++;
+      });
+    });
+    const set = (id, v) => { document.getElementById(id).textContent = v; };
+    set('hvsClasses', classes); set('hvsTeaching', fmtTeaching(mins)); set('hvsCampus', fmtTeaching(Math.round(campus / 60)));
+    set('hvsWorksheets', ws); set('hvsTests', tests); set('hvsHomework', hw);
+  }
+  function renderHvControls() {
+    const h = hvState();
+    document.querySelectorAll('#hvRange [data-hrange]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-hrange') === h.range));
+    document.getElementById('hvNav').style.display = h.range === 'custom' ? 'none' : 'flex';
+    document.getElementById('hvCustom').hidden = h.range !== 'custom';
+    document.getElementById('hvLabel').textContent = hvLabelText();
+    document.getElementById('hvNext').disabled = hvBounds().end >= todayStr();
+    document.getElementById('hvSearchRow').hidden = !h.searchOpen;
+    document.getElementById('hvFilterRow').hidden = !h.filterOpen;
+    document.getElementById('hvSearchBtn').setAttribute('aria-expanded', h.searchOpen ? 'true' : 'false');
+    document.getElementById('hvFilterBtn').setAttribute('aria-expanded', h.filterOpen ? 'true' : 'false');
+    document.getElementById('hvFilterDot').hidden = h.batch === 'all' && h.kind === 'all';
+    document.querySelectorAll('#hvKind [data-kind]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-kind') === h.kind));
+    const sel = document.getElementById('hvBatch');
+    const opts = ['all'].concat(allBatchesFlat());
+    (state.historyClasses || []).forEach((c) => { if (c.batch && c.entryType !== 'activity' && opts.indexOf(c.batch) === -1) opts.push(c.batch); });
+    const html = opts.map((o) => `<option value="${escapeHtml(o)}"${o === h.batch ? ' selected' : ''}>${o === 'all' ? 'All batches' : escapeHtml(o)}</option>`).join('');
+    if (sel._html !== html) { sel.innerHTML = html; sel._html = html; }
+    const searching = !!h.q.trim();
+    const drill = !!state.historySelectedDate && h.range !== 'day';
+    const dayView = !!state.historySelectedDate || h.range === 'day';
+    document.getElementById('hvPeriodBlock').style.display = (searching || drill) ? 'none' : 'flex';
+    document.getElementById('hvSum').style.display = searching ? 'none' : 'grid';
+    document.getElementById('hvActions').style.display = (searching || dayView) ? 'none' : 'grid';
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('historyList');
+    if (!el) return;
+    const h = hvState();
+    renderHvControls();
+    if (state.historySelectedDate) { renderHistoryDay(el); return; }
+    if (h.range === 'day') { showSelectedDay(h.anchor); return; }
+
+    const q = h.q.trim();
+    let dates;
+    if (q) {
+      const set = {};
+      (state.historyClasses || []).forEach((c) => { if (c.date) set[c.date] = 1; });
+      (state.classesToday || []).forEach((c) => { if (c.date) set[c.date] = 1; });
+      Object.keys(state.hvFetched || {}).forEach((d) => { set[d] = 1; });
+      dates = Object.keys(set).sort().reverse();
+    } else {
+      const b = hvBounds();
+      dates = datesBetween(b.start, b.end).reverse();
+      if (dates.length > 93) {
+        el.innerHTML = '<div class="tl-empty compact"><div><div class="tl-empty-title">Choose a shorter range</div><div class="tl-empty-sub">Custom ranges can be up to 3 months.</div></div></div>';
+        document.getElementById('hvSum').style.display = 'none';
+        return;
+      }
+      const missing = dates.filter((d) => !hvDay(d).ready && d !== todayStr());
+      if (missing.length) hvLoadMissing(missing);
+      renderHvSummary(dates);
+    }
+
+    hvRecordIndex = {};
+    let html = '';
+    let shown = 0;
+    let waiting = false;
+    dates.forEach((d) => {
+      const day = hvDay(d);
+      if (!day.ready) { waiting = true; return; }
+      const all = day.classes.filter((c) => !state.pendingDeleteIds.has(c.id));
+      all.forEach((c) => { hvRecordIndex[c.id] = c; });
+      const recs = hvSortRecords(all.filter((c) => hvMatchesFilters(c) && hvMatchesSearch(c, q)));
+      const secs = campusSeconds(day.campus);
+      if (!recs.length && (q || h.batch !== 'all' || h.kind !== 'all' || !secs)) return;
+      const nClasses = all.filter((c) => c.entryType !== 'activity').length;
+      const meta = [`${nClasses} class${nClasses === 1 ? '' : 'es'}`];
+      if (secs > 0) meta.push(`${fmtTeaching(Math.round(secs / 60))} on campus`);
+      html += `<button type="button" class="hv-day" data-hv-day="${d}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta">· ${meta.join(' · ')}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+      html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No classes logged</div>';
+      shown += recs.length;
+    });
+    if (q) html = `<div class="hv-note">${shown} result${shown === 1 ? '' : 's'} in recent records</div>` + html;
+    if (!shown && !html.includes('hv-day')) {
+      html = waiting
+        ? '<div class="skel"></div><div class="skel"></div>'
+        : `<div class="tl-empty">${'<svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'}<div class="tl-empty-title">No records found</div><div class="tl-empty-sub">${q ? 'Try another word, batch or date.' : 'Nothing was logged in this period.'}</div>${q ? '' : '<button type="button" class="tl-empty-btn" data-hv-add="">+ Add Class</button>'}</div>`;
+    } else if (waiting) {
+      html += '<div class="hv-note">Loading older records…</div>';
+    }
+    if (el._lastHtml !== html) { el._lastHtml = html; el.innerHTML = html; hvWireRecords(el); }
+  }
+
+  function renderHistoryDay(el) {
+    const h = hvState();
+    const d = state.historySelectedDate;
+    const all = (state.selectedDayClasses || []).filter((c) => !state.pendingDeleteIds.has(c.id));
+    hvRecordIndex = {};
+    all.forEach((c) => { hvRecordIndex[c.id] = c; });
+    const recs = hvSortRecords(all.filter((c) => hvMatchesFilters(c)));
+    const campus = state.selectedDayCampus;
+    const secs = campusSeconds(campus);
+    const sessions = ((campus && campus.sessions) || []).filter((x) => !state.pendingDeleteIds.has(x.id));
+    const nClasses = all.filter((c) => c.entryType !== 'activity').length;
+    renderHvSummary([d]);
+    const back = h.range === 'day' ? '' : '<button type="button" class="hv-back" id="hvDayBack"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>All dates</button>';
+    let html = back;
+    html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta">· ${nClasses} class${nClasses === 1 ? '' : 'es'}${secs > 0 ? ` · ${fmtTeaching(Math.round(secs / 60))} on campus` : ''}</span></div>`;
+    html += `<div class="hv-daybtns">
+      <button type="button" class="btn-secondary" data-report-date="${d}" style="border-color: var(--line);"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--gold);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>Day PDF</button>
+      <button type="button" class="btn-secondary" data-whatsapp-date="${d}" style="border-color: var(--line);"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#16A34A;"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg>WhatsApp</button>
+    </div>`;
+    if (sessions.length) html += `<div class="hv-sub">Check-in sessions</div><div class="class-list" id="historySessionsList">${sessionsCardsHtml(sessions)}</div>`;
+    html += `<div class="hv-sub" style="display:flex; align-items:center; justify-content:space-between;"><span>Classes and activities</span>
+      <span style="display:flex; gap:6px;"><button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button><button class="add-entry-btn" id="historyAddClassBtn">+ Class</button></span></div>`;
+    html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No records found for this day.</div>';
+    el._lastHtml = null;
+    el.innerHTML = html;
+    hvWireRecords(el);
+    const backBtn = document.getElementById('hvDayBack');
+    if (backBtn) backBtn.addEventListener('click', () => { state.historySelectedDate = null; renderHistory(); });
+    const sl = document.getElementById('historySessionsList');
+    if (sl) wireSessionsEvents(sl, d, sessions, () => showSelectedDay(d));
+    el.querySelectorAll('[data-report-date]').forEach((btn) => btn.addEventListener('click', () => downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'))));
+    el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => btn.addEventListener('click', () => shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'))));
+    const addClass = document.getElementById('historyAddClassBtn');
+    const addAct = document.getElementById('historyAddActivityBtn');
+    const backfill = (mode) => {
+      state.editingId = null;
+      state.editingSourceTab = d === todayStr() ? 'history-today' : 'history';
+      state.addTargetDate = d === todayStr() ? null : d;
+      state.entryMode = mode;
+      if (mode === 'class') resetClassForm(); else resetActivityForm();
+      renderForm();
+      switchTab('add');
+    };
+    if (addClass) addClass.addEventListener('click', () => backfill('class'));
+    if (addAct) addAct.addEventListener('click', () => backfill('activity'));
+  }
+
+  // ----- Detail sheet -----
+  let hvSheetId = null;
+  function checkRowHtml(on, yesText, noText, note) {
+    const icon = on
+      ? '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/></svg>'
+      : '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+    return `<div class="hv-d-check ${on ? 'yes' : 'no'}">${icon}<div>${on ? yesText : noText}${on && note ? `<small>${escapeHtml(note)}</small>` : ''}</div></div>`;
+  }
+  function openHvSheet(id) {
+    const c = hvRecordIndex[id];
+    if (!c) return;
+    hvSheetId = id;
+    const body = document.getElementById('hvSheetBody');
+    const dObj = dateObj(c.date || todayStr());
+    const dateTxt = `${dObj.toLocaleDateString('en-GB', { weekday: 'short' })}, ${dObj.getDate()} ${dObj.toLocaleDateString('en-GB', { month: 'long' })} ${dObj.getFullYear()}`;
+    if (c.entryType === 'activity') {
+      body.innerHTML = `<div class="hv-d-title">${escapeHtml(activityLabel(c.activityType))}</div>
+        <div class="hv-d-rows"><div class="hv-d-row"><span>Date</span><span>${escapeHtml(dateTxt)}</span></div></div>
+        ${c.note ? `<div class="hv-d-topic" style="white-space:pre-line;">${escapeHtml(c.note)}</div>` : ''}
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="hvEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="hvDelete" style="border-color: var(--line);">Delete</button></div>`;
+    } else {
+      const dur = classDuration(c);
+      body.innerHTML = `<div class="hv-d-title">${escapeHtml(c.batch || 'Class')}</div>
+        <div class="hv-d-wing">${escapeHtml(wingForBatch(c.batch) || 'Wing not recorded')}${c.subject ? ' · ' + escapeHtml(c.subject) : ''}</div>
+        <div class="hv-d-topic">${c.topic ? escapeHtml(c.topic) : '<span style="color:var(--muted); font-style:italic;">Topic not added</span>'}</div>
+        <div class="hv-d-rows">
+          <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dateTxt)}</span></div>
+          <div class="hv-d-row"><span>Start</span><span>${c.startTimeStr ? formatTimeStr(c.startTimeStr) : '—'}</span></div>
+          <div class="hv-d-row"><span>End</span><span>${c.endTimeStr ? formatTimeStr(c.endTimeStr) : '—'}</span></div>
+          <div class="hv-d-row"><span>Duration</span><span>${dur ? fmtTeaching(dur) : '—'}</span></div>
+        </div>
+        <div style="margin-top:8px;">
+          ${checkRowHtml(!!c.worksheet, 'Worksheet given', 'No worksheet', c.worksheetNote)}
+          ${checkRowHtml(!!c.material, 'Study material given', 'No study material', c.materialNote)}
+          ${checkRowHtml(!!c.test, 'Test / exam conducted', 'No test', c.testNote)}
+          ${checkRowHtml(!!c.homework, 'Homework given', 'No homework', c.homeworkNote)}
+        </div>
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="hvEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="hvDelete" style="border-color: var(--line);">Delete</button></div>`;
+    }
+    document.getElementById('hvEdit').addEventListener('click', () => {
+      closeHvSheet();
+      const list = Object.values(hvRecordIndex);
+      const tab = state.historySelectedDate ? 'history' : 'history-today';
+      if (c.entryType === 'activity') startEditActivity(c.id, list, tab); else startEditClass(c.id, list, tab);
+    });
+    document.getElementById('hvDelete').addEventListener('click', async () => {
+      closeHvSheet();
+      if (!state.db) return;
+      const isAct = c.entryType === 'activity';
+      await confirmAndDeleteWithUndo(
+        c.id,
+        () => state.db.collection('classes').doc(c.id).delete(),
+        'This entry will be permanently removed.',
+        'Delete this entry?',
+        isAct ? 'Activity deleted' : 'Class deleted',
+        () => renderHistory(),
+        () => {
+          state.selectedDayClasses = (state.selectedDayClasses || []).filter((x) => x.id !== c.id);
+          Object.keys(state.hvFetched || {}).forEach((k) => { state.hvFetched[k].classes = state.hvFetched[k].classes.filter((x) => x.id !== c.id); });
+          if (state.tab === 'history') renderHistory();
+        }
+      );
+    });
+    const root = document.getElementById('hvSheet');
+    root.classList.add('open');
+    root.setAttribute('aria-hidden', 'false');
+  }
+  function closeHvSheet() {
+    const root = document.getElementById('hvSheet');
+    root.classList.remove('open');
+    root.setAttribute('aria-hidden', 'true');
+    hvSheetId = null;
+  }
+  document.getElementById('hvSheetBackdrop').addEventListener('click', closeHvSheet);
+  document.getElementById('hvSheetClose').addEventListener('click', closeHvSheet);
+
+  // ----- Controls -----
+  document.querySelectorAll('#hvRange [data-hrange]').forEach((btn) => btn.addEventListener('click', () => {
+    const h = hvState();
+    h.range = btn.getAttribute('data-hrange');
+    if (h.range !== 'custom') h.anchor = todayStr();
+    if (h.range === 'custom' && !h.from) { h.from = shiftDateStr(todayStr(), -6); h.to = todayStr(); }
+    document.getElementById('hvFrom').value = h.from;
+    document.getElementById('hvTo').value = h.to;
+    state.historySelectedDate = null;
+    renderHistory();
+  }));
+  function hvShift(dir) {
+    const h = hvState();
+    if (h.range === 'day') h.anchor = shiftDateStr(h.anchor, dir);
+    else if (h.range === 'week') h.anchor = shiftDateStr(mondayOf(h.anchor), dir * 7);
+    else if (h.range === 'month') { const d = dateObj(h.anchor); h.anchor = dateKey(new Date(d.getFullYear(), d.getMonth() + dir, 1)); }
+    if (h.anchor > todayStr()) h.anchor = todayStr();
+    state.historySelectedDate = null;
+    renderHistory();
+  }
+  document.getElementById('hvPrev').addEventListener('click', () => hvShift(-1));
+  document.getElementById('hvNext').addEventListener('click', () => hvShift(1));
+  ['hvFrom', 'hvTo'].forEach((id) => document.getElementById(id).addEventListener('change', () => {
+    const h = hvState();
+    h.from = document.getElementById('hvFrom').value;
+    h.to = document.getElementById('hvTo').value;
+    state.historySelectedDate = null;
+    renderHistory();
+  }));
+  document.getElementById('hvSearchBtn').addEventListener('click', () => {
+    const h = hvState();
+    h.searchOpen = !h.searchOpen;
+    if (!h.searchOpen) { h.q = ''; document.getElementById('hvSearch').value = ''; }
+    state.historySelectedDate = null;
+    renderHistory();
+    if (h.searchOpen) setTimeout(() => document.getElementById('hvSearch').focus(), 30);
+  });
+  document.getElementById('hvSearch').addEventListener('input', (e) => {
+    hvState().q = e.target.value;
+    state.historySelectedDate = null;
+    renderHistory();
+  });
+  document.getElementById('hvFilterBtn').addEventListener('click', () => { const h = hvState(); h.filterOpen = !h.filterOpen; renderHistory(); });
+  document.getElementById('hvBatch').addEventListener('change', (e) => { hvState().batch = e.target.value; renderHistory(); });
+  document.querySelectorAll('#hvKind [data-kind]').forEach((b) => b.addEventListener('click', () => { hvState().kind = b.getAttribute('data-kind'); renderHistory(); }));
+  document.getElementById('hvReportBtn').addEventListener('click', () => {
+    const h = hvState();
+    const b = hvBounds();
+    const msg = document.getElementById('historyReportMsg');
+    if (state.historySelectedDate) { downloadReportForDate(state.historySelectedDate, msg); return; }
+    if (h.range === 'day') { downloadReportForDate(b.start, msg); return; }
+    if (h.range === 'week') { downloadWeeklyReport(b.start, msg); return; }
+    const dates = datesBetween(b.start, b.end);
+    if (dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
+    const title = h.range === 'month' ? 'Monthly Activity Report' : 'Activity Report';
+    const period = h.range === 'month' ? `Month: ${hvLabelText()}` : `Period: ${hvLabelText()}`;
+    const fn = `CATJEE-Report-${b.start}-to-${b.end}.pdf`;
+    downloadRangeReport(dates, title, period, 'Summary', fn, msg);
+  });
+
 
   function renderForm() {
     const isEditing = !!state.editingId;
@@ -3401,19 +3753,10 @@
     switchTab('add');
   });
   document.getElementById('navHistory').addEventListener('click', () => switchTab('history'));
-  document.getElementById('historyRangeChips').querySelectorAll('[data-range]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.historyRange = btn.getAttribute('data-range');
-      document.getElementById('historyRangeChips').querySelectorAll('[data-range]').forEach((b) => {
-        b.classList.toggle('active', b === btn);
-      });
-      renderHistory();
-    });
-  });
   document.getElementById('navAdmin').addEventListener('click', () => switchTab('admin'));
   document.getElementById('navSchedule').addEventListener('click', () => switchTab('schedule'));
   document.getElementById('downloadCsvBtn').addEventListener('click', () => {
-    downloadHistoryCsv(document.getElementById('historyReportMsg'));
+    downloadHistoryCsv(document.getElementById('historyReportMsg'), hvPeriodRecords());
   });
   document.getElementById('downloadAdminPdfBtn').addEventListener('click', () => {
     downloadAdminReport(document.getElementById('adminReportMsg'));
@@ -3440,8 +3783,8 @@
   });
 
   async function showSelectedDay(date) {
+    if (!date) { renderHistory(); return; }
     state.historySelectedDate = date;
-    document.getElementById('historyDateClearBtn').style.display = 'inline-flex';
     document.getElementById('historyList').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel short"></div>';
     const { classes, campus } = await fetchDayData(date);
     state.selectedDayClasses = classes;
@@ -3449,37 +3792,7 @@
     if (state.tab === 'history') renderHistory();
   }
 
-  function clearSelectedDay() {
-    state.historySelectedDate = null;
-    state.selectedDayClasses = [];
-    state.selectedDayCampus = null;
-    document.getElementById('historyDateClearBtn').style.display = 'none';
-    historyStepperDate = todayStr();
-    document.getElementById('historyDateLabelText').textContent = formatStepperDateLabel(historyStepperDate);
-    renderHistory();
-  }
 
-  let historyStepperDate = todayStr();
-  document.getElementById('historyDateLabelText').textContent = formatStepperDateLabel(historyStepperDate);
-  document.getElementById('historyDatePrev').addEventListener('click', () => {
-    historyStepperDate = shiftDateStr(historyStepperDate, -1);
-    document.getElementById('historyDateLabelText').textContent = formatStepperDateLabel(historyStepperDate);
-    showSelectedDay(historyStepperDate);
-  });
-  document.getElementById('historyDateNext').addEventListener('click', () => {
-    historyStepperDate = shiftDateStr(historyStepperDate, 1);
-    document.getElementById('historyDateLabelText').textContent = formatStepperDateLabel(historyStepperDate);
-    showSelectedDay(historyStepperDate);
-  });
-  function openHistoryCalendar() {
-    openCalendar(historyStepperDate, (dateStr) => {
-      historyStepperDate = dateStr;
-      document.getElementById('historyDateLabelText').textContent = formatStepperDateLabel(dateStr);
-      showSelectedDay(dateStr);
-    });
-  }
-  document.getElementById('historyDateCalIcon').addEventListener('click', openHistoryCalendar);
-  document.getElementById('historyDateClearBtn').addEventListener('click', clearSelectedDay);
 
   document.getElementById('addScheduleSlotBtn').addEventListener('click', async () => {
     if (!state.db || !state.teacherId) { flashOffline(); return; }
@@ -4463,14 +4776,17 @@
   }
 
   async function downloadWeeklyReport(mondayStr, msgEl) {
-    msgEl.textContent = 'Preparing weekly report…';
-
     const [y, m, d] = mondayStr.split('-').map(Number);
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const dt = new Date(y, m - 1, d + i);
       dates.push(`${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`);
     }
+    return downloadRangeReport(dates, 'Weekly Activity Report', `Week: ${weekLabel(mondayStr)}`, 'Week Summary', weeklyReportFilenameFor(mondayStr), msgEl);
+  }
+
+  async function downloadRangeReport(dates, title, periodLine, summaryTitle, filename, msgEl) {
+    msgEl.textContent = 'Preparing report…';
     const results = await Promise.all(dates.map((dt) => fetchDayData(dt)));
     const teacherName = (state.user && state.user.name) || 'Teacher';
 
@@ -4493,17 +4809,17 @@
 
     const w = createPdfWriter();
     w.heading('CATJEE Teach Desk', 18);
-    w.bodyLine('Weekly Activity Report', { size: 11 });
+    w.bodyLine(title, { size: 11 });
     w.addSpace(4);
     w.rule();
     w.addSpace(4);
     w.bodyLine(`Teacher: ${teacherName}`, { bold: true, size: 11 });
     if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { bold: true, size: 11 });
-    w.bodyLine(`Week: ${weekLabel(mondayStr)}`, { bold: true, size: 11 });
+    w.bodyLine(periodLine, { bold: true, size: 11 });
     w.addSpace(4);
     w.rule();
 
-    w.heading('Week Summary', 13);
+    w.heading(summaryTitle, 13);
     w.bodyLine(`Total campus time: ${formatDuration(totalSeconds)}`, { bold: true });
     w.bodyLine(`Total classes: ${totalClasses}`);
     w.bodyLine(`Total other activities: ${totalActivities}`);
@@ -4518,6 +4834,7 @@
     w.rule();
 
     dates.forEach((dt, i) => {
+      if (dates.length > 7 && !results[i].classes.length && !(results[i].campus && results[i].campus.totalSeconds)) return;
       w.addSpace(2);
       writeDayReportBody(w, dt, results[i].classes, results[i].campus, true);
       w.addSpace(4);
@@ -4526,9 +4843,9 @@
 
     const blob = w.finishBlob();
     try {
-      saveFile(weeklyReportFilenameFor(mondayStr), blob);
-      msgEl.textContent = 'Weekly report saved.';
-      showToast('Weekly report saved');
+      saveFile(filename, blob);
+      msgEl.textContent = 'Report saved.';
+      showToast('Report saved');
     } catch (err) {
       msgEl.textContent = 'Could not save the report. Please try again.';
     }
@@ -4540,12 +4857,12 @@
     return s;
   }
 
-  async function downloadHistoryCsv(msgEl) {
+  async function downloadHistoryCsv(msgEl, records) {
     msgEl.textContent = 'Preparing CSV…';
 
     const header = ['Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
     const rows = [header];
-    const sorted = state.historyClasses.slice().sort((a, b) => {
+    const sorted = (records || state.historyClasses).slice().sort((a, b) => {
       if (a.date !== b.date) return b.date.localeCompare(a.date);
       return (a.startTimeStr || '').localeCompare(b.startTimeStr || '');
     });
@@ -5626,7 +5943,7 @@
       renderSessions();
     }, () => flashOffline()));
 
-    unsubscribers.push(db.collection('campusHistory/' + tid + '/days').limit(120).onSnapshot((snap) => {
+    unsubscribers.push(db.collection('campusHistory/' + tid + '/days').orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(120).onSnapshot((snap) => {
       const map = {};
       snap.docs.forEach((d) => { map[d.id] = d.data(); });
       state.historyCampus = map;
@@ -5641,6 +5958,7 @@
 
     unsubscribers.push(db.collection('classes').where('teacherId', '==', tid).orderBy('createdAt', 'desc').limit(300).onSnapshot((snap) => {
       state.historyClasses = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.historyClassesLoaded = true;
       if (state.tab === 'history') renderHistory();
     }, () => flashOffline()));
 
