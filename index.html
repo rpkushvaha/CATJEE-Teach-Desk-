@@ -585,9 +585,14 @@
   .hv-rec { cursor: pointer; }
   .hv-rec .tl-card { border-left-width: 1px; }
   .hv-rec:active .tl-card { background: var(--neutral-soft); }
-  .hv-act-card { flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-  .hv-act-title { font-size: 14px; font-weight: 700; color: var(--ink); }
-  .hv-act-note { font-size: 13px; color: var(--muted-2); line-height: 1.45; margin-top: 2px; white-space: pre-line; overflow-wrap: anywhere; }
+  .hv-act-card { flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 7px 11px; }
+  .hv-act-card.leave { border-color: rgba(217,119,6,.35); background: rgba(217,119,6,.06); }
+  .hv-act-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .hv-act-title { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .hv-act-note { font-size: 12.5px; color: var(--muted-2); line-height: 1.45; margin-top: 2px; white-space: pre-line; overflow-wrap: anywhere; }
+  .tl-time.hv-act-ic { padding-top: 7px; color: var(--muted); display: flex; justify-content: flex-end; }
+  .tl-time.hv-act-ic.leave { color: #B45309; }
+  .tl-pill.leave { background: rgba(217,119,6,.14); color: #B45309; }
   .hv-back { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; background: none; border: none; color: var(--gold); font-weight: 600; font-size: 13.5px; padding: 4px 0; cursor: pointer; }
   .hv-daybtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .hv-daybtns .btn-secondary { padding: 10px 6px; font-size: 13px; }
@@ -2668,8 +2673,12 @@
   }
   function hvRecordHtml(c) {
     if (c.entryType === 'activity') {
-      return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}"><div class="tl-time">—</div>
-        <div class="hv-act-card"><div class="hv-act-title">${escapeHtml(activityLabel(c.activityType))}</div>
+      const isLeave = c.activityType === 'Leave / Holiday';
+      const icon = isLeave
+        ? ''
+        : '<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+      return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}"><div class="tl-time hv-act-ic${isLeave ? ' leave' : ''}">${icon}</div>
+        <div class="hv-act-card${isLeave ? ' leave' : ''}"><div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isLeave ? 'Leave / Holiday' : activityLabel(c.activityType))}</span>${isLeave ? '<span class="tl-pill leave">Leave</span>' : ''}</div>
         ${c.note ? `<div class="hv-act-note">${escapeHtml(c.note)}</div>` : ''}</div></div>`;
     }
     const st = hhmmToMin(c.startTimeStr);
@@ -2809,7 +2818,8 @@
       const secs = campusSeconds(day.campus);
       if (!recs.length && (q || h.batch !== 'all' || h.kind !== 'all' || !secs)) return;
       const nClasses = all.filter((c) => c.entryType !== 'activity').length;
-      const meta = [`${nClasses} class${nClasses === 1 ? '' : 'es'}`];
+      const onLeave = all.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday');
+      const meta = [(onLeave && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`];
       if (secs > 0) meta.push(`${fmtTeaching(Math.round(secs / 60))} on campus`);
       html += `<button type="button" class="hv-day" data-hv-day="${d}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta">· ${meta.join(' · ')}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>`;
       html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No classes logged</div>';
@@ -2840,7 +2850,8 @@
     renderHvSummary([d]);
     const back = h.range === 'day' ? '' : '<button type="button" class="hv-back" id="hvDayBack"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>All dates</button>';
     let html = back;
-    html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta">· ${nClasses} class${nClasses === 1 ? '' : 'es'}${secs > 0 ? ` · ${fmtTeaching(Math.round(secs / 60))} on campus` : ''}</span></div>`;
+    const onLeaveDay = all.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday');
+    html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta">· ${(onLeaveDay && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`}${secs > 0 ? ` · ${fmtTeaching(Math.round(secs / 60))} on campus` : ''}</span></div>`;
     html += `<div class="hv-daybtns">
       <button type="button" class="btn-secondary" data-report-date="${d}" style="border-color: var(--line);"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--gold);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>Day PDF</button>
       <button type="button" class="btn-secondary" data-whatsapp-date="${d}" style="border-color: var(--line);"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#16A34A;"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg>WhatsApp</button>
