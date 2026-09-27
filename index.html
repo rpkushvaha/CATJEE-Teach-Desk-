@@ -577,8 +577,10 @@
   .hv-sum { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 4px; }
   .hv-sum .sum-tile:nth-child(3n+1) { border-left: none; }
   .hv-sum .sum-num { font-size: 17px; }
-  .hv-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-  .hv-actions .btn-secondary { padding: 10px 14px; font-size: 13.5px; }
+  .hv-actions { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) auto; gap: 8px; }
+  .hv-actions .btn-secondary { white-space: nowrap; min-width: 0; }
+  @media (max-width: 380px) { #hvReportBtn .ic, #downloadCsvBtn .ic { display: none; } .hv-actions .btn-secondary { padding: 10px 6px; } }
+  .hv-actions .btn-secondary { padding: 10px 8px; font-size: 13px; gap: 5px; }
   #historyReportMsg:empty { display: none; }
   .hv-list { display: flex; flex-direction: column; gap: 8px; }
   .hv-note { font-size: 12.5px; color: var(--muted); text-align: center; padding: 4px 0; }
@@ -1206,6 +1208,7 @@
       <div class="sum-grid hv-sum" id="hvSum"></div>
       <div class="hv-actions" id="hvActions">
         <button type="button" class="btn-secondary" id="hvReportBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--gold);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>Generate Report</button>
+        <button type="button" class="btn-secondary" id="hvWhatsAppBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#16A34A;"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg>WhatsApp</button>
         <button type="button" class="btn-secondary" id="downloadCsvBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>CSV</button>
       </div>
       <div class="admin-sub" id="historyReportMsg" style="text-align:center;"></div>
@@ -1654,7 +1657,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 1.1 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 1.3 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2885,8 +2888,8 @@
     if (backBtn) backBtn.addEventListener('click', () => { state.historySelectedDate = null; renderHistory(); });
     const sl = document.getElementById('historySessionsList');
     if (sl) wireSessionsEvents(sl, d, sessions, () => showSelectedDay(d));
-    el.querySelectorAll('[data-report-date]').forEach((btn) => btn.addEventListener('click', () => downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'))));
-    el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => btn.addEventListener('click', () => shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'))));
+    el.querySelectorAll('[data-report-date]').forEach((btn) => btn.addEventListener('click', () => downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'), true)));
+    el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => btn.addEventListener('click', () => shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'), true)));
     const addClass = document.getElementById('historyAddClassBtn');
     const addAct = document.getElementById('historyAddActivityBtn');
     const backfill = (mode) => {
@@ -3030,19 +3033,32 @@
     if (h.kind === 'other' || h.kind === 'leave') h.batch = 'all';
     renderHistory();
   }));
-  document.getElementById('hvReportBtn').addEventListener('click', () => {
+  // The report always follows exactly what the History screen shows: its period and its filters.
+  function hvReportSpec() {
     const h = hvState();
     const b = hvBounds();
-    const msg = document.getElementById('historyReportMsg');
-    if (state.historySelectedDate) { downloadReportForDate(state.historySelectedDate, msg); return; }
-    if (h.range === 'day') { downloadReportForDate(b.start, msg); return; }
-    if (h.range === 'week') { downloadWeeklyReport(b.start, msg); return; }
+    if (state.historySelectedDate || h.range === 'day') {
+      const d = state.historySelectedDate || b.start;
+      return { single: d };
+    }
     const dates = datesBetween(b.start, b.end);
-    if (dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
-    const title = h.range === 'month' ? 'Monthly Activity Report' : 'Activity Report';
-    const period = h.range === 'month' ? `Month: ${hvLabelText()}` : `Period: ${hvLabelText()}`;
-    const fn = `CATJEE-Report-${b.start}-to-${b.end}.pdf`;
-    downloadRangeReport(dates, title, period, 'Summary', fn, msg);
+    if (h.range === 'week') return { dates, title: 'Weekly Activity Report', period: `Week: ${hvLabelText()}`, fn: weeklyReportFilenameFor(b.start) };
+    if (h.range === 'month') return { dates, title: 'Monthly Activity Report', period: `Month: ${hvLabelText()}`, fn: `CATJEE-Monthly-Report-${b.start.slice(0, 7)}.pdf` };
+    return { dates, title: 'Activity Report', period: `Period: ${hvLabelText()}`, fn: `CATJEE-Report-${b.start}-to-${b.end}.pdf` };
+  }
+  document.getElementById('hvReportBtn').addEventListener('click', () => {
+    const msg = document.getElementById('historyReportMsg');
+    const sp = hvReportSpec();
+    if (sp.single) { downloadReportForDate(sp.single, msg, true); return; }
+    if (sp.dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
+    downloadRangeReport(sp.dates, sp.title, sp.period, 'Summary', sp.fn, msg, true);
+  });
+  document.getElementById('hvWhatsAppBtn').addEventListener('click', () => {
+    const msg = document.getElementById('historyReportMsg');
+    const sp = hvReportSpec();
+    if (sp.single) { shareReportOnWhatsApp(sp.single, msg, true); return; }
+    if (sp.dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
+    shareRangeReport(sp.dates, sp.title, sp.period, sp.fn, msg, true);
   });
 
 
@@ -3809,7 +3825,7 @@
   document.getElementById('navAdmin').addEventListener('click', () => switchTab('admin'));
   document.getElementById('navSchedule').addEventListener('click', () => switchTab('schedule'));
   document.getElementById('downloadCsvBtn').addEventListener('click', () => {
-    downloadHistoryCsv(document.getElementById('historyReportMsg'), hvPeriodRecords());
+    downloadHvCsv(document.getElementById('historyReportMsg'));
   });
   document.getElementById('downloadAdminPdfBtn').addEventListener('click', () => {
     downloadAdminReport(document.getElementById('adminReportMsg'));
@@ -4620,99 +4636,231 @@
     return { heading, bodyLine, rule, addSpace, finishBlob };
   }
 
-  function writeDayReportBody(w, date, allForDate, campusForDate, includeHeader) {
-    const [yy, mm, dd] = date.split('-').map(Number);
-    const dateLabel = new Date(yy, mm - 1, dd).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
+  // ---------- Reports (PDF + WhatsApp) — one shared engine for Day / Week / Month / Custom ----------
+  const REPORT_KIND_TXT = { classes: 'Classes only', tests: 'Tests only', worksheets: 'Worksheets only', other: 'Other Work only', leave: 'Leave only' };
+  function reportFilter(useFilter) {
+    const h = state.hv || {};
+    const batch = useFilter && h.batch && h.batch !== 'all' ? h.batch : null;
+    const kind = useFilter && h.kind && h.kind !== 'all' ? h.kind : 'all';
+    const parts = [];
+    if (batch) parts.push(batch);
+    if (kind !== 'all') parts.push(REPORT_KIND_TXT[kind]);
+    const match = (c) => {
+      const isAct = c.entryType === 'activity';
+      const isLeave = isAct && c.activityType === 'Leave / Holiday';
+      if (batch && (isAct || c.batch !== batch)) return false;
+      if (kind === 'classes' && isAct) return false;
+      if (kind === 'tests' && (isAct || !c.test)) return false;
+      if (kind === 'worksheets' && (isAct || !c.worksheet)) return false;
+      if (kind === 'other' && (!isAct || isLeave)) return false;
+      if (kind === 'leave' && !isLeave) return false;
+      return true;
+    };
+    return {
+      match,
+      label: parts.length ? `Filtered: ${parts.join(' · ')}` : '',
+      showClasses: !(kind === 'other' || kind === 'leave'),
+      showActivities: !batch && (kind === 'all' || kind === 'other' || kind === 'leave')
+    };
+  }
+  function reportDayLabel(date) {
+    const d = dateObj(date);
+    return `${d.toLocaleDateString('en-GB', { weekday: 'long' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'long' })} ${d.getFullYear()}`;
+  }
+  function reportHm(mins) { return mins ? fmtTeaching(Math.round(mins)) : '0m'; }
+  function reportCampus(sec) { return reportHm(Math.round((sec || 0) / 60)); }
+  // Unique records for a day (guards against the same record arriving twice).
+  function reportDayRecords(classes) {
+    const seen = new Set();
+    return (classes || []).filter((c) => {
+      if (!c || !c.id || seen.has(c.id) || state.pendingDeleteIds.has(c.id)) return false;
+      seen.add(c.id);
+      return true;
+    });
+  }
+  function reportTotals(dates, results, f) {
+    const t = { classes: 0, mins: 0, campusSec: 0, ws: 0, tests: 0, hw: 0, other: 0, leave: 0, batches: {} };
+    dates.forEach((d, i) => {
+      t.campusSec += campusSeconds(results[i].campus);
+      reportDayRecords(results[i].classes).forEach((c) => {
+        if (!f.match(c)) return;
+        if (c.entryType === 'activity') {
+          if (c.activityType === 'Leave / Holiday') t.leave++; else t.other++;
+          return;
+        }
+        if (!hvStartedOrPast(c)) return; // not held yet — listed, but not counted
+        const m = classDuration(c);
+        t.classes++; t.mins += m;
+        if (c.worksheet) t.ws++;
+        if (c.test) t.tests++;
+        if (c.homework) t.hw++;
+        const b = c.batch || 'Unknown';
+        if (!t.batches[b]) t.batches[b] = { n: 0, mins: 0 };
+        t.batches[b].n++; t.batches[b].mins += m;
+      });
+    });
+    return t;
+  }
+  function checklistLines(c) {
+    return [
+      { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
+      { label: 'Study Material', given: c.material, note: c.materialNote },
+      { label: 'Test / Exam', given: c.test, note: c.testNote },
+      { label: 'Homework', given: c.homework, note: c.homeworkNote }
+    ].filter((it) => it.given).map((it) => `${it.label}: ${it.note ? it.note : 'Given'}`);
+  }
+  function writeDayReportBody(w, date, allForDate, campusForDate, includeHeader, f) {
+    f = f || reportFilter(false);
+    const recs = reportDayRecords(allForDate).filter(f.match);
     if (includeHeader) {
-      w.heading(dateLabel, 15);
-      w.rule();
+      w.heading(reportDayLabel(date), 14);
       w.addSpace(2);
     }
-
-    let campusSeconds = campusForDate.totalSeconds || 0;
-    if (campusForDate.checkedIn && campusForDate.checkInAt) {
-      campusSeconds += (Date.now() - campusForDate.checkInAt) / 1000;
-    }
-    w.bodyLine(`Campus time: ${formatDuration(campusSeconds)}`, { bold: true });
-    const sessions = campusForDate.sessions || [];
-    if (sessions.length === 0) {
-      w.bodyLine('No check-in recorded.');
-    } else if (sessions.length === 1) {
-      const s = sessions[0];
-      const inStr = formatTimeStr(toHHMM(s.in));
-      const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-      w.bodyLine(`  ${inStr} - ${outStr}`);
+    const campus = campusForDate || {};
+    w.bodyLine(`On campus: ${reportCampus(campusSeconds(campus))}`, { bold: true });
+    const sessions = campus.sessions || [];
+    if (!sessions.length) {
+      w.bodyLine('  No check-in recorded.');
     } else {
       sessions.forEach((s, i) => {
         const inStr = formatTimeStr(toHHMM(s.in));
         const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-        w.bodyLine(`  ${i + 1}. ${inStr} - ${outStr}`);
+        w.bodyLine(`  ${sessions.length > 1 ? (i + 1) + '. ' : ''}${inStr} - ${outStr}`);
       });
     }
-
-    const classItems = allForDate
-      .filter((c) => c.entryType !== 'activity')
-      .slice()
-      .sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
-    w.bodyLine(`Classes (${classItems.length}):`, { bold: true });
-    if (classItems.length === 0) {
-      w.bodyLine('  No classes logged.');
-    } else {
+    if (f.showClasses) {
+      const classItems = recs.filter((c) => c.entryType !== 'activity')
+        .sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
+      w.addSpace(2);
+      w.bodyLine(`Classes (${classItems.length})`, { bold: true });
+      if (!classItems.length) w.bodyLine('  None.');
       classItems.forEach((c, i) => {
-        const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
-        w.bodyLine(`  ${i + 1}. ${c.batch || ''} (${time})`, { bold: true });
-        w.bodyLine(`     Chapter / Topic: ${c.topic || 'No topic noted'}`);
-        const checklistItems = [
-          { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
-          { label: 'Study Material', given: c.material, note: c.materialNote },
-          { label: 'Test / Exam', given: c.test, note: c.testNote },
-          { label: 'Homework', given: c.homework, note: c.homeworkNote }
-        ];
-        checklistItems.filter((it) => it.given).forEach((it) => {
-          w.bodyLine(`     - ${it.label}: ${it.note ? it.note : 'Given'}`);
-        });
-        w.addSpace(3);
-        w.rule();
-        w.addSpace(3);
+        const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : 'Time not set';
+        const dur = classDuration(c);
+        const up = hvStartedOrPast(c) ? '' : '  [Upcoming - not counted]';
+        w.bodyLine(`  ${i + 1}. ${c.batch || 'Class'}  |  ${time}${dur ? ' (' + reportHm(dur) + ')' : ''}${up}`, { bold: true });
+        w.bodyLine(`     Topic: ${c.topic || 'Not added'}`);
+        checklistLines(c).forEach((l) => w.bodyLine(`     - ${l}`));
       });
     }
-
-    const activityItems = allForDate.filter((c) => c.entryType === 'activity');
-    w.bodyLine('Activities:', { bold: true });
-    if (activityItems.length === 0) {
-      w.bodyLine('  None logged.');
-    } else {
-      activityItems.forEach((a) => {
-        const line = a.activityType === 'Other Activity'
-          ? (a.note || 'No details noted')
-          : `${a.activityType || 'Activity'}${a.note ? ' - ' + a.note : ''}`;
-        w.bodyLine(`  - ${line}`);
-      });
+    if (f.showActivities) {
+      const acts = recs.filter((c) => c.entryType === 'activity');
+      w.addSpace(2);
+      w.bodyLine(`Other Work & Leave (${acts.length})`, { bold: true });
+      if (!acts.length) w.bodyLine('  None.');
+      acts.forEach((a) => w.bodyLine(`  - ${activityLabel(a.activityType)}${a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : ''}`));
     }
   }
-
-  async function downloadReportForDate(date, msgEl) {
-    msgEl.textContent = 'Preparing report…';
-
-    const { classes: allForDate, campus: campusForDate } = await fetchDayData(date);
+  function buildReportPdf(dates, results, title, periodLine, f) {
     const teacherName = (state.user && state.user.name) || 'Teacher';
-
+    const t = reportTotals(dates, results, f);
     const w = createPdfWriter();
     w.heading('CATJEE Teach Desk', 18);
-    w.bodyLine('Daily Activity Report', { size: 11 });
+    w.bodyLine(title, { size: 11 });
     w.addSpace(4);
     w.rule();
     w.addSpace(4);
     w.bodyLine(`Teacher: ${teacherName}`, { bold: true, size: 11 });
-    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { bold: true, size: 11 });
+    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { size: 11 });
+    w.bodyLine(periodLine, { bold: true, size: 11 });
+    if (f.label) w.bodyLine(`${f.label}  (summary and records below follow this filter)`, { bold: true, size: 10 });
     w.addSpace(4);
     w.rule();
-
-    writeDayReportBody(w, date, allForDate, campusForDate, true);
-
-    const blob = w.finishBlob();
+    w.heading('Summary', 13);
+    if (f.showClasses) {
+      w.bodyLine(`Classes taken: ${t.classes}`, { bold: true });
+      w.bodyLine(`Teaching time: ${reportHm(t.mins)}`);
+    }
+    w.bodyLine(`On-campus time: ${reportCampus(t.campusSec)}${f.label ? '  (not affected by filters)' : ''}`);
+    if (f.showClasses) {
+      w.bodyLine(`Worksheets: ${t.ws}    Tests: ${t.tests}    Homework: ${t.hw}`);
+    }
+    if (f.showActivities) w.bodyLine(`Other Work: ${t.other}    Leave: ${t.leave}`);
+    const bk = Object.keys(t.batches);
+    if (f.showClasses && bk.length > 1) {
+      w.addSpace(3);
+      w.bodyLine('Batch-wise', { bold: true });
+      bk.sort((a, b) => t.batches[b].n - t.batches[a].n).forEach((b) => w.bodyLine(`  ${b}: ${t.batches[b].n} class${t.batches[b].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b].mins)}`));
+    }
+    w.addSpace(6);
+    w.rule();
+    let wrote = 0;
+    dates.forEach((dt, i) => {
+      const recs = reportDayRecords(results[i].classes).filter(f.match);
+      const hasCampus = campusSeconds(results[i].campus) > 0;
+      if (dates.length > 1 && !recs.length && !(hasCampus && !f.label)) return;
+      w.addSpace(4);
+      writeDayReportBody(w, dt, results[i].classes, results[i].campus, true, f);
+      w.addSpace(4);
+      w.rule();
+      wrote++;
+    });
+    if (!wrote) { w.addSpace(4); w.bodyLine('No records in this period.'); }
+    return { blob: w.finishBlob(), totals: t };
+  }
+  function buildWhatsAppRangeText(dates, results, title, periodLine, f) {
+    const teacherName = (state.user && state.user.name) || 'Teacher';
+    const t = reportTotals(dates, results, f);
+    const L = [];
+    L.push(`*${title}*`);
+    L.push(`👤 *Teacher:* ${teacherName}`);
+    if (state.teacherSubject) L.push(`📘 *Subject:* ${state.teacherSubject}`);
+    L.push(`📅 ${periodLine}`);
+    if (f.label) L.push(`🔎 _${f.label}_`);
+    L.push('');
+    if (f.showClasses) {
+      L.push(`📚 *Classes:* ${t.classes}   ⏱ *Teaching:* ${reportHm(t.mins)}`);
+    }
+    L.push(`🕐 *On campus:* ${reportCampus(t.campusSec)}`);
+    if (f.showClasses) L.push(`📄 Worksheets: ${t.ws}   📝 Tests: ${t.tests}   🏠 Homework: ${t.hw}`);
+    if (f.showActivities) L.push(`🗂 Other Work: ${t.other}   🌴 Leave: ${t.leave}`);
+    const days = [];
+    dates.forEach((dt, i) => {
+      const recs = reportDayRecords(results[i].classes).filter(f.match);
+      const cls = recs.filter((c) => c.entryType !== 'activity').sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
+      const acts = recs.filter((c) => c.entryType === 'activity');
+      if (!cls.length && !acts.length) return;
+      const d = dateObj(dt);
+      const parts = [];
+      if (cls.length) parts.push(cls.map((c) => `${c.batch || 'Class'}${c.topic ? ' (' + c.topic + ')' : ''}${hvStartedOrPast(c) ? '' : ' _upcoming_'}`).join(', '));
+      if (acts.length) parts.push(acts.map((a) => activityLabel(a.activityType) + (a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : '')).join(', '));
+      days.push(`• *${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}:* ${parts.join(' | ')}`);
+    });
+    if (days.length) { L.push(''); L.push('*Day-wise*'); days.forEach((x) => L.push(x)); }
+    return L.join('\n');
+  }
+  async function reportData(dates) {
+    return Promise.all(dates.map((dt) => fetchDayData(dt)));
+  }
+  async function shareReportFileOrText(blob, filename, text, msgEl) {
     try {
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'CATJEE Teach Desk report', text: text.split('\n').slice(0, 6).join('\n') });
+        msgEl.textContent = '';
+        return;
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') { msgEl.textContent = ''; return; }
+    }
+    if (navigator.share) {
+      try { await navigator.share({ text }); msgEl.textContent = ''; return; } catch (err) { if (err && err.name === 'AbortError') { msgEl.textContent = ''; return; } }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      msgEl.textContent = 'Copied — paste it in WhatsApp.';
+      showToast('Copied to clipboard');
+    } else {
+      msgEl.textContent = 'Sharing is not supported on this browser.';
+    }
+  }
+
+  async function downloadReportForDate(date, msgEl, useFilter) {
+    msgEl.textContent = 'Preparing report…';
+    try {
+      const f = reportFilter(!!useFilter);
+      const results = await reportData([date]);
+      const { blob } = buildReportPdf([date], results, 'Daily Activity Report', `Date: ${reportDayLabel(date)}`, f);
       saveFile(reportFilenameFor(date), blob);
       msgEl.textContent = 'Report saved.';
       showToast('Report saved');
@@ -4721,106 +4869,60 @@
     }
   }
 
-  function buildWhatsAppReportText(date, allForDate, campusForDate, teacherName) {
-    const [yy, mm, dd] = date.split('-').map(Number);
-    const dateLabel = new Date(yy, mm - 1, dd).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-    let campusSeconds = campusForDate.totalSeconds || 0;
-    if (campusForDate.checkedIn && campusForDate.checkInAt) campusSeconds += (Date.now() - campusForDate.checkInAt) / 1000;
-
-    const lines = [];
-    lines.push('*Daily Activity Report*');
-    lines.push('');
-    lines.push(`👤 *Teacher:* ${teacherName}`);
-    if (state.teacherSubject) lines.push(`📘 *Subject:* ${state.teacherSubject}`);
-    lines.push(`📅 *Date:* ${dateLabel}`);
-    lines.push('');
-    lines.push(`🕐 *Campus time:* ${formatDuration(campusSeconds)}`);
-
-    const sessions = campusForDate.sessions || [];
-    if (sessions.length === 0) {
-      lines.push('No check-in recorded.');
-    } else if (sessions.length === 1) {
-      const s = sessions[0];
+  function buildWhatsAppReportText(date, allForDate, campusForDate, teacherName, f) {
+    f = f || reportFilter(false);
+    const recs = reportDayRecords(allForDate).filter(f.match);
+    const L = [];
+    L.push('*Daily Activity Report*');
+    L.push('');
+    L.push(`👤 *Teacher:* ${teacherName}`);
+    if (state.teacherSubject) L.push(`📘 *Subject:* ${state.teacherSubject}`);
+    L.push(`📅 *Date:* ${reportDayLabel(date)}`);
+    if (f.label) L.push(`🔎 _${f.label}_`);
+    L.push('');
+    const campus = campusForDate || {};
+    L.push(`🕐 *On campus:* ${reportCampus(campusSeconds(campus))}`);
+    const sessions = campus.sessions || [];
+    if (!sessions.length) L.push('No check-in recorded.');
+    sessions.forEach((s, i) => {
       const inStr = formatTimeStr(toHHMM(s.in));
       const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-      lines.push(`   In: ${inStr}   →   Out: ${outStr}`);
-    } else {
-      sessions.forEach((s, i) => {
-        const inStr = formatTimeStr(toHHMM(s.in));
-        const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-        lines.push(`   ${i + 1}) In: ${inStr}   →   Out: ${outStr}`);
-      });
-    }
-    lines.push('');
-
-    const classItems = allForDate
-      .filter((c) => c.entryType !== 'activity')
-      .slice()
-      .sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
-    lines.push(`📚 *Classes (${classItems.length}):*`);
-    if (classItems.length === 0) {
-      lines.push('No classes logged.');
-    } else {
+      L.push(`   ${sessions.length > 1 ? (i + 1) + ') ' : ''}In: ${inStr}   →   Out: ${outStr}`);
+    });
+    if (f.showClasses) {
+      const classItems = recs.filter((c) => c.entryType !== 'activity').sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
+      L.push('');
+      L.push(`📚 *Classes (${classItems.length}):*`);
+      if (!classItems.length) L.push('None.');
       classItems.forEach((c, i) => {
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
-        lines.push('');
-        lines.push(`*${i + 1}. ${c.batch || ''}* (${time})`);
-        lines.push(`_Chapter / Topic:_ ${c.topic || 'No topic noted'}`);
-        const checklistItems = [
-          { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
-          { label: 'Study Material', given: c.material, note: c.materialNote },
-          { label: 'Test / Exam', given: c.test, note: c.testNote },
-          { label: 'Homework', given: c.homework, note: c.homeworkNote }
-        ];
-        checklistItems.filter((it) => it.given).forEach((it) => {
-          lines.push(`   • ${it.label}: ${it.note ? it.note : 'Given'}`);
-        });
-        lines.push('');
+        L.push('');
+        L.push(`*${i + 1}. ${c.batch || ''}* (${time})${hvStartedOrPast(c) ? '' : ' _Upcoming_'}`);
+        L.push(`_Topic:_ ${c.topic || 'Not added'}`);
+        checklistLines(c).forEach((l) => L.push(`   • ${l}`));
       });
     }
-
-    const activityItems = allForDate.filter((c) => c.entryType === 'activity');
-    lines.push(`📝 *Activities:*`);
-    if (activityItems.length === 0) {
-      lines.push('None logged.');
-    } else {
-      activityItems.forEach((a) => {
-        const line = a.activityType === 'Other Activity'
-          ? (a.note || 'No details noted')
-          : `${a.activityType || 'Activity'}${a.note ? ' - ' + a.note : ''}`;
-        lines.push(`   ${line}`);
-      });
+    if (f.showActivities) {
+      const acts = recs.filter((c) => c.entryType === 'activity');
+      L.push('');
+      L.push('📝 *Other Work & Leave:*');
+      if (!acts.length) L.push('None.');
+      acts.forEach((a) => L.push(`   ${activityLabel(a.activityType)}${a.note ? ': ' + a.note : ''}`));
     }
-
-    return lines.join('\n');
+    return L.join('\n');
   }
 
-  async function shareReportOnWhatsApp(date, msgEl) {
-    msgEl.textContent = 'Preparing message…';
+  async function shareReportOnWhatsApp(date, msgEl, useFilter) {
+    msgEl.textContent = 'Preparing report…';
     try {
-      const { classes: allForDate, campus: campusForDate } = await fetchDayData(date);
+      const f = reportFilter(!!useFilter);
+      const results = await reportData([date]);
       const teacherName = (state.user && state.user.name) || 'Teacher';
-      const text = buildWhatsAppReportText(date, allForDate, campusForDate, teacherName);
-
-      if (navigator.share) {
-        try {
-          await navigator.share({ text });
-          msgEl.textContent = '';
-          return;
-        } catch (err) {
-          if (err && err.name === 'AbortError') { msgEl.textContent = ''; return; }
-        }
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-        msgEl.textContent = 'Copied — paste it in WhatsApp.';
-        showToast('Copied to clipboard');
-      } else {
-        msgEl.textContent = 'Sharing is not supported on this browser.';
-      }
+      const text = buildWhatsAppReportText(date, results[0].classes, results[0].campus, teacherName, f);
+      const { blob } = buildReportPdf([date], results, 'Daily Activity Report', `Date: ${reportDayLabel(date)}`, f);
+      await shareReportFileOrText(blob, reportFilenameFor(date), text, msgEl);
     } catch (err) {
-      msgEl.textContent = 'Could not prepare the message. Please try again.';
+      msgEl.textContent = 'Could not prepare the report. Please try again.';
     }
   }
 
@@ -4828,79 +4930,35 @@
     return `CATJEE-Weekly-Report-${mondayStr}.pdf`;
   }
 
-  async function downloadWeeklyReport(mondayStr, msgEl) {
-    const [y, m, d] = mondayStr.split('-').map(Number);
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const dt = new Date(y, m - 1, d + i);
-      dates.push(`${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`);
-    }
-    return downloadRangeReport(dates, 'Weekly Activity Report', `Week: ${weekLabel(mondayStr)}`, 'Week Summary', weeklyReportFilenameFor(mondayStr), msgEl);
+  async function downloadWeeklyReport(mondayStr, msgEl, useFilter) {
+    const dates = datesBetween(mondayStr, shiftDateStr(mondayStr, 6));
+    return downloadRangeReport(dates, 'Weekly Activity Report', `Week: ${weekLabel(mondayStr)}`, 'Summary', weeklyReportFilenameFor(mondayStr), msgEl, useFilter);
   }
 
-  async function downloadRangeReport(dates, title, periodLine, summaryTitle, filename, msgEl) {
+  async function downloadRangeReport(dates, title, periodLine, summaryTitle, filename, msgEl, useFilter) {
     msgEl.textContent = 'Preparing report…';
-    const results = await Promise.all(dates.map((dt) => fetchDayData(dt)));
-    const teacherName = (state.user && state.user.name) || 'Teacher';
-
-    let totalSeconds = 0, totalClasses = 0, totalActivities = 0;
-    const batchCounts = {};
-    results.forEach(({ classes, campus }) => {
-      let s = campus.totalSeconds || 0;
-      if (campus.checkedIn && campus.checkInAt) s += (Date.now() - campus.checkInAt) / 1000;
-      totalSeconds += s;
-      classes.forEach((c) => {
-        if (c.entryType === 'activity') {
-          totalActivities++;
-        } else {
-          totalClasses++;
-          const b = c.batch || 'Unknown';
-          batchCounts[b] = (batchCounts[b] || 0) + 1;
-        }
-      });
-    });
-
-    const w = createPdfWriter();
-    w.heading('CATJEE Teach Desk', 18);
-    w.bodyLine(title, { size: 11 });
-    w.addSpace(4);
-    w.rule();
-    w.addSpace(4);
-    w.bodyLine(`Teacher: ${teacherName}`, { bold: true, size: 11 });
-    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { bold: true, size: 11 });
-    w.bodyLine(periodLine, { bold: true, size: 11 });
-    w.addSpace(4);
-    w.rule();
-
-    w.heading(summaryTitle, 13);
-    w.bodyLine(`Total campus time: ${formatDuration(totalSeconds)}`, { bold: true });
-    w.bodyLine(`Total classes: ${totalClasses}`);
-    w.bodyLine(`Total other activities: ${totalActivities}`);
-    if (Object.keys(batchCounts).length > 0) {
-      w.addSpace(3);
-      w.bodyLine('Batch-wise:', { bold: true });
-      Object.keys(batchCounts)
-        .sort((a, b) => batchCounts[b] - batchCounts[a])
-        .forEach((b) => w.bodyLine(`  ${b}: ${batchCounts[b]}`));
-    }
-    w.addSpace(6);
-    w.rule();
-
-    dates.forEach((dt, i) => {
-      if (dates.length > 7 && !results[i].classes.length && !(results[i].campus && results[i].campus.totalSeconds)) return;
-      w.addSpace(2);
-      writeDayReportBody(w, dt, results[i].classes, results[i].campus, true);
-      w.addSpace(4);
-      w.rule();
-    });
-
-    const blob = w.finishBlob();
     try {
+      const f = reportFilter(!!useFilter);
+      const results = await reportData(dates);
+      const { blob } = buildReportPdf(dates, results, title, periodLine, f);
       saveFile(filename, blob);
       msgEl.textContent = 'Report saved.';
       showToast('Report saved');
     } catch (err) {
       msgEl.textContent = 'Could not save the report. Please try again.';
+    }
+  }
+
+  async function shareRangeReport(dates, title, periodLine, filename, msgEl, useFilter) {
+    msgEl.textContent = 'Preparing report…';
+    try {
+      const f = reportFilter(!!useFilter);
+      const results = await reportData(dates);
+      const { blob } = buildReportPdf(dates, results, title, periodLine, f);
+      const text = buildWhatsAppRangeText(dates, results, title, periodLine, f);
+      await shareReportFileOrText(blob, filename, text, msgEl);
+    } catch (err) {
+      msgEl.textContent = 'Could not prepare the report. Please try again.';
     }
   }
 
@@ -4910,10 +4968,31 @@
     return s;
   }
 
-  async function downloadHistoryCsv(msgEl, records) {
+  // CSV follows the same period and filters as Generate Report / WhatsApp.
+  async function downloadHvCsv(msgEl) {
+    msgEl.textContent = 'Preparing CSV…';
+    try {
+      const sp = hvReportSpec();
+      const dates = sp.single ? [sp.single] : sp.dates;
+      if (dates.length > 93) { msgEl.textContent = 'Choose a range of up to 3 months.'; return; }
+      const f = reportFilter(true);
+      const results = await reportData(dates);
+      const records = [];
+      results.forEach((r) => reportDayRecords(r.classes).forEach((c) => { if (f.match(c)) records.push(c); }));
+      const h = hvState();
+      const tag = [h.batch !== 'all' ? h.batch : '', h.kind !== 'all' ? (REPORT_KIND_TXT[h.kind] || h.kind) : '']
+        .filter(Boolean).join('-').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const range = dates.length === 1 ? dates[0] : `${dates[0]}-to-${dates[dates.length - 1]}`;
+      await downloadHistoryCsv(msgEl, records, `CATJEE-History-${range}${tag ? '-' + tag : ''}.csv`);
+    } catch (err) {
+      msgEl.textContent = 'Could not save the CSV. Please try again.';
+    }
+  }
+
+  async function downloadHistoryCsv(msgEl, records, filename) {
     msgEl.textContent = 'Preparing CSV…';
 
-    const header = ['Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
+    const header = ['Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Duration (min)', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
     const rows = [header];
     const sorted = (records || state.historyClasses).slice().sort((a, b) => {
       if (a.date !== b.date) return b.date.localeCompare(a.date);
@@ -4921,12 +5000,13 @@
     });
     sorted.forEach((c) => {
       if (c.entryType === 'activity') {
-        rows.push([c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', c.note || '']);
+        rows.push([c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', '', c.note || '']);
       } else {
         rows.push([
           c.date, 'Class', c.batch || '', c.topic || '',
           c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
           c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
+          classDuration(c) || '',
           c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No',
           [c.worksheet && c.worksheetNote ? ('Worksheet: ' + c.worksheetNote) : '', c.material && c.materialNote ? ('Material: ' + c.materialNote) : '', c.test && c.testNote ? ('Test: ' + c.testNote) : '', c.homework && c.homeworkNote ? ('Homework: ' + c.homeworkNote) : ''].filter(Boolean).join(' | ')
         ]);
@@ -4935,7 +5015,7 @@
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
     try {
-      saveFile(`CATJEE-History-${todayStr()}.csv`, csv, 'text/csv');
+      saveFile(filename || `CATJEE-History-${todayStr()}.csv`, '\ufeff' + csv, 'text/csv');
       msgEl.textContent = 'CSV saved.';
       showToast('CSV saved');
     } catch (err) {
