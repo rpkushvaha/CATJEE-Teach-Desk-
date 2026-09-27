@@ -500,6 +500,39 @@
   .report-panel.open { display: flex; }
   .report-panel .btn-secondary { margin-top: 0 !important; margin-bottom: 8px; }
   @media (max-width: 340px) { .sum-num { font-size: 16px; } .tl-time { width: 46px; } .qa-btn { font-size: 11px; } }
+
+  /* ---------- Add Class: faster logging, lighter look ---------- */
+  #view-add { gap: 16px; }
+  #view-add .form-title { font-size: 19px; font-weight: 600; }
+  #view-add .chip { font-weight: 600; }
+  #classFields > .field:not(:last-child):not(.nested-box), #activityFields > .field:not(:last-child) { padding-bottom: 0; border-bottom: none; }
+  #view-add .field label { font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  #recentChips .chip { padding: 9px 14px; }
+  .ab-toggle { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: 1px dashed var(--line); border-radius: 10px;
+    padding: 9px 12px; cursor: pointer; color: var(--muted-2); font-size: 13px; font-weight: 600; text-align: left; margin-top: -6px; }
+  .ab-cur { flex: 1; color: var(--muted); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ab-chev { transition: transform .2s ease; flex-shrink: 0; }
+  .ab-toggle[aria-expanded="true"] .ab-chev { transform: rotate(180deg); }
+  .ab-panel { display: none; flex-direction: column; gap: 14px; }
+  .ab-panel.open { display: flex; }
+  #view-add .nested-box { background: none; border: none; padding: 0; margin-top: 0; border-radius: 0; }
+  .dur-row { display: flex; align-items: center; gap: 10px; margin-top: 2px; flex-wrap: wrap; }
+  .dur-lbl { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  #durChips .chip { padding: 6px 12px; font-size: 12.5px; }
+  .topic-input { font-size: 15px; min-height: 64px; }
+  .topic-suggest { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; background: var(--gold-soft); color: var(--gold);
+    border: none; border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; text-align: left; }
+  .topic-suggest span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topic-suggest[hidden] { display: none; }
+  #view-add .checklist-grid { grid-template-columns: 1fr; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--card); }
+  #view-add .toggle-row.checklist-item { border: none; border-radius: 0; padding: 11px 14px; background: none; }
+  #view-add .toggle-row.checklist-item + .toggle-row.checklist-item { border-top: 1px solid var(--line); }
+  #view-add .toggle-row.checklist-item:has(.switch.on) { background: none; border-color: var(--line); }
+  #view-add .checklist-toggle-trigger { gap: 10px; min-height: 26px; }
+  #view-add .checklist-item .toggle-label { font-size: 14px; font-weight: 500; }
+  #view-add .checklist-note-input { margin: 8px 0 2px 28px; width: calc(100% - 28px); font-size: 13px; }
+  #view-add .save-btn { margin-top: 2px; }
+  #view-add .save-btn:disabled { opacity: .75; }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
   .drawer-root.open { pointer-events: auto; visibility: visible; transition: none; }
@@ -916,6 +949,14 @@
 
       <div id="classFields">
         <div class="sched-hint" id="schedHint"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span id="schedHintText"></span></div>
+        <div class="field" id="recentField">
+          <label>Recent classes</label>
+          <div class="chips" id="recentChips"></div>
+        </div>
+        <button type="button" class="ab-toggle" id="allBatchesToggle" aria-expanded="false">
+          <span>All batches</span><span class="ab-cur" id="allBatchesCur"></span><svg class="ic ab-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="allBatchesPanel" class="ab-panel">
         <div class="field">
           <label>Wing</label>
           <div class="chips" id="wingChips"></div>
@@ -935,6 +976,7 @@
             <button class="btn-secondary" id="inlineAddBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button>
           </div>
         </div>
+        </div>
 
         <div class="field">
           <label>Class Timing</label>
@@ -948,15 +990,23 @@
               <input class="text-input" id="endTimeInput" type="time" style="width:100%;">
             </div>
           </div>
+          <div class="dur-row"><span class="dur-lbl">Duration</span>
+            <div class="chips" id="durChips">
+              <button type="button" class="chip" data-dur="40">40m</button>
+              <button type="button" class="chip" data-dur="50">50m</button>
+              <button type="button" class="chip" data-dur="65">1h 5m</button>
+            </div>
+          </div>
         </div>
 
         <div class="field">
           <label for="topicInput">Chapter / Topic</label>
-          <textarea class="text-input" id="topicInput" rows="3" style="resize:vertical; font-family:inherit;" placeholder="e.g. Chapter 5 – Trigonometry"></textarea>
+          <textarea class="text-input topic-input" id="topicInput" rows="2" style="resize:vertical; font-family:inherit;" placeholder="Type today's topic" autocapitalize="sentences"></textarea>
+          <button type="button" class="topic-suggest" id="topicSuggest" hidden><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 15 14"/></svg><span id="topicSuggestText"></span></button>
         </div>
 
         <div class="field">
-          <label>Class Checklist</label>
+          <label>Checklist</label>
           <div class="checklist-grid">
             <div class="toggle-row checklist-item" data-key="worksheet">
               <div class="checklist-toggle-trigger">
@@ -2662,8 +2712,72 @@
       if (noteInput) noteInput.classList.toggle('show', !!state.form[key]);
     });
 
+    renderRecentAndAllBatches();
+    renderTopicSuggest();
+    syncDurChips();
     document.getElementById('saveClassBtn').disabled = state.saving;
+    if (state.saving) document.getElementById('saveClassBtn').textContent = 'Saving…';
     showFormMsg('');
+  }
+
+  // ---------- Add Class helpers: recent batches, duration, topic suggestion ----------
+  const CLASS_DURATIONS = [40, 50, 65];
+  const DEFAULT_DURATION = 40;
+  function tMin(t) { const p = String(t || '').split(':').map(Number); return (p.length >= 2 && !isNaN(p[0]) && !isNaN(p[1])) ? p[0] * 60 + p[1] : null; }
+  function minToT(m) { m = Math.max(0, Math.min(m, 23 * 60 + 59)); return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`; }
+  function recentBatches() {
+    const valid = new Set(allBatchesFlat());
+    const out = [];
+    (state.historyClasses || []).forEach((c) => {
+      if (c.entryType === 'activity' || !c.batch || !valid.has(c.batch) || out.indexOf(c.batch) !== -1) return;
+      out.push(c.batch);
+    });
+    return out.slice(0, 4);
+  }
+  function renderRecentAndAllBatches() {
+    const recents = recentBatches();
+    const field = document.getElementById('recentField');
+    const chips = document.getElementById('recentChips');
+    field.style.display = recents.length ? 'flex' : 'none';
+    chips.innerHTML = recents.map((b) => `<button type="button" class="chip${b === state.form.batch ? ' active' : ''}" data-recent="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
+    chips.querySelectorAll('[data-recent]').forEach((btn) => btn.addEventListener('click', () => {
+      const b = btn.getAttribute('data-recent');
+      const w = wingForBatch(b);
+      if (w) state.formWing = w;
+      selectBatch(b);
+    }));
+    // "All batches" stays folded unless there are no recents, or the chosen batch isn't a recent one.
+    if (state.allBatchesOpen == null) state.allBatchesOpen = false;
+    const mustOpen = !recents.length || (state.form.batch && recents.indexOf(state.form.batch) === -1);
+    const open = mustOpen || state.allBatchesOpen;
+    const toggle = document.getElementById('allBatchesToggle');
+    toggle.style.display = recents.length ? 'flex' : 'none';
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.getElementById('allBatchesPanel').classList.toggle('open', open);
+    document.getElementById('allBatchesCur').textContent = open ? '' : `${state.formWing} · Manage`;
+  }
+  function syncDurChips() {
+    const a = tMin(document.getElementById('startTimeInput').value);
+    const b = tMin(document.getElementById('endTimeInput').value);
+    const d = (a != null && b != null) ? b - a : null;
+    document.querySelectorAll('#durChips [data-dur]').forEach((c) => c.classList.toggle('active', d != null && Number(c.getAttribute('data-dur')) === d));
+  }
+  function currentDuration() {
+    const a = tMin(document.getElementById('startTimeInput').value);
+    const b = tMin(document.getElementById('endTimeInput').value);
+    return (a != null && b != null && b > a) ? b - a : null;
+  }
+  function renderTopicSuggest() {
+    const btn = document.getElementById('topicSuggest');
+    if (!btn) return;
+    const last = (!state.editingId && state.entryMode === 'class' && state.form.batch) ? findLastClassForBatch(state.form.batch) : null;
+    const typed = document.getElementById('topicInput').value.trim();
+    if (last && last.topic && typed !== last.topic.trim()) {
+      document.getElementById('topicSuggestText').textContent = `Last used: ${last.topic}`;
+      btn.hidden = false;
+    } else {
+      btn.hidden = true;
+    }
   }
 
   function showFormMsg(text) {
@@ -2676,7 +2790,7 @@
     const endEl = document.getElementById('endTimeInput');
     if (startEl.value || endEl.value) return;
     const now = new Date();
-    const end = new Date(now.getTime() + 45 * 60000);
+    const end = new Date(now.getTime() + DEFAULT_DURATION * 60000);
     const toHHMM = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
     startEl.value = toHHMM(now);
     endEl.value = toHHMM(end);
@@ -3402,6 +3516,50 @@
     } else {
       switchTab('today');
     }
+  });
+
+  document.getElementById('allBatchesToggle').addEventListener('click', () => {
+    state.allBatchesOpen = !document.getElementById('allBatchesPanel').classList.contains('open');
+    renderRecentAndAllBatches();
+  });
+  document.querySelectorAll('#durChips [data-dur]').forEach((c) => c.addEventListener('click', () => {
+    const startEl = document.getElementById('startTimeInput');
+    if (!startEl.value) { const n = new Date(); startEl.value = minToT(n.getHours() * 60 + n.getMinutes()); }
+    document.getElementById('endTimeInput').value = minToT(tMin(startEl.value) + Number(c.getAttribute('data-dur')));
+    showFormMsg('');
+    syncDurChips();
+  }));
+  let lastStartMin = null;
+  document.getElementById('startTimeInput').addEventListener('focus', () => { lastStartMin = tMin(document.getElementById('startTimeInput').value); });
+  document.getElementById('startTimeInput').addEventListener('change', () => {
+    // Moving the start time keeps the class length the same.
+    const startEl = document.getElementById('startTimeInput');
+    const endEl = document.getElementById('endTimeInput');
+    const s0 = lastStartMin;
+    const s1 = tMin(startEl.value);
+    const e0 = tMin(endEl.value);
+    let dur = (s0 != null && e0 != null && e0 > s0) ? e0 - s0 : null;
+    if (dur == null && (e0 == null || (s1 != null && e0 <= s1))) dur = DEFAULT_DURATION;
+    if (s1 != null && dur != null) endEl.value = minToT(s1 + dur);
+    lastStartMin = s1;
+    showFormMsg('');
+    syncDurChips();
+  });
+  document.getElementById('endTimeInput').addEventListener('change', () => {
+    const a = tMin(document.getElementById('startTimeInput').value);
+    const b = tMin(document.getElementById('endTimeInput').value);
+    showFormMsg(a != null && b != null && b <= a ? 'End time must be after the start time.' : '');
+    syncDurChips();
+  });
+  document.getElementById('topicInput').addEventListener('input', renderTopicSuggest);
+  document.getElementById('topicSuggest').addEventListener('click', () => {
+    const last = state.form.batch ? findLastClassForBatch(state.form.batch) : null;
+    if (!last || !last.topic) return;
+    const t = document.getElementById('topicInput');
+    t.value = last.topic;
+    state.form.topic = last.topic;
+    renderTopicSuggest();
+    t.focus();
   });
 
   document.getElementById('modeChips').querySelectorAll('[data-mode]').forEach((btn) => {
@@ -4779,7 +4937,7 @@
     state.formWing = wing;
     selectBatch(batch);
     const last = findLastClassForBatch(batch);
-    let duration = 45;
+    let duration = DEFAULT_DURATION;
     if (last && last.startTimeStr && last.endTimeStr) {
       const [sh, sm] = last.startTimeStr.split(':').map(Number);
       const [eh, em] = last.endTimeStr.split(':').map(Number);
@@ -4790,21 +4948,21 @@
     document.getElementById('startTimeInput').value = match.slot.time;
     document.getElementById('endTimeInput').value = `${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`;
     setSchedHint(`Filled in from your Schedule: ${batch} at ${formatTimeStr(match.slot.time)}. Change anything if needed.`);
+    syncDurChips();
   }
 
   function selectBatch(batch) {
     setSchedHint('');
     const last = findLastClassForBatch(batch);
+    const typedTopic = document.getElementById('topicInput').value;
     state.form = {
       batch,
-      topic: (last && last.topic) || '',
+      topic: typedTopic,
       worksheet: false,
       material: false,
       test: false,
       homework: false
     };
-    renderForm();
-    document.getElementById('topicInput').value = state.form.topic;
     document.getElementById('worksheetNoteInput').value = '';
     document.getElementById('materialNoteInput').value = '';
     document.getElementById('testNoteInput').value = '';
@@ -4817,6 +4975,7 @@
       document.getElementById('endTimeInput').value = '';
       prefillClassTiming();
     }
+    renderForm();
   }
 
   function prefillActivityFromLast() {
@@ -4853,6 +5012,9 @@
     document.getElementById('materialNoteInput').value = cls.materialNote || '';
     document.getElementById('testNoteInput').value = cls.testNote || '';
     document.getElementById('homeworkNoteInput').value = cls.homeworkNote || '';
+    const editWing = wingForBatch(state.form.batch);
+    if (editWing) state.formWing = editWing;
+    renderForm();
     switchTab('add');
   }
 
@@ -4932,6 +5094,10 @@
       showFormMsg('Please fill in the class start and end time.');
       return;
     }
+    if (tMin(endTimeStr) <= tMin(startTimeStr)) {
+      showFormMsg('End time must be after the start time.');
+      return;
+    }
     showFormMsg('');
     state.saving = true;
     renderForm();
@@ -4950,17 +5116,17 @@
         testNote: document.getElementById('testNoteInput').value.trim(),
         homeworkNote: document.getElementById('homeworkNoteInput').value.trim()
       };
-      if (editingId) {
-        await state.db.collection('classes').doc(editingId).update(payload);
-      } else {
-        await state.db.collection('classes').add(Object.assign({
+      const writeP = editingId
+        ? state.db.collection('classes').doc(editingId).update(payload)
+        : state.db.collection('classes').add(Object.assign({
           entryType: 'class',
           teacherId: state.teacherId,
           date: entryDate,
           subject: state.teacherSubject,
           createdAt: Date.now()
         }, payload));
-      }
+      // The entry is stored on the phone right away; don't keep the teacher waiting when the network is slow or offline.
+      await waitForWrite(writeP);
       state.editingId = null;
       state.editingSourceTab = null;
       state.addTargetDate = null;
@@ -4975,7 +5141,7 @@
       } else {
         switchTab('today');
       }
-      showToast(editingId ? 'Class updated' : 'Class saved');
+      showToast(editingId ? '✓ Class updated' : '✓ Class saved');
     } catch (err) {
       flashOffline();
     } finally {
@@ -4983,6 +5149,11 @@
       renderForm();
     }
   });
+
+  function waitForWrite(p) {
+    if (!navigator.onLine) { p.catch(() => flashOffline()); return Promise.resolve(); }
+    return Promise.race([p, new Promise((res) => setTimeout(res, 6000))]);
+  }
 
   document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
   document.getElementById('adminDatePrev').addEventListener('click', () => {
