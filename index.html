@@ -689,8 +689,11 @@
   #scheduleList .tl-item { gap: 8px; }
   .sv-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .sv-tlbl { font-size: 12.5px; font-weight: 600; color: var(--muted-2); margin-bottom: 4px; }
-  .sv-durfield { flex-direction: row; align-items: center; gap: 10px; margin-top: -4px; }
-  .sv-durfield label { margin: 0; }
+  .sv-durfield { margin-top: -4px; }
+  #svDurChips { flex-wrap: nowrap; gap: 6px; }
+  #svDurChips .chip { flex: 1; padding: 8px 4px; justify-content: center; text-align: center; white-space: nowrap; min-width: 0; }
+  .sv-form-head { display: flex; align-items: center; justify-content: space-between; }
+  #svThisWeek[hidden] { display: none; }
   .sv-form-btns { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
   .sv-form-btns .btn-secondary { padding: 12px 0; }
   .sv-day { display: flex; align-items: baseline; gap: 6px; padding: 10px 0 2px; }
@@ -1303,6 +1306,7 @@
         <div class="hv-label"><div id="svLabel"></div><div class="sv-which" id="svWhich"></div></div>
         <button type="button" class="hv-arrow" id="svNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
+      <button type="button" class="hv-back" id="svThisWeek" hidden style="align-self:center; margin-top:-6px;">Back to this week</button>
       <div class="sv-summary" id="svSummary"></div>
       <div class="sv-actions">
         <button type="button" class="save-btn" id="svAddBtn">+ Add Slot</button>
@@ -1310,7 +1314,7 @@
       </div>
 
       <div class="panel sv-form" id="svFormPanel" hidden>
-        <div class="panel-title" id="schedulePanelTitle">Add Slot</div>
+        <div class="sv-form-head"><div class="panel-title" id="schedulePanelTitle" style="margin:0;">Add Slot</div><button type="button" class="hv-sheet-x" id="svFormClose" aria-label="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
         <div class="field">
           <label>Day <span class="sv-hint" id="svDayHint">· tap one or more days</span></label>
           <div class="sv-days" id="scheduleDayChips"></div>
@@ -1765,7 +1769,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 2.3 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 2.4 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3891,6 +3895,7 @@
     const days = datesBetween(sv.weekStart, shiftDateStr(sv.weekStart, 6));
     document.getElementById('svLabel').textContent = `${dateObj(days[0]).getDate()} ${dateObj(days[0]).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(days[6]).getDate()} ${dateObj(days[6]).toLocaleDateString('en-GB', { month: 'short' })}`;
     document.getElementById('svWhich').textContent = svWeekLabel(sv.weekStart);
+    document.getElementById('svThisWeek').hidden = sv.weekStart === mondayOf(todayStr());
     document.getElementById('svNext').disabled = sv.weekStart >= shiftDateStr(mondayOf(todayStr()), 28);
     renderSvForm();
     const copyBtn = document.getElementById('svCopyBtn');
@@ -3903,7 +3908,7 @@
     days.forEach((d, i) => {
       const daySlots = slots.filter((s) => slotDate(s) === d);
       const isSun = i === 6;
-      if (isSun && !daySlots.length) return;
+      if (isSun && !daySlots.length && d !== todayStr()) return;
       const matched = matchDaySlots(daySlots, hvDay(d).classes);
       matched.forEach((m) => { counts[m.status]++; if (m.status !== 'cancelled') { counts.total++; counts.mins += slotDuration(m.slot); } });
       const today = d === todayStr();
@@ -4079,6 +4084,7 @@
   }
   function openSvForm(editing) {
     const sv = svState();
+    if (!sv.formOpen) { try { history.pushState({ svForm: 1 }, ''); } catch (err) { /* ignore */ } }
     sv.formOpen = true;
     if (!editing) {
       state.editingScheduleId = null;
@@ -4113,7 +4119,15 @@
     openSvForm(true);
   }
 
+  // Closing the form: if it added a history step (for the phone's Back button), step back instead.
   function cancelScheduleEdit() {
+    if (history.state && history.state.svForm) { history.back(); return; }
+    closeSvFormNow();
+  }
+  window.addEventListener('popstate', () => {
+    if (state.sv && state.sv.formOpen && !(history.state && history.state.svForm)) closeSvFormNow();
+  });
+  function closeSvFormNow() {
     state.editingScheduleId = null;
     svState().formOpen = false;
     document.getElementById('scheduleTimeInput').value = '';
@@ -4310,6 +4324,8 @@
 
   document.getElementById('cancelScheduleEditBtn').addEventListener('click', cancelScheduleEdit);
   document.getElementById('svAddBtn').addEventListener('click', () => openSvForm(false));
+  document.getElementById('svFormClose').addEventListener('click', cancelScheduleEdit);
+  document.getElementById('svThisWeek').addEventListener('click', () => { svState().weekStart = mondayOf(todayStr()); renderScheduleList(); });
   document.getElementById('svPrev').addEventListener('click', () => { const sv = svState(); sv.weekStart = shiftDateStr(sv.weekStart, -7); renderScheduleList(); });
   document.getElementById('svNext').addEventListener('click', () => { const sv = svState(); sv.weekStart = shiftDateStr(sv.weekStart, 7); renderScheduleList(); });
   document.querySelectorAll('#svDurChips [data-sv-dur]').forEach((b) => b.addEventListener('click', () => {
