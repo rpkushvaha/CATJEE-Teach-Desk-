@@ -386,6 +386,95 @@
   .sched-hint.show { display: flex; }
   .sched-hint .ic { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
   @media (prefers-reduced-motion: reduce) { .splash-logo, .splash-word, .splash-bar::after, .intro-slide, .intro-root.open { animation: none; transition: none; } }
+
+  /* ---------- Today screen redesign ---------- */
+  #view-today { gap: 16px; }
+  .today-hello { display: flex; flex-direction: column; gap: 2px; }
+  .hello-title { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .hello-date { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+  #view-today .status-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; gap: 12px;
+    box-shadow: 0 1px 3px rgba(23,23,23,0.06); color: var(--ink); }
+  #view-today .status-card.in { background: var(--card); color: var(--ink); border-color: var(--line);
+    box-shadow: inset 4px 0 0 #16A34A, 0 1px 3px rgba(23,23,23,0.06); }
+  #view-today .status-text { font-size: 15px; font-weight: 700; }
+  #view-today .timer { text-align: left; padding: 0; }
+  #view-today .timer-num { font-size: 34px; font-weight: 600; letter-spacing: -.01em; }
+  #view-today .timer-label { font-size: 12.5px; color: var(--muted); opacity: 1; margin-top: 4px; }
+  #view-today #sessionCountLabel { color: var(--ink); font-weight: 600; font-size: 13px; margin-top: 6px; }
+  #view-today .btn { padding: 13px 0; }
+  #view-today .btn-checkout { background: var(--ink); color: var(--paper); border: none; }
+  #view-today .loc-line { text-align: left; color: var(--muted); opacity: 1; min-height: 0; }
+  #view-today .loc-line:empty { display: none; }
+
+  .tsec { display: flex; flex-direction: column; gap: 10px; }
+  .tsec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .tsec-title { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
+  .tsec-meta { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+
+  .sum-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .sum-tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 6px; text-align: center; min-width: 0; }
+  .sum-num { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); line-height: 1.2; white-space: nowrap; }
+  .sum-lbl { font-size: 11.5px; color: var(--muted); font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .tl-list { gap: 8px; }
+  .tl-item { display: flex; gap: 10px; align-items: stretch; }
+  .tl-time { width: 52px; flex-shrink: 0; padding-top: 12px; text-align: right; font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.1; }
+  .tl-time small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); margin-top: 2px; }
+  .tl-card { flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px;
+    display: flex; flex-direction: column; gap: 5px; border-left-width: 3px; }
+  .tl-card.done { border-left-color: #16A34A; }
+  .tl-card.live { border-left-color: var(--gold); }
+  .tl-card.upcoming { border-left-color: var(--line); }
+  .tl-card.missed { border-left-color: #D97706; }
+  .tl-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .tl-batch { font-size: 14.5px; font-weight: 700; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tl-pill { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; flex-shrink: 0; }
+  .tl-pill.done { background: rgba(22,163,74,.12); color: #15803D; }
+  .tl-pill.live { background: var(--gold-soft); color: var(--gold); }
+  .tl-pill.upcoming { background: var(--neutral-soft); color: var(--muted-2); }
+  .tl-pill.missed { background: rgba(217,119,6,.12); color: #B45309; }
+  .tl-topic { font-size: 13.5px; color: var(--muted-2); line-height: 1.45; overflow-wrap: anywhere; }
+  .tl-topic.faint { color: var(--muted); font-style: italic; }
+  .tl-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .tl-meta { font-size: 12px; color: var(--muted); }
+  .tl-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tl-tag { font-size: 11px; font-weight: 600; color: var(--muted-2); background: var(--neutral-soft); padding: 2px 7px; border-radius: 6px; }
+  .tl-actions { display: flex; gap: 2px; margin-left: auto; }
+  .tl-actions .del-btn { padding: 6px; }
+  .tl-log { align-self: flex-start; background: none; border: 1px solid var(--line); color: var(--ink); font-weight: 600; font-size: 12.5px;
+    padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+  .tl-card.live .tl-log { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .tl-sub { font-size: 12.5px; font-weight: 600; color: var(--muted); margin: 6px 0 -2px; }
+  .tl-empty { background: var(--card); border: 1px dashed var(--line); border-radius: 12px; padding: 20px 16px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .tl-empty .ic { color: var(--muted); }
+  .tl-empty-title { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+  .tl-empty-sub { font-size: 13px; color: var(--muted); line-height: 1.5; max-width: 260px; }
+  .tl-empty-btn { margin-top: 6px; background: none; border: 1.5px solid var(--gold); color: var(--gold); font-weight: 700; font-size: 13px;
+    padding: 8px 16px; border-radius: 10px; cursor: pointer; }
+  .tl-empty.small { padding: 12px; flex-direction: row; justify-content: center; }
+  .tl-empty.small .tl-empty-title { font-size: 13px; font-weight: 600; color: var(--muted-2); }
+
+  .sess-toggle { width: 100%; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 12px; cursor: pointer; color: var(--ink); text-align: left; }
+  .sess-t { font-size: 13.5px; font-weight: 600; }
+  .sess-count { font-size: 12.5px; color: var(--muted); flex: 1; }
+  .sess-chev { color: var(--muted); transition: transform .2s ease; }
+  .sess-toggle[aria-expanded="true"] .sess-chev { transform: rotate(180deg); }
+  .qa-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .qa-btn { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 11px 4px 9px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--ink); font-size: 12px; font-weight: 600; min-width: 0; }
+  .qa-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .qa-btn .ic { color: var(--gold); }
+  .qa-btn.qa-primary { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .qa-btn.qa-primary .ic { color: #fff; }
+  .qa-btn[aria-expanded="true"] { border-color: var(--gold); background: var(--gold-soft); }
+  .qa-btn:active { transform: scale(.97); }
+  .report-panel { display: none; flex-direction: column; }
+  .report-panel.open { display: flex; }
+  .report-panel .btn-secondary { margin-top: 0 !important; margin-bottom: 8px; }
+  @media (max-width: 340px) { .sum-num { font-size: 16px; } .tl-time { width: 46px; } .qa-btn { font-size: 11px; } }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
   .drawer-root.open { pointer-events: auto; visibility: visible; transition: none; }
@@ -712,6 +801,11 @@
 
     <!-- TODAY -->
     <div class="tab-view active" id="view-today">
+      <div class="today-hello">
+        <div class="hello-title" id="helloTitle">Welcome</div>
+        <div class="hello-date" id="helloDate"></div>
+      </div>
+
       <div class="status-card" id="statusCard">
         <div class="status-row">
           <span class="status-dot" id="statusDot"></span>
@@ -728,23 +822,43 @@
       </div>
 
       <div id="sessionsSection" style="display:none;">
-        <div class="section-head">
-          <div class="section-title" style="font-size:15px;">Today's Sessions</div>
-        </div>
-        <div class="class-list" id="sessionsList" style="margin-top:8px;"></div>
+        <button class="sess-toggle" id="sessToggle" aria-expanded="false">
+          <span class="sess-t">Today's sessions</span>
+          <span class="sess-count" id="sessCount"></span>
+          <svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="class-list" id="sessionsList" style="margin-top:8px; display:none;"></div>
       </div>
 
-      <div>
-        <div class="section-head">
-          <div class="section-title" id="todayHeading">Today's Activity</div>
-          <div style="display:flex; gap:10px;">
-            <button class="add-entry-btn" id="addActivityLink">+ Activity</button>
-            <button class="add-entry-btn" id="addClassLink">+ Class</button>
-          </div>
+      <section class="tsec">
+        <div class="tsec-head"><div class="tsec-title">Today's Summary</div></div>
+        <div class="sum-grid">
+          <div class="sum-tile"><div class="sum-num" id="sumClasses">0</div><div class="sum-lbl">Classes</div></div>
+          <div class="sum-tile"><div class="sum-num" id="sumHours">0m</div><div class="sum-lbl">Teaching</div></div>
+          <div class="sum-tile"><div class="sum-num" id="sumWorksheets">0</div><div class="sum-lbl">Worksheets</div></div>
+          <div class="sum-tile"><div class="sum-num" id="sumTests">0</div><div class="sum-lbl">Tests</div></div>
         </div>
-        <div class="class-list" id="todayClassList" style="margin-top:10px;">
+      </section>
+
+      <section class="tsec">
+        <div class="tsec-head">
+          <div class="tsec-title" id="todayHeading">Today's Classes</div>
+          <div class="tsec-meta" id="todayClassesMeta"></div>
+        </div>
+        <div class="class-list tl-list" id="todayClassList">
           <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
         </div>
+      </section>
+
+      <section class="tsec">
+        <div class="tsec-head"><div class="tsec-title">Quick Actions</div></div>
+        <div class="qa-row">
+          <button class="qa-btn qa-primary" id="addClassLink"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add Class</span></button>
+          <button class="qa-btn" id="addActivityLink"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg><span>Activity</span></button>
+          <button class="qa-btn" id="qaSchedule"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span>Schedule</span></button>
+          <button class="qa-btn" id="qaReport" aria-expanded="false"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span>Report</span></button>
+        </div>
+        <div class="report-panel" id="reportPanel">
         <button class="btn-secondary" id="downloadReportBtn" style="border-color: var(--line); margin-top: 12px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15l3 3 3-3"></path></svg>
           Download Today's Report (PDF)
@@ -754,7 +868,8 @@
           Share Today's Report (WhatsApp)
         </button>
         <div class="admin-sub" id="reportMsg" style="text-align:center; margin-top:4px;"></div>
-      </div>
+        </div>
+      </section>
     </div>
 
     <!-- ADD CLASS / ACTIVITY -->
@@ -1752,6 +1867,7 @@
   // ---------- rendering ----------
 
   function renderStatus() {
+    renderHello();
     const c = state.campusToday;
     const card = document.getElementById('statusCard');
     const dot = document.getElementById('statusDot');
@@ -1780,7 +1896,7 @@
 
     if (c.checkedIn) {
       card.classList.add('in');
-      dot.style.background = 'var(--gold)';
+      dot.style.background = '#16A34A';
       text.textContent = 'On Campus';
       btn.className = 'btn btn-checkout';
       btn.innerHTML = svgLogout() + 'Check Out';
@@ -1942,10 +2058,178 @@
     });
   }
 
+  // ---------- Today screen: greeting, summary, class timeline ----------
+  const SLOT_MINUTES = 45;
+  function hhmmToMin(t) {
+    const p = String(t || '').split(':').map(Number);
+    return (p.length >= 2 && !isNaN(p[0]) && !isNaN(p[1])) ? p[0] * 60 + p[1] : null;
+  }
+  function fmtTeaching(mins) {
+    if (!mins) return '0m';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h ? `${h}h ${pad(m)}m` : `${m}m`;
+  }
+  function renderHello() {
+    const hr = new Date().getHours();
+    const greet = hr < 12 ? 'Good Morning' : (hr < 17 ? 'Good Afternoon' : 'Good Evening');
+    const first = ((state.user && state.user.name) || '').trim().split(/\s+/)[0] || '';
+    const title = first ? `${greet}, ${first}` : greet;
+    const dateTxt = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const t = document.getElementById('helloTitle');
+    const d = document.getElementById('helloDate');
+    if (t && t.textContent !== title) t.textContent = title;
+    if (d && d.textContent !== dateTxt) d.textContent = dateTxt;
+  }
+  function todayScheduleSlots() {
+    const today = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
+    return (state.scheduleSlots || [])
+      .filter((sl) => sl && sl.day === today && hhmmToMin(sl.time) != null && sl.label && !state.pendingDeleteIds.has(sl.id))
+      .slice()
+      .sort((x, y) => hhmmToMin(x.time) - hhmmToMin(y.time));
+  }
+  function classDuration(c) {
+    const a = hhmmToMin(c.startTimeStr);
+    const b = hhmmToMin(c.endTimeStr);
+    if (a == null || b == null) return 0;
+    let d = b - a;
+    if (d < 0) d += 24 * 60;
+    return d > 0 && d <= 12 * 60 ? d : 0;
+  }
+  function buildTodayTimeline() {
+    const entries = (state.classesToday || []).filter((c) => !state.pendingDeleteIds.has(c.id));
+    const classes = entries.filter((c) => c.entryType !== 'activity');
+    const activities = entries.filter((c) => c.entryType === 'activity');
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const used = new Set();
+    const items = [];
+    const classStatus = (c) => {
+      const a = hhmmToMin(c.startTimeStr);
+      const b = hhmmToMin(c.endTimeStr);
+      if (a != null && b != null && b > a) {
+        if (nowMin < a) return 'upcoming';
+        if (nowMin < b) return 'live';
+      }
+      return 'done';
+    };
+    todayScheduleSlots().forEach((slot) => {
+      const sMin = hhmmToMin(slot.time);
+      let match = null;
+      let bestDiff = Infinity;
+      classes.forEach((c) => {
+        if (used.has(c.id) || c.batch !== slot.label) return;
+        const cm = hhmmToMin(c.startTimeStr);
+        const diff = cm == null ? 600 : Math.abs(cm - sMin);
+        if (diff < bestDiff) { bestDiff = diff; match = c; }
+      });
+      if (match) {
+        used.add(match.id);
+        const cm = hhmmToMin(match.startTimeStr);
+        items.push({ kind: 'class', min: cm != null ? cm : sMin, cls: match, status: classStatus(match) });
+      } else {
+        const status = nowMin < sMin ? 'upcoming' : (nowMin < sMin + SLOT_MINUTES ? 'live' : 'missed');
+        items.push({ kind: 'slot', min: sMin, slot, status });
+      }
+    });
+    classes.forEach((c) => {
+      if (used.has(c.id)) return;
+      const cm = hhmmToMin(c.startTimeStr);
+      items.push({ kind: 'class', min: cm != null ? cm : 24 * 60, cls: c, status: classStatus(c) });
+    });
+    items.sort((x, y) => x.min - y.min);
+    return { items, classes, activities };
+  }
+  const TL_LABEL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged' };
+  function tlTimeHtml(min) {
+    if (min == null || min >= 24 * 60) return '<div class="tl-time">—</div>';
+    const txt = formatTimeStr(`${pad(Math.floor(min / 60))}:${pad(min % 60)}`);
+    const parts = txt.split(' ');
+    return `<div class="tl-time">${escapeHtml(parts[0])}<small>${escapeHtml(parts[1] || '')}</small></div>`;
+  }
+  function tlItemHtml(it) {
+    const pill = `<span class="tl-pill ${it.status}">${TL_LABEL[it.status]}</span>`;
+    if (it.kind === 'slot') {
+      const btnTxt = it.status === 'live' ? 'Log this class' : (it.status === 'missed' ? 'Log it now' : 'Log early');
+      return `<div class="tl-item">${tlTimeHtml(it.min)}
+        <div class="tl-card ${it.status}">
+          <div class="tl-top"><div class="tl-batch">${escapeHtml(it.slot.label)}</div>${pill}</div>
+          <div class="tl-topic faint">Scheduled class</div>
+          ${it.status === 'upcoming' ? '' : `<button class="tl-log" data-log-slot="${escapeHtml(it.slot.id)}">${btnTxt}</button>`}
+        </div></div>`;
+    }
+    const c = it.cls;
+    const range = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)}` : '';
+    const tags = [];
+    if (c.worksheet) tags.push('Worksheet');
+    if (c.material) tags.push('Material');
+    if (c.test) tags.push('Test');
+    if (c.homework) tags.push('Homework');
+    return `<div class="tl-item">${tlTimeHtml(it.min)}
+      <div class="tl-card ${it.status}">
+        <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div>${pill}</div>
+        ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
+        <div class="tl-foot">
+          <div style="display:flex; flex-direction:column; gap:5px; min-width:0;">
+            ${range ? `<div class="tl-meta">${range}</div>` : ''}
+            ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
+          </div>
+          <div class="tl-actions">
+            <button class="del-btn" data-edit="${c.id}" aria-label="Edit class">${svgEdit()}</button>
+            <button class="del-btn" data-del="${c.id}" aria-label="Delete class">${svgTrash()}</button>
+          </div>
+        </div>
+      </div></div>`;
+  }
+  function renderTodaySummary(classes) {
+    const set = (id, v) => { const e = document.getElementById(id); if (e && e.textContent !== String(v)) e.textContent = v; };
+    set('sumClasses', classes.length);
+    set('sumHours', fmtTeaching(classes.reduce((sum, c) => sum + classDuration(c), 0)));
+    set('sumWorksheets', classes.filter((c) => c.worksheet).length);
+    set('sumTests', classes.filter((c) => c.test).length);
+  }
   function renderTodayList() {
     const el = document.getElementById('todayClassList');
-    el.innerHTML = entryListHtml(state.classesToday);
+    if (!el) return;
+    renderHello();
+    if (!state.todayClassesLoaded) return;
+    const { items, classes, activities } = buildTodayTimeline();
+    renderTodaySummary(classes);
+    const meta = document.getElementById('todayClassesMeta');
+    const doneCount = items.filter((it) => it.status === 'done').length;
+    if (meta) meta.textContent = items.length ? `${doneCount} of ${items.length} done` : '';
+    let html = '';
+    if (items.length === 0) {
+      const emptyIcon = '<svg class="ic" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+      html = activities.length
+        ? '<div class="tl-empty small"><div class="tl-empty-title">No classes scheduled for today</div></div>'
+        : `<div class="tl-empty">${emptyIcon}<div class="tl-empty-title">No classes scheduled for today</div><div class="tl-empty-sub">Set up your weekly classes in Schedule, or log a class now.</div><button class="tl-empty-btn" data-empty-add="1">+ Add Class</button></div>`;
+    } else {
+      html = items.map(tlItemHtml).join('');
+    }
+    if (activities.length) html += '<div class="tl-sub">Other activities</div>' + mergedActivitiesCardHtml(activities, false);
+    if (el._lastHtml === html) return;
+    el._lastHtml = html;
+    el.innerHTML = html;
     wireEntryListEvents(el, () => state.classesToday, 'today');
+    el.querySelectorAll('[data-log-slot]').forEach((btn) => {
+      btn.addEventListener('click', () => openAddForSlot(btn.getAttribute('data-log-slot')));
+    });
+    el.querySelectorAll('[data-empty-add]').forEach((btn) => {
+      btn.addEventListener('click', () => document.getElementById('addClassLink').click());
+    });
+  }
+  function openAddForSlot(slotId) {
+    const slot = (state.scheduleSlots || []).find((x) => x.id === slotId);
+    if (!slot) return;
+    state.editingId = null;
+    state.editingSourceTab = null;
+    state.addTargetDate = null;
+    state.entryMode = 'class';
+    resetClassForm();
+    fillClassFromSlot(slot, hhmmToMin(slot.time));
+    renderForm();
+    switchTab('add');
   }
 
   function mondayOf(dateStr) {
@@ -3051,6 +3335,15 @@
   document.getElementById('cancelScheduleEditBtn').addEventListener('click', cancelScheduleEdit);
   document.getElementById('addClassLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'class'; prefillClassFromLast(); switchTab('add'); });
   document.getElementById('addActivityLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast(); switchTab('add'); });
+  document.getElementById('qaSchedule').addEventListener('click', () => document.getElementById('navSchedule').click());
+  document.getElementById('qaReport').addEventListener('click', () => {
+    const p = document.getElementById('reportPanel');
+    const open = !p.classList.contains('open');
+    p.classList.toggle('open', open);
+    document.getElementById('qaReport').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) setTimeout(() => p.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 30);
+  });
+  setInterval(() => { if (state.tab === 'today') renderTodayList(); }, 30000);
   document.getElementById('downloadReportBtn').addEventListener('click', () => {
     downloadReportForDate(todayStr(), document.getElementById('reportMsg'));
   });
@@ -3543,10 +3836,19 @@
     if (sessions.length === 0) { section.style.display = 'none'; return; }
     section.style.display = 'block';
     list.innerHTML = sessionsCardsHtml(sessions);
+    const cnt = document.getElementById('sessCount');
+    if (cnt) cnt.textContent = `${sessions.length} · view or edit times`;
     wireSessionsEvents(list, todayStr(), sessions, renderSessions);
   }
 
   document.getElementById('checkBtn').addEventListener('click', performCheckToggle);
+  document.getElementById('sessToggle').addEventListener('click', () => {
+    const list = document.getElementById('sessionsList');
+    const btn = document.getElementById('sessToggle');
+    const open = list.style.display === 'none';
+    list.style.display = open ? 'flex' : 'none';
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
 
   function reportFilenameFor(date) {
     return `CATJEE-Report-${date}.pdf`;
@@ -4405,9 +4707,14 @@
     if (state.addTargetDate && state.addTargetDate !== todayStr()) return;
     const match = findCurrentScheduleSlot();
     if (!match) return;
-    const batch = match.slot.label;
+    fillClassFromSlot(match.slot, match.startMin);
+  }
+
+  function fillClassFromSlot(slot, startMin) {
+    const batch = slot.label;
     const wing = wingForBatch(batch);
-    if (!wing) return;
+    if (!wing || startMin == null) return;
+    const match = { slot, startMin };
     state.formWing = wing;
     selectBatch(batch);
     const last = findLastClassForBatch(batch);
@@ -5055,6 +5362,7 @@
 
     unsubscribers.push(db.collection('classes').where('teacherId', '==', tid).where('date', '==', today).orderBy('createdAt', 'desc').limit(50).onSnapshot((snap) => {
       state.classesToday = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.todayClassesLoaded = true;
       renderTodayList();
     }, () => flashOffline()));
 
@@ -5104,6 +5412,7 @@
     unsubscribers.push(db.collection('schedule/' + tid + '/slots').limit(100).onSnapshot((snap) => {
       state.scheduleSlots = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       if (state.tab === 'schedule') renderScheduleList();
+      renderTodayList();
       pruneExpiredScheduleSlots();
     }, () => flashOffline()));
 
