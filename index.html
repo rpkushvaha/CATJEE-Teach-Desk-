@@ -120,7 +120,8 @@
   .brand-text { display: flex; flex-direction: column; }
   .brand-name { display: flex; align-items: center; }
   .brand-name img { height: 20px; width: auto; display: block; }
-  .brand-sub { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); }
+  /* "Teach Desk" lockup — identical in header, sign-in and splash (only scaled) */
+  .brand-sub { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: none; color: var(--muted-2); white-space: nowrap; line-height: 1.1; margin-top: 2px; }
   .avatar {
     width: 38px; height: 38px; border-radius: 999px; background: var(--gold-soft);
     border: 1.5px solid var(--gold);
@@ -358,7 +359,7 @@
   .splash-logo img, .splash-word img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .splash-word { height: 34px; animation: splashIn .6s .08s cubic-bezier(.22,.8,.26,1) both; }
   .splash-word img { width: auto; }
-  .splash-sub { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: -6px; }
+  .splash-sub { font-size: 18.5px; font-weight: 700; letter-spacing: .06em; text-transform: none; color: var(--muted-2); white-space: nowrap; line-height: 1.1; margin-top: -10px; }
   .splash-bar { width: 120px; height: 3px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 18px; }
   .splash-bar::after { content: ""; display: block; width: 40%; height: 100%; background: var(--gold); border-radius: 99px; animation: splashBar 1.1s ease-in-out infinite; }
   @keyframes splashIn { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
@@ -829,7 +830,7 @@
   .auth-logo img { width: 100%; height: 100%; object-fit: contain; }
   .auth-title { display: flex; align-items: center; justify-content: center; line-height: 1; }
   .auth-title img { height: 34px; width: auto; display: block; }
-  .auth-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 10px; }
+  .auth-sub { font-size: 18.5px; font-weight: 700; letter-spacing: .06em; text-transform: none; color: var(--muted-2); white-space: nowrap; line-height: 1.1; margin-top: -10px; margin-bottom: 10px; }
   .auth-tabs {
     display: flex; width: 100%; background: var(--neutral-soft); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 4px;
   }
@@ -1659,7 +1660,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 1.7 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 1.8 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
