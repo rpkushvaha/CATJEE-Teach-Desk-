@@ -105,15 +105,15 @@
   }
   #shell.hidden { display: none; }
   .topbar {
-    padding: 20px 20px 16px 20px; display: flex; align-items: center; justify-content: space-between;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 20px 9px 20px; display: flex; align-items: center; justify-content: space-between;
     background: var(--paper); border-bottom: 3px solid var(--gold);
   }
-  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 8px; }
   /* Brand sits on the right, teacher + menu on the left */
   .topbar { flex-direction: row-reverse; gap: 10px; }
   .brand-text { align-items: flex-start; text-align: left; }
   .logo {
-    width: 40px; height: 50px;
+    width: 31px; height: 38px;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .logo img { width: 100%; height: 100%; object-fit: contain; }
@@ -1660,7 +1660,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 1.8 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 1.9 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
