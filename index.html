@@ -246,7 +246,7 @@
     padding: 8px 13px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer;
     border: 1px solid var(--line); background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(23,23,23,0.03);
   }
-  .chip.active { background: var(--gold); color: #fff; border-color: var(--gold); box-shadow: none; }
+  .chip.active { background: var(--gold-soft); color: var(--gold); border-color: var(--gold); box-shadow: none; }
   .nested-box {
     background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--gold);
     border-radius: 12px; padding: 14px; margin-top: -2px;
@@ -668,6 +668,23 @@
   .sv-preview .warn, .sv-ampm { color: #B45309; font-weight: 600; }
   .sv-ampm { font-size: 11px; background: rgba(217,119,6,.12); border-radius: 5px; padding: 1px 6px; margin-left: 4px; }
   #scheduleList .tl-card { padding: 8px 11px; gap: 3px; }
+  .sv-rows { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .sv-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; min-height: 48px; }
+  .sv-row + .sv-row { border-top: 1px solid var(--line); }
+  .sv-row:active { background: var(--neutral-soft); }
+  .sv-time { width: 66px; flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .sv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .sv-batch { font-size: 13.5px; font-weight: 700; color: var(--ink); line-height: 1.3; overflow-wrap: anywhere; }
+  .sv-dur { font-size: 12px; color: var(--muted); }
+  .sv-topic { color: var(--muted); }
+  .sv-row .tl-pill { font-size: 10.5px; padding: 2px 7px; }
+  .sv-row.done { box-shadow: inset 3px 0 0 #16A34A; }
+  .sv-row.live { box-shadow: inset 3px 0 0 var(--gold); }
+  .sv-row.missed { box-shadow: inset 3px 0 0 #D97706; }
+  .sv-row.cancelled .sv-batch, .sv-row.cancelled .sv-time { text-decoration: line-through; color: var(--muted); }
+  .tl-pill.cancelled { background: var(--neutral-soft); color: var(--muted); }
+  .sv-summary b { display: block; color: var(--ink); font-weight: 700; font-size: 14px; }
+  .sv-summary span { display: block; margin-top: 1px; }
   #scheduleList .tl-time { padding-top: 9px; }
   #scheduleList .tl-item { gap: 8px; }
   .sv-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -679,7 +696,8 @@
   .sv-day { display: flex; align-items: baseline; gap: 6px; padding: 10px 0 2px; }
   .sv-day.today .hv-day-date { color: var(--gold); }
   .sv-today { font-size: 11px; font-weight: 700; color: #fff; background: var(--gold); border-radius: 999px; padding: 1px 8px; }
-  .sv-none { font-size: 12.5px; color: var(--muted); padding: 0 0 2px 62px; }
+  .sv-none { display: none; }
+  .sv-day { padding: 8px 0 4px !important; }
   .tl-card.missed { border-left-color: #D97706; }
   .sv-photos { padding: 12px 14px; }
   .sv-photos .panel-title { font-size: 14px; }
@@ -1144,6 +1162,7 @@
             <div class="chips" id="durChips">
               <button type="button" class="chip" data-dur="40">40m</button>
               <button type="button" class="chip" data-dur="50">50m</button>
+              <button type="button" class="chip" data-dur="60">1h</button>
               <button type="button" class="chip" data-dur="65">1h 5m</button>
             </div>
           </div>
@@ -1308,7 +1327,7 @@
           <label>Class Timing</label>
           <div class="sv-times">
             <div><div class="sv-tlbl">Start</div><input class="text-input" id="scheduleTimeInput" type="time"></div>
-            <div><div class="sv-tlbl">End</div><input class="text-input" id="scheduleEndInput" type="time"></div>
+            <div><div class="sv-tlbl">End <span class="sv-hint">· auto</span></div><input class="text-input" id="scheduleEndInput" type="time"></div>
           </div>
           <div class="sv-preview" id="svPreview"></div>
         </div>
@@ -1317,6 +1336,7 @@
           <div class="chips" id="svDurChips">
             <button type="button" class="chip" data-sv-dur="40">40m</button>
             <button type="button" class="chip" data-sv-dur="50">50m</button>
+            <button type="button" class="chip" data-sv-dur="60">1h</button>
             <button type="button" class="chip" data-sv-dur="65">1h 5m</button>
           </div>
         </div>
@@ -1745,7 +1765,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 2.2 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 2.3 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2389,7 +2409,7 @@
   function todayScheduleSlots() {
     const t = todayStr();
     return (state.scheduleSlots || [])
-      .filter((sl) => sl && slotDate(sl) === t && hhmmToMin(sl.time) != null && sl.label && !state.pendingDeleteIds.has(sl.id))
+      .filter((sl) => sl && !sl.cancelled && slotDate(sl) === t && hhmmToMin(sl.time) != null && sl.label && !state.pendingDeleteIds.has(sl.id))
       .slice()
       .sort((x, y) => hhmmToMin(x.time) - hhmmToMin(y.time));
   }
@@ -3801,6 +3821,7 @@
     }
   }
   function slotStatusFor(slot, matchCls) {
+    if (slot.cancelled && !matchCls) return 'cancelled';
     const d = slotDate(slot);
     const t = todayStr();
     const now = new Date();
@@ -3829,6 +3850,7 @@
     const sorted = slots.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
     sorted.forEach((slot) => {
       const sMin = hhmmToMin(slot.time);
+      if (slot.cancelled) return;
       (classes || []).forEach((c) => {
         if (c.entryType === 'activity' || c.batch !== slot.label || state.pendingDeleteIds.has(c.id)) return;
         const cm = hhmmToMin(c.startTimeStr);
@@ -3848,21 +3870,19 @@
     if (ws === shiftDateStr(t, -7)) return 'Last week';
     return '';
   }
-  const SV_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged' };
+  const SV_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged', cancelled: 'Cancelled' };
+  function svDur(m) { const h = Math.floor(m / 60), r = m % 60; return h ? (r ? `${h}h ${pad(r)}m` : `${h}h`) : `${r}m`; }
   function svSlotHtml(m) {
     const s = m.slot;
     const dur = slotDuration(s);
-    const subj = (m.cls && m.cls.subject) || state.teacherSubject || '';
     const st = hhmmToMin(s.time);
-    const endMin = st == null ? null : Math.min(st + dur, 23 * 60 + 59);
-    const range = st == null ? '' : `${formatTimeStr(s.time)} – ${formatTimeStr(`${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`)}`;
-    const topic = m.cls && m.cls.topic ? `<div class="tl-topic">${escapeHtml(m.cls.topic)}</div>` : '';
-    return `<div class="tl-item hv-rec" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">${tlTimeHtml(st)}
-      <div class="tl-card ${m.status}">
-        <div class="tl-top"><div class="tl-batch">${escapeHtml(s.label || 'Class')}</div><span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span></div>
-        ${topic}
-        <div class="tl-meta">${fmtTeaching(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${st != null && st < SV_EARLY ? '<span class="sv-ampm">Check AM/PM</span>' : ''}</div>
-      </div></div>`;
+    const ampm = st != null && st < SV_EARLY ? '<span class="sv-ampm">Check AM/PM</span>' : '';
+    const topic = m.cls && m.cls.topic ? `<span class="sv-topic"> · ${escapeHtml(m.cls.topic)}</span>` : '';
+    return `<div class="sv-row ${m.status}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
+      <span class="sv-time">${st != null ? escapeHtml(formatTimeStr(s.time)) : '—'}</span>
+      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}</span>${ampm}</span>
+      <span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span>
+    </div>`;
   }
   function renderScheduleList() {
     const el = document.getElementById('scheduleList');
@@ -3878,24 +3898,26 @@
     const slots = (state.scheduleSlots || []).filter((s) => !state.pendingDeleteIds.has(s.id));
     const missing = days.filter((d) => d <= todayStr() && d !== todayStr() && !hvDay(d).ready);
     if (missing.length) hvLoadMissing(missing);
-    const counts = { total: 0, done: 0, missed: 0, upcoming: 0, live: 0 };
+    const counts = { total: 0, done: 0, missed: 0, upcoming: 0, live: 0, cancelled: 0, mins: 0 };
     let html = '';
     days.forEach((d, i) => {
       const daySlots = slots.filter((s) => slotDate(s) === d);
       const isSun = i === 6;
       if (isSun && !daySlots.length) return;
       const matched = matchDaySlots(daySlots, hvDay(d).classes);
-      matched.forEach((m) => { counts.total++; counts[m.status]++; });
+      matched.forEach((m) => { counts[m.status]++; if (m.status !== 'cancelled') { counts.total++; counts.mins += slotDuration(m.slot); } });
       const today = d === todayStr();
-      html += `<div class="sv-day${today ? ' today' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${daySlots.length} class${daySlots.length === 1 ? '' : 'es'}` : ''}</span></div>`;
-      html += daySlots.length ? matched.map(svSlotHtml).join('') : '<div class="sv-none">No classes planned</div>';
+      const live = daySlots.filter((x) => !x.cancelled).length;
+      html += `<div class="sv-day${today ? ' today' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : ' · No classes'}</span></div>`;
+      if (daySlots.length) html += `<div class="sv-rows">${matched.map(svSlotHtml).join('')}</div>`;
     });
-    const parts = [];
+    const parts = [`${fmtTeaching(counts.mins)} teaching`];
     if (counts.done) parts.push(`${counts.done} done`);
     if (counts.live) parts.push(`${counts.live} in progress`);
     if (counts.upcoming) parts.push(`${counts.upcoming} upcoming`);
     if (counts.missed) parts.push(`${counts.missed} not logged`);
-    document.getElementById('svSummary').textContent = counts.total ? `${counts.total} class${counts.total === 1 ? '' : 'es'} planned · ${parts.join(' · ')}` : 'No classes planned for this week yet.';
+    if (counts.cancelled) parts.push(`${counts.cancelled} cancelled`);
+    document.getElementById('svSummary').innerHTML = counts.total || counts.cancelled ? `<b>${counts.total} class${counts.total === 1 ? '' : 'es'} · ${escapeHtml(parts[0])}</b>${parts.length > 1 ? `<span>${escapeHtml(parts.slice(1).join(' · '))}</span>` : ''}` : 'No classes planned for this week yet.';
     if (el._lastHtml !== html) {
       el._lastHtml = html;
       el.innerHTML = html;
@@ -3909,19 +3931,21 @@
     const m = matchDaySlots((state.scheduleSlots || []).filter((s) => slotDate(s) === d && !state.pendingDeleteIds.has(s.id)), hvDay(d).classes).find((x) => x.slot.id === id);
     const dur = slotDuration(slot);
     const body = document.getElementById('hvSheetBody');
-    const canLog = !m.cls && d <= todayStr();
+    const canLog = !m.cls && !slot.cancelled && d <= todayStr();
+    const canCancel = !m.cls;
     body.innerHTML = `<div class="hv-d-title">${escapeHtml(slot.label || 'Class')}</div>
       <div class="hv-d-wing">${escapeHtml(wingForBatch(slot.label) || '')}${state.teacherSubject ? ' · ' + escapeHtml(state.teacherSubject) : ''}</div>
       <div class="hv-d-rows" style="margin-top:10px;">
         <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dayHeading(d))}</span></div>
         <div class="hv-d-row"><span>Time</span><span>${slot.time ? formatTimeStr(slot.time) : '—'}</span></div>
-        <div class="hv-d-row"><span>Duration</span><span>${fmtTeaching(dur)}</span></div>
+        <div class="hv-d-row"><span>Duration</span><span>${svDur(dur)}</span></div>
         <div class="hv-d-row"><span>Status</span><span>${SV_PILL[m.status]}</span></div>
         ${m.cls && m.cls.topic ? `<div class="hv-d-row"><span>Topic</span><span>${escapeHtml(m.cls.topic)}</span></div>` : ''}
       </div>
       ${m.cls ? '<button type="button" class="dbtn-primary dbtn-block" id="svViewClass" style="margin-top:14px;">View logged class</button>' : ''}
       ${canLog ? '<button type="button" class="dbtn-primary dbtn-block" id="svLogClass" style="margin-top:14px;">Log this class</button>' : ''}
-      <div class="hv-d-btns sv-3btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary" id="svDupSlot" style="border-color: var(--line);">Duplicate</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Remove</button></div>`;
+      <div class="hv-d-btns sv-3btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary" id="svDupSlot" style="border-color: var(--line);">Duplicate</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Delete</button></div>
+      ${canCancel ? `<button type="button" class="btn-secondary dbtn-block" id="svCancelSlot" style="border-color: var(--line); margin-top:8px;">${slot.cancelled ? 'Restore class' : 'Cancel class'}</button>` : ''}`;
     const root = document.getElementById('hvSheet');
     root.classList.add('open');
     root.setAttribute('aria-hidden', 'false');
@@ -3930,6 +3954,16 @@
     const lb = document.getElementById('svLogClass');
     if (lb) lb.addEventListener('click', () => { closeHvSheet(); openAddForSlot(id, 'schedule'); });
     document.getElementById('svEditSlot').addEventListener('click', () => { closeHvSheet(); startEditScheduleSlot(id); });
+    const cb = document.getElementById('svCancelSlot');
+    if (cb) cb.addEventListener('click', async () => {
+      closeHvSheet();
+      if (!state.db || !state.teacherId) return;
+      const to = !slot.cancelled;
+      try {
+        await state.db.collection('schedule/' + state.teacherId + '/slots').doc(id).set({ cancelled: to }, { merge: true });
+        showToast(to ? 'Class marked as cancelled' : 'Class restored');
+      } catch (err) { flashOffline(err); }
+    });
     document.getElementById('svDupSlot').addEventListener('click', () => {
       closeHvSheet();
       const sv = svState();
@@ -4194,12 +4228,31 @@
       const ok = await showConfirm(`${formatTimeStr(time)} is very early in the morning. Is AM correct?`, 'Check the time', 'Yes, save');
       if (!ok) return;
     }
-    const clashes = [];
-    dates.forEach((d) => svOverlaps(d, startMin, startMin + dur, editingId).forEach((o) => clashes.push(`${dayHeading(d)}: ${o.label} (${formatTimeStr(o.time)} – ${svEndStr(o)})`)));
-    if (clashes.length) {
-      const ok = await showConfirm(`This time overlaps with:\n${clashes.join('\n')}`, 'Classes overlap', 'Save anyway');
+    // Exact repeats (same date, batch, start and end) are never saved twice.
+    const endMin = startMin + dur;
+    const isSame = (o, d) => o.id !== editingId && !state.pendingDeleteIds.has(o.id) && slotDate(o) === d && o.time === time && o.label === state.scheduleBatch && slotDuration(o) === dur;
+    const dupDates = dates.filter((d) => (state.scheduleSlots || []).some((o) => isSame(o, d)));
+    const newDates = dates.filter((d) => dupDates.indexOf(d) === -1);
+    if (!newDates.length) { showToast('This class is already scheduled for this time.', 'error'); return; }
+    const clashOf = (d) => svOverlaps(d, startMin, endMin, editingId).filter((o) => !o.cancelled && !isSame(o, d));
+    const range = `${formatTimeStr(time)} – ${formatTimeStr(svMinToHHMM(endMin))}`;
+    if (newDates.length > 1 || dupDates.length) {
+      const lines = dates.map((d) => {
+        if (dupDates.indexOf(d) !== -1) return `✕ ${dayHeading(d)} · already scheduled — skipped`;
+        const c = clashOf(d);
+        return c.length ? `⚠️ ${dayHeading(d)} · ${range} · overlaps ${c.map((o) => `${o.label} (${formatTimeStr(o.time)})`).join(', ')}` : `✓ ${dayHeading(d)} · ${range}`;
+      });
+      const ok = await showConfirm(`${state.scheduleBatch}\n\n${lines.join('\n')}`, `You are about to add ${newDates.length} class${newDates.length === 1 ? '' : 'es'}`, 'Add');
       if (!ok) return;
+    } else {
+      const c = clashOf(newDates[0]);
+      if (c.length) {
+        const ok = await showConfirm(`You already have a class scheduled during this time:\n${c.map((o) => `${o.label} · ${formatTimeStr(o.time)} – ${svEndStr(o)}`).join('\n')}\n\nAdd this class anyway?`, '⚠️ Time Conflict', 'Continue');
+        if (!ok) return;
+      }
     }
+    dates.length = 0;
+    newDates.forEach((d) => dates.push(d));
     sv.formDur = dur;
     const col = state.db.collection('schedule/' + state.teacherId + '/slots');
     try {
@@ -5767,7 +5820,7 @@
     const nowMin = now.getHours() * 60 + now.getMinutes();
     let best = null;
     (state.scheduleSlots || []).forEach((s) => {
-      if (!s || slotDate(s) !== todayD || !s.time || !s.label) return;
+      if (!s || s.cancelled || slotDate(s) !== todayD || !s.time || !s.label) return;
       if (state.pendingDeleteIds && state.pendingDeleteIds.has(s.id)) return;
       const [h, m] = String(s.time).split(':').map(Number);
       if (isNaN(h) || isNaN(m)) return;
@@ -6208,7 +6261,7 @@
       const now = new Date();
       const today = todayStr();
       const todayAbbr = DAY_ABBR[now.getDay()];
-      state.scheduleSlots.filter((s) => slotDate(s) === today).forEach((slot) => {
+      state.scheduleSlots.filter((s) => !s.cancelled && slotDate(s) === today).forEach((slot) => {
         const [h, m] = slot.time.split(':').map(Number);
         const slotDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
         const minsUntil = (slotDate.getTime() - now.getTime()) / 60000;
