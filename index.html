@@ -556,6 +556,9 @@
   .hv-search input { font-size: 15px; }
   .hv-filters { display: flex; flex-direction: column; gap: 6px; background: var(--neutral-soft); border-radius: 12px; padding: 10px 12px; }
   .hv-flbl { font-size: 12.5px; font-weight: 600; color: var(--muted-2); }
+  .hv-fnote { font-size: 12px; color: var(--muted); margin-top: -2px; }
+  .hv-fnote[hidden] { display: none; }
+  .hv-filters select:disabled { opacity: .55; }
   .hv-filters select { font-size: 14px; padding: 9px 10px; }
   .hv-filters .chip { padding: 6px 12px; font-size: 12.5px; }
   .hv-period { display: flex; flex-direction: column; gap: 8px; }
@@ -1157,6 +1160,7 @@
       <div class="hv-filters" id="hvFilterRow" hidden>
         <div class="hv-flbl">Class / Batch</div>
         <select class="text-input" id="hvBatch"></select>
+        <div class="hv-fnote" id="hvBatchNote" hidden>Batch filter applies to classes only.</div>
         <div class="hv-flbl">Show</div>
         <div class="chips" id="hvKind">
           <button type="button" class="chip active" data-kind="all">All</button>
@@ -1164,6 +1168,7 @@
           <button type="button" class="chip" data-kind="tests">Tests</button>
           <button type="button" class="chip" data-kind="worksheets">Worksheets</button>
           <button type="button" class="chip" data-kind="other">Other Work</button>
+          <button type="button" class="chip" data-kind="leave">Leave</button>
         </div>
       </div>
       <div id="hvPeriodBlock" class="hv-period">
@@ -2645,7 +2650,9 @@
     if (h.kind === 'classes' && isAct) return false;
     if (h.kind === 'tests' && (isAct || !c.test)) return false;
     if (h.kind === 'worksheets' && (isAct || !c.worksheet)) return false;
-    if (h.kind === 'other' && !isAct) return false;
+    const isLeave = isAct && c.activityType === 'Leave / Holiday';
+    if (h.kind === 'other' && (!isAct || isLeave)) return false;
+    if (h.kind === 'leave' && !isLeave) return false;
     return true;
   }
   function hvMatchesSearch(c, q) {
@@ -2674,7 +2681,7 @@
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}">${tlTimeHtml(st)}
       <div class="tl-card">
-        <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div></div>
+        <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div>${hvStartedOrPast(c) ? '' : '<span class="tl-pill upcoming">Upcoming</span>'}</div>
         ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
         ${range ? `<div class="tl-meta">${range}</div>` : ''}
         ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
@@ -2719,7 +2726,7 @@
       campus += campusSeconds(day.campus);
       day.classes.forEach((c) => {
         if (c.entryType === 'activity' || state.pendingDeleteIds.has(c.id) || !hvStartedOrPast(c)) return;
-        if (h.batch !== 'all' && c.batch !== h.batch) return;
+        if (!hvMatchesFilters(c)) return;
         classes++; mins += classDuration(c);
         if (c.worksheet) ws++;
         if (c.test) tests++;
@@ -2748,6 +2755,10 @@
     (state.historyClasses || []).forEach((c) => { if (c.batch && c.entryType !== 'activity' && opts.indexOf(c.batch) === -1) opts.push(c.batch); });
     const html = opts.map((o) => `<option value="${escapeHtml(o)}"${o === h.batch ? ' selected' : ''}>${o === 'all' ? 'All batches' : escapeHtml(o)}</option>`).join('');
     if (sel._html !== html) { sel.innerHTML = html; sel._html = html; }
+    sel.value = h.batch;
+    const actKind = h.kind === 'other' || h.kind === 'leave';
+    sel.disabled = actKind;
+    document.getElementById('hvBatchNote').hidden = !actKind;
     const searching = !!h.q.trim();
     const drill = !!state.historySelectedDate && h.range !== 'day';
     const dayView = !!state.historySelectedDate || h.range === 'day';
@@ -2982,7 +2993,13 @@
   });
   document.getElementById('hvFilterBtn').addEventListener('click', () => { const h = hvState(); h.filterOpen = !h.filterOpen; renderHistory(); });
   document.getElementById('hvBatch').addEventListener('change', (e) => { hvState().batch = e.target.value; renderHistory(); });
-  document.querySelectorAll('#hvKind [data-kind]').forEach((b) => b.addEventListener('click', () => { hvState().kind = b.getAttribute('data-kind'); renderHistory(); }));
+  document.querySelectorAll('#hvKind [data-kind]').forEach((b) => b.addEventListener('click', () => {
+    const h = hvState();
+    h.kind = b.getAttribute('data-kind');
+    // Other Work and Leave are not linked to a batch, so a batch filter would always hide them.
+    if (h.kind === 'other' || h.kind === 'leave') h.batch = 'all';
+    renderHistory();
+  }));
   document.getElementById('hvReportBtn').addEventListener('click', () => {
     const h = hvState();
     const b = hvBounds();
