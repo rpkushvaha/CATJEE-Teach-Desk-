@@ -556,6 +556,10 @@
   .hv-search input { font-size: 15px; }
   .hv-filters { display: flex; flex-direction: column; gap: 6px; background: var(--neutral-soft); border-radius: 12px; padding: 10px 12px; }
   .hv-flbl { font-size: 12.5px; font-weight: 600; color: var(--muted-2); }
+  .hv-fbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--gold-soft); color: var(--ink); border-radius: 10px; padding: 7px 8px 7px 12px; font-size: 13px; font-weight: 600; }
+  .hv-fbar[hidden] { display: none; }
+  .hv-fbar #hvFilterText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hv-fbar button { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 1px solid var(--line); color: var(--gold); font-weight: 700; font-size: 12.5px; border-radius: 999px; padding: 4px 10px; cursor: pointer; flex-shrink: 0; }
   .hv-fnote { font-size: 12px; color: var(--muted); margin-top: -2px; }
   .hv-fnote[hidden] { display: none; }
   .hv-filters select:disabled { opacity: .55; }
@@ -578,9 +582,11 @@
   #historyReportMsg:empty { display: none; }
   .hv-list { display: flex; flex-direction: column; gap: 8px; }
   .hv-note { font-size: 12.5px; color: var(--muted); text-align: center; padding: 4px 0; }
-  .hv-day { display: flex; align-items: baseline; gap: 6px; width: 100%; background: none; border: none; padding: 10px 0 2px; cursor: pointer; text-align: left; color: var(--ink); }
+  .hv-day { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: none; padding: 10px 0 2px; cursor: pointer; text-align: left; color: var(--ink); }
+  .hv-day-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
   .hv-day-date { font-size: 13.5px; font-weight: 700; }
-  .hv-day-meta { flex: 1; font-size: 12.5px; color: var(--muted); font-weight: 500; line-height: 1.35; }
+  .hv-day-meta { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  .hv-day-camp { font-size: 12.5px; color: var(--muted); font-weight: 500; white-space: nowrap; }
   .hv-day .ic { color: var(--muted); flex-shrink: 0; }
   .hv-rec { cursor: pointer; }
   .hv-rec .tl-card { border-left-width: 1px; }
@@ -1192,6 +1198,10 @@
           <label>From<input class="text-input" type="date" id="hvFrom"></label>
           <label>To<input class="text-input" type="date" id="hvTo"></label>
         </div>
+      </div>
+      <div class="hv-fbar" id="hvFilterBar" hidden>
+        <span id="hvFilterText"></span>
+        <button type="button" id="hvFilterClear"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Clear</button>
       </div>
       <div class="sum-grid hv-sum" id="hvSum"></div>
       <div class="hv-actions" id="hvActions">
@@ -2583,7 +2593,7 @@
     if (h.range === 'day') {
       if (b.start === todayStr()) return 'Today';
       if (b.start === shiftDateStr(todayStr(), -1)) return 'Yesterday';
-      return fmt(b.start, { weekday: 'short', day: 'numeric', month: 'long' });
+      return dayHeading(b.start);
     }
     if (h.range === 'week') return `${fmt(b.start, { day: 'numeric', month: 'short' })} – ${fmt(b.end, { day: 'numeric', month: 'short' })}`;
     if (h.range === 'month') return fmt(b.start, { month: 'long', year: 'numeric' });
@@ -2676,9 +2686,9 @@
       const isLeave = c.activityType === 'Leave / Holiday';
       const icon = isLeave
         ? ''
-        : '<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+        : '';
       return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}"><div class="tl-time hv-act-ic${isLeave ? ' leave' : ''}">${icon}</div>
-        <div class="hv-act-card${isLeave ? ' leave' : ''}"><div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isLeave ? 'Leave / Holiday' : activityLabel(c.activityType))}</span>${isLeave ? '<span class="tl-pill leave">Leave</span>' : ''}</div>
+        <div class="hv-act-card${isLeave ? ' leave' : ''}"><div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isLeave ? 'Leave / Holiday' : activityLabel(c.activityType))}</span></div>
         ${c.note ? `<div class="hv-act-note">${escapeHtml(c.note)}</div>` : ''}</div></div>`;
     }
     const st = hhmmToMin(c.startTimeStr);
@@ -2758,6 +2768,13 @@
     document.getElementById('hvSearchBtn').setAttribute('aria-expanded', h.searchOpen ? 'true' : 'false');
     document.getElementById('hvFilterBtn').setAttribute('aria-expanded', h.filterOpen ? 'true' : 'false');
     document.getElementById('hvFilterDot').hidden = h.batch === 'all' && h.kind === 'all';
+    const KIND_TXT = { classes: 'Classes only', tests: 'Tests only', worksheets: 'Worksheets only', other: 'Other Work only', leave: 'Leave only' };
+    const fParts = [];
+    if (h.batch !== 'all') fParts.push(h.batch);
+    if (h.kind !== 'all') fParts.push(KIND_TXT[h.kind] || h.kind);
+    const fbar = document.getElementById('hvFilterBar');
+    fbar.hidden = !fParts.length || !!h.q.trim();
+    document.getElementById('hvFilterText').textContent = fParts.length ? `Showing: ${fParts.join(' · ')}` : '';
     document.querySelectorAll('#hvKind [data-kind]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-kind') === h.kind));
     const sel = document.getElementById('hvBatch');
     const opts = ['all'].concat(allBatchesFlat());
@@ -2819,9 +2836,9 @@
       if (!recs.length && (q || h.batch !== 'all' || h.kind !== 'all' || !secs)) return;
       const nClasses = all.filter((c) => c.entryType !== 'activity').length;
       const onLeave = all.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday');
-      const meta = [(onLeave && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`];
-      if (secs > 0) meta.push(`${fmtTeaching(Math.round(secs / 60))} on campus`);
-      html += `<button type="button" class="hv-day" data-hv-day="${d}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta">· ${meta.join(' · ')}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+      const countTxt = (onLeave && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`;
+      const campTxt = secs > 0 ? `${fmtTeaching(Math.round(secs / 60))} on campus` : '';
+      html += `<button type="button" class="hv-day" data-hv-day="${d}"><span class="hv-day-text"><span class="hv-day-l1"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta"> · ${countTxt}</span></span>${campTxt ? `<span class="hv-day-camp">${campTxt}</span>` : ''}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>`;
       html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No classes logged</div>';
       shown += recs.length;
     });
@@ -2851,7 +2868,10 @@
     const back = h.range === 'day' ? '' : '<button type="button" class="hv-back" id="hvDayBack"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>All dates</button>';
     let html = back;
     const onLeaveDay = all.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday');
-    html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta">· ${(onLeaveDay && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`}${secs > 0 ? ` · ${fmtTeaching(Math.round(secs / 60))} on campus` : ''}</span></div>`;
+    const dCount = (onLeaveDay && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`;
+    const dCamp = secs > 0 ? `${fmtTeaching(Math.round(secs / 60))} on campus` : '';
+    const dDate = h.range === 'day' ? '' : `<span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta"> · </span>`;
+    html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-text"><span class="hv-day-l1">${dDate}<span class="${h.range === 'day' ? 'hv-day-date' : 'hv-day-meta'}">${dCount}</span></span>${dCamp ? `<span class="hv-day-camp">${dCamp}</span>` : ''}</span></div>`;
     html += `<div class="hv-daybtns">
       <button type="button" class="btn-secondary" data-report-date="${d}" style="border-color: var(--line);"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--gold);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>Day PDF</button>
       <button type="button" class="btn-secondary" data-whatsapp-date="${d}" style="border-color: var(--line);"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#16A34A;"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg>WhatsApp</button>
@@ -3003,6 +3023,7 @@
     renderHistory();
   });
   document.getElementById('hvFilterBtn').addEventListener('click', () => { const h = hvState(); h.filterOpen = !h.filterOpen; renderHistory(); });
+  document.getElementById('hvFilterClear').addEventListener('click', () => { const h = hvState(); h.batch = 'all'; h.kind = 'all'; renderHistory(); });
   document.getElementById('hvBatch').addEventListener('change', (e) => { hvState().batch = e.target.value; renderHistory(); });
   document.querySelectorAll('#hvKind [data-kind]').forEach((b) => b.addEventListener('click', () => {
     const h = hvState();
@@ -3752,6 +3773,12 @@
   }
 
   function switchTab(tab) {
+    // Leaving History resets its filters and search, so they never stay stuck unnoticed.
+    if (state.tab === 'history' && tab !== 'history' && state.hv && !(state.editingId || state.addTargetDate)) {
+      Object.assign(state.hv, { batch: 'all', kind: 'all', q: '', searchOpen: false, filterOpen: false });
+      const si = document.getElementById('hvSearch');
+      if (si) si.value = '';
+    }
     state.tab = tab;
     renderTabs();
     try {
