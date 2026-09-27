@@ -391,14 +391,14 @@
   /* ---------- Today screen redesign ---------- */
   #view-today { gap: 16px; }
   .today-hello { display: flex; flex-direction: column; gap: 2px; }
-  .hello-title { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .hello-title { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 600; color: var(--ink); line-height: 1.25; }
   .hello-date { font-size: 13px; color: var(--muted); font-weight: 500; }
 
   #view-today .status-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; gap: 12px;
     box-shadow: 0 1px 3px rgba(23,23,23,0.06); color: var(--ink); }
   #view-today .status-card.in { background: var(--card); color: var(--ink); border-color: var(--line);
     box-shadow: inset 4px 0 0 #16A34A, 0 1px 3px rgba(23,23,23,0.06); }
-  #view-today .status-text { font-size: 15px; font-weight: 700; }
+  #view-today .status-text { font-size: 15px; font-weight: 600; }
   #view-today .timer { text-align: left; padding: 0; }
   #view-today .timer-num { font-size: 34px; font-weight: 600; letter-spacing: -.01em; }
   #view-today .timer-label { font-size: 12.5px; color: var(--muted); opacity: 1; margin-top: 4px; }
@@ -410,18 +410,22 @@
   #view-today .status-card.pre .timer-num { display: none; }
   #view-today .status-card.pre .timer-label { margin-top: 0; font-size: 13px; }
 
-  .tsec { display: flex; flex-direction: column; gap: 10px; }
+  .tsec { display: flex; flex-direction: column; gap: 8px; }
   .tsec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-  .tsec-title { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
+  .tsec-title { font-size: 13px; font-weight: 600; color: var(--muted-2); letter-spacing: .01em; }
   .tsec-meta { font-size: 12.5px; color: var(--muted); font-weight: 500; }
 
-  .sum-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-  .sum-tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 3px; text-align: center; min-width: 0; }
+  .sum-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: var(--neutral-soft); border-radius: 12px; padding: 8px 0; }
+  .sum-tile { padding: 4px 3px; text-align: center; min-width: 0; }
+  .sum-tile + .sum-tile { border-left: 1px solid var(--line); }
   .sum-num { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); line-height: 1.2; white-space: nowrap; }
   .sum-lbl { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* Fallback when a label would be cut (small phone or large system font): 2 x 2 slim tiles */
   .sum-grid.stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .sum-grid.stack .sum-tile { display: flex; align-items: baseline; gap: 8px; text-align: left; padding: 9px 12px; }
+  .sum-grid.stack { padding: 0; }
+  .sum-grid.stack .sum-tile { display: flex; align-items: baseline; gap: 8px; text-align: left; padding: 10px 12px; border-left: none; }
+  .sum-grid.stack .sum-tile:nth-child(even) { border-left: 1px solid var(--line); }
+  .sum-grid.stack .sum-tile:nth-child(n+3) { border-top: 1px solid var(--line); }
   .sum-grid.stack .sum-num { font-size: 17px; }
   .sum-grid.stack .sum-lbl { font-size: 12.5px; margin-top: 0; }
 
@@ -2221,7 +2225,7 @@
     if (!force && grid.offsetWidth === sumFitWidth) return;
     sumFitWidth = grid.offsetWidth;
     grid.classList.remove('stack');
-    const cut = Array.from(grid.querySelectorAll('.sum-lbl, .sum-num')).some((el) => el.scrollWidth > el.clientWidth + 1);
+    const cut = Array.from(grid.querySelectorAll('.sum-lbl, .sum-num')).some((el) => el.scrollWidth > el.clientWidth);
     if (cut) grid.classList.add('stack');
   }
   window.addEventListener('resize', () => fitSummaryTiles(true));
