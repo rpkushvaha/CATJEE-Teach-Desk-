@@ -1657,7 +1657,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 1.3 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 1.4 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4832,6 +4832,19 @@
   async function reportData(dates) {
     return Promise.all(dates.map((dt) => fetchDayData(dt)));
   }
+  async function shareReportText(text, msgEl) {
+    if (navigator.share) {
+      try { await navigator.share({ text }); msgEl.textContent = ''; return; } catch (err) { if (err && err.name === 'AbortError') { msgEl.textContent = ''; return; } }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      msgEl.textContent = 'Copied — paste it in WhatsApp.';
+      showToast('Copied to clipboard');
+    } else {
+      msgEl.textContent = 'Sharing is not supported on this browser.';
+    }
+  }
+
   async function shareReportFileOrText(blob, filename, text, msgEl) {
     try {
       const file = new File([blob], filename, { type: 'application/pdf' });
@@ -4919,8 +4932,8 @@
       const results = await reportData([date]);
       const teacherName = (state.user && state.user.name) || 'Teacher';
       const text = buildWhatsAppReportText(date, results[0].classes, results[0].campus, teacherName, f);
-      const { blob } = buildReportPdf([date], results, 'Daily Activity Report', `Date: ${reportDayLabel(date)}`, f);
-      await shareReportFileOrText(blob, reportFilenameFor(date), text, msgEl);
+      // A single day goes as a WhatsApp message (text), not a PDF.
+      await shareReportText(text, msgEl);
     } catch (err) {
       msgEl.textContent = 'Could not prepare the report. Please try again.';
     }
