@@ -639,6 +639,34 @@
   .hv-d-btns .btn-secondary { padding: 11px 0; }
   .hv-d-btns .hv-del { color: var(--gold); }
   @media (prefers-reduced-motion: reduce) { .hv-sheet, .hv-sheet-backdrop { transition: none; } }
+
+  /* ---------- Schedule (week view) ---------- */
+  #view-schedule { gap: 12px; }
+  .sv-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .sv-which { font-size: 12px; font-weight: 500; color: var(--muted); margin-top: 1px; }
+  .sv-which:empty { display: none; }
+  .sv-summary { font-size: 13px; color: var(--muted-2); font-weight: 500; background: var(--neutral-soft); border-radius: 10px; padding: 9px 12px; }
+  #svAddBtn[hidden], #svFormPanel[hidden] { display: none; }
+  .sv-form { display: flex; flex-direction: column; gap: 14px; }
+  .sv-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+  .sv-daychip { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0 !important; border-radius: 10px !important; min-width: 0; }
+  .sv-daychip b { font-size: 12px; font-weight: 600; }
+  .sv-daychip small { font-size: 13px; font-weight: 700; }
+  .sv-daychip:disabled { opacity: .35; cursor: default; }
+  .sv-batches .chip { padding: 9px 14px; }
+  .sv-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sv-tlbl { font-size: 12.5px; font-weight: 600; color: var(--muted-2); margin-bottom: 4px; }
+  .sv-durfield { flex-direction: row; align-items: center; gap: 10px; margin-top: -4px; }
+  .sv-durfield label { margin: 0; }
+  .sv-form-btns { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+  .sv-form-btns .btn-secondary { padding: 12px 0; }
+  .sv-day { display: flex; align-items: baseline; gap: 6px; padding: 10px 0 2px; }
+  .sv-day.today .hv-day-date { color: var(--gold); }
+  .sv-today { font-size: 11px; font-weight: 700; color: #fff; background: var(--gold); border-radius: 999px; padding: 1px 8px; }
+  .sv-none { font-size: 12.5px; color: var(--muted); padding: 0 0 2px 62px; }
+  .tl-card.missed { border-left-color: #D97706; }
+  .sv-photos { padding: 12px 14px; }
+  .sv-photos .panel-title { font-size: 14px; }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
   .drawer-root.open { pointer-events: auto; visibility: visible; transition: none; }
@@ -1232,16 +1260,62 @@
     <!-- SCHEDULE -->
     <div class="tab-view" id="view-schedule">
       <div>
-        <div class="section-title" style="margin-bottom:2px;">This Week's Schedule</div>
-        <div class="history-sub">Add this week's class times to get a reminder 5 minutes before each one. Each slot clears itself once its time passes — add fresh ones next week.</div>
+        <div class="hv-title">Schedule</div>
+        <div class="sv-sub">Plan each week's classes · reminder 5 min before each one</div>
+      </div>
+      <div class="hv-nav">
+        <button type="button" class="hv-arrow" id="svPrev" aria-label="Previous week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="hv-label"><div id="svLabel"></div><div class="sv-which" id="svWhich"></div></div>
+        <button type="button" class="hv-arrow" id="svNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <div class="sv-summary" id="svSummary"></div>
+      <button type="button" class="save-btn" id="svAddBtn">+ Add Slot</button>
+
+      <div class="panel sv-form" id="svFormPanel" hidden>
+        <div class="panel-title" id="schedulePanelTitle">Add Slot</div>
+        <div class="field">
+          <label>Day</label>
+          <div class="sv-days" id="scheduleDayChips"></div>
+        </div>
+        <div class="field">
+          <label>Wing</label>
+          <div class="chips" id="scheduleWingChips"></div>
+        </div>
+        <div class="field">
+          <label>Class / Batch</label>
+          <div class="chips sv-batches" id="scheduleBatchChips"></div>
+        </div>
+        <div class="field">
+          <label>Class Timing</label>
+          <div class="sv-times">
+            <div><div class="sv-tlbl">Start</div><input class="text-input" id="scheduleTimeInput" type="time"></div>
+            <div><div class="sv-tlbl">End</div><input class="text-input" id="scheduleEndInput" type="time"></div>
+          </div>
+        </div>
+        <div class="field sv-durfield">
+          <label>Duration</label>
+          <div class="chips" id="svDurChips">
+            <button type="button" class="chip" data-sv-dur="40">40m</button>
+            <button type="button" class="chip" data-sv-dur="50">50m</button>
+            <button type="button" class="chip" data-sv-dur="65">1h 5m</button>
+          </div>
+        </div>
+        <div class="sv-form-btns">
+          <button class="btn-secondary" id="cancelScheduleEditBtn" style="border-color: var(--line);">Cancel</button>
+          <button class="save-btn" id="addScheduleSlotBtn" style="margin:0;">Add to Schedule</button>
+        </div>
       </div>
 
-      <div class="panel" id="scheduleNoticePanel">
+      <div class="class-list tl-list" id="scheduleList">
+        <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
+      </div>
+
+      <div class="panel sv-photos" id="scheduleNoticePanel">
         <div id="scheduleNoticeHeader" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
           <div class="panel-title" style="margin-bottom:0;"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>My Saved Photos</div>
           <span id="scheduleNoticeCount" style="font-size:13px; color:var(--muted); font-weight:700;">0/6</span>
         </div>
-        <div class="day-card-hint" id="scheduleNoticeHint" style="cursor:pointer;">Tap to expand</div>
+        <div class="day-card-hint" id="scheduleNoticeHint" style="display:none;">Tap to expand</div>
         <div id="scheduleNoticeBody" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
           <div class="admin-sub" style="margin-top:0;">Personal — only you can see these. Save any photo for quick reference (schedule, notes, anything). Tap a photo to view it full size.</div>
           <div id="scheduleNoticeGallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px 12px;"></div>
@@ -1250,31 +1324,6 @@
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-title" id="schedulePanelTitle">Add a Weekly Slot</div>
-        <div class="field">
-          <label>Day</label>
-          <div class="chips" id="scheduleDayChips"></div>
-        </div>
-        <div class="field">
-          <label>Wing</label>
-          <div class="chips" id="scheduleWingChips"></div>
-        </div>
-        <div class="field">
-          <label>Class / Batch</label>
-          <div class="chips" id="scheduleBatchChips"></div>
-        </div>
-        <div class="field">
-          <label for="scheduleTimeInput">Time</label>
-          <input class="text-input" id="scheduleTimeInput" type="time">
-        </div>
-        <button class="btn-secondary" id="addScheduleSlotBtn" style="border-color: var(--line);">+ Add to Schedule</button>
-        <button class="btn-secondary" id="cancelScheduleEditBtn" style="display:none; border-color: var(--line); color: var(--muted-2);">Cancel Edit</button>
-      </div>
-
-      <div class="class-list" id="scheduleList">
-        <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
-      </div>
     </div>
 
     <!-- ADMIN -->
@@ -1660,7 +1709,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 1.9 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 2.1 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2302,9 +2351,9 @@
     if (d && d.textContent !== dateTxt) d.textContent = dateTxt;
   }
   function todayScheduleSlots() {
-    const today = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
+    const t = todayStr();
     return (state.scheduleSlots || [])
-      .filter((sl) => sl && sl.day === today && hhmmToMin(sl.time) != null && sl.label && !state.pendingDeleteIds.has(sl.id))
+      .filter((sl) => sl && slotDate(sl) === t && hhmmToMin(sl.time) != null && sl.label && !state.pendingDeleteIds.has(sl.id))
       .slice()
       .sort((x, y) => hhmmToMin(x.time) - hhmmToMin(y.time));
   }
@@ -2333,23 +2382,13 @@
       }
       return 'done';
     };
-    todayScheduleSlots().forEach((slot) => {
-      const sMin = hhmmToMin(slot.time);
-      let match = null;
-      let bestDiff = Infinity;
-      classes.forEach((c) => {
-        if (used.has(c.id) || c.batch !== slot.label) return;
-        const cm = hhmmToMin(c.startTimeStr);
-        const diff = cm == null ? 600 : Math.abs(cm - sMin);
-        if (diff < bestDiff) { bestDiff = diff; match = c; }
-      });
-      if (match) {
-        used.add(match.id);
-        const cm = hhmmToMin(match.startTimeStr);
-        items.push({ kind: 'class', min: cm != null ? cm : sMin, cls: match, status: classStatus(match) });
+    matchDaySlots(todayScheduleSlots(), classes).forEach((m) => {
+      if (m.cls) {
+        used.add(m.cls.id);
+        const cm = hhmmToMin(m.cls.startTimeStr);
+        items.push({ kind: 'class', min: cm != null ? cm : hhmmToMin(m.slot.time), cls: m.cls, status: classStatus(m.cls) });
       } else {
-        const status = nowMin < sMin ? 'upcoming' : (nowMin < sMin + SLOT_MINUTES ? 'live' : 'missed');
-        items.push({ kind: 'slot', min: sMin, slot, status });
+        items.push({ kind: 'slot', min: hhmmToMin(m.slot.time), slot: m.slot, status: m.status });
       }
     });
     classes.forEach((c) => {
@@ -2464,12 +2503,13 @@
       </div></div>`;
   }
 
-  function openAddForSlot(slotId) {
+  function openAddForSlot(slotId, from) {
     const slot = (state.scheduleSlots || []).find((x) => x.id === slotId);
     if (!slot) return;
+    const d = slotDate(slot);
     state.editingId = null;
-    state.editingSourceTab = null;
-    state.addTargetDate = null;
+    state.editingSourceTab = from === 'schedule' ? 'schedule' : null;
+    state.addTargetDate = d && d !== todayStr() ? d : null;
     state.entryMode = 'class';
     resetClassForm();
     fillClassFromSlot(slot, hhmmToMin(slot.time));
@@ -2662,6 +2702,7 @@
     } catch (err) { /* keep what we have */ }
     hvLoading = false;
     if (state.tab === 'history') renderHistory();
+    if (state.tab === 'schedule') renderScheduleList();
   }
   function hvStartedOrPast(c) {
     if (c.date !== todayStr()) return true;
@@ -2962,8 +3003,8 @@
     }
     document.getElementById('hvEdit').addEventListener('click', () => {
       closeHvSheet();
-      const list = fromToday ? (state.classesToday || []) : Object.values(hvRecordIndex);
-      const tab = fromToday ? null : (state.historySelectedDate ? 'history' : 'history-today');
+      const list = fromToday ? (state.classesToday || []) : (from === 'schedule' ? [c] : Object.values(hvRecordIndex));
+      const tab = from === 'schedule' ? 'schedule' : (fromToday ? null : (state.historySelectedDate ? 'history' : 'history-today'));
       if (c.entryType === 'activity') startEditActivity(c.id, list, tab); else startEditClass(c.id, list, tab);
     });
     document.getElementById('hvDelete').addEventListener('click', async () => {
@@ -2976,12 +3017,13 @@
         'This entry will be permanently removed.',
         'Delete this entry?',
         isAct ? 'Activity deleted' : 'Class deleted',
-        () => (fromToday ? renderTodayList() : renderHistory()),
+        () => (fromToday ? renderTodayList() : (from === 'schedule' ? renderScheduleList() : renderHistory())),
         () => {
           state.selectedDayClasses = (state.selectedDayClasses || []).filter((x) => x.id !== c.id);
           Object.keys(state.hvFetched || {}).forEach((k) => { state.hvFetched[k].classes = state.hvFetched[k].classes.filter((x) => x.id !== c.id); });
           if (state.tab === 'history') renderHistory();
           if (state.tab === 'today') renderTodayList();
+          if (state.tab === 'schedule') renderScheduleList();
         }
       );
     });
@@ -3494,19 +3536,7 @@
     }
   }
 
-  function renderScheduleDayChips() {
-    const el = document.getElementById('scheduleDayChips');
-    el.innerHTML = DAYS.map((d) => {
-      const active = d === state.scheduleDay;
-      return `<button class="chip${active ? ' active' : ''}" data-day="${d}">${d}</button>`;
-    }).join('');
-    el.querySelectorAll('[data-day]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        state.scheduleDay = btn.getAttribute('data-day');
-        renderScheduleDayChips();
-      });
-    });
-  }
+  function renderScheduleDayChips() { if (state.sv && state.sv.formOpen) renderSvForm(); }
 
   function renderScheduleWingChips() {
     const el = document.getElementById('scheduleWingChips');
@@ -3691,21 +3721,16 @@
   }
 
   let pruningSchedule = false;
+  // Only tidies up slots from more than 6 weeks ago; recent slots stay so the week can show Completed / Missed.
   async function pruneExpiredScheduleSlots() {
     if (!state.db || !state.teacherId || pruningSchedule) return;
-    const now = new Date();
-    const expired = state.scheduleSlots.filter((s) => {
-      if (state.pendingDeleteIds.has(s.id)) return false;
-      const dayDate = currentWeekDateForDay(s.day);
-      if (!dayDate) return false;
-      const [h, m] = s.time.split(':').map(Number);
-      const slotDateTime = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), h, m, 0, 0);
-      return now > slotDateTime;
-    });
-    if (expired.length === 0) return;
+    migrateUndatedSlots();
+    const cutoff = shiftDateStr(todayStr(), -SLOT_KEEP_DAYS);
+    const old = (state.scheduleSlots || []).filter((s) => s.date && s.date < cutoff && !state.pendingDeleteIds.has(s.id));
+    if (!old.length) return;
     pruningSchedule = true;
     try {
-      for (const s of expired) {
+      for (const s of old) {
         try { await state.db.collection('schedule/' + state.teacherId + '/slots').doc(s.id).delete(); } catch (err) { /* ignore */ }
       }
     } finally {
@@ -3713,85 +3738,239 @@
     }
   }
 
+  // ---------- Schedule: dated, week-by-week slots ----------
+  // Each slot belongs to one date (its week). Slots no longer disappear when their time passes,
+  // so a week can show Completed / Missed; very old slots are tidied up after 6 weeks.
+  const SLOT_KEEP_DAYS = 42;
+  function slotDate(s) {
+    if (s && s.date) return s.date;
+    const d = s ? currentWeekDateForDay(s.day) : null;
+    return d ? dateKey(d) : null;
+  }
+  function slotDuration(s) { return (s && s.duration > 0 && s.duration <= 240) ? s.duration : DEFAULT_DURATION; }
+  function svState() {
+    if (!state.sv) state.sv = { weekStart: mondayOf(todayStr()), formOpen: false, formDate: todayStr() };
+    return state.sv;
+  }
+  const migratingSlots = new Set();
+  async function migrateUndatedSlots() {
+    if (!state.db || !state.teacherId) return;
+    for (const s of (state.scheduleSlots || [])) {
+      if (s.date || migratingSlots.has(s.id)) continue;
+      const d = slotDate(s);
+      if (!d) continue;
+      migratingSlots.add(s.id);
+      try { await state.db.collection('schedule/' + state.teacherId + '/slots').doc(s.id).set({ date: d }, { merge: true }); } catch (err) { /* retried next time */ }
+      migratingSlots.delete(s.id);
+    }
+  }
+  function slotStatusFor(slot, matchCls) {
+    const d = slotDate(slot);
+    const t = todayStr();
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const st = hhmmToMin(slot.time);
+    if (matchCls) {
+      if (d > t) return 'upcoming';
+      if (d === t) {
+        const a = hhmmToMin(matchCls.startTimeStr), b = hhmmToMin(matchCls.endTimeStr);
+        if (a != null && nowMin < a) return 'upcoming';
+        if (a != null && b != null && nowMin < b) return 'live';
+      }
+      return 'done';
+    }
+    if (d < t) return 'missed';
+    if (d > t) return 'upcoming';
+    if (st == null) return 'upcoming';
+    if (nowMin < st) return 'upcoming';
+    if (nowMin < st + slotDuration(slot)) return 'live';
+    return 'missed';
+  }
+  // Pair each slot of a day with a logged class of the same batch (closest start time). Never creates records.
+  function matchDaySlots(slots, classes) {
+    // Pair slots and logged classes of the same batch, closest times first (so one early slot can't take another slot's class).
+    const pairs = [];
+    const sorted = slots.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    sorted.forEach((slot) => {
+      const sMin = hhmmToMin(slot.time);
+      (classes || []).forEach((c) => {
+        if (c.entryType === 'activity' || c.batch !== slot.label || state.pendingDeleteIds.has(c.id)) return;
+        const cm = hhmmToMin(c.startTimeStr);
+        pairs.push({ slot, c, diff: cm == null || sMin == null ? 600 : Math.abs(cm - sMin) });
+      });
+    });
+    pairs.sort((x, y) => x.diff - y.diff);
+    const bySlot = new Map();
+    const usedC = new Set();
+    pairs.forEach((p) => { if (!bySlot.has(p.slot.id) && !usedC.has(p.c.id)) { bySlot.set(p.slot.id, p.c); usedC.add(p.c.id); } });
+    return sorted.map((slot) => { const c = bySlot.get(slot.id) || null; return { slot, cls: c, status: slotStatusFor(slot, c) }; });
+  }
+  function svWeekLabel(ws) {
+    const t = mondayOf(todayStr());
+    if (ws === t) return 'This week';
+    if (ws === shiftDateStr(t, 7)) return 'Next week';
+    if (ws === shiftDateStr(t, -7)) return 'Last week';
+    return '';
+  }
+  const SV_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged' };
+  function svSlotHtml(m) {
+    const s = m.slot;
+    const dur = slotDuration(s);
+    const subj = (m.cls && m.cls.subject) || state.teacherSubject || '';
+    const st = hhmmToMin(s.time);
+    const endMin = st == null ? null : Math.min(st + dur, 23 * 60 + 59);
+    const range = st == null ? '' : `${formatTimeStr(s.time)} – ${formatTimeStr(`${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`)}`;
+    const topic = m.cls && m.cls.topic ? `<div class="tl-topic">${escapeHtml(m.cls.topic)}</div>` : '';
+    return `<div class="tl-item hv-rec" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">${tlTimeHtml(st)}
+      <div class="tl-card ${m.status}">
+        <div class="tl-top"><div class="tl-batch">${escapeHtml(s.label || 'Class')}</div><span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span></div>
+        ${topic}
+        <div class="tl-meta">${[subj ? escapeHtml(subj) : '', fmtTeaching(dur), range].filter(Boolean).join(' · ')}</div>
+      </div></div>`;
+  }
   function renderScheduleList() {
     const el = document.getElementById('scheduleList');
-    const visibleSlots = state.scheduleSlots.filter((s) => !state.pendingDeleteIds.has(s.id));
-    if (visibleSlots.length === 0) {
-      el.innerHTML = '<div class="empty"><span class="empty-icon"><svg class="ic" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>No weekly classes set up yet.<span class="empty-hint">Add a slot below to get class-time reminders.</span></div>';
-      return;
+    if (!el) return;
+    const sv = svState();
+    const days = datesBetween(sv.weekStart, shiftDateStr(sv.weekStart, 6));
+    document.getElementById('svLabel').textContent = `${dateObj(days[0]).getDate()} ${dateObj(days[0]).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(days[6]).getDate()} ${dateObj(days[6]).toLocaleDateString('en-GB', { month: 'short' })}`;
+    document.getElementById('svWhich').textContent = svWeekLabel(sv.weekStart);
+    document.getElementById('svNext').disabled = sv.weekStart >= shiftDateStr(mondayOf(todayStr()), 28);
+    renderSvForm();
+    const slots = (state.scheduleSlots || []).filter((s) => !state.pendingDeleteIds.has(s.id));
+    const missing = days.filter((d) => d <= todayStr() && d !== todayStr() && !hvDay(d).ready);
+    if (missing.length) hvLoadMissing(missing);
+    const counts = { total: 0, done: 0, missed: 0, upcoming: 0, live: 0 };
+    let html = '';
+    days.forEach((d, i) => {
+      const daySlots = slots.filter((s) => slotDate(s) === d);
+      const isSun = i === 6;
+      if (isSun && !daySlots.length) return;
+      const matched = matchDaySlots(daySlots, hvDay(d).classes);
+      matched.forEach((m) => { counts.total++; counts[m.status]++; });
+      const today = d === todayStr();
+      html += `<div class="sv-day${today ? ' today' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${daySlots.length} class${daySlots.length === 1 ? '' : 'es'}` : ''}</span></div>`;
+      html += daySlots.length ? matched.map(svSlotHtml).join('') : '<div class="sv-none">No classes planned</div>';
+    });
+    const parts = [];
+    if (counts.done) parts.push(`${counts.done} done`);
+    if (counts.live) parts.push(`${counts.live} in progress`);
+    if (counts.upcoming) parts.push(`${counts.upcoming} upcoming`);
+    if (counts.missed) parts.push(`${counts.missed} not logged`);
+    document.getElementById('svSummary').textContent = counts.total ? `${counts.total} class${counts.total === 1 ? '' : 'es'} planned · ${parts.join(' · ')}` : 'No classes planned for this week yet.';
+    if (el._lastHtml !== html) {
+      el._lastHtml = html;
+      el.innerHTML = html;
+      el.querySelectorAll('[data-sv-slot]').forEach((row) => row.addEventListener('click', () => openSlotSheet(row.getAttribute('data-sv-slot'))));
     }
-    const byDay = {};
-    visibleSlots.forEach((s) => {
-      if (!byDay[s.day]) byDay[s.day] = [];
-      byDay[s.day].push(s);
+  }
+  function openSlotSheet(id) {
+    const slot = (state.scheduleSlots || []).find((s) => s.id === id);
+    if (!slot) return;
+    const d = slotDate(slot);
+    const m = matchDaySlots((state.scheduleSlots || []).filter((s) => slotDate(s) === d && !state.pendingDeleteIds.has(s.id)), hvDay(d).classes).find((x) => x.slot.id === id);
+    const dur = slotDuration(slot);
+    const body = document.getElementById('hvSheetBody');
+    const canLog = !m.cls && d <= todayStr();
+    body.innerHTML = `<div class="hv-d-title">${escapeHtml(slot.label || 'Class')}</div>
+      <div class="hv-d-wing">${escapeHtml(wingForBatch(slot.label) || '')}${state.teacherSubject ? ' · ' + escapeHtml(state.teacherSubject) : ''}</div>
+      <div class="hv-d-rows" style="margin-top:10px;">
+        <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dayHeading(d))}</span></div>
+        <div class="hv-d-row"><span>Time</span><span>${slot.time ? formatTimeStr(slot.time) : '—'}</span></div>
+        <div class="hv-d-row"><span>Duration</span><span>${fmtTeaching(dur)}</span></div>
+        <div class="hv-d-row"><span>Status</span><span>${SV_PILL[m.status]}</span></div>
+        ${m.cls && m.cls.topic ? `<div class="hv-d-row"><span>Topic</span><span>${escapeHtml(m.cls.topic)}</span></div>` : ''}
+      </div>
+      ${m.cls ? '<button type="button" class="dbtn-primary dbtn-block" id="svViewClass" style="margin-top:14px;">View logged class</button>' : ''}
+      ${canLog ? '<button type="button" class="dbtn-primary dbtn-block" id="svLogClass" style="margin-top:14px;">Log this class</button>' : ''}
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit slot</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Remove slot</button></div>`;
+    const root = document.getElementById('hvSheet');
+    root.classList.add('open');
+    root.setAttribute('aria-hidden', 'false');
+    const vb = document.getElementById('svViewClass');
+    if (vb) vb.addEventListener('click', () => { closeHvSheet(); setTimeout(() => openHvSheet(m.cls.id, m.cls, 'schedule'), 280); });
+    const lb = document.getElementById('svLogClass');
+    if (lb) lb.addEventListener('click', () => { closeHvSheet(); openAddForSlot(id, 'schedule'); });
+    document.getElementById('svEditSlot').addEventListener('click', () => { closeHvSheet(); startEditScheduleSlot(id); });
+    document.getElementById('svDelSlot').addEventListener('click', async () => {
+      closeHvSheet();
+      if (!state.db || !state.teacherId) return;
+      await confirmAndDeleteWithUndo(id, () => state.db.collection('schedule/' + state.teacherId + '/slots').doc(id).delete(),
+        'This slot will be removed from your schedule.', 'Remove this slot?', 'Slot removed', renderScheduleList, null, 'Remove');
     });
-    Object.keys(byDay).forEach((d) => byDay[d].sort((a, b) => a.time.localeCompare(b.time)));
-    const orderedDays = DAYS.filter((d) => byDay[d]).sort((a, b) => daysUntil(a) - daysUntil(b));
-    el.innerHTML = orderedDays.map((d) => {
-      const rows = byDay[d].map((s) => `
-        <div class="activity-row">
-          <div class="activity-row-text">
-            <span class="activity-row-title">${formatTimeStr(s.time)}</span>
-            <span class="activity-row-note">${escapeHtml(s.label)}</span>
-          </div>
-          <div class="activity-row-actions">
-            <button class="del-btn" data-edit-slot="${s.id}" aria-label="Edit slot">${svgEdit()}</button>
-            <button class="del-btn" data-del-slot="${s.id}" aria-label="Remove slot">${svgTrash()}</button>
-          </div>
-        </div>`).join('');
-      return `
-        <div class="class-card">
-          <div class="class-top"><div class="class-title">${d}, ${nextDateLabelForDay(d)}</div></div>
-          <div class="activity-rows">${rows}</div>
-        </div>`;
+  }
+  function svMinToHHMM(m) { m = Math.max(0, Math.min(m, 23 * 60 + 59)); return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`; }
+  function svFormDuration() {
+    const a = hhmmToMin(document.getElementById('scheduleTimeInput').value);
+    const b = hhmmToMin(document.getElementById('scheduleEndInput').value);
+    return (a != null && b != null) ? b - a : null;
+  }
+  function svApplyDur(dur) {
+    const a = hhmmToMin(document.getElementById('scheduleTimeInput').value);
+    if (a != null && dur) document.getElementById('scheduleEndInput').value = svMinToHHMM(a + dur);
+  }
+
+  function renderSvForm() {
+    const sv = svState();
+    const panel = document.getElementById('svFormPanel');
+    panel.hidden = !sv.formOpen;
+    document.getElementById('svAddBtn').hidden = sv.formOpen;
+    if (!sv.formOpen) return;
+    // Day chips show the dates of the week being viewed.
+    const days = datesBetween(sv.weekStart, shiftDateStr(sv.weekStart, 6));
+    if (days.indexOf(sv.formDate) === -1) sv.formDate = days.find((d) => d >= todayStr()) || days[0];
+    const dc = document.getElementById('scheduleDayChips');
+    dc.innerHTML = days.map((d) => {
+      const o = dateObj(d);
+      const past = d < todayStr();
+      return `<button type="button" class="chip sv-daychip${d === sv.formDate ? ' active' : ''}" data-sv-date="${d}"${past ? ' disabled' : ''}><b>${o.toLocaleDateString('en-GB', { weekday: 'short' })}</b><small>${o.getDate()}</small></button>`;
     }).join('');
-    el.querySelectorAll('[data-del-slot]').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const id = btn.getAttribute('data-del-slot');
-        if (!state.db || !state.teacherId) return;
-        await confirmAndDeleteWithUndo(
-          id,
-          () => state.db.collection('schedule/' + state.teacherId + '/slots').doc(id).delete(),
-          'This weekly slot will be removed from your schedule.',
-          'Remove this slot?',
-          'Slot removed',
-          renderScheduleList,
-          null,
-          'Remove'
-        );
-      });
-    });
-    el.querySelectorAll('[data-edit-slot]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startEditScheduleSlot(btn.getAttribute('data-edit-slot'));
-      });
-    });
+    dc.querySelectorAll('[data-sv-date]').forEach((b) => b.addEventListener('click', () => { sv.formDate = b.getAttribute('data-sv-date'); renderSvForm(); }));
+    const cur = svFormDuration();
+    document.querySelectorAll('#svDurChips [data-sv-dur]').forEach((b) => b.classList.toggle('active', Number(b.getAttribute('data-sv-dur')) === (cur != null ? cur : sv.formDur)));
+  }
+  function openSvForm(editing) {
+    const sv = svState();
+    sv.formOpen = true;
+    if (!editing) {
+      state.editingScheduleId = null;
+      sv.formDur = DEFAULT_DURATION;
+      document.getElementById('scheduleTimeInput').value = '';
+      document.getElementById('scheduleEndInput').value = '';
+      document.getElementById('schedulePanelTitle').textContent = 'Add Slot';
+      document.getElementById('addScheduleSlotBtn').textContent = 'Add to Schedule';
+    }
+    renderScheduleWingChips();
+    renderScheduleBatchChips();
+    renderScheduleList();
+    setTimeout(() => document.getElementById('svFormPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
   }
 
   function startEditScheduleSlot(id) {
     const slot = state.scheduleSlots.find((s) => s.id === id);
     if (!slot) return;
+    const sv = svState();
     state.editingScheduleId = id;
-    state.scheduleDay = slot.day;
+    sv.formDate = slotDate(slot);
+    sv.weekStart = mondayOf(sv.formDate);
+    sv.formDur = slotDuration(slot);
     state.scheduleWing = wingOfBatch(slot.label);
     state.scheduleBatch = slot.label;
-    renderScheduleDayChips();
-    renderScheduleWingChips();
-    renderScheduleBatchChips();
     document.getElementById('scheduleTimeInput').value = slot.time;
+    document.getElementById('scheduleEndInput').value = svMinToHHMM(hhmmToMin(slot.time) + slotDuration(slot));
     document.getElementById('schedulePanelTitle').textContent = 'Edit Slot';
     document.getElementById('addScheduleSlotBtn').textContent = 'Update Slot';
-    document.getElementById('cancelScheduleEditBtn').style.display = 'block';
+    openSvForm(true);
   }
 
   function cancelScheduleEdit() {
     state.editingScheduleId = null;
+    svState().formOpen = false;
     document.getElementById('scheduleTimeInput').value = '';
-    document.getElementById('schedulePanelTitle').textContent = 'Add a Weekly Slot';
-    document.getElementById('addScheduleSlotBtn').textContent = '+ Add to Schedule';
-    document.getElementById('cancelScheduleEditBtn').style.display = 'none';
+    document.getElementById('scheduleEndInput').value = '';
+    document.getElementById('schedulePanelTitle').textContent = 'Add Slot';
+    document.getElementById('addScheduleSlotBtn').textContent = 'Add to Schedule';
+    renderScheduleList();
   }
 
   function renderTabs() {
@@ -3883,30 +4062,66 @@
   document.getElementById('addScheduleSlotBtn').addEventListener('click', async () => {
     if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
     const time = document.getElementById('scheduleTimeInput').value;
-    if (!time) return;
+    if (!time) { showToast('Choose a start time', 'error'); return; }
+    if (!document.getElementById('scheduleEndInput').value) svApplyDur(svState().formDur || DEFAULT_DURATION);
+    const durNow = svFormDuration();
+    if (durNow == null || durNow <= 0) { showToast('End time must be after the start time', 'error'); return; }
+    if (durNow > 240) { showToast('A class can be up to 4 hours long', 'error'); return; }
+    svState().formDur = durNow;
+    if (!state.scheduleBatch) { showToast('Choose a class / batch', 'error'); return; }
     try {
       if (state.editingScheduleId) {
+        const fd = svState().formDate;
         await state.db.collection('schedule/' + state.teacherId + '/slots').doc(state.editingScheduleId).update({
-          day: state.scheduleDay,
+          day: DAY_ABBR[dateObj(fd).getDay()],
+          date: fd,
           time,
+          duration: svState().formDur || DEFAULT_DURATION,
           label: state.scheduleBatch
         });
         delete state.firedScheduleReminders[todayStr() + '_' + state.editingScheduleId];
         cancelScheduleEdit();
         showToast('Slot updated');
       } else {
+        const fd = svState().formDate;
+        if (fd < todayStr()) { showToast('Choose today or a later day', 'error'); return; }
         await state.db.collection('schedule/' + state.teacherId + '/slots').add({
-          day: state.scheduleDay,
+          day: DAY_ABBR[dateObj(fd).getDay()],
+          date: fd,
           time,
+          duration: svState().formDur || DEFAULT_DURATION,
           label: state.scheduleBatch,
           createdAt: Date.now()
         });
         document.getElementById('scheduleTimeInput').value = '';
-        showToast('Added to schedule');
+        document.getElementById('scheduleEndInput').value = '';
+        showToast(`Added for ${dayHeading(fd)}`);
+        svState().weekStart = mondayOf(fd);
+        renderScheduleList();
       }
     } catch (err) { flashOffline(err); }
   });
   document.getElementById('cancelScheduleEditBtn').addEventListener('click', cancelScheduleEdit);
+  document.getElementById('svAddBtn').addEventListener('click', () => openSvForm(false));
+  document.getElementById('svPrev').addEventListener('click', () => { const sv = svState(); sv.weekStart = shiftDateStr(sv.weekStart, -7); renderScheduleList(); });
+  document.getElementById('svNext').addEventListener('click', () => { const sv = svState(); sv.weekStart = shiftDateStr(sv.weekStart, 7); renderScheduleList(); });
+  document.querySelectorAll('#svDurChips [data-sv-dur]').forEach((b) => b.addEventListener('click', () => {
+    const d = Number(b.getAttribute('data-sv-dur'));
+    svState().formDur = d;
+    svApplyDur(d);
+    renderSvForm();
+  }));
+  // Start moves the end along with it (same length); End can be set to any time for other durations.
+  document.getElementById('scheduleTimeInput').addEventListener('change', () => {
+    const sv = svState();
+    svApplyDur(sv.formDur || DEFAULT_DURATION);
+    renderSvForm();
+  });
+  document.getElementById('scheduleEndInput').addEventListener('change', () => {
+    const d = svFormDuration();
+    if (d != null && d > 0) svState().formDur = d;
+    renderSvForm();
+  });
   document.getElementById('addClassLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'class'; prefillClassFromLast(); switchTab('add'); });
   document.getElementById('addActivityLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast(); switchTab('add'); });
   setInterval(() => { if (state.tab === 'today') renderTodayList(); }, 30000);
@@ -3918,10 +4133,13 @@
   });
   document.getElementById('backFromAdd').addEventListener('click', () => {
     const wasHistory = state.editingSourceTab === 'history' || state.editingSourceTab === 'history-today';
+    const wasSchedule = state.editingSourceTab === 'schedule';
     state.editingId = null;
     state.editingSourceTab = null;
     state.addTargetDate = null;
-    if (wasHistory) {
+    if (wasSchedule) {
+      switchTab('schedule');
+    } else if (wasHistory) {
       switchTab('history');
     } else {
       switchTab('today');
@@ -5388,12 +5606,12 @@
 
   // The slot from today's weekly schedule closest to now (from 1 hour ago to 45 minutes ahead).
   function findCurrentScheduleSlot() {
-    const today = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
+    const todayD = todayStr();
     const now = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
     let best = null;
     (state.scheduleSlots || []).forEach((s) => {
-      if (!s || s.day !== today || !s.time || !s.label) return;
+      if (!s || slotDate(s) !== todayD || !s.time || !s.label) return;
       if (state.pendingDeleteIds && state.pendingDeleteIds.has(s.id)) return;
       const [h, m] = String(s.time).split(':').map(Number);
       if (isNaN(h) || isNaN(m)) return;
@@ -5427,8 +5645,8 @@
     const match = { slot, startMin };
     state.formWing = wing;
     selectBatch(batch);
-    const last = findLastClassForBatch(batch);
-    let duration = DEFAULT_DURATION;
+    const last = slot.duration ? null : findLastClassForBatch(batch);
+    let duration = slot.duration ? slotDuration(slot) : DEFAULT_DURATION;
     if (last && last.startTimeStr && last.endTimeStr) {
       const [sh, sm] = last.startTimeStr.split(':').map(Number);
       const [eh, em] = last.endTimeStr.split(':').map(Number);
@@ -5527,7 +5745,7 @@
     if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
     const editingId = state.editingId;
     const isBackfill = !editingId && !!state.addTargetDate;
-    const returnTab = (editingId || isBackfill) ? (state.editingSourceTab || 'today') : 'today';
+    const returnTab = (editingId || isBackfill || state.editingSourceTab === 'schedule') ? (state.editingSourceTab || 'today') : 'today';
     const entryDate = state.addTargetDate || todayStr();
 
     if (state.entryMode === 'activity') {
@@ -5553,7 +5771,9 @@
         state.addTargetDate = null;
         resetActivityForm();
         renderForm();
-        if (returnTab === 'history') {
+        if (returnTab === 'schedule') {
+          switchTab('schedule');
+        } else if (returnTab === 'history') {
           switchTab('history');
           await showSelectedDay(state.historySelectedDate);
         } else if (returnTab === 'history-today') {
@@ -5623,7 +5843,9 @@
       state.addTargetDate = null;
       resetClassForm();
       renderForm();
-      if (returnTab === 'history') {
+      if (returnTab === 'schedule') {
+        switchTab('schedule');
+      } else if (returnTab === 'history') {
         switchTab('history');
         await showSelectedDay(state.historySelectedDate);
       } else if (returnTab === 'history-today') {
@@ -5829,7 +6051,7 @@
       const now = new Date();
       const today = todayStr();
       const todayAbbr = DAY_ABBR[now.getDay()];
-      state.scheduleSlots.filter((s) => s.day === todayAbbr).forEach((slot) => {
+      state.scheduleSlots.filter((s) => slotDate(s) === today).forEach((slot) => {
         const [h, m] = slot.time.split(':').map(Number);
         const slotDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
         const minsUntil = (slotDate.getTime() - now.getTime()) / 60000;
@@ -6120,11 +6342,13 @@
       state.classesToday = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       state.todayClassesLoaded = true;
       renderTodayList();
+      if (state.tab === 'schedule') renderScheduleList();
     }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.collection('classes').where('teacherId', '==', tid).orderBy('createdAt', 'desc').limit(300).onSnapshot((snap) => {
       state.historyClasses = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       state.historyClassesLoaded = true;
+      if (state.tab === 'schedule') renderScheduleList();
       if (state.tab === 'history') renderHistory();
     }, (err) => flashOffline(err)));
 
@@ -6166,7 +6390,7 @@
       renderScheduleNotice();
     }, () => {}));
 
-    unsubscribers.push(db.collection('schedule/' + tid + '/slots').limit(100).onSnapshot((snap) => {
+    unsubscribers.push(db.collection('schedule/' + tid + '/slots').limit(400).onSnapshot((snap) => {
       state.scheduleSlots = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       if (state.tab === 'schedule') renderScheduleList();
       renderTodayList();
