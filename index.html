@@ -654,6 +654,22 @@
   .sv-daychip small { font-size: 13px; font-weight: 700; }
   .sv-daychip:disabled { opacity: .35; cursor: default; }
   .sv-batches .chip { padding: 9px 14px; }
+  .sv-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .sv-actions:has(#svCopyBtn[hidden]) { grid-template-columns: 1fr; }
+  #svCopyBtn[hidden] { display: none; }
+  .sv-3btns { grid-template-columns: 1fr 1fr 1fr !important; }
+  #svDayHint[hidden] { display: none; }
+  .sv-actions #svAddBtn { margin: 0; }
+  .sv-actions .btn-secondary { padding: 12px 12px; font-size: 13px; white-space: nowrap; }
+  .sv-actions:has(#svAddBtn[hidden]) { display: none; }
+  .sv-hint { font-weight: 500; color: var(--muted); font-size: 12px; }
+  .sv-preview { font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 8px; }
+  .sv-preview:empty { display: none; }
+  .sv-preview .warn, .sv-ampm { color: #B45309; font-weight: 600; }
+  .sv-ampm { font-size: 11px; background: rgba(217,119,6,.12); border-radius: 5px; padding: 1px 6px; margin-left: 4px; }
+  #scheduleList .tl-card { padding: 8px 11px; gap: 3px; }
+  #scheduleList .tl-time { padding-top: 9px; }
+  #scheduleList .tl-item { gap: 8px; }
   .sv-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .sv-tlbl { font-size: 12.5px; font-weight: 600; color: var(--muted-2); margin-bottom: 4px; }
   .sv-durfield { flex-direction: row; align-items: center; gap: 10px; margin-top: -4px; }
@@ -1261,7 +1277,7 @@
     <div class="tab-view" id="view-schedule">
       <div>
         <div class="hv-title">Schedule</div>
-        <div class="sv-sub">Plan each week's classes · reminder 5 min before each one</div>
+        <div class="sv-sub" id="svSub">Plan each week's classes · reminder 5 min before each one</div>
       </div>
       <div class="hv-nav">
         <button type="button" class="hv-arrow" id="svPrev" aria-label="Previous week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -1269,12 +1285,15 @@
         <button type="button" class="hv-arrow" id="svNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
       <div class="sv-summary" id="svSummary"></div>
-      <button type="button" class="save-btn" id="svAddBtn">+ Add Slot</button>
+      <div class="sv-actions">
+        <button type="button" class="save-btn" id="svAddBtn">+ Add Slot</button>
+        <button type="button" class="btn-secondary" id="svCopyBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy last week</button>
+      </div>
 
       <div class="panel sv-form" id="svFormPanel" hidden>
         <div class="panel-title" id="schedulePanelTitle">Add Slot</div>
         <div class="field">
-          <label>Day</label>
+          <label>Day <span class="sv-hint" id="svDayHint">· tap one or more days</span></label>
           <div class="sv-days" id="scheduleDayChips"></div>
         </div>
         <div class="field">
@@ -1291,6 +1310,7 @@
             <div><div class="sv-tlbl">Start</div><input class="text-input" id="scheduleTimeInput" type="time"></div>
             <div><div class="sv-tlbl">End</div><input class="text-input" id="scheduleEndInput" type="time"></div>
           </div>
+          <div class="sv-preview" id="svPreview"></div>
         </div>
         <div class="field sv-durfield">
           <label>Duration</label>
@@ -1309,21 +1329,6 @@
       <div class="class-list tl-list" id="scheduleList">
         <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
       </div>
-
-      <div class="panel sv-photos" id="scheduleNoticePanel">
-        <div id="scheduleNoticeHeader" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-          <div class="panel-title" style="margin-bottom:0;"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>My Saved Photos</div>
-          <span id="scheduleNoticeCount" style="font-size:13px; color:var(--muted); font-weight:700;">0/6</span>
-        </div>
-        <div class="day-card-hint" id="scheduleNoticeHint" style="display:none;">Tap to expand</div>
-        <div id="scheduleNoticeBody" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
-          <div class="admin-sub" style="margin-top:0;">Personal — only you can see these. Save any photo for quick reference (schedule, notes, anything). Tap a photo to view it full size.</div>
-          <div id="scheduleNoticeGallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px 12px;"></div>
-          <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
-          <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Add Photo</button>
-        </div>
-      </div>
-
     </div>
 
     <!-- ADMIN -->
@@ -1486,7 +1491,7 @@
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-card">
     <div class="modal-title" id="confirmTitle">Are you sure?</div>
-    <div class="modal-body" id="confirmBody"></div>
+    <div class="modal-body" id="confirmBody" style="white-space: pre-line;"></div>
     <div class="modal-actions">
       <button class="modal-btn-cancel" id="confirmCancelBtn">Cancel</button>
       <button class="modal-btn-danger" id="confirmOkBtn">Delete</button>
@@ -1528,6 +1533,11 @@
           <button class="drow" data-open="profile" style="--i:0">
             <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></span>
             <span class="dlabel">Profile<small>Name and subject</small></span>
+            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
+          <button class="drow" data-open="photos" style="--i:2">
+            <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>
+            <span class="dlabel">My Saved Photos<small>Timetables, notes, anything</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
           <button class="drow" data-open="settings" style="--i:1">
@@ -1634,6 +1644,12 @@
             <span class="toggle-label">Class reminders<br><small class="dnote">A notification before each scheduled class</small></span>
             <span class="switch" id="menuReminderSwitch"><span class="knob"></span></span>
           </div>
+          <div class="dfield-label" style="margin:12px 0 8px;">Remind me before class</div>
+          <div class="chips sal-chips" id="reminderLeadChips">
+            <button type="button" class="chip" data-lead="5">5 min</button>
+            <button type="button" class="chip" data-lead="10">10 min</button>
+            <button type="button" class="chip" data-lead="15">15 min</button>
+          </div>
         </div>
         <div class="dcard">
           <div class="dfield-label" style="margin-bottom:10px;">Appearance</div>
@@ -1642,6 +1658,26 @@
             <button class="chip" data-theme-choice="dark">Dark</button>
             <button class="chip active" data-theme-choice="auto">Match phone</button>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY SAVED PHOTOS -->
+    <section class="dpanel dsub" id="dpanel-photos">
+      <div class="dhead"><button class="dicon-btn dback" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><div class="dtitle">My Saved Photos</div></div>
+      <div class="dscroll dbody">
+      <div id="scheduleNoticePanel">
+        <div id="scheduleNoticeHeader" style="display:none;">
+          <div class="panel-title" style="margin-bottom:0;"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>My Saved Photos</div>
+          <span id="scheduleNoticeCount" style="font-size:13px; color:var(--muted); font-weight:700;">0/6</span>
+        </div>
+        <div class="day-card-hint" id="scheduleNoticeHint" style="display:none;">Tap to expand</div>
+        <div id="scheduleNoticeBody" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
+          <div class="admin-sub" style="margin-top:0;">Personal — only you can see these. Save any photo for quick reference (schedule, notes, anything). Tap a photo to view it full size.</div>
+          <div id="scheduleNoticeGallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px 12px;"></div>
+          <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
+          <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Add Photo</button>
+        </div>
         </div>
       </div>
     </section>
@@ -1709,7 +1745,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 2.1 · updated 27 Sep 2026</div>
+          <div class="dnote">Version 2.2 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3655,7 +3691,7 @@
 
     const photos = state.scheduleNoticePhotos || [];
     countEl.textContent = `${photos.length}/${MAX_SCHEDULE_PHOTOS}`;
-    body.style.display = state.scheduleNoticeExpanded ? 'flex' : 'none';
+    body.style.display = 'flex';
     hint.textContent = state.scheduleNoticeExpanded ? 'Tap to collapse' : 'Tap to expand';
 
     const placeholderTile = state.scheduleNoticeUploading
@@ -3825,7 +3861,7 @@
       <div class="tl-card ${m.status}">
         <div class="tl-top"><div class="tl-batch">${escapeHtml(s.label || 'Class')}</div><span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span></div>
         ${topic}
-        <div class="tl-meta">${[subj ? escapeHtml(subj) : '', fmtTeaching(dur), range].filter(Boolean).join(' · ')}</div>
+        <div class="tl-meta">${fmtTeaching(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${st != null && st < SV_EARLY ? '<span class="sv-ampm">Check AM/PM</span>' : ''}</div>
       </div></div>`;
   }
   function renderScheduleList() {
@@ -3837,6 +3873,8 @@
     document.getElementById('svWhich').textContent = svWeekLabel(sv.weekStart);
     document.getElementById('svNext').disabled = sv.weekStart >= shiftDateStr(mondayOf(todayStr()), 28);
     renderSvForm();
+    const copyBtn = document.getElementById('svCopyBtn');
+    if (copyBtn) copyBtn.hidden = sv.weekStart < mondayOf(todayStr()) || !svCopyCandidates().length;
     const slots = (state.scheduleSlots || []).filter((s) => !state.pendingDeleteIds.has(s.id));
     const missing = days.filter((d) => d <= todayStr() && d !== todayStr() && !hvDay(d).ready);
     if (missing.length) hvLoadMissing(missing);
@@ -3883,7 +3921,7 @@
       </div>
       ${m.cls ? '<button type="button" class="dbtn-primary dbtn-block" id="svViewClass" style="margin-top:14px;">View logged class</button>' : ''}
       ${canLog ? '<button type="button" class="dbtn-primary dbtn-block" id="svLogClass" style="margin-top:14px;">Log this class</button>' : ''}
-      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit slot</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Remove slot</button></div>`;
+      <div class="hv-d-btns sv-3btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary" id="svDupSlot" style="border-color: var(--line);">Duplicate</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Remove</button></div>`;
     const root = document.getElementById('hvSheet');
     root.classList.add('open');
     root.setAttribute('aria-hidden', 'false');
@@ -3892,6 +3930,23 @@
     const lb = document.getElementById('svLogClass');
     if (lb) lb.addEventListener('click', () => { closeHvSheet(); openAddForSlot(id, 'schedule'); });
     document.getElementById('svEditSlot').addEventListener('click', () => { closeHvSheet(); startEditScheduleSlot(id); });
+    document.getElementById('svDupSlot').addEventListener('click', () => {
+      closeHvSheet();
+      const sv = svState();
+      state.scheduleWing = wingOfBatch(slot.label);
+      state.scheduleBatch = slot.label;
+      sv.formDur = dur;
+      openSvForm(false);
+      sv.formDates = [];
+      sv.formDatesTouched = true;
+      document.getElementById('scheduleTimeInput').value = slot.time;
+      document.getElementById('scheduleEndInput').value = svMinToHHMM(hhmmToMin(slot.time) + dur);
+      document.getElementById('schedulePanelTitle').textContent = 'Duplicate Slot';
+      renderScheduleWingChips();
+      renderScheduleBatchChips();
+      renderSvForm();
+      showToast('Pick the day(s) for the copy');
+    });
     document.getElementById('svDelSlot').addEventListener('click', async () => {
       closeHvSheet();
       if (!state.db || !state.teacherId) return;
@@ -3899,6 +3954,38 @@
         'This slot will be removed from your schedule.', 'Remove this slot?', 'Slot removed', renderScheduleList, null, 'Remove');
     });
   }
+  const LEAD_KEY = 'ctd_reminder_lead';
+  function reminderLead() {
+    let v = 5;
+    try { v = Number(localStorage.getItem(LEAD_KEY)) || 5; } catch (err) { /* ignore */ }
+    return [5, 10, 15].indexOf(v) === -1 ? 5 : v;
+  }
+  function renderReminderLead() {
+    const v = reminderLead();
+    document.querySelectorAll('#reminderLeadChips [data-lead]').forEach((b) => b.classList.toggle('active', Number(b.getAttribute('data-lead')) === v));
+    const sub = document.getElementById('svSub');
+    if (sub) sub.textContent = `Plan each week's classes · reminder ${v} min before each one`;
+  }
+  document.querySelectorAll('#reminderLeadChips [data-lead]').forEach((b) => b.addEventListener('click', () => {
+    try { localStorage.setItem(LEAD_KEY, b.getAttribute('data-lead')); } catch (err) { /* ignore */ }
+    state.firedScheduleReminders = {};
+    renderReminderLead();
+    showToast(`Reminder: ${b.getAttribute('data-lead')} min before class`);
+  }));
+  renderReminderLead();
+
+  const SV_EARLY = 6 * 60; // before 6:00 AM looks like an AM/PM slip
+  function svEndStr(slot) { const st = hhmmToMin(slot.time); return st == null ? '' : formatTimeStr(svMinToHHMM(st + slotDuration(slot))); }
+  function svOverlaps(date, startMin, endMin, ignoreId) {
+    return (state.scheduleSlots || []).filter((o) => {
+      if (o.id === ignoreId || state.pendingDeleteIds.has(o.id) || slotDate(o) !== date) return false;
+      const a = hhmmToMin(o.time);
+      if (a == null) return false;
+      const b = a + slotDuration(o);
+      return startMin < b && a < endMin;
+    });
+  }
+
   function svMinToHHMM(m) { m = Math.max(0, Math.min(m, 23 * 60 + 59)); return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`; }
   function svFormDuration() {
     const a = hhmmToMin(document.getElementById('scheduleTimeInput').value);
@@ -3918,14 +4005,41 @@
     if (!sv.formOpen) return;
     // Day chips show the dates of the week being viewed.
     const days = datesBetween(sv.weekStart, shiftDateStr(sv.weekStart, 6));
-    if (days.indexOf(sv.formDate) === -1) sv.formDate = days.find((d) => d >= todayStr()) || days[0];
+    const editing = !!state.editingScheduleId;
+    if (!sv.formDates) sv.formDates = [];
+    sv.formDates = sv.formDates.filter((d) => days.indexOf(d) !== -1 && d >= todayStr());
+    if (editing && days.indexOf(sv.formDate) === -1) sv.formDate = days.find((d) => d >= todayStr()) || days[0];
+    if (!editing && !sv.formDates.length && !sv.formDatesTouched) { const first = days.find((d) => d >= todayStr()); if (first) sv.formDates = [first]; }
+    document.getElementById('svDayHint').hidden = editing;
     const dc = document.getElementById('scheduleDayChips');
     dc.innerHTML = days.map((d) => {
       const o = dateObj(d);
       const past = d < todayStr();
-      return `<button type="button" class="chip sv-daychip${d === sv.formDate ? ' active' : ''}" data-sv-date="${d}"${past ? ' disabled' : ''}><b>${o.toLocaleDateString('en-GB', { weekday: 'short' })}</b><small>${o.getDate()}</small></button>`;
+      const on = editing ? d === sv.formDate : sv.formDates.indexOf(d) !== -1;
+      return `<button type="button" class="chip sv-daychip${on ? ' active' : ''}" data-sv-date="${d}"${past ? ' disabled' : ''}><b>${o.toLocaleDateString('en-GB', { weekday: 'short' })}</b><small>${o.getDate()}</small></button>`;
     }).join('');
-    dc.querySelectorAll('[data-sv-date]').forEach((b) => b.addEventListener('click', () => { sv.formDate = b.getAttribute('data-sv-date'); renderSvForm(); }));
+    dc.querySelectorAll('[data-sv-date]').forEach((b) => b.addEventListener('click', () => {
+      const d = b.getAttribute('data-sv-date');
+      if (editing) { sv.formDate = d; } else {
+        sv.formDatesTouched = true;
+        const i = sv.formDates.indexOf(d);
+        if (i === -1) sv.formDates.push(d); else sv.formDates.splice(i, 1);
+        sv.formDates.sort();
+      }
+      renderSvForm();
+    }));
+    // Readable confirmation of the times (AM/PM) under the time boxes.
+    const a = hhmmToMin(document.getElementById('scheduleTimeInput').value);
+    const bEnd = hhmmToMin(document.getElementById('scheduleEndInput').value);
+    const pv = document.getElementById('svPreview');
+    if (a != null && bEnd != null) {
+      const dur = bEnd - a;
+      pv.innerHTML = dur > 0
+        ? `${formatTimeStr(svMinToHHMM(a))} – ${formatTimeStr(svMinToHHMM(bEnd))} · ${fmtTeaching(dur)}${a < SV_EARLY ? ' <span class="warn">· very early — check AM/PM</span>' : ''}`
+        : '<span class="warn">End time must be after the start time</span>';
+    } else if (a != null) {
+      pv.innerHTML = `Starts ${formatTimeStr(svMinToHHMM(a))}${a < SV_EARLY ? ' <span class="warn">· very early — check AM/PM</span>' : ''}`;
+    } else pv.innerHTML = '';
     const cur = svFormDuration();
     document.querySelectorAll('#svDurChips [data-sv-dur]').forEach((b) => b.classList.toggle('active', Number(b.getAttribute('data-sv-dur')) === (cur != null ? cur : sv.formDur)));
   }
@@ -3934,6 +4048,8 @@
     sv.formOpen = true;
     if (!editing) {
       state.editingScheduleId = null;
+      sv.formDates = [];
+      sv.formDatesTouched = false;
       sv.formDur = DEFAULT_DURATION;
       document.getElementById('scheduleTimeInput').value = '';
       document.getElementById('scheduleEndInput').value = '';
@@ -4061,46 +4177,84 @@
 
   document.getElementById('addScheduleSlotBtn').addEventListener('click', async () => {
     if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
+    const sv = svState();
     const time = document.getElementById('scheduleTimeInput').value;
     if (!time) { showToast('Choose a start time', 'error'); return; }
-    if (!document.getElementById('scheduleEndInput').value) svApplyDur(svState().formDur || DEFAULT_DURATION);
-    const durNow = svFormDuration();
-    if (durNow == null || durNow <= 0) { showToast('End time must be after the start time', 'error'); return; }
-    if (durNow > 240) { showToast('A class can be up to 4 hours long', 'error'); return; }
-    svState().formDur = durNow;
     if (!state.scheduleBatch) { showToast('Choose a class / batch', 'error'); return; }
+    if (!document.getElementById('scheduleEndInput').value) svApplyDur(sv.formDur || DEFAULT_DURATION);
+    const dur = svFormDuration();
+    if (dur == null || dur <= 0) { showToast('End time must be after the start time', 'error'); return; }
+    if (dur > 240) { showToast('A class can be up to 4 hours long', 'error'); return; }
+    const editingId = state.editingScheduleId;
+    const dates = editingId ? [sv.formDate] : (sv.formDates || []).slice();
+    if (!dates.length) { showToast('Choose at least one day', 'error'); return; }
+    if (dates.some((d) => d < todayStr())) { showToast('Choose today or a later day', 'error'); return; }
+    const startMin = hhmmToMin(time);
+    if (startMin < SV_EARLY) {
+      const ok = await showConfirm(`${formatTimeStr(time)} is very early in the morning. Is AM correct?`, 'Check the time', 'Yes, save');
+      if (!ok) return;
+    }
+    const clashes = [];
+    dates.forEach((d) => svOverlaps(d, startMin, startMin + dur, editingId).forEach((o) => clashes.push(`${dayHeading(d)}: ${o.label} (${formatTimeStr(o.time)} – ${svEndStr(o)})`)));
+    if (clashes.length) {
+      const ok = await showConfirm(`This time overlaps with:\n${clashes.join('\n')}`, 'Classes overlap', 'Save anyway');
+      if (!ok) return;
+    }
+    sv.formDur = dur;
+    const col = state.db.collection('schedule/' + state.teacherId + '/slots');
     try {
-      if (state.editingScheduleId) {
-        const fd = svState().formDate;
-        await state.db.collection('schedule/' + state.teacherId + '/slots').doc(state.editingScheduleId).update({
-          day: DAY_ABBR[dateObj(fd).getDay()],
-          date: fd,
-          time,
-          duration: svState().formDur || DEFAULT_DURATION,
-          label: state.scheduleBatch
-        });
-        delete state.firedScheduleReminders[todayStr() + '_' + state.editingScheduleId];
+      if (editingId) {
+        await col.doc(editingId).update({ day: DAY_ABBR[dateObj(dates[0]).getDay()], date: dates[0], time, duration: dur, label: state.scheduleBatch });
+        Object.keys(state.firedScheduleReminders).forEach((k) => { if (k.endsWith('_' + editingId)) delete state.firedScheduleReminders[k]; });
         cancelScheduleEdit();
         showToast('Slot updated');
       } else {
-        const fd = svState().formDate;
-        if (fd < todayStr()) { showToast('Choose today or a later day', 'error'); return; }
-        await state.db.collection('schedule/' + state.teacherId + '/slots').add({
-          day: DAY_ABBR[dateObj(fd).getDay()],
-          date: fd,
-          time,
-          duration: svState().formDur || DEFAULT_DURATION,
-          label: state.scheduleBatch,
-          createdAt: Date.now()
-        });
+        for (const d of dates) {
+          await col.add({ day: DAY_ABBR[dateObj(d).getDay()], date: d, time, duration: dur, label: state.scheduleBatch, createdAt: Date.now() });
+        }
         document.getElementById('scheduleTimeInput').value = '';
         document.getElementById('scheduleEndInput').value = '';
-        showToast(`Added for ${dayHeading(fd)}`);
-        svState().weekStart = mondayOf(fd);
+        sv.formDates = [];
+        sv.formDatesTouched = true;
+        showToast(dates.length === 1 ? `Added for ${dayHeading(dates[0])}` : `Added ${dates.length} classes`);
         renderScheduleList();
       }
     } catch (err) { flashOffline(err); }
   });
+
+  // Copy last week's slots into the week on screen (only days from today onwards; skips ones already there).
+  function svCopyCandidates() {
+    const sv = svState();
+    const prevStart = shiftDateStr(sv.weekStart, -7);
+    const prevDays = datesBetween(prevStart, shiftDateStr(prevStart, 6));
+    const slots = (state.scheduleSlots || []).filter((s) => !state.pendingDeleteIds.has(s.id));
+    const out = [];
+    slots.forEach((s) => {
+      const d = slotDate(s);
+      if (prevDays.indexOf(d) === -1) return;
+      const nd = shiftDateStr(d, 7);
+      if (nd < todayStr()) return;
+      if (nd === todayStr()) { const n = new Date(); const st = hhmmToMin(s.time); if (st != null && st <= n.getHours() * 60 + n.getMinutes()) return; }
+      if (slots.some((o) => slotDate(o) === nd && o.time === s.time && o.label === s.label)) return;
+      out.push({ s, nd });
+    });
+    return out;
+  }
+  document.getElementById('svCopyBtn').addEventListener('click', async () => {
+    if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
+    const list = svCopyCandidates();
+    if (!list.length) { showToast('Nothing new to copy from last week'); return; }
+    const ok = await showConfirm(`Copy ${list.length} class${list.length === 1 ? '' : 'es'} from last week into this week? You can edit or remove any of them afterwards.`, 'Copy last week', 'Copy');
+    if (!ok) return;
+    const col = state.db.collection('schedule/' + state.teacherId + '/slots');
+    try {
+      for (const { s, nd } of list) {
+        await col.add({ day: DAY_ABBR[dateObj(nd).getDay()], date: nd, time: s.time, duration: slotDuration(s), label: s.label, createdAt: Date.now() });
+      }
+      showToast(`Copied ${list.length} class${list.length === 1 ? '' : 'es'}`);
+    } catch (err) { flashOffline(err); }
+  });
+
   document.getElementById('cancelScheduleEditBtn').addEventListener('click', cancelScheduleEdit);
   document.getElementById('svAddBtn').addEventListener('click', () => openSvForm(false));
   document.getElementById('svPrev').addEventListener('click', () => { const sv = svState(); sv.weekStart = shiftDateStr(sv.weekStart, -7); renderScheduleList(); });
@@ -4293,6 +4447,7 @@
     });
   });
 
+  function renderProfileSalLead() { renderReminderLead(); }
   function renderProfileSal() {
     const sal = (state.user && state.user.salutation) || '';
     document.querySelectorAll('#profileSalChips [data-psal]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-psal') === sal));
@@ -4320,6 +4475,7 @@
     document.getElementById('menuAvatar').innerHTML = document.getElementById('avatarBox').innerHTML;
     document.getElementById('menuShareAppBtn').style.display = state.canAdmin ? 'flex' : 'none';
     renderProfileSal();
+    renderReminderLead();
   }
 
   // Drawer navigation is kept in browser history, so the phone's Back button
@@ -6047,6 +6203,7 @@
       if (hoursSinceCheckIn < 24) reminderFired24h = false;
     }
 
+    const lead = reminderLead();
     if (remindersOn && state.scheduleSlots.length > 0) {
       const now = new Date();
       const today = todayStr();
@@ -6056,9 +6213,9 @@
         const slotDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
         const minsUntil = (slotDate.getTime() - now.getTime()) / 60000;
         const fireKey = today + '_' + slot.id;
-        if (minsUntil <= 5 && minsUntil > 4 && !state.firedScheduleReminders[fireKey]) {
+        if (minsUntil <= lead && minsUntil > lead - 1 && !state.firedScheduleReminders[fireKey]) {
           state.firedScheduleReminders[fireKey] = true;
-          showReminderAlert(`${slot.label} starts at ${formatTimeStr(slot.time)} — in 5 minutes.`);
+          showReminderAlert(`${slot.label} starts at ${formatTimeStr(slot.time)} — in ${lead} minutes.`);
         }
       });
     }
