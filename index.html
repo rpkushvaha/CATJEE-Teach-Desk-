@@ -403,6 +403,8 @@
   #view-today .timer-label { font-size: 12.5px; color: var(--muted); opacity: 1; margin-top: 4px; }
   #view-today #sessionCountLabel { color: var(--ink); font-weight: 600; font-size: 13px; margin-top: 6px; }
   #view-today .btn { padding: 13px 0; }
+  #view-today .btn-checkin { background: var(--gold); box-shadow: none; }
+  #view-today .btn-checkin:active { background: color-mix(in srgb, var(--gold) 88%, black); }
   #view-today .btn-checkout { background: var(--ink); color: var(--paper); border: none; }
   #view-today .loc-line { text-align: left; color: var(--muted); opacity: 1; min-height: 0; }
   #view-today .loc-line:empty { display: none; }
@@ -2105,7 +2107,8 @@
     const greet = greetingWord();
     const who = salutedName(state.user && state.user.name, state.user && state.user.salutation);
     const title = who ? `${greet}, ${who}` : greet;
-    const dateTxt = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const nowD = new Date();
+    const dateTxt = `${nowD.toLocaleDateString('en-GB', { weekday: 'long' })}, ${nowD.getDate()} ${nowD.toLocaleDateString('en-GB', { month: 'long' })}`;
     const t = document.getElementById('helloTitle');
     const d = document.getElementById('helloDate');
     if (t && t.textContent !== title) t.textContent = title;
