@@ -348,6 +348,44 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .net-banner { background: #2A2210; border-color: #6B5320; color: #F3D08A; } }
   :root[data-theme="dark"] .net-banner { background: #2A2210; border-color: #6B5320; color: #F3D08A; }
   @media (prefers-reduced-motion: reduce) { .skel, .live-dot, .status-card.pulse, .status-dot.pop { animation: none; } }
+
+  /* ---------- Part 2: splash, intro, schedule hint ---------- */
+  .splash { position: fixed; inset: 0; z-index: 998; background: var(--paper); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; transition: opacity .35s ease, visibility 0s linear .35s; }
+  .splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  .splash-logo { width: 84px; height: 105px; animation: splashIn .6s cubic-bezier(.22,.8,.26,1) both; }
+  .splash-logo img, .splash-word img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .splash-word { height: 34px; animation: splashIn .6s .08s cubic-bezier(.22,.8,.26,1) both; }
+  .splash-word img { width: auto; }
+  .splash-sub { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: -6px; }
+  .splash-bar { width: 120px; height: 3px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 18px; }
+  .splash-bar::after { content: ""; display: block; width: 40%; height: 100%; background: var(--gold); border-radius: 99px; animation: splashBar 1.1s ease-in-out infinite; }
+  @keyframes splashIn { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+  @keyframes splashBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+
+  .intro-root { position: fixed; inset: 0; z-index: 95; background: var(--paper); display: none; flex-direction: column;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 22px calc(22px + env(safe-area-inset-bottom, 0px)); }
+  .intro-root.open { display: flex; animation: introFade .3s ease both; }
+  @keyframes introFade { from { opacity: 0; } to { opacity: 1; } }
+  .intro-skip { align-self: flex-end; background: none; border: none; color: var(--muted-2); font-weight: 600; font-size: 14px; padding: 8px 4px; cursor: pointer; }
+  .intro-track { flex: 1; position: relative; overflow: hidden; }
+  .intro-slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px;
+    transition: transform .38s cubic-bezier(.22,.8,.26,1), opacity .38s ease; opacity: 0; transform: translateX(40px); pointer-events: none; }
+  .intro-slide.active { opacity: 1; transform: none; pointer-events: auto; }
+  .intro-slide.past { transform: translateX(-40px); }
+  .intro-art { width: 112px; height: 112px; border-radius: 32px; background: var(--gold-soft); color: var(--gold); display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .intro-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; color: var(--ink); max-width: 300px; line-height: 1.3; }
+  .intro-text { font-size: 15px; color: var(--muted-2); line-height: 1.6; max-width: 310px; margin: 0; }
+  .intro-dots { display: flex; justify-content: center; gap: 7px; margin: 10px 0 18px; }
+  .intro-dots span { width: 7px; height: 7px; border-radius: 99px; background: var(--line); transition: width .25s ease, background .25s ease; }
+  .intro-dots span.on { width: 22px; background: var(--gold); }
+  .intro-next { width: 100%; background: var(--gold); color: #fff; border: none; border-radius: 14px; padding: 15px; font-weight: 700; font-size: 15px; cursor: pointer; }
+
+  .sched-hint { display: none; align-items: flex-start; gap: 8px; background: var(--gold-soft); color: var(--ink); border-radius: 12px;
+    padding: 10px 12px; font-size: 13px; line-height: 1.45; }
+  .sched-hint.show { display: flex; }
+  .sched-hint .ic { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+  @media (prefers-reduced-motion: reduce) { .splash-logo, .splash-word, .splash-bar::after, .intro-slide, .intro-root.open { animation: none; transition: none; } }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
   .drawer-root.open { pointer-events: auto; visibility: visible; transition: none; }
@@ -607,6 +645,47 @@
   </div>
 </div>
 
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="splash-logo" id="splashLogo"></div>
+  <div class="splash-word" id="splashWord"></div>
+  <div class="splash-sub">Teach Desk</div>
+  <div class="splash-bar"></div>
+</div>
+<script>
+  (function () {
+    try {
+      var a = document.querySelector('#authScreen .auth-logo img');
+      var b = document.querySelector('#authScreen .auth-title img');
+      if (a) document.getElementById('splashLogo').appendChild(a.cloneNode());
+      if (b) document.getElementById('splashWord').appendChild(b.cloneNode());
+    } catch (e) {}
+    setTimeout(function () { var s = document.getElementById('splash'); if (s) s.classList.add('hide'); }, 8000);
+  })();
+</script>
+
+<div class="intro-root" id="introRoot" role="dialog" aria-modal="true" aria-label="Welcome">
+  <button class="intro-skip" id="introSkip">Skip</button>
+  <div class="intro-track">
+    <div class="intro-slide active">
+      <div class="intro-art"><svg class="ic" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l-5-5 5-5"/><path d="M15 12H3"/></svg></div>
+      <div class="intro-title">Check in when you reach campus</div>
+      <p class="intro-text">One tap on <strong>Check In</strong> when you arrive and <strong>Check Out</strong> when you leave. Your campus time is counted for you.</p>
+    </div>
+    <div class="intro-slide">
+      <div class="intro-art"><svg class="ic" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div>
+      <div class="intro-title">Log each class in seconds</div>
+      <p class="intro-text">Tap <strong>+ Class</strong>, pick the batch and write the topic. If the class is in your Schedule, the batch and time fill in by themselves.</p>
+    </div>
+    <div class="intro-slide">
+      <div class="intro-art"><svg class="ic" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
+      <div class="intro-title">Reports and reminders, ready</div>
+      <p class="intro-text">Share any day's report on WhatsApp or as a PDF from <strong>History</strong>, and add your weekly classes in <strong>Schedule</strong> to get reminders.</p>
+    </div>
+  </div>
+  <div class="intro-dots" id="introDots"><span class="on"></span><span></span><span></span></div>
+  <button class="intro-next" id="introNext">Next</button>
+</div>
+
 <div id="shell" class="hidden">
 
   <div class="topbar">
@@ -696,6 +775,7 @@
       </div>
 
       <div id="classFields">
+        <div class="sched-hint" id="schedHint"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span id="schedHintText"></span></div>
         <div class="field">
           <label>Wing</label>
           <div class="chips" id="wingChips"></div>
@@ -1241,6 +1321,7 @@
         <div class="dcard dhelp"><strong>Add a class</strong><span>Use "+ Class": pick the batch, timing and topic, and mark what you gave (worksheet, test, homework).</span></div>
         <div class="dcard dhelp"><strong>Add an activity</strong><span>For anything that isn't a class, like meetings, leave or other work.</span></div>
         <div class="dcard dhelp"><strong>History</strong><span>See any past day, week or month, and download or share a report.</span></div>
+        <button class="btn-secondary dbtn-block" id="introAgainBtn" style="border-color:var(--line);">Show the welcome tour again</button>
         <div class="dcard dhelp"><strong>Schedule</strong><span>Set weekly class reminders and keep personal photos for quick reference.</span></div>
       </div>
     </section>
@@ -3205,6 +3286,7 @@
     }
   });
   document.getElementById('pwdDoneBtn').addEventListener('click', () => history.back());
+  document.getElementById('introAgainBtn').addEventListener('click', () => { closeMenu(); setTimeout(openIntro, 350); });
 
   // ----- Contact director panel -----
   function prepareContactPanel() {
@@ -4285,11 +4367,65 @@
     return state.historyClasses.find((c) => c.entryType === 'activity') || null;
   }
 
+  function setSchedHint(text) {
+    const h = document.getElementById('schedHint');
+    if (!h) return;
+    document.getElementById('schedHintText').textContent = text || '';
+    h.classList.toggle('show', !!text);
+  }
+
+  // The slot from today's weekly schedule closest to now (from 1 hour ago to 45 minutes ahead).
+  function findCurrentScheduleSlot() {
+    const today = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    let best = null;
+    (state.scheduleSlots || []).forEach((s) => {
+      if (!s || s.day !== today || !s.time || !s.label) return;
+      if (state.pendingDeleteIds && state.pendingDeleteIds.has(s.id)) return;
+      const [h, m] = String(s.time).split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) return;
+      const diff = (h * 60 + m) - nowMin;
+      if (diff < -60 || diff > 45) return;
+      if (!best || Math.abs(diff) < Math.abs(best.diff)) best = { slot: s, diff, startMin: h * 60 + m };
+    });
+    return best;
+  }
+
+  function wingForBatch(batch) {
+    for (let i = 0; i < WINGS.length; i++) {
+      if (currentBatches(WINGS[i]).indexOf(batch) !== -1) return WINGS[i];
+    }
+    return null;
+  }
+
   function prefillClassFromLast() {
     resetClassForm();
+    setSchedHint('');
+    if (state.addTargetDate && state.addTargetDate !== todayStr()) return;
+    const match = findCurrentScheduleSlot();
+    if (!match) return;
+    const batch = match.slot.label;
+    const wing = wingForBatch(batch);
+    if (!wing) return;
+    state.formWing = wing;
+    selectBatch(batch);
+    const last = findLastClassForBatch(batch);
+    let duration = 45;
+    if (last && last.startTimeStr && last.endTimeStr) {
+      const [sh, sm] = last.startTimeStr.split(':').map(Number);
+      const [eh, em] = last.endTimeStr.split(':').map(Number);
+      const d = (eh * 60 + em) - (sh * 60 + sm);
+      if (d > 0 && d <= 240) duration = d;
+    }
+    const endMin = Math.min(match.startMin + duration, 23 * 60 + 59);
+    document.getElementById('startTimeInput').value = match.slot.time;
+    document.getElementById('endTimeInput').value = `${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`;
+    setSchedHint(`Filled in from your Schedule: ${batch} at ${formatTimeStr(match.slot.time)}. Change anything if needed.`);
   }
 
   function selectBatch(batch) {
+    setSchedHint('');
     const last = findLastClassForBatch(batch);
     state.form = {
       batch,
@@ -4325,6 +4461,7 @@
   }
 
   function startEditClass(id, source, sourceTab) {
+    setSchedHint('');
     const list = source || state.classesToday;
     const cls = list.find((c) => c.id === id);
     if (!cls) return;
@@ -4736,14 +4873,66 @@
 
   // ---------- Auth screen ----------
 
+  function hideSplash() {
+    const sp = document.getElementById('splash');
+    if (sp) sp.classList.add('hide');
+  }
   function showAuthScreen() {
     document.getElementById('authScreen').classList.add('active');
     document.getElementById('shell').classList.add('hidden');
+    hideSplash();
   }
   function showApp() {
     document.getElementById('authScreen').classList.remove('active');
     document.getElementById('shell').classList.remove('hidden');
+    hideSplash();
+    maybeShowIntro();
   }
+
+  // ---------- First-time welcome tour ----------
+  const INTRO_KEY = 'ctd_intro_seen_v1';
+  let introIndex = 0;
+  function renderIntro() {
+    const slides = document.querySelectorAll('#introRoot .intro-slide');
+    slides.forEach((el, i) => {
+      el.classList.toggle('active', i === introIndex);
+      el.classList.toggle('past', i < introIndex);
+    });
+    document.querySelectorAll('#introDots span').forEach((d, i) => d.classList.toggle('on', i === introIndex));
+    document.getElementById('introNext').textContent = introIndex === slides.length - 1 ? 'Get started' : 'Next';
+  }
+  function openIntro() {
+    introIndex = 0;
+    renderIntro();
+    document.getElementById('introRoot').classList.add('open');
+  }
+  function closeIntro() {
+    document.getElementById('introRoot').classList.remove('open');
+    try { localStorage.setItem(INTRO_KEY, '1'); } catch (err) { /* ignore */ }
+  }
+  function maybeShowIntro() {
+    let seen = false;
+    try { seen = localStorage.getItem(INTRO_KEY) === '1'; } catch (err) { seen = true; }
+    if (!seen) openIntro();
+  }
+  document.getElementById('introNext').addEventListener('click', () => {
+    const total = document.querySelectorAll('#introRoot .intro-slide').length;
+    if (introIndex < total - 1) { introIndex++; renderIntro(); } else { closeIntro(); }
+  });
+  document.getElementById('introSkip').addEventListener('click', closeIntro);
+  (function () {
+    let x0 = null;
+    const track = document.querySelector('#introRoot .intro-track');
+    track.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', (e) => {
+      if (x0 == null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      const total = document.querySelectorAll('#introRoot .intro-slide').length;
+      if (dx < -40 && introIndex < total - 1) { introIndex++; renderIntro(); }
+      if (dx > 40 && introIndex > 0) { introIndex--; renderIntro(); }
+      x0 = null;
+    }, { passive: true });
+  })();
 
   let authMode = 'signin';
   function setAuthMode(mode) {
