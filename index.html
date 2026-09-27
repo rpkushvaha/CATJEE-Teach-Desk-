@@ -1654,7 +1654,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 1.0</div>
+          <div class="dnote">Version 1.1 · updated 27 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2614,9 +2614,7 @@
     return !oldest || ds > oldest;
   }
   function hvCampusCovered(ds) {
-    const keys = Object.keys(state.historyCampus || {});
-    if (keys.length < 120) return true;
-    return ds > keys.sort()[0];
+    return ds >= shiftDateStr(todayStr(), -150);
   }
   function campusSeconds(c) {
     if (!c) return 0;
@@ -3443,7 +3441,7 @@
   }
 
   async function saveBatchList(wing, list) {
-    if (!state.db) { flashOffline(); return; }
+    if (!state.db) { flashOffline({ code: 'not-connected' }); return; }
     try {
       const wings = {
         'Pre-Foundation': wing === 'Pre-Foundation' ? list : currentBatches('Pre-Foundation'),
@@ -3451,7 +3449,7 @@
       };
       await state.db.doc('settings/batches').set({ wings });
       showToast('Batch list updated');
-    } catch (err) { flashOffline(); }
+    } catch (err) { flashOffline(err); }
   }
 
   function renderCampusLocationText() {
@@ -3850,7 +3848,7 @@
 
 
   document.getElementById('addScheduleSlotBtn').addEventListener('click', async () => {
-    if (!state.db || !state.teacherId) { flashOffline(); return; }
+    if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
     const time = document.getElementById('scheduleTimeInput').value;
     if (!time) return;
     try {
@@ -3873,7 +3871,7 @@
         document.getElementById('scheduleTimeInput').value = '';
         showToast('Added to schedule');
       }
-    } catch (err) { flashOffline(); }
+    } catch (err) { flashOffline(err); }
   });
   document.getElementById('cancelScheduleEditBtn').addEventListener('click', cancelScheduleEdit);
   document.getElementById('addClassLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'class'; prefillClassFromLast(); switchTab('add'); });
@@ -3998,9 +3996,9 @@
       try {
         await state.db.doc('profile/' + state.teacherId).set({ subject: trimmed });
         showToast('Subject saved');
-      } catch (err) { flashOffline(); }
+      } catch (err) { flashOffline(err); }
     } else {
-      flashOffline();
+      flashOffline({ code: 'not-connected' });
     }
   }
   document.getElementById('subjectSaveBtn').addEventListener('click', saveSubject);
@@ -4059,7 +4057,7 @@
     try {
       if (state.db && state.teacherId) await state.db.doc('profile/' + state.teacherId).set({ salutation: sal }, { merge: true });
       showToast('Saved');
-    } catch (err) { flashOffline(); }
+    } catch (err) { flashOffline(err); }
   }));
 
   function renderMenuProfile() {
@@ -4142,7 +4140,7 @@
       if (cu) await cu.updateProfile({ displayName: trimmed });
       if (state.db && state.teacherId) await state.db.doc('profile/' + state.teacherId).set({ name: trimmed }, { merge: true });
       showToast('Name saved');
-    } catch (err) { flashOffline(); }
+    } catch (err) { flashOffline(err); }
   }
   document.getElementById('menuNameSaveBtn').addEventListener('click', saveMenuName);
   document.getElementById('menuNameInput').addEventListener('keydown', (e) => {
@@ -4246,7 +4244,7 @@
     try {
       await historyRef.set(payload);
       try { await logRef.set(payload); } catch (err) { /* admin mirror is best-effort */ }
-    } catch (err) { flashOffline(); }
+    } catch (err) { flashOffline(err); }
   }
 
   async function adminForceCheckout(tid, date) {
@@ -4283,7 +4281,7 @@
   }
 
   async function performCheckToggle() {
-    if (!state.db || !state.teacherId) { flashOffline(); return; }
+    if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
     let sessions = (state.campusToday.sessions || []).slice();
     if (state.campusToday.checkedIn) {
       for (let i = sessions.length - 1; i >= 0; i--) {
@@ -4322,7 +4320,7 @@
     try {
       await historyRef.set(payload);
       try { await logRef.set(payload); } catch (err) { /* admin mirror is best-effort */ }
-    } catch (err) { flashOffline(); }
+    } catch (err) { flashOffline(err); }
   }
 
   async function editSessionForDate(date, sessions, sessionId, field, hhmm, dayOffset) {
@@ -5416,7 +5414,7 @@
   }
 
   document.getElementById('saveClassBtn').addEventListener('click', async () => {
-    if (!state.db || !state.teacherId) { flashOffline(); return; }
+    if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
     const editingId = state.editingId;
     const isBackfill = !editingId && !!state.addTargetDate;
     const returnTab = (editingId || isBackfill) ? (state.editingSourceTab || 'today') : 'today';
@@ -5456,7 +5454,7 @@
         }
         showToast(editingId ? 'Activity updated' : 'Activity saved');
       } catch (err) {
-        flashOffline();
+        flashOffline(err);
       } finally {
         state.saving = false;
         renderForm();
@@ -5526,7 +5524,7 @@
       }
       showToast(editingId ? '✓ Class updated' : '✓ Class saved');
     } catch (err) {
-      flashOffline();
+      flashOffline(err);
     } finally {
       state.saving = false;
       renderForm();
@@ -5534,7 +5532,7 @@
   });
 
   function waitForWrite(p) {
-    if (!navigator.onLine) { p.catch(() => flashOffline()); return Promise.resolve(); }
+    if (!navigator.onLine) { p.catch((err) => flashOffline(err)); return Promise.resolve(); }
     return Promise.race([p, new Promise((res) => setTimeout(res, 6000))]);
   }
 
@@ -5631,7 +5629,7 @@
       state.campusLocation = loc;
       renderCampusLocationText();
       if (state.db) {
-        try { await state.db.doc('settings/campusLocation').set(loc); showToast('Campus location saved'); } catch (err) { flashOffline(); }
+        try { await state.db.doc('settings/campusLocation').set(loc); showToast('Campus location saved'); } catch (err) { flashOffline(err); }
       }
     }, (err) => {
       let reason = 'Could not read your location.';
@@ -5654,24 +5652,25 @@
     state.campusLocation = loc;
     renderCampusLocationText();
     if (state.db) {
-      try { await state.db.doc('settings/campusLocation').set(loc); showToast('Campus location saved'); } catch (err) { flashOffline(); }
+      try { await state.db.doc('settings/campusLocation').set(loc); showToast('Campus location saved'); } catch (err) { flashOffline(err); }
     } else {
-      flashOffline();
+      flashOffline({ code: 'not-connected' });
     }
   });
 
   document.getElementById('saveDirectorContactBtn').addEventListener('click', async () => {
     const phone = document.getElementById('directorPhoneInput').value.trim();
     const email = document.getElementById('directorEmailInput').value.trim();
-    if (!state.db) { flashOffline(); return; }
+    if (!state.db) { flashOffline({ code: 'not-connected' }); return; }
     try {
       await state.db.doc('settings/directorContact').set({ phone, email });
       showToast('Director contact saved');
-    } catch (err) { flashOffline(); }
+    } catch (err) { flashOffline(err); }
   });
 
   let lastSaveErrorToast = 0;
-  function flashOffline() {
+  function flashOffline(err) {
+    if (err) { try { console.error('CATJEE data error:', err.code || '', err.message || err); } catch (e) { /* ignore */ } }
     if (!navigator.onLine) { updateNetBanner(); return; }
     // Clear any loading placeholders that will never fill in.
     document.querySelectorAll('.class-list').forEach((el) => {
@@ -5681,7 +5680,8 @@
     });
     if (Date.now() - lastSaveErrorToast > 4000) {
       lastSaveErrorToast = Date.now();
-      showToast("Couldn't reach the server. Please try again.", 'error');
+      const code = err && err.code ? ` (${err.code})` : '';
+      showToast(`Couldn't reach the server${code}. Please try again.`, 'error');
     }
   }
 
@@ -5745,14 +5745,14 @@
     unsubAdminClasses = state.db.collection('classes').where('date', '==', date).limit(500).onSnapshot((snap) => {
       state.adminClasses = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       if (state.tab === 'admin') renderAdmin();
-    }, () => flashOffline());
+    }, (err) => flashOffline(err));
 
     unsubAdminCampus = state.db.collection('campusLogs/' + date + '/teachers').limit(200).onSnapshot((snap) => {
       const map = {};
       snap.docs.forEach((d) => { map[d.id] = d.data(); });
       state.adminCampus = map;
       if (state.tab === 'admin') renderAdmin();
-    }, () => flashOffline());
+    }, (err) => flashOffline(err));
   }
 
   // ---------- init ----------
@@ -5987,7 +5987,7 @@
       renderSubject();
       renderProfileSal();
       renderHello();
-    }, () => flashOffline()));
+    }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.doc('campusHistory/' + tid).collection('days').doc(today).onSnapshot((snap) => {
       const data = snap.data();
@@ -5996,26 +5996,27 @@
         : { totalSeconds: 0, checkedIn: false, checkInAt: null, sessionCount: 0, sessions: [] };
       renderStatus();
       renderSessions();
-    }, () => flashOffline()));
+    }, (err) => flashOffline(err)));
 
-    unsubscribers.push(db.collection('campusHistory/' + tid + '/days').orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(120).onSnapshot((snap) => {
+    // Recent days only (last ~5 months), newest included. Ascending ID order needs no extra index.
+    unsubscribers.push(db.collection('campusHistory/' + tid + '/days').orderBy(firebase.firestore.FieldPath.documentId()).startAt(shiftDateStr(today, -150)).limit(200).onSnapshot((snap) => {
       const map = {};
       snap.docs.forEach((d) => { map[d.id] = d.data(); });
       state.historyCampus = map;
       if (state.tab === 'history') renderHistory();
-    }, () => flashOffline()));
+    }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.collection('classes').where('teacherId', '==', tid).where('date', '==', today).orderBy('createdAt', 'desc').limit(50).onSnapshot((snap) => {
       state.classesToday = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       state.todayClassesLoaded = true;
       renderTodayList();
-    }, () => flashOffline()));
+    }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.collection('classes').where('teacherId', '==', tid).orderBy('createdAt', 'desc').limit(300).onSnapshot((snap) => {
       state.historyClasses = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       state.historyClassesLoaded = true;
       if (state.tab === 'history') renderHistory();
-    }, () => flashOffline()));
+    }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.doc('settings/batches').onSnapshot((snap) => {
       const data = snap.data();
@@ -6060,7 +6061,7 @@
       if (state.tab === 'schedule') renderScheduleList();
       renderTodayList();
       pruneExpiredScheduleSlots();
-    }, () => flashOffline()));
+    }, (err) => flashOffline(err)));
 
     if (state.canAdmin) {
       subscribeAdminDate(state.adminDate);
