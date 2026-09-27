@@ -166,7 +166,8 @@
     width: 100%; padding: 14px 0; border-radius: 12px; border: none; cursor: pointer;
     font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .btn-checkin { background: linear-gradient(155deg, var(--gold), color-mix(in srgb, var(--gold) 78%, black)); color: #fff; box-shadow: 0 4px 12px color-mix(in srgb, var(--gold) 35%, transparent); }
+  .btn-checkin { background: var(--gold); color: #fff; box-shadow: none; }
+  .btn-checkin:active { background: color-mix(in srgb, var(--gold) 88%, black); }
   .btn-checkout { background: transparent; color: var(--paper); border: 1.5px solid var(--paper); }
   .btn-secondary {
     width: 100%; padding: 12px 0; border-radius: 12px; cursor: pointer;
@@ -244,7 +245,7 @@
     padding: 8px 13px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer;
     border: 1px solid var(--line); background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(23,23,23,0.03);
   }
-  .chip.active { background: linear-gradient(155deg, var(--gold), color-mix(in srgb, var(--gold) 78%, black)); color: #fff; border-color: transparent; box-shadow: 0 2px 8px color-mix(in srgb, var(--gold) 30%, transparent); }
+  .chip.active { background: var(--gold); color: #fff; border-color: var(--gold); box-shadow: none; }
   .nested-box {
     background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--gold);
     border-radius: 12px; padding: 14px; margin-top: -2px;
@@ -287,7 +288,7 @@
     border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: inherit;
   }
   .checklist-note-input.show { display: block; }
-  .save-btn { width: 100%; padding: 14px 0; border-radius: 12px; background: var(--gold); color: var(--navy); font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin: 4px 0 4px 0; }
+  .save-btn { width: 100%; padding: 14px 0; border-radius: 12px; background: var(--gold); color: #fff; font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin: 4px 0 4px 0; }
   .save-btn:disabled { opacity: .5; cursor: not-allowed; }
 
   /* History tab */
@@ -403,8 +404,6 @@
   #view-today .timer-label { font-size: 12.5px; color: var(--muted); opacity: 1; margin-top: 4px; }
   #view-today #sessionCountLabel { color: var(--ink); font-weight: 600; font-size: 13px; margin-top: 6px; }
   #view-today .btn { padding: 13px 0; }
-  #view-today .btn-checkin { background: var(--gold); box-shadow: none; }
-  #view-today .btn-checkin:active { background: color-mix(in srgb, var(--gold) 88%, black); }
   #view-today .btn-checkout { background: var(--ink); color: var(--paper); border: none; }
   #view-today .loc-line { text-align: left; color: var(--muted); opacity: 1; min-height: 0; }
   #view-today .loc-line:empty { display: none; }
@@ -569,6 +568,7 @@
   .dedit-btn { background: var(--gold-soft); color: var(--gold); border: none; border-radius: 999px; padding: 7px 14px; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; }
   .dbtn-primary { background: var(--gold); color: #fff; border: none; border-radius: 12px; padding: 13px 16px; font-weight: 700; font-size: 15px; cursor: pointer; }
   .dbtn-primary:disabled { opacity: .6; }
+  .dbtn-primary:active, .save-btn:active { background: color-mix(in srgb, var(--gold) 88%, black); }
   .dbtn-block { width: 100%; }
   .dtext { font-size: 14px; color: var(--muted-2); line-height: 1.6; margin: 0; }
   .dnote { font-size: 13px; color: var(--muted); font-weight: 400; }
