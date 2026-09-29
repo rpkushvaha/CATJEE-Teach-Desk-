@@ -652,6 +652,11 @@
   #view-schedule { gap: 10px; }
   .sv-empty { margin-top: 4px; }
   #svAddBtn[hidden], #svFormPanel[hidden] { display: none; }
+  #invigFields[hidden] { display: none !important; }
+  .inv-part { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .inv-part-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  .inv-scope .chip { padding: 6px 11px; font-size: 12.5px; }
+  #combineField[hidden], #combineBox[hidden], #combineToggle[hidden] { display: none !important; }
   .sv-form { display: flex; flex-direction: column; gap: 14px; }
   .sv-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
   .sv-daychip { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0 !important; border-radius: 10px !important; min-width: 0; }
@@ -688,6 +693,10 @@
   .sv-row.missed { box-shadow: inset 3px 0 0 #D97706; }
   .sv-row.cancelled .sv-batch, .sv-row.cancelled .sv-time { text-decoration: line-through; color: var(--muted); }
   .tl-pill.cancelled { background: var(--neutral-soft); color: var(--muted); }
+  .tl-pill.leave { background: rgba(217,119,6,.12); color: #B45309; }
+  .tl-pill.covered { background: rgba(22,163,74,.12); color: #15803D; }
+  .sv-row.leave { box-shadow: inset 3px 0 0 #D97706; }
+  .sv-row.covered { box-shadow: inset 3px 0 0 #16A34A; }
   .sv-summary b { display: block; color: var(--ink); font-weight: 600; font-size: 13.5px; }
   .sv-summary span { display: block; margin-top: 1px; }
   #scheduleList .tl-time { padding-top: 9px; }
@@ -732,6 +741,11 @@
   .ad-pill.leave { background: rgba(217,119,6,.12); color: #B45309; }
   .ad-pill.absent { background: var(--gold-soft); color: var(--gold); }
   .ad-pill.nocheck { background: rgba(217,119,6,.12); color: #B45309; }
+  .ad-exam { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+  .ad-exam + .ad-exam { border-top: 1px solid var(--line); }
+  .ad-exam.other { cursor: default; background: var(--neutral-soft); }
+  #adminExamForm[hidden], #adminNewExamBtn[hidden] { display: none !important; }
+  #adminExamList:empty { display: none; }
   .ad-detail { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 8px; background: var(--neutral-soft); }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
@@ -1178,6 +1192,15 @@
         </div>
         </div>
 
+        <div class="field" id="combineField" hidden>
+          <button type="button" class="hv-back" id="combineToggle" style="padding:0;">+ Combine another batch</button>
+          <div id="combineBox" hidden style="display:flex; flex-direction:column; gap:8px;">
+            <label style="margin:0;">Combined with</label>
+            <div class="chips" id="combineChips"></div>
+            <div class="hv-fnote">For a class test of several batches in one slot. Counted as one class; the test counts for each batch.</div>
+          </div>
+        </div>
+
         <div class="field">
           <label>Class Timing</label>
           <div style="display:flex; gap:10px;">
@@ -1228,7 +1251,7 @@
             <div class="toggle-row checklist-item" data-key="test">
               <div class="checklist-toggle-trigger">
                 <span class="checklist-icon"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
-                <span class="toggle-label">Test / Exam Conducted</span>
+                <span class="toggle-label">Class Test Conducted</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
               <input type="text" class="checklist-note-input" id="testNoteInput" placeholder="Test on which topic? (optional)">
@@ -1250,8 +1273,21 @@
           <label>Activity Type</label>
           <div class="chips" id="activityChips"></div>
         </div>
+        <div id="invigFields" hidden style="display:flex; flex-direction:column; gap:14px;">
+          <div class="field">
+            <label>Exam / Test</label>
+            <div class="chips" id="invigKindChips"></div>
+            <div class="hv-fnote" id="invigKindNote"></div>
+          </div>
+          <div class="field">
+            <label for="invigName">Test / Exam name</label>
+            <input class="text-input" id="invigName" type="text" placeholder="e.g. Unit Test 2 – Maths">
+          </div>
+          <div id="invigParts" style="display:flex; flex-direction:column; gap:10px;"></div>
+          <button type="button" class="hv-back" id="invigAddPart" style="padding:0;">+ Add another part</button>
+        </div>
         <div class="field">
-          <label for="activityNoteInput">Details</label>
+          <label for="activityNoteInput" id="activityNoteLabel">Details</label>
           <textarea class="text-input" id="activityNoteInput" rows="5" style="resize:vertical; font-family:inherit;" placeholder="e.g. Prepared question paper for Class 10"></textarea>
         </div>
       </div>
@@ -1446,6 +1482,28 @@
       <section class="tsec">
         <div class="tsec-head"><div class="tsec-title">Schedule (All Teachers)</div><div class="tsec-meta" id="adminSchedMeta"></div></div>
         <div id="adminSchedList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </section>
+
+      <section class="tsec" id="adminExamsSec">
+        <div class="tsec-head"><div class="tsec-title">Exams &amp; Invigilation</div><button type="button" class="hv-back" id="adminNewExamBtn" style="padding:0;">+ New Exam</button></div>
+        <div class="panel" id="adminExamForm" hidden style="display:flex; flex-direction:column; gap:12px;">
+          <div class="panel-title" id="adminExamFormTitle">New Exam</div>
+          <input class="text-input" id="adminExamName" type="text" placeholder="Exam / test name, e.g. Unit Test 2 – Maths">
+          <div class="sv-times">
+            <div><div class="sv-tlbl">Start</div><input class="text-input" id="adminExamStart" type="time"></div>
+            <div><div class="sv-tlbl">End</div><input class="text-input" id="adminExamEnd" type="time"></div>
+          </div>
+          <input class="text-input" id="adminExamRoom" type="text" placeholder="Room / Hall, e.g. Hall A">
+          <div class="sv-tlbl" style="margin:0;">Classes · tap a whole class or its batches</div>
+          <div class="chips inv-scope" id="adminExamScope"></div>
+          <div class="sv-tlbl" style="margin:0;">Invigilators (optional)</div>
+          <div class="chips inv-scope" id="adminExamInvig"></div>
+          <div class="sv-form-btns">
+            <button type="button" class="btn-secondary" id="adminExamCancel" style="border-color: var(--line);">Cancel</button>
+            <button type="button" class="save-btn" id="adminExamSave" style="margin:0;">Save Exam</button>
+          </div>
+        </div>
+        <div id="adminExamList" class="sv-rows"></div>
       </section>
 
       <section class="tsec">
@@ -1801,7 +1859,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 2.7 · updated 29 Sep 2026</div>
+          <div class="dnote">Version 2.8 · updated 29 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -1846,7 +1904,7 @@
     'Foundation': []
   };
   const DEFAULT_BATCHES = DEFAULT_BATCHES_BY_WING['Pre-Foundation'];
-  const ACTIVITY_TYPES = ['Other Activity', 'Leave / Holiday'];
+  const ACTIVITY_TYPES = ['Other Activity', 'Invigilation', 'Leave / Holiday'];
   // Saved value stays 'Other Activity' (older records use it); it is shown as 'Other Work'.
   function activityLabel(t) { return t === 'Other Activity' ? 'Other Work' : (t || 'Activity'); }
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -2518,7 +2576,7 @@
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-today-rec="${escapeHtml(c.id)}" role="button" tabindex="0">${tlTimeHtml(it.min)}
       <div class="tl-card ${it.status}">
-        <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div>${pill}</div>
+        <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${pill}</div>
         ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
         ${it.status === 'upcoming' ? '<div class="tl-meta"><span class="tl-filled">✓ Details filled</span></div>' : ''}
         <div class="tl-bottom">
@@ -2544,7 +2602,7 @@
     set('sumClasses', classes.length);
     set('sumHours', fmtTeaching(classes.reduce((sum, c) => sum + classDuration(c), 0)));
     set('sumWorksheets', classes.filter((c) => c.worksheet).length);
-    set('sumTests', classes.filter((c) => c.test).length);
+    set('sumTests', classes.reduce((s, c) => s + testCount(c), 0) + coveredTestsFor(todayStr(), state.classesToday).count);
     fitSummaryTiles(true);
   }
   function renderTodayList() {
@@ -2568,6 +2626,8 @@
       html = items.map(tlItemHtml).join('');
     }
     if (activities.length) html += '<div class="tl-sub">Activities</div>' + activities.map(todayActivityRowHtml).join('');
+    const cvT = coveredTestsFor(todayStr(), state.classesToday);
+    if (cvT.count) html += `<div class="ad-ok" style="margin-top:4px;">✓ Class test held in your class while you were on leave: ${escapeHtml(cvT.batches.join(', '))}</div>`;
     if (el._lastHtml === html) return;
     el._lastHtml = html;
     el.innerHTML = html;
@@ -2586,11 +2646,64 @@
       btn.addEventListener('click', () => document.getElementById('addClassLink').click());
     });
   }
+  // ---------- Step 3 helpers: combined batches, classes, invigilation, covered tests ----------
+  function entryBatches(c) { return (c && c.batches && c.batches.length) ? c.batches : (c && c.batch ? [c.batch] : []); }
+  function entryBatchLabel(c) { const b = entryBatches(c); return b.length > 1 ? b.join(' + ') : (b[0] || 'Class'); }
+  function testCount(c) { return c && c.test ? Math.max(1, entryBatches(c).length) : 0; }
+  function classOfBatch(b) { const m = String(b || '').match(/class\s*(\d+)/i); return m ? `Class ${m[1]}` : null; }
+  function allClassNames() {
+    const set = [];
+    allBatchesFlat().forEach((b) => { const c = classOfBatch(b); if (c && set.indexOf(c) === -1) set.push(c); });
+    return set.sort((a, b) => Number(a.replace(/\D/g, '')) - Number(b.replace(/\D/g, '')));
+  }
+  // "Class 9" means all of Class 9's batches.
+  function expandScope(scope) {
+    const out = [];
+    (scope || []).forEach((t) => {
+      if (/^Class \d+$/.test(t)) allBatchesFlat().forEach((b) => { if (classOfBatch(b) === t && out.indexOf(b) === -1) out.push(b); });
+      else if (out.indexOf(t) === -1) out.push(t);
+    });
+    return out;
+  }
+  function scopeLabel(scope) { return (scope || []).join(', '); }
+  function isInvig(c) { return c && c.entryType === 'activity' && c.activityType === 'Invigilation'; }
+  function invigMinutes(c) {
+    if (!isInvig(c)) return 0;
+    return (c.parts || []).reduce((s, p) => { const a = hhmmToMin(p.start), b = hhmmToMin(p.end); return s + (a != null && b != null && b > a ? b - a : 0); }, 0);
+  }
+  function invigSummary(c) {
+    const parts = c.parts || [];
+    const rooms = []; const scope = [];
+    parts.forEach((p) => { if (p.room && rooms.indexOf(p.room) === -1) rooms.push(p.room); (p.scope || []).forEach((x) => { if (scope.indexOf(x) === -1) scope.push(x); }); });
+    const bits = [c.testName || 'Test'];
+    if (c.invigKind === 'cover') bits.push('covering a class');
+    if (rooms.length) bits.push(rooms.join(', '));
+    if (scope.length) bits.push(scope.join(', '));
+    return { title: `Invigilation · ${svDur(invigMinutes(c) || 0)}${parts.length > 1 ? ` (${parts.length} parts)` : ''}`, sub: bits.join(' · ') };
+  }
+  // Class tests someone else conducted in this teacher's scheduled classes while they were on leave.
+  // The other teacher is never identified here.
+  function coveredTestsFor(date, entries) {
+    const onLeave = (entries || []).some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday');
+    if (!onLeave) return { count: 0, batches: [] };
+    const slots = (state.scheduleSlots || []).filter((s) => !s.cancelled && slotDate(s) === date);
+    if (!slots.length) return { count: 0, batches: [] };
+    const covers = (state.testCovers || []).filter((cv) => cv.date === date && cv.byTeacherId !== state.teacherId);
+    const hit = [];
+    slots.forEach((s) => {
+      const a = hhmmToMin(s.time); const b = a + slotDuration(s);
+      const found = covers.some((cv) => (cv.batches || []).indexOf(s.label) !== -1 && (cv.parts || []).some((p) => hhmmToMin(p.start) < b && a < hhmmToMin(p.end)));
+      if (found && hit.indexOf(s.label) === -1) hit.push(s.label);
+    });
+    return { count: hit.length, batches: hit };
+  }
+
   function todayActivityRowHtml(a) {
     const isLeave = a.activityType === 'Leave / Holiday';
     return `<div class="tl-item hv-rec" data-today-act="${escapeHtml(a.id)}" role="button" tabindex="0"><div class="tl-time"></div>
       <div class="hv-act-card${isLeave ? ' leave' : ''}">
-        <div class="hv-act-top"><span class="hv-act-title">${escapeHtml(activityLabel(a.activityType))}</span></div>
+        <div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isInvig(a) ? invigSummary(a).title : activityLabel(a.activityType))}</span></div>
+        ${isInvig(a) ? `<div class="hv-act-note">${escapeHtml(invigSummary(a).sub)}</div>` : ''}
         ${a.note ? `<div class="hv-act-note">${escapeHtml(a.note)}</div>` : ''}
       </div></div>`;
   }
@@ -2812,7 +2925,7 @@
   function hvMatchesFilters(c) {
     const h = hvState();
     const isAct = c.entryType === 'activity';
-    if (h.batch !== 'all' && (isAct || c.batch !== h.batch)) return false;
+    if (h.batch !== 'all' && (isAct || entryBatches(c).indexOf(h.batch) === -1)) return false;
     if (h.kind === 'classes' && isAct) return false;
     if (h.kind === 'tests' && (isAct || !c.test)) return false;
     if (h.kind === 'worksheets' && (isAct || !c.worksheet)) return false;
@@ -2839,7 +2952,8 @@
         ? ''
         : '';
       return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}"><div class="tl-time hv-act-ic${isLeave ? ' leave' : ''}">${icon}</div>
-        <div class="hv-act-card${isLeave ? ' leave' : ''}"><div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isLeave ? 'Leave / Holiday' : activityLabel(c.activityType))}</span></div>
+        <div class="hv-act-card${isLeave ? ' leave' : ''}"><div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isLeave ? 'Leave / Holiday' : (isInvig(c) ? invigSummary(c).title : activityLabel(c.activityType)))}</span></div>
+        ${isInvig(c) ? `<div class="hv-act-note">${escapeHtml(invigSummary(c).sub)}</div>` : ''}
         ${c.note ? `<div class="hv-act-note">${escapeHtml(c.note)}</div>` : ''}</div></div>`;
     }
     const st = hhmmToMin(c.startTimeStr);
@@ -2851,7 +2965,7 @@
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}">${tlTimeHtml(st)}
       <div class="tl-card">
-        <div class="tl-top"><div class="tl-batch">${escapeHtml(c.batch || 'Class')}</div>${hvStartedOrPast(c) ? '' : '<span class="tl-pill upcoming">Upcoming</span>'}</div>
+        <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : '<span class="tl-pill upcoming">Upcoming</span>'}</div>
         ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
         ${range ? `<div class="tl-meta">${range}</div>` : ''}
         ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
@@ -2894,12 +3008,13 @@
     dates.forEach((d) => {
       const day = hvDay(d);
       campus += campusSeconds(day.campus);
+      if (h.kind === 'all' || h.kind === 'tests') tests += coveredTestsFor(d, day.classes).count;
       day.classes.forEach((c) => {
         if (c.entryType === 'activity' || state.pendingDeleteIds.has(c.id) || !hvStartedOrPast(c)) return;
         if (!hvMatchesFilters(c)) return;
         classes++; mins += classDuration(c);
         if (c.worksheet) ws++;
-        if (c.test) tests++;
+        tests += testCount(c);
         if (c.homework) hw++;
       });
     });
@@ -3028,6 +3143,8 @@
     html += `<div class="hv-sub" style="display:flex; align-items:center; justify-content:space-between;"><span>Classes and activities</span>
       <span style="display:flex; gap:6px;"><button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button><button class="add-entry-btn" id="historyAddClassBtn">+ Class</button></span></div>`;
     html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No records found for this day.</div>';
+    const cvH = coveredTestsFor(d, all);
+    if (cvH.count) html += `<div class="ad-ok">✓ Class test held in your class while you were on leave: ${escapeHtml(cvH.batches.join(', '))}</div>`;
     el._lastHtml = null;
     el.innerHTML = html;
     hvWireRecords(el);
@@ -3070,13 +3187,15 @@
     const dObj = dateObj(c.date || todayStr());
     const dateTxt = `${dObj.toLocaleDateString('en-GB', { weekday: 'short' })}, ${dObj.getDate()} ${dObj.toLocaleDateString('en-GB', { month: 'long' })} ${dObj.getFullYear()}`;
     if (c.entryType === 'activity') {
-      body.innerHTML = `<div class="hv-d-title">${escapeHtml(activityLabel(c.activityType))}</div>
-        <div class="hv-d-rows"><div class="hv-d-row"><span>Date</span><span>${escapeHtml(dateTxt)}</span></div></div>
+      body.innerHTML = `<div class="hv-d-title">${escapeHtml(isInvig(c) ? 'Invigilation' : activityLabel(c.activityType))}</div>
+        ${isInvig(c) ? `<div class="hv-d-wing">${escapeHtml(c.testName || '')}${c.invigKind === 'cover' ? ' · covering a class' : ''}</div>` : ''}
+        <div class="hv-d-rows"><div class="hv-d-row"><span>Date</span><span>${escapeHtml(dateTxt)}</span></div>
+        ${isInvig(c) ? (c.parts || []).map((p, i) => `<div class="hv-d-row"><span>${(c.parts || []).length > 1 ? 'Part ' + (i + 1) : 'Time'}</span><span>${escapeHtml(formatTimeStr(p.start))} – ${escapeHtml(formatTimeStr(p.end))}${p.room ? ' · ' + escapeHtml(p.room) : ''}${(p.scope || []).length ? ' · ' + escapeHtml(scopeLabel(p.scope)) : ''}</span></div>`).join('') + `<div class="hv-d-row"><span>Total</span><span>${svDur(invigMinutes(c))}</span></div>` : ''}</div>
         ${c.note ? `<div class="hv-d-topic" style="white-space:pre-line;">${escapeHtml(c.note)}</div>` : ''}
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="hvEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="hvDelete" style="border-color: var(--line);">Delete</button></div>`;
     } else {
       const dur = classDuration(c);
-      body.innerHTML = `<div class="hv-d-title">${escapeHtml(c.batch || 'Class')}</div>
+      body.innerHTML = `<div class="hv-d-title">${escapeHtml(entryBatchLabel(c))}</div>
         <div class="hv-d-wing">${escapeHtml(wingForBatch(c.batch) || 'Wing not recorded')}${c.subject ? ' · ' + escapeHtml(c.subject) : ''}</div>
         <div class="hv-d-topic">${c.topic ? escapeHtml(c.topic) : '<span style="color:var(--muted); font-style:italic;">Topic not added</span>'}</div>
         <div class="hv-d-rows">
@@ -3105,7 +3224,7 @@
       const isAct = c.entryType === 'activity';
       await confirmAndDeleteWithUndo(
         c.id,
-        () => state.db.collection('classes').doc(c.id).delete(),
+        () => deleteEntryDoc(c),
         'This entry will be permanently removed.',
         'Delete this entry?',
         isAct ? 'Activity deleted' : 'Class deleted',
@@ -3276,10 +3395,33 @@
     }).join('');
     actChipsEl.querySelectorAll('[data-activity-type]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        state.activityForm.activityType = btn.getAttribute('data-activity-type');
+        const nt = btn.getAttribute('data-activity-type');
+        // A note copied from the last activity doesn't belong to a different type.
+        const ta = document.getElementById('activityNoteInput');
+        if (nt !== state.activityForm.activityType && !state.editingId && ta.value === (state.activityForm.note || '')) { ta.value = ''; state.activityForm.note = ''; }
+        state.activityForm.activityType = nt;
         renderForm();
       });
     });
+    if (typeof renderInvig === 'function') renderInvig();
+
+    const cf = document.getElementById('combineField');
+    cf.hidden = !state.form.batch;
+    const cbox = document.getElementById('combineBox');
+    const ex = state.form.extra || [];
+    cbox.hidden = !(state.form.combineOpen || ex.length);
+    document.getElementById('combineToggle').hidden = !cbox.hidden;
+    if (!cbox.hidden) {
+      const cc = document.getElementById('combineChips');
+      cc.innerHTML = allBatchesFlat().filter((b) => b !== state.form.batch)
+        .map((b) => `<button type="button" class="chip${ex.indexOf(b) !== -1 ? ' active' : ''}" data-combine="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
+      cc.querySelectorAll('[data-combine]').forEach((btn) => btn.addEventListener('click', () => {
+        const b = btn.getAttribute('data-combine');
+        const i = (state.form.extra = state.form.extra || []).indexOf(b);
+        if (i === -1) state.form.extra.push(b); else state.form.extra.splice(i, 1);
+        renderForm();
+      }));
+    }
 
     ['worksheet', 'material', 'test', 'homework'].forEach((key) => {
       const row = document.querySelector(`#view-add .toggle-row[data-key="${key}"]`);
@@ -3462,7 +3604,7 @@
   }
   // Refresh the schedule/week pieces when the admin returns to the tab.
   function refreshAdminExtras() { adminSlotsKey = ''; adminWeekKey = ''; loadAdminTeachers(true); }
-  const ADMIN_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged', cancelled: 'Cancelled', leave: 'On leave' };
+  const ADMIN_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged', cancelled: 'Cancelled', leave: 'On leave', covered: 'Test covered' };
 
   function renderAdmin() {
     const date = state.adminDate;
@@ -3500,6 +3642,8 @@
         if (wing !== 'all' && wingOfBatch(m.slot.label) !== wing) return;
         let st = m.status;
         if (st === 'missed' && onLeave) st = 'leave';
+        if ((st === 'missed' || st === 'leave') && (state.testCovers || []).some((cv) => cv.date === date && (cv.batches || []).indexOf(m.slot.label) !== -1
+          && (cv.parts || []).some((p) => hhmmToMin(p.start) < hhmmToMin(m.slot.time) + slotDuration(m.slot) && hhmmToMin(m.slot.time) < hhmmToMin(p.end)))) st = 'covered';
         sched.push({ tid, slot: m.slot, cls: m.cls, status: st });
       });
     });
@@ -3556,6 +3700,7 @@
     if (clashes.length) alerts.push({ t: `${clashes.length} time conflict${clashes.length === 1 ? '' : 's'} in schedules`, lines: clashes.slice(0, 3) });
     const cancelledN = sched.filter((x) => x.status === 'cancelled').length;
     if (cancelledN) alerts.push({ t: `${cancelledN} class${cancelledN === 1 ? '' : 'es'} cancelled`, lines: sched.filter((x) => x.status === 'cancelled').slice(0, 3).map((x) => `${formatTimeStr(x.slot.time)} · ${x.slot.label} · ${nameOf(x.tid)}`), info: true });
+    renderAdminExams(ids, nameOf, dayAll, sched).forEach((a) => alerts.push(a));
     const alertEl = document.getElementById('adminAlerts');
     alertEl.innerHTML = alerts.length
       ? alerts.map((a) => `<div class="ad-alert${a.info ? ' info' : ''}"><div class="ad-alert-t">${a.info ? '' : '⚠️ '}${escapeHtml(a.t)}</div>${a.lines.map((l) => `<div class="ad-alert-l">${escapeHtml(l)}</div>`).join('')}${a.more > 0 ? `<div class="ad-alert-l">+${a.more} more</div>` : ''}</div>`).join('')
@@ -3568,10 +3713,10 @@
     document.getElementById('adminSchedMeta').textContent = sched.length ? `${sched.length} class${sched.length === 1 ? '' : 'es'}` : '';
     schedEl.innerHTML = !slotsReady ? '<div class="skel short"></div>'
       : !sched.length ? '<div class="hv-note" style="text-align:left;">No classes scheduled by teachers for this day.</div>'
-      : `<div class="sv-rows">${rows.map((x) => `<div class="sv-row ${x.status === 'leave' ? 'missed' : x.status}">
+      : `<div class="sv-rows">${rows.map((x) => `<div class="sv-row ${x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status)}">
           <span class="sv-time">${escapeHtml(formatTimeStr(x.slot.time))}</span>
           <span class="sv-main"><span class="sv-batch">${escapeHtml(x.slot.label)}</span><span class="sv-dur">${escapeHtml(nameOf(x.tid))} · ${svDur(slotDuration(x.slot))}</span></span>
-          <span class="tl-pill ${x.status === 'leave' ? 'missed' : x.status}">${ADMIN_PILL[x.status]}</span></div>`).join('')}</div>
+          <span class="tl-pill ${x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status)}">${ADMIN_PILL[x.status]}</span></div>`).join('')}</div>
           ${sched.length > 8 ? `<button type="button" class="hv-back" id="adminSchedToggle" style="align-self:center;">${showAll ? 'Show less' : `Show all ${sched.length}`}</button>` : ''}`;
     const tg = document.getElementById('adminSchedToggle');
     if (tg) tg.addEventListener('click', () => { state.adminSchedAll = !state.adminSchedAll; renderAdmin(); });
@@ -3597,7 +3742,8 @@
         const expanded = state.adminExpandedTeacher === r.tid;
         const campus = state.adminCampus[r.tid];
         const stuckCheckedIn = !!(campus && campus.checkedIn && campus.checkInAt && (Date.now() - campus.checkInAt) >= 24 * 3600 * 1000);
-        const other = r.entries.filter((c) => c.entryType === 'activity' && c.activityType !== 'Leave / Holiday').length;
+        const other = r.entries.filter((c) => c.entryType === 'activity' && c.activityType !== 'Leave / Holiday' && !isInvig(c)).length;
+        const invMin = r.entries.filter(isInvig).reduce((s2, c) => s2 + invigMinutes(c), 0);
         let detail = '';
         if (expanded) {
           const counts = {};
@@ -3613,7 +3759,7 @@
         return `<div class="ad-trow${expanded ? ' open' : ''}" data-teacher-id="${r.tid}" role="button" tabindex="0">
           <div class="ad-tmain">
             <span class="ad-tname">${escapeHtml(nameOf(r.tid))}</span>
-            <span class="ad-tsub">${r.cls.length} class${r.cls.length === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
+            <span class="ad-tsub">${r.cls.length} class${r.cls.length === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${invMin ? ` · ${svDur(invMin)} invigilation` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
           </div>
           <span class="ad-pill ${r.st.key}">${r.st.label}</span>
         </div>${detail}`;
@@ -3639,11 +3785,135 @@
       set('adWkClasses', wc.length);
       set('adWkTeaching', fmtTeaching(wc.reduce((s, c) => s + classDuration(c), 0)));
       set('adWkWorksheets', wc.filter((c) => c.worksheet).length);
-      set('adWkTests', wc.filter((c) => c.test).length);
+      set('adWkTests', wc.reduce((s, c) => s + testCount(c), 0));
     } else {
       ['adWkClasses', 'adWkTeaching', 'adWkWorksheets', 'adWkTests'].forEach((id) => set(id, '…'));
     }
   }
+
+  // ---------- Admin: Exams & Invigilation ----------
+  state.adminExamForm = state.adminExamForm || null;
+  function renderAdminExams(ids, nameOf, dayAll, sched) {
+    const listEl = document.getElementById('adminExamList');
+    if (!listEl) return [];
+    const exams = (state.adminExams || []).slice().sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+    const invigs = dayAll.filter(isInvig);
+    const alerts = [];
+    const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+    const ended = (e) => state.adminDate < todayStr() || (state.adminDate === todayStr() && hhmmToMin(e.end) != null && nowMin >= hhmmToMin(e.end));
+    let html = exams.map((e) => {
+      const logs = invigs.filter((x) => x.examId === e.id);
+      const loggedBy = {};
+      logs.forEach((x) => { loggedBy[x.teacherId] = (loggedBy[x.teacherId] || 0) + invigMinutes(x); });
+      const assigned = e.invigilators || [];
+      const missing = assigned.filter((t) => loggedBy[t] === undefined);
+      if (missing.length && ended(e)) alerts.push({ t: `${e.name}: invigilation not logged`, lines: [missing.map(nameOf).join(', ')] });
+      const batches = expandScope(e.scope);
+      sched.filter((x) => x.status !== 'cancelled' && batches.indexOf(x.slot.label) !== -1).forEach((x) => {
+        const a = hhmmToMin(x.slot.time), b = a + slotDuration(x.slot);
+        if (a < hhmmToMin(e.end) && hhmmToMin(e.start) < b) alerts.push({ t: `${x.slot.label} has a class during ${e.name}`, lines: [`${formatTimeStr(x.slot.time)} · ${nameOf(x.tid)}`] });
+      });
+      const inv = Object.keys(loggedBy).map((t) => `${nameOf(t)} (${svDur(loggedBy[t])})`);
+      return `<div class="ad-exam" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0">
+        <div class="ad-tname">${escapeHtml(e.name)}</div>
+        <div class="ad-tsub">${escapeHtml(formatTimeStr(e.start))} – ${escapeHtml(formatTimeStr(e.end))}${e.room ? ' · ' + escapeHtml(e.room) : ''}${(e.scope || []).length ? ' · ' + escapeHtml(scopeLabel(e.scope)) : ''}</div>
+        ${inv.length ? `<div class="ad-tsub">Logged: ${escapeHtml(inv.join(', '))}</div>` : (ended(e) ? '<div class="ad-tsub">No invigilation logged</div>' : '')}
+        ${missing.length ? (ended(e) ? `<div class="ad-tsub" style="color:#B45309;">Assigned, not logged: ${escapeHtml(missing.map(nameOf).join(', '))}</div>` : `<div class="ad-tsub">Assigned: ${escapeHtml(missing.map(nameOf).join(', '))}</div>`) : ''}
+      </div>`;
+    }).join('');
+    const others = invigs.filter((x) => !x.examId || !exams.some((e) => e.id === x.examId));
+    if (others.length) {
+      html += others.map((x) => `<div class="ad-exam other">
+        <div class="ad-tname">${escapeHtml(x.testName || 'Test')}${x.invigKind === 'cover' ? ' · covering a class' : ''}</div>
+        <div class="ad-tsub">${escapeHtml(nameOf(x.teacherId))} · ${svDur(invigMinutes(x))} · ${escapeHtml((x.parts || []).map((p) => `${formatTimeStr(p.start)} – ${formatTimeStr(p.end)}${p.room ? ' ' + p.room : ''}${(p.scope || []).length ? ' (' + scopeLabel(p.scope) + ')' : ''}`).join('; '))}</div>
+      </div>`).join('');
+    }
+    listEl.innerHTML = html || '<div class="hv-note" style="text-align:left;">No exams or invigilation for this day.</div>';
+    listEl.querySelectorAll('[data-exam]').forEach((row) => row.addEventListener('click', () => openExamSheet(row.getAttribute('data-exam'), nameOf)));
+    renderAdminExamForm(ids, nameOf);
+    return alerts;
+  }
+  function renderAdminExamForm(ids, nameOf) {
+    const box = document.getElementById('adminExamForm');
+    const f = state.adminExamForm;
+    box.hidden = !f;
+    document.getElementById('adminNewExamBtn').hidden = !!f;
+    if (!f) return;
+    document.getElementById('adminExamFormTitle').textContent = f.id ? 'Edit Exam' : 'New Exam';
+    const sc = document.getElementById('adminExamScope');
+    sc.innerHTML = scopeChipsHtml(f.scope, 'data-exscope');
+    sc.querySelectorAll('[data-exscope]').forEach((el) => el.addEventListener('click', () => {
+      const v = el.getAttribute('data-exscope');
+      const k = f.scope.indexOf(v);
+      if (k === -1) {
+        f.scope.push(v);
+        if (/^Class \d+$/.test(v)) f.scope = f.scope.filter((x) => x === v || classOfBatch(x) !== v || /^Class \d+$/.test(x));
+        else if (f.scope.indexOf(classOfBatch(v)) !== -1) f.scope = f.scope.filter((x) => x !== classOfBatch(v));
+      } else f.scope.splice(k, 1);
+      renderAdminExamForm(ids, nameOf);
+    }));
+    const iv = document.getElementById('adminExamInvig');
+    iv.innerHTML = ids.map((t) => `<button type="button" class="chip${f.invigilators.indexOf(t) !== -1 ? ' active' : ''}" data-exinv="${escapeHtml(t)}">${escapeHtml(nameOf(t))}</button>`).join('');
+    iv.querySelectorAll('[data-exinv]').forEach((el) => el.addEventListener('click', () => {
+      const t = el.getAttribute('data-exinv');
+      const k = f.invigilators.indexOf(t);
+      if (k === -1) f.invigilators.push(t); else f.invigilators.splice(k, 1);
+      renderAdminExamForm(ids, nameOf);
+    }));
+  }
+  function openAdminExamForm(exam) {
+    state.adminExamForm = exam
+      ? { id: exam.id, scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice() }
+      : { id: null, scope: [], invigilators: [] };
+    document.getElementById('adminExamName').value = exam ? exam.name || '' : '';
+    document.getElementById('adminExamStart').value = exam ? exam.start || '' : '';
+    document.getElementById('adminExamEnd').value = exam ? exam.end || '' : '';
+    document.getElementById('adminExamRoom').value = exam ? exam.room || '' : '';
+    renderAdmin();
+    setTimeout(() => document.getElementById('adminExamForm').scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
+  }
+  function openExamSheet(id, nameOf) {
+    const e = (state.adminExams || []).find((x) => x.id === id);
+    if (!e) return;
+    document.getElementById('hvSheetBody').innerHTML = `<div class="hv-d-title">${escapeHtml(e.name)}</div>
+      <div class="hv-d-rows" style="margin-top:10px;">
+        <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dayHeading(e.date))}</span></div>
+        <div class="hv-d-row"><span>Time</span><span>${escapeHtml(formatTimeStr(e.start))} – ${escapeHtml(formatTimeStr(e.end))}</span></div>
+        <div class="hv-d-row"><span>Room / Hall</span><span>${escapeHtml(e.room || '—')}</span></div>
+        <div class="hv-d-row"><span>Classes</span><span>${escapeHtml(scopeLabel(e.scope) || '—')}</span></div>
+        <div class="hv-d-row"><span>Invigilators</span><span>${escapeHtml((e.invigilators || []).map(nameOf).join(', ') || '—')}</span></div>
+      </div>
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="exDelete" style="border-color: var(--line);">Delete</button></div>`;
+    const root = document.getElementById('hvSheet');
+    root.classList.add('open');
+    root.setAttribute('aria-hidden', 'false');
+    document.getElementById('exEdit').addEventListener('click', () => { closeHvSheet(); openAdminExamForm(e); });
+    document.getElementById('exDelete').addEventListener('click', async () => {
+      closeHvSheet();
+      await confirmAndDeleteWithUndo(e.id, () => state.db.collection('exams').doc(e.id).delete(), '', '', 'Exam deleted', renderAdmin, null, 'Delete');
+    });
+  }
+  document.getElementById('adminNewExamBtn').addEventListener('click', () => openAdminExamForm(null));
+  document.getElementById('adminExamCancel').addEventListener('click', () => { state.adminExamForm = null; renderAdmin(); });
+  document.getElementById('adminExamSave').addEventListener('click', async () => {
+    const f = state.adminExamForm;
+    if (!f || !state.db) return;
+    const name = document.getElementById('adminExamName').value.trim();
+    const start = document.getElementById('adminExamStart').value;
+    const end = document.getElementById('adminExamEnd').value;
+    const room = document.getElementById('adminExamRoom').value.trim();
+    if (!name) { showToast('Enter the exam name', 'error'); return; }
+    if (!start || !end || hhmmToMin(end) <= hhmmToMin(start)) { showToast('Check the start and end time', 'error'); return; }
+    if (!f.scope.length) { showToast('Choose the class or batches', 'error'); return; }
+    const data = { name, date: state.adminDate, start, end, room, scope: f.scope.slice(), invigilators: f.invigilators.slice() };
+    try {
+      if (f.id) await state.db.collection('exams').doc(f.id).set(data, { merge: true });
+      else await state.db.collection('exams').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId }, data));
+      state.adminExamForm = null;
+      showToast(f.id ? 'Exam updated' : 'Exam added');
+      renderAdmin();
+    } catch (err) { flashOffline(err); }
+  });
 
   const resolvedAdminNameIds = new Set();
 
@@ -3988,7 +4258,7 @@
       const sMin = hhmmToMin(slot.time);
       if (slot.cancelled) return;
       (classes || []).forEach((c) => {
-        if (c.entryType === 'activity' || c.batch !== slot.label || state.pendingDeleteIds.has(c.id)) return;
+        if (c.entryType === 'activity' || entryBatches(c).indexOf(slot.label) === -1 || state.pendingDeleteIds.has(c.id)) return;
         const cm = hhmmToMin(c.startTimeStr);
         pairs.push({ slot, c, diff: cm == null || sMin == null ? 600 : Math.abs(cm - sMin) });
       });
@@ -3996,7 +4266,7 @@
     pairs.sort((x, y) => x.diff - y.diff);
     const bySlot = new Map();
     const usedC = new Set();
-    pairs.forEach((p) => { if (!bySlot.has(p.slot.id) && !usedC.has(p.c.id)) { bySlot.set(p.slot.id, p.c); usedC.add(p.c.id); } });
+    pairs.forEach((p) => { const k = p.c.id + '|' + p.slot.label; if (!bySlot.has(p.slot.id) && !usedC.has(k)) { bySlot.set(p.slot.id, p.c); usedC.add(k); } });
     return sorted.map((slot) => { const c = bySlot.get(slot.id) || null; return { slot, cls: c, status: slotStatusFor(slot, c) }; });
   }
   function svWeekLabel(ws) {
@@ -4006,7 +4276,7 @@
     if (ws === shiftDateStr(t, -7)) return 'Last week';
     return '';
   }
-  const SV_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged', cancelled: 'Cancelled' };
+  const SV_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged', cancelled: 'Cancelled', leave: 'On leave', covered: 'Test held' };
   function svDur(m) { const h = Math.floor(m / 60), r = m % 60; return h ? (r ? `${h}h ${pad(r)}m` : `${h}h`) : `${r}m`; }
   function svSlotHtml(m) {
     const s = m.slot;
@@ -4038,13 +4308,19 @@
     const slots = (state.scheduleSlots || []).filter((s) => !state.pendingDeleteIds.has(s.id));
     const missing = days.filter((d) => d <= todayStr() && d !== todayStr() && !hvDay(d).ready);
     if (missing.length) hvLoadMissing(missing);
-    const counts = { total: 0, done: 0, missed: 0, upcoming: 0, live: 0, cancelled: 0, mins: 0 };
+    const counts = { total: 0, done: 0, missed: 0, upcoming: 0, live: 0, cancelled: 0, leave: 0, covered: 0, mins: 0 };
     let html = '';
     days.forEach((d, i) => {
       const daySlots = slots.filter((s) => slotDate(s) === d);
       const isSun = i === 6;
       if (isSun && !daySlots.length && d !== todayStr()) return;
-      const matched = matchDaySlots(daySlots, hvDay(d).classes);
+      const dayEntries = hvDay(d).classes;
+      const matched = matchDaySlots(daySlots, dayEntries);
+      // On a leave day, unlogged classes show "On leave" (or "Test held" if someone conducted a test in it).
+      if (dayEntries.some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday')) {
+        const cov = coveredTestsFor(d, dayEntries).batches;
+        matched.forEach((m) => { if (m.status === 'missed') m.status = cov.indexOf(m.slot.label) !== -1 ? 'covered' : 'leave'; });
+      }
       matched.forEach((m) => { counts[m.status]++; if (m.status !== 'cancelled') { counts.total++; counts.mins += slotDuration(m.slot); } });
       const today = d === todayStr();
       const live = daySlots.filter((x) => !x.cancelled).length;
@@ -4064,6 +4340,7 @@
     if (counts.upcoming) parts.push(`${counts.upcoming} upcoming`);
     if (counts.missed) parts.push(`${counts.missed} not logged`);
     if (counts.cancelled) parts.push(`${counts.cancelled} cancelled`);
+    if (counts.leave + counts.covered) parts.push(`${counts.leave + counts.covered} on leave`);
     document.getElementById('svSummary').innerHTML = counts.total || counts.cancelled ? `<b>${counts.total} class${counts.total === 1 ? '' : 'es'} · ${escapeHtml(parts[0])}</b>${parts.length > 1 ? `<span>${escapeHtml(parts.slice(1).join(' · '))}</span>` : ''}` : 'No classes planned for this week yet.';
     if (el._lastHtml !== html) {
       el._lastHtml = html;
@@ -4078,7 +4355,7 @@
     const m = matchDaySlots((state.scheduleSlots || []).filter((s) => slotDate(s) === d && !state.pendingDeleteIds.has(s.id)), hvDay(d).classes).find((x) => x.slot.id === id);
     const dur = slotDuration(slot);
     const body = document.getElementById('hvSheetBody');
-    const canLog = !m.cls && !slot.cancelled && d <= todayStr();
+    const canLog = !m.cls && !slot.cancelled && d <= todayStr() && m.status !== 'leave' && m.status !== 'covered';
     const canCancel = !m.cls;
     body.innerHTML = `<div class="hv-d-title">${escapeHtml(slot.label || 'Class')}</div>
       <div class="hv-d-wing">${escapeHtml(wingForBatch(slot.label) || '')}${state.teacherSubject ? ' · ' + escapeHtml(state.teacherSubject) : ''}</div>
@@ -4319,7 +4596,11 @@
   document.getElementById('navToday').addEventListener('click', () => switchTab('today'));
   document.getElementById('navAdd').addEventListener('click', () => {
     if (!state.editingId) {
-      if (state.entryMode === 'class') prefillClassFromLast(); else prefillActivityFromLast();
+      // The bottom "Add Class" button always opens a new class.
+      state.entryMode = 'class';
+      state.addTargetDate = null;
+      state.editingSourceTab = null;
+      prefillClassFromLast();
     }
     switchTab('add');
   });
@@ -4465,6 +4746,7 @@
   });
 
   document.getElementById('cancelScheduleEditBtn').addEventListener('click', cancelScheduleEdit);
+  document.getElementById('combineToggle').addEventListener('click', () => { state.form.combineOpen = true; renderForm(); });
   document.getElementById('svAddBtn').addEventListener('click', () => openSvForm(false));
   document.getElementById('svFormClose').addEventListener('click', cancelScheduleEdit);
   document.getElementById('svThisWeek').addEventListener('click', () => { svState().weekStart = mondayOf(todayStr()); renderScheduleList(); });
@@ -5250,7 +5532,7 @@
     const match = (c) => {
       const isAct = c.entryType === 'activity';
       const isLeave = isAct && c.activityType === 'Leave / Holiday';
-      if (batch && (isAct || c.batch !== batch)) return false;
+      if (batch && (isAct || entryBatches(c).indexOf(batch) === -1)) return false;
       if (kind === 'classes' && isAct) return false;
       if (kind === 'tests' && (isAct || !c.test)) return false;
       if (kind === 'worksheets' && (isAct || !c.worksheet)) return false;
@@ -5281,22 +5563,25 @@
     });
   }
   function reportTotals(dates, results, f) {
-    const t = { classes: 0, mins: 0, campusSec: 0, ws: 0, tests: 0, hw: 0, other: 0, leave: 0, batches: {} };
+    const t = { classes: 0, mins: 0, campusSec: 0, ws: 0, tests: 0, hw: 0, other: 0, leave: 0, invig: 0, invigMin: 0, covered: 0, batches: {} };
     dates.forEach((d, i) => {
       t.campusSec += campusSeconds(results[i].campus);
+      if (f.showClasses && !f.label) { const cv = coveredTestsFor(d, results[i].classes).count; t.tests += cv; t.covered += cv; }
       reportDayRecords(results[i].classes).forEach((c) => {
         if (!f.match(c)) return;
         if (c.entryType === 'activity') {
-          if (c.activityType === 'Leave / Holiday') t.leave++; else t.other++;
+          if (c.activityType === 'Leave / Holiday') t.leave++;
+          else if (isInvig(c)) { t.invig++; t.invigMin += invigMinutes(c); }
+          else t.other++;
           return;
         }
         if (!hvStartedOrPast(c)) return; // not held yet — listed, but not counted
         const m = classDuration(c);
         t.classes++; t.mins += m;
         if (c.worksheet) t.ws++;
-        if (c.test) t.tests++;
+        t.tests += testCount(c);
         if (c.homework) t.hw++;
-        const b = c.batch || 'Unknown';
+        const b = entryBatchLabel(c);
         if (!t.batches[b]) t.batches[b] = { n: 0, mins: 0 };
         t.batches[b].n++; t.batches[b].mins += m;
       });
@@ -5307,7 +5592,7 @@
     return [
       { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
       { label: 'Study Material', given: c.material, note: c.materialNote },
-      { label: 'Test / Exam', given: c.test, note: c.testNote },
+      { label: 'Class Test', given: c.test, note: c.testNote },
       { label: 'Homework', given: c.homework, note: c.homeworkNote }
     ].filter((it) => it.given).map((it) => `${it.label}: ${it.note ? it.note : 'Given'}`);
   }
@@ -5340,7 +5625,7 @@
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : 'Time not set';
         const dur = classDuration(c);
         const up = hvStartedOrPast(c) ? '' : '  [Upcoming - not counted]';
-        w.bodyLine(`  ${i + 1}. ${c.batch || 'Class'}  |  ${time}${dur ? ' (' + reportHm(dur) + ')' : ''}${up}`, { bold: true });
+        w.bodyLine(`  ${i + 1}. ${entryBatchLabel(c)}  |  ${time}${dur ? ' (' + reportHm(dur) + ')' : ''}${up}`, { bold: true });
         w.bodyLine(`     Topic: ${c.topic || 'Not added'}`);
         checklistLines(c).forEach((l) => w.bodyLine(`     - ${l}`));
       });
@@ -5350,7 +5635,9 @@
       w.addSpace(2);
       w.bodyLine(`Activities (${acts.length})`, { bold: true });
       if (!acts.length) w.bodyLine('  None.');
-      acts.forEach((a) => w.bodyLine(`  - ${activityLabel(a.activityType)}${a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : ''}`));
+      acts.forEach((a) => w.bodyLine(`  - ${isInvig(a) ? invigSummary(a).title + ' · ' + invigSummary(a).sub : activityLabel(a.activityType)}${a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : ''}`));
+      const cvd = f.label ? { count: 0 } : coveredTestsFor(date, allForDate);
+      if (cvd.count) w.bodyLine(`  - Class test held in your class while you were on leave: ${cvd.batches.join(', ')}`);
     }
   }
   function buildReportPdf(dates, results, title, periodLine, f) {
@@ -5378,6 +5665,7 @@
       w.bodyLine(`Worksheets: ${t.ws}    Tests: ${t.tests}    Homework: ${t.hw}`);
     }
     if (f.showActivities) w.bodyLine(`Other Work: ${t.other}    Leave: ${t.leave}`);
+    if (f.showActivities && t.invig) w.bodyLine(`Invigilation: ${reportHm(t.invigMin)} (${t.invig} dut${t.invig === 1 ? 'y' : 'ies'}, not counted as classes)`);
     const bk = Object.keys(t.batches);
     if (f.showClasses && bk.length > 1) {
       w.addSpace(3);
@@ -5416,6 +5704,7 @@
     L.push(`🕐 *On campus:* ${reportCampus(t.campusSec)}`);
     if (f.showClasses) L.push(`📄 Worksheets: ${t.ws}   📝 Tests: ${t.tests}   🏠 Homework: ${t.hw}`);
     if (f.showActivities) L.push(`🗂 Other Work: ${t.other}   🌴 Leave: ${t.leave}`);
+    if (f.showActivities && t.invig) L.push(`📋 Invigilation: ${reportHm(t.invigMin)}`);
     const days = [];
     dates.forEach((dt, i) => {
       const recs = reportDayRecords(results[i].classes).filter(f.match);
@@ -5424,8 +5713,8 @@
       if (!cls.length && !acts.length) return;
       const d = dateObj(dt);
       const parts = [];
-      if (cls.length) parts.push(cls.map((c) => `${c.batch || 'Class'}${c.topic ? ' (' + c.topic + ')' : ''}${hvStartedOrPast(c) ? '' : ' _upcoming_'}`).join(', '));
-      if (acts.length) parts.push(acts.map((a) => activityLabel(a.activityType) + (a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : '')).join(', '));
+      if (cls.length) parts.push(cls.map((c) => `${entryBatchLabel(c)}${c.topic ? ' (' + c.topic + ')' : ''}${hvStartedOrPast(c) ? '' : ' _upcoming_'}`).join(', '));
+      if (acts.length) parts.push(acts.map((a) => (isInvig(a) ? invigSummary(a).title + ' · ' + invigSummary(a).sub : activityLabel(a.activityType)) + (a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : '')).join(', '));
       days.push(`• *${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}:* ${parts.join(' | ')}`);
     });
     if (days.length) { L.push(''); L.push('*Day-wise*'); days.forEach((x) => L.push(x)); }
@@ -5522,7 +5811,9 @@
       L.push('');
       L.push('📝 *Activities:*');
       if (!acts.length) L.push('None.');
-      acts.forEach((a) => L.push(`   ${activityLabel(a.activityType)}${a.note ? ': ' + a.note : ''}`));
+      acts.forEach((a) => L.push(`   ${isInvig(a) ? invigSummary(a).title + ' · ' + invigSummary(a).sub : activityLabel(a.activityType)}${a.note ? ': ' + a.note : ''}`));
+      const cvw = f.label ? { count: 0 } : coveredTestsFor(date, allForDate);
+      if (cvw.count) L.push(`   Class test held in your class while you were on leave: ${cvw.batches.join(', ')}`);
     }
     return L.join('\n');
   }
@@ -5937,7 +6228,7 @@
   }
 
   function resetClassForm() {
-    state.form = { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false };
+    state.form = { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false, extra: [], combineOpen: false };
     document.getElementById('topicInput').value = '';
     document.getElementById('startTimeInput').value = '';
     document.getElementById('endTimeInput').value = '';
@@ -5949,6 +6240,7 @@
 
   function resetActivityForm() {
     state.activityForm = { activityType: ACTIVITY_TYPES[0], note: '' };
+    state.invig = newInvig();
     document.getElementById('activityNoteInput').value = '';
   }
 
@@ -6031,7 +6323,11 @@
     setSchedHint('');
     const last = findLastClassForBatch(batch);
     const typedTopic = document.getElementById('topicInput').value;
+    const keepExtra = ((state.form && state.form.extra) || []).filter((x) => x !== batch);
+    const keepOpen = !!(state.form && state.form.combineOpen);
     state.form = {
+      extra: keepExtra,
+      combineOpen: keepOpen,
       batch,
       topic: typedTopic,
       worksheet: false,
@@ -6072,7 +6368,10 @@
     state.editingSourceTab = sourceTab || 'today';
     state.addTargetDate = null;
     state.entryMode = 'class';
+    const ex = entryBatches(cls).slice(1);
     state.form = {
+      extra: ex,
+      combineOpen: ex.length > 0,
       batch: cls.batch || currentBatches()[0],
       topic: cls.topic || '',
       worksheet: !!cls.worksheet,
@@ -6094,6 +6393,136 @@
     switchTab('add');
   }
 
+  // ---------- Invigilation entry (Add Activity → Invigilation) ----------
+  function newInvig() { return { kind: 'other', examId: null, name: '', parts: [{ start: '', end: '', room: '', scope: [] }] }; }
+  if (!state.invig) state.invig = newInvig();
+  state.examsFor = state.examsFor || {};
+  async function loadExamsFor(date) {
+    if (!state.db || state.examsFor[date] !== undefined) return;
+    state.examsFor[date] = null;
+    try {
+      const snap = await state.db.collection('exams').where('date', '==', date).get();
+      state.examsFor[date] = snap.docs.map((d) => Object.assign({ id: d.id }, d.data())).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+    } catch (err) { state.examsFor[date] = []; }
+    if (state.tab === 'add') renderInvig();
+  }
+  function invigDate() { return state.addTargetDate || (state.editingId && state.invigEditDate) || todayStr(); }
+  function scopeChipsHtml(sel, attr) {
+    const cls = allClassNames();
+    const bat = allBatchesFlat();
+    return cls.map((c) => `<button type="button" class="chip${sel.indexOf(c) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')
+      + bat.map((b) => `<button type="button" class="chip${sel.indexOf(b) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
+  }
+  function renderInvig() {
+    const box = document.getElementById('invigFields');
+    if (!box) return;
+    const show = state.entryMode === 'activity' && state.activityForm.activityType === 'Invigilation';
+    box.hidden = !show;
+    document.getElementById('activityNoteLabel').textContent = show ? 'Notes (optional)' : 'Details';
+    if (!show) return;
+    const iv = state.invig;
+    const date = invigDate();
+    loadExamsFor(date);
+    const exams = state.examsFor[date] || [];
+    const kc = document.getElementById('invigKindChips');
+    kc.innerHTML = exams.map((e) => `<button type="button" class="chip${iv.kind === 'exam' && iv.examId === e.id ? ' active' : ''}" data-inv-exam="${escapeHtml(e.id)}">${escapeHtml(e.name)}</button>`).join('')
+      + `<button type="button" class="chip${iv.kind === 'cover' ? ' active' : ''}" data-inv-kind="cover">Class test (covering)</button>`
+      + `<button type="button" class="chip${iv.kind === 'other' ? ' active' : ''}" data-inv-kind="other">Other test</button>`;
+    document.getElementById('invigKindNote').textContent = iv.kind === 'cover'
+      ? 'A class test in another teacher\'s class. Counted as invigilation, not as your class.'
+      : (state.examsFor[date] === null ? 'Loading exams…' : (exams.length ? '' : 'No exams were set up by the admin for this day.'));
+    kc.querySelectorAll('[data-inv-exam]').forEach((b) => b.addEventListener('click', () => {
+      const e = exams.find((x) => x.id === b.getAttribute('data-inv-exam'));
+      if (!e) return;
+      iv.kind = 'exam'; iv.examId = e.id; iv.name = e.name || '';
+      const p = iv.parts[0];
+      if (!p.start && !p.end) { p.start = e.start || ''; p.end = e.end || ''; }
+      if (!p.room) p.room = e.room || '';
+      if (!p.scope.length) p.scope = (e.scope || []).slice();
+      renderInvig();
+    }));
+    kc.querySelectorAll('[data-inv-kind]').forEach((b) => b.addEventListener('click', () => {
+      iv.kind = b.getAttribute('data-inv-kind'); iv.examId = null;
+      renderInvig();
+    }));
+    const nameEl = document.getElementById('invigName');
+    nameEl.value = iv.name || '';
+    nameEl.disabled = iv.kind === 'exam';
+    const partsEl = document.getElementById('invigParts');
+    partsEl.innerHTML = iv.parts.map((p, i) => `<div class="inv-part">
+        <div class="inv-part-head"><span>${iv.parts.length > 1 ? 'Part ' + (i + 1) : 'Duty time'}</span>${iv.parts.length > 1 ? `<button type="button" class="hv-back" data-inv-del="${i}" style="padding:0; color:var(--muted);">Remove</button>` : ''}</div>
+        <div class="sv-times">
+          <div><div class="sv-tlbl">Start</div><input class="text-input" type="time" data-inv-start="${i}" value="${escapeHtml(p.start)}"></div>
+          <div><div class="sv-tlbl">End</div><input class="text-input" type="time" data-inv-end="${i}" value="${escapeHtml(p.end)}"></div>
+        </div>
+        <input class="text-input" data-inv-room="${i}" value="${escapeHtml(p.room)}" placeholder="Room / Hall, e.g. Room 3">
+        <div class="sv-tlbl" style="margin:0;">Class${iv.kind === 'cover' ? ' (required)' : ''} · tap a whole class or its batches</div>
+        <div class="chips inv-scope">${scopeChipsHtml(p.scope, `data-inv-scope="${i}" data-val`)}</div>
+      </div>`).join('');
+    partsEl.querySelectorAll('[data-inv-start]').forEach((el) => el.addEventListener('change', () => { iv.parts[+el.getAttribute('data-inv-start')].start = el.value; }));
+    partsEl.querySelectorAll('[data-inv-end]').forEach((el) => el.addEventListener('change', () => { iv.parts[+el.getAttribute('data-inv-end')].end = el.value; }));
+    partsEl.querySelectorAll('[data-inv-room]').forEach((el) => el.addEventListener('input', () => { iv.parts[+el.getAttribute('data-inv-room')].room = el.value; }));
+    partsEl.querySelectorAll('[data-inv-del]').forEach((el) => el.addEventListener('click', () => { iv.parts.splice(+el.getAttribute('data-inv-del'), 1); renderInvig(); }));
+    partsEl.querySelectorAll('[data-inv-scope]').forEach((el) => el.addEventListener('click', () => {
+      const p = iv.parts[+el.getAttribute('data-inv-scope')];
+      const v = el.getAttribute('data-val');
+      const k = p.scope.indexOf(v);
+      if (k === -1) {
+        p.scope.push(v);
+        // choosing a whole class replaces its individual batches
+        if (/^Class \d+$/.test(v)) p.scope = p.scope.filter((x) => x === v || classOfBatch(x) !== v || /^Class \d+$/.test(x));
+        else if (p.scope.indexOf(classOfBatch(v)) !== -1) p.scope = p.scope.filter((x) => x !== classOfBatch(v));
+      } else p.scope.splice(k, 1);
+      renderInvig();
+    }));
+  }
+  document.getElementById('invigName').addEventListener('input', (e) => { state.invig.name = e.target.value; });
+  document.getElementById('invigAddPart').addEventListener('click', () => {
+    const iv = state.invig;
+    const last = iv.parts[iv.parts.length - 1] || {};
+    iv.parts.push({ start: '', end: '', room: last.room || '', scope: (last.scope || []).slice() });
+    renderInvig();
+  });
+
+  // Returns an error message, or null. Also collects overlap warnings.
+  function validateInvig(date) {
+    const iv = state.invig;
+    const name = (iv.name || '').trim();
+    if (!name) return { err: 'Enter the test / exam name.' };
+    if (!iv.parts.length) return { err: 'Add at least one duty time.' };
+    for (let i = 0; i < iv.parts.length; i++) {
+      const p = iv.parts[i];
+      const a = hhmmToMin(p.start), b = hhmmToMin(p.end);
+      if (a == null || b == null) return { err: `Fill in the start and end time${iv.parts.length > 1 ? ' of part ' + (i + 1) : ''}.` };
+      if (b <= a) return { err: `End time must be after the start time${iv.parts.length > 1 ? ' (part ' + (i + 1) + ')' : ''}.` };
+      if (iv.kind === 'cover' && !p.scope.length) return { err: 'Choose the class / batch whose test you conducted.' };
+    }
+    const sorted = iv.parts.map((p, i) => ({ i, a: hhmmToMin(p.start), b: hhmmToMin(p.end) })).sort((x, y) => x.a - y.a);
+    for (let k = 1; k < sorted.length; k++) if (sorted[k].a < sorted[k - 1].b) return { err: `Part ${sorted[k - 1].i + 1} and part ${sorted[k].i + 1} overlap.` };
+    const warns = [];
+    const mine = (date === todayStr() ? (state.classesToday || []) : (state.historyClasses || []).filter((c) => c.date === date))
+      .filter((c) => c.id !== state.editingId && !state.pendingDeleteIds.has(c.id));
+    sorted.forEach((pp) => {
+      mine.forEach((c) => {
+        if (c.entryType === 'activity') {
+          if (isInvig(c)) (c.parts || []).forEach((q) => { if (hhmmToMin(q.start) < pp.b && pp.a < hhmmToMin(q.end)) warns.push(`another invigilation (${formatTimeStr(q.start)} – ${formatTimeStr(q.end)})`); });
+          return;
+        }
+        const ca = hhmmToMin(c.startTimeStr), cb = hhmmToMin(c.endTimeStr);
+        if (ca != null && cb != null && ca < pp.b && pp.a < cb) warns.push(`your class ${entryBatchLabel(c)} (${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)})`);
+      });
+      (state.scheduleSlots || []).filter((s) => !s.cancelled && slotDate(s) === date).forEach((s) => {
+        const sa = hhmmToMin(s.time), sb = sa + slotDuration(s);
+        if (sa < pp.b && pp.a < sb) warns.push(`scheduled ${s.label} (${formatTimeStr(s.time)})`);
+      });
+    });
+    return { err: null, warns: warns.filter((w, i, a) => a.indexOf(w) === i) };
+  }
+  async function deleteEntryDoc(c) {
+    await state.db.collection('classes').doc(c.id).delete();
+    if (isInvig(c) && c.invigKind === 'cover') { try { await state.db.collection('testCovers').doc(c.id).delete(); } catch (err) { /* ignore */ } }
+  }
+
   function startEditActivity(id, source, sourceTab) {
     const list = source || state.classesToday;
     const item = list.find((c) => c.id === id);
@@ -6103,6 +6532,11 @@
     state.addTargetDate = null;
     state.entryMode = 'activity';
     state.activityForm = { activityType: item.activityType || ACTIVITY_TYPES[0], note: item.note || '' };
+    state.invigEditDate = item.date || todayStr();
+    if (isInvig(item)) {
+      state.invig = { kind: item.invigKind || 'other', examId: item.examId || null, name: item.testName || '', parts: (item.parts || []).map((p) => ({ start: p.start || '', end: p.end || '', room: p.room || '', scope: (p.scope || []).slice() })) };
+      if (!state.invig.parts.length) state.invig.parts = newInvig().parts;
+    } else state.invig = newInvig();
     renderForm();
     document.getElementById('activityNoteInput').value = item.note || '';
     switchTab('add');
@@ -6116,6 +6550,17 @@
     const entryDate = state.addTargetDate || todayStr();
 
     if (state.entryMode === 'activity') {
+      const invig = state.activityForm.activityType === 'Invigilation';
+      const actDate = editingId ? (state.invigEditDate || entryDate) : entryDate;
+      if (invig) {
+        const v = validateInvig(actDate);
+        if (v.err) { showFormMsg(v.err); return; }
+        if (v.warns.length) {
+          const ok = await showConfirm(`This duty overlaps with:\n${v.warns.join('\n')}\n\nSave anyway?`, '⚠️ Time Conflict', 'Save');
+          if (!ok) return;
+        }
+      }
+      showFormMsg('');
       state.saving = true;
       renderForm();
       try {
@@ -6123,16 +6568,29 @@
           activityType: state.activityForm.activityType,
           note: document.getElementById('activityNoteInput').value.trim()
         };
-        if (editingId) {
-          await state.db.collection('classes').doc(editingId).update(payload);
-        } else {
-          await state.db.collection('classes').add(Object.assign({
-            entryType: 'activity',
-            teacherId: state.teacherId,
-            date: entryDate,
-            createdAt: Date.now()
-          }, payload));
+        const iv = state.invig;
+        if (invig) {
+          Object.assign(payload, {
+            invigKind: iv.kind, examId: iv.kind === 'exam' ? iv.examId : null, testName: (iv.name || '').trim(),
+            parts: iv.parts.map((p) => ({ start: p.start, end: p.end, room: (p.room || '').trim(), scope: p.scope.slice() }))
+          });
         }
+        const col = state.db.collection('classes');
+        const ref = editingId ? col.doc(editingId) : col.doc();
+        const prev = editingId ? ((state.classesToday || []).concat(state.historyClasses || [], state.selectedDayClasses || []).find((x) => x.id === editingId) || null) : null;
+        const writeP = editingId ? ref.update(payload) : ref.set(Object.assign({ entryType: 'activity', teacherId: state.teacherId, date: entryDate, createdAt: Date.now() }, payload));
+        // Covering a class test: shared record (no teacher name) so the class's own teacher gets the test counted.
+        let coverP = null;
+        if (invig && iv.kind === 'cover') {
+          coverP = state.db.collection('testCovers').doc(ref.id).set({
+            date: actDate, byTeacherId: state.teacherId, testName: payload.testName,
+            batches: expandScope([].concat(...payload.parts.map((p) => p.scope))),
+            parts: payload.parts.map((p) => ({ start: p.start, end: p.end })), createdAt: Date.now()
+          });
+        } else if (prev && isInvig(prev) && prev.invigKind === 'cover') {
+          coverP = state.db.collection('testCovers').doc(ref.id).delete().catch(() => {});
+        }
+        await waitForWrite(coverP ? Promise.all([writeP, coverP]) : writeP);
         state.editingId = null;
         state.editingSourceTab = null;
         state.addTargetDate = null;
@@ -6180,8 +6638,10 @@
     state.saving = true;
     renderForm();
     try {
+      const extraB = (state.form.extra || []).filter((x) => x && x !== state.form.batch);
       const payload = {
         batch: state.form.batch,
+        batches: extraB.length ? [state.form.batch].concat(extraB) : null,
         topic,
         startTimeStr,
         endTimeStr,
@@ -6440,11 +6900,19 @@
 
   let unsubAdminClasses = null;
   let unsubAdminCampus = null;
+  let unsubAdminExams = null;
 
   function subscribeAdminDate(date) {
     if (!state.db) return;
     if (unsubAdminClasses) unsubAdminClasses();
     if (unsubAdminCampus) unsubAdminCampus();
+    if (unsubAdminExams) unsubAdminExams();
+    state.adminExams = [];
+    unsubAdminExams = state.db.collection('exams').where('date', '==', date).onSnapshot((snap) => {
+      state.adminExams = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.examsFor[date] = state.adminExams.slice();
+      if (state.tab === 'admin') renderAdmin();
+    }, () => {});
 
     unsubAdminClasses = state.db.collection('classes').where('date', '==', date).limit(500).onSnapshot((snap) => {
       state.adminClasses = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
@@ -6762,6 +7230,12 @@
       renderScheduleNotice();
     }, () => {}));
 
+    unsubscribers.push(db.collection('testCovers').where('date', '>=', shiftDateStr(today, -62)).onSnapshot((snap) => {
+      state.testCovers = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      renderTodayList();
+      if (state.tab === 'history') renderHistory();
+      if (state.tab === 'admin') renderAdmin();
+    }, () => {}));
     unsubscribers.push(db.collection('schedule/' + tid + '/slots').limit(400).onSnapshot((snap) => {
       state.scheduleSlots = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       if (state.tab === 'schedule') renderScheduleList();
