@@ -653,7 +653,18 @@
   .sv-empty { margin-top: 4px; }
   #svAddBtn[hidden], #svFormPanel[hidden] { display: none; }
   #invigFields[hidden] { display: none !important; }
-  .inv-part { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .inv-part { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .inv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .inv-row > div:last-child { grid-column: 1 / -1; }
+  .inv-row .text-input { padding: 10px 8px; font-size: 14px; min-width: 0; }
+  .inv-hint { font-size: 12.5px; color: var(--muted-2); background: var(--neutral-soft); border-radius: 10px; padding: 8px 10px; }
+  .list-add { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .list-add .btn-secondary { width: auto; padding: 10px 16px; }
+  .inv-exam { display: flex; flex-direction: column; gap: 2px; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; }
+  .inv-exam.active { border-color: var(--gold); background: var(--gold-soft); }
+  .inv-exam-t { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .inv-exam-s { font-size: 12.5px; color: var(--muted-2); }
+  #invigExamBox[hidden], #invigSelfBox[hidden], #invigBackToExams[hidden] { display: none !important; }
   .inv-part-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--muted-2); }
   .inv-scope .chip { padding: 6px 11px; font-size: 12.5px; }
   #combineField[hidden], #combineBox[hidden], #combineToggle[hidden] { display: none !important; }
@@ -743,7 +754,9 @@
   .ad-pill.nocheck { background: rgba(217,119,6,.12); color: #B45309; }
   .ad-exam { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
   .ad-exam + .ad-exam { border-top: 1px solid var(--line); }
-  .ad-exam.other { cursor: default; background: var(--neutral-soft); }
+  .ad-exam.static { cursor: default; }
+  .ad-grp { font-size: 12px; font-weight: 600; color: var(--muted-2); background: var(--neutral-soft); padding: 6px 12px; }
+  .ad-grp ~ .ad-exam, .ad-exam + .ad-grp { border-top: 1px solid var(--line); }
   #adminExamForm[hidden], #adminNewExamBtn[hidden] { display: none !important; }
   #adminExamList:empty { display: none; }
   .ad-detail { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 8px; background: var(--neutral-soft); }
@@ -1255,6 +1268,7 @@
                 <span class="switch"><span class="knob"></span></span>
               </div>
               <input type="text" class="checklist-note-input" id="testNoteInput" placeholder="Test on which topic? (optional)">
+              <input type="text" class="checklist-note-input" id="testRoomsInput" placeholder="Rooms, e.g. 3, 4, 5 (optional)">
             </div>
             <div class="toggle-row checklist-item" data-key="homework">
               <div class="checklist-toggle-trigger">
@@ -1274,17 +1288,24 @@
           <div class="chips" id="activityChips"></div>
         </div>
         <div id="invigFields" hidden style="display:flex; flex-direction:column; gap:14px;">
-          <div class="field">
-            <label>Exam / Test</label>
-            <div class="chips" id="invigKindChips"></div>
-            <div class="hv-fnote" id="invigKindNote"></div>
+          <div class="hv-fnote" style="margin:0;">Duty only · not counted as a class</div>
+          <div id="invigExamBox" class="field" style="display:flex; flex-direction:column; gap:8px;">
+            <label style="margin:0;">Today's exams — tap one</label>
+            <div id="invigExamList" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <button type="button" class="hv-back" id="invigSelfLink" style="padding:0; align-self:flex-start;">Not in the list? Fill it yourself</button>
           </div>
-          <div class="field">
-            <label for="invigName">Test / Exam name</label>
-            <input class="text-input" id="invigName" type="text" placeholder="e.g. Unit Test 2 – Maths">
+          <div id="invigSelfBox" style="display:flex; flex-direction:column; gap:12px;">
+            <div class="inv-hint">Took a test in your own class? Use <b>Add Class</b> instead.</div>
+            <div class="field"><label>Test Type</label><div class="chips" id="invigTypeChips"></div></div>
+            <div class="field"><label>Subject</label><div class="chips" id="invigSubjChips"></div></div>
+            <div class="field"><label>Class · tap a whole class or its batches</label><div class="chips inv-scope" id="invigScope"></div></div>
+            <button type="button" class="hv-back" id="invigBackToExams" style="padding:0; align-self:flex-start;">Choose from today's exams</button>
           </div>
-          <div id="invigParts" style="display:flex; flex-direction:column; gap:10px;"></div>
-          <button type="button" class="hv-back" id="invigAddPart" style="padding:0;">+ Add another part</button>
+          <div class="field" style="gap:8px;">
+            <label>Your Duty</label>
+            <div id="invigParts" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <button type="button" class="hv-back" id="invigAddPart" style="padding:0; align-self:flex-start;">+ Add another part (after a break / other room)</button>
+          </div>
         </div>
         <div class="field">
           <label for="activityNoteInput" id="activityNoteLabel">Details</label>
@@ -1485,10 +1506,13 @@
       </section>
 
       <section class="tsec" id="adminExamsSec">
-        <div class="tsec-head"><div class="tsec-title">Exams &amp; Invigilation</div><button type="button" class="hv-back" id="adminNewExamBtn" style="padding:0;">+ New Exam</button></div>
+        <div class="tsec-head"><div class="tsec-title">Tests &amp; Exams</div><button type="button" class="hv-back" id="adminNewExamBtn" style="padding:0;">+ New Exam</button></div>
         <div class="panel" id="adminExamForm" hidden style="display:flex; flex-direction:column; gap:12px;">
           <div class="panel-title" id="adminExamFormTitle">New Exam</div>
-          <input class="text-input" id="adminExamName" type="text" placeholder="Exam / test name, e.g. Unit Test 2 – Maths">
+          <div class="sv-tlbl" style="margin:0;">Test type</div>
+          <div class="chips inv-scope" id="adminExamType"></div>
+          <div class="sv-tlbl" style="margin:0;">Subject (optional)</div>
+          <div class="chips inv-scope" id="adminExamSubject"></div>
           <div class="sv-times">
             <div><div class="sv-tlbl">Start</div><input class="text-input" id="adminExamStart" type="time"></div>
             <div><div class="sv-tlbl">End</div><input class="text-input" id="adminExamEnd" type="time"></div>
@@ -1504,6 +1528,11 @@
           </div>
         </div>
         <div id="adminExamList" class="sv-rows"></div>
+      </section>
+
+      <section class="tsec">
+        <div class="tsec-head"><div class="tsec-title">Tests Held</div><div class="tsec-meta">by class &amp; subject</div></div>
+        <div id="adminTestsHeld"></div>
       </section>
 
       <section class="tsec">
@@ -1545,6 +1574,20 @@
           <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:15px; padding:13px 14px;">
           <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button>
         </div>
+      </div>
+
+      <div class="panel" id="adminTestTypesPanel">
+        <div class="panel-title">Test Types</div>
+        <div class="admin-sub" style="margin:0;">Shown when teachers log invigilation and when you add an exam.</div>
+        <div class="activity-rows" id="testTypesRows"></div>
+        <div class="list-add"><input class="text-input" id="newTestTypeInput" type="text" placeholder="e.g. Half-Yearly"><button class="btn-secondary" id="addTestTypeBtn" style="border-color: var(--line);">+ Add</button></div>
+      </div>
+
+      <div class="panel" id="adminSubjectsPanel">
+        <div class="panel-title">Subjects</div>
+        <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
+        <div class="activity-rows" id="subjectsRows"></div>
+        <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
       <div class="panel" id="adminCampusPanel">
@@ -1859,7 +1902,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 2.8 · updated 29 Sep 2026</div>
+          <div class="dnote">Version 2.9 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -1905,6 +1948,8 @@
   };
   const DEFAULT_BATCHES = DEFAULT_BATCHES_BY_WING['Pre-Foundation'];
   const ACTIVITY_TYPES = ['Other Activity', 'Invigilation', 'Leave / Holiday'];
+  const DEFAULT_TEST_TYPES = ['Class Test', 'Unit Test', 'Half-Yearly', 'Pre-Board'];
+  const DEFAULT_SUBJECTS = ['Maths', 'Physics', 'Chemistry', 'Biology', 'Science', 'English', 'Hindi', 'Social Science', 'Computer'];
   // Saved value stays 'Other Activity' (older records use it); it is shown as 'Other Work'.
   function activityLabel(t) { return t === 'Other Activity' ? 'Other Work' : (t || 'Activity'); }
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -2676,27 +2721,15 @@
     const rooms = []; const scope = [];
     parts.forEach((p) => { if (p.room && rooms.indexOf(p.room) === -1) rooms.push(p.room); (p.scope || []).forEach((x) => { if (scope.indexOf(x) === -1) scope.push(x); }); });
     const bits = [c.testName || 'Test'];
-    if (c.invigKind === 'cover') bits.push('covering a class');
     if (rooms.length) bits.push(rooms.join(', '));
     if (scope.length) bits.push(scope.join(', '));
     return { title: `Invigilation · ${svDur(invigMinutes(c) || 0)}${parts.length > 1 ? ` (${parts.length} parts)` : ''}`, sub: bits.join(' · ') };
   }
   // Class tests someone else conducted in this teacher's scheduled classes while they were on leave.
   // The other teacher is never identified here.
-  function coveredTestsFor(date, entries) {
-    const onLeave = (entries || []).some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday');
-    if (!onLeave) return { count: 0, batches: [] };
-    const slots = (state.scheduleSlots || []).filter((s) => !s.cancelled && slotDate(s) === date);
-    if (!slots.length) return { count: 0, batches: [] };
-    const covers = (state.testCovers || []).filter((cv) => cv.date === date && cv.byTeacherId !== state.teacherId);
-    const hit = [];
-    slots.forEach((s) => {
-      const a = hhmmToMin(s.time); const b = a + slotDuration(s);
-      const found = covers.some((cv) => (cv.batches || []).indexOf(s.label) !== -1 && (cv.parts || []).some((p) => hhmmToMin(p.start) < b && a < hhmmToMin(p.end)));
-      if (found && hit.indexOf(s.label) === -1) hit.push(s.label);
-    });
-    return { count: hit.length, batches: hit };
-  }
+  // Tests are recorded per class and subject (Admin → Tests & Exams); no credit is moved between teachers.
+  function coveredTestsFor() { return { count: 0, batches: [] }; }
+
 
   function todayActivityRowHtml(a) {
     const isLeave = a.activityType === 'Leave / Holiday';
@@ -3188,7 +3221,7 @@
     const dateTxt = `${dObj.toLocaleDateString('en-GB', { weekday: 'short' })}, ${dObj.getDate()} ${dObj.toLocaleDateString('en-GB', { month: 'long' })} ${dObj.getFullYear()}`;
     if (c.entryType === 'activity') {
       body.innerHTML = `<div class="hv-d-title">${escapeHtml(isInvig(c) ? 'Invigilation' : activityLabel(c.activityType))}</div>
-        ${isInvig(c) ? `<div class="hv-d-wing">${escapeHtml(c.testName || '')}${c.invigKind === 'cover' ? ' · covering a class' : ''}</div>` : ''}
+        ${isInvig(c) ? `<div class="hv-d-wing">${escapeHtml(c.testName || '')}${(c.scope || []).length ? ' · ' + escapeHtml(scopeLabel(c.scope)) : ''}</div>` : ''}
         <div class="hv-d-rows"><div class="hv-d-row"><span>Date</span><span>${escapeHtml(dateTxt)}</span></div>
         ${isInvig(c) ? (c.parts || []).map((p, i) => `<div class="hv-d-row"><span>${(c.parts || []).length > 1 ? 'Part ' + (i + 1) : 'Time'}</span><span>${escapeHtml(formatTimeStr(p.start))} – ${escapeHtml(formatTimeStr(p.end))}${p.room ? ' · ' + escapeHtml(p.room) : ''}${(p.scope || []).length ? ' · ' + escapeHtml(scopeLabel(p.scope)) : ''}</span></div>`).join('') + `<div class="hv-d-row"><span>Total</span><span>${svDur(invigMinutes(c))}</span></div>` : ''}</div>
         ${c.note ? `<div class="hv-d-topic" style="white-space:pre-line;">${escapeHtml(c.note)}</div>` : ''}
@@ -3207,7 +3240,7 @@
         <div style="margin-top:8px;">
           ${checkRowHtml(!!c.worksheet, 'Worksheet given', 'No worksheet', c.worksheetNote)}
           ${checkRowHtml(!!c.material, 'Study material given', 'No study material', c.materialNote)}
-          ${checkRowHtml(!!c.test, 'Test / exam conducted', 'No test', c.testNote)}
+          ${checkRowHtml(!!c.test, 'Class test conducted', 'No class test', [c.testNote, c.testRooms ? 'Rooms: ' + c.testRooms : ''].filter(Boolean).join(' · '))}
           ${checkRowHtml(!!c.homework, 'Homework given', 'No homework', c.homeworkNote)}
         </div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="hvEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="hvDelete" style="border-color: var(--line);">Delete</button></div>`;
@@ -3429,6 +3462,7 @@
       if (state.form[key]) sw.classList.add('on'); else sw.classList.remove('on');
       const noteInput = document.getElementById(key + 'NoteInput');
       if (noteInput) noteInput.classList.toggle('show', !!state.form[key]);
+      if (key === 'test') document.getElementById('testRoomsInput').classList.toggle('show', !!state.form.test);
     });
 
     renderRecentAndAllBatches();
@@ -3701,6 +3735,7 @@
     const cancelledN = sched.filter((x) => x.status === 'cancelled').length;
     if (cancelledN) alerts.push({ t: `${cancelledN} class${cancelledN === 1 ? '' : 'es'} cancelled`, lines: sched.filter((x) => x.status === 'cancelled').slice(0, 3).map((x) => `${formatTimeStr(x.slot.time)} · ${x.slot.label} · ${nameOf(x.tid)}`), info: true });
     renderAdminExams(ids, nameOf, dayAll, sched).forEach((a) => alerts.push(a));
+    renderTestsHeld(dayAll, nameOf);
     const alertEl = document.getElementById('adminAlerts');
     alertEl.innerHTML = alerts.length
       ? alerts.map((a) => `<div class="ad-alert${a.info ? ' info' : ''}"><div class="ad-alert-t">${a.info ? '' : '⚠️ '}${escapeHtml(a.t)}</div>${a.lines.map((l) => `<div class="ad-alert-l">${escapeHtml(l)}</div>`).join('')}${a.more > 0 ? `<div class="ad-alert-l">+${a.more} more</div>` : ''}</div>`).join('')
@@ -3791,44 +3826,196 @@
     }
   }
 
+  // ---------- Admin: Tests Held (by class/batch and subject) ----------
+  // "Maths", "Math", "Mathematics" all match.
+  function subjKey(sub) { return String(sub || '').toLowerCase().replace(/[^a-z]/g, '').slice(0, 4); }
+  function renderTestsHeld(dayAll, nameOf) {
+    const el = document.getElementById('adminTestsHeld');
+    if (!el) return;
+    const ov = (a1, b1, a2, b2) => a1 != null && b1 != null && a2 != null && b2 != null && a1 < b2 && a2 < b1;
+    const sameBatches = (a, b) => { const B = expandScope(b); return expandScope(a).some((x) => B.indexOf(x) !== -1); };
+    const invigs = dayAll.filter(isInvig);
+    const used = new Set();
+    // Class tests: taken in a teacher's own class (Add Class). Helpers who logged invigilation for it are attached.
+    const classTests = dayAll.filter((c) => c.entryType !== 'activity' && c.test).map((c) => {
+      const ca = hhmmToMin(c.startTimeStr), cb = hhmmToMin(c.endTimeStr);
+      const helpers = invigs.filter((x) => !used.has(x.id) && !x.examId && x.testType === 'Class Test'
+        && subjKey(x.subject) === subjKey(c.subject) && sameBatches(x.scope || [], entryBatches(c))
+        && (x.parts || []).some((p) => ov(hhmmToMin(p.start), hhmmToMin(p.end), ca, cb)));
+      helpers.forEach((x) => used.add(x.id));
+      return { c, helpers };
+    });
+    const orphanCT = invigs.filter((x) => !used.has(x.id) && !x.examId && x.testType === 'Class Test');
+    orphanCT.forEach((x) => used.add(x.id));
+    // Exams: admin-created, plus teacher-entered ones (grouped by type + subject + classes).
+    const groups = {};
+    (state.adminExams || []).forEach((e) => { groups['e:' + e.id] = { title: examTitle(e), scope: e.scope || [], time: `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`, room: e.room || '', inv: [] }; });
+    invigs.filter((x) => !used.has(x.id)).forEach((x) => {
+      const key = x.examId && groups['e:' + x.examId] ? 'e:' + x.examId : `s:${x.testType || x.testName}|${x.subject || ''}|${scopeLabel(x.scope || [])}`;
+      if (!groups[key]) groups[key] = { title: x.testType ? `${x.testType}${x.subject ? ' · ' + x.subject : ''}` : (x.testName || 'Test'), scope: x.scope || [], time: '', room: '', inv: [] };
+      const rooms = (x.parts || []).map((p) => p.room).filter(Boolean).join(', ');
+      groups[key].inv.push(`${nameOf(x.teacherId)}${rooms ? ' (' + rooms + ')' : ''}`);
+    });
+    const ctHtml = classTests.map(({ c, helpers }) => `<div class="ad-exam" style="cursor:default;">
+        <div class="ad-tname">${escapeHtml(c.subject || 'Class test')} · ${escapeHtml(entryBatchLabel(c))}</div>
+        <div class="ad-tsub">${escapeHtml(nameOf(c.teacherId))} · ${escapeHtml(formatTimeStr(c.startTimeStr))} – ${escapeHtml(formatTimeStr(c.endTimeStr))}${c.testRooms ? ' · Rooms ' + escapeHtml(c.testRooms) : ''}${c.testNote ? ' · ' + escapeHtml(c.testNote) : ''}</div>
+        ${helpers.length ? `<div class="ad-tsub">Invigilators: ${escapeHtml(helpers.map((x) => nameOf(x.teacherId) + ((x.parts || [])[0] && x.parts[0].room ? ' (' + x.parts[0].room + ')' : '')).join(', '))}</div>` : ''}
+      </div>`).concat(orphanCT.map((x) => `<div class="ad-exam" style="cursor:default;">
+        <div class="ad-tname">${escapeHtml(x.subject || 'Class test')} · ${escapeHtml(scopeLabel(x.scope || []))}</div>
+        <div class="ad-tsub">Invigilated by ${escapeHtml(nameOf(x.teacherId))}${(x.parts || [])[0] ? ' · ' + escapeHtml(formatTimeStr(x.parts[0].start)) + ' – ' + escapeHtml(formatTimeStr(x.parts[x.parts.length - 1].end)) : ''}</div>
+        <div class="ad-tsub" style="color:#B45309;">Class teacher's entry not found</div>
+      </div>`)).join('');
+    const exHtml = Object.keys(groups).map((k) => { const g = groups[k]; return `<div class="ad-exam" style="cursor:default;">
+        <div class="ad-tname">${escapeHtml(g.title)}</div>
+        <div class="ad-tsub">${escapeHtml([scopeLabel(g.scope), g.room, g.time].filter(Boolean).join(' · '))}</div>
+        <div class="ad-tsub">${g.inv.length ? 'Invigilators: ' + escapeHtml(g.inv.join(', ')) : 'No invigilation logged'}</div>
+      </div>`; }).join('');
+    el.innerHTML = (ctHtml || exHtml)
+      ? `${ctHtml ? `<div class="hv-sub" style="margin:0 0 4px;">Class Tests</div><div class="sv-rows">${ctHtml}</div>` : ''}${exHtml ? `<div class="hv-sub" style="margin:${ctHtml ? '10px' : '0'} 0 4px;">Exams</div><div class="sv-rows">${exHtml}</div>` : ''}`
+      : '<div class="hv-note" style="text-align:left;">No tests on this day.</div>';
+  }
+
+  // ---------- Admin: manage Test Types and Subjects ----------
+  const LIST_CFG = {
+    testTypes: { rows: 'testTypesRows', input: 'newTestTypeInput', get: () => testTypesList() },
+    subjects: { rows: 'subjectsRows', input: 'newSubjectInput', get: () => subjectsList() }
+  };
+  state.listEditing = null;
+  async function saveList(key, list) {
+    if (!state.db) return;
+    try { await state.db.doc('settings/' + key).set({ list }); } catch (err) { flashOffline(err); }
+  }
+  function renderListManagers() {
+    Object.keys(LIST_CFG).forEach((key) => {
+      const cfg = LIST_CFG[key];
+      const el = document.getElementById(cfg.rows);
+      if (!el) return;
+      const list = cfg.get();
+      el.innerHTML = list.map((name, i) => {
+        const editing = state.listEditing && state.listEditing.key === key && state.listEditing.i === i;
+        return editing
+          ? `<div class="activity-row"><input class="text-input" data-list-edit value="${escapeHtml(name)}" style="flex:1; padding:8px 10px;"><button class="dedit-btn" data-list-save>Save</button></div>`
+          : `<div class="activity-row"><div class="activity-row-text"><span class="activity-row-title">${escapeHtml(name)}</span></div>
+              <button class="del-btn" data-list-edit-i="${i}" aria-label="Rename">${svgEdit()}</button>
+              <button class="del-btn" data-list-del-i="${i}" aria-label="Remove">${svgTrash()}</button></div>`;
+      }).join('');
+      el.querySelectorAll('[data-list-edit-i]').forEach((b) => b.addEventListener('click', () => { state.listEditing = { key, i: +b.getAttribute('data-list-edit-i') }; renderListManagers(); const inp = el.querySelector('[data-list-edit]'); if (inp) inp.focus(); }));
+      el.querySelectorAll('[data-list-del-i]').forEach((b) => b.addEventListener('click', async () => {
+        const i = +b.getAttribute('data-list-del-i');
+        const next = list.slice(); const gone = next.splice(i, 1)[0];
+        await saveList(key, next);
+        showToast(`Removed "${gone}"`);
+      }));
+      const saveBtn = el.querySelector('[data-list-save]');
+      if (saveBtn) saveBtn.addEventListener('click', async () => {
+        const v = el.querySelector('[data-list-edit]').value.trim();
+        const i = state.listEditing.i;
+        state.listEditing = null;
+        if (!v || list.some((x, k) => k !== i && x.toLowerCase() === v.toLowerCase())) { renderListManagers(); return; }
+        const next = list.slice(); next[i] = v;
+        await saveList(key, next);
+      });
+    });
+  }
+  Object.keys(LIST_CFG).forEach((key) => {
+    const cfg = LIST_CFG[key];
+    const btn = document.getElementById(key === 'testTypes' ? 'addTestTypeBtn' : 'addSubjectBtn');
+    btn.addEventListener('click', async () => {
+      const inp = document.getElementById(cfg.input);
+      const v = inp.value.trim();
+      if (!v) return;
+      const list = cfg.get();
+      if (list.some((x) => x.toLowerCase() === v.toLowerCase())) { showToast('Already in the list'); return; }
+      inp.value = '';
+      await saveList(key, list.concat([v]));
+      showToast(`Added "${v}"`);
+    });
+  });
+  renderListManagers();
+
   // ---------- Admin: Exams & Invigilation ----------
   state.adminExamForm = state.adminExamForm || null;
   function renderAdminExams(ids, nameOf, dayAll, sched) {
     const listEl = document.getElementById('adminExamList');
     if (!listEl) return [];
-    const exams = (state.adminExams || []).slice().sort((a, b) => (a.start || '').localeCompare(b.start || ''));
-    const invigs = dayAll.filter(isInvig);
     const alerts = [];
+    const date = state.adminDate;
     const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-    const ended = (e) => state.adminDate < todayStr() || (state.adminDate === todayStr() && hhmmToMin(e.end) != null && nowMin >= hhmmToMin(e.end));
-    let html = exams.map((e) => {
+    const ended = (e) => date < todayStr() || (date === todayStr() && hhmmToMin(e.end) != null && nowMin >= hhmmToMin(e.end));
+    const invigs = dayAll.filter(isInvig);
+    const span = (x) => { const ps = x.parts || []; return { a: Math.min(...ps.map((p) => hhmmToMin(p.start))), b: Math.max(...ps.map((p) => hhmmToMin(p.end))) }; };
+    const overlaps = (a1, b1, a2, b2) => a1 < b2 && a2 < b1;
+    const batchesOfInv = (x) => expandScope(x.scope && x.scope.length ? x.scope : [].concat(...(x.parts || []).map((p) => p.scope || [])));
+    const roomsOfInv = (x) => (x.parts || []).map((p) => p.room).filter(Boolean);
+    const used = new Set();
+
+    // --- Class tests: taken in a teacher's own class (Add Class); helpers who logged invigilation are attached.
+    const ct = dayAll.filter((c) => c.entryType !== 'activity' && c.test);
+    const classRows = ct.map((c) => {
+      const a = hhmmToMin(c.startTimeStr), b = hhmmToMin(c.endTimeStr);
+      const bs = entryBatches(c);
+      const helpers = invigs.filter((x) => !used.has(x.id) && (x.testType || '') === 'Class Test' && (!x.subject || !c.subject || x.subject === c.subject)
+        && batchesOfInv(x).some((y) => bs.indexOf(y) !== -1) && (() => { const sp = span(x); return overlaps(a, b, sp.a, sp.b); })());
+      helpers.forEach((x) => used.add(x.id));
+      return `<div class="ad-exam static">
+        <div class="ad-tname">${escapeHtml(entryBatchLabel(c))} · ${escapeHtml(c.subject || 'Class test')}</div>
+        <div class="ad-tsub">${escapeHtml(nameOf(c.teacherId))} · ${escapeHtml(formatTimeStr(c.startTimeStr))} – ${escapeHtml(formatTimeStr(c.endTimeStr))}${c.testRooms ? ' · Rooms ' + escapeHtml(c.testRooms) : ''}${c.testNote ? ' · ' + escapeHtml(c.testNote) : ''}</div>
+        ${helpers.length ? `<div class="ad-tsub">Invigilators: ${escapeHtml(helpers.map((x) => nameOf(x.teacherId) + (roomsOfInv(x).length ? ' (' + roomsOfInv(x).join(', ') + ')' : '')).join(', '))}</div>` : ''}
+      </div>`;
+    });
+    // Invigilation for a class test with no matching class-teacher entry.
+    invigs.filter((x) => !used.has(x.id) && !x.examId && (x.testType || '') === 'Class Test').forEach((x) => {
+      used.add(x.id);
+      const sp = span(x);
+      classRows.push(`<div class="ad-exam static">
+        <div class="ad-tname">${escapeHtml(scopeLabel(x.scope) || 'Class')} · ${escapeHtml(x.subject || 'Class test')}</div>
+        <div class="ad-tsub">${escapeHtml(formatTimeStr(svMinToHHMM(sp.a)))} – ${escapeHtml(formatTimeStr(svMinToHHMM(sp.b)))} · Invigilator: ${escapeHtml(nameOf(x.teacherId))}${roomsOfInv(x).length ? ' (' + escapeHtml(roomsOfInv(x).join(', ')) + ')' : ''}</div>
+        <div class="ad-tsub" style="color:#B45309;">Class teacher's entry not found</div>
+      </div>`);
+    });
+
+    // --- Exams: added by admin, plus ones teachers logged themselves (grouped by type, subject and time).
+    const exams = (state.adminExams || []).slice().sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+    const examRows = exams.map((e) => {
       const logs = invigs.filter((x) => x.examId === e.id);
+      logs.forEach((x) => used.add(x.id));
       const loggedBy = {};
       logs.forEach((x) => { loggedBy[x.teacherId] = (loggedBy[x.teacherId] || 0) + invigMinutes(x); });
-      const assigned = e.invigilators || [];
-      const missing = assigned.filter((t) => loggedBy[t] === undefined);
-      if (missing.length && ended(e)) alerts.push({ t: `${e.name}: invigilation not logged`, lines: [missing.map(nameOf).join(', ')] });
+      const missing = (e.invigilators || []).filter((t) => loggedBy[t] === undefined);
+      if (missing.length && ended(e)) alerts.push({ t: `${examTitle(e)}: invigilation not logged`, lines: [missing.map(nameOf).join(', ')] });
       const batches = expandScope(e.scope);
       sched.filter((x) => x.status !== 'cancelled' && batches.indexOf(x.slot.label) !== -1).forEach((x) => {
         const a = hhmmToMin(x.slot.time), b = a + slotDuration(x.slot);
-        if (a < hhmmToMin(e.end) && hhmmToMin(e.start) < b) alerts.push({ t: `${x.slot.label} has a class during ${e.name}`, lines: [`${formatTimeStr(x.slot.time)} · ${nameOf(x.tid)}`] });
+        if (overlaps(a, b, hhmmToMin(e.start), hhmmToMin(e.end))) alerts.push({ t: `${x.slot.label} has a class during ${examTitle(e)}`, lines: [`${formatTimeStr(x.slot.time)} · ${nameOf(x.tid)}`] });
       });
       const inv = Object.keys(loggedBy).map((t) => `${nameOf(t)} (${svDur(loggedBy[t])})`);
       return `<div class="ad-exam" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0">
-        <div class="ad-tname">${escapeHtml(e.name)}</div>
-        <div class="ad-tsub">${escapeHtml(formatTimeStr(e.start))} – ${escapeHtml(formatTimeStr(e.end))}${e.room ? ' · ' + escapeHtml(e.room) : ''}${(e.scope || []).length ? ' · ' + escapeHtml(scopeLabel(e.scope)) : ''}</div>
-        ${inv.length ? `<div class="ad-tsub">Logged: ${escapeHtml(inv.join(', '))}</div>` : (ended(e) ? '<div class="ad-tsub">No invigilation logged</div>' : '')}
+        <div class="ad-tname">${escapeHtml(examTitle(e))}</div>
+        <div class="ad-tsub">${escapeHtml([scopeLabel(e.scope), e.room, `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
+        ${inv.length ? `<div class="ad-tsub">Invigilators: ${escapeHtml(inv.join(', '))}</div>` : ''}
         ${missing.length ? (ended(e) ? `<div class="ad-tsub" style="color:#B45309;">Assigned, not logged: ${escapeHtml(missing.map(nameOf).join(', '))}</div>` : `<div class="ad-tsub">Assigned: ${escapeHtml(missing.map(nameOf).join(', '))}</div>`) : ''}
       </div>`;
-    }).join('');
-    const others = invigs.filter((x) => !x.examId || !exams.some((e) => e.id === x.examId));
-    if (others.length) {
-      html += others.map((x) => `<div class="ad-exam other">
-        <div class="ad-tname">${escapeHtml(x.testName || 'Test')}${x.invigKind === 'cover' ? ' · covering a class' : ''}</div>
-        <div class="ad-tsub">${escapeHtml(nameOf(x.teacherId))} · ${svDur(invigMinutes(x))} · ${escapeHtml((x.parts || []).map((p) => `${formatTimeStr(p.start)} – ${formatTimeStr(p.end)}${p.room ? ' ' + p.room : ''}${(p.scope || []).length ? ' (' + scopeLabel(p.scope) + ')' : ''}`).join('; '))}</div>
-      </div>`).join('');
-    }
-    listEl.innerHTML = html || '<div class="hv-note" style="text-align:left;">No exams or invigilation for this day.</div>';
+    });
+    const groups = [];
+    invigs.filter((x) => !used.has(x.id)).forEach((x) => {
+      const sp = span(x);
+      const g = groups.find((q) => q.name === (x.testName || 'Exam') && overlaps(q.a, q.b, sp.a, sp.b));
+      if (g) { g.items.push(x); g.a = Math.min(g.a, sp.a); g.b = Math.max(g.b, sp.b); } else groups.push({ name: x.testName || 'Exam', a: sp.a, b: sp.b, items: [x] });
+    });
+    groups.forEach((g) => {
+      const sc = [].concat(...g.items.map((x) => x.scope || [])).filter((v, i, a) => a.indexOf(v) === i);
+      const rooms = [].concat(...g.items.map(roomsOfInv)).filter((v, i, a) => a.indexOf(v) === i);
+      examRows.push(`<div class="ad-exam static">
+        <div class="ad-tname">${escapeHtml(g.name)}</div>
+        <div class="ad-tsub">${escapeHtml([scopeLabel(sc), rooms.join(', '), `${formatTimeStr(svMinToHHMM(g.a))} – ${formatTimeStr(svMinToHHMM(g.b))}`].filter(Boolean).join(' · '))}</div>
+        <div class="ad-tsub">Invigilators: ${escapeHtml(g.items.map((x) => `${nameOf(x.teacherId)} (${svDur(invigMinutes(x))})`).join(', '))}</div>
+      </div>`);
+    });
+
+    let html = '';
+    if (classRows.length) html += `<div class="ad-grp">Class Tests · ${ct.reduce((s2, c) => s2 + testCount(c), 0) || classRows.length}</div>` + classRows.join('');
+    if (examRows.length) html += `<div class="ad-grp">Exams · ${examRows.length}</div>` + examRows.join('');
+    listEl.innerHTML = html || '<div class="hv-note" style="text-align:left; padding:10px 12px;">No tests or exams for this day.</div>';
     listEl.querySelectorAll('[data-exam]').forEach((row) => row.addEventListener('click', () => openExamSheet(row.getAttribute('data-exam'), nameOf)));
     renderAdminExamForm(ids, nameOf);
     return alerts;
@@ -3840,6 +4027,8 @@
     document.getElementById('adminNewExamBtn').hidden = !!f;
     if (!f) return;
     document.getElementById('adminExamFormTitle').textContent = f.id ? 'Edit Exam' : 'New Exam';
+    chipRow(document.getElementById('adminExamType'), testTypesList(), f.type, 'data-extype', (v) => { f.type = v; renderAdminExamForm(ids, nameOf); });
+    chipRow(document.getElementById('adminExamSubject'), subjectsList(), f.subject, 'data-exsubj', (v) => { f.subject = f.subject === v ? '' : v; renderAdminExamForm(ids, nameOf); });
     const sc = document.getElementById('adminExamScope');
     sc.innerHTML = scopeChipsHtml(f.scope, 'data-exscope');
     sc.querySelectorAll('[data-exscope]').forEach((el) => el.addEventListener('click', () => {
@@ -3863,9 +4052,8 @@
   }
   function openAdminExamForm(exam) {
     state.adminExamForm = exam
-      ? { id: exam.id, scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice() }
-      : { id: null, scope: [], invigilators: [] };
-    document.getElementById('adminExamName').value = exam ? exam.name || '' : '';
+      ? { id: exam.id, type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice() }
+      : { id: null, type: '', subject: '', name: '', scope: [], invigilators: [] };
     document.getElementById('adminExamStart').value = exam ? exam.start || '' : '';
     document.getElementById('adminExamEnd').value = exam ? exam.end || '' : '';
     document.getElementById('adminExamRoom').value = exam ? exam.room || '' : '';
@@ -3875,7 +4063,7 @@
   function openExamSheet(id, nameOf) {
     const e = (state.adminExams || []).find((x) => x.id === id);
     if (!e) return;
-    document.getElementById('hvSheetBody').innerHTML = `<div class="hv-d-title">${escapeHtml(e.name)}</div>
+    document.getElementById('hvSheetBody').innerHTML = `<div class="hv-d-title">${escapeHtml(examTitle(e))}</div>
       <div class="hv-d-rows" style="margin-top:10px;">
         <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dayHeading(e.date))}</span></div>
         <div class="hv-d-row"><span>Time</span><span>${escapeHtml(formatTimeStr(e.start))} – ${escapeHtml(formatTimeStr(e.end))}</span></div>
@@ -3898,14 +4086,14 @@
   document.getElementById('adminExamSave').addEventListener('click', async () => {
     const f = state.adminExamForm;
     if (!f || !state.db) return;
-    const name = document.getElementById('adminExamName').value.trim();
+    if (!f.type && !f.name) { showToast('Choose the test type', 'error'); return; }
+    const name = f.type ? `${f.type}${f.subject ? ' · ' + f.subject : ''}` : f.name;
     const start = document.getElementById('adminExamStart').value;
     const end = document.getElementById('adminExamEnd').value;
     const room = document.getElementById('adminExamRoom').value.trim();
-    if (!name) { showToast('Enter the exam name', 'error'); return; }
     if (!start || !end || hhmmToMin(end) <= hhmmToMin(start)) { showToast('Check the start and end time', 'error'); return; }
     if (!f.scope.length) { showToast('Choose the class or batches', 'error'); return; }
-    const data = { name, date: state.adminDate, start, end, room, scope: f.scope.slice(), invigilators: f.invigilators.slice() };
+    const data = { name, type: f.type || '', subject: f.subject || '', date: state.adminDate, start, end, room, scope: f.scope.slice(), invigilators: f.invigilators.slice() };
     try {
       if (f.id) await state.db.collection('exams').doc(f.id).set(data, { merge: true });
       else await state.db.collection('exams').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId }, data));
@@ -5592,7 +5780,7 @@
     return [
       { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
       { label: 'Study Material', given: c.material, note: c.materialNote },
-      { label: 'Class Test', given: c.test, note: c.testNote },
+      { label: 'Class Test', given: c.test, note: [c.testNote, c.testRooms ? 'Rooms: ' + c.testRooms : ''].filter(Boolean).join(' · ') },
       { label: 'Homework', given: c.homework, note: c.homeworkNote }
     ].filter((it) => it.given).map((it) => `${it.label}: ${it.note ? it.note : 'Given'}`);
   }
@@ -6235,6 +6423,7 @@
     document.getElementById('worksheetNoteInput').value = '';
     document.getElementById('materialNoteInput').value = '';
     document.getElementById('testNoteInput').value = '';
+    document.getElementById('testRoomsInput').value = '';
     document.getElementById('homeworkNoteInput').value = '';
   }
 
@@ -6386,6 +6575,7 @@
     document.getElementById('worksheetNoteInput').value = cls.worksheetNote || '';
     document.getElementById('materialNoteInput').value = cls.materialNote || '';
     document.getElementById('testNoteInput').value = cls.testNote || '';
+    document.getElementById('testRoomsInput').value = cls.testRooms || '';
     document.getElementById('homeworkNoteInput').value = cls.homeworkNote || '';
     const editWing = wingForBatch(state.form.batch);
     if (editWing) state.formWing = editWing;
@@ -6394,7 +6584,10 @@
   }
 
   // ---------- Invigilation entry (Add Activity → Invigilation) ----------
-  function newInvig() { return { kind: 'other', examId: null, name: '', parts: [{ start: '', end: '', room: '', scope: [] }] }; }
+  // Two ways: pick one of today's exams added by the admin, or fill type, subject and class yourself.
+  function testTypesList() { return (state.testTypes && state.testTypes.length) ? state.testTypes : DEFAULT_TEST_TYPES; }
+  function subjectsList() { return (state.subjects && state.subjects.length) ? state.subjects : DEFAULT_SUBJECTS; }
+  function newInvig() { return { mode: 'exam', examId: null, type: '', subject: '', scope: [], parts: [{ start: '', end: '', room: '' }] }; }
   if (!state.invig) state.invig = newInvig();
   state.examsFor = state.examsFor || {};
   async function loadExamsFor(date) {
@@ -6407,11 +6600,23 @@
     if (state.tab === 'add') renderInvig();
   }
   function invigDate() { return state.addTargetDate || (state.editingId && state.invigEditDate) || todayStr(); }
+  function examTitle(e) { return e.type ? `${e.type}${e.subject ? ' · ' + e.subject : ''}` : (e.name || 'Exam'); }
   function scopeChipsHtml(sel, attr) {
-    const cls = allClassNames();
-    const bat = allBatchesFlat();
-    return cls.map((c) => `<button type="button" class="chip${sel.indexOf(c) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')
-      + bat.map((b) => `<button type="button" class="chip${sel.indexOf(b) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
+    return allClassNames().map((c) => `<button type="button" class="chip${sel.indexOf(c) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')
+      + allBatchesFlat().map((b) => `<button type="button" class="chip${sel.indexOf(b) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
+  }
+  // Toggle a class/batch in a scope list; a whole class replaces its individual batches.
+  function toggleScope(list, v) {
+    const k = list.indexOf(v);
+    if (k !== -1) { list.splice(k, 1); return list; }
+    list.push(v);
+    if (/^Class \d+$/.test(v)) return list.filter((x) => x === v || classOfBatch(x) !== v || /^Class \d+$/.test(x));
+    if (list.indexOf(classOfBatch(v)) !== -1) return list.filter((x) => x !== classOfBatch(v));
+    return list;
+  }
+  function chipRow(el, items, active, attr, onPick) {
+    el.innerHTML = items.map((t) => `<button type="button" class="chip${t === active ? ' active' : ''}" ${attr}="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
+    el.querySelectorAll(`[${attr}]`).forEach((b) => b.addEventListener('click', () => onPick(b.getAttribute(attr))));
   }
   function renderInvig() {
     const box = document.getElementById('invigFields');
@@ -6424,78 +6629,76 @@
     const date = invigDate();
     loadExamsFor(date);
     const exams = state.examsFor[date] || [];
-    const kc = document.getElementById('invigKindChips');
-    kc.innerHTML = exams.map((e) => `<button type="button" class="chip${iv.kind === 'exam' && iv.examId === e.id ? ' active' : ''}" data-inv-exam="${escapeHtml(e.id)}">${escapeHtml(e.name)}</button>`).join('')
-      + `<button type="button" class="chip${iv.kind === 'cover' ? ' active' : ''}" data-inv-kind="cover">Class test (covering)</button>`
-      + `<button type="button" class="chip${iv.kind === 'other' ? ' active' : ''}" data-inv-kind="other">Other test</button>`;
-    document.getElementById('invigKindNote').textContent = iv.kind === 'cover'
-      ? 'A class test in another teacher\'s class. Counted as invigilation, not as your class.'
-      : (state.examsFor[date] === null ? 'Loading exams…' : (exams.length ? '' : 'No exams were set up by the admin for this day.'));
-    kc.querySelectorAll('[data-inv-exam]').forEach((b) => b.addEventListener('click', () => {
-      const e = exams.find((x) => x.id === b.getAttribute('data-inv-exam'));
-      if (!e) return;
-      iv.kind = 'exam'; iv.examId = e.id; iv.name = e.name || '';
-      const p = iv.parts[0];
-      if (!p.start && !p.end) { p.start = e.start || ''; p.end = e.end || ''; }
-      if (!p.room) p.room = e.room || '';
-      if (!p.scope.length) p.scope = (e.scope || []).slice();
-      renderInvig();
-    }));
-    kc.querySelectorAll('[data-inv-kind]').forEach((b) => b.addEventListener('click', () => {
-      iv.kind = b.getAttribute('data-inv-kind'); iv.examId = null;
-      renderInvig();
-    }));
-    const nameEl = document.getElementById('invigName');
-    nameEl.value = iv.name || '';
-    nameEl.disabled = iv.kind === 'exam';
+    const useExams = exams.length > 0 && iv.mode === 'exam';
+    document.getElementById('invigExamBox').hidden = !useExams;
+    document.getElementById('invigSelfBox').hidden = useExams;
+    document.getElementById('invigBackToExams').hidden = !exams.length;
+    if (useExams) {
+      const list = document.getElementById('invigExamList');
+      list.innerHTML = exams.map((e) => `<button type="button" class="inv-exam${iv.examId === e.id ? ' active' : ''}" data-inv-exam="${escapeHtml(e.id)}">
+          <span class="inv-exam-t">${escapeHtml(examTitle(e))}</span>
+          <span class="inv-exam-s">${escapeHtml([scopeLabel(e.scope), e.room, `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</span>
+        </button>`).join('');
+      list.querySelectorAll('[data-inv-exam]').forEach((b) => b.addEventListener('click', () => {
+        const e = exams.find((x) => x.id === b.getAttribute('data-inv-exam'));
+        if (!e) return;
+        iv.examId = e.id;
+        iv.parts = [{ start: e.start || '', end: e.end || '', room: e.room || '' }];
+        renderInvig();
+      }));
+    } else {
+      chipRow(document.getElementById('invigTypeChips'), testTypesList(), iv.type, 'data-inv-type', (v) => { iv.type = v; renderInvig(); });
+      chipRow(document.getElementById('invigSubjChips'), subjectsList(), iv.subject, 'data-inv-subj', (v) => { iv.subject = v; renderInvig(); });
+      const sc = document.getElementById('invigScope');
+      sc.innerHTML = scopeChipsHtml(iv.scope, 'data-inv-scope');
+      sc.querySelectorAll('[data-inv-scope]').forEach((b) => b.addEventListener('click', () => { iv.scope = toggleScope(iv.scope, b.getAttribute('data-inv-scope')); renderInvig(); }));
+    }
     const partsEl = document.getElementById('invigParts');
     partsEl.innerHTML = iv.parts.map((p, i) => `<div class="inv-part">
-        <div class="inv-part-head"><span>${iv.parts.length > 1 ? 'Part ' + (i + 1) : 'Duty time'}</span>${iv.parts.length > 1 ? `<button type="button" class="hv-back" data-inv-del="${i}" style="padding:0; color:var(--muted);">Remove</button>` : ''}</div>
-        <div class="sv-times">
+        ${iv.parts.length > 1 ? `<div class="inv-part-head"><span>Part ${i + 1}</span><button type="button" class="hv-back" data-inv-del="${i}" style="padding:0; color:var(--muted);">Remove</button></div>` : ''}
+        <div class="inv-row">
           <div><div class="sv-tlbl">Start</div><input class="text-input" type="time" data-inv-start="${i}" value="${escapeHtml(p.start)}"></div>
           <div><div class="sv-tlbl">End</div><input class="text-input" type="time" data-inv-end="${i}" value="${escapeHtml(p.end)}"></div>
+          <div><div class="sv-tlbl">Room / Hall</div><input class="text-input" data-inv-room="${i}" value="${escapeHtml(p.room)}" placeholder="e.g. Room 4 or Hall A"></div>
         </div>
-        <input class="text-input" data-inv-room="${i}" value="${escapeHtml(p.room)}" placeholder="Room / Hall, e.g. Room 3">
-        <div class="sv-tlbl" style="margin:0;">Class${iv.kind === 'cover' ? ' (required)' : ''} · tap a whole class or its batches</div>
-        <div class="chips inv-scope">${scopeChipsHtml(p.scope, `data-inv-scope="${i}" data-val`)}</div>
       </div>`).join('');
     partsEl.querySelectorAll('[data-inv-start]').forEach((el) => el.addEventListener('change', () => { iv.parts[+el.getAttribute('data-inv-start')].start = el.value; }));
     partsEl.querySelectorAll('[data-inv-end]').forEach((el) => el.addEventListener('change', () => { iv.parts[+el.getAttribute('data-inv-end')].end = el.value; }));
     partsEl.querySelectorAll('[data-inv-room]').forEach((el) => el.addEventListener('input', () => { iv.parts[+el.getAttribute('data-inv-room')].room = el.value; }));
     partsEl.querySelectorAll('[data-inv-del]').forEach((el) => el.addEventListener('click', () => { iv.parts.splice(+el.getAttribute('data-inv-del'), 1); renderInvig(); }));
-    partsEl.querySelectorAll('[data-inv-scope]').forEach((el) => el.addEventListener('click', () => {
-      const p = iv.parts[+el.getAttribute('data-inv-scope')];
-      const v = el.getAttribute('data-val');
-      const k = p.scope.indexOf(v);
-      if (k === -1) {
-        p.scope.push(v);
-        // choosing a whole class replaces its individual batches
-        if (/^Class \d+$/.test(v)) p.scope = p.scope.filter((x) => x === v || classOfBatch(x) !== v || /^Class \d+$/.test(x));
-        else if (p.scope.indexOf(classOfBatch(v)) !== -1) p.scope = p.scope.filter((x) => x !== classOfBatch(v));
-      } else p.scope.splice(k, 1);
-      renderInvig();
-    }));
   }
-  document.getElementById('invigName').addEventListener('input', (e) => { state.invig.name = e.target.value; });
+  document.getElementById('invigSelfLink').addEventListener('click', () => { state.invig.mode = 'self'; state.invig.examId = null; renderInvig(); });
+  document.getElementById('invigBackToExams').addEventListener('click', () => { state.invig.mode = 'exam'; renderInvig(); });
   document.getElementById('invigAddPart').addEventListener('click', () => {
     const iv = state.invig;
     const last = iv.parts[iv.parts.length - 1] || {};
-    iv.parts.push({ start: '', end: '', room: last.room || '', scope: (last.scope || []).slice() });
+    iv.parts.push({ start: '', end: '', room: last.room || '' });
     renderInvig();
   });
-
-  // Returns an error message, or null. Also collects overlap warnings.
+  // What this duty is about (from the chosen exam, or from the teacher's own choices).
+  function invigInfo(date) {
+    const iv = state.invig;
+    const exams = state.examsFor[date] || [];
+    if (exams.length && iv.mode === 'exam') {
+      const e = exams.find((x) => x.id === iv.examId);
+      if (!e) return { err: 'Tap the exam you did invigilation for, or fill it yourself.' };
+      return { kind: 'exam', examId: e.id, type: e.type || '', subject: e.subject || '', scope: (e.scope || []).slice(), name: examTitle(e) };
+    }
+    if (!iv.type) return { err: 'Choose the test type.' };
+    if (!iv.subject) return { err: 'Choose the subject.' };
+    if (!iv.scope.length) return { err: 'Choose the class.' };
+    return { kind: 'self', examId: null, type: iv.type, subject: iv.subject, scope: iv.scope.slice(), name: `${iv.type} · ${iv.subject}` };
+  }
   function validateInvig(date) {
     const iv = state.invig;
-    const name = (iv.name || '').trim();
-    if (!name) return { err: 'Enter the test / exam name.' };
-    if (!iv.parts.length) return { err: 'Add at least one duty time.' };
+    const info = invigInfo(date);
+    if (info.err) return { err: info.err };
+    if (!iv.parts.length) return { err: 'Add your duty time.' };
     for (let i = 0; i < iv.parts.length; i++) {
       const p = iv.parts[i];
       const a = hhmmToMin(p.start), b = hhmmToMin(p.end);
       if (a == null || b == null) return { err: `Fill in the start and end time${iv.parts.length > 1 ? ' of part ' + (i + 1) : ''}.` };
       if (b <= a) return { err: `End time must be after the start time${iv.parts.length > 1 ? ' (part ' + (i + 1) + ')' : ''}.` };
-      if (iv.kind === 'cover' && !p.scope.length) return { err: 'Choose the class / batch whose test you conducted.' };
     }
     const sorted = iv.parts.map((p, i) => ({ i, a: hhmmToMin(p.start), b: hhmmToMin(p.end) })).sort((x, y) => x.a - y.a);
     for (let k = 1; k < sorted.length; k++) if (sorted[k].a < sorted[k - 1].b) return { err: `Part ${sorted[k - 1].i + 1} and part ${sorted[k].i + 1} overlap.` };
@@ -6516,7 +6719,7 @@
         if (sa < pp.b && pp.a < sb) warns.push(`scheduled ${s.label} (${formatTimeStr(s.time)})`);
       });
     });
-    return { err: null, warns: warns.filter((w, i, a) => a.indexOf(w) === i) };
+    return { err: null, info, warns: warns.filter((w, i, a) => a.indexOf(w) === i) };
   }
   async function deleteEntryDoc(c) {
     await state.db.collection('classes').doc(c.id).delete();
@@ -6534,7 +6737,9 @@
     state.activityForm = { activityType: item.activityType || ACTIVITY_TYPES[0], note: item.note || '' };
     state.invigEditDate = item.date || todayStr();
     if (isInvig(item)) {
-      state.invig = { kind: item.invigKind || 'other', examId: item.examId || null, name: item.testName || '', parts: (item.parts || []).map((p) => ({ start: p.start || '', end: p.end || '', room: p.room || '', scope: (p.scope || []).slice() })) };
+      const sc = (item.scope && item.scope.length) ? item.scope.slice() : [].concat(...(item.parts || []).map((p) => p.scope || [])).filter((v, i, a) => a.indexOf(v) === i);
+      state.invig = { mode: item.examId ? 'exam' : 'self', examId: item.examId || null, type: item.testType || '', subject: item.subject || '', scope: sc,
+        parts: (item.parts || []).map((p) => ({ start: p.start || '', end: p.end || '', room: p.room || '' })) };
       if (!state.invig.parts.length) state.invig.parts = newInvig().parts;
     } else state.invig = newInvig();
     renderForm();
@@ -6552,9 +6757,11 @@
     if (state.entryMode === 'activity') {
       const invig = state.activityForm.activityType === 'Invigilation';
       const actDate = editingId ? (state.invigEditDate || entryDate) : entryDate;
+      let invInfo = null;
       if (invig) {
         const v = validateInvig(actDate);
         if (v.err) { showFormMsg(v.err); return; }
+        invInfo = v.info;
         if (v.warns.length) {
           const ok = await showConfirm(`This duty overlaps with:\n${v.warns.join('\n')}\n\nSave anyway?`, '⚠️ Time Conflict', 'Save');
           if (!ok) return;
@@ -6571,26 +6778,15 @@
         const iv = state.invig;
         if (invig) {
           Object.assign(payload, {
-            invigKind: iv.kind, examId: iv.kind === 'exam' ? iv.examId : null, testName: (iv.name || '').trim(),
-            parts: iv.parts.map((p) => ({ start: p.start, end: p.end, room: (p.room || '').trim(), scope: p.scope.slice() }))
+            invigKind: invInfo.kind, examId: invInfo.examId, testType: invInfo.type, subject: invInfo.subject,
+            testName: invInfo.name, scope: invInfo.scope,
+            parts: iv.parts.map((p) => ({ start: p.start, end: p.end, room: (p.room || '').trim(), scope: invInfo.scope.slice() }))
           });
         }
         const col = state.db.collection('classes');
         const ref = editingId ? col.doc(editingId) : col.doc();
-        const prev = editingId ? ((state.classesToday || []).concat(state.historyClasses || [], state.selectedDayClasses || []).find((x) => x.id === editingId) || null) : null;
         const writeP = editingId ? ref.update(payload) : ref.set(Object.assign({ entryType: 'activity', teacherId: state.teacherId, date: entryDate, createdAt: Date.now() }, payload));
-        // Covering a class test: shared record (no teacher name) so the class's own teacher gets the test counted.
-        let coverP = null;
-        if (invig && iv.kind === 'cover') {
-          coverP = state.db.collection('testCovers').doc(ref.id).set({
-            date: actDate, byTeacherId: state.teacherId, testName: payload.testName,
-            batches: expandScope([].concat(...payload.parts.map((p) => p.scope))),
-            parts: payload.parts.map((p) => ({ start: p.start, end: p.end })), createdAt: Date.now()
-          });
-        } else if (prev && isInvig(prev) && prev.invigKind === 'cover') {
-          coverP = state.db.collection('testCovers').doc(ref.id).delete().catch(() => {});
-        }
-        await waitForWrite(coverP ? Promise.all([writeP, coverP]) : writeP);
+        await waitForWrite(writeP);
         state.editingId = null;
         state.editingSourceTab = null;
         state.addTargetDate = null;
@@ -6652,6 +6848,7 @@
         worksheetNote: document.getElementById('worksheetNoteInput').value.trim(),
         materialNote: document.getElementById('materialNoteInput').value.trim(),
         testNote: document.getElementById('testNoteInput').value.trim(),
+        testRooms: state.form.test ? document.getElementById('testRoomsInput').value.trim() : '',
         homeworkNote: document.getElementById('homeworkNoteInput').value.trim()
       };
       const writeP = editingId
@@ -7211,6 +7408,16 @@
       renderScheduleBatchChips();
     }, () => {}));
 
+    unsubscribers.push(db.doc('settings/testTypes').onSnapshot((snap) => {
+      state.testTypes = (snap.exists && snap.data().list) || null;
+      renderListManagers();
+      if (state.tab === 'add') renderInvig();
+    }, () => {}));
+    unsubscribers.push(db.doc('settings/subjects').onSnapshot((snap) => {
+      state.subjects = (snap.exists && snap.data().list) || null;
+      renderListManagers();
+      if (state.tab === 'add') renderInvig();
+    }, () => {}));
     unsubscribers.push(db.doc('settings/campusLocation').onSnapshot((snap) => {
       const data = snap.data();
       state.campusLocation = data && typeof data.lat === 'number' ? { lat: data.lat, lng: data.lng } : null;
@@ -7230,12 +7437,6 @@
       renderScheduleNotice();
     }, () => {}));
 
-    unsubscribers.push(db.collection('testCovers').where('date', '>=', shiftDateStr(today, -62)).onSnapshot((snap) => {
-      state.testCovers = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
-      renderTodayList();
-      if (state.tab === 'history') renderHistory();
-      if (state.tab === 'admin') renderAdmin();
-    }, () => {}));
     unsubscribers.push(db.collection('schedule/' + tid + '/slots').limit(400).onSnapshot((snap) => {
       state.scheduleSlots = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       if (state.tab === 'schedule') renderScheduleList();
