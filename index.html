@@ -776,6 +776,14 @@
   .act-card .field { gap: 6px; }
   #invigSelfBox[hidden], #leaveFields[hidden], #leaveRange[hidden] { display: none !important; }
   .pk-group { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .pk-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .pk-sess { font-size: 12px; font-weight: 600; color: var(--muted-2); margin-top: 2px; }
+  .pk-selected { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; padding: 8px 10px; background: var(--neutral-soft); border-radius: 10px; }
+  .pk-sel-lbl { font-size: 12px; font-weight: 600; color: var(--muted-2); margin-right: 2px; }
+  .pk-x { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--gold); background: var(--gold-soft); color: var(--gold); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .sess-pill { border: 1px solid var(--line); background: var(--card); color: var(--muted-2); border-radius: 999px; padding: 3px 9px; font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+  .sess-pill.evening { color: #4338CA; border-color: rgba(67,56,202,.35); }
+  .sess-pill.special { color: #B45309; border-color: rgba(217,119,6,.35); }
   .field-err { animation: fieldErr 2.4s ease; border-radius: 12px; }
   @keyframes fieldErr { 0%, 60% { box-shadow: 0 0 0 2px var(--gold); } 100% { box-shadow: 0 0 0 0 transparent; } }
   @media (prefers-reduced-motion: reduce) { .field-err { animation: none; box-shadow: 0 0 0 2px var(--gold); } }
@@ -1941,7 +1949,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.5 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.6 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2737,7 +2745,8 @@
   function entryBatchLabel(c) { const b = entryBatches(c); return b.length > 1 ? b.join(' + ') : (b[0] || 'Class'); }
   function testCount(c) { return c && c.test ? Math.max(1, entryBatches(c).length) : 0; }
   // Remedial and Evening batches are separate groups: they are never included when a whole class (e.g. "Class 10") is chosen.
-  function classOfBatch(b) { if (/remedial|evening/i.test(String(b || ''))) return null; const m = String(b || '').match(/class\s*(\d+)/i); return m ? `Class ${m[1]}` : null; }
+  // A whole class ("Class 10") means its Morning batches; Evening and Special (e.g. Remedial) batches are separate.
+  function classOfBatch(b) { if (typeof batchSession === 'function' && batchSession(b) !== 'morning') return null; if (/remedial|evening/i.test(String(b || ''))) return null; const m = String(b || '').match(/class\s*(\d+)/i); return m ? `Class ${m[1]}` : null; }
   function allClassNames() {
     const set = [];
     allBatchesFlat().forEach((b) => { const c = classOfBatch(b); if (c && set.indexOf(c) === -1) set.push(c); });
@@ -4228,7 +4237,10 @@
       'Foundation': wing === 'Foundation' ? list : currentBatches('Foundation')
     };
     try {
-      await state.db.doc('settings/batches').set({ wings, renames });
+      const sessions = Object.assign({}, state.batchSessions || {});
+      if (sessions[oldName] && !sessions[newName]) sessions[newName] = sessions[oldName];
+      delete sessions[oldName];
+      await state.db.doc('settings/batches').set({ wings, renames, sessions });
       showToast(merging ? 'Batches merged' : 'Batch renamed everywhere');
     } catch (err) { flashOffline(err); }
   }
@@ -4262,9 +4274,23 @@
       </div>` : `
       <div class="activity-row">
         <div class="activity-row-text"><span class="activity-row-title">${escapeHtml(b)}</span></div>
+        ${state.canAdmin ? `<button type="button" class="sess-pill ${batchSession(b)}" data-sess-batch="${i}" aria-label="Change session">${escapeHtml({ morning: 'Morning', evening: 'Evening', special: 'Special' }[batchSession(b)])}</button>` : ''}
         ${state.canAdmin ? `<button class="del-btn" data-rename-batch="${i}" aria-label="Rename batch">${svgEdit()}</button>` : ''}
         <button class="del-btn" data-del-batch="${i}" aria-label="Remove batch">${svgTrash()}</button>
       </div>`).join('');
+    // Tap the session pill to cycle Morning → Evening → Special.
+    el.querySelectorAll('[data-sess-batch]').forEach((btn) => btn.addEventListener('click', async () => {
+      const b = list[+btn.getAttribute('data-sess-batch')];
+      const order = ['morning', 'evening', 'special'];
+      const next = order[(order.indexOf(batchSession(b)) + 1) % 3];
+      const sessions = Object.assign({}, state.batchSessions || {}, { [b]: next });
+      try {
+        await state.db.doc('settings/batches').set({ sessions }, { merge: true });
+        state.batchSessions = sessions;
+        renderBatchListInto(elId, wing);
+        showToast(`${b}: ${{ morning: 'Morning', evening: 'Evening', special: 'Special' }[next]}`);
+      } catch (err) { flashOffline(err); }
+    }));
     el.querySelectorAll('[data-rename-batch]').forEach((btn) => btn.addEventListener('click', () => {
       state.batchEditKey = elId + '|' + wing; state.batchEditIdx = +btn.getAttribute('data-rename-batch');
       renderBatchListInto(elId, wing);
@@ -4309,7 +4335,7 @@
         'Pre-Foundation': wing === 'Pre-Foundation' ? list : currentBatches('Pre-Foundation'),
         'Foundation': wing === 'Foundation' ? list : currentBatches('Foundation')
       };
-      await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {} });
+      await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {}, sessions: state.batchSessions || {} });
       showToast('Batch list updated');
     } catch (err) { flashOffline(err); }
   }
@@ -6905,32 +6931,62 @@
     (scope || []).forEach((t) => { const k = /^Class \d+$/.test(t) ? t : batchGroupOf(t); if (o.indexOf(k) === -1) o.push(k); });
     return o;
   }
+  // Sessions: Morning / Evening / Special. Admin can set each batch's session in Batch List;
+  // otherwise it is read from the name ("Evening" → Evening, "Remedial" → Special, else Morning).
+  state.batchSessions = state.batchSessions || {};
+  const SESSIONS = [['morning', '☀️ Morning'], ['evening', '🌙 Evening'], ['special', '📌 Special']];
+  function batchSession(b) {
+    const set = state.batchSessions[b];
+    if (set === 'morning' || set === 'evening' || set === 'special') return set;
+    if (/remedial|special/i.test(String(b || ''))) return 'special';
+    if (/evening/i.test(String(b || ''))) return 'evening';
+    return 'morning';
+  }
+  function shortBatch(b) {
+    const t = String(b || '').replace(/class\s*\d+/i, '').replace(/^[\s\-–]+|[\s\-–]+$/g, '').replace(/\s{2,}/g, ' ').trim();
+    return t || b;
+  }
+  function scopeTokLabel(t) { return /^Class \d+$/.test(t) ? `${t} · all morning` : t; }
   function renderScopePicker(el, st, rerender) {
     st.open = st.open || openFromScope(st.scope);
     const groups = pickerGroups();
-    let html = `<div class="chips">${groups.map((g) => `<button type="button" class="chip${st.open.indexOf(g) !== -1 ? ' active' : ''}" data-pk-cls="${escapeHtml(g)}">${st.open.indexOf(g) !== -1 ? '✓ ' : ''}${escapeHtml(g)}</button>`).join('')}</div>`;
+    // one class open at a time keeps the list short
+    if (st.open.length > 1) st.open = st.open.slice(-1);
+    let html = `<div class="chips">${groups.map((g) => {
+      const on = st.open.indexOf(g) !== -1;
+      const n = st.scope.filter((t) => t === g || batchGroupOf(t) === g).length;
+      return `<button type="button" class="chip${on || n ? ' active' : ''}" data-pk-cls="${escapeHtml(g)}">${n ? '✓ ' : ''}${escapeHtml(g)}</button>`;
+    }).join('')}</div>`;
     st.open.filter((g) => groups.indexOf(g) !== -1).forEach((g) => {
       const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
-      const hasRegular = g !== 'Other' && bats.some((b) => classOfBatch(b) === g);
       const chip = (tok, label) => `<button type="button" class="chip${st.scope.indexOf(tok) !== -1 ? ' active' : ''}" data-pk-tok="${escapeHtml(tok)}">${st.scope.indexOf(tok) !== -1 ? '✓ ' : ''}${escapeHtml(label)}</button>`;
-      const short = (b) => { const t = b.replace(new RegExp('^' + g.replace(' ', '\\s*') + '\\s*[-–]?\\s*', 'i'), '').trim(); return t || b; };
-      html += `<div class="pk-group"><div class="sv-tlbl" style="margin:0;">${escapeHtml(g)} batches</div><div class="chips">${hasRegular ? chip(g, 'All regular') : ''}${bats.map((b) => chip(b, short(b))).join('')}</div></div>`;
+      html += `<div class="pk-group"><div class="pk-title">${escapeHtml(g)}</div>`;
+      SESSIONS.forEach(([key, label]) => {
+        const list = bats.filter((b) => batchSession(b) === key);
+        if (!list.length) return;
+        const all = key === 'morning' && g !== 'Other' && list.length > 1 ? chip(g, 'All morning') : '';
+        html += `<div class="pk-sess">${label}</div><div class="chips">${all}${list.map((b) => chip(b, shortBatch(b))).join('')}</div>`;
+      });
+      html += '</div>';
     });
+    if (st.scope.length) {
+      html += `<div class="pk-selected"><span class="pk-sel-lbl">Selected</span>${st.scope.map((t) => `<button type="button" class="pk-x" data-pk-rm="${escapeHtml(t)}">${escapeHtml(scopeTokLabel(t))} <span aria-hidden="true">✕</span></button>`).join('')}</div>`;
+    }
     el.innerHTML = html;
     el.querySelectorAll('[data-pk-cls]').forEach((btn) => btn.addEventListener('click', () => {
       const g = btn.getAttribute('data-pk-cls');
-      const k = st.open.indexOf(g);
-      if (k !== -1) {
-        st.open.splice(k, 1);
-        st.scope = st.scope.filter((t) => t !== g && batchGroupOf(t) !== g);
-      } else {
-        st.open.push(g);
-        const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
-        if (g !== 'Other' && bats.some((b) => classOfBatch(b) === g) && !st.scope.some((t) => t === g || batchGroupOf(t) === g)) st.scope.push(g);
+      if (st.open.indexOf(g) !== -1) { st.open = []; rerender(); return; }
+      st.open = [g];
+      const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
+      const morning = bats.filter((b) => batchSession(b) === 'morning');
+      if (!st.scope.some((t) => t === g || batchGroupOf(t) === g)) {
+        if (g !== 'Other' && morning.length > 1) st.scope.push(g);
+        else if (morning.length === 1) st.scope.push(morning[0]);
       }
       rerender();
     }));
     el.querySelectorAll('[data-pk-tok]').forEach((btn) => btn.addEventListener('click', () => { st.scope = toggleScope(st.scope, btn.getAttribute('data-pk-tok')); rerender(); }));
+    el.querySelectorAll('[data-pk-rm]').forEach((btn) => btn.addEventListener('click', () => { const t = btn.getAttribute('data-pk-rm'); st.scope = st.scope.filter((x) => x !== t); rerender(); }));
   }
   function flagField(id) {
     const el = document.getElementById(id);
@@ -7785,6 +7841,7 @@
 
     unsubscribers.push(db.doc('settings/batches').onSnapshot((snap) => {
       const data = snap.data();
+      state.batchSessions = (data && data.sessions && typeof data.sessions === 'object') ? data.sessions : {};
       const rn = (data && data.renames && typeof data.renames === 'object') ? data.renames : {};
       if (JSON.stringify(rn) !== JSON.stringify(state.batchRenames || {})) {
         state.batchRenames = rn;
