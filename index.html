@@ -1941,7 +1941,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.4 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.5 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5821,20 +5821,36 @@
     function bodyLine(text, opts) {
       opts = opts || {};
       const size = opts.size || 10.5;
+      const indent = opts.indent || 0;
       const rawLines = String(text).split(/\r\n|\r|\n/);
       rawLines.forEach((rawLine) => {
         const safe = toAsciiSafe(rawLine);
-        const lines = wrapAscii(safe, contentWidth, size);
+        const lines = wrapAscii(safe, contentWidth - indent, size);
         (lines.length ? lines : ['']).forEach((line) => {
           ensure(14);
-          currentOps.push({ x: marginX, y, size, bold: !!opts.bold, text: line });
+          currentOps.push({ x: marginX + indent, y, size, bold: !!opts.bold, text: line });
           y -= 14;
         });
       });
     }
+    // Two "Label: value" pairs side by side (summary grid).
+    function pairRow(pairs, opts) {
+      opts = opts || {};
+      const size = opts.size || 10.5;
+      const colW = contentWidth / 2;
+      ensure(16);
+      pairs.forEach((p, i) => {
+        if (!p) return;
+        const x = marginX + i * colW;
+        const lab = toAsciiSafe(p[0] + ':');
+        currentOps.push({ x, y, size, bold: false, text: lab });
+        currentOps.push({ x: x + 128, y, size, bold: true, text: toAsciiSafe(String(p[1])) });
+      });
+      y -= 16;
+    }
     function rule() {
       ensure(10);
-      currentOps.push({ x: marginX, y, size: 8, bold: false, text: '------------------------------------------------------------------' });
+      currentOps.push({ x: marginX, y, size: 8, bold: false, text: '-'.repeat(Math.floor(contentWidth / 2.67)) });
       y -= 14;
     }
     function addSpace(px) { y -= px; }
@@ -5842,7 +5858,7 @@
       newPage();
       return buildMinimalPdf(pages);
     }
-    return { heading, bodyLine, rule, addSpace, finishBlob };
+    return { heading, bodyLine, pairRow, rule, addSpace, finishBlob };
   }
 
   // ---------- Reports (PDF + WhatsApp) — one shared engine for Day / Week / Month / Custom ----------
@@ -5905,6 +5921,7 @@
         t.classes++; t.mins += m;
         if (c.worksheet) t.ws++;
         t.tests += testCount(c);
+        if (c.material) t.mat = (t.mat || 0) + 1;
         if (c.homework) t.hw++;
         const b = entryBatchLabel(c);
         if (!t.batches[b]) t.batches[b] = { n: 0, mins: 0 };
@@ -5921,83 +5938,107 @@
       { label: 'Homework', given: c.homework, note: c.homeworkNote }
     ].filter((it) => it.given).map((it) => `${it.label}: ${it.note ? it.note : 'Given'}`);
   }
+  // ---------- PDF: day section (same order and wording as the WhatsApp report) ----------
   function writeDayReportBody(w, date, allForDate, campusForDate, includeHeader, f) {
     f = f || reportFilter(false);
     const recs = reportDayRecords(allForDate).filter(f.match);
-    if (includeHeader) {
-      w.heading(reportDayLabel(date), 14);
-      w.addSpace(2);
-    }
+    if (includeHeader) { w.heading(reportDayLabel(date), 13); w.addSpace(2); }
+    const acts = recs.filter((c) => c.entryType === 'activity');
+    const leaves = f.showActivities ? acts.filter((a) => a.activityType === 'Leave / Holiday') : [];
+    const classItems = f.showClasses ? recs.filter((c) => c.entryType !== 'activity').sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || '')) : [];
+    const invs = f.showActivities ? acts.filter(isInvig) : [];
+    const others = f.showActivities ? acts.filter((a) => !isInvig(a) && a.activityType !== 'Leave / Holiday') : [];
     const campus = campusForDate || {};
-    w.bodyLine(`On campus: ${reportCampus(campusSeconds(campus))}`, { bold: true });
     const sessions = campus.sessions || [];
-    if (!sessions.length) {
-      w.bodyLine('  No check-in recorded.');
-    } else {
+    const hasWork = classItems.length || invs.length || others.length;
+    let wrote = false;
+    const sec = (t) => { if (wrote) w.addSpace(4); w.bodyLine(t, { bold: true }); wrote = true; };
+    if (leaves.length) {
+      sec('ON LEAVE');
+      leaves.forEach((a) => { const r = waClean(a.note); if (r && !/^on leave\.?$/i.test(r)) w.bodyLine(`Reason: ${r}`, { indent: 14 }); });
+    }
+    if (sessions.length) {
+      sec(`ATTENDANCE  (Total: ${reportCampus(campusSeconds(campus))})`);
       sessions.forEach((s, i) => {
-        const inStr = formatTimeStr(toHHMM(s.in));
-        const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-        w.bodyLine(`  ${sessions.length > 1 ? (i + 1) + '. ' : ''}${inStr} - ${outStr}`);
+        const a = formatTimeStr(toHHMM(s.in));
+        const b = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
+        w.bodyLine(`${sessions.length > 1 ? (i + 1) + '. ' : ''}${a}  -  ${b}`, { indent: 14 });
       });
+    } else if (!leaves.length && hasWork && !f.label) {
+      sec('ATTENDANCE: Check-in not recorded');
     }
-    if (f.showClasses) {
-      const classItems = recs.filter((c) => c.entryType !== 'activity')
-        .sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
-      w.addSpace(2);
-      w.bodyLine(`Classes (${classItems.length})`, { bold: true });
-      if (!classItems.length) w.bodyLine('  None.');
+    if (classItems.length) {
+      sec(`CLASSES (${classItems.length})`);
       classItems.forEach((c, i) => {
-        const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : 'Time not set';
-        const dur = classDuration(c);
-        const up = (hvStartedOrPast(c) ? '' : '  [Upcoming - not counted]') + (c.editedAt ? '  [edited ' + stampTxt(c.editedAt) + ']' : '');
-        w.bodyLine(`  ${i + 1}. ${entryBatchLabel(c)}  |  ${time}${dur ? ' (' + reportHm(dur) + ')' : ''}${up}`, { bold: true });
-        w.bodyLine(`     Topic: ${c.topic || 'Not added'}`);
-        checklistLines(c).forEach((l) => w.bodyLine(`     - ${l}`));
+        const up = hvStartedOrPast(c) ? '' : '   [Upcoming - not counted]';
+        const ed = c.editedAt ? `   [edited ${stampTxt(c.editedAt)}]` : '';
+        w.bodyLine(`${i + 1}. ${entryBatchLabel(c)}${up}${ed}`, { bold: true, indent: 14 });
+        if (c.startTimeStr && c.endTimeStr) w.bodyLine(`Time: ${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}  (${reportHm(classDuration(c))})`, { indent: 28 });
+        if (c.topic) w.bodyLine(`Topic: ${waClean(c.topic)}`, { indent: 28 });
+        if (c.worksheet) w.bodyLine(`Worksheet given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`, { indent: 28 });
+        if (c.material) w.bodyLine(`Study material given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`, { indent: 28 });
+        if (c.test) {
+          const nb = entryBatches(c).length;
+          let line = `Class test conducted${nb > 1 ? ` (${nb} batches)` : ''}${c.testNote ? ': ' + waClean(c.testNote) : ''}`;
+          if (c.testRooms) { const r = waClean(c.testRooms); line += `  |  ${/[,&]| and /.test(r) ? 'Rooms' : 'Room'} ${r}`; }
+          w.bodyLine(line, { indent: 28 });
+        }
+        if (c.homework) w.bodyLine(`Homework given${c.homeworkNote ? ': ' + waClean(c.homeworkNote) : ''}`, { indent: 28 });
       });
     }
-    if (f.showActivities) {
-      const acts = recs.filter((c) => c.entryType === 'activity');
-      w.addSpace(2);
-      w.bodyLine(`Activities (${acts.length})`, { bold: true });
-      if (!acts.length) w.bodyLine('  None.');
-      acts.forEach((a) => w.bodyLine(`  - ${isInvig(a) ? invigSummary(a).title + ' · ' + invigSummary(a).sub : activityLabel(a.activityType)}${a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : ''}`));
-      const cvd = f.label ? { count: 0 } : coveredTestsFor(date, allForDate);
-      if (cvd.count) w.bodyLine(`  - Class test held in your class while you were on leave: ${cvd.batches.join(', ')}`);
+    if (invs.length) {
+      sec(`INVIGILATION  (${reportHm(invs.reduce((s2, a) => s2 + invigMinutes(a), 0))}, not counted as classes)`);
+      invs.forEach((a) => {
+        w.bodyLine([(a.testName || a.testType || '').replace(/\s*·\s*/g, ' - '), scopeLabel(a.scope || [])].filter(Boolean).join('  |  '), { indent: 14 });
+        (a.parts || []).forEach((p) => w.bodyLine(`${formatTimeStr(p.start)} - ${formatTimeStr(p.end)}${p.room ? '  |  ' + waClean(p.room) : ''}`, { indent: 28 }));
+        if (a.note) w.bodyLine(`Notes: ${waClean(a.note)}`, { indent: 28 });
+      });
     }
+    if (others.length) {
+      sec('OTHER WORK');
+      others.forEach((a) => {
+        const lines = String(a.note || '').split(/\n+/).map(waSentence).filter(Boolean);
+        (lines.length ? lines : [activityLabel(a.activityType) + '.']).forEach((x) => w.bodyLine(`-  ${x}`, { indent: 14 }));
+      });
+    }
+    if (!wrote) w.bodyLine(isWeeklyOff(date) && !f.label ? 'WEEKLY OFF' : 'No activity recorded for this day.', { bold: isWeeklyOff(date) && !f.label });
   }
+  // Summary block used by every PDF (teacher and institute).
+  function writeSummaryBlock(w, t, f) {
+    f = f || reportFilter(false);
+    const rows = [];
+    if (f.showClasses) rows.push([['Classes taken', t.classes], ['Teaching time', reportHm(t.mins)]]);
+    rows.push([['On-campus time', reportCampus(t.campusSec)], f.showActivities ? ['Invigilation', `${reportHm(t.invigMin)}${t.invig ? ` (${t.invig} dut${t.invig === 1 ? 'y' : 'ies'})` : ''}`] : null]);
+    if (f.showClasses) {
+      rows.push([['Worksheets given', t.ws], ['Study material given', t.mat || 0]]);
+      rows.push([['Class tests conducted', t.tests], ['Homework given', t.hw]]);
+    }
+    if (f.showActivities) rows.push([['Other work', t.other], ['Leave', `${t.leave} day${t.leave === 1 ? '' : 's'}`]]);
+    rows.forEach((r) => w.pairRow(r));
+    if (f.label) w.bodyLine('On-campus time is not affected by filters.', { size: 9 });
+  }
+
   function buildReportPdf(dates, results, title, periodLine, f) {
     const teacherName = (state.user && state.user.name) || 'Teacher';
     const t = reportTotals(dates, results, f);
     const w = createPdfWriter();
-    w.heading('CATJEE Teach Desk', 18);
-    w.bodyLine(title, { size: 11 });
-    w.addSpace(4);
-    w.rule();
-    w.addSpace(4);
+    w.heading(title.toUpperCase(), 17);
+    w.addSpace(2);
     w.bodyLine(`Teacher: ${teacherName}`, { bold: true, size: 11 });
     if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { size: 11 });
-    w.bodyLine(periodLine, { bold: true, size: 11 });
-    if (f.label) w.bodyLine(`${f.label}  (summary and records below follow this filter)`, { bold: true, size: 10 });
+    w.bodyLine(periodLine, { size: 11 });
+    if (f.label) w.bodyLine(`${f.label} (summary and records follow this filter)`, { bold: true, size: 10 });
     w.addSpace(4);
     w.rule();
-    w.heading('Summary', 13);
-    if (f.showClasses) {
-      w.bodyLine(`Classes taken: ${t.classes}`, { bold: true });
-      w.bodyLine(`Teaching time: ${reportHm(t.mins)}`);
-    }
-    w.bodyLine(`On-campus time: ${reportCampus(t.campusSec)}${f.label ? '  (not affected by filters)' : ''}`);
-    if (f.showClasses) {
-      w.bodyLine(`Worksheets: ${t.ws}    Tests: ${t.tests}    Homework: ${t.hw}`);
-    }
-    if (f.showActivities) w.bodyLine(`Other Work: ${t.other}    Leave: ${t.leave}`);
-    if (f.showActivities && t.invig) w.bodyLine(`Invigilation: ${reportHm(t.invigMin)} (${t.invig} dut${t.invig === 1 ? 'y' : 'ies'}, not counted as classes)`);
+    w.heading('SUMMARY', 12);
+    writeSummaryBlock(w, t, f);
     const bk = Object.keys(t.batches);
     if (f.showClasses && bk.length > 1) {
-      w.addSpace(3);
+      w.addSpace(4);
       w.bodyLine('Batch-wise', { bold: true });
-      bk.sort((a, b) => t.batches[b].n - t.batches[a].n).forEach((b) => w.bodyLine(`  ${b}: ${t.batches[b].n} class${t.batches[b].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b].mins)}`));
+      bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`${b2}:  ${t.batches[b2].n} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`, { indent: 14 }));
     }
-    w.addSpace(6);
+    w.addSpace(4);
     w.rule();
     let wrote = 0;
     dates.forEach((dt, i) => {
@@ -6013,6 +6054,7 @@
     if (!wrote) { w.addSpace(4); w.bodyLine('No records in this period.'); }
     return { blob: w.finishBlob(), totals: t };
   }
+
   function buildWhatsAppRangeText(dates, results, title, periodLine, f) {
     const teacherName = (state.user && state.user.name) || 'Teacher';
     const t = reportTotals(dates, results, f);
@@ -6116,12 +6158,7 @@
   }
 
   // ---------- WhatsApp daily report ----------
-  function waRange(a, b) {
-    // "10:30 – 11:35 AM" when both are in the same half of the day, otherwise "11:30 AM – 12:10 PM".
-    const A = formatTimeStr(a), B = formatTimeStr(b);
-    const pa = A.slice(-2), pb = B.slice(-2);
-    return pa === pb ? `${A.slice(0, -3)} – ${B}` : `${A} – ${B}`;
-  }
+  function waRange(a, b) { return `${formatTimeStr(a)} – ${formatTimeStr(b)}`; }
   function waClean(txt) { return String(txt || '').replace(/\*/g, '').replace(/[ \t]+/g, ' ').replace(/\s*\n+\s*/g, '; ').trim(); }
   function waSentence(txt) {
     let t = String(txt || '').replace(/\*/g, '').replace(/^[•\-–\s]+/, '').replace(/[ \t]+/g, ' ').trim();
@@ -6134,7 +6171,7 @@
   function buildWhatsAppReportText(date, allForDate, campusForDate, teacherName, f) {
     f = f || reportFilter(false);
     const recs = reportDayRecords(allForDate).filter(f.match);
-    const SEP = '━━━━━━━━━━━━━━';
+    const SEP = '──────────';
     const d = dateObj(date);
     const dateTxt = `${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}`;
     const head = ['*DAILY ACTIVITY REPORT*', '', `👤 *Teacher:* ${teacherName}`];
@@ -6282,6 +6319,9 @@
       const results = await reportData(dates);
       const records = [];
       results.forEach((r) => reportDayRecords(r.classes).forEach((c) => { if (f.match(c)) records.push(c); }));
+      const campusByDate = {};
+      dates.forEach((d, i) => { if (results[i].campus && (results[i].campus.sessions || []).length) campusByDate[d] = results[i].campus; });
+      state.csvCampusByDate = campusByDate;
       const h = hvState();
       const tag = [h.batch !== 'all' ? h.batch : '', h.kind !== 'all' ? (REPORT_KIND_TXT[h.kind] || h.kind) : '']
         .filter(Boolean).join('-').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -6292,39 +6332,78 @@
     }
   }
 
-  // One CSV layout for every export (teacher and admin, day/week/month), so files always match.
-  const CSV_HEADER = ['Date', 'Type', 'Batch / Class', 'Subject', 'Topic / Test / Activity', 'Start Time', 'End Time', 'Duration (min)', 'Worksheet', 'Material', 'Test', 'Homework', 'Rooms / Details', 'Note', 'Logged At', 'Last Edited'];
-  function csvRowFor(c) { return csvRowCore(c).concat([c.createdAt && c.createdAt > 1e12 ? stampTxt(c.createdAt) : '', c.editedAt ? stampTxt(c.editedAt) : '']); }
-  function csvRowCore(c) {
-    const yn = (v) => (v ? 'Yes' : 'No');
+  // ---------- Excel / CSV: one layout for every export ----------
+  // One row per entry, plus one "Attendance" row per day. A cell is filled only when there is something to say
+  // (e.g. the Worksheet cell holds the worksheet name, or "Given"), so there is no column of "No"s to read through.
+  const CSV_HEADER = ['Date', 'Day', 'Entry', 'Batch / Class', 'Subject', 'Topic / Test / Work', 'Start', 'End', 'Duration (min)', 'Worksheet', 'Study Material', 'Class Test', 'Homework', 'Room(s)', 'Remarks', 'Logged At', 'Last Edited'];
+  const CSV_ORDER = { Attendance: 0, Class: 1, Invigilation: 2, 'Other Work': 3, Leave: 4 };
+  function csvDay(date) { return dateObj(date).toLocaleDateString('en-GB', { weekday: 'short' }); }
+  function csvStamp(c) { return [c.createdAt && c.createdAt > 1e12 ? stampTxt(c.createdAt) : '', c.editedAt ? stampTxt(c.editedAt) : '']; }
+  function csvRowFor(c) {
+    const base = (entry) => [c.date, csvDay(c.date), entry];
     if (c.entryType === 'activity') {
       if (isInvig(c)) {
         const parts = c.parts || [];
-        const details = parts.map((p) => `${formatTimeStr(p.start)}-${formatTimeStr(p.end)}${p.room ? ' ' + p.room : ''}`).join('; ');
-        return [c.date, 'Invigilation', scopeLabel(c.scope || []), c.subject || '', c.testName || c.testType || '',
+        const rooms = parts.map((p) => `${p.room ? waClean(p.room) + ' ' : ''}(${formatTimeStr(p.start)}–${formatTimeStr(p.end)})`).join('; ');
+        return base('Invigilation').concat([scopeLabel(c.scope || []), c.subject || '', c.testType || c.testName || '',
           parts[0] ? formatTimeStr(parts[0].start) : '', parts.length ? formatTimeStr(parts[parts.length - 1].end) : '',
-          invigMinutes(c) || '', '', '', '', '', details, c.note || ''];
+          invigMinutes(c) || '', '', '', '', '', rooms, waClean(c.note)], csvStamp(c));
       }
-      return [c.date, activityLabel(c.activityType), '', '', '', '', '', '', '', '', '', '', '', c.note || ''];
+      if (c.activityType === 'Leave / Holiday') {
+        const r = waClean(c.note);
+        return base('Leave').concat(['', '', '', '', '', '', '', '', '', '', '', /^on leave\.?$/i.test(r) ? '' : r], csvStamp(c));
+      }
+      const work = String(c.note || '').split(/\n+/).map(waSentence).filter(Boolean).join(' ');
+      return base('Other Work').concat(['', '', work, '', '', '', '', '', '', '', '', ''], csvStamp(c));
     }
-    const notes = [c.worksheet && c.worksheetNote ? 'Worksheet: ' + c.worksheetNote : '', c.material && c.materialNote ? 'Material: ' + c.materialNote : '',
-      c.test && c.testNote ? 'Test: ' + c.testNote : '', c.homework && c.homeworkNote ? 'Homework: ' + c.homeworkNote : ''].filter(Boolean).join('; ');
-    return [c.date, 'Class', entryBatchLabel(c), c.subject || '', c.topic || '',
+    const nb = entryBatches(c).length;
+    return base('Class').concat([entryBatchLabel(c), c.subject || '', waClean(c.topic),
       c.startTimeStr ? formatTimeStr(c.startTimeStr) : '', c.endTimeStr ? formatTimeStr(c.endTimeStr) : '', classDuration(c) || '',
-      yn(c.worksheet), yn(c.material), c.test ? `Yes${entryBatches(c).length > 1 ? ' (' + entryBatches(c).length + ' batches)' : ''}` : 'No', yn(c.homework),
-      c.test && c.testRooms ? 'Rooms: ' + c.testRooms : '', notes];
+      c.worksheet ? (waClean(c.worksheetNote) || 'Given') : '',
+      c.material ? (waClean(c.materialNote) || 'Given') : '',
+      c.test ? `${waClean(c.testNote) || 'Conducted'}${nb > 1 ? ` (${nb} batches)` : ''}` : '',
+      c.homework ? (waClean(c.homeworkNote) || 'Given') : '',
+      c.test ? waClean(c.testRooms) : '', ''], csvStamp(c));
+  }
+  function csvAttendanceRow(date, campus) {
+    const ss = (campus && campus.sessions) || [];
+    if (!ss.length) return null;
+    const last = ss[ss.length - 1];
+    const spans = ss.map((s) => `${formatTimeStr(toHHMM(s.in))}–${s.out != null ? formatTimeStr(toHHMM(s.out)) : 'in progress'}`).join('; ');
+    return [date, csvDay(date), 'Attendance', '', '', '', formatTimeStr(toHHMM(ss[0].in)), last.out != null ? formatTimeStr(toHHMM(last.out)) : 'In progress',
+      Math.round(campusSeconds(campus) / 60), '', '', '', '', '', ss.length > 1 ? `Sessions: ${spans}` : '', '', ''];
+  }
+  function csvSortRows(rows) {
+    // rows: arrays whose first cell may be a teacher name (withTeacher) — sort by date, then entry order, then start time.
+    return rows;
+  }
+  function buildCsvRows(records, campusByDate) {
+    const rows = [];
+    const dates = {};
+    (records || []).forEach((c) => { if (c && c.date) dates[c.date] = 1; });
+    Object.keys(campusByDate || {}).forEach((d) => { dates[d] = 1; });
+    Object.keys(dates).sort().forEach((d) => {
+      const dayRows = [];
+      const att = csvAttendanceRow(d, (campusByDate || {})[d]);
+      if (att) dayRows.push(att);
+      (records || []).filter((c) => c.date === d).forEach((c) => dayRows.push(csvRowFor(c)));
+      dayRows.sort((a, b) => (CSV_ORDER[a[2]] - CSV_ORDER[b[2]]) || String(a[6] ? tMin12(a[6]) : 9999).localeCompare(String(b[6] ? tMin12(b[6]) : 9999), undefined, { numeric: true }));
+      dayRows.forEach((r) => rows.push(r));
+    });
+    return rows;
+  }
+  function tMin12(t) {
+    const m = String(t || '').match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!m) return 9999;
+    let h = Number(m[1]) % 12; if (/pm/i.test(m[3])) h += 12;
+    return h * 60 + Number(m[2]);
   }
 
   async function downloadHistoryCsv(msgEl, records, filename) {
     msgEl.textContent = 'Preparing CSV…';
 
-    const header = CSV_HEADER;
-    const rows = [header];
-    const sorted = (records || state.historyClasses).slice().sort((a, b) => {
-      if (a.date !== b.date) return b.date.localeCompare(a.date);
-      return (a.startTimeStr || '').localeCompare(b.startTimeStr || '');
-    });
-    sorted.forEach((c) => { rows.push(csvRowFor(c)); });
+    const rows = [CSV_HEADER].concat(buildCsvRows(records || state.historyClasses, state.csvCampusByDate || {}));
+    state.csvCampusByDate = null;
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
     try {
@@ -6372,12 +6451,11 @@
     const dateLabel = new Date(yy, mm - 1, dd).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     const w = createPdfWriter();
-    w.heading('CATJEE Teach Desk', 18);
-    w.bodyLine('Institute-Wide Daily Report', { size: 11 });
-    w.addSpace(4);
-    w.bodyLine(`Date: ${dateLabel}`, { bold: true, size: 11 });
-    if (state.adminReportWing !== 'all') w.bodyLine(`Wing: ${state.adminReportWing}`, { bold: true, size: 11 });
-    w.bodyLine(`Teachers reporting: ${teacherIds.length}`);
+    w.heading('INSTITUTE DAILY ACTIVITY REPORT', 16);
+    w.addSpace(2);
+    w.bodyLine(`Date: ${reportDayLabel(state.adminDate)}`, { bold: true, size: 11 });
+    if (state.adminReportWing !== 'all') w.bodyLine(`Wing: ${state.adminReportWing}`, { size: 11 });
+    w.bodyLine(`Teachers: ${teacherIds.length}`, { size: 11 });
     w.addSpace(6);
     w.rule();
 
@@ -6416,12 +6494,14 @@
     } catch (err) { /* best effort */ }
 
     const date = state.adminDate;
-    const header = ['Teacher'].concat(CSV_HEADER);
-    const rows = [header];
-    const sorted = filtered.slice().sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
-    sorted.forEach((c) => {
-      const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
-      rows.push([name].concat(csvRowFor(c)));
+    const rows = [['Teacher'].concat(CSV_HEADER)];
+    const byT = {};
+    filtered.forEach((c) => { (byT[c.teacherId] = byT[c.teacherId] || []).push(c); });
+    Object.keys(state.adminCampus || {}).forEach((tid) => { if (!byT[tid]) byT[tid] = []; });
+    Object.keys(byT).sort((a, b) => ((state.adminNames[a] && state.adminNames[a].name) || '').localeCompare((state.adminNames[b] && state.adminNames[b].name) || '')).forEach((tid) => {
+      const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
+      const cmp = {}; if (state.adminCampus[tid]) cmp[date] = state.adminCampus[tid];
+      buildCsvRows(byT[tid], cmp).forEach((r) => rows.push([name].concat(r)));
     });
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
@@ -6507,37 +6587,32 @@
     });
 
     const w = createPdfWriter();
-    w.heading('CATJEE Teach Desk', 18);
-    w.bodyLine('Institute-Wide Report', { size: 11 });
-    w.addSpace(4);
-    w.bodyLine(`Range: ${label}`, { bold: true, size: 11 });
-    if (state.adminReportWing !== 'all') w.bodyLine(`Wing: ${state.adminReportWing}`, { bold: true, size: 11 });
-    w.bodyLine(`Teachers active: ${teacherIds.length}`);
+    w.heading(`INSTITUTE ${state.adminReportRange === 'month' ? 'MONTHLY' : 'WEEKLY'} ACTIVITY REPORT`, 16);
+    w.addSpace(2);
+    w.bodyLine(`Period: ${reportDayLabel(dates[0])} to ${reportDayLabel(dates[dates.length - 1])}`, { bold: true, size: 11 });
+    if (state.adminReportWing !== 'all') w.bodyLine(`Wing: ${state.adminReportWing}`, { size: 11 });
+    w.bodyLine(`Teachers: ${teacherIds.length}`, { size: 11 });
     w.addSpace(6);
     w.rule();
 
-    const sum = { classes: 0, mins: 0, campusSec: 0, ws: 0, tests: 0, hw: 0, other: 0, leave: 0, invig: 0, invigMin: 0 };
+    const sum = { classes: 0, mins: 0, campusSec: 0, ws: 0, mat: 0, tests: 0, hw: 0, other: 0, leave: 0, invig: 0, invigMin: 0 };
     teacherIds.forEach((tid) => { const t = byTeacher[tid]; Object.keys(sum).forEach((k) => { sum[k] += t[k] || 0; }); });
-    w.heading('Institute Summary', 13);
-    w.bodyLine(`Classes taken: ${sum.classes}    Teaching time: ${reportHm(sum.mins)}`, { bold: true });
-    w.bodyLine(`Worksheets: ${sum.ws}    Tests: ${sum.tests}    Homework: ${sum.hw}`);
-    w.bodyLine(`Invigilation: ${reportHm(sum.invigMin)}    Other Work: ${sum.other}    Leave: ${sum.leave}`);
+    w.heading('INSTITUTE SUMMARY', 12);
+    writeSummaryBlock(w, sum, reportFilter(false));
     w.addSpace(6);
     w.rule();
     teacherIds.forEach((tid) => {
       const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
       const t = byTeacher[tid];
+      w.addSpace(4);
       w.heading(name, 13);
-      w.bodyLine(`Classes taken: ${t.classes}    Teaching time: ${reportHm(t.mins)}`, { bold: true });
-      w.bodyLine(`On-campus time: ${reportCampus(t.campusSec)}`);
-      w.bodyLine(`Worksheets: ${t.ws}    Tests: ${t.tests}    Homework: ${t.hw}`);
-      if (t.invig || t.other || t.leave) w.bodyLine(`Invigilation: ${reportHm(t.invigMin)}    Other Work: ${t.other}    Leave: ${t.leave}`);
+      writeSummaryBlock(w, t, reportFilter(false));
       const bk = Object.keys(t.batches || {});
       if (bk.length) {
-        w.bodyLine('Batch-wise:');
-        bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`  ${b2}: ${t.batches[b2].n} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`));
+        w.bodyLine('Batch-wise', { bold: true });
+        bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`${b2}:  ${t.batches[b2].n} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`, { indent: 14 }));
       }
-      w.addSpace(6);
+      w.addSpace(4);
       w.rule();
     });
 
@@ -6572,15 +6647,14 @@
       await resolveAdminNames(teacherIds);
     } catch (err) { /* best effort */ }
 
-    const header = ['Teacher'].concat(CSV_HEADER);
-    const rows = [header];
-    const sorted = allClasses.slice().sort((a, b) => {
-      if (a.date !== b.date) return a.date.localeCompare(b.date);
-      return (a.startTimeStr || '').localeCompare(b.startTimeStr || '');
-    });
-    sorted.forEach((c) => {
-      const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
-      rows.push([name].concat(csvRowFor(c)));
+    const rows = [['Teacher'].concat(CSV_HEADER)];
+    const byT = {};
+    const campusByT = {};
+    results.forEach(({ date: dd, campus }) => { Object.keys(campus || {}).forEach((tid) => { (campusByT[tid] = campusByT[tid] || {})[dd] = campus[tid]; if (!byT[tid]) byT[tid] = []; }); });
+    allClasses.forEach((c) => { (byT[c.teacherId] = byT[c.teacherId] || []).push(c); });
+    Object.keys(byT).sort((a, b) => ((state.adminNames[a] && state.adminNames[a].name) || '').localeCompare((state.adminNames[b] && state.adminNames[b].name) || '')).forEach((tid) => {
+      const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
+      buildCsvRows(byT[tid], campusByT[tid] || {}).forEach((r) => rows.push([name].concat(r)));
     });
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
