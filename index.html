@@ -1935,7 +1935,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.2 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.3 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6013,7 +6013,7 @@
     L.push(`*${title}*`);
     L.push(`👤 *Teacher:* ${teacherName}`);
     if (state.teacherSubject) L.push(`📘 *Subject:* ${state.teacherSubject}`);
-    L.push(`📅 ${periodLine}`);
+    L.push(`🗓 ${periodLine}`);
     if (f.label) L.push(`🔎 _${f.label}_`);
     L.push('');
     if (f.showClasses) {
@@ -6021,7 +6021,7 @@
     }
     L.push(`🕐 *On campus:* ${reportCampus(t.campusSec)}`);
     if (f.showClasses) L.push(`📄 Worksheets: ${t.ws}   📝 Tests: ${t.tests}   🏠 Homework: ${t.hw}`);
-    if (f.showActivities) L.push(`🗂 Other Work: ${t.other}   🌴 Leave: ${t.leave}`);
+    if (f.showActivities) L.push(`🗂 Other Work: ${t.other}   Leave: ${t.leave}`);
     if (f.showActivities && t.invig) L.push(`📋 Invigilation: ${reportHm(t.invigMin)}`);
     const days = [];
     dates.forEach((dt, i) => {
@@ -6094,46 +6094,80 @@
   function buildWhatsAppReportText(date, allForDate, campusForDate, teacherName, f) {
     f = f || reportFilter(false);
     const recs = reportDayRecords(allForDate).filter(f.match);
-    const L = [];
-    L.push('*Daily Activity Report*');
-    L.push('');
-    L.push(`👤 *Teacher:* ${teacherName}`);
-    if (state.teacherSubject) L.push(`📘 *Subject:* ${state.teacherSubject}`);
-    L.push(`📅 *Date:* ${reportDayLabel(date)}`);
-    if (f.label) L.push(`🔎 _${f.label}_`);
-    L.push('');
+    const SEP = '──────────';
+    const d = dateObj(date);
+    const dateTxt = `${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}`;
+    // Teacher text: a leading "*" or "-" becomes a bullet, so WhatsApp never turns it into bold by accident.
+    const bullets = (txt) => String(txt || '').split(/\n+/).map((x) => x.trim()).filter(Boolean)
+      .map((x) => '• ' + x.replace(/^[*•\-–]+\s*/, '').replace(/\*/g, ''));
+    const clean = (txt) => String(txt || '').replace(/\*/g, '').replace(/\s*\n+\s*/g, '; ').trim();
+    const sections = [];
+    const head = ['*Daily Activity Report*', '', `👤 *Teacher:* ${teacherName}`];
+    if (state.teacherSubject) head.push(`📘 *Subject:* ${state.teacherSubject}`);
+    head.push(`🗓 *Date:* ${dateTxt}`);
+    if (f.label) head.push(`🔎 _${f.label}_`);
+    const acts = recs.filter((c) => c.entryType === 'activity');
+    const leaves = f.showActivities ? acts.filter((a) => a.activityType === 'Leave / Holiday') : [];
     const campus = campusForDate || {};
-    L.push(`🕐 *On campus:* ${reportCampus(campusSeconds(campus))}`);
     const sessions = campus.sessions || [];
-    if (!sessions.length) L.push('No check-in recorded.');
-    sessions.forEach((s, i) => {
-      const inStr = formatTimeStr(toHHMM(s.in));
-      const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
-      L.push(`   ${sessions.length > 1 ? (i + 1) + ') ' : ''}In: ${inStr}   →   Out: ${outStr}`);
-    });
+    if (leaves.length) {
+      const L = [date === todayStr() ? '*On leave today*' : '*On leave*'];
+      leaves.forEach((a) => { if (a.note) L.push(`_${clean(a.note)}_`); });
+      sections.push(L);
+    }
+    if (sessions.length || !leaves.length) {
+      const L = [`🕘 *On campus:* ${reportCampus(campusSeconds(campus))}`];
+      if (!sessions.length) L.push('   No check-in recorded.');
+      sessions.forEach((s, i) => {
+        const inStr = formatTimeStr(toHHMM(s.in));
+        const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : '_in progress_';
+        L.push(`   ${sessions.length > 1 ? (i + 1) + ') ' : ''}${inStr} → ${outStr}`);
+      });
+      sections.push(L);
+    }
     if (f.showClasses) {
       const classItems = recs.filter((c) => c.entryType !== 'activity').sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
-      L.push('');
-      L.push(`📚 *Classes (${classItems.length}):*`);
-      if (!classItems.length) L.push('None.');
-      classItems.forEach((c, i) => {
-        const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : '-';
-        L.push('');
-        L.push(`*${i + 1}. ${c.batch || ''}* (${time})${hvStartedOrPast(c) ? '' : ' _Upcoming_'}`);
-        L.push(`_Topic:_ ${c.topic || 'Not added'}`);
-        checklistLines(c).forEach((l) => L.push(`   • ${l}`));
-      });
+      if (classItems.length) {
+        const L = [`📚 *Classes (${classItems.length})*`];
+        classItems.forEach((c, i) => {
+          const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)}` : '';
+          if (i) L.push('');
+          L.push(`*${i + 1}. ${entryBatchLabel(c)}*${time ? ' · ' + time : ''}${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
+          if (c.topic) L.push(`   ${clean(c.topic)}`);
+          if (c.worksheet) L.push(`   ✅ Worksheet${c.worksheetNote ? ': ' + clean(c.worksheetNote) : ''}`);
+          if (c.material) L.push(`   ✅ Study material${c.materialNote ? ': ' + clean(c.materialNote) : ''}`);
+          if (c.test) {
+            const nb = entryBatches(c).length;
+            const bits = [`📝 Class Test${nb > 1 ? ` (${nb} batches)` : ''}`];
+            if (c.testRooms) bits.push(`Rooms ${clean(c.testRooms)}`);
+            if (c.testNote) bits.push(clean(c.testNote));
+            L.push('   ' + bits.join(' · '));
+          }
+          if (c.homework) L.push(`   ✅ Homework${c.homeworkNote ? ': ' + clean(c.homeworkNote) : ''}`);
+        });
+        sections.push(L);
+      }
     }
     if (f.showActivities) {
-      const acts = recs.filter((c) => c.entryType === 'activity');
-      L.push('');
-      L.push('📝 *Activities:*');
-      if (!acts.length) L.push('None.');
-      acts.forEach((a) => L.push(`   ${isInvig(a) ? invigSummary(a).title + ' · ' + invigSummary(a).sub : activityLabel(a.activityType)}${a.note ? ': ' + a.note : ''}`));
-      const cvw = f.label ? { count: 0 } : coveredTestsFor(date, allForDate);
-      if (cvw.count) L.push(`   Class test held in your class while you were on leave: ${cvw.batches.join(', ')}`);
+      const inv = acts.filter(isInvig);
+      if (inv.length) {
+        const L = ['📋 *Invigilation*'];
+        inv.forEach((a, k) => {
+          if (k) L.push('');
+          L.push(`   ${[a.testName || a.testType, scopeLabel(a.scope || [])].filter(Boolean).join(' · ')}`);
+          (a.parts || []).forEach((p) => L.push(`   ${formatTimeStr(p.start)} – ${formatTimeStr(p.end)}${p.room ? ' · ' + clean(p.room) : ''}`));
+          if (a.note) L.push(`   _${clean(a.note)}_`);
+        });
+        sections.push(L);
+      }
+      const other = acts.filter((a) => !isInvig(a) && a.activityType !== 'Leave / Holiday');
+      if (other.length) {
+        const L = ['🗂 *Other Work*'];
+        other.forEach((a) => { const b = bullets(a.note); if (b.length) b.forEach((x) => L.push('   ' + x)); else L.push('   • ' + activityLabel(a.activityType)); });
+        sections.push(L);
+      }
     }
-    return L.join('\n');
+    return head.join('\n') + '\n' + sections.map((sec) => SEP + '\n' + sec.join('\n')).join('\n');
   }
 
   async function shareReportOnWhatsApp(date, msgEl, useFilter) {
