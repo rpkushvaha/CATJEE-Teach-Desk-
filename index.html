@@ -1902,7 +1902,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 2.9 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.0 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2695,7 +2695,8 @@
   function entryBatches(c) { return (c && c.batches && c.batches.length) ? c.batches : (c && c.batch ? [c.batch] : []); }
   function entryBatchLabel(c) { const b = entryBatches(c); return b.length > 1 ? b.join(' + ') : (b[0] || 'Class'); }
   function testCount(c) { return c && c.test ? Math.max(1, entryBatches(c).length) : 0; }
-  function classOfBatch(b) { const m = String(b || '').match(/class\s*(\d+)/i); return m ? `Class ${m[1]}` : null; }
+  // Remedial and Evening batches are separate groups: they are never included when a whole class (e.g. "Class 10") is chosen.
+  function classOfBatch(b) { if (/remedial|evening/i.test(String(b || ''))) return null; const m = String(b || '').match(/class\s*(\d+)/i); return m ? `Class ${m[1]}` : null; }
   function allClassNames() {
     const set = [];
     allBatchesFlat().forEach((b) => { const c = classOfBatch(b); if (c && set.indexOf(c) === -1) set.push(c); });
@@ -6083,29 +6084,38 @@
     }
   }
 
+  // One CSV layout for every export (teacher and admin, day/week/month), so files always match.
+  const CSV_HEADER = ['Date', 'Type', 'Batch / Class', 'Subject', 'Topic / Test / Activity', 'Start Time', 'End Time', 'Duration (min)', 'Worksheet', 'Material', 'Test', 'Homework', 'Rooms / Details', 'Note'];
+  function csvRowFor(c) {
+    const yn = (v) => (v ? 'Yes' : 'No');
+    if (c.entryType === 'activity') {
+      if (isInvig(c)) {
+        const parts = c.parts || [];
+        const details = parts.map((p) => `${formatTimeStr(p.start)}-${formatTimeStr(p.end)}${p.room ? ' ' + p.room : ''}`).join('; ');
+        return [c.date, 'Invigilation', scopeLabel(c.scope || []), c.subject || '', c.testName || c.testType || '',
+          parts[0] ? formatTimeStr(parts[0].start) : '', parts.length ? formatTimeStr(parts[parts.length - 1].end) : '',
+          invigMinutes(c) || '', '', '', '', '', details, c.note || ''];
+      }
+      return [c.date, activityLabel(c.activityType), '', '', '', '', '', '', '', '', '', '', '', c.note || ''];
+    }
+    const notes = [c.worksheet && c.worksheetNote ? 'Worksheet: ' + c.worksheetNote : '', c.material && c.materialNote ? 'Material: ' + c.materialNote : '',
+      c.test && c.testNote ? 'Test: ' + c.testNote : '', c.homework && c.homeworkNote ? 'Homework: ' + c.homeworkNote : ''].filter(Boolean).join('; ');
+    return [c.date, 'Class', entryBatchLabel(c), c.subject || '', c.topic || '',
+      c.startTimeStr ? formatTimeStr(c.startTimeStr) : '', c.endTimeStr ? formatTimeStr(c.endTimeStr) : '', classDuration(c) || '',
+      yn(c.worksheet), yn(c.material), c.test ? `Yes${entryBatches(c).length > 1 ? ' (' + entryBatches(c).length + ' batches)' : ''}` : 'No', yn(c.homework),
+      c.test && c.testRooms ? 'Rooms: ' + c.testRooms : '', notes];
+  }
+
   async function downloadHistoryCsv(msgEl, records, filename) {
     msgEl.textContent = 'Preparing CSV…';
 
-    const header = ['Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Duration (min)', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
+    const header = CSV_HEADER;
     const rows = [header];
     const sorted = (records || state.historyClasses).slice().sort((a, b) => {
       if (a.date !== b.date) return b.date.localeCompare(a.date);
       return (a.startTimeStr || '').localeCompare(b.startTimeStr || '');
     });
-    sorted.forEach((c) => {
-      if (c.entryType === 'activity') {
-        rows.push([c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', '', c.note || '']);
-      } else {
-        rows.push([
-          c.date, 'Class', c.batch || '', c.topic || '',
-          c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
-          c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
-          classDuration(c) || '',
-          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No',
-          [c.worksheet && c.worksheetNote ? ('Worksheet: ' + c.worksheetNote) : '', c.material && c.materialNote ? ('Material: ' + c.materialNote) : '', c.test && c.testNote ? ('Test: ' + c.testNote) : '', c.homework && c.homeworkNote ? ('Homework: ' + c.homeworkNote) : ''].filter(Boolean).join(' | ')
-        ]);
-      }
-    });
+    sorted.forEach((c) => { rows.push(csvRowFor(c)); });
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
     try {
@@ -6197,28 +6207,18 @@
     } catch (err) { /* best effort */ }
 
     const date = state.adminDate;
-    const header = ['Teacher', 'Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
+    const header = ['Teacher'].concat(CSV_HEADER);
     const rows = [header];
     const sorted = filtered.slice().sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
     sorted.forEach((c) => {
       const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
-      if (c.entryType === 'activity') {
-        rows.push([name, c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', c.note || '']);
-      } else {
-        rows.push([
-          name, c.date, 'Class', c.batch || '', c.topic || '',
-          c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
-          c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
-          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No',
-          [c.worksheet && c.worksheetNote ? ('Worksheet: ' + c.worksheetNote) : '', c.material && c.materialNote ? ('Material: ' + c.materialNote) : '', c.test && c.testNote ? ('Test: ' + c.testNote) : '', c.homework && c.homeworkNote ? ('Homework: ' + c.homeworkNote) : ''].filter(Boolean).join(' | ')
-        ]);
-      }
+      rows.push([name].concat(csvRowFor(c)));
     });
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
     const wingTag = state.adminReportWing === 'all' ? '' : `-${state.adminReportWing}`;
     try {
-      saveFile(`CATJEE-Institute-Report-${date}${wingTag}.csv`, csv, 'text/csv');
+      saveFile(`CATJEE-Institute-Report-${date}${wingTag}.csv`, '\ufeff' + csv, 'text/csv');
       msgEl.textContent = 'CSV saved.';
       showToast('CSV saved');
     } catch (err) {
@@ -6266,31 +6266,23 @@
     const { dates, label, fileTag } = adminReportRangeDates();
     const results = await Promise.all(dates.map((dt) => fetchAdminDayData(dt)));
 
-    const byTeacher = {};
+    // Same counting as teacher reports and History (reportTotals): started classes only,
+    // combined tests per batch, invigilation / other work / leave kept apart.
+    const tidSet = {};
     results.forEach(({ classes, campus }) => {
-      filterByAdminWing(classes).forEach((c) => {
-        const tid = c.teacherId || 'unknown';
-        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0, batchCounts: {} };
-        if (c.entryType === 'activity') {
-          byTeacher[tid].activityCount++;
-        } else {
-          byTeacher[tid].classCount++;
-          if (c.worksheet) byTeacher[tid].worksheet++;
-          if (c.material) byTeacher[tid].material++;
-          if (c.test) byTeacher[tid].test++;
-          if (c.homework) byTeacher[tid].homework++;
-          const b = c.batch || 'Unknown';
-          byTeacher[tid].batchCounts[b] = (byTeacher[tid].batchCounts[b] || 0) + 1;
-        }
-      });
-      Object.keys(campus).forEach((tid) => {
-        if (!byTeacher[tid]) byTeacher[tid] = { classCount: 0, activityCount: 0, totalSeconds: 0, worksheet: 0, material: 0, test: 0, homework: 0, batchCounts: {} };
-        let s = campus[tid].totalSeconds || 0;
-        if (campus[tid].checkedIn && campus[tid].checkInAt) s += (Date.now() - campus[tid].checkInAt) / 1000;
-        byTeacher[tid].totalSeconds += s;
-      });
+      filterByAdminWing(classes).forEach((c) => { if (c.teacherId) tidSet[c.teacherId] = 1; });
+      Object.keys(campus || {}).forEach((tid) => { tidSet[tid] = 1; });
     });
-
+    const allF = reportFilter(false);
+    const byTeacher = {};
+    Object.keys(tidSet).forEach((tid) => {
+      const per = results.map(({ classes, campus }) => ({
+        classes: filterByAdminWing(classes).filter((c) => c.teacherId === tid),
+        campus: (campus || {})[tid] || null
+      }));
+      const t = reportTotals(dates, per, allF);
+      if (t.classes || t.campusSec > 0 || t.other || t.leave || t.invig) byTeacher[tid] = t;
+    });
     const teacherIds = Object.keys(byTeacher);
     if (teacherIds.length === 0) {
       msgEl.textContent = 'No activity to report for this range.';
@@ -6315,18 +6307,26 @@
     w.addSpace(6);
     w.rule();
 
+    const sum = { classes: 0, mins: 0, campusSec: 0, ws: 0, tests: 0, hw: 0, other: 0, leave: 0, invig: 0, invigMin: 0 };
+    teacherIds.forEach((tid) => { const t = byTeacher[tid]; Object.keys(sum).forEach((k) => { sum[k] += t[k] || 0; }); });
+    w.heading('Institute Summary', 13);
+    w.bodyLine(`Classes taken: ${sum.classes}    Teaching time: ${reportHm(sum.mins)}`, { bold: true });
+    w.bodyLine(`Worksheets: ${sum.ws}    Tests: ${sum.tests}    Homework: ${sum.hw}`);
+    w.bodyLine(`Invigilation: ${reportHm(sum.invigMin)}    Other Work: ${sum.other}    Leave: ${sum.leave}`);
+    w.addSpace(6);
+    w.rule();
     teacherIds.forEach((tid) => {
       const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
       const t = byTeacher[tid];
       w.heading(name, 13);
-      w.bodyLine(`Total campus time: ${formatDuration(t.totalSeconds)}`, { bold: true });
-      w.bodyLine(`Classes: ${t.classCount}   Activities: ${t.activityCount}`);
-      if (t.classCount > 0) {
-        w.bodyLine(`Worksheet: ${t.worksheet}/${t.classCount}   Material: ${t.material}/${t.classCount}   Test: ${t.test}/${t.classCount}   Homework: ${t.homework}/${t.classCount}`);
+      w.bodyLine(`Classes taken: ${t.classes}    Teaching time: ${reportHm(t.mins)}`, { bold: true });
+      w.bodyLine(`On-campus time: ${reportCampus(t.campusSec)}`);
+      w.bodyLine(`Worksheets: ${t.ws}    Tests: ${t.tests}    Homework: ${t.hw}`);
+      if (t.invig || t.other || t.leave) w.bodyLine(`Invigilation: ${reportHm(t.invigMin)}    Other Work: ${t.other}    Leave: ${t.leave}`);
+      const bk = Object.keys(t.batches || {});
+      if (bk.length) {
         w.bodyLine('Batch-wise:');
-        Object.keys(t.batchCounts)
-          .sort((a, b) => t.batchCounts[b] - t.batchCounts[a])
-          .forEach((b) => w.bodyLine(`  ${b}: ${t.batchCounts[b]}`));
+        bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`  ${b2}: ${t.batches[b2].n} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`));
       }
       w.addSpace(6);
       w.rule();
@@ -6363,7 +6363,7 @@
       await resolveAdminNames(teacherIds);
     } catch (err) { /* best effort */ }
 
-    const header = ['Teacher', 'Date', 'Type', 'Batch', 'Topic / Activity', 'Start Time', 'End Time', 'Worksheet', 'Material', 'Test', 'Homework', 'Note'];
+    const header = ['Teacher'].concat(CSV_HEADER);
     const rows = [header];
     const sorted = allClasses.slice().sort((a, b) => {
       if (a.date !== b.date) return a.date.localeCompare(b.date);
@@ -6371,23 +6371,13 @@
     });
     sorted.forEach((c) => {
       const name = (state.adminNames[c.teacherId] && state.adminNames[c.teacherId].name) || 'Unnamed teacher';
-      if (c.entryType === 'activity') {
-        rows.push([name, c.date, 'Activity', '', activityLabel(c.activityType), '', '', '', '', '', '', c.note || '']);
-      } else {
-        rows.push([
-          name, c.date, 'Class', c.batch || '', c.topic || '',
-          c.startTimeStr ? formatTimeStr(c.startTimeStr) : '',
-          c.endTimeStr ? formatTimeStr(c.endTimeStr) : '',
-          c.worksheet ? 'Yes' : 'No', c.material ? 'Yes' : 'No', c.test ? 'Yes' : 'No', c.homework ? 'Yes' : 'No',
-          [c.worksheet && c.worksheetNote ? ('Worksheet: ' + c.worksheetNote) : '', c.material && c.materialNote ? ('Material: ' + c.materialNote) : '', c.test && c.testNote ? ('Test: ' + c.testNote) : '', c.homework && c.homeworkNote ? ('Homework: ' + c.homeworkNote) : ''].filter(Boolean).join(' | ')
-        ]);
-      }
+      rows.push([name].concat(csvRowFor(c)));
     });
     const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 
     const wingTag = state.adminReportWing === 'all' ? '' : `-${state.adminReportWing}`;
     try {
-      saveFile(`CATJEE-Institute-Report-${fileTag}${wingTag}.csv`, csv, 'text/csv');
+      saveFile(`CATJEE-Institute-Report-${fileTag}${wingTag}.csv`, '\ufeff' + csv, 'text/csv');
       msgEl.textContent = 'CSV saved.';
       showToast('CSV saved');
     } catch (err) {
@@ -6829,6 +6819,32 @@
     if (tMin(endTimeStr) <= tMin(startTimeStr)) {
       showFormMsg('End time must be after the start time.');
       return;
+    }
+    if (state.saving) return;
+    // Same class logged twice (double tap, or entered again later) is blocked; any other clash is confirmed first.
+    {
+      const d = editingId ? (((state.classesToday || []).concat(state.historyClasses || [], state.selectedDayClasses || []).find((x) => x.id === editingId) || {}).date || entryDate) : entryDate;
+      const seen = new Set();
+      const mine = (state.classesToday || []).concat(state.historyClasses || [], state.selectedDayClasses || [])
+        .filter((x) => x && x.date === d && x.id !== editingId && !state.pendingDeleteIds.has(x.id) && !seen.has(x.id) && seen.add(x.id));
+      const newB = [state.form.batch].concat((state.form.extra || []).filter((x) => x && x !== state.form.batch));
+      const a1 = tMin(startTimeStr), b1 = tMin(endTimeStr);
+      const dup = mine.find((x) => x.entryType !== 'activity' && x.startTimeStr === startTimeStr && x.endTimeStr === endTimeStr
+        && entryBatches(x).some((bb) => newB.indexOf(bb) !== -1));
+      if (dup) { showFormMsg('This class is already logged for this time.'); return; }
+      const clashes = [];
+      mine.forEach((x) => {
+        if (x.entryType === 'activity') {
+          if (isInvig(x)) (x.parts || []).forEach((p) => { if (tMin(p.start) < b1 && a1 < tMin(p.end)) clashes.push(`invigilation ${formatTimeStr(p.start)} – ${formatTimeStr(p.end)}`); });
+          return;
+        }
+        const xa = tMin(x.startTimeStr), xb = tMin(x.endTimeStr);
+        if (xa != null && xb != null && xa < b1 && a1 < xb) clashes.push(`${entryBatchLabel(x)} ${formatTimeStr(x.startTimeStr)} – ${formatTimeStr(x.endTimeStr)}`);
+      });
+      if (clashes.length) {
+        const ok = await showConfirm(`You already have at this time:\n${clashes.join('\n')}\n\nSave this class anyway?`, '⚠️ Time Conflict', 'Save');
+        if (!ok) return;
+      }
     }
     showFormMsg('');
     state.saving = true;
