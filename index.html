@@ -761,6 +761,24 @@
   #adminExamForm[hidden], #adminNewExamBtn[hidden] { display: none !important; }
   #adminExamList:empty { display: none; }
   .ad-detail { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 8px; background: var(--neutral-soft); }
+
+  /* ---------- Add Activity (sectioned) ---------- */
+  .act-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .act-seg-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; min-height: 60px; text-align: center; line-height: 1.2; }
+  .act-seg-btn .ic { color: var(--muted-2); }
+  .act-seg-btn.active { background: var(--gold-soft); color: var(--gold); border-color: var(--gold); }
+  .act-seg-btn.active .ic { color: var(--gold); }
+  .act-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .act-card-t { font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  .act-card .sv-times > div { min-width: 0; }
+  .act-card input[type="date"], .act-card input[type="time"] { width: 100%; min-width: 0; box-sizing: border-box; }
+  .act-card .field { gap: 6px; }
+  #invigSelfBox[hidden], #leaveFields[hidden], #leaveRange[hidden] { display: none !important; }
+  .pk-group { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .field-err { animation: fieldErr 2.4s ease; border-radius: 12px; }
+  @keyframes fieldErr { 0%, 60% { box-shadow: 0 0 0 2px var(--gold); } 100% { box-shadow: 0 0 0 0 transparent; } }
+  @media (prefers-reduced-motion: reduce) { .field-err { animation: none; box-shadow: 0 0 0 2px var(--gold); } }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
   .drawer-root.open { pointer-events: auto; visibility: visible; transition: none; }
@@ -1283,35 +1301,49 @@
         </div>
       </div>
 
-      <div id="activityFields" style="display:none; flex-direction:column; gap:18px;">
+      <div id="activityFields" style="display:none; flex-direction:column; gap:14px;">
         <div class="field">
           <label>Activity Type</label>
-          <div class="chips" id="activityChips"></div>
+          <div class="act-seg" id="activityChips"></div>
         </div>
         <div id="invigFields" hidden style="display:flex; flex-direction:column; gap:14px;">
-          <div class="hv-fnote" style="margin:0;">Duty only · not counted as a class</div>
           <div id="invigExamBox" class="field" style="display:flex; flex-direction:column; gap:8px;">
             <label style="margin:0;">Today's exams — tap one</label>
             <div id="invigExamList" style="display:flex; flex-direction:column; gap:8px;"></div>
             <button type="button" class="hv-back" id="invigSelfLink" style="padding:0; align-self:flex-start;">Not in the list? Fill it yourself</button>
           </div>
-          <div id="invigSelfBox" style="display:flex; flex-direction:column; gap:12px;">
+          <section class="act-card" id="invigSelfBox">
+            <div class="act-card-t">Exam Details</div>
             <div class="inv-hint">Took a test in your own class? Use <b>Add Class</b> instead.</div>
-            <div class="field"><label>Test Type</label><div class="chips" id="invigTypeChips"></div></div>
-            <div class="field"><label>Subject</label><div class="chips" id="invigSubjChips"></div></div>
-            <div class="field"><label>Class · tap a whole class or its batches</label><div class="chips inv-scope" id="invigScope"></div></div>
+            <div class="field" id="invigTypeField"><label>Test Type</label><div class="chips" id="invigTypeChips"></div></div>
+            <div class="field" id="invigSubjField"><label>Subject</label><div class="chips" id="invigSubjChips"></div></div>
+            <div class="field" id="invigClassField"><label>Class</label><div id="invigScope"></div></div>
             <button type="button" class="hv-back" id="invigBackToExams" style="padding:0; align-self:flex-start;">Choose from today's exams</button>
-          </div>
-          <div class="field" style="gap:8px;">
-            <label>Your Duty</label>
-            <div id="invigParts" style="display:flex; flex-direction:column; gap:8px;"></div>
-            <button type="button" class="hv-back" id="invigAddPart" style="padding:0; align-self:flex-start;">+ Add another part (after a break / other room)</button>
-          </div>
+          </section>
+          <section class="act-card" id="invigDutyField">
+            <div class="act-card-t">Duty Details</div>
+            <div id="invigParts" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <button type="button" class="hv-back" id="invigAddPart" style="padding:0; align-self:flex-start;">+ Add another duty slot</button>
+          </section>
         </div>
-        <div class="field">
-          <label for="activityNoteInput" id="activityNoteLabel">Details</label>
-          <textarea class="text-input" id="activityNoteInput" rows="5" style="resize:vertical; font-family:inherit;" placeholder="e.g. Prepared question paper for Class 10"></textarea>
+        <div id="leaveFields" hidden>
+          <section class="act-card">
+            <div class="act-card-t">Dates</div>
+            <div class="chips" id="leaveModeChips">
+              <button type="button" class="chip active" data-leave-mode="single">Single day</button>
+              <button type="button" class="chip" data-leave-mode="multi">Multiple days</button>
+            </div>
+            <div class="sv-times" id="leaveRange" hidden>
+              <div><div class="sv-tlbl">From</div><input class="text-input" type="date" id="leaveFrom"></div>
+              <div><div class="sv-tlbl">To</div><input class="text-input" type="date" id="leaveTo"></div>
+            </div>
+            <div class="hv-fnote" id="leaveRangeNote"></div>
+          </section>
         </div>
+        <section class="act-card" id="activityNoteCard">
+          <label for="activityNoteInput" id="activityNoteLabel" class="act-card-t" style="margin:0;">Work Details</label>
+          <textarea class="text-input" id="activityNoteInput" rows="4" style="resize:none; font-family:inherit;" placeholder="Describe the work completed…"></textarea>
+        </section>
       </div>
 
       <div class="modal-msg" id="formMsg" style="min-height:0; color: var(--amber); font-weight:600;"></div>
@@ -1903,7 +1935,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.1 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.2 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -1949,8 +1981,9 @@
   };
   const DEFAULT_BATCHES = DEFAULT_BATCHES_BY_WING['Pre-Foundation'];
   const ACTIVITY_TYPES = ['Other Activity', 'Invigilation', 'Leave / Holiday'];
-  const DEFAULT_TEST_TYPES = ['Class Test', 'Unit Test', 'Half-Yearly', 'Pre-Board'];
-  const DEFAULT_SUBJECTS = ['Maths', 'Physics', 'Chemistry', 'Biology', 'Science', 'English', 'Hindi', 'Social Science', 'Computer'];
+  const ACT_ICONS = {"Other Activity": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/></svg>", "Invigilation": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2\"/><rect x=\"9\" y=\"3\" width=\"6\" height=\"4\" rx=\"1\"/><polyline points=\"9 14 11 16 15 12\"/></svg>", "Leave / Holiday": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"/><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"/><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"/><line x1=\"9\" y1=\"14\" x2=\"15\" y2=\"18\"/><line x1=\"15\" y1=\"14\" x2=\"9\" y2=\"18\"/></svg>"};
+  const DEFAULT_TEST_TYPES = ['Class Test', 'Unit Test', 'Half-Yearly', 'Pre-Board 1', 'Pre-Board 2', 'Annual Exam'];
+  const DEFAULT_SUBJECTS = ['Maths', 'Physics', 'Chemistry', 'Biology', 'Science', 'English', 'Hindi', 'Social Science', 'Computer', 'Reasoning'];
   // Saved value stays 'Other Activity' (older records use it); it is shown as 'Other Work'.
   function activityLabel(t) { return t === 'Other Activity' ? 'Other Work' : (t || 'Activity'); }
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -3429,7 +3462,7 @@
     const actChipsEl = document.getElementById('activityChips');
     actChipsEl.innerHTML = ACTIVITY_TYPES.map((t) => {
       const active = t === state.activityForm.activityType;
-      return `<button class="chip${active ? ' active' : ''}" data-activity-type="${escapeHtml(t)}">${escapeHtml(activityLabel(t))}</button>`;
+      return `<button type="button" class="act-seg-btn${active ? ' active' : ''}" data-activity-type="${escapeHtml(t)}">${ACT_ICONS[t] || ''}<span>${escapeHtml(activityLabel(t))}</span></button>`;
     }).join('');
     actChipsEl.querySelectorAll('[data-activity-type]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -4035,7 +4068,8 @@
     chipRow(document.getElementById('adminExamType'), testTypesList(), f.type, 'data-extype', (v) => { f.type = v; renderAdminExamForm(ids, nameOf); });
     chipRow(document.getElementById('adminExamSubject'), subjectsList(), f.subject, 'data-exsubj', (v) => { f.subject = f.subject === v ? '' : v; renderAdminExamForm(ids, nameOf); });
     const sc = document.getElementById('adminExamScope');
-    sc.innerHTML = scopeChipsHtml(f.scope, 'data-exscope');
+    renderScopePicker(sc, f, () => renderAdminExamForm(ids, nameOf));
+    if (false) sc.innerHTML = scopeChipsHtml(f.scope, 'data-exscope');
     sc.querySelectorAll('[data-exscope]').forEach((el) => el.addEventListener('click', () => {
       const v = el.getAttribute('data-exscope');
       const k = f.scope.indexOf(v);
@@ -6515,6 +6549,7 @@
 
   function resetActivityForm() {
     state.activityForm = { activityType: ACTIVITY_TYPES[0], note: '' };
+    state.leave = { multi: false, from: '', to: '' };
     state.invig = newInvig();
     document.getElementById('activityNoteInput').value = '';
   }
@@ -6704,12 +6739,66 @@
     el.innerHTML = items.map((t) => `<button type="button" class="chip${t === active ? ' active' : ''}" ${attr}="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
     el.querySelectorAll(`[${attr}]`).forEach((b) => b.addEventListener('click', () => onPick(b.getAttribute(attr))));
   }
+  // Class → Batch picker (used by Invigilation and the Admin exam form).
+  // Pick a class first; only its batches then appear. "All regular" = the class token (Evening / Remedial stay separate).
+  function batchGroupOf(b) { const m = String(b || '').match(/class\s*(\d+)/i); return m ? `Class ${m[1]}` : 'Other'; }
+  function pickerGroups() {
+    const g = [];
+    allBatchesFlat().forEach((b) => { const k = batchGroupOf(b); if (g.indexOf(k) === -1) g.push(k); });
+    return g.sort((a, b) => (a === 'Other') - (b === 'Other') || Number(a.replace(/\D/g, '')) - Number(b.replace(/\D/g, '')));
+  }
+  function openFromScope(scope) {
+    const o = [];
+    (scope || []).forEach((t) => { const k = /^Class \d+$/.test(t) ? t : batchGroupOf(t); if (o.indexOf(k) === -1) o.push(k); });
+    return o;
+  }
+  function renderScopePicker(el, st, rerender) {
+    st.open = st.open || openFromScope(st.scope);
+    const groups = pickerGroups();
+    let html = `<div class="chips">${groups.map((g) => `<button type="button" class="chip${st.open.indexOf(g) !== -1 ? ' active' : ''}" data-pk-cls="${escapeHtml(g)}">${st.open.indexOf(g) !== -1 ? '✓ ' : ''}${escapeHtml(g)}</button>`).join('')}</div>`;
+    st.open.filter((g) => groups.indexOf(g) !== -1).forEach((g) => {
+      const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
+      const hasRegular = g !== 'Other' && bats.some((b) => classOfBatch(b) === g);
+      const chip = (tok, label) => `<button type="button" class="chip${st.scope.indexOf(tok) !== -1 ? ' active' : ''}" data-pk-tok="${escapeHtml(tok)}">${st.scope.indexOf(tok) !== -1 ? '✓ ' : ''}${escapeHtml(label)}</button>`;
+      const short = (b) => { const t = b.replace(new RegExp('^' + g.replace(' ', '\\s*') + '\\s*[-–]?\\s*', 'i'), '').trim(); return t || b; };
+      html += `<div class="pk-group"><div class="sv-tlbl" style="margin:0;">${escapeHtml(g)} batches</div><div class="chips">${hasRegular ? chip(g, 'All regular') : ''}${bats.map((b) => chip(b, short(b))).join('')}</div></div>`;
+    });
+    el.innerHTML = html;
+    el.querySelectorAll('[data-pk-cls]').forEach((btn) => btn.addEventListener('click', () => {
+      const g = btn.getAttribute('data-pk-cls');
+      const k = st.open.indexOf(g);
+      if (k !== -1) {
+        st.open.splice(k, 1);
+        st.scope = st.scope.filter((t) => t !== g && batchGroupOf(t) !== g);
+      } else {
+        st.open.push(g);
+        const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
+        if (g !== 'Other' && bats.some((b) => classOfBatch(b) === g) && !st.scope.some((t) => t === g || batchGroupOf(t) === g)) st.scope.push(g);
+      }
+      rerender();
+    }));
+    el.querySelectorAll('[data-pk-tok]').forEach((btn) => btn.addEventListener('click', () => { st.scope = toggleScope(st.scope, btn.getAttribute('data-pk-tok')); rerender(); }));
+  }
+  function flagField(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('field-err'); void el.offsetWidth; el.classList.add('field-err');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => el.classList.remove('field-err'), 2400);
+  }
+
   function renderInvig() {
     const box = document.getElementById('invigFields');
     if (!box) return;
     const show = state.entryMode === 'activity' && state.activityForm.activityType === 'Invigilation';
     box.hidden = !show;
-    document.getElementById('activityNoteLabel').textContent = show ? 'Notes (optional)' : 'Details';
+    const at = state.activityForm.activityType;
+    const isLeave = state.entryMode === 'activity' && at === 'Leave / Holiday';
+    const NOTE = { 'Invigilation': ['Notes (optional)', 'Add instructions, observations or remarks…'], 'Leave / Holiday': ['Reason (optional)', 'Add reason or remarks…'] };
+    const nt = NOTE[at] || ['Work Details', 'Describe the work completed…'];
+    document.getElementById('activityNoteLabel').textContent = nt[0];
+    document.getElementById('activityNoteInput').placeholder = nt[1];
+    renderLeaveBox(isLeave);
     if (!show) return;
     const iv = state.invig;
     const date = invigDate();
@@ -6735,13 +6824,11 @@
     } else {
       chipRow(document.getElementById('invigTypeChips'), testTypesList(), iv.type, 'data-inv-type', (v) => { iv.type = v; renderInvig(); });
       chipRow(document.getElementById('invigSubjChips'), subjectsList(), iv.subject, 'data-inv-subj', (v) => { iv.subject = v; renderInvig(); });
-      const sc = document.getElementById('invigScope');
-      sc.innerHTML = scopeChipsHtml(iv.scope, 'data-inv-scope');
-      sc.querySelectorAll('[data-inv-scope]').forEach((b) => b.addEventListener('click', () => { iv.scope = toggleScope(iv.scope, b.getAttribute('data-inv-scope')); renderInvig(); }));
+      renderScopePicker(document.getElementById('invigScope'), iv, renderInvig);
     }
     const partsEl = document.getElementById('invigParts');
     partsEl.innerHTML = iv.parts.map((p, i) => `<div class="inv-part">
-        ${iv.parts.length > 1 ? `<div class="inv-part-head"><span>Part ${i + 1}</span><button type="button" class="hv-back" data-inv-del="${i}" style="padding:0; color:var(--muted);">Remove</button></div>` : ''}
+        ${iv.parts.length > 1 ? `<div class="inv-part-head"><span>Duty slot ${i + 1}</span><button type="button" class="hv-back" data-inv-del="${i}" style="padding:0; color:var(--muted);">Remove</button></div>` : ''}
         <div class="inv-row">
           <div><div class="sv-tlbl">Start</div><input class="text-input" type="time" data-inv-start="${i}" value="${escapeHtml(p.start)}"></div>
           <div><div class="sv-tlbl">End</div><input class="text-input" type="time" data-inv-end="${i}" value="${escapeHtml(p.end)}"></div>
@@ -6761,6 +6848,28 @@
     iv.parts.push({ start: '', end: '', room: last.room || '' });
     renderInvig();
   });
+  // ---------- Leave: single day or several days ----------
+  state.leave = state.leave || { multi: false, from: '', to: '' };
+  function renderLeaveBox(show) {
+    const box = document.getElementById('leaveFields');
+    if (!box) return;
+    box.hidden = !show || !!state.editingId;
+    if (box.hidden) return;
+    const L = state.leave;
+    const base = state.addTargetDate || todayStr();
+    if (!L.from) L.from = base;
+    if (!L.to) L.to = shiftDateStr(base, 1);
+    document.querySelectorAll('#leaveModeChips [data-leave-mode]').forEach((b) => b.classList.toggle('active', (b.getAttribute('data-leave-mode') === 'multi') === L.multi));
+    document.getElementById('leaveRange').hidden = !L.multi;
+    document.getElementById('leaveFrom').value = L.from;
+    document.getElementById('leaveTo').value = L.to;
+    const n = L.multi && L.to >= L.from ? datesBetween(L.from, L.to).length : 0;
+    document.getElementById('leaveRangeNote').textContent = L.multi ? (n ? `${n} day${n === 1 ? '' : 's'} · one leave entry per day` : 'The "To" date must be on or after "From".') : dayHeading(base);
+  }
+  document.querySelectorAll('#leaveModeChips [data-leave-mode]').forEach((b) => b.addEventListener('click', () => { state.leave.multi = b.getAttribute('data-leave-mode') === 'multi'; renderLeaveBox(true); }));
+  document.getElementById('leaveFrom').addEventListener('change', (e) => { state.leave.from = e.target.value; if (state.leave.to < state.leave.from) state.leave.to = state.leave.from; renderLeaveBox(true); });
+  document.getElementById('leaveTo').addEventListener('change', (e) => { state.leave.to = e.target.value; renderLeaveBox(true); });
+
   // What this duty is about (from the chosen exam, or from the teacher's own choices).
   function invigInfo(date) {
     const iv = state.invig;
@@ -6783,11 +6892,11 @@
     for (let i = 0; i < iv.parts.length; i++) {
       const p = iv.parts[i];
       const a = hhmmToMin(p.start), b = hhmmToMin(p.end);
-      if (a == null || b == null) return { err: `Fill in the start and end time${iv.parts.length > 1 ? ' of part ' + (i + 1) : ''}.` };
-      if (b <= a) return { err: `End time must be after the start time${iv.parts.length > 1 ? ' (part ' + (i + 1) + ')' : ''}.` };
+      if (a == null || b == null) return { err: `Fill in the start and end time${iv.parts.length > 1 ? ' of duty slot ' + (i + 1) : ''}.` };
+      if (b <= a) return { err: `End time must be after the start time${iv.parts.length > 1 ? ' (duty slot ' + (i + 1) + ')' : ''}.` };
     }
     const sorted = iv.parts.map((p, i) => ({ i, a: hhmmToMin(p.start), b: hhmmToMin(p.end) })).sort((x, y) => x.a - y.a);
-    for (let k = 1; k < sorted.length; k++) if (sorted[k].a < sorted[k - 1].b) return { err: `Part ${sorted[k - 1].i + 1} and part ${sorted[k].i + 1} overlap.` };
+    for (let k = 1; k < sorted.length; k++) if (sorted[k].a < sorted[k - 1].b) return { err: `Duty slot ${sorted[k - 1].i + 1} and duty slot ${sorted[k].i + 1} overlap.` };
     const warns = [];
     const mine = (date === todayStr() ? (state.classesToday || []) : (state.historyClasses || []).filter((c) => c.date === date))
       .filter((c) => c.id !== state.editingId && !state.pendingDeleteIds.has(c.id));
@@ -6828,6 +6937,7 @@
         parts: (item.parts || []).map((p) => ({ start: p.start || '', end: p.end || '', room: p.room || '' })) };
       if (!state.invig.parts.length) state.invig.parts = newInvig().parts;
     } else state.invig = newInvig();
+    if (state.invig) state.invig.open = openFromScope(state.invig.scope);
     renderForm();
     document.getElementById('activityNoteInput').value = item.note || '';
     switchTab('add');
@@ -6846,17 +6956,35 @@
       let invInfo = null;
       if (invig) {
         const v = validateInvig(actDate);
-        if (v.err) { showFormMsg(v.err); return; }
+        if (v.err) {
+          showFormMsg(v.err);
+          flagField(/exam you did/.test(v.err) ? 'invigExamBox' : /test type/.test(v.err) ? 'invigTypeField' : /subject/.test(v.err) ? 'invigSubjField' : /class/.test(v.err) ? 'invigClassField' : 'invigDutyField');
+          return;
+        }
         invInfo = v.info;
         if (v.warns.length) {
           const ok = await showConfirm(`This duty overlaps with:\n${v.warns.join('\n')}\n\nSave anyway?`, '⚠️ Time Conflict', 'Save');
           if (!ok) return;
         }
       }
+      const leaveDates = (state.activityForm.activityType === 'Leave / Holiday' && !editingId && state.leave.multi)
+        ? (state.leave.to >= state.leave.from ? datesBetween(state.leave.from, state.leave.to) : []) : null;
+      if (leaveDates && !leaveDates.length) { showFormMsg('The "To" date must be on or after "From".'); flagField('leaveFields'); return; }
+      if (leaveDates && leaveDates.length > 31) { showFormMsg('Choose up to 31 days at a time.'); flagField('leaveFields'); return; }
       showFormMsg('');
       state.saving = true;
       renderForm();
       try {
+        if (leaveDates) {
+          const noteL = document.getElementById('activityNoteInput').value.trim();
+          const col = state.db.collection('classes');
+          await waitForWrite(Promise.all(leaveDates.map((d) => col.add({ entryType: 'activity', teacherId: state.teacherId, date: d, createdAt: Date.now(), activityType: 'Leave / Holiday', note: noteL }))));
+          state.addTargetDate = null; state.editingSourceTab = null;
+          resetActivityForm(); renderForm();
+          switchTab('today');
+          showToast(`✓ Leave added for ${leaveDates.length} day${leaveDates.length === 1 ? '' : 's'}`);
+          return;
+        }
         const payload = {
           activityType: state.activityForm.activityType,
           note: document.getElementById('activityNoteInput').value.trim()
@@ -6890,7 +7018,7 @@
         } else {
           switchTab('today');
         }
-        showToast(editingId ? 'Activity updated' : 'Activity saved');
+        showToast(editingId ? '✓ Activity updated' : '✓ Activity saved');
       } catch (err) {
         flashOffline(err);
       } finally {
