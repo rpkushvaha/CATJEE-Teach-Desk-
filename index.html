@@ -787,6 +787,12 @@
   .field-err { animation: fieldErr 2.4s ease; border-radius: 12px; }
   @keyframes fieldErr { 0%, 60% { box-shadow: 0 0 0 2px var(--gold); } 100% { box-shadow: 0 0 0 0 transparent; } }
   @media (prefers-reduced-motion: reduce) { .field-err { animation: none; box-shadow: 0 0 0 2px var(--gold); } }
+  /* ---------- Back-to-top button ---------- */
+  #scrollTopBtn { position: fixed; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 44px; height: 44px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card); color: var(--gold); display: flex; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(23,23,23,.14); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+  #scrollTopBtn.show { opacity: 1; transform: none; pointer-events: auto; }
+  @media (prefers-reduced-motion: reduce) { #scrollTopBtn { transition: none; } }
   /* ---------- Slide-out menu drawer ---------- */
   .drawer-root { position: fixed; inset: 0; z-index: 88; pointer-events: none; visibility: hidden; transition: visibility 0s linear .32s; }
   .drawer-root.open { pointer-events: auto; visibility: visible; transition: none; }
@@ -1363,6 +1369,7 @@
       <div class="hv-head">
         <div class="hv-title">History</div>
         <div class="hv-icons">
+          <button class="hv-icon" id="hvCalBtn" aria-label="Jump to a date"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
           <button class="hv-icon" id="hvSearchBtn" aria-label="Search" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
           <button class="hv-icon" id="hvFilterBtn" aria-label="Filters" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg><span class="hv-dot" id="hvFilterDot" hidden></span></button>
         </div>
@@ -1692,6 +1699,7 @@
 
 </div>
 
+<button type="button" id="scrollTopBtn" aria-label="Back to top"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg></button>
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-card">
     <div class="modal-title" id="confirmTitle">Are you sure?</div>
@@ -1949,7 +1957,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.6 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.7 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3378,6 +3386,26 @@
     hvState().q = e.target.value;
     state.historySelectedDate = null;
     renderHistory();
+  });
+  (function initScrollTop() {
+    const btn = document.getElementById('scrollTopBtn');
+    let ticking = false;
+    const update = () => { ticking = false; btn.classList.toggle('show', window.scrollY > 500); };
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+  })();
+  document.getElementById('hvCalBtn').addEventListener('click', () => {
+    const h = hvState();
+    const cur = state.historySelectedDate || (h.range === 'day' ? h.anchor : todayStr());
+    openCalendar(cur, (dateStr) => {
+      h.range = 'day';
+      h.anchor = dateStr > todayStr() ? todayStr() : dateStr;
+      h.q = ''; h.searchOpen = false;
+      const si = document.getElementById('hvSearch'); if (si) si.value = '';
+      state.historySelectedDate = null;
+      renderHistory();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   });
   document.getElementById('hvFilterBtn').addEventListener('click', () => { const h = hvState(); h.filterOpen = !h.filterOpen; renderHistory(); });
   document.getElementById('hvFilterClear').addEventListener('click', () => { const h = hvState(); h.batch = 'all'; h.kind = 'all'; renderHistory(); });
