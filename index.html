@@ -1623,6 +1623,12 @@
         <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
+      <div class="panel" id="adminWeeklyOffPanel">
+        <div class="panel-title">Weekly Off</div>
+        <div class="admin-sub" style="margin:0;">On these days a teacher with no activity shows as "Weekly off" (not Absent), and their report says WEEKLY OFF.</div>
+        <div class="chips" id="weeklyOffChips" style="margin-top:10px;"></div>
+      </div>
+
       <div class="panel" id="adminCampusPanel">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Campus Location (for location check)</div>
         <div class="admin-sub" id="campusLocText">Not set yet.</div>
@@ -1935,7 +1941,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.3 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.4 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3620,6 +3626,7 @@
     if (secs > 0) return { key: 'present', label: 'Present', secs };
     if (onLeave) return { key: 'leave', label: 'On leave', secs };
     if ((dayEntries || []).some((x) => x.entryType !== 'activity')) return { key: 'nocheck', label: 'No check-in', secs };
+    if (isWeeklyOff(state.adminDate) && !(dayEntries || []).length) return { key: 'off', label: 'Weekly off', secs };
     if (state.adminDate === todayStr()) return { key: 'notin', label: 'Not checked in', secs };
     if (state.adminDate > todayStr()) return { key: 'notin', label: '—', secs };
     return { key: 'absent', label: 'Absent', secs };
@@ -3805,7 +3812,7 @@
       const cls = entries.filter((c) => c.entryType !== 'activity' && inWing(c) && hvStartedOrPast(c));
       return { tid, entries, cls, mins: cls.reduce((s, c) => s + classDuration(c), 0), st: adminStatusOfTeacher(tid, entries) };
     });
-    const order = { oncampus: 0, present: 1, nocheck: 2, leave: 3, notin: 4, absent: 5 };
+    const order = { oncampus: 0, present: 1, nocheck: 2, leave: 3, notin: 4, off: 5, absent: 6 };
     teacherRows.sort((a, b) => (order[a.st.key] - order[b.st.key]) || nameOf(a.tid).localeCompare(nameOf(b.tid)));
     document.getElementById('adminTeacherMeta').textContent = teacherRows.length ? `${presentN} present · ${leaveN} on leave` : '';
     if (!teacherRows.length) {
@@ -6091,84 +6098,122 @@
     }
   }
 
+  // ---------- Weekly off (institute setting) ----------
+  const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  state.weeklyOff = state.weeklyOff || ['Sun'];
+  function isWeeklyOff(date) { return (state.weeklyOff || []).indexOf(WEEKDAYS[dateObj(date).getDay()]) !== -1; }
+  function renderWeeklyOffChips() {
+    const el = document.getElementById('weeklyOffChips');
+    if (!el) return;
+    el.innerHTML = WEEKDAYS.slice(1).concat('Sun').map((d) => `<button type="button" class="chip${(state.weeklyOff || []).indexOf(d) !== -1 ? ' active' : ''}" data-woff="${d}">${d}</button>`).join('');
+    el.querySelectorAll('[data-woff]').forEach((b) => b.addEventListener('click', async () => {
+      const d = b.getAttribute('data-woff');
+      const list = (state.weeklyOff || []).slice();
+      const k = list.indexOf(d);
+      if (k === -1) list.push(d); else list.splice(k, 1);
+      try { await state.db.doc('settings/institute').set({ weeklyOff: list }, { merge: true }); showToast('Weekly off updated'); } catch (err) { flashOffline(err); }
+    }));
+  }
+
+  // ---------- WhatsApp daily report ----------
+  function waRange(a, b) {
+    // "10:30 – 11:35 AM" when both are in the same half of the day, otherwise "11:30 AM – 12:10 PM".
+    const A = formatTimeStr(a), B = formatTimeStr(b);
+    const pa = A.slice(-2), pb = B.slice(-2);
+    return pa === pb ? `${A.slice(0, -3)} – ${B}` : `${A} – ${B}`;
+  }
+  function waClean(txt) { return String(txt || '').replace(/\*/g, '').replace(/[ \t]+/g, ' ').replace(/\s*\n+\s*/g, '; ').trim(); }
+  function waSentence(txt) {
+    let t = String(txt || '').replace(/\*/g, '').replace(/^[•\-–\s]+/, '').replace(/[ \t]+/g, ' ').trim();
+    if (!t) return '';
+    t = t.charAt(0).toUpperCase() + t.slice(1);
+    if (!/[.!?]$/.test(t)) t += '.';
+    return t;
+  }
+
   function buildWhatsAppReportText(date, allForDate, campusForDate, teacherName, f) {
     f = f || reportFilter(false);
     const recs = reportDayRecords(allForDate).filter(f.match);
-    const SEP = '──────────';
+    const SEP = '━━━━━━━━━━━━━━';
     const d = dateObj(date);
     const dateTxt = `${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}`;
-    // Teacher text: a leading "*" or "-" becomes a bullet, so WhatsApp never turns it into bold by accident.
-    const bullets = (txt) => String(txt || '').split(/\n+/).map((x) => x.trim()).filter(Boolean)
-      .map((x) => '• ' + x.replace(/^[*•\-–]+\s*/, '').replace(/\*/g, ''));
-    const clean = (txt) => String(txt || '').replace(/\*/g, '').replace(/\s*\n+\s*/g, '; ').trim();
-    const sections = [];
-    const head = ['*Daily Activity Report*', '', `👤 *Teacher:* ${teacherName}`];
+    const head = ['*DAILY ACTIVITY REPORT*', '', `👤 *Teacher:* ${teacherName}`];
     if (state.teacherSubject) head.push(`📘 *Subject:* ${state.teacherSubject}`);
-    head.push(`🗓 *Date:* ${dateTxt}`);
+    head.push(`📅 *Date:* ${dateTxt}`);
     if (f.label) head.push(`🔎 _${f.label}_`);
+    const sections = [];
     const acts = recs.filter((c) => c.entryType === 'activity');
     const leaves = f.showActivities ? acts.filter((a) => a.activityType === 'Leave / Holiday') : [];
+    const classItems = f.showClasses ? recs.filter((c) => c.entryType !== 'activity').sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || '')) : [];
+    const invs = f.showActivities ? acts.filter(isInvig) : [];
+    const others = f.showActivities ? acts.filter((a) => !isInvig(a) && a.activityType !== 'Leave / Holiday') : [];
     const campus = campusForDate || {};
     const sessions = campus.sessions || [];
+    const hasWork = classItems.length || invs.length || others.length;
+    // Status / attendance
     if (leaves.length) {
-      const L = [date === todayStr() ? '*On leave today*' : '*On leave*'];
-      leaves.forEach((a) => { if (a.note) L.push(`_${clean(a.note)}_`); });
+      const L = ['*ON LEAVE*'];
+      leaves.forEach((a) => { const r = waClean(a.note); if (r && !/^on leave\.?$/i.test(r)) L.push(`_${r}_`); });
       sections.push(L);
     }
-    if (sessions.length || !leaves.length) {
-      const L = [`🕘 *On campus:* ${reportCampus(campusSeconds(campus))}`];
-      if (!sessions.length) L.push('   No check-in recorded.');
-      sessions.forEach((s, i) => {
+    if (sessions.length) {
+      const L = ['🕘 *ATTENDANCE*'];
+      sessions.forEach((s) => {
         const inStr = formatTimeStr(toHHMM(s.in));
-        const outStr = s.out != null ? formatTimeStr(toHHMM(s.out)) : '_in progress_';
-        L.push(`   ${sessions.length > 1 ? (i + 1) + ') ' : ''}${inStr} → ${outStr}`);
+        L.push(s.out != null ? waRange(toHHMM(s.in), toHHMM(s.out)) : `${inStr} – _in progress_`);
+      });
+      L.push(`*Total:* ${reportCampus(campusSeconds(campus))}`);
+      sections.push(L);
+    } else if (!leaves.length && hasWork && !f.label) {
+      sections.push(['⚠️ *Check-in not recorded*']);
+    }
+    // Classes
+    if (classItems.length) {
+      const L = [`📚 *CLASSES (${classItems.length})*`];
+      classItems.forEach((c, i) => {
+        if (i) L.push('');
+        L.push(`*${i + 1}. ${entryBatchLabel(c)}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
+        if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
+        if (c.topic) L.push(`📌 Topic: ${waClean(c.topic)}`);
+        if (c.worksheet) L.push(`📄 Worksheet Given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`);
+        if (c.material) L.push(`📖 Study Material Given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`);
+        if (c.test) {
+          const nb = entryBatches(c).length;
+          let line = `🖊️ Class Test Conducted${nb > 1 ? ` (${nb} batches)` : ''}${c.testNote ? ': ' + waClean(c.testNote) : ''}`;
+          if (c.testRooms) { const r = waClean(c.testRooms); line += ` · ${/[,&]| and /.test(r) ? 'Rooms' : 'Room'} ${r}`; }
+          L.push(line);
+        }
+        if (c.homework) L.push(`📓 Homework Given${c.homeworkNote ? ': ' + waClean(c.homeworkNote) : ''}`);
       });
       sections.push(L);
     }
-    if (f.showClasses) {
-      const classItems = recs.filter((c) => c.entryType !== 'activity').sort((a, b) => (a.startTimeStr || '').localeCompare(b.startTimeStr || ''));
-      if (classItems.length) {
-        const L = [`📚 *Classes (${classItems.length})*`];
-        classItems.forEach((c, i) => {
-          const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)}` : '';
-          if (i) L.push('');
-          L.push(`*${i + 1}. ${entryBatchLabel(c)}*${time ? ' · ' + time : ''}${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
-          if (c.topic) L.push(`   ${clean(c.topic)}`);
-          if (c.worksheet) L.push(`   ✅ Worksheet${c.worksheetNote ? ': ' + clean(c.worksheetNote) : ''}`);
-          if (c.material) L.push(`   ✅ Study material${c.materialNote ? ': ' + clean(c.materialNote) : ''}`);
-          if (c.test) {
-            const nb = entryBatches(c).length;
-            const bits = [`📝 Class Test${nb > 1 ? ` (${nb} batches)` : ''}`];
-            if (c.testRooms) bits.push(`Rooms ${clean(c.testRooms)}`);
-            if (c.testNote) bits.push(clean(c.testNote));
-            L.push('   ' + bits.join(' · '));
-          }
-          if (c.homework) L.push(`   ✅ Homework${c.homeworkNote ? ': ' + clean(c.homeworkNote) : ''}`);
-        });
-        sections.push(L);
-      }
+    // Invigilation (never counted as a class)
+    if (invs.length) {
+      const total = invs.reduce((s2, a) => s2 + invigMinutes(a), 0);
+      const L = [`📋 *INVIGILATION* (${svDur(total)})`];
+      invs.forEach((a, k) => {
+        if (k) L.push('');
+        L.push([a.testName || a.testType, scopeLabel(a.scope || [])].filter(Boolean).join(' · '));
+        (a.parts || []).forEach((p) => L.push(`🕙 ${waRange(p.start, p.end)}${p.room ? ' · ' + waClean(p.room) : ''}`));
+        if (a.note) L.push(`_${waClean(a.note)}_`);
+      });
+      sections.push(L);
     }
-    if (f.showActivities) {
-      const inv = acts.filter(isInvig);
-      if (inv.length) {
-        const L = ['📋 *Invigilation*'];
-        inv.forEach((a, k) => {
-          if (k) L.push('');
-          L.push(`   ${[a.testName || a.testType, scopeLabel(a.scope || [])].filter(Boolean).join(' · ')}`);
-          (a.parts || []).forEach((p) => L.push(`   ${formatTimeStr(p.start)} – ${formatTimeStr(p.end)}${p.room ? ' · ' + clean(p.room) : ''}`));
-          if (a.note) L.push(`   _${clean(a.note)}_`);
-        });
-        sections.push(L);
-      }
-      const other = acts.filter((a) => !isInvig(a) && a.activityType !== 'Leave / Holiday');
-      if (other.length) {
-        const L = ['🗂 *Other Work*'];
-        other.forEach((a) => { const b = bullets(a.note); if (b.length) b.forEach((x) => L.push('   ' + x)); else L.push('   • ' + activityLabel(a.activityType)); });
-        sections.push(L);
-      }
+    // Other work
+    if (others.length) {
+      const L = ['🗂 *OTHER WORK*'];
+      others.forEach((a) => {
+        const lines = String(a.note || '').split(/\n+/).map(waSentence).filter(Boolean);
+        if (lines.length) lines.forEach((x) => L.push('• ' + x)); else L.push('• ' + activityLabel(a.activityType) + '.');
+      });
+      sections.push(L);
+    }
+    if (!sections.length) {
+      sections.push(isWeeklyOff(date) && !f.label ? ['📅 *WEEKLY OFF*'] : ['_No activity recorded for this day._']);
     }
     return head.join('\n') + '\n' + sections.map((sec) => SEP + '\n' + sec.join('\n')).join('\n');
   }
+
 
   async function shareReportOnWhatsApp(date, msgEl, useFilter) {
     msgEl.textContent = 'Preparing report…';
@@ -7692,6 +7737,12 @@
       renderScheduleBatchChips();
     }, () => {}));
 
+    unsubscribers.push(db.doc('settings/institute').onSnapshot((snap) => {
+      const data = snap.data() || {};
+      state.weeklyOff = Array.isArray(data.weeklyOff) ? data.weeklyOff : ['Sun'];
+      renderWeeklyOffChips();
+      if (state.tab === 'admin') renderAdmin();
+    }, () => {}));
     unsubscribers.push(db.doc('settings/testTypes').onSnapshot((snap) => {
       state.testTypes = (snap.exists && snap.data().list) || null;
       renderListManagers();
