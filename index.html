@@ -752,6 +752,7 @@
   .ad-pill.leave { background: rgba(217,119,6,.12); color: #B45309; }
   .ad-pill.absent { background: var(--gold-soft); color: var(--gold); }
   .ad-pill.nocheck { background: rgba(217,119,6,.12); color: #B45309; }
+  .edit-stamp { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
   .ad-exam { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
   .ad-exam + .ad-exam { border-top: 1px solid var(--line); }
   .ad-exam.static { cursor: default; }
@@ -1902,7 +1903,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.0 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.1 · updated 30 Sep 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2402,7 +2403,7 @@
   }
 
   function classCardHtml(cls, showDelete) {
-    const title = `${cls.batch} · ${cls.subject || 'Untitled subject'}`;
+    const title = `${entryBatchLabel(cls)} · ${cls.subject || 'Untitled subject'}`;
     const topic = cls.topic ? cls.topic : '';
     const time = (cls.startTimeStr && cls.endTimeStr) ? `${formatTimeStr(cls.startTimeStr)} – ${formatTimeStr(cls.endTimeStr)}` : '';
     const badges = [
@@ -2430,6 +2431,7 @@
         </div>
         ${time ? `<div class="class-time">${time}</div>` : ''}
         ${topic ? `<div class="class-topic">${escapeHtml(topic)}</div>` : ''}
+        ${cls.editedAt ? `<div class="edit-stamp">Last edited ${escapeHtml(stampTxt(cls.editedAt))}</div>` : ''}
         <div class="badges">${badges}</div>
         ${notesLine}
       </div>`;
@@ -3226,6 +3228,7 @@
         <div class="hv-d-rows"><div class="hv-d-row"><span>Date</span><span>${escapeHtml(dateTxt)}</span></div>
         ${isInvig(c) ? (c.parts || []).map((p, i) => `<div class="hv-d-row"><span>${(c.parts || []).length > 1 ? 'Part ' + (i + 1) : 'Time'}</span><span>${escapeHtml(formatTimeStr(p.start))} – ${escapeHtml(formatTimeStr(p.end))}${p.room ? ' · ' + escapeHtml(p.room) : ''}${(p.scope || []).length ? ' · ' + escapeHtml(scopeLabel(p.scope)) : ''}</span></div>`).join('') + `<div class="hv-d-row"><span>Total</span><span>${svDur(invigMinutes(c))}</span></div>` : ''}</div>
         ${c.note ? `<div class="hv-d-topic" style="white-space:pre-line;">${escapeHtml(c.note)}</div>` : ''}
+        ${editStampHtml(c)}
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="hvEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="hvDelete" style="border-color: var(--line);">Delete</button></div>`;
     } else {
       const dur = classDuration(c);
@@ -3244,6 +3247,7 @@
           ${checkRowHtml(!!c.test, 'Class test conducted', 'No class test', [c.testNote, c.testRooms ? 'Rooms: ' + c.testRooms : ''].filter(Boolean).join(' · '))}
           ${checkRowHtml(!!c.homework, 'Homework given', 'No homework', c.homeworkNote)}
         </div>
+        ${editStampHtml(c)}
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="hvEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="hvDelete" style="border-color: var(--line);">Delete</button></div>`;
     }
     document.getElementById('hvEdit').addEventListener('click', () => {
@@ -3613,7 +3617,7 @@
     adminSlotsKey = key;
     try {
       const res = await Promise.all(ids.map((tid) => state.db.collection('schedule/' + tid + '/slots').where('date', '==', date).get()
-        .then((snap) => ({ tid, slots: snap.docs.map((d) => Object.assign({ id: d.id }, d.data())) }))
+        .then((snap) => ({ tid, slots: snap.docs.map((d) => normDoc(d)) }))
         .catch(() => ({ tid, slots: [] }))));
       if (adminSlotsKey !== key) return;
       const map = {};
@@ -3631,7 +3635,7 @@
     try {
       const days = datesBetween(ws, shiftDateStr(ws, 6));
       const res = await Promise.all(days.map((d) => state.db.collection('classes').where('date', '==', d).limit(500).get()
-        .then((snap) => snap.docs.map((x) => Object.assign({ id: x.id }, x.data()))).catch(() => [])));
+        .then((snap) => snap.docs.map((x) => normDoc(x))).catch(() => [])));
       if (adminWeekKey !== ws) return;
       state.adminWeek = { weekStart: ws, classes: [].concat(...res) };
       if (state.tab === 'admin') renderAdmin();
@@ -4129,6 +4133,77 @@
     } catch (err) { /* ignore */ }
   }
 
+  // ---------- Batch renames ("Rename everywhere") ----------
+  // Old records are never rewritten. A rename is kept as old → new in settings/batches and applied
+  // to every record as it is read, so History, Schedule, Admin and all reports show the new name.
+  state.batchRenames = state.batchRenames || {};
+  function canonBatch(n) {
+    let cur = n; let hops = 0;
+    while (cur && state.batchRenames[cur] && state.batchRenames[cur] !== cur && hops < 10) { cur = state.batchRenames[cur]; hops++; }
+    return cur;
+  }
+  function canonList(arr) {
+    const out = [];
+    (arr || []).forEach((x) => { const c = canonBatch(x); if (c && out.indexOf(c) === -1) out.push(c); });
+    return out;
+  }
+  function canonDoc(o) {
+    if (!o) return o;
+    if (o.batch) o.batch = canonBatch(o.batch);
+    if (Array.isArray(o.batches)) o.batches = canonList(o.batches);
+    if (o.label) o.label = canonBatch(o.label);
+    if (Array.isArray(o.scope)) o.scope = canonList(o.scope);
+    if (Array.isArray(o.parts)) o.parts.forEach((p) => { if (Array.isArray(p.scope)) p.scope = canonList(p.scope); });
+    return o;
+  }
+  function normDoc(d) { return canonDoc(Object.assign({ id: d.id }, d.data())); }
+  function recanonAll() {
+    const lists = [state.classesToday, state.historyClasses, state.adminClasses, state.scheduleSlots, state.adminExams, state.selectedDayClasses];
+    lists.forEach((l) => (l || []).forEach(canonDoc));
+    Object.values(state.adminSlots || {}).forEach((l) => (l || []).forEach(canonDoc));
+    if (state.adminWeek) (state.adminWeek.classes || []).forEach(canonDoc);
+    Object.values(state.hvFetched || {}).forEach((r) => (r.classes || []).forEach(canonDoc));
+    Object.values(state.examsFor || {}).forEach((l) => (l || []).forEach(canonDoc));
+  }
+  async function renameBatchEverywhere(wing, idx, newName) {
+    const list = currentBatches(wing).slice();
+    const oldName = list[idx];
+    newName = (newName || '').trim();
+    if (!newName || newName === oldName) return;
+    const all = allBatchesFlat();
+    const merging = all.indexOf(newName) !== -1;
+    const msg = merging
+      ? `"${oldName}" will be merged into the existing batch "${newName}". All old entries of "${oldName}" will show as "${newName}".`
+      : `All old and new entries of "${oldName}" (classes, schedule, exams, reports) will show as "${newName}". Nothing is deleted.`;
+    const ok = await showConfirm(msg, 'Rename everywhere?', merging ? 'Merge' : 'Rename');
+    if (!ok) return;
+    if (merging) list.splice(idx, 1); else list[idx] = newName;
+    const renames = Object.assign({}, state.batchRenames);
+    Object.keys(renames).forEach((k) => { if (renames[k] === oldName) renames[k] = newName; });
+    renames[oldName] = newName;
+    delete renames[newName];
+    const wings = {
+      'Pre-Foundation': wing === 'Pre-Foundation' ? list : currentBatches('Pre-Foundation'),
+      'Foundation': wing === 'Foundation' ? list : currentBatches('Foundation')
+    };
+    try {
+      await state.db.doc('settings/batches').set({ wings, renames });
+      showToast(merging ? 'Batches merged' : 'Batch renamed everywhere');
+    } catch (err) { flashOffline(err); }
+  }
+
+  // ---------- "Logged / Last edited" line ----------
+  function stampTxt(ms) {
+    const d = new Date(ms);
+    return `${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}, ${formatTimeStr(`${pad(d.getHours())}:${pad(d.getMinutes())}`)}`;
+  }
+  function editStampHtml(c) {
+    const bits = [];
+    if (c.createdAt && c.createdAt > 1e12) bits.push('Logged ' + stampTxt(c.createdAt));
+    if (c.editedAt) bits.push('Last edited ' + stampTxt(c.editedAt));
+    return bits.length ? `<div class="edit-stamp">${escapeHtml(bits.join(' · '))}</div>` : '';
+  }
+
   function renderBatchListInto(elId, wing) {
     const el = document.getElementById(elId);
     if (!el) return;
@@ -4137,11 +4212,31 @@
       el.innerHTML = '<div class="admin-sub" style="margin:0;">No batches yet in this wing. Add one below.</div>';
       return;
     }
-    el.innerHTML = list.map((b, i) => `
+    const editing = state.batchEditKey === elId + '|' + wing ? state.batchEditIdx : -1;
+    el.innerHTML = list.map((b, i) => i === editing ? `
+      <div class="activity-row" style="gap:6px;">
+        <input class="text-input" data-rename-input="${i}" value="${escapeHtml(b)}" style="flex:1; min-width:0; padding:8px 10px; font-size:14px;">
+        <button class="add-entry-btn" data-rename-save="${i}" style="white-space:nowrap;">Save</button>
+        <button class="del-btn" data-rename-cancel="${i}" aria-label="Cancel">✕</button>
+      </div>` : `
       <div class="activity-row">
         <div class="activity-row-text"><span class="activity-row-title">${escapeHtml(b)}</span></div>
+        ${state.canAdmin ? `<button class="del-btn" data-rename-batch="${i}" aria-label="Rename batch">${svgEdit()}</button>` : ''}
         <button class="del-btn" data-del-batch="${i}" aria-label="Remove batch">${svgTrash()}</button>
       </div>`).join('');
+    el.querySelectorAll('[data-rename-batch]').forEach((btn) => btn.addEventListener('click', () => {
+      state.batchEditKey = elId + '|' + wing; state.batchEditIdx = +btn.getAttribute('data-rename-batch');
+      renderBatchListInto(elId, wing);
+      const inp = el.querySelector('[data-rename-input]'); if (inp) inp.focus();
+    }));
+    el.querySelectorAll('[data-rename-cancel]').forEach((btn) => btn.addEventListener('click', () => { state.batchEditKey = null; renderBatchListInto(elId, wing); }));
+    el.querySelectorAll('[data-rename-save]').forEach((btn) => btn.addEventListener('click', async () => {
+      const i = +btn.getAttribute('data-rename-save');
+      const v = el.querySelector('[data-rename-input]').value;
+      state.batchEditKey = null;
+      await renameBatchEverywhere(wing, i, v);
+      renderBatchListInto(elId, wing);
+    }));
     el.querySelectorAll('[data-del-batch]').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const idx = parseInt(btn.getAttribute('data-del-batch'), 10);
@@ -4173,7 +4268,7 @@
         'Pre-Foundation': wing === 'Pre-Foundation' ? list : currentBatches('Pre-Foundation'),
         'Foundation': wing === 'Foundation' ? list : currentBatches('Foundation')
       };
-      await state.db.doc('settings/batches').set({ wings });
+      await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {} });
       showToast('Batch list updated');
     } catch (err) { flashOffline(err); }
   }
@@ -5650,7 +5745,7 @@
     if (!state.db || !state.teacherId) return { classes, campus };
     try {
       const snap = await state.db.collection('classes').where('teacherId', '==', state.teacherId).where('date', '==', date).get();
-      classes = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      classes = snap.docs.map((d) => normDoc(d));
     } catch (err) { /* leave empty on failure */ }
     try {
       const csnap = await state.db.doc('campusHistory/' + state.teacherId).collection('days').doc(date).get();
@@ -5813,7 +5908,7 @@
       classItems.forEach((c, i) => {
         const time = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}` : 'Time not set';
         const dur = classDuration(c);
-        const up = hvStartedOrPast(c) ? '' : '  [Upcoming - not counted]';
+        const up = (hvStartedOrPast(c) ? '' : '  [Upcoming - not counted]') + (c.editedAt ? '  [edited ' + stampTxt(c.editedAt) + ']' : '');
         w.bodyLine(`  ${i + 1}. ${entryBatchLabel(c)}  |  ${time}${dur ? ' (' + reportHm(dur) + ')' : ''}${up}`, { bold: true });
         w.bodyLine(`     Topic: ${c.topic || 'Not added'}`);
         checklistLines(c).forEach((l) => w.bodyLine(`     - ${l}`));
@@ -6085,8 +6180,9 @@
   }
 
   // One CSV layout for every export (teacher and admin, day/week/month), so files always match.
-  const CSV_HEADER = ['Date', 'Type', 'Batch / Class', 'Subject', 'Topic / Test / Activity', 'Start Time', 'End Time', 'Duration (min)', 'Worksheet', 'Material', 'Test', 'Homework', 'Rooms / Details', 'Note'];
-  function csvRowFor(c) {
+  const CSV_HEADER = ['Date', 'Type', 'Batch / Class', 'Subject', 'Topic / Test / Activity', 'Start Time', 'End Time', 'Duration (min)', 'Worksheet', 'Material', 'Test', 'Homework', 'Rooms / Details', 'Note', 'Logged At', 'Last Edited'];
+  function csvRowFor(c) { return csvRowCore(c).concat([c.createdAt && c.createdAt > 1e12 ? stampTxt(c.createdAt) : '', c.editedAt ? stampTxt(c.editedAt) : '']); }
+  function csvRowCore(c) {
     const yn = (v) => (v ? 'Yes' : 'No');
     if (c.entryType === 'activity') {
       if (isInvig(c)) {
@@ -6231,7 +6327,7 @@
       state.db.collection('classes').where('date', '==', date).limit(500).get(),
       state.db.collection('campusLogs/' + date + '/teachers').limit(200).get()
     ]);
-    const classes = classesSnap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+    const classes = classesSnap.docs.map((d) => normDoc(d));
     const campusMap = {};
     campusSnap.docs.forEach((d) => { campusMap[d.id] = d.data(); });
     return { date, classes, campus: campusMap };
@@ -6585,7 +6681,7 @@
     state.examsFor[date] = null;
     try {
       const snap = await state.db.collection('exams').where('date', '==', date).get();
-      state.examsFor[date] = snap.docs.map((d) => Object.assign({ id: d.id }, d.data())).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+      state.examsFor[date] = snap.docs.map((d) => normDoc(d)).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
     } catch (err) { state.examsFor[date] = []; }
     if (state.tab === 'add') renderInvig();
   }
@@ -6775,6 +6871,7 @@
         }
         const col = state.db.collection('classes');
         const ref = editingId ? col.doc(editingId) : col.doc();
+        if (editingId) payload.editedAt = Date.now();
         const writeP = editingId ? ref.update(payload) : ref.set(Object.assign({ entryType: 'activity', teacherId: state.teacherId, date: entryDate, createdAt: Date.now() }, payload));
         await waitForWrite(writeP);
         state.editingId = null;
@@ -6868,7 +6965,7 @@
         homeworkNote: document.getElementById('homeworkNoteInput').value.trim()
       };
       const writeP = editingId
-        ? state.db.collection('classes').doc(editingId).update(payload)
+        ? state.db.collection('classes').doc(editingId).update(Object.assign({ editedAt: Date.now() }, payload))
         : state.db.collection('classes').add(Object.assign({
           entryType: 'class',
           teacherId: state.teacherId,
@@ -7122,13 +7219,13 @@
     if (unsubAdminExams) unsubAdminExams();
     state.adminExams = [];
     unsubAdminExams = state.db.collection('exams').where('date', '==', date).onSnapshot((snap) => {
-      state.adminExams = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.adminExams = snap.docs.map((d) => normDoc(d));
       state.examsFor[date] = state.adminExams.slice();
       if (state.tab === 'admin') renderAdmin();
     }, () => {});
 
     unsubAdminClasses = state.db.collection('classes').where('date', '==', date).limit(500).onSnapshot((snap) => {
-      state.adminClasses = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.adminClasses = snap.docs.map((d) => normDoc(d));
       if (state.tab === 'admin') renderAdmin();
     }, (err) => flashOffline(err));
 
@@ -7392,14 +7489,14 @@
     }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.collection('classes').where('teacherId', '==', tid).where('date', '==', today).orderBy('createdAt', 'desc').limit(50).onSnapshot((snap) => {
-      state.classesToday = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.classesToday = snap.docs.map((d) => normDoc(d));
       state.todayClassesLoaded = true;
       renderTodayList();
       if (state.tab === 'schedule') renderScheduleList();
     }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.collection('classes').where('teacherId', '==', tid).orderBy('createdAt', 'desc').limit(300).onSnapshot((snap) => {
-      state.historyClasses = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.historyClasses = snap.docs.map((d) => normDoc(d));
       state.historyClassesLoaded = true;
       if (state.tab === 'schedule') renderScheduleList();
       if (state.tab === 'history') renderHistory();
@@ -7407,6 +7504,15 @@
 
     unsubscribers.push(db.doc('settings/batches').onSnapshot((snap) => {
       const data = snap.data();
+      const rn = (data && data.renames && typeof data.renames === 'object') ? data.renames : {};
+      if (JSON.stringify(rn) !== JSON.stringify(state.batchRenames || {})) {
+        state.batchRenames = rn;
+        recanonAll();
+        if (state.tab === 'history') renderHistory();
+        if (state.tab === 'schedule') renderScheduleList();
+        if (state.tab === 'admin') renderAdmin();
+        renderTodayList();
+      }
       if (data && data.wings && typeof data.wings === 'object') {
         state.batchesByWing = {
           'Pre-Foundation': (Array.isArray(data.wings['Pre-Foundation']) && data.wings['Pre-Foundation'].length) ? data.wings['Pre-Foundation'] : DEFAULT_BATCHES_BY_WING['Pre-Foundation'].slice(),
@@ -7454,7 +7560,7 @@
     }, () => {}));
 
     unsubscribers.push(db.collection('schedule/' + tid + '/slots').limit(400).onSnapshot((snap) => {
-      state.scheduleSlots = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      state.scheduleSlots = snap.docs.map((d) => normDoc(d));
       if (state.tab === 'schedule') renderScheduleList();
       renderTodayList();
       pruneExpiredScheduleSlots();
