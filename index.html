@@ -820,6 +820,16 @@
   .sv-row.tt-clash { box-shadow: inset 3px 0 0 #D97706; }
   .tl-pill.tt-own { background: var(--neutral-soft); color: var(--muted-2); }
   .sv-coord { font-size: 11px; font-weight: 600; color: var(--gold); }
+  /* ---------- Duty plan ---------- */
+  .plan-box { display: flex; flex-direction: column; gap: 12px; }
+  #examPlanBox[hidden] { display: none !important; }
+  .plan-room { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .plan-room-h { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  .plan-slot { background: var(--neutral-soft); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .plan-sum { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .duty-card { background: var(--card); border: 1px solid var(--gold); border-radius: 12px; padding: 12px; }
+  .duty-card .ad-tsub { margin-top: 3px; font-size: 13px; color: var(--ink); }
+  #myDutySec[hidden] { display: none !important; }
   /* ---------- Team & coordinator mode ---------- */
   #view-admin .atab-off2 { display: none !important; }
   .team-row { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
@@ -1223,6 +1233,10 @@
         <div class="class-list" id="sessionsList" style="margin-top:8px; display:none;"></div>
       </div>
 
+      <section class="tsec" id="myDutySec" hidden>
+        <div class="tsec-head"><div class="tsec-title">My Invigilation Duty</div></div>
+        <div id="myDutyList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </section>
       <section class="tsec">
         <div class="tsec-head"><div class="tsec-title">Today's Summary</div></div>
         <div class="sum-grid" id="sumGrid">
@@ -1667,6 +1681,7 @@
             <button type="button" class="save-btn" id="adminExamSave" style="margin:0;">Save Exam</button>
           </div>
         </div>
+        <div class="panel plan-box" id="examPlanBox" hidden></div>
         <div id="adminExamList" class="sv-rows"></div>
       </section>
 
@@ -1728,6 +1743,13 @@
         <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
         <div class="activity-rows" id="subjectsRows"></div>
         <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
+      </div>
+
+      <div class="panel set-acc" id="adminRoomsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><circle cx="14.5" cy="12.5" r="1"/></svg>Rooms</div>
+        <div class="admin-sub" style="margin:0;">Rooms and halls used for exams and the duty plan.</div>
+        <div class="activity-rows" id="roomsRows"></div>
+        <div class="list-add"><input class="text-input" id="newRoomInput" type="text" placeholder="e.g. Hall A or Room 4"><button class="btn-secondary" id="addRoomBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
       <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
@@ -2068,7 +2090,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.4 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.5 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2839,6 +2861,7 @@
       html = items.map(tlItemHtml).join('');
     }
     if (activities.length) html += '<div class="tl-sub">Activities</div>' + activities.map(todayActivityRowHtml).join('');
+    try { renderMyDuties(); } catch (e) { /* ignore */ }
     const cvT = coveredTestsFor(todayStr(), state.classesToday);
     if (cvT.count) html += `<div class="ad-ok" style="margin-top:4px;">✓ Class test held in your class while you were on leave: ${escapeHtml(cvT.batches.join(', '))}</div>`;
     if (el._lastHtml === html) return;
@@ -4398,6 +4421,7 @@
     if (id === 'adminBatchPanel') { const n = allBatchesFlat().length; return `${n} batch${n === 1 ? '' : 'es'}`; }
     if (id === 'adminTestTypesPanel') return String(testTypesList().length);
     if (id === 'adminSubjectsPanel') return String(subjectsList().length);
+    if (id === 'adminRoomsPanel') return String(roomsList().length);
     if (id === 'adminWeeklyOffPanel') return (state.weeklyOff || []).join(', ') || 'None';
     if (id === 'adminTeamPanel') { const ids = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u)); const c = ids.filter(isCoordUid).length; return `${ids.length - c} teacher${ids.length - c === 1 ? '' : 's'} · ${c} coordinator${c === 1 ? '' : 's'}`; }
     if (id === 'adminCampusPanel') return /^Set/.test(document.getElementById('campusLocText').textContent) ? 'Set' : 'Not set';
@@ -4682,7 +4706,8 @@
   // ---------- Admin: manage Test Types and Subjects ----------
   const LIST_CFG = {
     testTypes: { rows: 'testTypesRows', input: 'newTestTypeInput', get: () => testTypesList() },
-    subjects: { rows: 'subjectsRows', input: 'newSubjectInput', get: () => subjectsList() }
+    subjects: { rows: 'subjectsRows', input: 'newSubjectInput', get: () => subjectsList() },
+    rooms: { rows: 'roomsRows', input: 'newRoomInput', get: () => roomsList() }
   };
   state.listEditing = null;
   async function saveList(key, list) {
@@ -4723,7 +4748,7 @@
   }
   Object.keys(LIST_CFG).forEach((key) => {
     const cfg = LIST_CFG[key];
-    const btn = document.getElementById(key === 'testTypes' ? 'addTestTypeBtn' : 'addSubjectBtn');
+    const btn = document.getElementById({ testTypes: 'addTestTypeBtn', subjects: 'addSubjectBtn', rooms: 'addRoomBtn' }[key]);
     btn.addEventListener('click', async () => {
       const inp = document.getElementById(cfg.input);
       const v = inp.value.trim();
@@ -4736,6 +4761,218 @@
     });
   });
   renderListManagers();
+
+  // ---------- Exam Duty Plan (rooms × duty slots × invigilators) ----------
+  // exam.plan = { rooms: [{ room, scope: [...], slots: [{ start, end, teachers: [uid] }] }] }
+  function roomsList() { return state.rooms || []; }
+  state.planEdit = null;
+  function planOf(e) { return (e && e.plan && Array.isArray(e.plan.rooms)) ? e.plan.rooms : []; }
+  function planTeachers(rooms) {
+    const out = [];
+    rooms.forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((t) => { if (out.indexOf(t) === -1) out.push(t); })));
+    return out;
+  }
+  function planNameOf(u) { return (state.adminNames[u] && state.adminNames[u].name) || 'Teacher'; }
+  function planWarnings(exam, rooms) {
+    const w = [];
+    const date = exam.date;
+    const seen = {};
+    rooms.forEach((r, ri) => {
+      const label = r.room || `Room ${ri + 1}`;
+      if (!r.room) w.push(`Room ${ri + 1}: choose the room`);
+      else if (seen[r.room]) w.push(`${r.room} is added twice`);
+      seen[r.room] = 1;
+      if (!(r.scope || []).length) w.push(`${label}: choose the class / batch sitting there`);
+      (r.slots || []).forEach((sl, si) => {
+        const a = hhmmToMin(sl.start), b = hhmmToMin(sl.end);
+        if (a == null || b == null || b <= a) w.push(`${label}, slot ${si + 1}: check the start and end time`);
+        if (!(sl.teachers || []).length) w.push(`${label} ${formatTimeStr(sl.start)} – ${formatTimeStr(sl.end)}: no invigilator`);
+      });
+      const ss = (r.slots || []).slice().sort((x, y) => (x.start || '').localeCompare(y.start || ''));
+      for (let k = 1; k < ss.length; k++) if (hhmmToMin(ss[k].start) < hhmmToMin(ss[k - 1].end)) w.push(`${label}: duty slots overlap`);
+    });
+    // each teacher: two places at once, a class in their timetable, or on leave
+    const duties = [];
+    rooms.forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((t) => duties.push({ t, r: r.room || 'a room', a: hhmmToMin(sl.start), b: hhmmToMin(sl.end), sl }))));
+    for (let i = 0; i < duties.length; i++) for (let j = i + 1; j < duties.length; j++) {
+      const x = duties[i], y = duties[j];
+      if (x.t === y.t && x.a < y.b && y.a < x.b) w.push(`${planNameOf(x.t)} is in ${x.r} and ${y.r} at the same time`);
+    }
+    const dayAll = (state.adminClasses || []).filter((c) => c.date === date);
+    planTeachers(rooms).forEach((t) => {
+      if (dayAll.some((c) => c.teacherId === t && c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) w.push(`${planNameOf(t)} is on leave that day`);
+      const slots = ((state.adminSlotsDate === date && state.adminSlots && state.adminSlots[t]) || []).filter((s) => !s.cancelled);
+      duties.filter((d) => d.t === t).forEach((d) => slots.forEach((s) => {
+        const sa = hhmmToMin(s.time), sb = sa + slotDuration(s);
+        if (sa < d.b && d.a < sb) w.push(`${planNameOf(t)} has ${s.label} at ${formatTimeStr(s.time)} during duty in ${d.r}`);
+      }));
+    });
+    return w.filter((x, i, a) => a.indexOf(x) === i);
+  }
+  function openPlanEditor(exam) {
+    const rooms = planOf(exam).map((r) => ({ room: r.room || '', scope: (r.scope || []).slice(), slots: (r.slots || []).map((sl) => ({ start: sl.start, end: sl.end, teachers: (sl.teachers || []).slice() })) }));
+    if (!rooms.length) rooms.push({ room: '', scope: (exam.scope || []).slice(), slots: [{ start: exam.start, end: exam.end, teachers: [] }] });
+    state.planEdit = { examId: exam.id, rooms };
+    state.adminTab = 'exams';
+    renderAdmin();
+    renderPlanEditor();
+    setTimeout(() => { const b = document.getElementById('examPlanBox'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 40);
+  }
+  // Rebuilt only on explicit actions (never by the dashboard's timer), so time pickers stay open.
+  function renderPlanEditor() {
+    const box = document.getElementById('examPlanBox');
+    const pe = state.planEdit;
+    const exam = pe && (state.adminExams || []).find((x) => x.id === pe.examId);
+    box.hidden = !pe || !exam;
+    if (!pe || !exam) { box.innerHTML = ''; return; }
+    const ids = ttTeacherIds ? ttTeacherIds() : (state.adminTeacherIds || []);
+    const rl = roomsList();
+    box.innerHTML = `<div class="panel-title" style="margin:0;">Duty Plan</div>
+      <div class="admin-sub" style="margin:0;">${escapeHtml(examTitle(exam))} · ${escapeHtml(dayHeading(exam.date))} · ${escapeHtml(formatTimeStr(exam.start))} – ${escapeHtml(formatTimeStr(exam.end))}</div>
+      ${pe.rooms.map((r, ri) => `<div class="plan-room">
+        <div class="plan-room-h"><span>Room ${ri + 1}</span>${pe.rooms.length > 1 ? `<button type="button" class="team-remove" data-pl-rmroom="${ri}">Remove room</button>` : ''}</div>
+        <div class="chips">${rl.map((n) => `<button type="button" class="chip${r.room === n ? ' active' : ''}" data-pl-room="${ri}" data-v="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join('') || '<span class="hv-note">Add your rooms in Settings → Rooms first.</span>'}</div>
+        <div class="sv-tlbl" style="margin:4px 0 0;">Who sits here</div>
+        <div data-pl-scope="${ri}"></div>
+        <div class="sv-tlbl" style="margin:4px 0 0;">Duty slots</div>
+        ${r.slots.map((sl, si) => `<div class="plan-slot">
+          <div class="sv-times">
+            <div><div class="sv-tlbl">From</div><input class="text-input" type="time" data-pl-start="${ri}:${si}" value="${escapeHtml(sl.start || '')}"></div>
+            <div><div class="sv-tlbl">To</div><input class="text-input" type="time" data-pl-end="${ri}:${si}" value="${escapeHtml(sl.end || '')}"></div>
+          </div>
+          <div class="sv-tlbl" style="margin:0;">Invigilators</div>
+          <div class="chips inv-scope">${ids.map((u) => `<button type="button" class="chip${(sl.teachers || []).indexOf(u) !== -1 ? ' active' : ''}" data-pl-t="${ri}:${si}" data-v="${u}">${escapeHtml(planNameOf(u))}</button>`).join('')}</div>
+          ${r.slots.length > 1 ? `<button type="button" class="team-remove" data-pl-rmslot="${ri}:${si}">Remove slot</button>` : ''}
+        </div>`).join('')}
+        <button type="button" class="hv-back" data-pl-addslot="${ri}" style="padding:0; align-self:flex-start;">+ Add duty slot</button>
+      </div>`).join('')}
+      <button type="button" class="btn-secondary" id="plAddRoom" style="border-color: var(--line);">+ Add room</button>
+      <div id="plWarn"></div>
+      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="plCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="plSave" style="margin:0;">Save Duty Plan</button></div>`;
+    pe.rooms.forEach((r, ri) => {
+      const el = box.querySelector(`[data-pl-scope="${ri}"]`);
+      if (!r._pk) r._pk = { scope: r.scope, open: null };
+      r._pk.scope = r.scope;
+      renderScopePicker(el, r._pk, () => { r.scope = r._pk.scope; renderPlanEditor(); });
+    });
+    const at = (v) => v.split(':').map(Number);
+    box.querySelectorAll('[data-pl-room]').forEach((b) => b.addEventListener('click', () => { pe.rooms[+b.getAttribute('data-pl-room')].room = b.getAttribute('data-v'); renderPlanEditor(); }));
+    box.querySelectorAll('[data-pl-t]').forEach((b) => b.addEventListener('click', () => {
+      const [ri, si] = at(b.getAttribute('data-pl-t')); const sl = pe.rooms[ri].slots[si]; const u = b.getAttribute('data-v');
+      const k = sl.teachers.indexOf(u); if (k === -1) sl.teachers.push(u); else sl.teachers.splice(k, 1);
+      renderPlanEditor();
+    }));
+    box.querySelectorAll('[data-pl-start]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-pl-start')); pe.rooms[ri].slots[si].start = inp.value; renderPlanWarnings(); }));
+    box.querySelectorAll('[data-pl-end]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-pl-end')); pe.rooms[ri].slots[si].end = inp.value; renderPlanWarnings(); }));
+    box.querySelectorAll('[data-pl-addslot]').forEach((b) => b.addEventListener('click', () => {
+      const r = pe.rooms[+b.getAttribute('data-pl-addslot')]; const last = r.slots[r.slots.length - 1];
+      r.slots.push({ start: (last && last.end) || exam.start, end: exam.end, teachers: [] });
+      renderPlanEditor();
+    }));
+    box.querySelectorAll('[data-pl-rmslot]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = at(b.getAttribute('data-pl-rmslot')); pe.rooms[ri].slots.splice(si, 1); renderPlanEditor(); }));
+    box.querySelectorAll('[data-pl-rmroom]').forEach((b) => b.addEventListener('click', () => { pe.rooms.splice(+b.getAttribute('data-pl-rmroom'), 1); renderPlanEditor(); }));
+    document.getElementById('plAddRoom').addEventListener('click', () => { pe.rooms.push({ room: '', scope: [], slots: [{ start: exam.start, end: exam.end, teachers: [] }] }); renderPlanEditor(); });
+    document.getElementById('plCancel').addEventListener('click', () => { state.planEdit = null; renderPlanEditor(); });
+    document.getElementById('plSave').addEventListener('click', savePlan);
+    renderPlanWarnings();
+  }
+  function renderPlanWarnings() {
+    const pe = state.planEdit; const el = document.getElementById('plWarn');
+    const exam = pe && (state.adminExams || []).find((x) => x.id === pe.examId);
+    if (!el || !exam) return;
+    const w = planWarnings(exam, pe.rooms);
+    el.innerHTML = w.length ? `<div class="ad-alert"><div class="ad-alert-t">⚠️ Please check</div>${w.map((x) => `<div class="ad-alert-l">${escapeHtml(x)}</div>`).join('')}</div>` : '<div class="ad-ok">✓ No clashes found</div>';
+  }
+  async function savePlan() {
+    const pe = state.planEdit;
+    const exam = (state.adminExams || []).find((x) => x.id === pe.examId);
+    if (!exam) return;
+    if (pe.rooms.some((r) => !r.room)) { showToast('Choose a room for every room card', 'error'); return; }
+    if (pe.rooms.some((r) => r.slots.some((sl) => !sl.start || !sl.end || hhmmToMin(sl.end) <= hhmmToMin(sl.start)))) { showToast('Check the duty slot times', 'error'); return; }
+    const w = planWarnings(exam, pe.rooms).filter((x) => !/no invigilator|choose the class/.test(x));
+    if (w.length) {
+      const ok = await showConfirm(`${w.slice(0, 5).join('\n')}${w.length > 5 ? `\n+${w.length - 5} more` : ''}\n\nSave anyway?`, '⚠️ Please check', 'Save');
+      if (!ok) return;
+    }
+    const rooms = pe.rooms.map((r) => ({ room: r.room, scope: r.scope.slice(), slots: r.slots.map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers.slice() })) }));
+    try {
+      await waitForWrite(state.db.collection('exams').doc(exam.id).set({ plan: { rooms }, invigilators: planTeachers(rooms), planUpdatedAt: Date.now() }, { merge: true }));
+      state.planEdit = null;
+      renderPlanEditor();
+      showToast('Duty plan saved');
+    } catch (err) { flashOffline(err); }
+  }
+  function dutyChartText(exam) {
+    const d = dateObj(exam.date);
+    const L = ['*INVIGILATION DUTY CHART*', '', `📋 *${examTitle(exam)}*`, `📅 ${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()} · ${formatTimeStr(exam.start)} – ${formatTimeStr(exam.end)}`];
+    planOf(exam).forEach((r) => {
+      L.push('──────────');
+      L.push(`*${r.room}*${(r.scope || []).length ? ' — ' + scopeLabel(r.scope) : ''}`);
+      (r.slots || []).forEach((sl) => L.push(`🕙 ${formatTimeStr(sl.start)} – ${formatTimeStr(sl.end)}: ${(sl.teachers || []).map(planNameOf).join(', ') || '—'}`));
+    });
+    return L.join('\n');
+  }
+  function dutyChartPdf(exam) {
+    const w = createPdfWriter();
+    w.heading('INVIGILATION DUTY CHART', 16);
+    w.addSpace(2);
+    w.bodyLine(examTitle(exam).replace(/\s*·\s*/g, ' - '), { bold: true, size: 12 });
+    w.bodyLine(`${reportDayLabel(exam.date)}  |  ${formatTimeStr(exam.start)} - ${formatTimeStr(exam.end)}`, { size: 11 });
+    w.addSpace(4); w.rule();
+    planOf(exam).forEach((r) => {
+      w.addSpace(4);
+      w.bodyLine(`${r.room}${(r.scope || []).length ? '   (' + scopeLabel(r.scope) + ')' : ''}`, { bold: true, size: 12 });
+      (r.slots || []).forEach((sl) => w.bodyLine(`${formatTimeStr(sl.start)} - ${formatTimeStr(sl.end)}:   ${(sl.teachers || []).map(planNameOf).join(', ') || '-'}`, { indent: 14 }));
+      w.addSpace(4); w.rule();
+    });
+    saveFile(`Duty-Chart-${examTitle(exam).replace(/[^A-Za-z0-9]+/g, '-')}-${exam.date}.pdf`, w.finishBlob());
+  }
+
+  // ---------- Teacher: "My invigilation duty" on Today ----------
+  state.examsForAt = state.examsForAt || {};
+  function myDuties(date) {
+    const exams = state.examsFor[date] || [];
+    const out = [];
+    exams.forEach((e) => {
+      const mine = [];
+      planOf(e).forEach((r) => (r.slots || []).forEach((sl) => { if ((sl.teachers || []).indexOf(state.teacherId) !== -1) mine.push({ start: sl.start, end: sl.end, room: r.room, scope: r.scope || [] }); }));
+      if (mine.length) out.push({ exam: e, slots: mine.sort((a, b) => (a.start || '').localeCompare(b.start || '')) });
+    });
+    return out;
+  }
+  function renderMyDuties() {
+    const sec = document.getElementById('myDutySec');
+    if (!sec) return;
+    const today = todayStr();
+    if (!state.examsForAt[today] || Date.now() - state.examsForAt[today] > 120000) {
+      state.examsForAt[today] = Date.now();
+      delete state.examsFor[today];
+      loadExamsFor(today).then(() => renderMyDuties());
+    }
+    const list = myDuties(today);
+    sec.hidden = !list.length;
+    if (!list.length) return;
+    const logged = (state.classesToday || []).filter(isInvig);
+    document.getElementById('myDutyList').innerHTML = list.map(({ exam, slots }) => {
+      const done = logged.find((c) => c.examId === exam.id);
+      return `<div class="duty-card">
+        <div class="ad-tname">${escapeHtml(examTitle(exam))}</div>
+        ${slots.map((s) => `<div class="ad-tsub">🕙 ${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))} · <b>${escapeHtml(s.room)}</b>${s.scope.length ? ' · ' + escapeHtml(scopeLabel(s.scope)) : ''}</div>`).join('')}
+        ${done ? `<div class="ad-ok" style="margin-top:6px;">✓ Duty logged</div>` : `<button type="button" class="save-btn" data-log-duty="${escapeHtml(exam.id)}" style="margin:8px 0 0;">✓ Log this duty</button>`}
+      </div>`;
+    }).join('');
+    document.querySelectorAll('[data-log-duty]').forEach((b) => b.addEventListener('click', () => {
+      const item = list.find((x) => x.exam.id === b.getAttribute('data-log-duty'));
+      if (!item) return;
+      state.editingId = null; state.addTargetDate = null; state.editingSourceTab = 'today';
+      state.entryMode = 'activity';
+      state.activityForm = { activityType: 'Invigilation', note: '' };
+      state.invig = { mode: 'exam', examId: item.exam.id, type: '', subject: '', scope: [], parts: item.slots.map((s) => ({ start: s.start, end: s.end, room: s.room })) };
+      switchTab('add');
+      renderForm();
+      showToast('Check the times, change them if you were late, then Save');
+    }));
+  }
 
   // ---------- Admin: Exams & Invigilation ----------
   state.adminExamForm = state.adminExamForm || null;
@@ -4793,9 +5030,12 @@
         if (overlaps(a, b, hhmmToMin(e.start), hhmmToMin(e.end))) alerts.push({ t: `${x.slot.label} has a class during ${examTitle(e)}`, lines: [`${formatTimeStr(x.slot.time)} · ${nameOf(x.tid)}`] });
       });
       const inv = Object.keys(loggedBy).map((t) => `${nameOf(t)} (${svDur(loggedBy[t])})`);
-      return `<div class="ad-exam" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0">
+      const pr = planOf(e);
+      const planLine = pr.length ? `Duty plan: ${pr.length} room${pr.length === 1 ? '' : 's'}${pr.some((r) => (r.slots || []).some((sl) => !(sl.teachers || []).length)) ? ' · ⚠️ a slot has no invigilator' : ''}` : 'No duty plan yet · tap to make one';
+      return `<div class="ad-exam" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${escapeHtml(examTitle(e))}</div>
         <div class="ad-tsub">${escapeHtml([scopeLabel(e.scope), e.room, `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
+        <div class="ad-tsub" style="color: var(--gold); font-weight: 600;">${escapeHtml(planLine)}</div>
         ${inv.length ? `<div class="ad-tsub">Invigilators: ${escapeHtml(inv.join(', '))}</div>` : ''}
         ${missing.length ? (ended(e) ? `<div class="ad-tsub" style="color:#B45309;">Assigned, not logged: ${escapeHtml(missing.map(nameOf).join(', '))}</div>` : `<div class="ad-tsub">Assigned: ${escapeHtml(missing.map(nameOf).join(', '))}</div>`) : ''}
       </div>`;
@@ -4876,11 +5116,17 @@
         <div class="hv-d-row"><span>Classes</span><span>${escapeHtml(scopeLabel(e.scope) || '—')}</span></div>
         <div class="hv-d-row"><span>Invigilators</span><span>${escapeHtml((e.invigilators || []).map(nameOf).join(', ') || '—')}</span></div>
       </div>
+      ${planOf(e).length ? `<div class="plan-sum">${planOf(e).map((r) => `<div class="plan-sum-r"><b>${escapeHtml(r.room)}</b>${(r.scope || []).length ? ' · ' + escapeHtml(scopeLabel(r.scope)) : ''}${(r.slots || []).map((sl) => `<div class="ad-tsub">${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}: ${escapeHtml((sl.teachers || []).map(nameOf).join(', ') || '—')}</div>`).join('')}</div>`).join('')}</div>` : ''}
+      <button type="button" class="save-btn" id="exPlan" style="margin:12px 0 0;">${planOf(e).length ? 'Edit Duty Plan' : 'Make Duty Plan (rooms & invigilators)'}</button>
+      ${planOf(e).length ? `<div class="sid-actions" style="margin-top:8px;"><button type="button" class="btn-secondary" id="exChartPdf" style="border-color: var(--line);">Chart PDF</button><button type="button" class="btn-secondary" id="exChartWa" style="border-color: var(--line);">Share on WhatsApp</button></div>` : ''}
       <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="exDelete" style="border-color: var(--line);">Delete</button></div>`;
     const root = document.getElementById('hvSheet');
     root.classList.add('open');
     root.setAttribute('aria-hidden', 'false');
     document.getElementById('exEdit').addEventListener('click', () => { closeHvSheet(); openAdminExamForm(e); });
+    document.getElementById('exPlan').addEventListener('click', () => { closeHvSheet(); openPlanEditor(e); });
+    const cp = document.getElementById('exChartPdf'); if (cp) cp.addEventListener('click', () => dutyChartPdf(e));
+    const cw = document.getElementById('exChartWa'); if (cw) cw.addEventListener('click', () => window.open('https://wa.me/?text=' + encodeURIComponent(dutyChartText(e)), '_blank'));
     document.getElementById('exDelete').addEventListener('click', async () => {
       closeHvSheet();
       await confirmAndDeleteWithUndo(e.id, () => state.db.collection('exams').doc(e.id).delete(), '', '', 'Exam deleted', renderAdmin, null, 'Delete');
@@ -5682,6 +5928,7 @@
       if (tab === 'history') renderHistory();
       if (tab === 'admin') { refreshAdminExtras(); renderAdmin(); }
       if (tab === 'schedule') renderScheduleList();
+      if (tab === 'today') renderMyDuties();
     } catch (err) {
       showToast('Something went wrong loading this tab', 'error');
     }
@@ -5876,7 +6123,7 @@
   });
   document.getElementById('addClassLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'class'; prefillClassFromLast(); switchTab('add'); });
   document.getElementById('addActivityLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast(); switchTab('add'); });
-  setInterval(() => { if (state.tab === 'today') renderTodayList(); }, 30000);
+  setInterval(() => { if (state.tab === 'today') { renderTodayList(); renderMyDuties(); } }, 30000);
   document.getElementById('downloadReportBtn').addEventListener('click', () => {
     downloadReportForDate(todayStr(), document.getElementById('reportMsg'));
   });
@@ -8284,6 +8531,18 @@
     }
 
     const lead = reminderLead();
+    if (remindersOn && typeof myDuties === 'function') {
+      const now2 = new Date(); const today2 = todayStr();
+      myDuties(today2).forEach(({ exam, slots }) => slots.forEach((sl) => {
+        const [h, m] = String(sl.start).split(':').map(Number);
+        const mins = (new Date(now2.getFullYear(), now2.getMonth(), now2.getDate(), h, m).getTime() - now2.getTime()) / 60000;
+        const key = 'duty_' + today2 + '_' + exam.id + '_' + sl.start + '_' + sl.room;
+        if (mins <= lead && mins > lead - 1 && !state.firedScheduleReminders[key]) {
+          state.firedScheduleReminders[key] = true;
+          showReminderAlert(`Invigilation duty in ${sl.room} at ${formatTimeStr(sl.start)} — in ${lead} minutes.`);
+        }
+      }));
+    }
     if (remindersOn && state.scheduleSlots.length > 0) {
       const now = new Date();
       const today = todayStr();
@@ -8711,6 +8970,11 @@
       state.testTypes = (snap.exists && snap.data().list) || null;
       renderListManagers();
       if (state.tab === 'add') renderInvig();
+    }, () => {}));
+    unsubscribers.push(db.doc('settings/rooms').onSnapshot((snap) => {
+      state.rooms = (snap.exists && snap.data().list) || [];
+      renderListManagers();
+      if (state.tab === 'admin') renderAdmin();
     }, () => {}));
     unsubscribers.push(db.doc('settings/subjects').onSnapshot((snap) => {
       state.subjects = (snap.exists && snap.data().list) || null;
