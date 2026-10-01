@@ -814,6 +814,13 @@
   .team-chips { align-items: center; }
   .team-chips .chip { padding: 6px 11px; font-size: 12.5px; }
   .team-lbl { font-size: 12px; font-weight: 600; color: var(--muted-2); margin-right: 2px; }
+  .team-id { font-size: 12.5px; color: var(--muted); }
+  .team-id b { color: var(--ink); font-weight: 600; letter-spacing: .03em; }
+  .sid-block { display: flex; flex-direction: column; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--line); margin-top: 8px; }
+  .sid-form { display: flex; flex-direction: column; gap: 10px; }
+  .sid-actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; }
+  .sid-new { display: flex; flex-direction: column; gap: 8px; align-items: stretch; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 12px; }
+  .sid-code { font-size: 26px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-align: center; }
   .team-remove { align-self: flex-start; border: none; background: none; padding: 2px 0; font: inherit; font-size: 12.5px; font-weight: 600; color: #B91C1C; cursor: pointer; }
   .team-removed { border-top: 1px dashed var(--line); margin-top: 6px; padding-top: 6px; }
   .team-rm-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13.5px; color: var(--muted); }
@@ -1059,8 +1066,13 @@
       <button class="auth-tab" id="authTabSignup">Create Account</button>
     </div>
 
+    <div id="authStaffField" class="field" style="display:none;">
+      <label>Staff ID</label>
+      <input class="text-input" id="authStaffId" type="text" placeholder="e.g. CTJ-7K4P9X" autocapitalize="characters" autocomplete="off">
+      <div class="sal-preview" id="authStaffHint">Ask the admin for your Staff ID.</div>
+    </div>
     <div id="authNameField" class="field" style="display:none;">
-      <label>Full Name</label>
+      <label>Your Name</label>
       <input class="text-input" id="authName" type="text" placeholder="e.g. Priya Sharma" autocomplete="name">
     </div>
     <div id="authSalField" class="field" style="display:none;">
@@ -1073,8 +1085,8 @@
       <div class="sal-preview" id="authSalPreview"></div>
     </div>
     <div class="field">
-      <label>Email</label>
-      <input class="text-input" id="authEmail" type="email" placeholder="you@example.com" autocomplete="username">
+      <label id="authEmailLabel">Email or Staff ID</label>
+      <input class="text-input" id="authEmail" type="text" placeholder="you@example.com or CTJ-7K4P9X" autocomplete="username">
     </div>
     <div class="field">
       <label>Password</label>
@@ -1682,6 +1694,7 @@
       <div class="panel set-acc admin-only" id="adminTeamPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team</div>
         <div class="admin-sub" style="margin:0;">Choose who is a coordinator and which wing each person belongs to. A coordinator manages their wing (dashboard, exams, reports, batch lists) and can force a check-out, but does not teach.</div>
+        <div id="staffIdsBlock" class="sid-block"></div>
         <div id="teamRows" style="display:flex; flex-direction:column; margin-top:6px;"></div>
       </div>
 
@@ -2005,7 +2018,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.0 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.1 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3800,6 +3813,7 @@
       const w = teamWings(uid);
       return `<div class="team-row">
         <div class="team-name">${escapeHtml(name)}${uid === state.teacherId ? ' <span class="team-you">(you)</span>' : ''}</div>
+        <div class="team-id">${(state.team[uid] && state.team[uid].staffId) ? `ID: <b>${escapeHtml(state.team[uid].staffId)}</b>` : `<button type="button" class="hv-back" data-team-mkid="${uid}" style="padding:0;">Create Staff ID</button>`}</div>
         <div class="chips team-chips">
           <button type="button" class="chip${coord ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
           <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
@@ -3825,6 +3839,7 @@
       }
       save(uid, { role }, role === 'coordinator' ? `${name} is now a coordinator` : `${name} is now a teacher`);
     }));
+    el.querySelectorAll('[data-team-mkid]').forEach((b) => b.addEventListener('click', () => createIdForExisting(b.getAttribute('data-team-mkid'))));
     el.querySelectorAll('[data-team-remove]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-team-remove');
       const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person';
@@ -3844,6 +3859,125 @@
       save(uid, { wings: w }, 'Wing updated');
     }));
   }
+  // ---------- Staff IDs (invite codes) ----------
+  // staffIds/{CODE}:  { note, role, wings, status: 'unused' | 'used' | 'revoked', usedBy, usedAt, createdAt }
+  // staffLogin/{CODE}: { email }  — lets a person sign in with their Staff ID instead of email
+  // members/{uid}:    { staffId, joinedAt } — proof this account joined with a valid ID
+  const STAFF_PREFIX = 'CTJ-';
+  const STAFF_ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O, 1/I/L
+  function normStaffId(v) {
+    let t = String(v || '').toUpperCase().replace(/\s+/g, '');
+    if (/^CTJ[^-]/.test(t)) t = 'CTJ-' + t.slice(3);
+    return t;
+  }
+  function looksLikeStaffId(v) { return /^CTJ-?[A-Z0-9]{4,6}$/i.test(String(v || '').replace(/\s+/g, '')); }
+  async function newStaffCode() {
+    for (let k = 0; k < 8; k++) {
+      let c = STAFF_PREFIX;
+      const buf = new Uint32Array(6);
+      (window.crypto || window.msCrypto).getRandomValues(buf);
+      buf.forEach((n) => { c += STAFF_ALPHA[n % STAFF_ALPHA.length]; });
+      const snap = await state.db.doc('staffIds/' + c).get();
+      if (!snap.exists) return c;
+    }
+    throw new Error('Could not create a unique ID, please try again.');
+  }
+  state.staffForm = state.staffForm || null;
+  state.lastStaffCode = state.lastStaffCode || null;
+  let unsubStaffIds = null;
+  function subscribeStaffIds() {
+    if (unsubStaffIds || !state.db || !state.canAdmin) return;
+    unsubStaffIds = state.db.collection('staffIds').onSnapshot((snap) => {
+      state.staffIds = snap.docs.map((d) => Object.assign({ code: d.id }, d.data()));
+      if (state.tab === 'admin') renderAdmin();
+    }, () => {});
+  }
+  function staffShareText(code) {
+    const link = location.href.split('#')[0].split('?')[0];
+    return `CATJEE Teach Desk\n\nYour Staff ID: *${code}*\n\nOpen ${link} → Create Account → enter this Staff ID, your name, email and a password.\nAfter that you can sign in with your Staff ID or your email.`;
+  }
+  function renderStaffIdsBlock() {
+    const el = document.getElementById('staffIdsBlock');
+    if (!el) return;
+    const f = state.staffForm;
+    const list = (state.staffIds || []).slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    const unused = list.filter((x) => x.status === 'unused');
+    let html = '';
+    if (state.lastStaffCode) {
+      html += `<div class="sid-new"><div class="team-lbl">New Staff ID</div><div class="sid-code">${escapeHtml(state.lastStaffCode)}</div>
+        <div class="sid-actions"><button type="button" class="btn-secondary" id="sidCopy" style="border-color: var(--line);">Copy</button><button type="button" class="save-btn" id="sidShare" style="margin:0;">Share on WhatsApp</button></div>
+        <button type="button" class="hv-back" id="sidDone" style="padding:0; align-self:center;">Done</button></div>`;
+    } else if (f) {
+      html += `<div class="sid-form">
+        <input class="text-input" id="sidNote" type="text" placeholder="For (optional), e.g. New Physics teacher" value="${escapeHtml(f.note || '')}">
+        <div class="chips team-chips"><span class="team-lbl">Role</span>
+          <button type="button" class="chip${f.role === 'teacher' ? ' active' : ''}" data-sid-role="teacher">Teacher</button>
+          <button type="button" class="chip${f.role === 'coordinator' ? ' active' : ''}" data-sid-role="coordinator">Coordinator</button></div>
+        <div class="chips team-chips"><span class="team-lbl">Wing</span>
+          <button type="button" class="chip${f.wings.indexOf('Pre-Foundation') !== -1 ? ' active' : ''}" data-sid-wing="Pre-Foundation">Pre-Foundation</button>
+          <button type="button" class="chip${f.wings.indexOf('Foundation') !== -1 ? ' active' : ''}" data-sid-wing="Foundation">Foundation</button></div>
+        <div class="sid-actions"><button type="button" class="btn-secondary" id="sidCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="sidGenerate" style="margin:0;">Generate ID</button></div>
+      </div>`;
+    } else {
+      html += `<button type="button" class="btn-secondary" id="sidAdd" style="border-color: var(--line);">+ Add staff (create Staff ID)</button>`;
+    }
+    if (unused.length) {
+      html += `<div class="team-lbl" style="margin:10px 0 2px;">Waiting to be used (${unused.length})</div>` + unused.map((x) => `<div class="team-rm-row">
+        <span><b style="font-weight:600; color: var(--ink);">${escapeHtml(x.code)}</b>${x.note ? ' · ' + escapeHtml(x.note) : ''} · ${x.role === 'coordinator' ? 'Coordinator' : 'Teacher'}</span>
+        <span style="display:flex; gap:12px;"><button type="button" class="hv-back" data-sid-reshare="${escapeHtml(x.code)}" style="padding:0;">Share</button><button type="button" class="team-remove" data-sid-revoke="${escapeHtml(x.code)}">Cancel</button></span></div>`).join('');
+    }
+    el.innerHTML = html;
+    const on = (id, fn) => { const b = document.getElementById(id); if (b) b.addEventListener('click', fn); };
+    on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1) }; renderStaffIdsBlock(); });
+    on('sidCancel', () => { state.staffForm = null; renderStaffIdsBlock(); });
+    on('sidDone', () => { state.lastStaffCode = null; renderStaffIdsBlock(); });
+    on('sidCopy', async () => { try { await navigator.clipboard.writeText(state.lastStaffCode); showToast('Staff ID copied'); } catch (e) { showToast(state.lastStaffCode); } });
+    on('sidShare', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(state.lastStaffCode)), '_blank'));
+    const noteEl = document.getElementById('sidNote');
+    if (noteEl) noteEl.addEventListener('input', () => { state.staffForm.note = noteEl.value; });
+    el.querySelectorAll('[data-sid-role]').forEach((b) => b.addEventListener('click', () => { state.staffForm.role = b.getAttribute('data-sid-role'); renderStaffIdsBlock(); }));
+    el.querySelectorAll('[data-sid-wing]').forEach((b) => b.addEventListener('click', () => {
+      const w = b.getAttribute('data-sid-wing'); const k = state.staffForm.wings.indexOf(w);
+      if (k === -1) state.staffForm.wings.push(w); else state.staffForm.wings.splice(k, 1);
+      renderStaffIdsBlock();
+    }));
+    on('sidGenerate', async () => {
+      const ff = state.staffForm;
+      if (!ff.wings.length) { showToast('Choose a wing', 'error'); return; }
+      try {
+        const code = await newStaffCode();
+        await state.db.doc('staffIds/' + code).set({ note: (ff.note || '').trim(), role: ff.role, wings: ff.wings.slice(), status: 'unused', createdAt: Date.now(), createdBy: state.teacherId });
+        state.staffForm = null; state.lastStaffCode = code;
+        renderStaffIdsBlock();
+      } catch (err) { flashOffline(err); }
+    });
+    el.querySelectorAll('[data-sid-reshare]').forEach((b) => b.addEventListener('click', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(b.getAttribute('data-sid-reshare'))), '_blank')));
+    el.querySelectorAll('[data-sid-revoke]').forEach((b) => b.addEventListener('click', async () => {
+      const code = b.getAttribute('data-sid-revoke');
+      const ok = await showConfirm(`${code} will stop working. Nobody can create an account with it.`, 'Cancel this Staff ID?', 'Cancel ID');
+      if (!ok) return;
+      try { await state.db.doc('staffIds/' + code).delete(); showToast('Staff ID cancelled'); } catch (err) { flashOffline(err); }
+    }));
+  }
+  // Give an existing person (who joined before Staff IDs) their own ID, so they can sign in with it too.
+  async function createIdForExisting(uid) {
+    const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person';
+    let email = '';
+    try { const p = await state.db.doc('profile/' + uid).get(); email = (p.data() || {}).email || ''; } catch (e) { /* ignore */ }
+    if (!email) { showToast(`${name} needs to open the new app version once first`, 'error'); return; }
+    try {
+      const code = await newStaffCode();
+      const batch = state.db.batch();
+      batch.set(state.db.doc('staffIds/' + code), { note: '', role: isCoordUid(uid) ? 'coordinator' : 'teacher', wings: teamWings(uid), status: 'used', usedBy: uid, usedAt: Date.now(), createdAt: Date.now(), createdBy: state.teacherId });
+      batch.set(state.db.doc('staffLogin/' + code), { email });
+      batch.set(state.db.doc('team/' + uid), { staffId: code }, { merge: true });
+      await batch.commit();
+      state.lastStaffCode = code;
+      showToast(`Staff ID for ${name}: ${code}`);
+      renderStaffIdsBlock();
+    } catch (err) { flashOffline(err); }
+  }
+
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
     const coordOnly = state.isCoordinator && !state.canAdmin;
@@ -3926,7 +4060,7 @@
     applyRoleUI();
     applyAdminTab();
     renderSettingsAccordion();
-    if (state.canAdmin) renderTeamPanel();
+    if (state.canAdmin) { subscribeStaffIds(); renderTeamPanel(); renderStaffIdsBlock(); }
     const date = state.adminDate;
     const wing = state.adminReportWing;
     const isToday = date === todayStr();
@@ -7925,6 +8059,9 @@
     authMode = mode;
     document.getElementById('authTabSignin').classList.toggle('active', mode === 'signin');
     document.getElementById('authTabSignup').classList.toggle('active', mode === 'signup');
+    document.getElementById('authStaffField').style.display = mode === 'signup' ? 'flex' : 'none';
+    document.getElementById('authEmailLabel').textContent = mode === 'signup' ? 'Email' : 'Email or Staff ID';
+    document.getElementById('authEmail').placeholder = mode === 'signup' ? 'you@example.com' : 'you@example.com or CTJ-7K4P9X';
     document.getElementById('authNameField').style.display = mode === 'signup' ? 'flex' : 'none';
     document.getElementById('authSalField').style.display = mode === 'signup' ? 'flex' : 'none';
     document.getElementById('authSubmitBtn').textContent = mode === 'signup' ? 'Create Account' : 'Sign In';
@@ -7975,22 +8112,63 @@
     el.style.display = 'block';
   }
 
+  // Staff ID check while typing (sign-up)
+  document.getElementById('authStaffId').addEventListener('change', async () => {
+    const code = normStaffId(document.getElementById('authStaffId').value);
+    const hint = document.getElementById('authStaffHint');
+    if (!looksLikeStaffId(code)) { hint.textContent = 'Ask the admin for your Staff ID.'; return; }
+    try {
+      const snap = await firebase.firestore().doc('staffIds/' + code).get();
+      const d = snap.data();
+      hint.textContent = !snap.exists ? 'This Staff ID was not found. Please check it.' : (d.status !== 'unused' ? 'This Staff ID has already been used.' : `✓ Valid ID · ${d.role === 'coordinator' ? 'Coordinator' : 'Teacher'} · ${(d.wings || []).join(', ')}`);
+    } catch (err) { hint.textContent = 'Could not check the ID. Check your internet.'; }
+  });
   document.getElementById('authSubmitBtn').addEventListener('click', async () => {
-    const email = document.getElementById('authEmail').value.trim();
+    let email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const name = document.getElementById('authName').value.trim();
     document.getElementById('authError').style.display = 'none';
-    if (!email || !password) { showAuthError('Please enter both email and password.'); return; }
+    if (!email || !password) { showAuthError(authMode === 'signup' ? 'Please enter your email and a password.' : 'Please enter your email (or Staff ID) and password.'); return; }
     const btn = document.getElementById('authSubmitBtn');
     btn.disabled = true;
+    const fs = firebase.firestore();
     try {
       if (authMode === 'signup') {
-        if (!name) { showAuthError('Please enter your full name.'); btn.disabled = false; return; }
+        const code = normStaffId(document.getElementById('authStaffId').value);
+        if (!looksLikeStaffId(code)) { showAuthError('Enter the Staff ID you received from the admin.'); btn.disabled = false; return; }
+        if (!name) { showAuthError('Please enter your name.'); btn.disabled = false; return; }
         if (!authSalutation) { showAuthError('Choose how we should address you.'); btn.disabled = false; return; }
-        const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        await cred.user.updateProfile({ displayName: name });
-        await firebase.firestore().doc('profile/' + cred.user.uid).set({ name: name, subject: '', salutation: authSalutation }, { merge: true });
+        const idSnap = await fs.doc('staffIds/' + code).get();
+        const idData = idSnap.data();
+        if (!idSnap.exists) { showAuthError('This Staff ID was not found. Please check it with the admin.'); btn.disabled = false; return; }
+        if (idData.status !== 'unused') { showAuthError('This Staff ID has already been used. Ask the admin for a new one.'); btn.disabled = false; return; }
+        // Hold the normal start-up until the ID is linked to this account.
+        let release;
+        state.signupPromise = new Promise((r) => { release = r; });
+        try {
+          const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
+          const uid = cred.user.uid;
+          try {
+            await cred.user.updateProfile({ displayName: name });
+            const batch = fs.batch();
+            batch.update(fs.doc('staffIds/' + code), { status: 'used', usedBy: uid, usedAt: Date.now(), note: '' });
+            batch.set(fs.doc('members/' + uid), { staffId: code, joinedAt: Date.now() });
+            batch.set(fs.doc('team/' + uid), { staffId: code, role: idData.role || 'teacher', wings: idData.wings || [], status: 'active' });
+            batch.set(fs.doc('staffLogin/' + code), { email: cred.user.email });
+            await batch.commit();
+            await fs.doc('profile/' + uid).set({ name: name, subject: '', salutation: authSalutation, email: cred.user.email }, { merge: true });
+          } catch (claimErr) {
+            try { await cred.user.delete(); } catch (e) { /* ignore */ }
+            throw new Error('This Staff ID could not be used (it may have just been used by someone else). Please ask the admin.');
+          }
+        } finally { release(); state.signupPromise = null; }
       } else {
+        if (looksLikeStaffId(email) && email.indexOf('@') === -1) {
+          const code = normStaffId(email);
+          const snap = await fs.doc('staffLogin/' + code).get();
+          if (!snap.exists || !(snap.data() || {}).email) { showAuthError('No account is linked to this Staff ID yet. Use your email, or create your account first.'); btn.disabled = false; return; }
+          email = snap.data().email;
+        }
         await firebase.auth().signInWithEmailAndPassword(email, password);
       }
     } catch (err) {
@@ -8021,6 +8199,20 @@
 
   async function loadUserData(firebaseUser) {
     const db = firebase.firestore();
+    if (state.signupPromise) { try { await state.signupPromise; } catch (e) { /* ignore */ } }
+    // Only people who joined with a Staff ID (or were already using the app) may enter.
+    {
+      let member = false;
+      try { member = (await db.doc('members/' + firebaseUser.uid).get()).exists; } catch (e) { /* ignore */ }
+      if (!member) { try { member = (await db.doc('admins/' + firebaseUser.uid).get()).exists; } catch (e) { /* ignore */ } }
+      if (!member) { try { member = (await db.doc('profile/' + firebaseUser.uid).get()).exists; } catch (e) { /* ignore */ } }
+      if (!member) {
+        try { await firebase.auth().signOut(); } catch (e) { /* ignore */ }
+        showAuthScreen();
+        showAuthError('This account is not linked to a Staff ID. Tap "Create Account" and enter the Staff ID you received from the admin.');
+        return;
+      }
+    }
     state.db = db;
     state.teacherId = firebaseUser.uid;
     state.user = { name: firebaseUser.displayName || firebaseUser.email || 'Teacher', avatarUrl: firebaseUser.photoURL || null };
@@ -8031,6 +8223,9 @@
       const profileData = profileSnap.data();
       if (firebaseUser.displayName && (!profileData || profileData.name !== firebaseUser.displayName)) {
         await db.doc('profile/' + firebaseUser.uid).set({ name: firebaseUser.displayName }, { merge: true });
+      }
+      if (firebaseUser.email && (!profileData || profileData.email !== firebaseUser.email)) {
+        await db.doc('profile/' + firebaseUser.uid).set({ email: firebaseUser.email }, { merge: true });
       }
     } catch (err) { /* best effort */ }
 
