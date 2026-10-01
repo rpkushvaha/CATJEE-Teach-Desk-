@@ -805,6 +805,21 @@
   .set-acc:not(.open) > *:not(.panel-title) { display: none !important; }
   .set-acc.open > .panel-title { margin-bottom: 12px; }
   #view-admin .set-acc { padding-top: 14px; padding-bottom: 14px; }
+  /* ---------- Timetable ---------- */
+  .ad-tabs { display: flex !important; gap: 2px !important; overflow-x: auto; scrollbar-width: none; }
+  .ad-tabs::-webkit-scrollbar { display: none; }
+  .ad-tab { flex: 1 0 auto; font-size: 11.5px !important; padding: 8px 3px !important; white-space: nowrap; }
+  .tt-teachers { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .tt-teachers::-webkit-scrollbar { display: none; }
+  .tt-teachers .chip { flex-shrink: 0; }
+  #ttSummary[hidden], #ttActions[hidden], #ttCopyBtn[hidden], #ttForm[hidden] { display: none !important; }
+  #ttSummary { display: flex; flex-direction: column; gap: 2px; }
+  .tt-form { display: flex; flex-direction: column; gap: 12px; }
+  .tt-row .sv-main { min-width: 0; }
+  .tt-warn { display: block; font-size: 11.5px; color: #B45309; font-weight: 600; margin-top: 2px; }
+  .sv-row.tt-clash { box-shadow: inset 3px 0 0 #D97706; }
+  .tl-pill.tt-own { background: var(--neutral-soft); color: var(--muted-2); }
+  .sv-coord { font-size: 11px; font-weight: 600; color: var(--gold); }
   /* ---------- Team & coordinator mode ---------- */
   #view-admin .atab-off2 { display: none !important; }
   .team-row { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
@@ -1542,7 +1557,8 @@
         <button type="button" class="hv-icon" id="adminDateCalIcon" aria-label="Open calendar"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
       </div>
       <div class="ad-tabs" id="adminTabs" role="tablist">
-        <button type="button" class="ad-tab" data-atab-btn="dash" role="tab">Dashboard</button>
+        <button type="button" class="ad-tab" data-atab-btn="dash" role="tab">Home</button>
+        <button type="button" class="ad-tab" data-atab-btn="tt" role="tab">Timetable</button>
         <button type="button" class="ad-tab" data-atab-btn="exams" role="tab">Exams</button>
         <button type="button" class="ad-tab" data-atab-btn="reports" role="tab">Reports</button>
         <button type="button" class="ad-tab" data-atab-btn="settings" role="tab">Settings</button>
@@ -1554,7 +1570,7 @@
       </div>
       <button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams reports" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button>
 
-      <div class="chips" id="adminWingChips" data-atab="dash reports">
+      <div class="chips" id="adminWingChips" data-atab="dash tt reports">
         <button class="chip active" data-admin-wing="all">All</button>
         <button class="chip" data-admin-wing="Pre-Foundation">Pre-Foundation</button>
         <button class="chip" data-admin-wing="Foundation">Foundation</button>
@@ -1602,6 +1618,22 @@
       <section class="tsec" data-atab="dash">
         <div class="tsec-head"><div class="tsec-title">Schedule (All Teachers)</div><div class="tsec-meta" id="adminSchedMeta"></div></div>
         <div id="adminSchedList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </section>
+
+      <section class="tsec" id="ttSec" data-atab="tt">
+        <div class="hv-nav">
+          <button type="button" class="hv-arrow" id="ttPrev" aria-label="Previous week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <div style="text-align:center;"><div class="hv-label" id="ttLabel"></div><div class="sv-sub" id="ttWhich" style="text-align:center;"></div></div>
+          <button type="button" class="hv-arrow" id="ttNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="chips tt-teachers" id="ttTeachers"></div>
+        <div class="sv-summary" id="ttSummary" hidden></div>
+        <div class="sv-actions" id="ttActions">
+          <button type="button" class="save-btn" id="ttAddBtn" style="margin:0;">+ Add class</button>
+          <button type="button" class="btn-secondary" id="ttCopyBtn" style="border-color: var(--line);">Copy last week</button>
+        </div>
+        <div class="panel tt-form" id="ttForm" hidden></div>
+        <div id="ttBody" style="display:flex; flex-direction:column;"></div>
       </section>
 
       <section class="tsec" id="adminExamsSec" data-atab="exams">
@@ -2018,7 +2050,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.1 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.2 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3978,6 +4010,268 @@
     } catch (err) { flashOffline(err); }
   }
 
+  // ---------- Timetable (Admin / Coordinator) ----------
+  // Slots are written into each teacher's own schedule (schedule/{teacher}/slots) with setBy = the coordinator,
+  // so they appear in the teacher's Schedule, reminders and Today automatically.
+  state.tt = state.tt || { weekStart: mondayOf(todayStr()), teacher: 'all', form: null, slots: {}, key: '' };
+  const TT_DURS = [40, 50, 60, 65];
+  const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  function ttTeacherIds() {
+    const lw = leadWings();
+    const wing = state.adminReportWing;
+    return (state.adminTeacherIds || []).filter((u) => !isCoordUid(u) && !isRemovedUid(u))
+      .filter((u) => { const tw = teamWings(u); if (!tw.length) return true; if (wing !== 'all') return tw.indexOf(wing) !== -1; return tw.some((x) => lw.indexOf(x) !== -1); })
+      .sort((a, b) => ttName(a).localeCompare(ttName(b)));
+  }
+  function ttName(u) { return (state.adminNames[u] && state.adminNames[u].name) || 'Teacher'; }
+  function ttBatches() {
+    const lw = state.adminReportWing !== 'all' ? [state.adminReportWing] : leadWings();
+    const out = [];
+    lw.forEach((w) => currentBatches(w).forEach((b) => { if (out.indexOf(b) === -1) out.push(b); }));
+    return out;
+  }
+  async function loadTtWeek(force) {
+    const tt = state.tt;
+    const ids = ttTeacherIds();
+    const ws = tt.weekStart, we = shiftDateStr(ws, 6);
+    const prev = shiftDateStr(ws, -7);
+    const key = ws + '|' + ids.join(',');
+    if (!state.db || (!force && key === tt.key)) return;
+    tt.key = key;
+    const res = await Promise.all(ids.map((tid) => state.db.collection('schedule/' + tid + '/slots').where('date', '>=', prev).where('date', '<=', we).get()
+      .then((snap) => ({ tid, slots: snap.docs.map(normDoc).filter((s) => s.date >= prev && s.date <= we) }))
+      .catch(() => ({ tid, slots: [] }))));
+    if (tt.key !== key) return;
+    const map = {};
+    res.forEach((r) => { map[r.tid] = r.slots; });
+    tt.slots = map;
+    if (state.tab === 'admin' && state.adminTab === 'tt') renderTimetable();
+  }
+  function ttAll(dateFrom, dateTo) {
+    const out = [];
+    Object.keys(state.tt.slots || {}).forEach((tid) => (state.tt.slots[tid] || []).forEach((s) => { if (s.date >= dateFrom && s.date <= dateTo) out.push({ tid, s }); }));
+    return out;
+  }
+  // Clashes: the same teacher twice, the same batch with two teachers, or the same room twice at one time.
+  function ttClashes(list) {
+    const res = {};
+    const act = list.filter((x) => !x.s.cancelled);
+    for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) {
+      const a = act[i], b = act[j];
+      if (a.s.date !== b.s.date) continue;
+      const a1 = hhmmToMin(a.s.time), a2 = a1 + slotDuration(a.s), b1 = hhmmToMin(b.s.time), b2 = b1 + slotDuration(b.s);
+      if (!(a1 < b2 && b1 < a2)) continue;
+      let why = '';
+      if (a.tid === b.tid) why = `${ttName(a.tid)} has two classes`;
+      else if (a.s.label === b.s.label) why = `${a.s.label} has two teachers`;
+      else if (a.s.room && b.s.room && a.s.room.trim().toLowerCase() === b.s.room.trim().toLowerCase()) why = `Room ${a.s.room} is used twice`;
+      if (why) { res[a.s.id] = why; res[b.s.id] = why; }
+    }
+    return res;
+  }
+  function renderTimetable() {
+    const el = document.getElementById('ttBody');
+    if (!el) return;
+    const tt = state.tt;
+    const ws = tt.weekStart, we = shiftDateStr(ws, 6);
+    const ids = ttTeacherIds();
+    if (tt.teacher !== 'all' && ids.indexOf(tt.teacher) === -1) tt.teacher = 'all';
+    loadTtWeek(false);
+    document.getElementById('ttLabel').textContent = `${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })}`;
+    const cur = mondayOf(todayStr());
+    document.getElementById('ttWhich').textContent = svWeekLabel(ws);
+    document.getElementById('ttPrev').disabled = ws <= shiftDateStr(cur, -28);
+    document.getElementById('ttNext').disabled = ws >= shiftDateStr(cur, 28);
+    const past = we < todayStr();
+    document.getElementById('ttActions').hidden = past || !!tt.form;
+    document.getElementById('ttCopyBtn').hidden = !ttCopyList().length;
+    // teacher filter
+    document.getElementById('ttTeachers').innerHTML = [['all', 'All teachers']].concat(ids.map((u) => [u, ttName(u)]))
+      .map(([v, l]) => `<button type="button" class="chip${tt.teacher === v ? ' active' : ''}" data-tt-t="${escapeHtml(v)}">${escapeHtml(l)}</button>`).join('');
+    document.querySelectorAll('#ttTeachers [data-tt-t]').forEach((b) => b.addEventListener('click', () => { tt.teacher = b.getAttribute('data-tt-t'); renderTimetable(); }));
+    renderTtForm();
+    const all = ttAll(ws, we);
+    const clash = ttClashes(all);
+    const shown = all.filter((x) => tt.teacher === 'all' || x.tid === tt.teacher);
+    const nClash = Object.keys(clash).filter((id) => shown.some((x) => x.s.id === id)).length;
+    const nTeach = shown.map((x) => x.tid).filter((v, i, a) => a.indexOf(v) === i).length;
+    document.getElementById('ttSummary').innerHTML = shown.length
+      ? `<b>${shown.filter((x) => !x.s.cancelled).length} classes · ${nTeach} teacher${nTeach === 1 ? '' : 's'}</b>${nClash ? `<span style="color:#B45309;">⚠️ ${nClash} class${nClash === 1 ? '' : 'es'} in a clash</span>` : ''}`
+      : '';
+    document.getElementById('ttSummary').hidden = !shown.length;
+    if (!Object.keys(tt.slots || {}).length && ids.length) { el.innerHTML = '<div class="skel short"></div>'; return; }
+    let html = '';
+    datesBetween(ws, we).forEach((d) => {
+      const day = shown.filter((x) => x.s.date === d).sort((a, b) => (a.s.time || '').localeCompare(b.s.time || ''));
+      if (!day.length && dateObj(d).getDay() === 0) return;
+      html += `<div class="sv-day${d === todayStr() ? ' today' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${d === todayStr() ? '<span class="sv-today">Today</span>' : ''}<span class="hv-day-meta"> · ${day.length ? day.length + ' class' + (day.length === 1 ? '' : 'es') : 'No classes'}</span></div>`;
+      if (day.length) {
+        html += `<div class="sv-rows">${day.map((x) => {
+          const s = x.s; const end = svMinToHHMM(hhmmToMin(s.time) + slotDuration(s));
+          return `<div class="sv-row tt-row${s.cancelled ? ' cancelled' : ''}${clash[s.id] ? ' tt-clash' : ''}" data-tt-slot="${escapeHtml(s.id)}" data-tt-tid="${escapeHtml(x.tid)}" role="button" tabindex="0">
+            <span class="sv-time">${escapeHtml(formatTimeStr(s.time))}</span>
+            <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || '')}</span><span class="sv-dur">${escapeHtml(ttName(x.tid))} · till ${escapeHtml(formatTimeStr(end))}${s.room ? ' · ' + escapeHtml(s.room) : ''}</span>
+            ${clash[s.id] ? `<span class="tt-warn">⚠️ ${escapeHtml(clash[s.id])}</span>` : ''}</span>
+            ${s.cancelled ? '<span class="tl-pill cancelled">Cancelled</span>' : (s.setBy ? '' : '<span class="tl-pill tt-own">By teacher</span>')}
+          </div>`;
+        }).join('')}</div>`;
+      }
+    });
+    el.innerHTML = html || '<div class="hv-note" style="text-align:left;">No classes this week yet.</div>';
+    el.querySelectorAll('[data-tt-slot]').forEach((r) => r.addEventListener('click', () => openTtSheet(r.getAttribute('data-tt-tid'), r.getAttribute('data-tt-slot'))));
+  }
+  function openTtSheet(tid, id) {
+    const s = ((state.tt.slots || {})[tid] || []).find((x) => x.id === id);
+    if (!s) return;
+    const end = svMinToHHMM(hhmmToMin(s.time) + slotDuration(s));
+    const mine = !!s.setBy;
+    document.getElementById('hvSheetBody').innerHTML = `<div class="hv-d-title">${escapeHtml(s.label || 'Class')}</div>
+      <div class="hv-d-wing">${escapeHtml(ttName(tid))}</div>
+      <div class="hv-d-rows" style="margin-top:10px;">
+        <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dayHeading(s.date))}</span></div>
+        <div class="hv-d-row"><span>Time</span><span>${escapeHtml(formatTimeStr(s.time))} – ${escapeHtml(formatTimeStr(end))}</span></div>
+        <div class="hv-d-row"><span>Room</span><span>${escapeHtml(s.room || '—')}</span></div>
+        <div class="hv-d-row"><span>Added by</span><span>${mine ? escapeHtml(s.setByName || 'Coordinator') : 'The teacher'}</span></div>
+        ${s.cancelled ? '<div class="hv-d-row"><span>Status</span><span>Cancelled by the teacher</span></div>' : ''}
+      </div>
+      ${mine ? `<div class="hv-d-btns"><button type="button" class="btn-secondary" id="ttEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="ttDel" style="border-color: var(--line);">Delete</button></div>`
+        : '<div class="hv-note" style="text-align:left; margin-top:12px;">This class was added by the teacher, so only they can change it.</div>'}`;
+    const root = document.getElementById('hvSheet');
+    root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+    if (!mine) return;
+    document.getElementById('ttEdit').addEventListener('click', () => { closeHvSheet(); openTtForm({ tid, slot: s }); });
+    document.getElementById('ttDel').addEventListener('click', async () => {
+      closeHvSheet();
+      const ok = await showConfirm(`Remove ${s.label} (${formatTimeStr(s.time)}, ${dayHeading(s.date)}) from ${ttName(tid)}'s timetable?`, 'Delete class?', 'Delete');
+      if (!ok) return;
+      try { await state.db.collection('schedule/' + tid + '/slots').doc(s.id).delete(); showToast('Class removed'); await loadTtWeek(true); } catch (err) { flashOffline(err); }
+    });
+  }
+  function openTtForm(edit) {
+    const ws = state.tt.weekStart;
+    state.tt.form = edit
+      ? { id: edit.slot.id, oldTid: edit.tid, tid: edit.tid, dates: [edit.slot.date], batch: edit.slot.label, start: edit.slot.time, dur: slotDuration(edit.slot), room: edit.slot.room || '' }
+      : { id: null, tid: state.tt.teacher !== 'all' ? state.tt.teacher : null, dates: [], batch: null, start: '', dur: 40, room: '' };
+    if (!edit && ws === mondayOf(todayStr())) state.tt.form.dates = [];
+    renderTimetable();
+    setTimeout(() => { const f = document.getElementById('ttForm'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 40);
+  }
+  function renderTtForm() {
+    const box = document.getElementById('ttForm');
+    const f = state.tt.form;
+    box.hidden = !f;
+    if (!f) return;
+    const ws = state.tt.weekStart;
+    const days = datesBetween(ws, shiftDateStr(ws, 6));
+    const end = f.start ? svMinToHHMM(hhmmToMin(f.start) + f.dur) : '';
+    box.innerHTML = `<div class="panel-title" style="margin:0;">${f.id ? 'Edit class' : 'Add class to timetable'}</div>
+      <div class="field"><label>${f.id ? 'Day' : 'Day · tap one or more'}</label><div class="sv-days">${days.map((d) => {
+        const dis = d < todayStr();
+        return `<button type="button" class="chip sv-daychip${f.dates.indexOf(d) !== -1 ? ' active' : ''}" data-tt-day="${d}"${dis ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`;
+      }).join('')}</div></div>
+      <div class="field"><label>Teacher</label><div class="chips">${ttTeacherIds().map((u) => `<button type="button" class="chip${f.tid === u ? ' active' : ''}" data-tt-ft="${u}">${escapeHtml(ttName(u))}</button>`).join('') || '<span class="hv-note">No teachers in this wing yet.</span>'}</div></div>
+      <div class="field"><label>Class / Batch</label><div class="chips">${ttBatches().map((b) => `<button type="button" class="chip${f.batch === b ? ' active' : ''}" data-tt-b="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
+      <div class="field"><label>Timing</label>
+        <div class="sv-times"><div><div class="sv-tlbl">Start</div><input class="text-input" type="time" id="ttStart" value="${escapeHtml(f.start)}"></div>
+        <div><div class="sv-tlbl">End · auto</div><input class="text-input" type="time" id="ttEnd" value="${escapeHtml(end)}"></div></div>
+        <div class="chips" style="margin-top:8px;">${TT_DURS.map((m) => `<button type="button" class="chip${f.dur === m ? ' active' : ''}" data-tt-dur="${m}">${svDur(m)}</button>`).join('')}</div></div>
+      <div class="field"><label>Room (optional)</label><input class="text-input" id="ttRoom" type="text" placeholder="e.g. Room 4" value="${escapeHtml(f.room)}"></div>
+      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="ttCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="ttSave" style="margin:0;">${f.id ? 'Save changes' : 'Add to timetable'}</button></div>`;
+    box.querySelectorAll('[data-tt-day]').forEach((b) => b.addEventListener('click', () => {
+      const d = b.getAttribute('data-tt-day');
+      if (f.id) f.dates = [d]; else { const k = f.dates.indexOf(d); if (k === -1) f.dates.push(d); else f.dates.splice(k, 1); }
+      renderTtForm();
+    }));
+    box.querySelectorAll('[data-tt-ft]').forEach((b) => b.addEventListener('click', () => { f.tid = b.getAttribute('data-tt-ft'); renderTtForm(); }));
+    box.querySelectorAll('[data-tt-b]').forEach((b) => b.addEventListener('click', () => { f.batch = b.getAttribute('data-tt-b'); renderTtForm(); }));
+    box.querySelectorAll('[data-tt-dur]').forEach((b) => b.addEventListener('click', () => { f.dur = Number(b.getAttribute('data-tt-dur')); renderTtForm(); }));
+    document.getElementById('ttStart').addEventListener('change', (e) => { f.start = e.target.value; renderTtForm(); });
+    document.getElementById('ttEnd').addEventListener('change', (e) => { const m = hhmmToMin(e.target.value) - hhmmToMin(f.start); if (f.start && m > 0) f.dur = m; renderTtForm(); });
+    document.getElementById('ttRoom').addEventListener('input', (e) => { f.room = e.target.value; });
+    document.getElementById('ttCancel').addEventListener('click', () => { state.tt.form = null; renderTimetable(); });
+    document.getElementById('ttSave').addEventListener('click', saveTtForm);
+  }
+  async function saveTtForm() {
+    const f = state.tt.form;
+    if (!f.dates.length) { showToast('Choose the day', 'error'); return; }
+    if (!f.tid) { showToast('Choose the teacher', 'error'); return; }
+    if (!f.batch) { showToast('Choose the class / batch', 'error'); return; }
+    if (!f.start) { showToast('Enter the start time', 'error'); return; }
+    if (hhmmToMin(f.start) + f.dur > 24 * 60) { showToast('The class must end before midnight', 'error'); return; }
+    const room = (f.room || '').trim();
+    const ws = state.tt.weekStart;
+    const others = ttAll(ws, shiftDateStr(ws, 6)).filter((x) => !(f.id && x.s.id === f.id));
+    const warns = []; const dupDates = [];
+    f.dates.forEach((d) => {
+      const a1 = hhmmToMin(f.start), a2 = a1 + f.dur;
+      others.filter((x) => x.s.date === d && !x.s.cancelled).forEach((x) => {
+        const b1 = hhmmToMin(x.s.time), b2 = b1 + slotDuration(x.s);
+        if (x.tid === f.tid && x.s.time === f.start && x.s.label === f.batch) { dupDates.push(d); return; }
+        if (!(a1 < b2 && b1 < a2)) return;
+        const when = `${WD[dateObj(d).getDay()]} ${formatTimeStr(x.s.time)}`;
+        if (x.tid === f.tid) warns.push(`${ttName(f.tid)} already has ${x.s.label} (${when})`);
+        else if (x.s.label === f.batch) warns.push(`${f.batch} already has ${ttName(x.tid)} (${when})`);
+        else if (room && x.s.room && x.s.room.trim().toLowerCase() === room.toLowerCase()) warns.push(`Room ${room} is used by ${x.s.label} (${when})`);
+      });
+    });
+    const dates = f.dates.filter((d) => dupDates.indexOf(d) === -1);
+    if (!dates.length) { showToast('This class is already in the timetable.', 'error'); return; }
+    if (warns.length) {
+      const ok = await showConfirm(`${warns.slice(0, 5).join('\n')}${warns.length > 5 ? `\n+${warns.length - 5} more` : ''}\n\nSave anyway?`, '⚠️ Time Conflict', 'Save');
+      if (!ok) return;
+    }
+    const me = (state.user && state.user.name) || 'Coordinator';
+    const data = (d) => ({ day: WD[dateObj(d).getDay()], date: d, time: f.start, duration: f.dur, label: f.batch, room, setBy: state.teacherId, setByName: me });
+    try {
+      const batch = state.db.batch();
+      if (f.id) {
+        if (f.oldTid !== f.tid) {
+          batch.delete(state.db.collection('schedule/' + f.oldTid + '/slots').doc(f.id));
+          batch.set(state.db.collection('schedule/' + f.tid + '/slots').doc(), Object.assign({ createdAt: Date.now() }, data(dates[0])));
+        } else batch.set(state.db.collection('schedule/' + f.tid + '/slots').doc(f.id), Object.assign({ updatedAt: Date.now() }, data(dates[0])), { merge: true });
+      } else {
+        dates.forEach((d) => batch.set(state.db.collection('schedule/' + f.tid + '/slots').doc(), Object.assign({ createdAt: Date.now() }, data(d))));
+      }
+      await waitForWrite(batch.commit());
+      showToast(f.id ? 'Class updated' : `${dates.length} class${dates.length === 1 ? '' : 'es'} added${dupDates.length ? ` (${dupDates.length} already there)` : ''}`);
+      state.tt.form = null;
+      await loadTtWeek(true);
+      renderTimetable();
+    } catch (err) { flashOffline(err); }
+  }
+  // Classes the coordinator set last week that are not yet in this week.
+  function ttCopyList() {
+    const ws = state.tt.weekStart; const prev = shiftDateStr(ws, -7);
+    const all = ttAll(prev, shiftDateStr(ws, 6));
+    const out = [];
+    all.filter((x) => x.s.date < ws && x.s.setBy && !x.s.cancelled).forEach((x) => {
+      const nd = shiftDateStr(x.s.date, 7);
+      if (nd < todayStr()) return;
+      if (all.some((y) => y.tid === x.tid && y.s.date === nd && y.s.time === x.s.time && y.s.label === x.s.label)) return;
+      out.push({ tid: x.tid, s: x.s, nd });
+    });
+    return out;
+  }
+  async function ttCopyLastWeek() {
+    const list = ttCopyList();
+    if (!list.length) return;
+    const ok = await showConfirm(`Copy ${list.length} class${list.length === 1 ? '' : 'es'} from last week's timetable into this week? Classes already there are skipped.`, 'Copy last week?', 'Copy');
+    if (!ok) return;
+    const me = (state.user && state.user.name) || 'Coordinator';
+    try {
+      const batch = state.db.batch();
+      list.forEach((x) => batch.set(state.db.collection('schedule/' + x.tid + '/slots').doc(), { day: WD[dateObj(x.nd).getDay()], date: x.nd, time: x.s.time, duration: slotDuration(x.s), label: x.s.label, room: x.s.room || '', setBy: state.teacherId, setByName: me, createdAt: Date.now() }));
+      await waitForWrite(batch.commit());
+      showToast(`${list.length} class${list.length === 1 ? '' : 'es'} copied`);
+      await loadTtWeek(true);
+      renderTimetable();
+    } catch (err) { flashOffline(err); }
+  }
+  document.getElementById('ttPrev').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, -7); state.tt.form = null; renderTimetable(); });
+  document.getElementById('ttNext').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, 7); state.tt.form = null; renderTimetable(); });
+  document.getElementById('ttAddBtn').addEventListener('click', () => openTtForm(null));
+  document.getElementById('ttCopyBtn').addEventListener('click', ttCopyLastWeek);
+
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
     const coordOnly = state.isCoordinator && !state.canAdmin;
@@ -4012,7 +4306,7 @@
     document.querySelectorAll('#view-admin [data-atab]').forEach((el) => {
       el.classList.toggle('atab-off', el.getAttribute('data-atab').split(' ').indexOf(t) === -1);
     });
-    const dated = t !== 'settings';
+    const dated = t !== 'settings' && t !== 'tt';
     document.getElementById('adminDateSub').classList.toggle('atab-off', !dated);
     document.getElementById('adminDateCalIcon').classList.toggle('atab-off', !dated);
   }
@@ -4061,6 +4355,7 @@
     applyAdminTab();
     renderSettingsAccordion();
     if (state.canAdmin) { subscribeStaffIds(); renderTeamPanel(); renderStaffIdsBlock(); }
+    if (state.adminTab === 'tt') renderTimetable();
     const date = state.adminDate;
     const wing = state.adminReportWing;
     const isToday = date === todayStr();
@@ -4918,7 +5213,7 @@
     if (!state.db || !state.teacherId || pruningSchedule) return;
     migrateUndatedSlots();
     const cutoff = shiftDateStr(todayStr(), -SLOT_KEEP_DAYS);
-    const old = (state.scheduleSlots || []).filter((s) => s.date && s.date < cutoff && !state.pendingDeleteIds.has(s.id));
+    const old = (state.scheduleSlots || []).filter((s) => s.date && s.date < cutoff && !s.setBy && !state.pendingDeleteIds.has(s.id));
     if (!old.length) return;
     pruningSchedule = true;
     try {
@@ -5016,7 +5311,7 @@
     const topic = m.cls && m.cls.topic ? `<span class="sv-topic"> · ${escapeHtml(m.cls.topic)}</span>` : '';
     return `<div class="sv-row ${m.status}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${st != null ? escapeHtml(formatTimeStr(s.time)) : '—'}</span>
-      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}</span>${ampm}</span>
+      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${s.room ? ' · ' + escapeHtml(s.room) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
       <span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span>
     </div>`;
   }
@@ -5087,6 +5382,7 @@
     const body = document.getElementById('hvSheetBody');
     const canLog = !m.cls && !slot.cancelled && d <= todayStr() && m.status !== 'leave' && m.status !== 'covered';
     const canCancel = !m.cls;
+    const bySet = !!slot.setBy;
     body.innerHTML = `<div class="hv-d-title">${escapeHtml(slot.label || 'Class')}</div>
       <div class="hv-d-wing">${escapeHtml(wingForBatch(slot.label) || '')}${state.teacherSubject ? ' · ' + escapeHtml(state.teacherSubject) : ''}</div>
       <div class="hv-d-rows" style="margin-top:10px;">
@@ -5094,11 +5390,13 @@
         <div class="hv-d-row"><span>Time</span><span>${slot.time ? formatTimeStr(slot.time) : '—'}</span></div>
         <div class="hv-d-row"><span>Duration</span><span>${svDur(dur)}</span></div>
         <div class="hv-d-row"><span>Status</span><span>${SV_PILL[m.status]}</span></div>
+        ${slot.room ? `<div class="hv-d-row"><span>Room</span><span>${escapeHtml(slot.room)}</span></div>` : ''}
+        ${bySet ? `<div class="hv-d-row"><span>Set by</span><span>${escapeHtml(slot.setByName || 'Coordinator')}</span></div>` : ''}
         ${m.cls && m.cls.topic ? `<div class="hv-d-row"><span>Topic</span><span>${escapeHtml(m.cls.topic)}</span></div>` : ''}
       </div>
       ${m.cls ? '<button type="button" class="dbtn-primary dbtn-block" id="svViewClass" style="margin-top:14px;">View logged class</button>' : ''}
       ${canLog ? '<button type="button" class="dbtn-primary dbtn-block" id="svLogClass" style="margin-top:14px;">Log this class</button>' : ''}
-      <div class="hv-d-btns sv-3btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary" id="svDupSlot" style="border-color: var(--line);">Duplicate</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Delete</button></div>
+      ${bySet ? '<div class="hv-note" style="text-align:left; margin-top:12px;">This class is in your timetable from the coordinator. You can log it or mark it cancelled.</div>' : `<div class="hv-d-btns sv-3btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary" id="svDupSlot" style="border-color: var(--line);">Duplicate</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Delete</button></div>`}
       ${canCancel ? `<button type="button" class="btn-secondary dbtn-block" id="svCancelSlot" style="border-color: var(--line); margin-top:8px;">${slot.cancelled ? 'Restore class' : 'Cancel class'}</button>` : ''}`;
     const root = document.getElementById('hvSheet');
     root.classList.add('open');
@@ -5107,7 +5405,7 @@
     if (vb) vb.addEventListener('click', () => { closeHvSheet(); setTimeout(() => openHvSheet(m.cls.id, m.cls, 'schedule'), 280); });
     const lb = document.getElementById('svLogClass');
     if (lb) lb.addEventListener('click', () => { closeHvSheet(); openAddForSlot(id, 'schedule'); });
-    document.getElementById('svEditSlot').addEventListener('click', () => { closeHvSheet(); startEditScheduleSlot(id); });
+    if (!bySet) document.getElementById('svEditSlot').addEventListener('click', () => { closeHvSheet(); startEditScheduleSlot(id); });
     const cb = document.getElementById('svCancelSlot');
     if (cb) cb.addEventListener('click', async () => {
       closeHvSheet();
@@ -5118,7 +5416,7 @@
         showToast(to ? 'Class marked as cancelled' : 'Class restored');
       } catch (err) { flashOffline(err); }
     });
-    document.getElementById('svDupSlot').addEventListener('click', () => {
+    if (!bySet) document.getElementById('svDupSlot').addEventListener('click', () => {
       closeHvSheet();
       const sv = svState();
       state.scheduleWing = wingOfBatch(slot.label);
@@ -5135,7 +5433,7 @@
       renderSvForm();
       showToast('Pick the day(s) for the copy');
     });
-    document.getElementById('svDelSlot').addEventListener('click', async () => {
+    if (!bySet) document.getElementById('svDelSlot').addEventListener('click', async () => {
       closeHvSheet();
       if (!state.db || !state.teacherId) return;
       await confirmAndDeleteWithUndo(id, () => state.db.collection('schedule/' + state.teacherId + '/slots').doc(id).delete(),
@@ -5450,6 +5748,7 @@
     const slots = (state.scheduleSlots || []).filter((s) => !state.pendingDeleteIds.has(s.id));
     const out = [];
     slots.forEach((s) => {
+      if (s.setBy) return; // the coordinator copies their own timetable
       const d = slotDate(s);
       if (prevDays.indexOf(d) === -1) return;
       const nd = shiftDateStr(d, 7);
