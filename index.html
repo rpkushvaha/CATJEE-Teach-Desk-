@@ -822,11 +822,20 @@
   .sv-coord { font-size: 11px; font-weight: 600; color: var(--gold); }
   /* ---------- Duty plan ---------- */
   .plan-box { display: flex; flex-direction: column; gap: 12px; }
+  .xp-head { display: flex; align-items: baseline; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 600; color: var(--ink); }
+  .xp-sub { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .chip-busy { border-style: dashed; }
+  .busy-tag { font-size: 11px; font-weight: 600; color: #B45309; margin-left: 2px; }
   #examPlanBox[hidden] { display: none !important; }
   .plan-room { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
   .plan-room-h { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--muted-2); }
   .plan-slot { background: var(--neutral-soft); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
   .plan-sum { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .sv-row.sv-duty { box-shadow: inset 3px 0 0 var(--gold); background: var(--gold-soft); cursor: default; }
+  .tl-pill.duty { background: var(--card); color: var(--gold); border: 1px solid var(--gold); }
+  .hv-act-card.duty-planned { border-color: var(--gold); border-style: dashed; }
+  .hv-act-card .hv-act-top { gap: 8px; }
+  .hv-act-card .tl-pill { margin-left: auto; flex-shrink: 0; }
   .duty-card { background: var(--card); border: 1px solid var(--gold); border-radius: 12px; padding: 12px; }
   .duty-card .ad-tsub { margin-top: 3px; font-size: 13px; color: var(--ink); }
   #myDutySec[hidden] { display: none !important; }
@@ -1667,15 +1676,13 @@
           <div class="chips inv-scope" id="adminExamSubject"></div>
           <div class="sv-tlbl" style="margin:0;">Classes</div>
           <div id="adminExamScope"></div>
-          <div class="sv-tlbl" style="margin:0;">Timing &amp; Room</div>
+          <div class="sv-tlbl" style="margin:0;">Exam Time</div>
           <div class="sv-times">
             <div><div class="sv-tlbl">Start</div><input class="text-input" id="adminExamStart" type="time"></div>
             <div><div class="sv-tlbl">End</div><input class="text-input" id="adminExamEnd" type="time"></div>
           </div>
-          <input class="text-input" id="adminExamRoom" type="text" placeholder="Room / Hall, e.g. Hall A">
-          
-          <div class="sv-tlbl" style="margin:0;">Invigilators (optional)</div>
-          <div class="chips inv-scope" id="adminExamInvig"></div>
+          <div class="xp-head"><span>Duty Plan</span><span class="xp-sub">rooms &amp; invigilators</span></div>
+          <div id="adminExamPlan" class="plan-box"></div>
           <div class="sv-form-btns">
             <button type="button" class="btn-secondary" id="adminExamCancel" style="border-color: var(--line);">Cancel</button>
             <button type="button" class="save-btn" id="adminExamSave" style="margin:0;">Save Exam</button>
@@ -2090,7 +2097,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.5 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.6 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2248,7 +2255,7 @@
     if (dateStr === y1) return 'Yesterday';
     const [y, m, d] = dateStr.split('-').map(Number);
     const dt = new Date(y, m - 1, d);
-    return dt.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    return `${dt.toLocaleDateString('en-GB', { weekday: 'short' })}, ${dt.getDate()} ${dt.toLocaleDateString('en-GB', { month: 'short' })} ${dt.getFullYear()}`;
   }
 
   function formatDuration(totalSeconds) {
@@ -2860,8 +2867,9 @@
     } else {
       html = items.map(tlItemHtml).join('');
     }
-    if (activities.length) html += '<div class="tl-sub">Activities</div>' + activities.map(todayActivityRowHtml).join('');
-    try { renderMyDuties(); } catch (e) { /* ignore */ }
+    let duties = [];
+    try { ensureTodayExams(); duties = plannedDutiesToday(); } catch (e) { duties = []; }
+    if (activities.length || duties.length) html += '<div class="tl-sub">Activities</div>' + duties.map(dutyRowHtml).join('') + activities.map(todayActivityRowHtml).join('');
     const cvT = coveredTestsFor(todayStr(), state.classesToday);
     if (cvT.count) html += `<div class="ad-ok" style="margin-top:4px;">✓ Class test held in your class while you were on leave: ${escapeHtml(cvT.batches.join(', '))}</div>`;
     if (el._lastHtml === html) return;
@@ -2878,6 +2886,7 @@
         if (rec) openHvSheet(id, rec, 'today');
       });
     });
+    el.querySelectorAll('[data-today-duty]').forEach((row) => row.addEventListener('click', () => openDutySheet(row.getAttribute('data-today-duty'))));
     el.querySelectorAll('[data-empty-add]').forEach((btn) => {
       btn.addEventListener('click', () => document.getElementById('addClassLink').click());
     });
@@ -2924,13 +2933,91 @@
   function coveredTestsFor() { return { count: 0, batches: [] }; }
 
 
+  // ---------- Planned duties on Today → Activities ----------
+  function ensureTodayExams() {
+    const today = todayStr();
+    if (state.examsForAt[today] && Date.now() - state.examsForAt[today] < 120000) return;
+    state.examsForAt[today] = Date.now();
+    delete state.examsFor[today];
+    loadExamsFor(today).then(() => { renderTodayList(); if (state.tab === 'schedule') renderScheduleList(); });
+  }
+  function plannedDutiesToday() {
+    const today = todayStr();
+    const logged = (state.classesToday || []).filter((c) => isInvig(c) && c.examId);
+    return myDuties(today).filter((d) => !logged.some((c) => c.examId === d.exam.id));
+  }
+  function dutyStatus(slots, date) {
+    const now = new Date(); const nm = now.getHours() * 60 + now.getMinutes();
+    if (date < todayStr()) return 'missed';
+    if (date > todayStr()) return 'upcoming';
+    const a = Math.min(...slots.map((s) => hhmmToMin(s.start))), b = Math.max(...slots.map((s) => hhmmToMin(s.end)));
+    return nm < a ? 'upcoming' : (nm < b ? 'live' : 'missed');
+  }
+  const DUTY_PILL = { upcoming: 'Upcoming', live: 'In Progress', missed: 'Not logged' };
+  function dutyRowHtml(d) {
+    const st = dutyStatus(d.slots, todayStr());
+    return `<div class="tl-item hv-rec" data-today-duty="${escapeHtml(d.exam.id)}" role="button" tabindex="0"><div class="tl-time"></div>
+      <div class="hv-act-card duty-planned">
+        <div class="hv-act-top"><span class="hv-act-title">Invigilation · ${escapeHtml(examTitle(d.exam))}</span><span class="tl-pill ${st}">${DUTY_PILL[st]}</span></div>
+        ${d.slots.map((s) => `<div class="hv-act-note">${escapeHtml(s.room)} · ${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))}</div>`).join('')}
+      </div></div>`;
+  }
+  async function logPlannedDuty(exam, slots) {
+    const parts = slots.map((s) => ({ start: s.start, end: s.end, room: s.room, scope: (exam.scope || []).slice() }));
+    const payload = { entryType: 'activity', activityType: 'Invigilation', teacherId: state.teacherId, date: exam.date, createdAt: Date.now(),
+      invigKind: 'exam', examId: exam.id, testType: exam.type || '', subject: exam.subject || '', testName: examTitle(exam), scope: (exam.scope || []).slice(), parts, note: '' };
+    try { await waitForWrite(state.db.collection('classes').add(payload)); showToast('✓ Duty logged'); } catch (err) { flashOffline(err); }
+  }
+  function openDutySheet(examId) {
+    const d = myDuties(todayStr()).find((x) => x.exam.id === examId);
+    if (!d) return;
+    const slots = d.slots.map((s) => Object.assign({}, s));
+    const body = document.getElementById('hvSheetBody');
+    const draw = (editing) => {
+      body.innerHTML = `<div class="hv-d-title">Invigilation</div>
+        <div class="hv-d-wing">${escapeHtml(examTitle(d.exam))}${(d.exam.scope || []).length ? ' · ' + escapeHtml(scopeLabel(d.exam.scope)) : ''}</div>
+        <div class="hv-d-rows" style="margin-top:10px;">${slots.map((s, i) => editing
+          ? `<div class="plan-slot" style="margin-bottom:8px;"><div class="team-lbl">${escapeHtml(s.room)}</div><div class="sv-times">
+              <div><div class="sv-tlbl">From</div><input class="text-input" type="time" data-dt-s="${i}" value="${escapeHtml(s.start)}"></div>
+              <div><div class="sv-tlbl">To</div><input class="text-input" type="time" data-dt-e="${i}" value="${escapeHtml(s.end)}"></div></div></div>`
+          : `<div class="hv-d-row"><span>${escapeHtml(s.room)}</span><span>${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))}</span></div>`).join('')}</div>
+        <div class="hv-note" style="text-align:left; margin-top:10px;">${editing ? 'Change the times if you came late or left early, then save.' : 'Planned by the coordinator. Confirm once your duty is done.'}</div>
+        <div class="hv-d-btns">${editing
+          ? '<button type="button" class="btn-secondary" id="dtBack" style="border-color: var(--line);">Back</button><button type="button" class="save-btn" id="dtSave" style="margin:0;">Save duty</button>'
+          : '<button type="button" class="btn-secondary" id="dtEdit" style="border-color: var(--line);">Edit time</button><button type="button" class="save-btn" id="dtDone" style="margin:0;">✓ Duty done</button>'}</div>`;
+      if (editing) {
+        body.querySelectorAll('[data-dt-s]').forEach((inp) => inp.addEventListener('change', () => { slots[+inp.getAttribute('data-dt-s')].start = inp.value; }));
+        body.querySelectorAll('[data-dt-e]').forEach((inp) => inp.addEventListener('change', () => { slots[+inp.getAttribute('data-dt-e')].end = inp.value; }));
+        document.getElementById('dtBack').addEventListener('click', () => draw(false));
+        document.getElementById('dtSave').addEventListener('click', async () => {
+          body.querySelectorAll('[data-dt-s]').forEach((inp) => { slots[+inp.getAttribute('data-dt-s')].start = inp.value; });
+          body.querySelectorAll('[data-dt-e]').forEach((inp) => { slots[+inp.getAttribute('data-dt-e')].end = inp.value; });
+          if (slots.some((s) => !s.start || !s.end || hhmmToMin(s.end) <= hhmmToMin(s.start))) { showToast('End time must be after the start time', 'error'); return; }
+          closeHvSheet(); await logPlannedDuty(d.exam, slots);
+        });
+      } else {
+        document.getElementById('dtEdit').addEventListener('click', () => draw(true));
+        document.getElementById('dtDone').addEventListener('click', async () => { closeHvSheet(); await logPlannedDuty(d.exam, slots); });
+      }
+    };
+    draw(false);
+    const root = document.getElementById('hvSheet');
+    root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+  // Other Work notes: "*" or "-" at the start of a line becomes a bullet.
+  function noteHtml(note) {
+    const lines = String(note || '').split(/\n+/).map((x) => x.trim()).filter(Boolean);
+    if (lines.length > 1 || /^[*•\-–]/.test(lines[0] || '')) return lines.map((x) => '• ' + escapeHtml(x.replace(/^[*•\-–]+\s*/, ''))).join('<br>');
+    return escapeHtml(lines[0] || '');
+  }
+
   function todayActivityRowHtml(a) {
     const isLeave = a.activityType === 'Leave / Holiday';
     return `<div class="tl-item hv-rec" data-today-act="${escapeHtml(a.id)}" role="button" tabindex="0"><div class="tl-time"></div>
       <div class="hv-act-card${isLeave ? ' leave' : ''}">
-        <div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isInvig(a) ? invigSummary(a).title : activityLabel(a.activityType))}</span></div>
+        <div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isInvig(a) ? invigSummary(a).title : activityLabel(a.activityType))}</span>${isInvig(a) && a.examId ? '<span class="tl-pill done">Done</span>' : ''}</div>
         ${isInvig(a) ? `<div class="hv-act-note">${escapeHtml(invigSummary(a).sub)}</div>` : ''}
-        ${a.note ? `<div class="hv-act-note">${escapeHtml(a.note)}</div>` : ''}
+        ${a.note ? `<div class="hv-act-note">${noteHtml(a.note)}</div>` : ''}
       </div></div>`;
   }
 
@@ -3180,7 +3267,7 @@
       return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}"><div class="tl-time hv-act-ic${isLeave ? ' leave' : ''}">${icon}</div>
         <div class="hv-act-card${isLeave ? ' leave' : ''}"><div class="hv-act-top"><span class="hv-act-title">${escapeHtml(isLeave ? 'Leave / Holiday' : (isInvig(c) ? invigSummary(c).title : activityLabel(c.activityType)))}</span></div>
         ${isInvig(c) ? `<div class="hv-act-note">${escapeHtml(invigSummary(c).sub)}</div>` : ''}
-        ${c.note ? `<div class="hv-act-note">${escapeHtml(c.note)}</div>` : ''}</div></div>`;
+        ${c.note ? `<div class="hv-act-note">${noteHtml(c.note)}</div>` : ''}</div></div>`;
     }
     const st = hhmmToMin(c.startTimeStr);
     const range = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)}` : '';
@@ -4942,37 +5029,10 @@
   }
   function renderMyDuties() {
     const sec = document.getElementById('myDutySec');
-    if (!sec) return;
-    const today = todayStr();
-    if (!state.examsForAt[today] || Date.now() - state.examsForAt[today] > 120000) {
-      state.examsForAt[today] = Date.now();
-      delete state.examsFor[today];
-      loadExamsFor(today).then(() => renderMyDuties());
-    }
-    const list = myDuties(today);
-    sec.hidden = !list.length;
-    if (!list.length) return;
-    const logged = (state.classesToday || []).filter(isInvig);
-    document.getElementById('myDutyList').innerHTML = list.map(({ exam, slots }) => {
-      const done = logged.find((c) => c.examId === exam.id);
-      return `<div class="duty-card">
-        <div class="ad-tname">${escapeHtml(examTitle(exam))}</div>
-        ${slots.map((s) => `<div class="ad-tsub">🕙 ${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))} · <b>${escapeHtml(s.room)}</b>${s.scope.length ? ' · ' + escapeHtml(scopeLabel(s.scope)) : ''}</div>`).join('')}
-        ${done ? `<div class="ad-ok" style="margin-top:6px;">✓ Duty logged</div>` : `<button type="button" class="save-btn" data-log-duty="${escapeHtml(exam.id)}" style="margin:8px 0 0;">✓ Log this duty</button>`}
-      </div>`;
-    }).join('');
-    document.querySelectorAll('[data-log-duty]').forEach((b) => b.addEventListener('click', () => {
-      const item = list.find((x) => x.exam.id === b.getAttribute('data-log-duty'));
-      if (!item) return;
-      state.editingId = null; state.addTargetDate = null; state.editingSourceTab = 'today';
-      state.entryMode = 'activity';
-      state.activityForm = { activityType: 'Invigilation', note: '' };
-      state.invig = { mode: 'exam', examId: item.exam.id, type: '', subject: '', scope: [], parts: item.slots.map((s) => ({ start: s.start, end: s.end, room: s.room })) };
-      switchTab('add');
-      renderForm();
-      showToast('Check the times, change them if you were late, then Save');
-    }));
+    if (sec) sec.hidden = true;
+    ensureTodayExams();
   }
+
 
   // ---------- Admin: Exams & Invigilation ----------
   state.adminExamForm = state.adminExamForm || null;
@@ -5031,7 +5091,7 @@
       });
       const inv = Object.keys(loggedBy).map((t) => `${nameOf(t)} (${svDur(loggedBy[t])})`);
       const pr = planOf(e);
-      const planLine = pr.length ? `Duty plan: ${pr.length} room${pr.length === 1 ? '' : 's'}${pr.some((r) => (r.slots || []).some((sl) => !(sl.teachers || []).length)) ? ' · ⚠️ a slot has no invigilator' : ''}` : 'No duty plan yet · tap to make one';
+      const planLine = pr.length ? `Duty plan: ${pr.map((r) => r.room).join(', ')}${pr.some((r) => (r.slots || []).some((sl) => !(sl.teachers || []).length)) ? ' · ⚠️ a slot has no invigilator' : ''}` : 'No duty plan yet · tap → Edit to add rooms';
       return `<div class="ad-exam" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${escapeHtml(examTitle(e))}</div>
         <div class="ad-tsub">${escapeHtml([scopeLabel(e.scope), e.room, `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
@@ -5064,6 +5124,92 @@
     renderAdminExamForm(ids, nameOf);
     return alerts;
   }
+  // ---------- Duty Plan inside the New / Edit Exam form ----------
+  // Rooms only (the exam's classes are chosen once above). Built when the form opens and rebuilt only on taps,
+  // never by the dashboard timer, so time pickers stay open.
+  function examFormTimes() { return { start: document.getElementById('adminExamStart').value, end: document.getElementById('adminExamEnd').value }; }
+  function dutyBusy(u, sl, date) {
+    const a = hhmmToMin(sl.start), b = hhmmToMin(sl.end);
+    const day = (state.adminClasses || []).filter((c) => c.date === date && c.teacherId === u);
+    if (day.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) return 'on leave';
+    if (a == null || b == null) return '';
+    const slots = ((state.adminSlotsDate === date && state.adminSlots && state.adminSlots[u]) || []).filter((s) => !s.cancelled);
+    const hit = slots.find((s) => { const sa = hhmmToMin(s.time), sb = sa + slotDuration(s); return sa < b && a < sb; });
+    if (hit) return `class ${formatTimeStr(hit.time)}`;
+    const cls = day.find((c) => c.entryType !== 'activity' && hhmmToMin(c.startTimeStr) < b && a < hhmmToMin(c.endTimeStr));
+    return cls ? `class ${formatTimeStr(cls.startTimeStr)}` : '';
+  }
+  function renderExamPlanSection() {
+    const box = document.getElementById('adminExamPlan');
+    const f = state.adminExamForm;
+    if (!box || !f) return;
+    const ids = ttTeacherIds();
+    const rl = roomsList();
+    const date = state.adminDate;
+    const nameOf = planNameOf;
+    box.innerHTML = `${f.rooms.map((r, ri) => `<div class="plan-room">
+        <div class="plan-room-h"><span>Room ${ri + 1}</span><button type="button" class="team-remove" data-xp-rmroom="${ri}">Remove</button></div>
+        <div class="chips">${rl.map((n) => `<button type="button" class="chip${r.room === n ? ' active' : ''}" data-xp-room="${ri}" data-v="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join('') || '<span class="hv-note">Add your rooms in Settings → Rooms first.</span>'}</div>
+        ${r.slots.map((sl, si) => `<div class="plan-slot">
+          <div class="sv-times">
+            <div><div class="sv-tlbl">From</div><input class="text-input" type="time" data-xp-start="${ri}:${si}" value="${escapeHtml(sl.start || '')}"></div>
+            <div><div class="sv-tlbl">To</div><input class="text-input" type="time" data-xp-end="${ri}:${si}" value="${escapeHtml(sl.end || '')}"></div>
+          </div>
+          <div class="sv-tlbl" style="margin:0;">Invigilators</div>
+          <div class="chips inv-scope" data-xp-chips="${ri}:${si}">${ids.map((u) => { const busy = dutyBusy(u, sl, date); const on = (sl.teachers || []).indexOf(u) !== -1; return `<button type="button" class="chip${on ? ' active' : ''}${busy ? ' chip-busy' : ''}" data-xp-t="${ri}:${si}" data-v="${u}" title="${escapeHtml(busy)}">${escapeHtml(nameOf(u))}${busy ? ` <span class="busy-tag">⚠️ ${escapeHtml(busy)}</span>` : ''}</button>`; }).join('')}</div>
+          ${r.slots.length > 1 ? `<button type="button" class="team-remove" data-xp-rmslot="${ri}:${si}">Remove slot</button>` : ''}
+        </div>`).join('')}
+        <button type="button" class="hv-back" data-xp-addslot="${ri}" style="padding:0; align-self:flex-start;">+ Split time (add duty slot)</button>
+      </div>`).join('')}
+      <button type="button" class="btn-secondary" id="xpAddRoom" style="border-color: var(--line);">+ Add room</button>
+      <div id="xpWarn"></div>`;
+    const at = (v) => v.split(':').map(Number);
+    box.querySelectorAll('[data-xp-room]').forEach((b) => b.addEventListener('click', () => { f.rooms[+b.getAttribute('data-xp-room')].room = b.getAttribute('data-v'); renderExamPlanSection(); }));
+    box.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => {
+      const [ri, si] = at(b.getAttribute('data-xp-t')); const sl = f.rooms[ri].slots[si]; const u = b.getAttribute('data-v');
+      const k = sl.teachers.indexOf(u); if (k === -1) sl.teachers.push(u); else sl.teachers.splice(k, 1);
+      renderExamPlanSection();
+    }));
+    // after a time change, refresh only that slot's teacher chips (busy marks) and the warnings
+    const refreshChips = (ri, si) => {
+      const c = box.querySelector(`[data-xp-chips="${ri}:${si}"]`); if (!c) return;
+      const sl = f.rooms[ri].slots[si];
+      c.innerHTML = ids.map((u) => { const busy = dutyBusy(u, sl, date); const on = (sl.teachers || []).indexOf(u) !== -1; return `<button type="button" class="chip${on ? ' active' : ''}${busy ? ' chip-busy' : ''}" data-xp-t="${ri}:${si}" data-v="${u}" title="${escapeHtml(busy)}">${escapeHtml(nameOf(u))}${busy ? ` <span class="busy-tag">⚠️ ${escapeHtml(busy)}</span>` : ''}</button>`; }).join('');
+      c.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => { const u = b.getAttribute('data-v'); const k = sl.teachers.indexOf(u); if (k === -1) sl.teachers.push(u); else sl.teachers.splice(k, 1); refreshChips(ri, si); renderExamPlanWarnings(); }));
+    };
+    box.querySelectorAll('[data-xp-start]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-start')); const sl = f.rooms[ri].slots[si]; sl.start = inp.value; sl._auto = false; refreshChips(ri, si); renderExamPlanWarnings(); }));
+    box.querySelectorAll('[data-xp-end]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-end')); const sl = f.rooms[ri].slots[si]; sl.end = inp.value; sl._autoE = false; refreshChips(ri, si); renderExamPlanWarnings(); }));
+    box.querySelectorAll('[data-xp-addslot]').forEach((b) => b.addEventListener('click', () => {
+      const r = f.rooms[+b.getAttribute('data-xp-addslot')]; const last = r.slots[r.slots.length - 1]; const t = examFormTimes();
+      if (last && t.start && t.end && last.start && last.end && last.end === t.end) {
+        // split the last slot in half
+        const mid = svMinToHHMM(Math.round((hhmmToMin(last.start) + hhmmToMin(last.end)) / 2 / 5) * 5);
+        last.end = mid; r.slots.push({ start: mid, end: t.end, teachers: [] });
+      } else r.slots.push({ start: (last && last.end) || t.start, end: t.end, teachers: [] });
+      renderExamPlanSection();
+    }));
+    box.querySelectorAll('[data-xp-rmslot]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = at(b.getAttribute('data-xp-rmslot')); f.rooms[ri].slots.splice(si, 1); renderExamPlanSection(); }));
+    box.querySelectorAll('[data-xp-rmroom]').forEach((b) => b.addEventListener('click', () => { f.rooms.splice(+b.getAttribute('data-xp-rmroom'), 1); renderExamPlanSection(); }));
+    document.getElementById('xpAddRoom').addEventListener('click', () => { const t = examFormTimes(); f.rooms.push({ room: '', slots: [{ start: t.start, end: t.end, teachers: [] }] }); renderExamPlanSection(); });
+    renderExamPlanWarnings();
+  }
+  function renderExamPlanWarnings() {
+    const el = document.getElementById('xpWarn'); const f = state.adminExamForm;
+    if (!el || !f) return;
+    if (!f.rooms.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">Add rooms to plan who invigilates where (optional).</div>'; return; }
+    const t = examFormTimes();
+    const rooms = f.rooms.map((r) => ({ room: r.room, scope: ['x'], slots: r.slots.map((sl) => ({ start: sl.start || t.start, end: sl.end || t.end, teachers: sl.teachers })) }));
+    const w = planWarnings({ date: state.adminDate, start: t.start, end: t.end }, rooms).filter((x) => !/choose the class/.test(x));
+    el.innerHTML = w.length ? `<div class="ad-alert"><div class="ad-alert-t">⚠️ Please check</div>${w.map((x) => `<div class="ad-alert-l">${escapeHtml(x)}</div>`).join('')}</div>` : '<div class="ad-ok">✓ No clashes found</div>';
+  }
+  // When the exam time is set or changed, empty duty slots follow it.
+  ['adminExamStart', 'adminExamEnd'].forEach((id) => document.getElementById(id).addEventListener('change', () => {
+    const f = state.adminExamForm; if (!f) return;
+    const t = examFormTimes();
+    f.rooms.forEach((r) => { if (r.slots.length === 1) { const sl = r.slots[0]; if (!sl.start || sl._auto) { sl.start = t.start; sl._auto = true; } if (!sl.end || sl._autoE) { sl.end = t.end; sl._autoE = true; } } });
+    renderExamPlanSection();
+  }));
+
   function renderAdminExamForm(ids, nameOf) {
     const box = document.getElementById('adminExamForm');
     const f = state.adminExamForm;
@@ -5086,22 +5232,18 @@
       } else f.scope.splice(k, 1);
       renderAdminExamForm(ids, nameOf);
     }));
-    const iv = document.getElementById('adminExamInvig');
-    iv.innerHTML = ids.map((t) => `<button type="button" class="chip${f.invigilators.indexOf(t) !== -1 ? ' active' : ''}" data-exinv="${escapeHtml(t)}">${escapeHtml(nameOf(t))}</button>`).join('');
-    iv.querySelectorAll('[data-exinv]').forEach((el) => el.addEventListener('click', () => {
-      const t = el.getAttribute('data-exinv');
-      const k = f.invigilators.indexOf(t);
-      if (k === -1) f.invigilators.push(t); else f.invigilators.splice(k, 1);
-      renderAdminExamForm(ids, nameOf);
-    }));
+    const pb = document.getElementById('adminExamPlan');
+    if (pb._key !== f.key) { pb._key = f.key; renderExamPlanSection(); }
   }
   function openAdminExamForm(exam) {
     state.adminExamForm = exam
-      ? { id: exam.id, type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice() }
-      : { id: null, type: '', subject: '', name: '', scope: [], invigilators: [] };
+      ? { id: exam.id, type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
+          rooms: planOf(exam).length ? planOf(exam).map((r) => ({ room: r.room || '', slots: (r.slots || []).map((sl) => ({ start: sl.start, end: sl.end, teachers: (sl.teachers || []).slice() })) }))
+            : (exam.room ? [{ room: exam.room, slots: [{ start: exam.start, end: exam.end, teachers: (exam.invigilators || []).slice() }] }] : []) }
+      : { id: null, type: '', subject: '', name: '', scope: [], invigilators: [], rooms: [] };
+    state.adminExamForm.key = 'x' + Date.now();
     document.getElementById('adminExamStart').value = exam ? exam.start || '' : '';
     document.getElementById('adminExamEnd').value = exam ? exam.end || '' : '';
-    document.getElementById('adminExamRoom').value = exam ? exam.room || '' : '';
     renderAdmin();
     setTimeout(() => document.getElementById('adminExamForm').scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
   }
@@ -5112,19 +5254,19 @@
       <div class="hv-d-rows" style="margin-top:10px;">
         <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dayHeading(e.date))}</span></div>
         <div class="hv-d-row"><span>Time</span><span>${escapeHtml(formatTimeStr(e.start))} – ${escapeHtml(formatTimeStr(e.end))}</span></div>
-        <div class="hv-d-row"><span>Room / Hall</span><span>${escapeHtml(e.room || '—')}</span></div>
+        ${planOf(e).length ? '' : `<div class="hv-d-row"><span>Room / Hall</span><span>${escapeHtml(e.room || '—')}</span></div>`}
         <div class="hv-d-row"><span>Classes</span><span>${escapeHtml(scopeLabel(e.scope) || '—')}</span></div>
         <div class="hv-d-row"><span>Invigilators</span><span>${escapeHtml((e.invigilators || []).map(nameOf).join(', ') || '—')}</span></div>
       </div>
       ${planOf(e).length ? `<div class="plan-sum">${planOf(e).map((r) => `<div class="plan-sum-r"><b>${escapeHtml(r.room)}</b>${(r.scope || []).length ? ' · ' + escapeHtml(scopeLabel(r.scope)) : ''}${(r.slots || []).map((sl) => `<div class="ad-tsub">${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}: ${escapeHtml((sl.teachers || []).map(nameOf).join(', ') || '—')}</div>`).join('')}</div>`).join('')}</div>` : ''}
-      <button type="button" class="save-btn" id="exPlan" style="margin:12px 0 0;">${planOf(e).length ? 'Edit Duty Plan' : 'Make Duty Plan (rooms & invigilators)'}</button>
+
       ${planOf(e).length ? `<div class="sid-actions" style="margin-top:8px;"><button type="button" class="btn-secondary" id="exChartPdf" style="border-color: var(--line);">Chart PDF</button><button type="button" class="btn-secondary" id="exChartWa" style="border-color: var(--line);">Share on WhatsApp</button></div>` : ''}
       <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="exDelete" style="border-color: var(--line);">Delete</button></div>`;
     const root = document.getElementById('hvSheet');
     root.classList.add('open');
     root.setAttribute('aria-hidden', 'false');
     document.getElementById('exEdit').addEventListener('click', () => { closeHvSheet(); openAdminExamForm(e); });
-    document.getElementById('exPlan').addEventListener('click', () => { closeHvSheet(); openPlanEditor(e); });
+
     const cp = document.getElementById('exChartPdf'); if (cp) cp.addEventListener('click', () => dutyChartPdf(e));
     const cw = document.getElementById('exChartWa'); if (cw) cw.addEventListener('click', () => window.open('https://wa.me/?text=' + encodeURIComponent(dutyChartText(e)), '_blank'));
     document.getElementById('exDelete').addEventListener('click', async () => {
@@ -5141,10 +5283,17 @@
     const name = f.type ? `${f.type}${f.subject ? ' · ' + f.subject : ''}` : f.name;
     const start = document.getElementById('adminExamStart').value;
     const end = document.getElementById('adminExamEnd').value;
-    const room = document.getElementById('adminExamRoom').value.trim();
     if (!start || !end || hhmmToMin(end) <= hhmmToMin(start)) { showToast('Check the start and end time', 'error'); return; }
     if (!f.scope.length) { showToast('Choose the class or batches', 'error'); return; }
-    const data = { name, type: f.type || '', subject: f.subject || '', date: state.adminDate, start, end, room, scope: f.scope.slice(), invigilators: f.invigilators.slice() };
+    const rooms = f.rooms.map((r) => ({ room: r.room, scope: f.scope.slice(), slots: r.slots.map((sl) => ({ start: sl.start || start, end: sl.end || end, teachers: sl.teachers.slice() })) }));
+    if (rooms.some((r) => !r.room)) { showToast('Choose the room in every room card', 'error'); return; }
+    if (rooms.some((r) => r.slots.some((sl) => hhmmToMin(sl.end) <= hhmmToMin(sl.start)))) { showToast('Check the duty slot times', 'error'); return; }
+    const pw = rooms.length ? planWarnings({ date: state.adminDate, start, end }, rooms).filter((x) => !/no invigilator|choose the class/.test(x)) : [];
+    if (pw.length) {
+      const ok = await showConfirm(`${pw.slice(0, 5).join('\n')}${pw.length > 5 ? `\n+${pw.length - 5} more` : ''}\n\nSave anyway?`, '⚠️ Please check', 'Save');
+      if (!ok) return;
+    }
+    const data = { name, type: f.type || '', subject: f.subject || '', date: state.adminDate, start, end, room: rooms.map((r) => r.room).join(', '), scope: f.scope.slice(), invigilators: planTeachers(rooms), plan: { rooms } };
     try {
       if (f.id) await state.db.collection('exams').doc(f.id).set(data, { merge: true });
       else await state.db.collection('exams').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId }, data));
@@ -5637,6 +5786,28 @@
       <span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span>
     </div>`;
   }
+  // Invigilation duties planned for this teacher in a week (view-only in Schedule).
+  state.weekDuties = state.weekDuties || { key: '', list: [] };
+  function loadWeekDuties(ws) {
+    if (!state.db || !state.teacherId) return;
+    const key = ws + '|' + Math.floor(Date.now() / 120000);
+    if (state.weekDuties.key === key) return;
+    state.weekDuties.key = key;
+    state.db.collection('exams').where('date', '>=', ws).where('date', '<=', shiftDateStr(ws, 6)).get().then((snap) => {
+      const list = [];
+      snap.docs.map(normDoc).filter((e) => e.date >= ws && e.date <= shiftDateStr(ws, 6)).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => {
+        if ((sl.teachers || []).indexOf(state.teacherId) !== -1) list.push({ date: e.date, start: sl.start, end: sl.end, room: r.room, title: examTitle(e) });
+      })));
+      state.weekDuties.list = list;
+      if (state.tab === 'schedule') renderScheduleList();
+    }).catch(() => {});
+  }
+  function weekDutyRowsHtml(d) {
+    const rows = (state.weekDuties.list || []).filter((x) => x.date === d).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+    return rows.map((x) => `<div class="sv-row sv-duty"><span class="sv-time">${escapeHtml(formatTimeStr(x.start))}</span>
+      <span class="sv-main"><span class="sv-batch">Invigilation · ${escapeHtml(x.room)}</span><span class="sv-dur">${escapeHtml(x.title)} · till ${escapeHtml(formatTimeStr(x.end))}</span></span>
+      <span class="tl-pill duty">Duty</span></div>`).join('');
+  }
   function renderScheduleList() {
     const el = document.getElementById('scheduleList');
     if (!el) return;
@@ -5657,10 +5828,12 @@
     if (missing.length) hvLoadMissing(missing);
     const counts = { total: 0, done: 0, missed: 0, upcoming: 0, live: 0, cancelled: 0, leave: 0, covered: 0, mins: 0 };
     let html = '';
+    loadWeekDuties(sv.weekStart);
     days.forEach((d, i) => {
       const daySlots = slots.filter((s) => slotDate(s) === d);
+      const dutyHtml = weekDutyRowsHtml(d);
       const isSun = i === 6;
-      if (isSun && !daySlots.length && d !== todayStr()) return;
+      if (isSun && !daySlots.length && !dutyHtml && d !== todayStr()) return;
       const dayEntries = hvDay(d).classes;
       const matched = matchDaySlots(daySlots, dayEntries);
       // On a leave day, unlogged classes show "On leave" (or "Test held" if someone conducted a test in it).
@@ -5672,7 +5845,7 @@
       const today = d === todayStr();
       const live = daySlots.filter((x) => !x.cancelled).length;
       html += `<div class="sv-day${today ? ' today' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : ' · No classes'}</span></div>`;
-      if (daySlots.length) html += `<div class="sv-rows">${matched.map(svSlotHtml).join('')}</div>`;
+      if (daySlots.length || dutyHtml) html += `<div class="sv-rows">${dutyHtml}${matched.map(svSlotHtml).join('')}</div>`;
     });
     const weekHasSlots = days.some((d) => slots.some((x) => slotDate(x) === d));
     const sumEl = document.getElementById('svSummary');
@@ -8011,13 +8184,15 @@
     renderLeaveBox(isLeave);
     if (!show) return;
     const iv = state.invig;
+    // Planned exams are confirmed from Today → Activities, so this screen is for duties without a plan.
+    if (!(state.editingId && iv.examId)) iv.mode = 'self';
     const date = invigDate();
     loadExamsFor(date);
     const exams = state.examsFor[date] || [];
     const useExams = exams.length > 0 && iv.mode === 'exam';
     document.getElementById('invigExamBox').hidden = !useExams;
     document.getElementById('invigSelfBox').hidden = useExams;
-    document.getElementById('invigBackToExams').hidden = !exams.length;
+    document.getElementById('invigBackToExams').hidden = true;
     if (useExams) {
       const list = document.getElementById('invigExamList');
       list.innerHTML = exams.map((e) => `<button type="button" class="inv-exam${iv.examId === e.id ? ' active' : ''}" data-inv-exam="${escapeHtml(e.id)}">
