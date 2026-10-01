@@ -787,6 +787,24 @@
   .field-err { animation: fieldErr 2.4s ease; border-radius: 12px; }
   @keyframes fieldErr { 0%, 60% { box-shadow: 0 0 0 2px var(--gold); } 100% { box-shadow: 0 0 0 0 transparent; } }
   @media (prefers-reduced-motion: reduce) { .field-err { animation: none; box-shadow: 0 0 0 2px var(--gold); } }
+  /* ---------- Admin tabs ---------- */
+  .ad-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--neutral-soft); border-radius: 12px; }
+  .ad-tab { border: 1px solid transparent; background: transparent; color: var(--muted-2); font: inherit; font-size: 13px; font-weight: 600; padding: 8px 2px; border-radius: 9px; cursor: pointer; }
+  .ad-tab.active { background: var(--card); color: var(--gold); border-color: var(--gold); box-shadow: 0 1px 2px rgba(23,23,23,.06); }
+  #view-admin .atab-off { display: none !important; }
+  #adminTestsHeldSec[hidden] { display: none !important; }
+  .ad-sum3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  #adminWingChips { flex-wrap: nowrap; }
+  #adminWingChips .chip { flex: 1 1 auto; justify-content: center; text-align: center; white-space: nowrap; }
+  .set-acc > .panel-title { display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0; min-height: 28px; }
+  .set-acc .set-sum { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+  .set-acc > .panel-title > .ic { color: var(--gold); flex-shrink: 0; }
+  .set-acc .set-sum .ic { color: var(--muted); }
+  .set-acc .set-chev { transition: transform .2s ease; }
+  .set-acc.open .set-chev { transform: rotate(90deg); }
+  .set-acc:not(.open) > *:not(.panel-title) { display: none !important; }
+  .set-acc.open > .panel-title { margin-bottom: 12px; }
+  #view-admin .set-acc { padding-top: 14px; padding-bottom: 14px; }
   /* ---------- Back-to-top button ---------- */
   #scrollTopBtn { position: fixed; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 44px; height: 44px; border-radius: 999px;
     border: 1px solid var(--line); background: var(--card); color: var(--gold); display: flex; align-items: center; justify-content: center; cursor: pointer;
@@ -1493,43 +1511,51 @@
     <div class="tab-view" id="view-admin">
       <div class="hv-head">
         <div>
-          <div class="hv-title">Admin Dashboard</div>
+          <div class="hv-title">Admin</div>
           <div class="sv-sub" id="adminDateSub"></div>
         </div>
         <button type="button" class="hv-icon" id="adminDateCalIcon" aria-label="Open calendar"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
       </div>
-      <div class="hv-nav">
+      <div class="ad-tabs" id="adminTabs" role="tablist">
+        <button type="button" class="ad-tab" data-atab-btn="dash" role="tab">Dashboard</button>
+        <button type="button" class="ad-tab" data-atab-btn="exams" role="tab">Exams</button>
+        <button type="button" class="ad-tab" data-atab-btn="reports" role="tab">Reports</button>
+        <button type="button" class="ad-tab" data-atab-btn="settings" role="tab">Settings</button>
+      </div>
+      <div class="hv-nav" data-atab="dash exams reports">
         <button type="button" class="hv-arrow" id="adminDatePrev" aria-label="Previous day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="hv-label" id="adminDateLabelText">Today</div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <button type="button" class="hv-back" id="adminDateClearBtn" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button>
+      <button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams reports" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button>
 
-      <div class="chips" id="adminWingChips">
-        <button class="chip active" data-admin-wing="all">All wings</button>
+      <div class="chips" id="adminWingChips" data-atab="dash reports">
+        <button class="chip active" data-admin-wing="all">All</button>
         <button class="chip" data-admin-wing="Pre-Foundation">Pre-Foundation</button>
         <button class="chip" data-admin-wing="Foundation">Foundation</button>
       </div>
 
-      <div class="qa-row ad-quick">
-        <button type="button" class="qa-btn" data-ad-jump="adminReportsSec"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="qa-l">Reports</span></button>
-        <button type="button" class="qa-btn" data-ad-jump="adminBatchPanel"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg><span class="qa-l">Batches</span></button>
-        <button type="button" class="qa-btn" data-ad-jump="adminCampusPanel"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="qa-l">Campus</span></button>
-      </div>
 
-      <section class="tsec">
-        <div class="tsec-head"><div class="tsec-title">Overview</div></div>
-        <div class="sum-grid hv-sum">
+
+      <section class="tsec" data-atab="dash">
+        <div class="tsec-head"><div class="tsec-title">Classes</div><div class="tsec-meta" id="adLoggedMeta"></div></div>
+        <div class="sum-grid">
           <div class="sum-tile"><div class="sum-num" id="adScheduled">0</div><div class="sum-lbl">Scheduled</div></div>
           <div class="sum-tile"><div class="sum-num" id="adCompleted">0</div><div class="sum-lbl">Completed</div></div>
           <div class="sum-tile"><div class="sum-num" id="adUpcoming">0</div><div class="sum-lbl">Upcoming</div></div>
-          <div class="sum-tile"><div class="sum-num" id="adTeaching">0m</div><div class="sum-lbl">Teaching</div></div>
+          <div class="sum-tile"><div class="sum-num" id="adNotLogged">0</div><div class="sum-lbl">Not logged</div></div>
+        </div>
+      </section>
+      <section class="tsec" data-atab="dash">
+        <div class="tsec-head"><div class="tsec-title">Teachers</div></div>
+        <div class="sum-grid ad-sum3">
           <div class="sum-tile"><div class="sum-num" id="adPresent">0</div><div class="sum-lbl">Present</div></div>
-          <div class="sum-tile"><div class="sum-num" id="adLeave">0</div><div class="sum-lbl">On Leave</div></div>
+          <div class="sum-tile"><div class="sum-num" id="adLeave">0</div><div class="sum-lbl">On leave</div></div>
+          <div class="sum-tile"><div class="sum-num" id="adNotIn">0</div><div class="sum-lbl">Not in</div></div>
         </div>
       </section>
 
-      <div class="teacher-card ad-oncampus" id="onCampusNowCard" style="display:none; cursor:pointer;">
+      <div class="teacher-card ad-oncampus" id="onCampusNowCard" data-atab="dash" style="display:none; cursor:pointer;">
         <div class="teacher-top">
           <div class="teacher-name"><span class="live-dot"></span>On Campus Right Now</div>
           <div class="teacher-time num" id="onCampusNowCount">0</div>
@@ -1538,36 +1564,38 @@
         <div id="onCampusNowNames" style="display:none; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
 
-      <section class="tsec">
+      <section class="tsec" data-atab="dash">
         <div class="tsec-head"><div class="tsec-title">Attention Required</div></div>
         <div id="adminAlerts"></div>
       </section>
 
-      <section class="tsec">
+      <section class="tsec" data-atab="dash">
         <div class="tsec-head"><div class="tsec-title">Teacher Activity</div><div class="tsec-meta" id="adminTeacherMeta"></div></div>
         <div id="adminTeacherList"><div class="skel short"></div><div class="skel short"></div></div>
       </section>
 
-      <section class="tsec">
+      <section class="tsec" data-atab="dash">
         <div class="tsec-head"><div class="tsec-title">Schedule (All Teachers)</div><div class="tsec-meta" id="adminSchedMeta"></div></div>
         <div id="adminSchedList" style="display:flex; flex-direction:column; gap:8px;"></div>
       </section>
 
-      <section class="tsec" id="adminExamsSec">
+      <section class="tsec" id="adminExamsSec" data-atab="exams">
         <div class="tsec-head"><div class="tsec-title">Tests &amp; Exams</div><button type="button" class="hv-back" id="adminNewExamBtn" style="padding:0;">+ New Exam</button></div>
         <div class="panel" id="adminExamForm" hidden style="display:flex; flex-direction:column; gap:12px;">
           <div class="panel-title" id="adminExamFormTitle">New Exam</div>
-          <div class="sv-tlbl" style="margin:0;">Test type</div>
+          <div class="sv-tlbl" style="margin:0;">Test Type</div>
           <div class="chips inv-scope" id="adminExamType"></div>
           <div class="sv-tlbl" style="margin:0;">Subject (optional)</div>
           <div class="chips inv-scope" id="adminExamSubject"></div>
+          <div class="sv-tlbl" style="margin:0;">Classes</div>
+          <div id="adminExamScope"></div>
+          <div class="sv-tlbl" style="margin:0;">Timing &amp; Room</div>
           <div class="sv-times">
             <div><div class="sv-tlbl">Start</div><input class="text-input" id="adminExamStart" type="time"></div>
             <div><div class="sv-tlbl">End</div><input class="text-input" id="adminExamEnd" type="time"></div>
           </div>
           <input class="text-input" id="adminExamRoom" type="text" placeholder="Room / Hall, e.g. Hall A">
-          <div class="sv-tlbl" style="margin:0;">Classes · tap a whole class or its batches</div>
-          <div class="chips inv-scope" id="adminExamScope"></div>
+          
           <div class="sv-tlbl" style="margin:0;">Invigilators (optional)</div>
           <div class="chips inv-scope" id="adminExamInvig"></div>
           <div class="sv-form-btns">
@@ -1578,12 +1606,12 @@
         <div id="adminExamList" class="sv-rows"></div>
       </section>
 
-      <section class="tsec">
+      <section class="tsec" id="adminTestsHeldSec" data-atab="exams">
         <div class="tsec-head"><div class="tsec-title">Tests Held</div><div class="tsec-meta">by class &amp; subject</div></div>
         <div id="adminTestsHeld"></div>
       </section>
 
-      <section class="tsec">
+      <section class="tsec" data-atab="reports">
         <div class="tsec-head"><div class="tsec-title">This Week</div><div class="tsec-meta" id="adWeekLabel"></div></div>
         <div class="sum-grid" id="adWeekGrid">
           <div class="sum-tile"><div class="sum-num" id="adWkClasses">0</div><div class="sum-lbl">Classes</div></div>
@@ -1593,7 +1621,7 @@
         </div>
       </section>
 
-      <section class="tsec" id="adminReportsSec">
+      <section class="tsec" id="adminReportsSec" data-atab="reports">
         <div class="tsec-head"><div class="tsec-title">Institute Reports</div><span class="current-period-tag" id="adminReportWingTag" style="display:none;"></span></div>
         <div class="admin-sub" id="adminReportRangeSub" style="margin:0;">Every teacher's activity for the selected date, in one file.</div>
         <div class="chips" id="adminReportRangeChips">
@@ -1608,8 +1636,8 @@
         <div class="admin-sub" id="adminReportMsg" style="text-align:center;"></div>
       </section>
 
-      <div class="tsec-head" style="margin-top:6px;"><div class="tsec-title">Settings</div></div>
-      <div class="panel" id="adminBatchPanel">
+      <div class="tsec-head" data-atab="settings"><div class="tsec-title">Settings</div><div class="tsec-meta">Tap a setting to open it</div></div>
+      <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
         <div class="chips" id="adminBatchWingChips">
@@ -1624,28 +1652,29 @@
         </div>
       </div>
 
-      <div class="panel" id="adminTestTypesPanel">
-        <div class="panel-title">Test Types</div>
+      <div class="panel set-acc" id="adminTestTypesPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Test Types</div>
         <div class="admin-sub" style="margin:0;">Shown when teachers log invigilation and when you add an exam.</div>
         <div class="activity-rows" id="testTypesRows"></div>
         <div class="list-add"><input class="text-input" id="newTestTypeInput" type="text" placeholder="e.g. Half-Yearly"><button class="btn-secondary" id="addTestTypeBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
-      <div class="panel" id="adminSubjectsPanel">
-        <div class="panel-title">Subjects</div>
+      <div class="panel set-acc" id="adminSubjectsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Subjects</div>
         <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
         <div class="activity-rows" id="subjectsRows"></div>
         <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
-      <div class="panel" id="adminWeeklyOffPanel">
-        <div class="panel-title">Weekly Off</div>
+      <div class="panel set-acc" id="adminWeeklyOffPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Weekly Off</div>
         <div class="admin-sub" style="margin:0;">On these days a teacher with no activity shows as "Weekly off" (not Absent), and their report says WEEKLY OFF.</div>
         <div class="chips" id="weeklyOffChips" style="margin-top:10px;"></div>
       </div>
 
-      <div class="panel" id="adminCampusPanel">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Campus Location (for location check)</div>
+      <div class="panel set-acc" id="adminCampusPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Campus Location</div>
+        <div class="admin-sub" style="margin:0 0 4px;">Used to check that teachers are on campus when they check in.</div>
         <div class="admin-sub" id="campusLocText">Not set yet.</div>
         <button class="btn-secondary" id="setLocationBtn" style="border-color: var(--line);">Use My Current Location</button>
         <button class="action-btn" id="toggleManualLocBtn" style="margin-top:4px;">Enter coordinates manually</button>
@@ -1659,8 +1688,8 @@
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"/></svg>Director Contact (shown to teachers)</div>
+      <div class="panel set-acc" id="adminContactPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"/></svg>Director Contact</div>
         <div class="admin-sub">Teachers can reach out from their Menu → Contact Director. Leave blank to hide a field.</div>
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
           <input class="text-input" id="directorPhoneInput" type="tel" placeholder="WhatsApp number, e.g. 91987xxxxxxx">
@@ -1957,7 +1986,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 3.7 · updated 30 Sep 2026</div>
+          <div class="dnote">Version 3.8 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3722,7 +3751,65 @@
   function refreshAdminExtras() { adminSlotsKey = ''; adminWeekKey = ''; loadAdminTeachers(true); }
   const ADMIN_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged', cancelled: 'Cancelled', leave: 'On leave', covered: 'Test covered' };
 
+  // ---------- Admin tabs: Dashboard / Exams / Reports / Settings ----------
+  state.adminTab = (() => { try { return localStorage.getItem('ctd_admin_tab') || 'dash'; } catch (e) { return 'dash'; } })();
+  state.adminSetOpen = null;
+  function applyAdminTab() {
+    const t = state.adminTab;
+    document.querySelectorAll('#adminTabs [data-atab-btn]').forEach((b) => {
+      const on = b.getAttribute('data-atab-btn') === t;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('#view-admin [data-atab]').forEach((el) => {
+      el.classList.toggle('atab-off', el.getAttribute('data-atab').split(' ').indexOf(t) === -1);
+    });
+    const dated = t !== 'settings';
+    document.getElementById('adminDateSub').classList.toggle('atab-off', !dated);
+    document.getElementById('adminDateCalIcon').classList.toggle('atab-off', !dated);
+  }
+  document.querySelectorAll('#adminTabs [data-atab-btn]').forEach((b) => b.addEventListener('click', () => {
+    state.adminTab = b.getAttribute('data-atab-btn');
+    try { localStorage.setItem('ctd_admin_tab', state.adminTab); } catch (e) { /* ignore */ }
+    applyAdminTab();
+    renderAdmin();
+    window.scrollTo({ top: 0 });
+  }));
+  // Settings: each panel opens on tap, one at a time, with a short summary while closed.
+  function settingsSummary(id) {
+    if (id === 'adminBatchPanel') { const n = allBatchesFlat().length; return `${n} batch${n === 1 ? '' : 'es'}`; }
+    if (id === 'adminTestTypesPanel') return String(testTypesList().length);
+    if (id === 'adminSubjectsPanel') return String(subjectsList().length);
+    if (id === 'adminWeeklyOffPanel') return (state.weeklyOff || []).join(', ') || 'None';
+    if (id === 'adminCampusPanel') return /^Set/.test(document.getElementById('campusLocText').textContent) ? 'Set' : 'Not set';
+    if (id === 'adminContactPanel') return (document.getElementById('directorPhoneInput').value || document.getElementById('directorEmailInput').value) ? 'Set' : 'Not set';
+    return '';
+  }
+  function renderSettingsAccordion() {
+    document.querySelectorAll('#view-admin .set-acc').forEach((p) => {
+      const open = state.adminSetOpen === p.id;
+      p.classList.toggle('open', open);
+      const head = p.querySelector('.panel-title');
+      if (!head) return;
+      let sum = head.querySelector('.set-sum');
+      if (!sum) {
+        sum = document.createElement('span');
+        sum.className = 'set-sum';
+        head.appendChild(sum);
+        head.setAttribute('role', 'button');
+        head.setAttribute('tabindex', '0');
+        const toggle = () => { state.adminSetOpen = state.adminSetOpen === p.id ? null : p.id; renderSettingsAccordion(); };
+        head.addEventListener('click', toggle);
+        head.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+      }
+      sum.innerHTML = `${escapeHtml(settingsSummary(p.id))}<svg class="ic set-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>`;
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+
   function renderAdmin() {
+    applyAdminTab();
+    renderSettingsAccordion();
     const date = state.adminDate;
     const wing = state.adminReportWing;
     const isToday = date === todayStr();
@@ -3776,11 +3863,13 @@
     const leaveN = statuses.filter((s) => s.key === 'leave').length;
     const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
     set('adScheduled', slotsReady ? planned.length : '…');
-    set('adCompleted', started.length);
+    set('adCompleted', slotsReady ? planned.filter((x) => x.status === 'done' || x.status === 'covered').length : '…');
     set('adUpcoming', slotsReady ? planned.filter((x) => x.status === 'upcoming' || x.status === 'live').length : '…');
-    set('adTeaching', fmtTeaching(teachMin));
+    set('adNotLogged', slotsReady ? planned.filter((x) => x.status === 'missed').length : '…');
+    set('adLoggedMeta', `${started.length} class${started.length === 1 ? '' : 'es'} logged · ${fmtTeaching(teachMin)} teaching`);
     set('adPresent', presentN);
     set('adLeave', leaveN);
+    set('adNotIn', statuses.filter((s2) => s2.key === 'notin' || s2.key === 'absent').length);
 
     // --- On campus right now (today only)
     const onCampusCard = document.getElementById('onCampusNowCard');
@@ -3912,6 +4001,9 @@
   // "Maths", "Math", "Mathematics" all match.
   function subjKey(sub) { return String(sub || '').toLowerCase().replace(/[^a-z]/g, '').slice(0, 4); }
   function renderTestsHeld(dayAll, nameOf) {
+    // The Exams list above already groups Class Tests and Exams; this older block stays hidden to avoid repeating them.
+    const secH = document.getElementById('adminTestsHeldSec');
+    if (secH) { secH.hidden = true; return; }
     const el = document.getElementById('adminTestsHeld');
     if (!el) return;
     const ov = (a1, b1, a2, b2) => a1 != null && b1 != null && a2 != null && b2 != null && a1 < b2 && a2 < b1;
@@ -3952,6 +4044,10 @@
         <div class="ad-tsub">${escapeHtml([scopeLabel(g.scope), g.room, g.time].filter(Boolean).join(' · '))}</div>
         <div class="ad-tsub">${g.inv.length ? 'Invigilators: ' + escapeHtml(g.inv.join(', ')) : 'No invigilation logged'}</div>
       </div>`; }).join('');
+    const sec = document.getElementById('adminTestsHeldSec');
+    if (sec) sec.hidden = !(ctHtml || exHtml);
+    const exList = document.getElementById('adminExamList');
+    if (exList && (ctHtml || exHtml) && /No exams or tests/.test(exList.textContent)) exList.innerHTML = '<div class="hv-note" style="text-align:left;">No exams scheduled for this day.</div>';
     el.innerHTML = (ctHtml || exHtml)
       ? `${ctHtml ? `<div class="hv-sub" style="margin:0 0 4px;">Class Tests</div><div class="sv-rows">${ctHtml}</div>` : ''}${exHtml ? `<div class="hv-sub" style="margin:${ctHtml ? '10px' : '0'} 0 4px;">Exams</div><div class="sv-rows">${exHtml}</div>` : ''}`
       : '<div class="hv-note" style="text-align:left;">No tests on this day.</div>';
