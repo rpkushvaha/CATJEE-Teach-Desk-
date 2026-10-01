@@ -840,6 +840,13 @@
   .team-removed { border-top: 1px dashed var(--line); margin-top: 6px; padding-top: 6px; }
   .team-rm-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13.5px; color: var(--muted); }
   body.coord-mode #view-today > .tsec { display: none !important; }
+  /* ---------- Coordinator preview bar ---------- */
+  #coordPreviewBar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 41;
+    display: flex; align-items: center; gap: 10px; background: var(--ink); color: #fff; border-radius: 999px; padding: 7px 8px 7px 14px; font-size: 12.5px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.22); max-width: calc(100% - 96px); white-space: nowrap; }
+  #coordPreviewBar[hidden] { display: none; }
+  #coordPreviewBar b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  #coordPreviewExit { border: none; background: var(--gold); color: #fff; font: inherit; font-weight: 700; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
   /* ---------- Back-to-top button ---------- */
   #scrollTopBtn { position: fixed; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 44px; height: 44px; border-radius: 999px;
     border: 1px solid var(--line); background: var(--card); color: var(--gold); display: flex; align-items: center; justify-content: center; cursor: pointer;
@@ -1723,6 +1730,16 @@
         <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
+      <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
+        <div class="panel-title" style="margin:0 0 6px;">Preview as Coordinator</div>
+        <div class="admin-sub" style="margin:0 0 10px;">See the app exactly as a coordinator sees it, to check their screens. Anything you add or change in preview is real, so delete test entries afterwards.</div>
+        <div class="chips">
+          <button type="button" class="chip" data-preview-wing="Pre-Foundation">Pre-Foundation</button>
+          <button type="button" class="chip" data-preview-wing="Foundation">Foundation</button>
+          <button type="button" class="chip" data-preview-wing="both">Both wings</button>
+        </div>
+      </div>
+
       <div class="panel set-acc admin-only" id="adminTeamPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team</div>
         <div class="admin-sub" style="margin:0;">Choose who is a coordinator and which wing each person belongs to. A coordinator manages their wing (dashboard, exams, reports, batch lists) and can force a check-out, but does not teach.</div>
@@ -1792,6 +1809,7 @@
 
 </div>
 
+<div id="coordPreviewBar" hidden><span>👁 Coordinator preview · <b id="coordPreviewWing"></b></span><button type="button" id="coordPreviewExit">Exit</button></div>
 <button type="button" id="scrollTopBtn" aria-label="Back to top"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg></button>
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-card">
@@ -2050,7 +2068,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.3 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.4 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3821,7 +3839,11 @@
   function isCoordUid(uid) { return !!(state.team[uid] && state.team[uid].role === 'coordinator' && state.team[uid].status !== 'removed'); }
   function isRemovedUid(uid) { return !!(state.team[uid] && state.team[uid].status === 'removed'); }
   function teamWings(uid) { return (state.team[uid] && Array.isArray(state.team[uid].wings)) ? state.team[uid].wings : []; }
-  function leadWings() { return state.canAdmin ? ['Pre-Foundation', 'Foundation'] : (state.coordWings || []); }
+  // Admin "Preview as Coordinator": the admin sees exactly the coordinator's screens (permissions stay the admin's).
+  state.previewCoord = null;
+  function coordView() { return (state.isCoordinator && !state.canAdmin) || !!state.previewCoord; }
+  function viewWings() { return state.previewCoord ? state.previewCoord.wings : (state.coordWings || []); }
+  function leadWings() { if (state.previewCoord) return state.previewCoord.wings; return state.canAdmin ? ['Pre-Foundation', 'Foundation'] : (state.coordWings || []); }
   let unsubTeam = null;
   function subscribeTeam() {
     if (unsubTeam || !state.db) return;
@@ -4296,24 +4318,56 @@
 
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
-    const coordOnly = state.isCoordinator && !state.canAdmin;
+    const coordOnly = coordView();
+    const bar = document.getElementById('coordPreviewBar');
+    if (bar) { bar.hidden = !state.previewCoord; if (state.previewCoord) document.getElementById('coordPreviewWing').textContent = state.previewCoord.wings.join(', '); }
     document.body.classList.toggle('coord-mode', coordOnly);
     document.getElementById('navAdmin').style.display = (state.canAdmin || state.isCoordinator) ? 'flex' : 'none';
     const lbl = document.querySelector('#navAdmin span');
     if (lbl) lbl.textContent = coordOnly ? 'Coordinator' : 'Admin';
     ['navAdd', 'navHistory', 'navSchedule'].forEach((id) => { const n = document.getElementById(id); if (n) n.style.display = coordOnly ? 'none' : ''; });
-    document.querySelectorAll('#view-admin .admin-only').forEach((el) => el.classList.toggle('atab-off2', !state.canAdmin));
+    document.querySelectorAll('#view-admin .admin-only').forEach((el) => el.classList.toggle('atab-off2', !state.canAdmin || coordOnly));
+    const t0 = document.querySelector('#view-admin .hv-title');
+    if (!coordOnly) {
+      document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((b) => { b.style.display = ''; });
+      if (t0) t0.textContent = 'Admin';
+    }
     if (coordOnly) {
-      const w = state.coordWings || [];
+      const w = viewWings();
       if (w.length === 1) state.adminReportWing = w[0];
       document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((b) => {
         const v = b.getAttribute('data-admin-wing');
         b.style.display = (v === 'all' ? w.length > 1 : w.indexOf(v) !== -1) ? '' : 'none';
       });
       const t = document.querySelector('#view-admin .hv-title');
-      if (t) t.textContent = 'Coordinator';
+      if (t) t.textContent = state.previewCoord ? 'Coordinator (preview)' : 'Coordinator';
     }
   }
+  function startCoordPreview(wings) {
+    state.previewCoord = { wings: wings.slice() };
+    state.adminReportWing = wings.length === 1 ? wings[0] : 'all';
+    state.adminTab = 'dash';
+    state.adminSetOpen = null;
+    if (state.tt) { state.tt.form = null; state.tt.teacher = 'all'; state.tt.key = ''; }
+    switchTab('admin');
+    renderAdmin();
+    window.scrollTo({ top: 0 });
+  }
+  function stopCoordPreview() {
+    state.previewCoord = null;
+    state.adminReportWing = 'all';
+    state.adminTab = 'settings';
+    if (state.tt) { state.tt.form = null; state.tt.key = ''; }
+    applyRoleUI();
+    switchTab('admin');
+    renderAdmin();
+    showToast('Back to Admin');
+  }
+  document.getElementById('coordPreviewExit').addEventListener('click', stopCoordPreview);
+  document.querySelectorAll('[data-preview-wing]').forEach((b) => b.addEventListener('click', () => {
+    const w = b.getAttribute('data-preview-wing');
+    startCoordPreview(w === 'both' ? ['Pre-Foundation', 'Foundation'] : [w]);
+  }));
 
   // ---------- Admin tabs: Dashboard / Exams / Reports / Settings ----------
   state.adminTab = (() => { try { return localStorage.getItem('ctd_admin_tab') || 'dash'; } catch (e) { return 'dash'; } })();
