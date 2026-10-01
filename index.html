@@ -812,7 +812,7 @@
   .tt-teachers { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
   .tt-teachers::-webkit-scrollbar { display: none; }
   .tt-teachers .chip { flex-shrink: 0; }
-  #ttSummary[hidden], #ttActions[hidden], #ttCopyBtn[hidden], #ttForm[hidden] { display: none !important; }
+  #ttSummary[hidden], #ttActions[hidden], #ttCopyBtn[hidden], #ttForm[hidden], #ttTeachers[hidden] { display: none !important; }
   #ttSummary { display: flex; flex-direction: column; gap: 2px; }
   .tt-form { display: flex; flex-direction: column; gap: 12px; }
   .tt-row .sv-main { min-width: 0; }
@@ -1626,7 +1626,7 @@
           <div style="text-align:center;"><div class="hv-label" id="ttLabel"></div><div class="sv-sub" id="ttWhich" style="text-align:center;"></div></div>
           <button type="button" class="hv-arrow" id="ttNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
-        <div class="chips tt-teachers" id="ttTeachers"></div>
+        <div class="chips tt-teachers" id="ttTeachers" aria-label="Show timetable of"></div>
         <div class="sv-summary" id="ttSummary" hidden></div>
         <div class="sv-actions" id="ttActions">
           <button type="button" class="save-btn" id="ttAddBtn" style="margin:0;">+ Add class</button>
@@ -2050,7 +2050,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.2 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.3 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4084,9 +4084,11 @@
     document.getElementById('ttNext').disabled = ws >= shiftDateStr(cur, 28);
     const past = we < todayStr();
     document.getElementById('ttActions').hidden = past || !!tt.form;
+    document.getElementById('ttTeachers').hidden = !!tt.form;
+    document.getElementById('ttSummary').hidden = true;
     document.getElementById('ttCopyBtn').hidden = !ttCopyList().length;
     // teacher filter
-    document.getElementById('ttTeachers').innerHTML = [['all', 'All teachers']].concat(ids.map((u) => [u, ttName(u)]))
+    document.getElementById('ttTeachers').innerHTML = '<span class="team-lbl" style="flex-shrink:0;">Show</span>' + [['all', 'All teachers']].concat(ids.map((u) => [u, ttName(u)]))
       .map(([v, l]) => `<button type="button" class="chip${tt.teacher === v ? ' active' : ''}" data-tt-t="${escapeHtml(v)}">${escapeHtml(l)}</button>`).join('');
     document.querySelectorAll('#ttTeachers [data-tt-t]').forEach((b) => b.addEventListener('click', () => { tt.teacher = b.getAttribute('data-tt-t'); renderTimetable(); }));
     renderTtForm();
@@ -4098,7 +4100,7 @@
     document.getElementById('ttSummary').innerHTML = shown.length
       ? `<b>${shown.filter((x) => !x.s.cancelled).length} classes · ${nTeach} teacher${nTeach === 1 ? '' : 's'}</b>${nClash ? `<span style="color:#B45309;">⚠️ ${nClash} class${nClash === 1 ? '' : 'es'} in a clash</span>` : ''}`
       : '';
-    document.getElementById('ttSummary').hidden = !shown.length;
+    document.getElementById('ttSummary').hidden = !shown.length || !!tt.form;
     if (!Object.keys(tt.slots || {}).length && ids.length) { el.innerHTML = '<div class="skel short"></div>'; return; }
     let html = '';
     datesBetween(ws, we).forEach((d) => {
@@ -4153,43 +4155,63 @@
       ? { id: edit.slot.id, oldTid: edit.tid, tid: edit.tid, dates: [edit.slot.date], batch: edit.slot.label, start: edit.slot.time, dur: slotDuration(edit.slot), room: edit.slot.room || '' }
       : { id: null, tid: state.tt.teacher !== 'all' ? state.tt.teacher : null, dates: [], batch: null, start: '', dur: 40, room: '' };
     if (!edit && ws === mondayOf(todayStr())) state.tt.form.dates = [];
+    state.tt.form.key = 'f' + Date.now();
     renderTimetable();
     setTimeout(() => { const f = document.getElementById('ttForm'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 40);
   }
+  // The form is built once when it opens; later changes only update it in place, so the phone's time picker never closes by itself.
   function renderTtForm() {
     const box = document.getElementById('ttForm');
     const f = state.tt.form;
     box.hidden = !f;
-    if (!f) return;
+    if (!f) { box._built = null; return; }
+    if (box._built === f.key) { syncTtForm(); return; }
+    box._built = f.key;
     const ws = state.tt.weekStart;
     const days = datesBetween(ws, shiftDateStr(ws, 6));
-    const end = f.start ? svMinToHHMM(hhmmToMin(f.start) + f.dur) : '';
     box.innerHTML = `<div class="panel-title" style="margin:0;">${f.id ? 'Edit class' : 'Add class to timetable'}</div>
       <div class="field"><label>${f.id ? 'Day' : 'Day · tap one or more'}</label><div class="sv-days">${days.map((d) => {
         const dis = d < todayStr();
-        return `<button type="button" class="chip sv-daychip${f.dates.indexOf(d) !== -1 ? ' active' : ''}" data-tt-day="${d}"${dis ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`;
+        return `<button type="button" class="chip sv-daychip" data-tt-day="${d}"${dis ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`;
       }).join('')}</div></div>
-      <div class="field"><label>Teacher</label><div class="chips">${ttTeacherIds().map((u) => `<button type="button" class="chip${f.tid === u ? ' active' : ''}" data-tt-ft="${u}">${escapeHtml(ttName(u))}</button>`).join('') || '<span class="hv-note">No teachers in this wing yet.</span>'}</div></div>
-      <div class="field"><label>Class / Batch</label><div class="chips">${ttBatches().map((b) => `<button type="button" class="chip${f.batch === b ? ' active' : ''}" data-tt-b="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
+      <div class="field"><label>Teacher</label><div class="chips" id="ttFormTeachers">${ttTeacherIds().map((u) => `<button type="button" class="chip" data-tt-ft="${u}">${escapeHtml(ttName(u))}</button>`).join('') || '<span class="hv-note">No teachers in this wing yet.</span>'}</div></div>
+      <div class="field"><label>Class / Batch</label><div class="chips">${ttBatches().map((b) => `<button type="button" class="chip" data-tt-b="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
       <div class="field"><label>Timing</label>
         <div class="sv-times"><div><div class="sv-tlbl">Start</div><input class="text-input" type="time" id="ttStart" value="${escapeHtml(f.start)}"></div>
-        <div><div class="sv-tlbl">End · auto</div><input class="text-input" type="time" id="ttEnd" value="${escapeHtml(end)}"></div></div>
-        <div class="chips" style="margin-top:8px;">${TT_DURS.map((m) => `<button type="button" class="chip${f.dur === m ? ' active' : ''}" data-tt-dur="${m}">${svDur(m)}</button>`).join('')}</div></div>
+        <div><div class="sv-tlbl">End · auto</div><input class="text-input" type="time" id="ttEnd"></div></div>
+        <div class="chips" style="margin-top:8px;">${TT_DURS.map((m) => `<button type="button" class="chip" data-tt-dur="${m}">${svDur(m)}</button>`).join('')}</div></div>
       <div class="field"><label>Room (optional)</label><input class="text-input" id="ttRoom" type="text" placeholder="e.g. Room 4" value="${escapeHtml(f.room)}"></div>
       <div class="sv-form-btns"><button type="button" class="btn-secondary" id="ttCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="ttSave" style="margin:0;">${f.id ? 'Save changes' : 'Add to timetable'}</button></div>`;
     box.querySelectorAll('[data-tt-day]').forEach((b) => b.addEventListener('click', () => {
       const d = b.getAttribute('data-tt-day');
       if (f.id) f.dates = [d]; else { const k = f.dates.indexOf(d); if (k === -1) f.dates.push(d); else f.dates.splice(k, 1); }
-      renderTtForm();
+      syncTtForm();
     }));
-    box.querySelectorAll('[data-tt-ft]').forEach((b) => b.addEventListener('click', () => { f.tid = b.getAttribute('data-tt-ft'); renderTtForm(); }));
-    box.querySelectorAll('[data-tt-b]').forEach((b) => b.addEventListener('click', () => { f.batch = b.getAttribute('data-tt-b'); renderTtForm(); }));
-    box.querySelectorAll('[data-tt-dur]').forEach((b) => b.addEventListener('click', () => { f.dur = Number(b.getAttribute('data-tt-dur')); renderTtForm(); }));
-    document.getElementById('ttStart').addEventListener('change', (e) => { f.start = e.target.value; renderTtForm(); });
-    document.getElementById('ttEnd').addEventListener('change', (e) => { const m = hhmmToMin(e.target.value) - hhmmToMin(f.start); if (f.start && m > 0) f.dur = m; renderTtForm(); });
+    box.querySelectorAll('[data-tt-ft]').forEach((b) => b.addEventListener('click', () => { f.tid = b.getAttribute('data-tt-ft'); syncTtForm(); }));
+    box.querySelectorAll('[data-tt-b]').forEach((b) => b.addEventListener('click', () => { f.batch = b.getAttribute('data-tt-b'); syncTtForm(); }));
+    box.querySelectorAll('[data-tt-dur]').forEach((b) => b.addEventListener('click', () => { f.dur = Number(b.getAttribute('data-tt-dur')); syncTtForm(); }));
+    const st = document.getElementById('ttStart');
+    const onStart = () => { f.start = st.value; syncTtForm(); };
+    st.addEventListener('change', onStart);
+    st.addEventListener('blur', onStart);
+    const en = document.getElementById('ttEnd');
+    en.addEventListener('change', () => { const m = hhmmToMin(en.value) - hhmmToMin(f.start); if (f.start && m > 0) f.dur = m; syncTtForm(); });
     document.getElementById('ttRoom').addEventListener('input', (e) => { f.room = e.target.value; });
     document.getElementById('ttCancel').addEventListener('click', () => { state.tt.form = null; renderTimetable(); });
-    document.getElementById('ttSave').addEventListener('click', saveTtForm);
+    document.getElementById('ttSave').addEventListener('click', () => { f.start = st.value || f.start; saveTtForm(); });
+    syncTtForm();
+  }
+  function syncTtForm() {
+    const f = state.tt.form;
+    const box = document.getElementById('ttForm');
+    if (!f || !box) return;
+    box.querySelectorAll('[data-tt-day]').forEach((b) => b.classList.toggle('active', f.dates.indexOf(b.getAttribute('data-tt-day')) !== -1));
+    box.querySelectorAll('[data-tt-ft]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-tt-ft') === f.tid));
+    box.querySelectorAll('[data-tt-b]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-tt-b') === f.batch));
+    box.querySelectorAll('[data-tt-dur]').forEach((b) => b.classList.toggle('active', Number(b.getAttribute('data-tt-dur')) === f.dur));
+    const en = document.getElementById('ttEnd');
+    // never touch an input the user is using right now
+    if (en && document.activeElement !== en) en.value = f.start ? svMinToHHMM(hhmmToMin(f.start) + f.dur) : '';
   }
   async function saveTtForm() {
     const f = state.tt.form;
@@ -7714,6 +7736,10 @@
       renderScopePicker(document.getElementById('invigScope'), iv, renderInvig);
     }
     const partsEl = document.getElementById('invigParts');
+    // Don't rebuild the duty slots while the user is setting a time (it would close the phone's clock).
+    const sig = iv.parts.map((p) => [p.start, p.end, p.room].join('|')).join('#') + '/' + iv.parts.length;
+    if (partsEl.contains(document.activeElement) && partsEl._n === iv.parts.length) { partsEl._sig = sig; return; }
+    partsEl._n = iv.parts.length; partsEl._sig = sig;
     partsEl.innerHTML = iv.parts.map((p, i) => `<div class="inv-part">
         ${iv.parts.length > 1 ? `<div class="inv-part-head"><span>Duty slot ${i + 1}</span><button type="button" class="hv-back" data-inv-del="${i}" style="padding:0; color:var(--muted);">Remove</button></div>` : ''}
         <div class="inv-row">
