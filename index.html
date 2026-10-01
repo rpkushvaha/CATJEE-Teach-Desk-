@@ -820,6 +820,43 @@
   .sv-row.tt-clash { box-shadow: inset 3px 0 0 #D97706; }
   .tl-pill.tt-own { background: var(--neutral-soft); color: var(--muted-2); }
   .sv-coord { font-size: 11px; font-weight: 600; color: var(--gold); }
+  /* ---------- Timetable grid ---------- */
+  .tg-mode { display: flex; gap: 6px; }
+  .tg-mode .chip { flex: 1; justify-content: center; text-align: center; }
+  #tgWrap[hidden], #ttListWrap[hidden] { display: none !important; }
+  .tg-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .tg-status { display: flex; justify-content: space-between; align-items: center; }
+  .tg-st { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(217,119,6,.12); color: #B45309; }
+  .tg-st.ok { background: rgba(22,163,74,.12); color: #15803D; }
+  .tg-sun { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  .tg-days { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .tg-days .chip { flex-shrink: 0; padding: 6px 10px; }
+  .tg-paint { display: flex; flex-direction: column; gap: 4px; }
+  .tg-paint .chip { padding: 5px 10px; font-size: 12px; }
+  .tg-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  .tg-table { border-collapse: collapse; width: 100%; min-width: 340px; table-layout: fixed; font-size: 12px; }
+  .tg-table th, .tg-table td { border: 1px solid var(--line); padding: 6px 3px; text-align: center; vertical-align: middle; }
+  .tg-table thead th { background: var(--neutral-soft); font-size: 11px; font-weight: 600; color: var(--muted-2); line-height: 1.25; }
+  .tg-table thead th span { font-weight: 500; font-size: 10px; }
+  .tg-table th:first-child { width: 58px; }
+  .tg-b { background: var(--neutral-soft); font-size: 11.5px; font-weight: 700; color: var(--ink); text-align: left !important; padding-left: 6px !important; }
+  .tg-b span { display: block; font-size: 10px; font-weight: 600; color: var(--gold); }
+  .tg-c { cursor: pointer; height: 50px; }
+  .tg-c > span { color: var(--muted); font-size: 16px; }
+  .tg-c b { display: block; font-weight: 600; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tg-c small { display: block; font-size: 10px; color: var(--muted); }
+  .tg-c i { display: block; font-style: normal; font-size: 9.5px; font-weight: 700; color: var(--gold); }
+  .tg-c em { font-style: normal; font-size: 10px; }
+  .tg-full { background: var(--card); }
+  .tg-clash { background: rgba(217,119,6,.12); }
+  .tg-test { box-shadow: inset 0 0 0 2px var(--gold-soft); }
+  .tg-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tg-teacher { margin-top: 10px; font-size: 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .pe-row { display: grid; grid-template-columns: 28px 1fr 10px 1fr 36px; gap: 6px; align-items: center; }
+  .pe-row .text-input { min-width: 0; padding: 9px 8px; }
+  .mp-row { display: grid; grid-template-columns: 1fr 1.2fr; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; }
+  .mp-row select { padding: 8px; font-size: 13px; min-width: 0; }
+  .mp-all { padding-bottom: 6px; border-bottom: 1px dashed var(--line); }
   /* ---------- Duty plan ---------- */
   .plan-box { display: flex; flex-direction: column; gap: 12px; }
   .xp-head { display: flex; align-items: baseline; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 600; color: var(--ink); }
@@ -1656,6 +1693,9 @@
           <div style="text-align:center;"><div class="hv-label" id="ttLabel"></div><div class="sv-sub" id="ttWhich" style="text-align:center;"></div></div>
           <button type="button" class="hv-arrow" id="ttNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
+        <div class="tg-mode"><button type="button" class="chip active" data-tt-mode="grid">Weekly grid</button><button type="button" class="chip" data-tt-mode="list">All classes</button></div>
+        <div id="tgWrap" class="tg-wrap"></div>
+        <div id="ttListWrap" hidden>
         <div class="chips tt-teachers" id="ttTeachers" aria-label="Show timetable of"></div>
         <div class="sv-summary" id="ttSummary" hidden></div>
         <div class="sv-actions" id="ttActions">
@@ -1664,6 +1704,7 @@
         </div>
         <div class="panel tt-form" id="ttForm" hidden></div>
         <div id="ttBody" style="display:flex; flex-direction:column;"></div>
+        </div>
       </section>
 
       <section class="tsec" id="adminExamsSec" data-atab="exams">
@@ -1750,6 +1791,18 @@
         <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
         <div class="activity-rows" id="subjectsRows"></div>
         <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
+      </div>
+
+      <div class="panel set-acc" id="adminPeriodsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Periods &amp; Timings</div>
+        <div class="admin-sub" style="margin:0;">Period times for each timetable (Pre-Foundation Morning, Evening…).</div>
+        <div id="periodsBody" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"></div>
+      </div>
+
+      <div class="panel set-acc" id="adminMappingPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8l3 3-3 3"/></svg>Teacher Mapping</div>
+        <div class="admin-sub" style="margin:0;">The usual teacher for each subject (and batch). The timetable fills the teacher in automatically.</div>
+        <div id="mappingBody" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
 
       <div class="panel set-acc" id="adminRoomsPanel" data-atab="settings">
@@ -2097,7 +2150,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.6 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.7 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4204,6 +4257,19 @@
   function renderTimetable() {
     const el = document.getElementById('ttBody');
     if (!el) return;
+    const gridMode = state.tg.mode !== 'list';
+    document.querySelectorAll('[data-tt-mode]').forEach((b) => b.classList.toggle('active', (b.getAttribute('data-tt-mode') === 'grid') === gridMode));
+    document.getElementById('tgWrap').hidden = !gridMode;
+    document.getElementById('ttListWrap').hidden = gridMode;
+    if (gridMode) {
+      const ws0 = state.tt.weekStart, cur0 = mondayOf(todayStr());
+      document.getElementById('ttLabel').textContent = `${dateObj(ws0).getDate()} ${dateObj(ws0).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(shiftDateStr(ws0, 6)).getDate()} ${dateObj(shiftDateStr(ws0, 6)).toLocaleDateString('en-GB', { month: 'short' })}`;
+      document.getElementById('ttWhich').textContent = svWeekLabel(ws0);
+      document.getElementById('ttPrev').disabled = ws0 <= shiftDateStr(cur0, -28);
+      document.getElementById('ttNext').disabled = ws0 >= shiftDateStr(cur0, 28);
+      renderTgGrid();
+      return;
+    }
     const tt = state.tt;
     const ws = tt.weekStart, we = shiftDateStr(ws, 6);
     const ids = ttTeacherIds();
@@ -4421,10 +4487,402 @@
       renderTimetable();
     } catch (err) { flashOffline(err); }
   }
-  document.getElementById('ttPrev').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, -7); state.tt.form = null; renderTimetable(); });
-  document.getElementById('ttNext').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, 7); state.tt.form = null; renderTimetable(); });
+  document.getElementById('ttPrev').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, -7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; renderTimetable(); });
+  document.getElementById('ttNext').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, 7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; renderTimetable(); });
   document.getElementById('ttAddBtn').addEventListener('click', () => openTtForm(null));
+  document.querySelectorAll('[data-tt-mode]').forEach((b) => b.addEventListener('click', () => { state.tg.mode = b.getAttribute('data-tt-mode'); state.tt.key = ''; renderTimetable(); }));
   document.getElementById('ttCopyBtn').addEventListener('click', ttCopyLastWeek);
+
+  // =====================================================================
+  // Weekly Timetable Grid (Admin / Coordinator)
+  // A timetable per wing + session (e.g. Pre-Foundation · Morning) per week:
+  //   timetables/{weekStart__wing__session} = { group, wing, session, weekStart, sunday, cells:[{d,p,b,s,t,test}], status, published:[...] }
+  // Publishing writes each class into the teacher's own schedule (setBy), so Schedule, Today, reminders and logging all work as before.
+  // =====================================================================
+  const SESS_LABEL = { morning: 'Morning', evening: 'Evening', special: 'Special' };
+  const DEFAULT_PERIODS = [['09:00', '09:40'], ['09:40', '10:20'], ['10:30', '11:35'], ['11:55', '13:00'], ['13:10', '14:15']].map(([start, end]) => ({ start, end }));
+  state.periodSets = state.periodSets || {};
+  state.teacherMap = state.teacherMap || {};
+  state.batchRooms = state.batchRooms || {};
+  state.tg = state.tg || { mode: 'grid', group: null, day: null, paint: null, doc: null, docKey: '', others: [] };
+  function ttGroups() {
+    const out = [];
+    leadWings().forEach((w) => ['morning', 'evening', 'special'].forEach((ses) => {
+      const bats = currentBatches(w).filter((b) => batchSession(b) === ses);
+      if (bats.length) out.push({ key: `${w}|${ses}`, wing: w, session: ses, label: `${w} · ${SESS_LABEL[ses]}`, batches: bats });
+    }));
+    return out;
+  }
+  function tgGroup() {
+    const gs = ttGroups();
+    let g = gs.find((x) => x.key === state.tg.group);
+    if (!g) { g = gs[0] || null; state.tg.group = g ? g.key : null; }
+    return g;
+  }
+  function periodsFor(key) { const p = state.periodSets[key]; return (Array.isArray(p) && p.length) ? p : DEFAULT_PERIODS; }
+  function batchRoom(b) { return state.batchRooms[b] || ''; }
+  function defaultTeacher(b, subj) {
+    if (!subj) return '';
+    const m = state.teacherMap || {};
+    const t = m[`${b}|${subj}`] || m[`*|${subj}`] || '';
+    return t && !isRemovedUid(t) ? t : '';
+  }
+  function tgDocId(ws, g) { return `${ws}__${g.wing}__${g.session}`.replace(/[^A-Za-z0-9_-]+/g, '-'); }
+  function cellKey(c) { return `${c.d}|${c.p}|${c.b}`; }
+  function hashStr(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0; return h.toString(36); }
+  function slotIdFor(docId, c) { return 'tt_' + hashStr(docId + '#' + cellKey(c)); }
+  let tgUnsub = null;
+  function subscribeTgDoc() {
+    const g = tgGroup();
+    if (!g || !state.db) return;
+    const ws = state.tt.weekStart;
+    const id = tgDocId(ws, g);
+    if (state.tg.docKey === id) return;
+    state.tg.docKey = id;
+    state.tg.doc = null;
+    if (tgUnsub) tgUnsub();
+    tgUnsub = state.db.collection('timetables').doc(id).onSnapshot((snap) => {
+      if (state.tg.docKey !== id) return;
+      if (state.tg.saving || tgSaveTimer) return; // a local change is about to be saved; keep it
+      state.tg.doc = snap.exists ? Object.assign({ cells: [] }, snap.data()) : { group: g.key, wing: g.wing, session: g.session, weekStart: ws, sunday: false, cells: [], status: 'draft', published: [] };
+      if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid();
+    }, () => {});
+    // other timetables of the same week (other wings / sessions) for teacher clash checks
+    state.db.collection('timetables').where('weekStart', '==', ws).get().then((snap) => {
+      state.tg.others = snap.docs.filter((d) => d.id !== id).map((d) => d.data());
+      if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid();
+    }).catch(() => {});
+  }
+  let tgSaveTimer = null;
+  function tgSave() {
+    const doc = state.tg.doc; if (!doc) return;
+    doc.status = 'draft'; doc.updatedAt = Date.now();
+    state.tg.dirty = true;
+    clearTimeout(tgSaveTimer);
+    tgSaveTimer = setTimeout(async () => {
+      state.tg.saving = true;
+      try { await state.db.collection('timetables').doc(state.tg.docKey).set(doc); } catch (err) { flashOffline(err); }
+      state.tg.saving = false;
+      tgSaveTimer = null;
+    }, 700);
+  }
+  function tgDays() {
+    const ws = state.tt.weekStart;
+    const days = datesBetween(ws, shiftDateStr(ws, 5));
+    if (state.tg.doc && state.tg.doc.sunday) days.push(shiftDateStr(ws, 6));
+    return days;
+  }
+  function tgCell(d, p, b) { return (state.tg.doc && state.tg.doc.cells || []).find((c) => c.d === d && c.p === p && c.b === b) || null; }
+  function tgSetCell(d, p, b, val) {
+    const doc = state.tg.doc;
+    doc.cells = (doc.cells || []).filter((c) => !(c.d === d && c.p === p && c.b === b));
+    if (val) doc.cells.push(Object.assign({ d, p, b }, val));
+    tgSave();
+  }
+  // Teacher clashes in the same period (this grid + other wings' grids of the same week).
+  function tgClashes() {
+    const g = tgGroup(); if (!g || !state.tg.doc) return {};
+    const per = periodsFor(g.key);
+    const all = [];
+    (state.tg.doc.cells || []).forEach((c) => { const pp = per[c.p]; if (c.t && pp) all.push({ c, a: hhmmToMin(pp.start), z: hhmmToMin(pp.end), own: true }); });
+    (state.tg.others || []).forEach((o) => { const op = periodsFor(o.group); (o.cells || []).forEach((c) => { const pp = op[c.p]; if (c.t && pp) all.push({ c, a: hhmmToMin(pp.start), z: hhmmToMin(pp.end), own: false, g: o.group }); }); });
+    const res = {};
+    for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+      const x = all[i], y = all[j];
+      if (x.c.t !== y.c.t || x.c.d !== y.c.d || !(x.a < y.z && y.a < x.z)) continue;
+      const msg = (o) => `${ttName(x.c.t)} also has ${o.c.b} (${o.c.s})`;
+      if (x.own) res[cellKey(x.c)] = msg(y);
+      if (y.own) res[cellKey(y.c)] = msg(x);
+    }
+    return res;
+  }
+  function renderTgGrid() {
+    const box = document.getElementById('tgWrap');
+    if (!box) return;
+    const groups = ttGroups();
+    const g = tgGroup();
+    subscribeTgDoc();
+    const days = tgDays();
+    if (!state.tg.day || days.indexOf(state.tg.day) === -1) state.tg.day = days.indexOf(todayStr()) !== -1 ? todayStr() : days[0];
+    const doc = state.tg.doc;
+    const per = g ? periodsFor(g.key) : [];
+    const clash = tgClashes();
+    const subjects = subjectsList();
+    const st = doc ? (doc.status === 'published' && !state.tg.dirty ? 'Published' : ((doc.published || []).length ? 'Changes not published' : 'Draft')) : '';
+    let html = `<div class="chips tt-teachers">${groups.map((x) => `<button type="button" class="chip${g && x.key === g.key ? ' active' : ''}" data-tg-group="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>`;
+    if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
+    if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
+    html += `<div class="tg-status"><span class="tg-st ${st === 'Published' ? 'ok' : 'draft'}">${st}</span><label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday</label></div>`;
+    html += `<div class="chips tg-days">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; return `<button type="button" class="chip${d === state.tg.day ? ' active' : ''}" data-tg-day="${d}">${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}${n ? ' •' : ''}</button>`; }).join('')}</div>`;
+    // paint bar
+    html += `<div class="tg-paint"><span class="team-lbl">🖌 Paint</span><div class="chips tt-teachers">${['', ...subjects].map((s) => `<button type="button" class="chip${(state.tg.paint || '') === s ? ' active' : ''}" data-tg-paint="${escapeHtml(s)}">${s ? escapeHtml(s) : 'Off'}</button>`).join('')}</div></div>`;
+    const d = state.tg.day;
+    html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${per.map((pp, i) => `<th>P${i + 1}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(' ', '\u00a0'))}</span></th>`).join('')}</tr></thead><tbody>`;
+    g.batches.forEach((b) => {
+      html += `<tr><th class="tg-b">${escapeHtml(gridBatchLabel(b))}${batchRoom(b) ? `<span>${escapeHtml(batchRoom(b))}</span>` : ''}</th>`;
+      per.forEach((pp, i) => {
+        const c = tgCell(d, i, b);
+        const k = `${d}|${i}|${b}`;
+        const cl = c ? (clash[k] ? ' tg-clash' : ' tg-full') : '';
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b>${escapeHtml(c.s)}</b>${c.test ? '<i>Test</i>' : ''}<small>${c.t ? escapeHtml(initials(ttName(c.t))) : '⚠️ no teacher'}</small>${clash[k] ? '<em>⚠️</em>' : ''}` : '<span>+</span>'}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    const nClash = Object.keys(clash).length; const noT = (doc.cells || []).filter((c) => !c.t).length;
+    if (nClash || noT) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Please check</div>${nClash ? `<div class="ad-alert-l">${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places — tap ⚠️ cells</div>` : ''}${noT ? `<div class="ad-alert-l">${noT} class${noT === 1 ? '' : 'es'} without a teacher (set Teacher Mapping)</div>` : ''}</div>`;
+    html += `<div class="tg-actions">
+      <button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
+      <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>
+      <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">Timetable image</button>
+      <button type="button" class="save-btn" id="tgPublish" style="margin:0;">Publish week</button>
+    </div><div id="tgCopyDayBox"></div>`;
+    box.innerHTML = html;
+    bindTg(box);
+    renderTgCopyBox();
+  }
+  // "Class 9 - Batch 1" → "9 · B1", "Class 10 - Evening" → "10 · Eve", others unchanged
+  function gridBatchLabel(b) {
+    const m = String(b).match(/class\s*(\d+)\s*[-–]?\s*(.*)$/i);
+    if (!m) return b;
+    const rest = m[2].replace(/batch\s*/i, 'B').replace(/evening/i, 'Eve').trim();
+    return rest ? `${m[1]} · ${rest}` : m[1];
+  }
+  function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase(); }
+  function classOfBatchNum(b) { const m = String(b).match(/class\s*(\d+)/i); return m ? m[1] : ''; }
+  function bindTg(box) {
+    box.querySelectorAll('[data-tg-group]').forEach((b) => b.addEventListener('click', () => { state.tg.group = b.getAttribute('data-tg-group'); state.tg.docKey = ''; state.tg.dirty = false; renderTgGrid(); }));
+    box.querySelectorAll('[data-tg-day]').forEach((b) => b.addEventListener('click', () => { state.tg.day = b.getAttribute('data-tg-day'); state.tg.copy = null; renderTgGrid(); }));
+    box.querySelectorAll('[data-tg-paint]').forEach((b) => b.addEventListener('click', () => { state.tg.paint = b.getAttribute('data-tg-paint') || null; renderTgGrid(); }));
+    const sun = document.getElementById('tgSunday'); if (sun) sun.addEventListener('change', () => { state.tg.doc.sunday = sun.checked; tgSave(); renderTgGrid(); });
+    box.querySelectorAll('[data-tg-cell]').forEach((td) => td.addEventListener('click', () => {
+      const [d, p, ...rest] = td.getAttribute('data-tg-cell').split('|'); const b = rest.join('|'); const pi = Number(p);
+      if (state.tg.paint) {
+        const c = tgCell(d, pi, b);
+        if (c && c.s === state.tg.paint) tgSetCell(d, pi, b, null);
+        else tgSetCell(d, pi, b, { s: state.tg.paint, t: defaultTeacher(b, state.tg.paint) });
+        renderTgGrid();
+      } else openTgCellSheet(d, pi, b);
+    }));
+    const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+    on('tgCopyWeek', tgCopyLastWeek);
+    on('tgCopyDay', tgCopyDayPicker);
+    on('tgImage', tgImage);
+    on('tgPublish', tgPublish);
+  }
+  function openTgCellSheet(d, p, b) {
+    const g = tgGroup(); const per = periodsFor(g.key)[p];
+    const cur = tgCell(d, p, b);
+    const st = { s: cur ? cur.s : '', t: cur ? cur.t : '', test: !!(cur && cur.test), change: false };
+    const body = document.getElementById('hvSheetBody');
+    const ids = ttTeacherIds();
+    const draw = () => {
+      if (!st.change && st.s) st.t = st.t && cur && cur.s === st.s ? st.t : defaultTeacher(b, st.s);
+      body.innerHTML = `<div class="hv-d-title">${escapeHtml(b)}</div>
+        <div class="hv-d-wing">${escapeHtml(WD[dateObj(d).getDay()])} ${dateObj(d).getDate()} · P${p + 1} · ${escapeHtml(formatTimeStr(per.start))} – ${escapeHtml(formatTimeStr(per.end))}${batchRoom(b) ? ' · ' + escapeHtml(batchRoom(b)) : ''}</div>
+        <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div>
+        <div class="chips">${subjectsList().map((s) => `<button type="button" class="chip${st.s === s ? ' active' : ''}" data-cs="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>
+        ${st.s ? `<div class="tg-teacher">👤 <b>${st.t ? escapeHtml(ttName(st.t)) : 'No teacher set'}</b> <span class="mut">${st.t && st.t === defaultTeacher(b, st.s) ? '(default)' : (st.t ? '(changed)' : '')}</span>
+          <button type="button" class="hv-back" id="csChange" style="padding:0;">${st.change ? 'Hide' : 'Change teacher'}</button></div>` : ''}
+        ${st.s && st.change ? `<div class="chips" style="margin-top:6px;">${ids.map((u) => `<button type="button" class="chip${st.t === u ? ' active' : ''}" data-ct="${u}">${escapeHtml(ttName(u))}</button>`).join('')}</div>` : ''}
+        ${st.s ? `<label class="tg-sun" style="margin-top:10px;"><input type="checkbox" id="csTest"${st.test ? ' checked' : ''}> Class test</label>` : ''}
+        <div class="hv-d-btns">${cur ? '<button type="button" class="btn-secondary hv-del" id="csClear" style="border-color: var(--line);">Clear</button>' : '<button type="button" class="btn-secondary" id="csCancel" style="border-color: var(--line);">Cancel</button>'}<button type="button" class="save-btn" id="csAssign" style="margin:0;"${st.s ? '' : ' disabled'}>Assign</button></div>`;
+      body.querySelectorAll('[data-cs]').forEach((x) => x.addEventListener('click', () => { st.s = x.getAttribute('data-cs'); st.change = false; st.t = defaultTeacher(b, st.s); draw(); }));
+      body.querySelectorAll('[data-ct]').forEach((x) => x.addEventListener('click', () => { st.t = x.getAttribute('data-ct'); draw(); }));
+      const ch = document.getElementById('csChange'); if (ch) ch.addEventListener('click', () => { st.change = !st.change; draw(); });
+      const tc = document.getElementById('csTest'); if (tc) tc.addEventListener('change', () => { st.test = tc.checked; });
+      const cl = document.getElementById('csClear'); if (cl) cl.addEventListener('click', () => { tgSetCell(d, p, b, null); closeHvSheet(); renderTgGrid(); });
+      const cc = document.getElementById('csCancel'); if (cc) cc.addEventListener('click', closeHvSheet);
+      document.getElementById('csAssign').addEventListener('click', () => { if (!st.s) return; tgSetCell(d, p, b, { s: st.s, t: st.t || '', test: st.test || false }); closeHvSheet(); renderTgGrid(); });
+    };
+    draw();
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+  async function tgCopyLastWeek() {
+    const g = tgGroup(); const ws = state.tt.weekStart; const prev = shiftDateStr(ws, -7);
+    let src;
+    try { src = await state.db.collection('timetables').doc(tgDocId(prev, g)).get(); } catch (err) { flashOffline(err); return; }
+    const cells = (src.exists && src.data().cells) || [];
+    if (!cells.length) { showToast('Last week has no timetable for this group', 'error'); return; }
+    if ((state.tg.doc.cells || []).length) {
+      const ok = await showConfirm('This replaces the classes already in this week\'s grid with last week\'s timetable.', 'Copy last week?', 'Copy');
+      if (!ok) return;
+    }
+    state.tg.doc.cells = cells.map((c) => Object.assign({}, c, { d: shiftDateStr(c.d, 7), t: c.t && !isRemovedUid(c.t) ? c.t : defaultTeacher(c.b, c.s) }));
+    if (cells.some((c) => dateObj(c.d).getDay() === 0)) state.tg.doc.sunday = true;
+    tgSave(); renderTgGrid(); showToast(`${cells.length} classes copied`);
+  }
+  function tgCopyDayPicker() { state.tg.copy = { src: state.tg.day, pick: [] }; renderTgGrid(); }
+  function renderTgCopyBox() {
+    const box = document.getElementById('tgCopyDayBox');
+    const cp = state.tg.copy;
+    if (!box || !cp) return;
+    const days = tgDays().filter((d) => d !== cp.src);
+    box.innerHTML = `<div class="panel" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"><div class="team-lbl">Copy ${escapeHtml(dayHeading(cp.src))} to</div>
+      <div class="chips">${days.map((d) => `<button type="button" class="chip${cp.pick.indexOf(d) !== -1 ? ' active' : ''}" data-cpd="${d}">${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}</button>`).join('')}</div>
+      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="cpdCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="cpdGo" style="margin:0;">Copy</button></div></div>`;
+    box.querySelectorAll('[data-cpd]').forEach((b) => b.addEventListener('click', () => { const d = b.getAttribute('data-cpd'); const k = cp.pick.indexOf(d); if (k === -1) cp.pick.push(d); else cp.pick.splice(k, 1); renderTgCopyBox(); }));
+    document.getElementById('cpdCancel').addEventListener('click', () => { state.tg.copy = null; renderTgGrid(); });
+    document.getElementById('cpdGo').addEventListener('click', async () => {
+      const pick = cp.pick.slice();
+      if (!pick.length) { showToast('Choose the days', 'error'); return; }
+      const has = (state.tg.doc.cells || []).some((c) => pick.indexOf(c.d) !== -1);
+      if (has) { const ok = await showConfirm('Classes already in those days will be replaced.', 'Copy day?', 'Copy'); if (!ok) return; }
+      const srcCells = (state.tg.doc.cells || []).filter((c) => c.d === cp.src);
+      state.tg.doc.cells = (state.tg.doc.cells || []).filter((c) => pick.indexOf(c.d) === -1).concat(...pick.map((d) => srcCells.map((c) => Object.assign({}, c, { d }))));
+      state.tg.copy = null;
+      tgSave(); renderTgGrid(); showToast('Day copied');
+    });
+  }
+  // Publish: write / update / remove the classes in each teacher's schedule.
+  async function tgPublish() {
+    const g = tgGroup(); const doc = state.tg.doc; if (!doc) return;
+    const per = periodsFor(g.key);
+    const cells = (doc.cells || []).filter((c) => c.t && per[c.p]);
+    const noT = (doc.cells || []).filter((c) => !c.t).length;
+    const clash = Object.keys(tgClashes()).length;
+    const msg = `${cells.length} classes will go to the teachers' schedules${noT ? `\n${noT} class${noT === 1 ? '' : 'es'} without a teacher will be skipped` : ''}${clash ? `\n⚠️ ${clash} teacher clash${clash === 1 ? '' : 'es'}` : ''}`;
+    const ok = await showConfirm(msg, 'Publish this week?', 'Publish');
+    if (!ok) return;
+    const me = (state.user && state.user.name) || 'Coordinator';
+    const docId = state.tg.docKey;
+    const newIds = {};
+    const ops = [];
+    cells.forEach((c) => {
+      const pp = per[c.p]; const id = slotIdFor(docId, c);
+      newIds[c.t + '/' + id] = 1;
+      ops.push(['set', `schedule/${c.t}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, room: batchRoom(c.b), subject: c.s, test: !!c.test, setBy: state.teacherId, setByName: me, ttId: docId, createdAt: Date.now() }]);
+    });
+    (doc.published || []).forEach((key) => { if (!newIds[key]) ops.push(['del', `schedule/${key.split('/')[0]}/slots/${key.split('/')[1]}`]); });
+    try {
+      for (let i = 0; i < ops.length; i += 400) {
+        const batch = state.db.batch();
+        ops.slice(i, i + 400).forEach(([op, path, data]) => { const ref = state.db.doc(path); if (op === 'set') batch.set(ref, data); else batch.delete(ref); });
+        await waitForWrite(batch.commit());
+      }
+      doc.published = Object.keys(newIds); doc.status = 'published'; doc.publishedAt = Date.now(); doc.periodsUsed = per;
+      state.tg.saving = true;
+      await state.db.collection('timetables').doc(docId).set(doc);
+      state.tg.saving = false; state.tg.dirty = false;
+      state.tt.key = '';
+      showToast(`✓ Published · ${cells.length} classes`);
+      renderTgGrid();
+    } catch (err) { state.tg.saving = false; flashOffline(err); }
+  }
+  // Timetable image (same layout as the printed timetable), for WhatsApp or printing.
+  function tgImage() {
+    const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return;
+    const per = periodsFor(g.key); const days = tgDays(); const bats = g.batches;
+    const colDate = 150, colClass = 120, colP = 150, colBr = 70, rowH = 46, headH = 150;
+    const cols = []; per.forEach((pp, i) => { if (i > 0 && hhmmToMin(pp.start) > hhmmToMin(per[i - 1].end)) cols.push({ br: true, a: per[i - 1].end, z: pp.start }); cols.push({ p: i, pp }); });
+    const W = colDate + colClass + cols.reduce((s, c) => s + (c.br ? colBr : colP), 0) + 40;
+    const H = headH + days.length * bats.length * rowH + 40;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const txt = (t, cx, cy, size, bold, color, maxW) => { x.font = `${bold ? '700 ' : ''}${size}px Arial, sans-serif`; x.fillStyle = color || '#111'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(t), cx, cy, maxW); };
+    const box = (bx, by, bw, bh, fill) => { if (fill) { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); } x.strokeStyle = '#222'; x.lineWidth = 1.2; x.strokeRect(bx, by, bw, bh); };
+    const ws = state.tt.weekStart; const we = days[days.length - 1];
+    box(20, 12, W - 40, 40, '#FFFF00');
+    txt(`${g.wing.toUpperCase()} (${SESS_LABEL[g.session].toUpperCase()} BATCH) TIME-TABLE (${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })} ${dateObj(we).getFullYear()})`, W / 2, 32, 22, true, '#000', W - 60);
+    const rooms = bats.filter(batchRoom).map((b) => `${b}: ${batchRoom(b)} Room`).join('     ');
+    if (rooms) txt(rooms, W / 2, 68, 15, true, '#C00000', W - 60);
+    let cx = 20; const y0 = 86;
+    box(cx, y0, colDate, 64, '#F8CBAD'); txt('DATE', cx + colDate / 2, y0 + 32, 15, true); cx += colDate;
+    box(cx, y0, colClass, 64, '#F8CBAD'); txt('CLASS', cx + colClass / 2, y0 + 32, 15, true); cx += colClass;
+    cols.forEach((c) => {
+      const w = c.br ? colBr : colP;
+      box(cx, y0, w, 30, '#FFFF00'); txt(c.br ? 'BREAK' : `PERIOD ${c.p + 1}`, cx + w / 2, y0 + 15, 13, true);
+      box(cx, y0 + 30, w, 34, '#F8CBAD'); const sh = (t) => formatTimeStr(t).replace(/\s?(AM|PM)$/i, ''); txt(c.br ? `${sh(c.a)}-${sh(c.z)}` : `${formatTimeStr(c.pp.start)} - ${formatTimeStr(c.pp.end)}`, cx + w / 2, y0 + 47, 12, false, '#000', w - 6);
+      cx += w;
+    });
+    let y = headH;
+    days.forEach((d, di) => {
+      const dh = bats.length * rowH;
+      box(20, y, colDate, dh, '#E2EFDA');
+      txt(dateObj(d).toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase(), 20 + colDate / 2, y + dh / 2 - 10, 14, true);
+      txt(`(${String(dateObj(d).getDate()).padStart(2, '0')}.${String(dateObj(d).getMonth() + 1).padStart(2, '0')}.${dateObj(d).getFullYear()})`, 20 + colDate / 2, y + dh / 2 + 10, 13, true);
+      bats.forEach((b, bi) => {
+        const ry = y + bi * rowH; let cx2 = 20 + colDate;
+        const shade = di % 2 ? '#DDEBF7' : '#FFFFFF';
+        box(cx2, ry, colClass, rowH, '#FFFFFF'); txt(b.replace(/class\s*/i, '').replace(/\s*-\s*Batch\s*/i, ' B'), cx2 + colClass / 2, ry + rowH / 2, 13, true, '#000', colClass - 8); cx2 += colClass;
+        cols.forEach((c) => {
+          const w = c.br ? colBr : colP;
+          if (c.br) { box(cx2, ry, w, rowH, '#D0CECE'); cx2 += w; return; }
+          const cell = tgCell(d, c.p, b);
+          box(cx2, ry, w, rowH, shade);
+          if (cell) { txt(cell.s, cx2 + w / 2, ry + rowH / 2 - (cell.test ? 8 : 0), 15, true, '#000', w - 8); if (cell.test) txt('(Class Test)', cx2 + w / 2, ry + rowH / 2 + 11, 12, true, '#000'); }
+          cx2 += w;
+        });
+      });
+      y += dh;
+    });
+    cv.toBlob((blob) => {
+      const name = `Timetable-${g.wing}-${SESS_LABEL[g.session]}-${ws}.png`.replace(/\s+/g, '-');
+      const file = new File([blob], name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'Timetable' }).catch(() => saveFile(name, blob));
+      else saveFile(name, blob);
+    }, 'image/png');
+  }
+
+  // ---------- Settings: Periods & timings, Teacher mapping, Batch rooms ----------
+  state.perEdit = null;
+  function renderPeriodsPanel() {
+    const el = document.getElementById('periodsBody'); if (!el) return;
+    const groups = ttGroups();
+    if (!state.perEdit || !groups.find((x) => x.key === state.perEdit.key)) {
+      const g = groups[0]; if (!g) { el.innerHTML = '<div class="hv-note">Add batches first.</div>'; return; }
+      state.perEdit = { key: g.key, list: periodsFor(g.key).map((p) => Object.assign({}, p)) };
+    }
+    const pe = state.perEdit;
+    el.innerHTML = `<div class="chips">${groups.map((x) => `<button type="button" class="chip${x.key === pe.key ? ' active' : ''}" data-pe-g="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>
+      ${pe.list.map((p, i) => `<div class="pe-row"><span class="team-lbl">P${i + 1}</span><input class="text-input" type="time" data-pe-s="${i}" value="${escapeHtml(p.start)}"><span>–</span><input class="text-input" type="time" data-pe-e="${i}" value="${escapeHtml(p.end)}"><button type="button" class="del-btn" data-pe-del="${i}" aria-label="Remove period">${svgTrash()}</button></div>`).join('')}
+      <div class="hv-note" style="text-align:left;">Gaps between periods are shown as breaks.</div>
+      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;">Save timings</button></div>`;
+    el.querySelectorAll('[data-pe-g]').forEach((b) => b.addEventListener('click', () => { const k = b.getAttribute('data-pe-g'); state.perEdit = { key: k, list: periodsFor(k).map((p) => Object.assign({}, p)) }; renderPeriodsPanel(); }));
+    el.querySelectorAll('[data-pe-s]').forEach((inp) => inp.addEventListener('change', () => { pe.list[+inp.getAttribute('data-pe-s')].start = inp.value; }));
+    el.querySelectorAll('[data-pe-e]').forEach((inp) => inp.addEventListener('change', () => { pe.list[+inp.getAttribute('data-pe-e')].end = inp.value; }));
+    el.querySelectorAll('[data-pe-del]').forEach((b) => b.addEventListener('click', () => { pe.list.splice(+b.getAttribute('data-pe-del'), 1); renderPeriodsPanel(); }));
+    document.getElementById('peAdd').addEventListener('click', () => { const last = pe.list[pe.list.length - 1]; pe.list.push({ start: last ? last.end : '09:00', end: last ? svMinToHHMM(hhmmToMin(last.end) + 40) : '09:40' }); renderPeriodsPanel(); });
+    document.getElementById('peSave').addEventListener('click', async () => {
+      if (pe.list.some((p) => !p.start || !p.end || hhmmToMin(p.end) <= hhmmToMin(p.start))) { showToast('Check the period times', 'error'); return; }
+      const sorted = pe.list.slice().sort((a, b) => a.start.localeCompare(b.start));
+      for (let i = 1; i < sorted.length; i++) if (hhmmToMin(sorted[i].start) < hhmmToMin(sorted[i - 1].end)) { showToast('Two periods overlap', 'error'); return; }
+      const groupsObj = Object.assign({}, state.periodSets, { [pe.key]: sorted });
+      try { await state.db.doc('settings/periods').set({ groups: groupsObj }); showToast('Timings saved'); } catch (err) { flashOffline(err); }
+    });
+  }
+  state.mapSubj = null;
+  function renderMappingPanel() {
+    const el = document.getElementById('mappingBody'); if (!el) return;
+    const subs = subjectsList();
+    if (!state.mapSubj || subs.indexOf(state.mapSubj) === -1) state.mapSubj = subs[0];
+    const s = state.mapSubj; const ids = ttTeacherIds(); const m = state.teacherMap || {};
+    const bats = []; leadWings().forEach((w) => currentBatches(w).forEach((b) => { if (bats.indexOf(b) === -1) bats.push(b); }));
+    const opt = (sel, none) => `<option value="">${none}</option>` + ids.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('');
+    el.innerHTML = `<div class="chips tt-teachers">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
+      <div class="mp-row mp-all"><span>All batches</span><select class="text-input" data-mp-k="*|${escapeHtml(s)}">${opt(m[`*|${s}`] || '', '— No default —')}</select></div>
+      <div class="hv-note" style="text-align:left;">Change a batch only if it has a different ${escapeHtml(s)} teacher.</div>
+      ${bats.map((b) => `<div class="mp-row"><span>${escapeHtml(b)}</span><select class="text-input" data-mp-k="${escapeHtml(b)}|${escapeHtml(s)}">${opt(m[`${b}|${s}`] || '', 'Same as all batches')}</select></div>`).join('')}`;
+    el.querySelectorAll('[data-mp-s]').forEach((b) => b.addEventListener('click', () => { state.mapSubj = b.getAttribute('data-mp-s'); renderMappingPanel(); }));
+    el.querySelectorAll('[data-mp-k]').forEach((sel) => sel.addEventListener('change', async () => {
+      const k = sel.getAttribute('data-mp-k'); const map = Object.assign({}, state.teacherMap);
+      if (sel.value) map[k] = sel.value; else delete map[k];
+      try { await state.db.doc('settings/teacherMap').set({ map }); state.teacherMap = map; showToast('Default teacher saved'); } catch (err) { flashOffline(err); }
+    }));
+  }
+  function openBatchRoomSheet(b) {
+    const body = document.getElementById('hvSheetBody');
+    const cur = batchRoom(b);
+    body.innerHTML = `<div class="hv-d-title">${escapeHtml(b)}</div><div class="hv-d-wing">Fixed room for this batch</div>
+      <div class="chips" style="margin-top:12px;">${roomsList().map((r) => `<button type="button" class="chip${cur === r ? ' active' : ''}" data-br="${escapeHtml(r)}">${escapeHtml(r)}</button>`).join('') || '<span class="hv-note">Add rooms in Settings → Rooms first.</span>'}
+      ${cur ? '<button type="button" class="chip" data-br="">No fixed room</button>' : ''}</div>`;
+    body.querySelectorAll('[data-br]').forEach((x) => x.addEventListener('click', async () => {
+      const rooms = Object.assign({}, state.batchRooms); const v = x.getAttribute('data-br');
+      if (v) rooms[b] = v; else delete rooms[b];
+      try { await state.db.doc('settings/batches').set({ rooms }, { merge: true }); state.batchRooms = rooms; closeHvSheet(); showToast('Room saved'); } catch (err) { flashOffline(err); }
+    }));
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
 
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
@@ -4509,6 +4967,8 @@
     if (id === 'adminTestTypesPanel') return String(testTypesList().length);
     if (id === 'adminSubjectsPanel') return String(subjectsList().length);
     if (id === 'adminRoomsPanel') return String(roomsList().length);
+    if (id === 'adminPeriodsPanel') return `${ttGroups().filter((g) => state.periodSets[g.key]).length}/${ttGroups().length} set`;
+    if (id === 'adminMappingPanel') return `${Object.keys(state.teacherMap || {}).length} set`;
     if (id === 'adminWeeklyOffPanel') return (state.weeklyOff || []).join(', ') || 'None';
     if (id === 'adminTeamPanel') { const ids = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u)); const c = ids.filter(isCoordUid).length; return `${ids.length - c} teacher${ids.length - c === 1 ? '' : 's'} · ${c} coordinator${c === 1 ? '' : 's'}`; }
     if (id === 'adminCampusPanel') return /^Set/.test(document.getElementById('campusLocText').textContent) ? 'Set' : 'Not set';
@@ -4543,6 +5003,12 @@
     renderSettingsAccordion();
     if (state.canAdmin) { subscribeStaffIds(); renderTeamPanel(); renderStaffIdsBlock(); }
     if (state.adminTab === 'tt') renderTimetable();
+    if (state.adminTab === 'settings') {
+      const pb = document.getElementById('periodsBody');
+      if (pb && !pb.contains(document.activeElement)) renderPeriodsPanel();
+      const mb = document.getElementById('mappingBody');
+      if (mb && !mb.contains(document.activeElement)) renderMappingPanel();
+    }
     const date = state.adminDate;
     const wing = state.adminReportWing;
     const isToday = date === todayStr();
@@ -5385,7 +5851,10 @@
       const sessions = Object.assign({}, state.batchSessions || {});
       if (sessions[oldName] && !sessions[newName]) sessions[newName] = sessions[oldName];
       delete sessions[oldName];
-      await state.db.doc('settings/batches').set({ wings, renames, sessions });
+      const rooms0 = Object.assign({}, state.batchRooms || {});
+      if (rooms0[oldName] && !rooms0[newName]) rooms0[newName] = rooms0[oldName];
+      delete rooms0[oldName];
+      await state.db.doc('settings/batches').set({ wings, renames, sessions, rooms: rooms0 });
       showToast(merging ? 'Batches merged' : 'Batch renamed everywhere');
     } catch (err) { flashOffline(err); }
   }
@@ -5419,10 +5888,12 @@
       </div>` : `
       <div class="activity-row">
         <div class="activity-row-text"><span class="activity-row-title">${escapeHtml(b)}</span></div>
+        ${(state.canAdmin || state.isCoordinator) ? `<button type="button" class="sess-pill" data-room-batch="${i}" aria-label="Set room">${batchRoom(b) ? escapeHtml(batchRoom(b)) : '+ Room'}</button>` : ''}
         ${(state.canAdmin || state.isCoordinator) ? `<button type="button" class="sess-pill ${batchSession(b)}" data-sess-batch="${i}" aria-label="Change session">${escapeHtml({ morning: 'Morning', evening: 'Evening', special: 'Special' }[batchSession(b)])}</button>` : ''}
         ${(state.canAdmin || state.isCoordinator) ? `<button class="del-btn" data-rename-batch="${i}" aria-label="Rename batch">${svgEdit()}</button>` : ''}
         <button class="del-btn" data-del-batch="${i}" aria-label="Remove batch">${svgTrash()}</button>
       </div>`).join('');
+    el.querySelectorAll('[data-room-batch]').forEach((btn) => btn.addEventListener('click', () => openBatchRoomSheet(list[+btn.getAttribute('data-room-batch')])));
     // Tap the session pill to cycle Morning → Evening → Special.
     el.querySelectorAll('[data-sess-batch]').forEach((btn) => btn.addEventListener('click', async () => {
       const b = list[+btn.getAttribute('data-sess-batch')];
@@ -5480,7 +5951,7 @@
         'Pre-Foundation': wing === 'Pre-Foundation' ? list : currentBatches('Pre-Foundation'),
         'Foundation': wing === 'Foundation' ? list : currentBatches('Foundation')
       };
-      await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {}, sessions: state.batchSessions || {} });
+      await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {}, sessions: state.batchSessions || {}, rooms: state.batchRooms || {} });
       showToast('Batch list updated');
     } catch (err) { flashOffline(err); }
   }
@@ -5782,7 +6253,7 @@
     const topic = m.cls && m.cls.topic ? `<span class="sv-topic"> · ${escapeHtml(m.cls.topic)}</span>` : '';
     return `<div class="sv-row ${m.status}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${st != null ? escapeHtml(formatTimeStr(s.time)) : '—'}</span>
-      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${s.room ? ' · ' + escapeHtml(s.room) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
+      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${s.subject ? escapeHtml(s.subject) + (s.test ? ' (Class Test)' : '') + ' · ' : ''}${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${s.room ? ' · ' + escapeHtml(s.room) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
       <span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span>
     </div>`;
   }
@@ -9109,6 +9580,7 @@
     unsubscribers.push(db.doc('settings/batches').onSnapshot((snap) => {
       const data = snap.data();
       state.batchSessions = (data && data.sessions && typeof data.sessions === 'object') ? data.sessions : {};
+      state.batchRooms = (data && data.rooms && typeof data.rooms === 'object') ? data.rooms : {};
       const rn = (data && data.renames && typeof data.renames === 'object') ? data.renames : {};
       if (JSON.stringify(rn) !== JSON.stringify(state.batchRenames || {})) {
         state.batchRenames = rn;
@@ -9145,6 +9617,14 @@
       state.testTypes = (snap.exists && snap.data().list) || null;
       renderListManagers();
       if (state.tab === 'add') renderInvig();
+    }, () => {}));
+    unsubscribers.push(db.doc('settings/periods').onSnapshot((snap) => {
+      state.periodSets = (snap.exists && snap.data().groups) || {};
+      if (state.tab === 'admin') renderAdmin();
+    }, () => {}));
+    unsubscribers.push(db.doc('settings/teacherMap').onSnapshot((snap) => {
+      state.teacherMap = (snap.exists && snap.data().map) || {};
+      if (state.tab === 'admin') renderAdmin();
     }, () => {}));
     unsubscribers.push(db.doc('settings/rooms').onSnapshot((snap) => {
       state.rooms = (snap.exists && snap.data().list) || [];
