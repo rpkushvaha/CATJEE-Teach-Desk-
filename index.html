@@ -809,7 +809,7 @@
   .ad-tabs { display: flex !important; gap: 2px !important; overflow-x: auto; scrollbar-width: none; }
   .ad-tabs::-webkit-scrollbar { display: none; }
   .ad-tab { flex: 1 0 auto; font-size: 11.5px !important; padding: 8px 3px !important; white-space: nowrap; }
-  .tt-teachers { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .tt-teachers { flex-wrap: wrap; }
   .tt-teachers::-webkit-scrollbar { display: none; }
   .tt-teachers .chip { flex-shrink: 0; }
   #ttSummary[hidden], #ttActions[hidden], #ttCopyBtn[hidden], #ttForm[hidden], #ttTeachers[hidden] { display: none !important; }
@@ -829,21 +829,26 @@
   .tg-st { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(217,119,6,.12); color: #B45309; }
   .tg-st.ok { background: rgba(22,163,74,.12); color: #15803D; }
   .tg-sun { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted-2); }
-  .tg-days { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .tg-days .chip { flex-shrink: 0; padding: 6px 10px; }
+  .tg-days { display: grid; gap: 4px; }
+  .tg-day { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; cursor: pointer; min-width: 0; position: relative; }
+  .tg-day b { font-size: 12px; font-weight: 600; }
+  .tg-day small { font-size: 12px; color: var(--muted); }
+  .tg-day.active { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
+  .tg-day.active small { color: var(--gold); }
+  .tg-day.has::after { content: ''; position: absolute; top: 4px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
   .tg-paint { display: flex; flex-direction: column; gap: 4px; }
   .tg-paint .chip { padding: 5px 10px; font-size: 12px; }
-  .tg-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
-  .tg-table { border-collapse: collapse; width: 100%; min-width: 340px; table-layout: fixed; font-size: 12px; }
-  .tg-table th, .tg-table td { border: 1px solid var(--line); padding: 6px 3px; text-align: center; vertical-align: middle; }
+  .tg-scroll { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .tg-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 12px; }
+  .tg-table th, .tg-table td { border: 1px solid var(--line); padding: 5px 2px; text-align: center; vertical-align: middle; overflow-wrap: anywhere; }
   .tg-table thead th { background: var(--neutral-soft); font-size: 11px; font-weight: 600; color: var(--muted-2); line-height: 1.25; }
   .tg-table thead th span { font-weight: 500; font-size: 10px; }
-  .tg-table th:first-child { width: 58px; }
-  .tg-b { background: var(--neutral-soft); font-size: 11.5px; font-weight: 700; color: var(--ink); text-align: left !important; padding-left: 6px !important; }
+  .tg-table th:first-child { width: 52px; }
+  .tg-b { background: var(--neutral-soft); font-size: 11px; font-weight: 700; color: var(--ink); text-align: left !important; padding-left: 5px !important; line-height: 1.25; }
   .tg-b span { display: block; font-size: 10px; font-weight: 600; color: var(--gold); }
   .tg-c { cursor: pointer; height: 50px; }
   .tg-c > span { color: var(--muted); font-size: 16px; }
-  .tg-c b { display: block; font-weight: 600; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tg-c b { display: block; font-weight: 600; font-size: 11px; line-height: 1.2; white-space: normal; overflow-wrap: anywhere; }
   .tg-c small { display: block; font-size: 10px; color: var(--muted); }
   .tg-c i { display: block; font-style: normal; font-size: 9.5px; font-weight: 700; color: var(--gold); }
   .tg-c em { font-style: normal; font-size: 10px; }
@@ -862,7 +867,8 @@
   .tg-teacher { margin-top: 10px; font-size: 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .pe-row { display: grid; grid-template-columns: 28px 1fr 10px 1fr 36px; gap: 6px; align-items: center; }
   .pe-row .text-input { min-width: 0; padding: 9px 8px; }
-  .mp-row { display: grid; grid-template-columns: 1fr 1.2fr; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; }
+  .mp-row { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; }
+  .mp-row select { width: 100%; }
   .mp-row select { padding: 8px; font-size: 13px; min-width: 0; }
   .mp-all { padding-bottom: 6px; border-bottom: 1px dashed var(--line); }
   /* ---------- Duty plan ---------- */
@@ -2158,7 +2164,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.8 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 4.9 · updated 1 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4629,14 +4635,14 @@
     if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
     html += `<div class="tg-status"><span class="tg-st ${st === 'Published' ? 'ok' : 'draft'}">${st}</span><label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday</label></div>`;
-    html += `<div class="chips tg-days">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; return `<button type="button" class="chip${d === state.tg.day ? ' active' : ''}" data-tg-day="${d}">${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}${n ? ' •' : ''}</button>`; }).join('')}</div>`;
+    html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`; }).join('')}</div>`;
     // paint bar
     if (!state.tg.sel) html += `<div class="tg-paint"><span class="team-lbl">🖌 Paint</span><div class="chips tt-teachers">${['', ...subjects].map((s) => `<button type="button" class="chip${(state.tg.paint || '') === s ? ' active' : ''}" data-tg-paint="${escapeHtml(s)}">${s ? escapeHtml(s) : 'Off'}</button>`).join('')}</div></div>`;
     const d = state.tg.day;
     const perD = periodsForDay(g.key, d);
     const sel = state.tg.sel;
     if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
-    html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${i + 1}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(' ', '\u00a0'))}</span></th>`).join('')}</tr></thead><tbody>`;
+    html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${i + 1}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
     g.batches.forEach((b) => {
       html += `<tr><th class="tg-b">${escapeHtml(gridBatchLabel(b))}${batchRoom(b) ? `<span>${escapeHtml(batchRoom(b))}</span>` : ''}</th>`;
       perD.forEach((pp, i) => {
@@ -4645,7 +4651,7 @@
         const isSel = sel && sel.cells.indexOf(k) !== -1;
         if (c && c.ex) { html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return; }
         const cl = c ? (clash[k] ? ' tg-clash' : ' tg-full') : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b>${escapeHtml(c.s)}</b>${c.test ? '<i>Test</i>' : ''}<small>${c.t ? escapeHtml(initials(ttName(c.t))) : '⚠️ no teacher'}</small>${clash[k] ? '<em>⚠️</em>' : ''}` : '<span>+</span>'}</td>`;
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b title="${escapeHtml(c.s)}">${escapeHtml(shortSubj(c.s))}</b>${c.test ? '<i>Test</i>' : ''}<small>${c.t ? escapeHtml(initials(ttName(c.t))) : '⚠️'}</small>${clash[k] ? '<em>⚠️</em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
@@ -4661,6 +4667,8 @@
       <button type="button" class="save-btn" id="tgPublish" style="margin:0;">Publish week</button>
     </div>
     <div class="hv-note" style="text-align:left;">Tip: tap a period heading (P1, P2…) to change its time for this day only, e.g. on an exam day.</div><div id="tgCopyDayBox"></div>`;
+    if (box._html === html) { renderTgCopyBox(); return; } // nothing changed: keep the grid as it is
+    box._html = html;
     box.innerHTML = html;
     bindTg(box);
     renderTgCopyBox();
@@ -4672,6 +4680,9 @@
     const rest = m[2].replace(/batch\s*/i, 'B').replace(/evening/i, 'Eve').trim();
     return rest ? `${m[1]} · ${rest}` : m[1];
   }
+  // Short subject names for the narrow grid cells only (full names everywhere else).
+  const SUBJ_SHORT = { mathematics: 'Maths', maths: 'Maths', physics: 'Phy', chemistry: 'Chem', biology: 'Bio', english: 'Eng', hindi: 'Hindi', computer: 'Comp', 'social science': 'SSt', science: 'Sci', reasoning: 'Reas', 'geo/eco': 'Geo/Eco', 'his/pol.sc.': 'His/Pol', 'his/pol.sc': 'His/Pol', sanskrit: 'Skt' };
+  function shortSubj(x) { const k = String(x || '').trim().toLowerCase(); if (SUBJ_SHORT[k]) return SUBJ_SHORT[k]; return x.length > 7 ? x.slice(0, 5) + '.' : x; }
   function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase(); }
   function classOfBatchNum(b) { const m = String(b).match(/class\s*(\d+)/i); return m ? m[1] : ''; }
   function bindTg(box) {
@@ -4748,7 +4759,10 @@
   function renderTgCopyBox() {
     const box = document.getElementById('tgCopyDayBox');
     const cp = state.tg.copy;
-    if (!box || !cp) return;
+    if (!box) return;
+    if (!cp) { if (box.innerHTML) box.innerHTML = ''; return; }
+    if (box._cpKey === cp.src + '|' + cp.pick.join(',') && box.innerHTML) return;
+    box._cpKey = cp.src + '|' + cp.pick.join(',');
     const days = tgDays().filter((d) => d !== cp.src);
     box.innerHTML = `<div class="panel" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"><div class="team-lbl">Copy ${escapeHtml(dayHeading(cp.src))} to</div>
       <div class="chips">${days.map((d) => `<button type="button" class="chip${cp.pick.indexOf(d) !== -1 ? ' active' : ''}" data-cpd="${d}">${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}</button>`).join('')}</div>
