@@ -858,6 +858,21 @@
   .tg-test { box-shadow: inset 0 0 0 2px var(--gold-soft); }
   .tg-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .tg-exam { background: var(--gold-soft); }
+  .tg-st-acts { display: inline-flex; gap: 6px; align-items: center; }
+  .tg-mini { border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .tg-mini-gold { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+  .tg-lock { text-align: left !important; margin: -2px 0 0 !important; }
+  .tg-paintbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 8px 10px; font-size: 13px; color: var(--ink); }
+  .tg-paintbar b { color: var(--gold); }
+  .tg-chgd { position: relative; }
+  .tg-chgd::after { content: ''; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+  .tg-day.chg { border-color: var(--gold); }
+  .tg-b { cursor: pointer; }
+  .tg-b .tg-moved { color: #fff; background: var(--gold); border-radius: 4px; padding: 0 3px; display: inline-block; margin-top: 1px; }
+  .tg-b .tg-noroom { color: var(--muted) !important; font-weight: 500 !important; }
+  .tg-pubrow { display: flex; flex-direction: column; gap: 8px; }
+  .tg-pubok { text-align: center; font-size: 13.5px; font-weight: 600; color: #15803D; background: rgba(22,163,74,.08); border: 1px solid rgba(22,163,74,.25); border-radius: 12px; padding: 11px; }
+  .nt-acts { display: inline-flex; gap: 14px; align-items: center; }
   .tg-exhint { background: repeating-linear-gradient(45deg, var(--gold-soft), var(--gold-soft) 6px, transparent 6px, transparent 12px); }
   .tg-exhint small { color: var(--gold) !important; font-weight: 700; }
   .tg-exwarn { box-shadow: inset 0 0 0 2px var(--gold); }
@@ -2238,7 +2253,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 5.4 · updated 2 Oct 2026</div>
+          <div class="dnote">Version 5.5 · updated 2 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4687,6 +4702,7 @@
   }
   function tgCell(d, p, b) { return (state.tg.doc && state.tg.doc.cells || []).find((c) => c.d === d && c.p === p && c.b === b) || null; }
   function tgSetCell(d, p, b, val) {
+    tgRemember();
     const doc = state.tg.doc;
     doc.cells = (doc.cells || []).filter((c) => !(c.d === d && c.p === p && c.b === b));
     if (val) doc.cells.push(Object.assign({ d, p, b }, val));
@@ -4731,43 +4747,56 @@
     if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
     const pubImg = weekTtImages(state.tt.weekStart).find((x) => x.id === state.tg.docKey);
-    if (pubImg) html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>📅 Published timetable picture · tap to view</span></button>`;
-    html += `<div class="tg-status"><span class="tg-st ${st === 'Published' ? 'ok' : 'draft'}">${st}</span><label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday</label></div>`;
-    html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`; }).join('')}</div>`;
+    if (pubImg) html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>🗓️ Published timetable picture · tap to view</span></button>`;
+    const editable = tgEditable();
+    const pend = tgPendingCount(); const chg = tgChanges();
+    const st2 = (doc.published || []).length ? (pend ? `${pend} change${pend === 1 ? '' : 's'} not published` : 'Published') : 'Draft';
+    const canUndo = editable && state.tg.undo.some((x) => x.key === state.tg.docKey);
+    html += `<div class="tg-status"><span class="tg-st ${st2 === 'Published' ? 'ok' : 'draft'}">${st2}</span>
+      <span class="tg-st-acts">${canUndo ? '<button type="button" class="tg-mini" id="tgUndo">↶ Undo</button>' : ''}
+      ${(doc.published || []).length ? (editable ? '<button type="button" class="tg-mini" id="tgEditDone">✓ Done</button>' : '<button type="button" class="tg-mini tg-mini-gold" id="tgEdit">✏️ Edit timetable</button>') : ''}</span></div>
+      ${editable ? `<label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday this week</label>` : '<div class="hv-note tg-lock">🔒 Published timetable · tap “Edit timetable” to make changes</div>'}`;
+    html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}${chg && chg.days[d] ? ' chg' : ''}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`; }).join('')}</div>`;
     // paint bar
-    if (!state.tg.sel) html += `<div class="tg-paint"><span class="team-lbl">🖌 Paint</span><div class="chips tt-teachers">${['', ...subjects].map((s) => `<button type="button" class="chip${(state.tg.paint || '') === s ? ' active' : ''}" data-tg-paint="${escapeHtml(s)}">${s ? escapeHtml(s) : 'Off'}</button>`).join('')}</div></div>`;
+    if (!editable) state.tg.paint = null;
+    if (state.tg.paint) html += `<div class="tg-paintbar"><span>🖌 Paint <b>${escapeHtml(state.tg.paint)}</b> is on · tap cells to fill</span><button type="button" class="tg-mini" data-tg-paint="">Turn off</button></div>`;
+    if (!state.tg.sel && editable) html += `<div class="tg-paint"><span class="team-lbl">🖌 Paint</span><div class="chips tt-teachers">${['', ...subjects].map((s) => `<button type="button" class="chip${(state.tg.paint || '') === s ? ' active' : ''}" data-tg-paint="${escapeHtml(s)}">${s ? escapeHtml(s) : 'Off'}</button>`).join('')}</div></div>`;
     const d = state.tg.day;
     const perD = periodsForDay(g.key, d);
     const sel = state.tg.sel;
     if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
     html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${i + 1}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
     g.batches.forEach((b) => {
-      html += `<tr><th class="tg-b">${escapeHtml(gridBatchLabel(b))}${batchRoom(b) ? `<span>${escapeHtml(batchRoom(b))}</span>` : ''}</th>`;
+      const rOn = batchRoomOn(b, d); const rMoved = rOn && rOn !== batchRoom(b);
+      html += `<tr><th class="tg-b" data-tg-room="${escapeHtml(b)}" role="button">${escapeHtml(gridBatchLabel(b))}${rOn ? `<span class="${rMoved ? 'tg-moved' : ''}">${escapeHtml(rOn)}</span>` : '<span class="tg-noroom">+ room</span>'}</th>`;
       perD.forEach((pp, i) => {
         const c = tgCell(d, i, b);
         const k = `${d}|${i}|${b}`;
         const isSel = sel && sel.cells.indexOf(k) !== -1;
         if (c && c.ex) { html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return; }
         const exHere = examAt(b, d, pp.start, pp.end);
-        if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}"><small>📝 ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
+        if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small>📝 ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
         const cl = c ? (clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em>📝</em>' : ''}` : '<span>+</span>'}</td>`;
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em>📝</em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
     html += '</tbody></table></div>';
     const nClash = Object.keys(clash).length; const noT = (doc.cells || []).filter((c) => !c.t && !c.ex).length;
     if (nClash || noT) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Please check</div>${nClash ? `<div class="ad-alert-l">${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places — tap ⚠️ cells</div>` : ''}${noT ? `<div class="ad-alert-l">${noT} class${noT === 1 ? '' : 'es'} without a teacher (set Teacher Mapping)</div>` : ''}</div>`;
-    html += `<div class="tg-actions">
-      <button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
-      <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>
+    const dayPend = chg && chg.days[d] && Object.keys(chg.days).length > 1;
+    html += `<div class="tg-pubrow">${pend || !(doc.published || []).length
+        ? `<button type="button" class="save-btn" id="tgPublish" style="margin:0;">${(doc.published || []).length ? `Publish ${pend} change${pend === 1 ? '' : 's'}` : 'Publish week'}</button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--gold); color: var(--gold);">Publish only ${escapeHtml(WD[dateObj(d).getDay()])} ${dateObj(d).getDate()}</button>` : ''}`
+        : '<div class="tg-pubok">✓ Published · teachers have this timetable</div>'}</div>
+    <div class="tg-actions">
+      ${editable ? `<button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
+      <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>` : ''}
       <button type="button" class="btn-secondary" id="tgAbsent" style="border-color: var(--line);">Teacher absent</button>
-      <button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);">Mark exam</button>
+      ${editable ? '<button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);">Mark exam</button>' : ''}
       <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">${weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey) ? 'Share image' : 'Timetable image'}</button>
-      <button type="button" class="btn-secondary hv-del" id="tgDelWeek" style="border-color: var(--line);">Delete week</button>
-      <button type="button" class="save-btn" id="tgPublish" style="margin:0;">Publish week</button>
+      ${editable ? '<button type="button" class="btn-secondary hv-del" id="tgDelWeek" style="border-color: var(--line);">Delete week</button>' : ''}
     </div>
-    <div class="hv-note" style="text-align:left;">Tip: tap a period heading (P1, P2…) to change its time for this day only, e.g. on an exam day.</div><div id="tgCopyDayBox"></div>`;
+    ${editable ? '<div class="hv-note" style="text-align:left;">Tip: tap a period heading (P1, P2…) to change its time, or a batch name to change its room — for this day only.</div>' : ''}<div id="tgCopyDayBox"></div>`;
     if (box._html === html) { renderTgCopyBox(); return; } // nothing changed: keep the grid as it is
     box._html = html;
     box.innerHTML = html;
@@ -4791,12 +4820,15 @@
     box.querySelectorAll('[data-tg-day]').forEach((b) => b.addEventListener('click', () => { state.tg.day = b.getAttribute('data-tg-day'); state.tg.copy = null; renderTgGrid(); }));
     box.querySelectorAll('[data-tg-paint]').forEach((b) => b.addEventListener('click', () => { state.tg.paint = b.getAttribute('data-tg-paint') || null; renderTgGrid(); }));
     const sun = document.getElementById('tgSunday'); if (sun) sun.addEventListener('change', () => { state.tg.doc.sunday = sun.checked; tgSave(); renderTgGrid(); });
-    box.querySelectorAll('[data-tg-ph]').forEach((th) => th.addEventListener('click', () => { if (!state.tg.sel) openPeriodDaySheet(state.tg.day, Number(th.getAttribute('data-tg-ph'))); }));
+    const locked = () => { showToast('Tap “Edit timetable” first to make changes'); };
+    box.querySelectorAll('[data-tg-ph]').forEach((th) => th.addEventListener('click', () => { if (state.tg.sel) return; if (!tgEditable()) { locked(); return; } openPeriodDaySheet(state.tg.day, Number(th.getAttribute('data-tg-ph'))); }));
+    box.querySelectorAll('[data-tg-room]').forEach((th) => th.addEventListener('click', () => { if (state.tg.sel) return; if (!tgEditable()) { locked(); return; } openDayRoomSheet(state.tg.day, th.getAttribute('data-tg-room')); }));
     box.querySelectorAll('[data-tg-cell]').forEach((td) => td.addEventListener('click', () => {
       const [d, p, ...rest] = td.getAttribute('data-tg-cell').split('|'); const b = rest.join('|'); const pi = Number(p);
       if (state.tg.sel) { tgToggleSel(d, pi, b); return; }
       const cx = tgCell(d, pi, b);
       if (cx && cx.ex) { openExamBlockSheet(cx); return; }
+      if (!tgEditable()) { locked(); return; }
       if (state.tg.paint) {
         const c = tgCell(d, pi, b);
         if (c && c.s === state.tg.paint) { tgSetCell(d, pi, b, null); renderTgGrid(); return; }
@@ -4811,7 +4843,11 @@
     on('tgCopyDay', tgCopyDayPicker);
     on('tgImage', tgImage);
     on('tgViewImg', () => { const x = weekTtImages(state.tt.weekStart).find((y) => y.id === state.tg.docKey); if (x) openImageViewer(x.image, false); });
-    on('tgPublish', tgPublish);
+    on('tgPublish', () => tgPublish());
+    on('tgPublishDay', () => tgPublish(state.tg.day));
+    on('tgEdit', () => { state.tg.editKey = state.tg.docKey; renderTgGrid(); showToast('Editing on · changes are saved as a draft until you publish'); });
+    on('tgEditDone', () => { state.tg.editKey = null; state.tg.paint = null; renderTgGrid(); });
+    on('tgUndo', tgUndo);
     on('tgExam', tgStartExamSelect);
     on('tgAbsent', () => openAbsent({ date: tgDays().indexOf(todayStr()) !== -1 ? todayStr() : null }));
     on('tgDelWeek', tgDeleteWeek);
@@ -4864,6 +4900,7 @@
       const ok = await showConfirm('This replaces the classes already in this week\'s grid with last week\'s timetable.', 'Copy last week?', 'Copy');
       if (!ok) return;
     }
+    tgRemember();
     state.tg.doc.cells = cells.map((c) => { const n = Object.assign({}, c, { d: shiftDateStr(c.d, 7), t: c.t && !isRemovedUid(c.t) ? c.t : defaultTeacher(c.b, c.s) }); delete n.sub; return n; });
     if (cells.some((c) => dateObj(c.d).getDay() === 0)) state.tg.doc.sunday = true;
     tgSave(); renderTgGrid(); showToast(`${cells.length} classes copied`);
@@ -4887,6 +4924,7 @@
       if (!pick.length) { showToast('Choose the days', 'error'); return; }
       const has = (state.tg.doc.cells || []).some((c) => pick.indexOf(c.d) !== -1);
       if (has) { const ok = await showConfirm('Classes already in those days will be replaced.', 'Copy day?', 'Copy'); if (!ok) return; }
+      tgRemember();
       const srcCells = (state.tg.doc.cells || []).filter((c) => c.d === cp.src && !c.ex);
       state.tg.doc.cells = (state.tg.doc.cells || []).filter((c) => pick.indexOf(c.d) === -1).concat(...pick.map((d) => srcCells.map((c) => Object.assign({}, c, { d }))));
       state.tg.copy = null;
@@ -4894,14 +4932,15 @@
     });
   }
   // Publish: write / update / remove the classes in each teacher's schedule.
-  async function tgPublish() {
+  async function tgPublish(dayOnly) {
     const g = tgGroup(); const doc = state.tg.doc; if (!doc) return;
+    if (dayOnly && !doc.pubSnap) dayOnly = null; // first publish is always the whole week
     const per = periodsFor(g.key);
-    const cells = (doc.cells || []).filter((c) => effT(c) && !c.ex && per[c.p]);
+    const cells = (doc.cells || []).filter((c) => effT(c) && !c.ex && per[c.p] && (!dayOnly || c.d === dayOnly));
     const noT = (doc.cells || []).filter((c) => !effT(c) && !c.ex).length;
     const clash = Object.keys(tgClashes()).length;
     const msg = `${cells.length} classes will go to the teachers' schedules${noT ? `\n${noT} class${noT === 1 ? '' : 'es'} without a teacher will be skipped` : ''}${clash ? `\n⚠️ ${clash} teacher clash${clash === 1 ? '' : 'es'}` : ''}`;
-    const ok = await showConfirm(msg, 'Publish this week?', 'Publish');
+    const ok = await showConfirm(dayOnly ? `${dayHeading(dayOnly)} only.\n${msg}\nChanges on other days stay as a draft.` : msg, dayOnly ? 'Publish this day?' : 'Publish this week?', 'Publish');
     if (!ok) return;
     const me = (state.user && state.user.name) || 'Coordinator';
     const docId = state.tg.docKey;
@@ -4911,9 +4950,21 @@
       const pp = periodsForDay(g.key, c.d)[c.p]; const id = slotIdFor(docId, c);
       const T = effT(c);
       newIds[T + '/' + id] = 1;
-      ops.push(['set', `schedule/${T}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, room: batchRoom(c.b), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: me, ttId: docId, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() }]);
+      ops.push(['set', `schedule/${T}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, room: batchRoomOn(c.b, c.d), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: me, ttId: docId, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() }]);
     });
-    (doc.published || []).forEach((key) => { if (!newIds[key]) ops.push(['del', `schedule/${key.split('/')[0]}/slots/${key.split('/')[1]}`]); });
+    // classes that were published before (whole week, or only that day) and are no longer there
+    let oldKeys = doc.published || [];
+    if (dayOnly) {
+      oldKeys = [];
+      Object.keys(doc.pubSnap.cells || {}).forEach((k) => {
+        const [dd, pp, ...rest] = k.split('|'); if (dd !== dayOnly) return;
+        const sig = (doc.pubSnap.cells[k] || '').split('|'); if (sig[3]) return;
+        const T0 = sig[4] ? sig[4].split('/')[0] : sig[1]; if (!T0) return;
+        const key = T0 + '/' + slotIdFor(docId, { d: dd, p: Number(pp), b: rest.join('|') });
+        if ((doc.published || []).indexOf(key) !== -1) oldKeys.push(key);
+      });
+    }
+    oldKeys.forEach((key) => { if (!newIds[key]) ops.push(['del', `schedule/${key.split('/')[0]}/slots/${key.split('/')[1]}`]); });
     try {
       for (let i = 0; i < ops.length; i += 400) {
         const batch = state.db.batch();
@@ -4921,7 +4972,18 @@
         await waitForWrite(batch.commit());
       }
       const republish = !!doc.publishedAt;
-      doc.published = Object.keys(newIds); doc.status = 'published'; doc.publishedAt = Date.now(); doc.periodsUsed = per;
+      if (dayOnly) {
+        doc.published = (doc.published || []).filter((k) => oldKeys.indexOf(k) === -1).concat(Object.keys(newIds));
+        const snap = doc.pubSnap; const now = snapOf(doc);
+        Object.keys(snap.cells).forEach((k) => { if (k.startsWith(dayOnly + '|')) delete snap.cells[k]; });
+        Object.keys(now.cells).forEach((k) => { if (k.startsWith(dayOnly + '|')) snap.cells[k] = now.cells[k]; });
+        const dt = JSON.parse(snap.dayTimes || '{}'); const dr = JSON.parse(snap.dayRooms || '{}');
+        if ((doc.dayTimes || {})[dayOnly]) dt[dayOnly] = doc.dayTimes[dayOnly]; else delete dt[dayOnly];
+        if ((doc.dayRooms || {})[dayOnly]) dr[dayOnly] = doc.dayRooms[dayOnly]; else delete dr[dayOnly];
+        snap.dayTimes = JSON.stringify(dt); snap.dayRooms = JSON.stringify(dr);
+      } else { doc.published = Object.keys(newIds); doc.pubSnap = snapOf(doc); }
+      doc.status = 'published'; doc.publishedAt = Date.now(); doc.periodsUsed = per;
+      state.tg.editKey = null; state.tg.paint = null; state.tg.undo = state.tg.undo.filter((x) => x.key !== docId);
       state.tg.saving = true;
       await state.db.collection('timetables').doc(docId).set(doc);
       state.tg.saving = false; state.tg.dirty = false;
@@ -4933,11 +4995,36 @@
       await imgP;
       const wsL = state.tt.weekStart; const dd0 = tgDays(); const weL = dd0[dd0.length - 1];
       const wk = `${dateObj(wsL).getDate()} ${dateObj(wsL).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(weL).getDate()} ${dateObj(weL).toLocaleDateString('en-GB', { month: 'short' })}`;
-      tch.forEach((u) => notify(u, { type: republish ? 'ttu' : 'tt', title: `${republish ? 'Timetable updated' : 'Timetable ready'}: ${wk}`, body: g.label, link: { tab: 'schedule', view: 'grid', ws: wsL } }));
+      tch.forEach((u) => notify(u, { key: 'tt_' + docId, type: republish ? 'ttu' : 'tt', title: `${republish ? 'Timetable updated' : 'Timetable ready'}: ${wk}`, body: g.label, link: { tab: 'schedule', view: 'grid', ws: wsL } }));
       showToast(`✓ Published · ${cells.length} classes · timetable picture sent to teachers`);
       renderTgGrid();
     } catch (err) { state.tg.saving = false; flashOffline(err); }
   }
+  // Draw a few lines of text centred in a box, shrinking them so they always stay inside it.
+  function fitLines(ctx, lines, cx, top, w, h) {
+    const lh = 1.18; const pad = 6;
+    let total = lines.reduce((a, l) => a + l[2] * lh, 0);
+    const k = Math.min(1, (h - pad) / total);
+    const sizes = lines.map((l) => {
+      let sz = Math.max(8, l[2] * k);
+      ctx.font = `${l[3] === false ? '' : '700 '}${sz}px Arial, sans-serif`;
+      const wd = ctx.measureText(String(l[0])).width;
+      if (wd > w - 8) sz = Math.max(7, sz * (w - 8) / wd);
+      return sz;
+    });
+    total = sizes.reduce((a, z) => a + z * lh, 0);
+    let y = top + (h - total) / 2;
+    lines.forEach((l, i) => {
+      ctx.font = `${l[3] === false ? '' : '700 '}${sizes[i]}px Arial, sans-serif`;
+      ctx.fillStyle = l[1] || '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(l[0]), cx, y + sizes[i] * lh / 2);
+      y += sizes[i] * lh;
+    });
+  }
+  // Your own classes (added in Schedule) show your subject and the batch's room too.
+  function mySubject() { const ss = typeof teacherSubjects === 'function' ? teacherSubjects(state.teacherId) : []; return ss[0] || (state.user && state.user.subject) || ''; }
+  function slotSubject(s) { return s.subject || mySubject(); }
+  function slotRoom(s) { return s.room || batchRoom(s.label || ''); }
   // Timetable image (same layout as the printed timetable), for WhatsApp or printing.
   function tgImage(returnCanvas) {
     const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return null;
@@ -4995,7 +5082,7 @@
         const drawEx = (bx, by, bw, bh) => {
           box(bx, by, bw, bh, '#FFFFFF');
           const lines = [[type, '#000'], ...(subj ? [[subj.toUpperCase(), '#C00000']] : []), ...(ea ? [[`(Time ${fmtS(ea)} – ${fmtS(ez)})`, '#000']] : [])];
-          lines.forEach(([t, col], li) => txt(t, bx + bw / 2, by + bh / 2 + (li - (lines.length - 1) / 2) * 18, li === 2 ? 12 : 15, true, col, bw - 10));
+          fitLines(x, lines.map(([t, col], li) => [t, col, li === 2 ? 12 : 15]), bx + bw / 2, by, bw, bh);
         };
         if (rect) {
           const xa = pX(p0).x, xz = pX(p1).x + pX(p1).w;
@@ -5011,10 +5098,12 @@
           const cell = tgCell(d, p, b);
           box(o.x, ry, o.w, rowH, shade);
           if (!cell) return;
-          if (cell.ex) { txt(cell.s, o.x + o.w / 2, ry + rowH / 2, 12, true, '#C00000', o.w - 8); return; }
+          if (cell.ex) { fitLines(x, [[cell.s, '#C00000', 12]], o.x + o.w / 2, ry, o.w, rowH); return; }
           const chg = perD[p] && perD[p].changed;
           const lines = [[effS(cell), cell.sub ? '#C00000' : '#000', 15], ...(cell.sub ? [['(Sub)', '#C00000', 11]] : []), ...(cell.test ? [['(Class Test)', '#000', 12]] : []), ...(chg ? [[`(${fmtS(perD[p].start)} – ${fmtS(perD[p].end)})`, '#C00000', 11]] : [])];
-          lines.forEach(([t, col, sz], li) => txt(t, o.x + o.w / 2, ry + rowH / 2 + (li - (lines.length - 1) / 2) * 15, sz, true, col, o.w - 8));
+          const rDay = doc.dayRooms && doc.dayRooms[d] && doc.dayRooms[d][b];
+          if (rDay) lines.push([`(Room ${rDay})`, '#C00000', 11]);
+          fitLines(x, lines, o.x + o.w / 2, ry, o.w, rowH);
         });
       });
       y += dh;
@@ -5042,6 +5131,7 @@
       <div class="hv-note" style="text-align:left; margin-top:8px;">Use this for exam days. Other days keep the normal time.</div>
       <div class="hv-d-btns"><button type="button" class="btn-secondary" id="pdReset" style="border-color: var(--line);">Normal time</button><button type="button" class="save-btn" id="pdSave" style="margin:0;">Save for this day</button></div>`;
     const setOv = (val) => {
+      tgRemember();
       const doc = state.tg.doc; // always the current copy (it may have been refreshed while the sheet was open)
       doc.dayTimes = Object.assign({}, doc.dayTimes || {});
       const day = Object.assign({}, doc.dayTimes[d] || {});
@@ -5094,6 +5184,7 @@
         try {
           const ref = state.db.collection('exams').doc();
           await waitForWrite(ref.set({ type: f.type, subject: f.subject, name: '', date: d, start: f.start, end: f.end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
+          tgRemember();
           const doc = state.tg.doc;
           sel.cells.forEach((k) => { const [dd, pp, ...rest] = k.split('|'); const bb = rest.join('|'); doc.cells = (doc.cells || []).filter((c) => !(c.d === dd && c.p === Number(pp) && c.b === bb)); doc.cells.push({ d: dd, p: Number(pp), b: bb, ex: ref.id, s: `${f.type}${f.subject ? ' · ' + f.subject : ''}`, et: `${f.start}-${f.end}` }); });
           state.tg.sel = null; tgSave(); closeHvSheet(); renderTgGrid();
@@ -5215,7 +5306,7 @@
     if (wasPub && before !== after) {
       const tm = cellTimes(doc, c);
       batch.delete(state.db.doc(`schedule/${before}/slots/${id}`));
-      if (after && tm) batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: batchRoom(c.b), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
+      if (after && tm) batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: batchRoomOn(c.b, c.d, doc), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
       doc.published = pub.filter((k) => k !== before + '/' + id).concat(after ? [after + '/' + id] : []);
     }
     const plain = Object.assign({}, doc); delete plain._id;
@@ -5413,7 +5504,7 @@
     if (!slots.length) { el.innerHTML = '<div class="hv-note">No classes this week yet.</div>'; return; }
     const cellOf = (d, t) => slots.filter((s) => s.date === d && s.time === t);
     el.innerHTML = `<div class="tg-scroll"><table class="tg-table my-tt"><thead><tr><th>Day</th>${times.map((t) => `<th>${escapeHtml(formatTimeStr(t).replace(/\\s?(AM|PM)$/i, ''))}</th>`).join('')}</tr></thead><tbody>
-      ${days.map((d) => `<tr><th class="tg-b">${WD[dateObj(d).getDay()]}<span>${dateObj(d).getDate()}</span></th>${times.map((t) => { const cs = cellOf(d, t); return `<td class="tg-c${cs.length ? ' tg-full' : ''}">${cs.map((s) => `<b>${escapeHtml(gridBatchLabel(s.label || ''))}</b><small>${escapeHtml(s.subject ? shortSubj(s.subject) : '')}${s.test ? ' · Test' : ''}</small>${s.subFor ? '<i>Sub</i>' : ''}`).join('')}</td>`; }).join('')}</tr>`).join('')}
+      ${days.map((d) => `<tr><th class="tg-b">${WD[dateObj(d).getDay()]}<span>${dateObj(d).getDate()}</span></th>${times.map((t) => { const cs = cellOf(d, t); return `<td class="tg-c${cs.length ? ' tg-full' : ''}">${cs.map((s) => `<b>${escapeHtml(gridBatchLabel(s.label || ''))}</b><small>${escapeHtml(slotSubject(s) ? shortSubj(slotSubject(s)) : '')}${s.test ? ' · Test' : ''}</small>${s.subFor ? '<i>Sub</i>' : ''}`).join('')}</td>`; }).join('')}</tr>`).join('')}
       </tbody></table></div>
       <button type="button" class="btn-secondary" id="myTTImg" style="border-color: var(--line); margin-top:10px;">Download / share as image</button>`;
     document.getElementById('myTTImg').addEventListener('click', () => myWeekImage(ws));
@@ -5437,7 +5528,7 @@
       times.forEach((t, i) => {
         const cx = 20 + colDay + i * colT; const cs = slots.filter((s) => s.date === d && s.time === t);
         box(cx, ry, colT, rowH, di % 2 ? '#DDEBF7' : '#FFFFFF');
-        if (cs[0]) { const s = cs[0]; txt(s.label || '', cx + colT / 2, ry + rowH / 2 - 12, 13, true, '#000', colT - 8); txt(`${s.subject || ''}${s.test ? ' (Class Test)' : ''}`, cx + colT / 2, ry + rowH / 2 + 5, 12, false, '#000', colT - 8); txt(`${s.room || ''}${s.subFor ? (s.room ? ' · ' : '') + 'Substitute' : ''}`, cx + colT / 2, ry + rowH / 2 + 21, 11, true, '#C00000', colT - 8); }
+        if (cs[0]) { const s = cs[0]; const rm = slotRoom(s); fitLines(x, [[s.label || '', '#000', 13], [`${slotSubject(s)}${s.test ? ' (Class Test)' : ''}`, '#000', 12, false], ...(rm || s.subFor ? [[`${rm}${s.subFor ? (rm ? ' · ' : '') + 'Substitute' : ''}`, '#C00000', 11]] : [])], cx + colT / 2, ry, colT, rowH); }
       });
     });
     cv.toBlob((blob) => {
@@ -5554,7 +5645,9 @@
   // notices/{uid}/items = { type, title, body, link, at, read } — written when something changes for that teacher.
   function notify(uid, n) {
     if (!state.db || !uid) return;
-    state.db.collection('notices/' + uid + '/items').add(Object.assign({ at: Date.now(), read: false }, n)).catch(() => {});
+    const data = Object.assign({ at: Date.now(), read: false }, n);
+    if (n.key) state.db.doc('notices/' + uid + '/items/' + String(n.key).replace(/[^A-Za-z0-9_-]+/g, '-')).set(data).catch(() => {});
+    else state.db.collection('notices/' + uid + '/items').add(data).catch(() => {});
   }
   function slotWhen(d, t) { return `${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()} ${dateObj(d).toLocaleDateString('en-GB', { month: 'short' })}${t ? ' · ' + formatTimeStr(t) : ''}`; }
   state.notices = state.notices || [];
@@ -5608,7 +5701,7 @@
   function openNotices() {
     const list = allNotices();
     const body = document.getElementById('hvSheetBody');
-    body.innerHTML = `<div class="nt-head"><div class="hv-d-title" style="margin:0;">Notifications</div>${list.some((x) => !x.read) ? '<button type="button" class="hv-back" id="ntAll" style="padding:0;">Mark all read</button>' : ''}</div>
+    body.innerHTML = `<div class="nt-head"><div class="hv-d-title" style="margin:0;">Notifications</div><span class="nt-acts">${list.some((x) => !x.read) ? '<button type="button" class="hv-back" id="ntAll" style="padding:0;">Mark all read</button>' : ''}${list.some((x) => x.read && !x.lead) ? '<button type="button" class="hv-back" id="ntClear" style="padding:0; color: var(--muted-2);">Clear read</button>' : ''}</span></div>
       ${list.length ? `<div class="nt-list">${list.map((n, i) => `<button type="button" class="nt-row${n.read ? '' : ' unread'}" data-nt="${i}">
         <span class="nt-ic nt-${N_ICON[n.type] || 'calendar'}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${N_SVG[N_ICON[n.type] || 'calendar']}</svg></span>
         <span class="nt-txt"><b>${escapeHtml(n.title)}</b>${n.body ? `<span>${escapeHtml(n.body)}</span>` : ''}<small>${escapeHtml(noticeAgo(n.at))}</small></span>
@@ -5617,6 +5710,13 @@
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
     const all = document.getElementById('ntAll');
     if (all) all.addEventListener('click', () => { list.forEach(markNoticeRead); renderBell(); openNotices(); });
+    const clr = document.getElementById('ntClear');
+    if (clr) clr.addEventListener('click', () => {
+      const gone = list.filter((x) => x.read && !x.lead);
+      gone.forEach((x) => state.db.doc('notices/' + state.teacherId + '/items/' + x.id).delete().catch(() => {}));
+      state.notices = (state.notices || []).filter((x) => gone.indexOf(x) === -1);
+      renderBell(); openNotices(); showToast(`${gone.length} cleared`);
+    });
     body.querySelectorAll('[data-nt]').forEach((b) => b.addEventListener('click', () => {
       const n = list[+b.getAttribute('data-nt')]; markNoticeRead(n); renderBell(); closeHvSheet();
       const L = n.link || {};
@@ -5647,6 +5747,71 @@
       const stamp = updated ? `Updated: ${nw.getDate()} ${nw.toLocaleDateString('en-GB', { month: 'short' })}, ${formatTimeStr(`${pad(nw.getHours())}:${pad(nw.getMinutes())}`)}` : '';
       await withTimetable(plain, () => { state.tg.imgStamp = stamp; const p = saveTtImage(doc._id, timetableTeachers(doc), updated); state.tg.imgStamp = ''; return p; });
     } catch (e) { state.tg.imgStamp = ''; }
+  }
+
+  // ---------- Grid safety: view mode, change marks, undo, day-only room ----------
+  // What a published timetable looked like, to show what has changed since.
+  function cellSig(c) { return c ? [c.s, c.t, c.test ? 1 : 0, c.ex || '', c.sub ? c.sub.t + '/' + (c.sub.s || '') : ''].join('|') : ''; }
+  function snapOf(doc) {
+    const cells = {}; (doc.cells || []).forEach((c) => { cells[cellKey(c)] = cellSig(c); });
+    return { cells, dayTimes: JSON.stringify(doc.dayTimes || {}), dayRooms: JSON.stringify(doc.dayRooms || {}) };
+  }
+  // keys of changed cells and days with changes (null = never published with tracking)
+  function tgChanges() {
+    const doc = state.tg.doc; if (!doc || !doc.pubSnap) return null;
+    const snap = doc.pubSnap; const keys = {}; const days = {};
+    const now = {}; (doc.cells || []).forEach((c) => { now[cellKey(c)] = cellSig(c); });
+    Object.keys(now).concat(Object.keys(snap.cells || {})).forEach((k) => { if ((now[k] || '') !== ((snap.cells || {})[k] || '')) { keys[k] = 1; days[k.split('|')[0]] = 1; } });
+    const dt0 = JSON.parse(snap.dayTimes || '{}'), dt1 = doc.dayTimes || {}, dr0 = JSON.parse(snap.dayRooms || '{}'), dr1 = doc.dayRooms || {};
+    tgDays().forEach((d) => { if (JSON.stringify(dt0[d] || {}) !== JSON.stringify(dt1[d] || {}) || JSON.stringify(dr0[d] || {}) !== JSON.stringify(dr1[d] || {})) days[d] = 1; });
+    return { keys, days, n: Object.keys(keys).length + Object.keys(days).filter((d) => !Object.keys(keys).some((k) => k.startsWith(d + '|'))).length };
+  }
+  function tgPendingCount() {
+    const doc = state.tg.doc; if (!doc) return 0;
+    const ch = tgChanges();
+    if (ch) return ch.n;
+    return doc.status === 'published' ? 0 : ((doc.cells || []).length ? (doc.cells || []).length : 0);
+  }
+  // A published timetable opens read-only; "Edit timetable" unlocks it.
+  function tgEditable() {
+    const doc = state.tg.doc; if (!doc) return false;
+    if (state.tg.editKey === state.tg.docKey) return true;
+    return !(doc.published || []).length; // never published → editing straight away
+  }
+  // Undo: remember the grid before each change.
+  state.tg.undo = state.tg.undo || [];
+  function tgRemember() {
+    const doc = state.tg.doc; if (!doc) return;
+    state.tg.undo.push({ key: state.tg.docKey, cells: JSON.stringify(doc.cells || []), dayTimes: JSON.stringify(doc.dayTimes || {}), dayRooms: JSON.stringify(doc.dayRooms || {}) });
+    if (state.tg.undo.length > 30) state.tg.undo.shift();
+  }
+  function tgUndo() {
+    const u = state.tg.undo.filter((x) => x.key === state.tg.docKey).pop();
+    if (!u) return;
+    state.tg.undo.splice(state.tg.undo.lastIndexOf(u), 1);
+    const doc = state.tg.doc;
+    doc.cells = JSON.parse(u.cells); doc.dayTimes = JSON.parse(u.dayTimes); doc.dayRooms = JSON.parse(u.dayRooms);
+    tgSave(); renderTgGrid(); showToast('Change undone');
+  }
+  function batchRoomOn(b, d, doc) { const D = doc || state.tg.doc || {}; return (D.dayRooms && D.dayRooms[d] && D.dayRooms[d][b]) || batchRoom(b); }
+  function openDayRoomSheet(d, b) {
+    const body = document.getElementById('hvSheetBody');
+    const normal = batchRoom(b); const cur = batchRoomOn(b, d);
+    body.innerHTML = `<div class="hv-d-title">${escapeHtml(b)}</div><div class="hv-d-wing">Room for ${escapeHtml(dayHeading(d))} only${normal ? ' · normal room ' + escapeHtml(normal) : ''}</div>
+      <div class="chips" style="margin-top:12px;">${roomsList().map((r) => `<button type="button" class="chip${cur === r ? ' active' : ''}" data-dr="${escapeHtml(r)}">${escapeHtml(r)}</button>`).join('') || '<span class="hv-note">Add rooms in Settings → Rooms first.</span>'}</div>
+      <div class="hv-note" style="text-align:left; margin-top:10px;">For a lasting change, set the room in Settings → Class / Batch List.</div>
+      ${cur !== normal ? '<div class="hv-d-btns"><button type="button" class="btn-secondary" id="drReset" style="border-color: var(--line);">Back to normal room</button></div>' : ''}`;
+    const setRoom = (v) => {
+      tgRemember();
+      const doc = state.tg.doc; doc.dayRooms = Object.assign({}, doc.dayRooms || {});
+      const day = Object.assign({}, doc.dayRooms[d] || {});
+      if (v && v !== normal) day[b] = v; else delete day[b];
+      if (Object.keys(day).length) doc.dayRooms[d] = day; else delete doc.dayRooms[d];
+      tgSave(); closeHvSheet(); renderTgGrid();
+    };
+    body.querySelectorAll('[data-dr]').forEach((x) => x.addEventListener('click', () => setRoom(x.getAttribute('data-dr'))));
+    const rs = document.getElementById('drReset'); if (rs) rs.addEventListener('click', () => setRoom(null));
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
 
   // ---------- Settings: Periods & timings, Teacher mapping, Batch rooms ----------
@@ -5829,7 +5994,12 @@
     applyRoleUI();
     applyAdminTab();
     renderSettingsAccordion();
-    if (state.canAdmin) { subscribeStaffIds(); renderTeamPanel(); renderStaffIdsBlock(); }
+    if (state.canAdmin) {
+      subscribeStaffIds();
+      const tp = document.getElementById('adminTeamPanel');
+      if (!(tp && tp.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) renderTeamPanel();
+      if (!state.staffForm && !state.lastStaffCode) renderStaffIdsBlock();
+    }
     if (state.adminTab === 'tt') renderTimetable();
     if (state.adminTab === 'settings') {
       const pb = document.getElementById('periodsBody');
@@ -6289,7 +6459,7 @@
   }
   function dutyChartText(exam) {
     const d = dateObj(exam.date);
-    const L = ['*INVIGILATION DUTY CHART*', '', `📋 *${examTitle(exam)}*`, `📅 ${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()} · ${formatTimeStr(exam.start)} – ${formatTimeStr(exam.end)}`];
+    const L = ['*INVIGILATION DUTY CHART*', '', `📋 *${examTitle(exam)}*`, `🗓️ ${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()} · ${formatTimeStr(exam.start)} – ${formatTimeStr(exam.end)}`];
     planOf(exam).forEach((r) => {
       L.push('──────────');
       L.push(`*${r.room}*${(r.scope || []).length ? ' — ' + scopeLabel(r.scope) : ''}`);
@@ -6939,7 +7109,7 @@
       : '';
 
     const ttl = state.myTtImages || [];
-    gallery.innerHTML = ttl.map((x) => `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;"><img data-open-ttimg="${escapeHtml(x.id)}" src="${x.image}" alt="Timetable" style="width:100%; aspect-ratio:1; object-fit:cover; object-position:top; border-radius:10px; cursor:pointer; display:block; outline:2px solid var(--gold); outline-offset:-2px;"><span class="tti-cap">📅 Timetable · ${escapeHtml(dateObj(x.weekStart).getDate() + ' ' + dateObj(x.weekStart).toLocaleDateString('en-GB', { month: 'short' }))}${x.updated ? '<em>Updated</em>' : ''}</span></div>`).join('') + photos.map((p) => `
+    gallery.innerHTML = ttl.map((x) => `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;"><img data-open-ttimg="${escapeHtml(x.id)}" src="${x.image}" alt="Timetable" style="width:100%; aspect-ratio:1; object-fit:cover; object-position:top; border-radius:10px; cursor:pointer; display:block; outline:2px solid var(--gold); outline-offset:-2px;"><span class="tti-cap">🗓️ Timetable · ${escapeHtml(dateObj(x.weekStart).getDate() + ' ' + dateObj(x.weekStart).toLocaleDateString('en-GB', { month: 'short' }))}${x.updated ? '<em>Updated</em>' : ''}</span></div>`).join('') + photos.map((p) => `
       <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
         <img data-open-photo="${p.id}" src="${p.imageBase64}" alt="Saved photo" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:pointer; display:block;">
         <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="padding:4px;">${svgTrash()}</button>
@@ -7101,7 +7271,7 @@
     const topic = m.cls && m.cls.topic ? `<span class="sv-topic"> · ${escapeHtml(m.cls.topic)}</span>` : '';
     return `<div class="sv-row ${m.status}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${st != null ? escapeHtml(formatTimeStr(s.time)) : '—'}</span>
-      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${s.subFor ? `<span class="sv-coord">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span> · ` : ''}${s.subject ? escapeHtml(s.subject) + (s.test ? ' (Class Test)' : '') + ' · ' : ''}${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${s.room ? ' · ' + escapeHtml(s.room) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
+      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${s.subFor ? `<span class="sv-coord">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span> · ` : ''}${slotSubject(s) ? escapeHtml(slotSubject(s)) + (s.test ? ' (Class Test)' : '') + ' · ' : ''}${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${slotRoom(s) ? ' · ' + escapeHtml(slotRoom(s)) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
       <span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span>
     </div>`;
   }
@@ -8762,7 +8932,7 @@
     const dateTxt = `${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}`;
     const head = ['*DAILY ACTIVITY REPORT*', '', `👤 *Teacher:* ${teacherName}`];
     if (state.teacherSubject) head.push(`📘 *Subject:* ${state.teacherSubject}`);
-    head.push(`📅 *Date:* ${dateTxt}`);
+    head.push(`🗓️ *Date:* ${dateTxt}`);
     if (f.label) head.push(`🔎 _${f.label}_`);
     const sections = [];
     const acts = recs.filter((c) => c.entryType === 'activity');
@@ -8832,7 +9002,7 @@
       sections.push(L);
     }
     if (!sections.length) {
-      sections.push(isWeeklyOff(date) && !f.label ? ['📅 *WEEKLY OFF*'] : ['_No activity recorded for this day._']);
+      sections.push(isWeeklyOff(date) && !f.label ? ['🗓️ *WEEKLY OFF*'] : ['_No activity recorded for this day._']);
     }
     return head.join('\n') + '\n' + sections.map((sec) => SEP + '\n' + sec.join('\n')).join('\n');
   }
@@ -10566,7 +10736,9 @@
     }, () => {}));
 
     unsubscribers.push(db.collection('notices/' + tid + '/items').orderBy('at', 'desc').limit(30).onSnapshot((snap) => {
-      state.notices = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      const cutoff = Date.now() - 30 * 86400000;
+      state.notices = [];
+      snap.docs.forEach((d) => { const x = Object.assign({ id: d.id }, d.data()); if ((x.at || 0) < cutoff) d.ref.delete().catch(() => {}); else state.notices.push(x); });
       renderBell();
     }, () => {}));
     unsubscribers.push(db.collection('timetableImages').where('teachers', 'array-contains', tid).onSnapshot((snap) => {
