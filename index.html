@@ -858,6 +858,9 @@
   .tg-test { box-shadow: inset 0 0 0 2px var(--gold-soft); }
   .tg-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .tg-exam { background: var(--gold-soft); }
+  .tg-exhint { background: repeating-linear-gradient(45deg, var(--gold-soft), var(--gold-soft) 6px, transparent 6px, transparent 12px); }
+  .tg-exhint small { color: var(--gold) !important; font-weight: 700; }
+  .tg-exwarn { box-shadow: inset 0 0 0 2px var(--gold); }
   .tg-subc { background: rgba(37,99,235,.08); }
   .tg-c i { display: block; }
   .abs-box { display: flex; flex-direction: column; gap: 10px; }
@@ -937,9 +940,10 @@
   .team-rm-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13.5px; color: var(--muted); }
   body.coord-mode #view-today > .tsec { display: none !important; }
   /* ---------- Coordinator preview bar ---------- */
-  #coordPreviewBar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 41;
-    display: flex; align-items: center; gap: 10px; background: var(--ink); color: #fff; border-radius: 999px; padding: 7px 8px 7px 14px; font-size: 12.5px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.22); max-width: calc(100% - 96px); white-space: nowrap; }
+  #coordPreviewBar { position: fixed; left: 12px; right: 72px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 41;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--ink); color: #fff; border-radius: 999px; padding: 6px 6px 6px 12px; font-size: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.22); white-space: nowrap; }
+  #coordPreviewBar > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   #coordPreviewBar[hidden] { display: none; }
   #coordPreviewBar b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
   #coordPreviewExit { border: none; background: var(--gold); color: #fff; font: inherit; font-weight: 700; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
@@ -2197,7 +2201,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 5.2 · updated 2 Oct 2026</div>
+          <div class="dnote">Version 5.3 · updated 2 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4622,7 +4626,7 @@
     }).catch(() => {});
   }
   let tgSaveTimer = null;
-  function ttCacheStale() { if (state.wk) state.wk.at = 0; if (state.dashTT) state.dashTT.at = 0; }
+  function ttCacheStale() { Object.keys(state.wkCache || {}).forEach((k) => { state.wkCache[k].at = 0; }); if (state.dashTT) state.dashTT.at = 0; if (state.tgExams) state.tgExams.at = 0; }
   let tgSaveKey = null;
   async function tgFlush() {
     if (!tgSaveTimer) return;
@@ -4681,6 +4685,11 @@
     const days = tgDays();
     if (!state.tg.day || days.indexOf(state.tg.day) === -1) state.tg.day = days.indexOf(todayStr()) !== -1 ? todayStr() : days[0];
     const doc = state.tg.doc;
+    if (doc) {
+      let filled = 0;
+      (doc.cells || []).forEach((c) => { if (!c.ex && !c.t && c.s) { const t = defaultTeacher(c.b, c.s); if (t) { c.t = t; filled++; } } });
+      if (filled) { tgSave(); setTimeout(() => showToast(`${filled} class${filled === 1 ? '' : 'es'} got their teacher from Teacher Mapping`), 50); }
+    }
     const per = g ? periodsFor(g.key) : [];
     const clash = tgClashes();
     const subjects = subjectsList();
@@ -4706,8 +4715,10 @@
         const k = `${d}|${i}|${b}`;
         const isSel = sel && sel.cells.indexOf(k) !== -1;
         if (c && c.ex) { html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return; }
+        const exHere = examAt(b, d, pp.start, pp.end);
+        if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}"><small>📝 ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
         const cl = c ? (clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b title="${escapeHtml(c.s)}">${escapeHtml(shortSubj(c.s))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}` : '<span>+</span>'}</td>`;
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b title="${escapeHtml(c.s)}">${escapeHtml(shortSubj(c.s))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em>📝</em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
@@ -4755,9 +4766,11 @@
       if (cx && cx.ex) { openExamBlockSheet(cx); return; }
       if (state.tg.paint) {
         const c = tgCell(d, pi, b);
-        if (c && c.s === state.tg.paint) tgSetCell(d, pi, b, null);
-        else tgSetCell(d, pi, b, { s: state.tg.paint, t: defaultTeacher(b, state.tg.paint) });
-        renderTgGrid();
+        if (c && c.s === state.tg.paint) { tgSetCell(d, pi, b, null); renderTgGrid(); return; }
+        const pp = periodsForDay(tgGroup().key, d)[pi]; const ex = examAt(b, d, pp.start, pp.end);
+        const put = () => { tgSetCell(d, pi, b, { s: state.tg.paint, t: defaultTeacher(b, state.tg.paint) }); renderTgGrid(); };
+        if (ex) showConfirm(`${b} has an exam then:\n${examLine(ex)}\n\nAdd ${state.tg.paint} anyway?`, '⚠️ Exam at this time', 'Add anyway').then((ok) => { if (ok) put(); });
+        else put();
       } else openTgCellSheet(d, pi, b);
     }));
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
@@ -4782,6 +4795,7 @@
       if (!st.change && st.s) st.t = st.t && cur && cur.s === st.s ? st.t : defaultTeacher(b, st.s);
       body.innerHTML = `<div class="hv-d-title">${escapeHtml(b)}</div>
         <div class="hv-d-wing">${escapeHtml(WD[dateObj(d).getDay()])} ${dateObj(d).getDate()} · P${p + 1} · ${escapeHtml(formatTimeStr(per.start))} – ${escapeHtml(formatTimeStr(per.end))}${batchRoom(b) ? ' · ' + escapeHtml(batchRoom(b)) : ''}</div>
+        ${examAt(b, d, per.start, per.end) ? `<div class="ad-alert" style="margin-top:10px;"><div class="ad-alert-t">📝 Exam at this time</div><div class="ad-alert-l">${escapeHtml(examLine(examAt(b, d, per.start, per.end)))}</div></div>` : ''}
         ${cur && cur.sub ? `<div class="abs-done" style="margin-top:10px;">🔁 ${escapeHtml(ttName(cur.sub.t))} is the substitute for ${escapeHtml(ttName(cur.sub.for))} <button type="button" class="hv-back" id="csUndoSub" style="padding:0;">Undo</button></div>` : ''}
         <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div>
         <div class="chips">${subjectsList().map((s) => `<button type="button" class="chip${st.s === s ? ' active' : ''}" data-cs="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>
@@ -4797,7 +4811,12 @@
       const cl = document.getElementById('csClear'); if (cl) cl.addEventListener('click', () => { tgSetCell(d, p, b, null); closeHvSheet(); renderTgGrid(); });
       const us = document.getElementById('csUndoSub'); if (us) us.addEventListener('click', async () => { closeHvSheet(); try { await moveCell(Object.assign({ _id: state.tg.docKey }, state.tg.doc), `${d}|${p}|${b}`, null, 'undo'); showToast('Substitute removed'); } catch (err) { flashOffline(err); } renderTgGrid(); });
       const cc = document.getElementById('csCancel'); if (cc) cc.addEventListener('click', closeHvSheet);
-      document.getElementById('csAssign').addEventListener('click', () => { if (!st.s) return; tgSetCell(d, p, b, { s: st.s, t: st.t || '', test: st.test || false }); closeHvSheet(); renderTgGrid(); });
+      document.getElementById('csAssign').addEventListener('click', async () => {
+        if (!st.s) return;
+        const ex = examAt(b, d, per.start, per.end);
+        if (ex && !(cur && cur.s === st.s)) { const ok = await showConfirm(`${b} has an exam then:\n${examLine(ex)}\n\nAdd ${st.s} anyway?`, '⚠️ Exam at this time', 'Add anyway'); if (!ok) return; }
+        tgSetCell(d, p, b, { s: st.s, t: st.t || '', test: st.test || false }); closeHvSheet(); renderTgGrid();
+      });
     };
     draw();
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
@@ -5026,6 +5045,11 @@
         keepTimes();
         if (!f.type) { showToast('Choose the test type', 'error'); return; }
         if (!f.start || !f.end || hhmmToMin(f.end) <= hhmmToMin(f.start)) { showToast('Check the exam time', 'error'); return; }
+        const selKeys = sel.cells.slice();
+        const others = (state.tg.doc.cells || []).filter((c) => c.d === d && !c.ex && bats.indexOf(c.b) !== -1 && selKeys.indexOf(cellKey(c)) === -1)
+          .filter((c) => { const pp = periodsForDay(tgGroup().key, d)[c.p]; return pp && hhmmToMin(pp.start) < hhmmToMin(f.end) && hhmmToMin(f.start) < hhmmToMin(pp.end); })
+          .map((c) => `${c.b} · ${c.s} · P${c.p + 1}`);
+        if (others.length) { const ok = await showConfirm(`These classes are also during the exam time:\n${others.slice(0, 6).join('\n')}${others.length > 6 ? `\n+${others.length - 6} more` : ''}\n\nMark the exam anyway? (You can clear those cells after.)`, '⚠️ Classes during the exam', 'Mark exam'); if (!ok) return; }
         try {
           const ref = state.db.collection('exams').doc();
           await waitForWrite(ref.set({ type: f.type, subject: f.subject, name: '', date: d, start: f.start, end: f.end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
@@ -5091,15 +5115,18 @@
   // moves only that class from the absent teacher's schedule to the substitute's — no Publish needed.
   // =====================================================================
   function effT(c) { return c && c.sub && c.sub.t ? c.sub.t : (c ? c.t : ''); }
-  state.wk = state.wk || { ws: '', docs: [] }; // all timetables of a week (every wing / session)
+  // All timetables of a week (every wing / session), cached separately for each week.
+  state.wkCache = state.wkCache || {};
+  function wkDocs(ws) { return (state.wkCache[ws] && state.wkCache[ws].docs) || []; }
   async function loadWeekTimetables(ws, force) {
     if (!state.db) return [];
-    if (!force && state.wk.ws === ws && Date.now() - (state.wk.at || 0) < 60000) return state.wk.docs;
+    const c = state.wkCache[ws];
+    if (!force && c && Date.now() - (c.at || 0) < 60000) return c.docs;
     try {
       const snap = await state.db.collection('timetables').where('weekStart', '==', ws).get();
-      state.wk = { ws, at: Date.now(), docs: snap.docs.map((d) => Object.assign({ _id: d.id, cells: [] }, d.data())) };
-    } catch (e) { state.wk = { ws, at: Date.now(), docs: [] }; }
-    return state.wk.docs;
+      state.wkCache[ws] = { at: Date.now(), docs: snap.docs.map((d) => Object.assign({ _id: d.id, cells: [] }, d.data())) };
+    } catch (e) { if (!state.wkCache[ws]) state.wkCache[ws] = { at: Date.now(), docs: [] }; }
+    return state.wkCache[ws].docs;
   }
   function cellTimes(doc, c) {
     const ov = doc.dayTimes && doc.dayTimes[c.d] && doc.dayTimes[c.d][c.p];
@@ -5110,7 +5137,7 @@
   function teacherBusy(u, date, start, end, skip) {
     const a = hhmmToMin(start), z = hhmmToMin(end);
     if ((state.wkLeaves && state.wkLeaves[u + '|' + date]) || (state.adminClasses || []).some((c) => c.teacherId === u && c.date === date && c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) return 'on leave';
-    for (const doc of state.wk.docs) for (const c of (doc.cells || [])) {
+    for (const doc of wkDocs(mondayOf(date))) for (const c of (doc.cells || [])) {
       if (c.d !== date || c.ex || effT(c) !== u || (skip && doc._id === skip.doc && cellKey(c) === skip.key)) continue;
       const tm = cellTimes(doc, c); if (!tm) continue;
       if (hhmmToMin(tm.start) < z && a < hhmmToMin(tm.end)) return `${gridBatchLabel(c.b)} ${formatTimeStr(tm.start)}`;
@@ -5126,8 +5153,9 @@
       const fresh = await state.db.collection('timetables').doc(docIn._id).get();
       if (fresh.exists) {
         doc = Object.assign({ _id: docIn._id, cells: [] }, fresh.data());
-        const i = state.wk.docs.findIndex((d) => d._id === docIn._id);
-        if (i !== -1) state.wk.docs[i] = doc;
+        const list = wkDocs(doc.weekStart || mondayOf((doc.cells[0] || {}).d || todayStr()));
+        const i = list.findIndex((d) => d._id === docIn._id);
+        if (i !== -1) list[i] = doc;
       }
     } catch (e) { /* offline: use the copy we have */ }
     const c = (doc.cells || []).find((x) => cellKey(x) === key);
@@ -5184,23 +5212,24 @@
     box.hidden = !ab;
     if (!ab) { box.innerHTML = ''; return; }
     const ws = state.tt.weekStart;
-    const days = datesBetween(ws, shiftDateStr(ws, 6));
+    const hasSun = wkDocs(ws).some((d) => d.sunday || (d.cells || []).some((c) => dateObj(c.d).getDay() === 0));
+    const days = datesBetween(ws, shiftDateStr(ws, hasSun ? 6 : 5));
     const ids = ttTeacherIds();
     // classes per teacher (whole week) and per day (chosen teacher), from every wing's timetable
     const cnt = {}; const dayCnt = {};
-    state.wk.docs.forEach((doc) => (doc.cells || []).forEach((c) => { if (c.ex) return; const T = effT(c); if (!T) return; cnt[T] = (cnt[T] || 0) + 1; if (ab.t && (T === ab.t || c.t === ab.t)) dayCnt[c.d] = (dayCnt[c.d] || 0) + 1; }));
+    wkDocs(ws).forEach((doc) => (doc.cells || []).forEach((c) => { if (c.ex) return; const T = effT(c); if (!T) return; cnt[T] = (cnt[T] || 0) + 1; if (ab.t && (T === ab.t || c.t === ab.t)) dayCnt[c.d] = (dayCnt[c.d] || 0) + 1; }));
     const we = shiftDateStr(ws, 6);
     let html = `<div class="sv-form-head"><div class="panel-title" style="margin:0;">Teacher absent</div><button type="button" class="hv-sheet-x" id="absClose" aria-label="Close">✕</button></div>
       <div class="admin-sub" style="margin:0;">Week ${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })} · change the week with ‹ › above</div>
-      ${state.wk.docs.length ? '' : '<div class="ad-alert"><div class="ad-alert-t">No timetable made for this week yet</div></div>'}
+      ${wkDocs(ws).length ? '' : '<div class="ad-alert"><div class="ad-alert-t">No timetable made for this week yet</div></div>'}
       <div class="sv-tlbl" style="margin:0;">Who is absent?</div>
       <div class="chips">${ids.map((u) => `<button type="button" class="chip${ab.t === u ? ' active' : ''}" data-ab-t="${u}">${escapeHtml(ttName(u))}${cnt[u] ? ` <span class="free-tag" style="color:var(--muted)">${cnt[u]}</span>` : ''}</button>`).join('')}</div>
       <div class="sv-tlbl" style="margin:0;">Which days?</div>
-      <div class="tg-days" style="grid-template-columns: repeat(7, minmax(0, 1fr));">${days.map((d) => `<button type="button" class="tg-day${ab.days.indexOf(d) !== -1 ? ' active' : ''}${dayCnt[d] ? ' has' : ''}" data-ab-d="${d}"${d < todayStr() ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`).join('')}</div>
+      <div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => `<button type="button" class="tg-day${ab.days.indexOf(d) !== -1 ? ' active' : ''}${dayCnt[d] ? ' has' : ''}" data-ab-d="${d}"${d < todayStr() ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`).join('')}</div>
       ${ab.t ? `<div class="hv-note" style="text-align:left;">${Object.keys(dayCnt).length ? '• = days on which ' + escapeHtml(ttName(ab.t)) + ' has classes' : escapeHtml(ttName(ab.t)) + ' has no timetable classes this week'}</div>` : ''}`;
     if (ab.t && ab.days.length) {
       const rows = [];
-      state.wk.docs.forEach((doc) => (doc.cells || []).forEach((c) => {
+      wkDocs(ws).forEach((doc) => (doc.cells || []).forEach((c) => {
         if (c.ex || ab.days.indexOf(c.d) === -1) return;
         if (c.t !== ab.t && effT(c) !== ab.t) return;
         const tm = cellTimes(doc, c); if (!tm) return;
@@ -5228,7 +5257,7 @@
     box.querySelectorAll('[data-ab-t]').forEach((b) => b.addEventListener('click', () => { ab.t = b.getAttribute('data-ab-t'); ab.pick = {}; renderAbsent(); }));
     box.querySelectorAll('[data-ab-d]').forEach((b) => b.addEventListener('click', () => { const d = b.getAttribute('data-ab-d'); const k = ab.days.indexOf(d); if (k === -1) ab.days.push(d); else ab.days.splice(k, 1); renderAbsent(); }));
     box.querySelectorAll('[data-ab-pick]').forEach((b) => b.addEventListener('click', () => { ab.pick[b.getAttribute('data-ab-pick')] = b.getAttribute('data-v'); renderAbsent(); }));
-    const find = (ref) => { const [docId, key] = ref.split('#'); return { doc: state.wk.docs.find((d) => d._id === docId), key }; };
+    const find = (ref) => { const [docId, key] = ref.split('#'); return { doc: wkDocs(ws).find((d) => d._id === docId), key }; };
     box.querySelectorAll('[data-ab-apply]').forEach((b) => b.addEventListener('click', async () => {
       const ref = b.getAttribute('data-ab-apply'); const { doc, key } = find(ref); const u = ab.pick[ref];
       if (!doc || !u) return;
@@ -5247,7 +5276,7 @@
     const sh = document.getElementById('absShare');
     if (sh) sh.addEventListener('click', () => {
       const lines = [];
-      state.wk.docs.forEach((doc) => (doc.cells || []).forEach((c) => { if (c.sub && c.sub.for === ab.t && ab.days.indexOf(c.d) !== -1) { const tm = cellTimes(doc, c); lines.push({ k: c.d + (tm ? tm.start : ''), t: `🕙 ${WD[dateObj(c.d).getDay()]} ${dateObj(c.d).getDate()} · ${tm ? formatTimeStr(tm.start) : ''} · ${c.b} · ${c.s} → *${ttName(c.sub.t)}*` }); } }));
+      wkDocs(ws).forEach((doc) => (doc.cells || []).forEach((c) => { if (c.sub && c.sub.for === ab.t && ab.days.indexOf(c.d) !== -1) { const tm = cellTimes(doc, c); lines.push({ k: c.d + (tm ? tm.start : ''), t: `🕙 ${WD[dateObj(c.d).getDay()]} ${dateObj(c.d).getDate()} · ${tm ? formatTimeStr(tm.start) : ''} · ${c.b} · ${c.s} → *${ttName(c.sub.t)}*` }); } }));
       lines.sort((x, y) => x.k.localeCompare(y.k));
       window.open('https://wa.me/?text=' + encodeURIComponent(`*SUBSTITUTION*\n${ttName(ab.t)} is absent\n──────────\n${lines.map((x) => x.t).join('\n')}`), '_blank');
     });
@@ -5420,6 +5449,36 @@
     box._key = key;
     box.innerHTML = ttImgTiles(list);
     bindTtImgTiles(box, list);
+  }
+
+  // ---------- Exams vs timetable classes ----------
+  state.tgExams = state.tgExams || { ws: '', at: 0, list: [] };
+  function weekExams(ws) {
+    if (state.tgExams.ws === ws && Date.now() - state.tgExams.at < 60000) return state.tgExams.list;
+    state.tgExams = { ws, at: Date.now(), list: state.tgExams.ws === ws ? state.tgExams.list : [] };
+    state.db.collection('exams').where('date', '>=', ws).where('date', '<=', shiftDateStr(ws, 6)).get().then((snap) => {
+      state.tgExams = { ws, at: Date.now(), list: snap.docs.map(normDoc).filter((e) => e.date >= ws && e.date <= shiftDateStr(ws, 6)) };
+      if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid();
+    }).catch(() => {});
+    return state.tgExams.list;
+  }
+  // an exam for this batch on this day that overlaps the given time
+  function examAt(b, d, start, end) {
+    const a = hhmmToMin(start), z = hhmmToMin(end);
+    return weekExams(mondayOf(d)).find((e) => e.date === d && expandScope(e.scope).indexOf(b) !== -1 && hhmmToMin(e.start) < z && a < hhmmToMin(e.end)) || null;
+  }
+  function examLine(e) { return `${examTitle(e)} (${formatTimeStr(e.start)} – ${formatTimeStr(e.end)})`; }
+  // timetable classes of these batches on this day that overlap the exam time
+  async function classesDuringExam(date, scope, start, end, skipExamId) {
+    const docs = await loadWeekTimetables(mondayOf(date), true);
+    const bats = expandScope(scope); const a = hhmmToMin(start), z = hhmmToMin(end);
+    const out = [];
+    docs.forEach((doc) => (doc.cells || []).forEach((c) => {
+      if (c.d !== date || c.ex || bats.indexOf(c.b) === -1) return;
+      const tm = cellTimes(doc, c); if (!tm) return;
+      if (hhmmToMin(tm.start) < z && a < hhmmToMin(tm.end)) out.push(`${c.b} · ${c.s} · ${formatTimeStr(tm.start)}`);
+    }));
+    return out;
   }
 
   // ---------- Settings: Periods & timings, Teacher mapping, Batch rooms ----------
@@ -6356,6 +6415,14 @@
     const rooms = f.rooms.map((r) => ({ room: r.room, scope: f.scope.slice(), slots: r.slots.map((sl) => ({ start: sl.start || start, end: sl.end || end, teachers: sl.teachers.slice() })) }));
     if (rooms.some((r) => !r.room)) { showToast('Choose the room in every room card', 'error'); return; }
     if (rooms.some((r) => r.slots.some((sl) => hhmmToMin(sl.end) <= hhmmToMin(sl.start)))) { showToast('Check the duty slot times', 'error'); return; }
+    // classes in the timetable for these batches during the exam
+    try {
+      const during = await classesDuringExam(state.adminDate, f.scope, start, end, f.id);
+      if (during.length) {
+        const ok = await showConfirm(`These batches have timetable classes during the exam:\n${during.slice(0, 6).join('\n')}${during.length > 6 ? `\n+${during.length - 6} more` : ''}\n\nSave the exam anyway? (Clear or move those classes in the Timetable.)`, '⚠️ Classes during the exam', 'Save exam');
+        if (!ok) return;
+      }
+    } catch (e) { /* timetable not available offline */ }
     const pw = rooms.length ? planWarnings({ date: state.adminDate, start, end }, rooms).filter((x) => !/no invigilator|choose the class/.test(x)) : [];
     if (pw.length) {
       const ok = await showConfirm(`${pw.slice(0, 5).join('\n')}${pw.length > 5 ? `\n+${pw.length - 5} more` : ''}\n\nSave anyway?`, '⚠️ Please check', 'Save');
