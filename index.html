@@ -857,6 +857,22 @@
   .tg-test { box-shadow: inset 0 0 0 2px var(--gold-soft); }
   .tg-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .tg-exam { background: var(--gold-soft); }
+  .tg-subc { background: rgba(37,99,235,.08); }
+  .tg-c i { display: block; }
+  .abs-box { display: flex; flex-direction: column; gap: 10px; }
+  #absBox[hidden], #svGrid[hidden] { display: none !important; }
+  .abs-row { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .abs-row.done { border-color: rgba(22,163,74,.4); background: rgba(22,163,74,.05); }
+  .abs-h { font-size: 13.5px; color: var(--ink); }
+  .abs-done { font-size: 13.5px; font-weight: 600; color: #15803D; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .abs-apply { margin: 0 !important; padding: 9px !important; font-size: 14px !important; }
+  .free-tag { font-size: 11px; font-weight: 600; color: #15803D; margin-left: 2px; }
+  .ad-subs { border: 1px solid rgba(37,99,235,.25); background: rgba(37,99,235,.05); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .bl-head { font-size: 12.5px; font-weight: 700; color: var(--muted-2); padding: 10px 0 4px; border-bottom: 1px solid var(--line); }
+  .bl-head:first-child { padding-top: 0; }
+  .tt-notice { display: flex; flex-direction: column; gap: 2px; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; color: var(--ink); cursor: pointer; }
+  .tt-notice span { font-size: 12.5px; color: var(--muted-2); }
+  .my-tt td b { font-size: 10.5px; }
   .tg-exam b { color: var(--gold); white-space: normal; font-size: 10.5px; line-height: 1.2; }
   .tg-sel { outline: 3px solid var(--gold); outline-offset: -3px; background: var(--gold-soft) !important; }
   .tg-ph { cursor: pointer; }
@@ -1581,6 +1597,8 @@
       </div>
       <button type="button" class="hv-back" id="svThisWeek" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to this week</button>
       <div class="sv-summary" id="svSummary"></div>
+      <div class="tg-mode"><button type="button" class="chip active" data-sv-view="list">List</button><button type="button" class="chip" data-sv-view="grid">Weekly timetable</button></div>
+      <div id="svGrid" hidden></div>
       <div class="sv-actions">
         <button type="button" class="save-btn" id="svAddBtn">+ Add Slot</button>
         <button type="button" class="btn-secondary" id="svCopyBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy last week</button>
@@ -1708,6 +1726,7 @@
           <button type="button" class="hv-arrow" id="ttNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
         <div class="tg-mode"><button type="button" class="chip active" data-tt-mode="grid">Weekly grid</button><button type="button" class="chip" data-tt-mode="list">All classes</button></div>
+        <div class="panel abs-box" id="absBox" hidden></div>
         <div id="tgWrap" class="tg-wrap"></div>
         <div id="ttListWrap" hidden>
         <div class="chips tt-teachers" id="ttTeachers" aria-label="Show timetable of"></div>
@@ -2164,7 +2183,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 4.9 · updated 1 Oct 2026</div>
+          <div class="dnote">Version 5.0 · updated 2 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2280,7 +2299,7 @@
   function sortBatches(list) {
     const rank = (b) => { const t = String(b); const sess = typeof batchSession === 'function' ? batchSession(t) : (/remedial/i.test(t) ? 'special' : (/evening/i.test(t) ? 'evening' : 'morning')); return { morning: 0, evening: 1, special: 2 }[sess] || 0; };
     const num = (b) => { const m = String(b).match(/class\s*(\d+)/i); return m ? Number(m[1]) : 999; };
-    return list.slice().sort((a, b) => (num(a) - num(b)) || (rank(a) - rank(b)) || String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }));
+    return list.slice().sort((a, b) => (rank(a) - rank(b)) || (num(a) - num(b)) || String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }));
   }
 
   function allBatchesFlat() {
@@ -2942,6 +2961,11 @@
     }
     let duties = [];
     try { ensureTodayExams(); duties = plannedDutiesToday(); } catch (e) { duties = []; }
+    try {
+      const seen = Number(localStorage.getItem('ctd_tt_seen') || 0); const ws0 = mondayOf(todayStr());
+      const fresh = (state.scheduleSlots || []).filter((x) => x.setBy && x.ttId && x.date >= ws0 && (x.createdAt || 0) > seen);
+      if (fresh.length) html = `<div class="tt-notice" data-open-mytt="1" role="button" tabindex="0">📅 <b>Your timetable is ready</b><span>${fresh.length} class${fresh.length === 1 ? '' : 'es'} added · tap to see the week</span></div>` + html;
+    } catch (e) { /* ignore */ }
     if (activities.length || duties.length) html += '<div class="tl-sub">Activities</div>' + duties.map(dutyRowHtml).join('') + activities.map(todayActivityRowHtml).join('');
     const cvT = coveredTestsFor(todayStr(), state.classesToday);
     if (cvT.count) html += `<div class="ad-ok" style="margin-top:4px;">✓ Class test held in your class while you were on leave: ${escapeHtml(cvT.batches.join(', '))}</div>`;
@@ -2960,6 +2984,7 @@
       });
     });
     el.querySelectorAll('[data-today-duty]').forEach((row) => row.addEventListener('click', () => openDutySheet(row.getAttribute('data-today-duty'))));
+    el.querySelectorAll('[data-open-mytt]').forEach((row) => row.addEventListener('click', () => { svState().view = 'grid'; svState().weekStart = mondayOf(todayStr()); switchTab('schedule'); }));
     el.querySelectorAll('[data-empty-add]').forEach((btn) => {
       btn.addEventListener('click', () => document.getElementById('addClassLink').click());
     });
@@ -4082,7 +4107,8 @@
       const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person';
       const ok = await showConfirm(`${name} will no longer be able to use the app, and will disappear from teacher lists. All their past records and reports stay safe. You can restore access at any time.`, 'Remove access?', 'Remove');
       if (!ok) return;
-      save(uid, { status: 'removed', role: 'teacher', removedAt: Date.now() }, `${name}'s access removed`);
+      await save(uid, { status: 'removed', role: 'teacher', removedAt: Date.now() }, `${name}'s access removed`);
+      reassignLeaver(uid);
     }));
     el.querySelectorAll('[data-team-restore]').forEach((b) => b.addEventListener('click', () => {
       const uid = b.getAttribute('data-team-restore');
@@ -4507,8 +4533,8 @@
       renderTimetable();
     } catch (err) { flashOffline(err); }
   }
-  document.getElementById('ttPrev').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, -7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; renderTimetable(); });
-  document.getElementById('ttNext').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, 7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; renderTimetable(); });
+  document.getElementById('ttPrev').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, -7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; state.abs = null; renderAbsent(); renderTimetable(); });
+  document.getElementById('ttNext').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, 7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; state.abs = null; renderAbsent(); renderTimetable(); });
   document.getElementById('ttAddBtn').addEventListener('click', () => openTtForm(null));
   document.querySelectorAll('[data-tt-mode]').forEach((b) => b.addEventListener('click', () => { state.tg.mode = b.getAttribute('data-tt-mode'); state.tt.key = ''; renderTimetable(); }));
   document.getElementById('ttCopyBtn').addEventListener('click', ttCopyLastWeek);
@@ -4576,8 +4602,10 @@
     }).catch(() => {});
   }
   let tgSaveTimer = null;
+  function ttCacheStale() { if (state.wk) state.wk.at = 0; if (state.dashTT) state.dashTT.at = 0; }
   function tgSave() {
     const doc = state.tg.doc; if (!doc) return;
+    ttCacheStale();
     doc.status = 'draft'; doc.updatedAt = Date.now();
     state.tg.dirty = true;
     clearTimeout(tgSaveTimer);
@@ -4606,8 +4634,8 @@
     const g = tgGroup(); if (!g || !state.tg.doc) return {};
     const per = periodsFor(g.key);
     const all = [];
-    (state.tg.doc.cells || []).forEach((c) => { const pp = periodsForDay(g.key, c.d)[c.p]; if (c.t && !c.ex && pp) all.push({ c, a: hhmmToMin(pp.start), z: hhmmToMin(pp.end), own: true }); });
-    (state.tg.others || []).forEach((o) => { (o.cells || []).forEach((c) => { const ov = (o.dayTimes && o.dayTimes[c.d] && o.dayTimes[c.d][c.p]) || periodsFor(o.group)[c.p]; if (c.t && !c.ex && ov) all.push({ c, a: hhmmToMin(ov.start), z: hhmmToMin(ov.end), own: false, g: o.group }); }); });
+    (state.tg.doc.cells || []).forEach((c) => { const pp = periodsForDay(g.key, c.d)[c.p]; if (effT(c) && !c.ex && pp) all.push({ c: Object.assign({}, c, { t: effT(c) }), a: hhmmToMin(pp.start), z: hhmmToMin(pp.end), own: true }); });
+    (state.tg.others || []).forEach((o) => { (o.cells || []).forEach((c) => { const ov = (o.dayTimes && o.dayTimes[c.d] && o.dayTimes[c.d][c.p]) || periodsFor(o.group)[c.p]; if (effT(c) && !c.ex && ov) all.push({ c: Object.assign({}, c, { t: effT(c) }), a: hhmmToMin(ov.start), z: hhmmToMin(ov.end), own: false, g: o.group }); }); });
     const res = {};
     for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
       const x = all[i], y = all[j];
@@ -4650,8 +4678,8 @@
         const k = `${d}|${i}|${b}`;
         const isSel = sel && sel.cells.indexOf(k) !== -1;
         if (c && c.ex) { html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return; }
-        const cl = c ? (clash[k] ? ' tg-clash' : ' tg-full') : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b title="${escapeHtml(c.s)}">${escapeHtml(shortSubj(c.s))}</b>${c.test ? '<i>Test</i>' : ''}<small>${c.t ? escapeHtml(initials(ttName(c.t))) : '⚠️'}</small>${clash[k] ? '<em>⚠️</em>' : ''}` : '<span>+</span>'}</td>`;
+        const cl = c ? (clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) : '';
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}">${c ? `<b title="${escapeHtml(c.s)}">${escapeHtml(shortSubj(c.s))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
@@ -4661,6 +4689,7 @@
     html += `<div class="tg-actions">
       <button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
       <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>
+      <button type="button" class="btn-secondary" id="tgAbsent" style="border-color: var(--line);">Teacher absent</button>
       <button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);">Mark exam</button>
       <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">Timetable image</button>
       <button type="button" class="btn-secondary hv-del" id="tgDelWeek" style="border-color: var(--line);">Delete week</button>
@@ -4709,6 +4738,7 @@
     on('tgImage', tgImage);
     on('tgPublish', tgPublish);
     on('tgExam', tgStartExamSelect);
+    on('tgAbsent', () => openAbsent({ date: tgDays().indexOf(todayStr()) !== -1 ? todayStr() : null }));
     on('tgDelWeek', tgDeleteWeek);
     on('tgSelCancel', () => { state.tg.sel = null; renderTgGrid(); });
     on('tgSelNext', openExamCellsSheet);
@@ -4723,6 +4753,7 @@
       if (!st.change && st.s) st.t = st.t && cur && cur.s === st.s ? st.t : defaultTeacher(b, st.s);
       body.innerHTML = `<div class="hv-d-title">${escapeHtml(b)}</div>
         <div class="hv-d-wing">${escapeHtml(WD[dateObj(d).getDay()])} ${dateObj(d).getDate()} · P${p + 1} · ${escapeHtml(formatTimeStr(per.start))} – ${escapeHtml(formatTimeStr(per.end))}${batchRoom(b) ? ' · ' + escapeHtml(batchRoom(b)) : ''}</div>
+        ${cur && cur.sub ? `<div class="abs-done" style="margin-top:10px;">🔁 ${escapeHtml(ttName(cur.sub.t))} is the substitute for ${escapeHtml(ttName(cur.sub.for))} <button type="button" class="hv-back" id="csUndoSub" style="padding:0;">Undo</button></div>` : ''}
         <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div>
         <div class="chips">${subjectsList().map((s) => `<button type="button" class="chip${st.s === s ? ' active' : ''}" data-cs="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>
         ${st.s ? `<div class="tg-teacher">👤 <b>${st.t ? escapeHtml(ttName(st.t)) : 'No teacher set'}</b> <span class="mut">${st.t && st.t === defaultTeacher(b, st.s) ? '(default)' : (st.t ? '(changed)' : '')}</span>
@@ -4735,6 +4766,7 @@
       const ch = document.getElementById('csChange'); if (ch) ch.addEventListener('click', () => { st.change = !st.change; draw(); });
       const tc = document.getElementById('csTest'); if (tc) tc.addEventListener('change', () => { st.test = tc.checked; });
       const cl = document.getElementById('csClear'); if (cl) cl.addEventListener('click', () => { tgSetCell(d, p, b, null); closeHvSheet(); renderTgGrid(); });
+      const us = document.getElementById('csUndoSub'); if (us) us.addEventListener('click', async () => { closeHvSheet(); try { await moveCell(Object.assign({ _id: state.tg.docKey }, state.tg.doc), `${d}|${p}|${b}`, null, 'undo'); showToast('Substitute removed'); } catch (err) { flashOffline(err); } renderTgGrid(); });
       const cc = document.getElementById('csCancel'); if (cc) cc.addEventListener('click', closeHvSheet);
       document.getElementById('csAssign').addEventListener('click', () => { if (!st.s) return; tgSetCell(d, p, b, { s: st.s, t: st.t || '', test: st.test || false }); closeHvSheet(); renderTgGrid(); });
     };
@@ -4751,7 +4783,7 @@
       const ok = await showConfirm('This replaces the classes already in this week\'s grid with last week\'s timetable.', 'Copy last week?', 'Copy');
       if (!ok) return;
     }
-    state.tg.doc.cells = cells.map((c) => Object.assign({}, c, { d: shiftDateStr(c.d, 7), t: c.t && !isRemovedUid(c.t) ? c.t : defaultTeacher(c.b, c.s) }));
+    state.tg.doc.cells = cells.map((c) => { const n = Object.assign({}, c, { d: shiftDateStr(c.d, 7), t: c.t && !isRemovedUid(c.t) ? c.t : defaultTeacher(c.b, c.s) }); delete n.sub; return n; });
     if (cells.some((c) => dateObj(c.d).getDay() === 0)) state.tg.doc.sunday = true;
     tgSave(); renderTgGrid(); showToast(`${cells.length} classes copied`);
   }
@@ -4784,8 +4816,8 @@
   async function tgPublish() {
     const g = tgGroup(); const doc = state.tg.doc; if (!doc) return;
     const per = periodsFor(g.key);
-    const cells = (doc.cells || []).filter((c) => c.t && !c.ex && per[c.p]);
-    const noT = (doc.cells || []).filter((c) => !c.t && !c.ex).length;
+    const cells = (doc.cells || []).filter((c) => effT(c) && !c.ex && per[c.p]);
+    const noT = (doc.cells || []).filter((c) => !effT(c) && !c.ex).length;
     const clash = Object.keys(tgClashes()).length;
     const msg = `${cells.length} classes will go to the teachers' schedules${noT ? `\n${noT} class${noT === 1 ? '' : 'es'} without a teacher will be skipped` : ''}${clash ? `\n⚠️ ${clash} teacher clash${clash === 1 ? '' : 'es'}` : ''}`;
     const ok = await showConfirm(msg, 'Publish this week?', 'Publish');
@@ -4796,8 +4828,9 @@
     const ops = [];
     cells.forEach((c) => {
       const pp = periodsForDay(g.key, c.d)[c.p]; const id = slotIdFor(docId, c);
-      newIds[c.t + '/' + id] = 1;
-      ops.push(['set', `schedule/${c.t}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, room: batchRoom(c.b), subject: c.s, test: !!c.test, setBy: state.teacherId, setByName: me, ttId: docId, createdAt: Date.now() }]);
+      const T = effT(c);
+      newIds[T + '/' + id] = 1;
+      ops.push(['set', `schedule/${T}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, room: batchRoom(c.b), subject: c.s, test: !!c.test, setBy: state.teacherId, setByName: me, ttId: docId, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() }]);
     });
     (doc.published || []).forEach((key) => { if (!newIds[key]) ops.push(['del', `schedule/${key.split('/')[0]}/slots/${key.split('/')[1]}`]); });
     try {
@@ -4811,6 +4844,7 @@
       await state.db.collection('timetables').doc(docId).set(doc);
       state.tg.saving = false; state.tg.dirty = false;
       state.tt.key = '';
+      ttCacheStale();
       showToast(`✓ Published · ${cells.length} classes`);
       renderTgGrid();
     } catch (err) { state.tg.saving = false; flashOffline(err); }
@@ -5016,6 +5050,255 @@
       state.tg.dirty = false; state.tt.key = '';
       renderTgGrid(); showToast('Timetable deleted');
     } catch (err) { flashOffline(err); }
+  }
+
+  // =====================================================================
+  // Stage 3: substitutes, teacher absent, teacher leaving
+  // A substitute is stored on the cell (c.sub = { t, for, by, at }); the regular teacher (c.t) is kept,
+  // so Teacher Mapping and "Copy last week" stay correct. Applying a substitute on a published class
+  // moves only that class from the absent teacher's schedule to the substitute's — no Publish needed.
+  // =====================================================================
+  function effT(c) { return c && c.sub && c.sub.t ? c.sub.t : (c ? c.t : ''); }
+  state.wk = state.wk || { ws: '', docs: [] }; // all timetables of a week (every wing / session)
+  async function loadWeekTimetables(ws, force) {
+    if (!state.db) return [];
+    if (!force && state.wk.ws === ws && Date.now() - (state.wk.at || 0) < 60000) return state.wk.docs;
+    try {
+      const snap = await state.db.collection('timetables').where('weekStart', '==', ws).get();
+      state.wk = { ws, at: Date.now(), docs: snap.docs.map((d) => Object.assign({ _id: d.id, cells: [] }, d.data())) };
+    } catch (e) { state.wk = { ws, at: Date.now(), docs: [] }; }
+    return state.wk.docs;
+  }
+  function cellTimes(doc, c) {
+    const ov = doc.dayTimes && doc.dayTimes[c.d] && doc.dayTimes[c.d][c.p];
+    const pp = ov || (doc.periodsUsed && doc.periodsUsed[c.p]) || periodsFor(doc.group)[c.p];
+    return pp ? { start: pp.start, end: pp.end } : null;
+  }
+  // Is teacher u busy (another class, or on leave) at this time? Looks at all wings' timetables of the week.
+  function teacherBusy(u, date, start, end, skip) {
+    const a = hhmmToMin(start), z = hhmmToMin(end);
+    if ((state.adminClasses || []).some((c) => c.teacherId === u && c.date === date && c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) return 'on leave';
+    for (const doc of state.wk.docs) for (const c of (doc.cells || [])) {
+      if (c.d !== date || c.ex || effT(c) !== u || (skip && doc._id === skip.doc && cellKey(c) === skip.key)) continue;
+      const tm = cellTimes(doc, c); if (!tm) continue;
+      if (hhmmToMin(tm.start) < z && a < hhmmToMin(tm.end)) return `${gridBatchLabel(c.b)} ${formatTimeStr(tm.start)}`;
+    }
+    return '';
+  }
+  // Move one cell to a teacher (substitute = for one class; permanent = replace the regular teacher).
+  async function moveCell(doc, key, newT, mode) {
+    const c = (doc.cells || []).find((x) => cellKey(x) === key);
+    if (!c) return false;
+    const before = effT(c);
+    if (mode === 'sub') c.sub = { t: newT, for: c.t, by: state.teacherId, byName: (state.user && state.user.name) || '', at: Date.now() };
+    else if (mode === 'undo') delete c.sub;
+    else if (mode === 'replace') { c.t = newT; delete c.sub; }
+    const after = effT(c);
+    doc.updatedAt = Date.now();
+    const id = slotIdFor(doc._id, c);
+    const batch = state.db.batch();
+    const pub = doc.published || [];
+    const wasPub = pub.indexOf(before + '/' + id) !== -1;
+    if (wasPub && before !== after) {
+      const tm = cellTimes(doc, c);
+      batch.delete(state.db.doc(`schedule/${before}/slots/${id}`));
+      if (after && tm) batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: batchRoom(c.b), subject: c.s, test: !!c.test, setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
+      doc.published = pub.filter((k) => k !== before + '/' + id).concat(after ? [after + '/' + id] : []);
+    }
+    const plain = Object.assign({}, doc); delete plain._id;
+    batch.set(state.db.collection('timetables').doc(doc._id), plain);
+    await waitForWrite(batch.commit());
+    if (state.tg.docKey === doc._id) { state.tg.doc = plain; state.tg.dirty = state.tg.dirty || !wasPub; }
+    ttCacheStale();
+    return true;
+  }
+  // ---------- Teacher absent screen ----------
+  state.abs = null;
+  function openAbsent(prefill) {
+    const ws = mondayOf((prefill && prefill.date) || state.tt.weekStart);
+    state.tt.weekStart = ws;
+    state.abs = { t: (prefill && prefill.t) || '', days: prefill && prefill.date ? [prefill.date] : [], pick: {} };
+    state.adminTab = 'tt'; state.tg.mode = 'grid';
+    loadWeekTimetables(ws, true).then(() => { renderAdmin(); renderAbsent(); });
+    renderAdmin();
+    setTimeout(() => { const b = document.getElementById('absBox'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+  }
+  function renderAbsent() {
+    const box = document.getElementById('absBox');
+    if (!box) return;
+    const ab = state.abs;
+    box.hidden = !ab;
+    if (!ab) { box.innerHTML = ''; return; }
+    const ws = state.tt.weekStart;
+    const days = datesBetween(ws, shiftDateStr(ws, 6));
+    const ids = ttTeacherIds();
+    let html = `<div class="sv-form-head"><div class="panel-title" style="margin:0;">Teacher absent</div><button type="button" class="hv-sheet-x" id="absClose" aria-label="Close">✕</button></div>
+      <div class="sv-tlbl" style="margin:0;">Who is absent?</div>
+      <div class="chips">${ids.map((u) => `<button type="button" class="chip${ab.t === u ? ' active' : ''}" data-ab-t="${u}">${escapeHtml(ttName(u))}</button>`).join('')}</div>
+      <div class="sv-tlbl" style="margin:0;">Which days?</div>
+      <div class="tg-days" style="grid-template-columns: repeat(7, minmax(0, 1fr));">${days.map((d) => `<button type="button" class="tg-day${ab.days.indexOf(d) !== -1 ? ' active' : ''}" data-ab-d="${d}"${d < todayStr() ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`).join('')}</div>`;
+    if (ab.t && ab.days.length) {
+      const rows = [];
+      state.wk.docs.forEach((doc) => (doc.cells || []).forEach((c) => {
+        if (c.ex || ab.days.indexOf(c.d) === -1) return;
+        if (c.t !== ab.t && effT(c) !== ab.t) return;
+        const tm = cellTimes(doc, c); if (!tm) return;
+        rows.push({ doc, c, tm, key: cellKey(c) });
+      }));
+      rows.sort((x, y) => (x.c.d + x.tm.start).localeCompare(y.c.d + y.tm.start));
+      html += `<div class="sv-tlbl" style="margin:0;">${rows.length ? `${rows.length} class${rows.length === 1 ? '' : 'es'} of ${escapeHtml(ttName(ab.t))}` : 'No timetable classes on these days'}</div>`;
+      rows.forEach((r) => {
+        const done = r.c.sub && r.c.sub.for === ab.t;
+        const subjTeachers = Object.keys(state.teacherMap || {}).filter((k) => k.split('|')[1] === r.c.s).map((k) => state.teacherMap[k]);
+        const cand = ids.filter((u) => u !== ab.t).sort((a, b) => (subjTeachers.indexOf(b) !== -1) - (subjTeachers.indexOf(a) !== -1));
+        const pk = ab.pick[r.doc._id + '#' + r.key] || '';
+        html += `<div class="abs-row${done ? ' done' : ''}">
+          <div class="abs-h"><b>${escapeHtml(WD[dateObj(r.c.d).getDay()])} ${dateObj(r.c.d).getDate()} · ${escapeHtml(formatTimeStr(r.tm.start))}</b> · ${escapeHtml(r.c.b)} · ${escapeHtml(r.c.s)}</div>
+          ${done ? `<div class="abs-done">✓ ${escapeHtml(ttName(r.c.sub.t))} (substitute) <button type="button" class="hv-back" data-ab-undo="${escapeHtml(r.doc._id + '#' + r.key)}" style="padding:0;">Undo</button></div>`
+            : `<div class="chips">${cand.map((u) => { const busy = teacherBusy(u, r.c.d, r.tm.start, r.tm.end); const same = subjTeachers.indexOf(u) !== -1; return `<button type="button" class="chip${pk === u ? ' active' : ''}${busy ? ' chip-busy' : ''}" data-ab-pick="${escapeHtml(r.doc._id + '#' + r.key)}" data-v="${u}">${escapeHtml(ttName(u))}${same ? ' ★' : ''}${busy ? ` <span class="busy-tag">⚠️ ${escapeHtml(busy)}</span>` : ' <span class="free-tag">free</span>'}</button>`; }).join('')}</div>
+               <button type="button" class="save-btn abs-apply" data-ab-apply="${escapeHtml(r.doc._id + '#' + r.key)}"${pk ? '' : ' disabled'}>Apply substitute</button>`}
+        </div>`;
+      });
+      if (rows.some((r) => r.c.sub && r.c.sub.for === ab.t)) html += `<button type="button" class="btn-secondary" id="absShare" style="border-color: var(--line);">Share substitutions on WhatsApp</button>`;
+      html += '<div class="hv-note" style="text-align:left;">★ teaches this subject · free = no class at that time. Each "Apply" sends the class to that teacher only.</div>';
+    }
+    box.innerHTML = html;
+    document.getElementById('absClose').addEventListener('click', () => { state.abs = null; renderAbsent(); });
+    box.querySelectorAll('[data-ab-t]').forEach((b) => b.addEventListener('click', () => { ab.t = b.getAttribute('data-ab-t'); ab.pick = {}; renderAbsent(); }));
+    box.querySelectorAll('[data-ab-d]').forEach((b) => b.addEventListener('click', () => { const d = b.getAttribute('data-ab-d'); const k = ab.days.indexOf(d); if (k === -1) ab.days.push(d); else ab.days.splice(k, 1); renderAbsent(); }));
+    box.querySelectorAll('[data-ab-pick]').forEach((b) => b.addEventListener('click', () => { ab.pick[b.getAttribute('data-ab-pick')] = b.getAttribute('data-v'); renderAbsent(); }));
+    const find = (ref) => { const [docId, key] = ref.split('#'); return { doc: state.wk.docs.find((d) => d._id === docId), key }; };
+    box.querySelectorAll('[data-ab-apply]').forEach((b) => b.addEventListener('click', async () => {
+      const ref = b.getAttribute('data-ab-apply'); const { doc, key } = find(ref); const u = ab.pick[ref];
+      if (!doc || !u) return;
+      const c = doc.cells.find((x) => cellKey(x) === key); const tm = cellTimes(doc, c);
+      const busy = teacherBusy(u, c.d, tm.start, tm.end);
+      if (busy) { const ok = await showConfirm(`${ttName(u)} is busy then (${busy}). Assign anyway?`, '⚠️ Teacher conflict', 'Assign'); if (!ok) return; }
+      b.disabled = true;
+      try { await moveCell(doc, key, u, 'sub'); showToast(`✓ Sent to ${ttName(u)}`); } catch (err) { flashOffline(err); }
+      renderAbsent(); if (state.tg.docKey === doc._id) renderTgGrid();
+    }));
+    box.querySelectorAll('[data-ab-undo]').forEach((b) => b.addEventListener('click', async () => {
+      const { doc, key } = find(b.getAttribute('data-ab-undo')); if (!doc) return;
+      try { await moveCell(doc, key, null, 'undo'); showToast('Substitute removed'); } catch (err) { flashOffline(err); }
+      renderAbsent(); if (state.tg.docKey === doc._id) renderTgGrid();
+    }));
+    const sh = document.getElementById('absShare');
+    if (sh) sh.addEventListener('click', () => {
+      const lines = [];
+      state.wk.docs.forEach((doc) => (doc.cells || []).forEach((c) => { if (c.sub && c.sub.for === ab.t && ab.days.indexOf(c.d) !== -1) { const tm = cellTimes(doc, c); lines.push({ k: c.d + (tm ? tm.start : ''), t: `🕙 ${WD[dateObj(c.d).getDay()]} ${dateObj(c.d).getDate()} · ${tm ? formatTimeStr(tm.start) : ''} · ${c.b} · ${c.s} → *${ttName(c.sub.t)}*` }); } }));
+      lines.sort((x, y) => x.k.localeCompare(y.k));
+      window.open('https://wa.me/?text=' + encodeURIComponent(`*SUBSTITUTION*\n${ttName(ab.t)} is absent\n──────────\n${lines.map((x) => x.t).join('\n')}`), '_blank');
+    });
+  }
+  // Admin / Coordinator Home: substitutions of the day, and leave that needs a substitute
+  state.dashTT = state.dashTT || { ws: '', docs: [] };
+  function refreshDashTT() {
+    const ws = mondayOf(state.adminDate);
+    if (state.dashTT.ws === ws && Date.now() - (state.dashTT.at || 0) < 30000) return;
+    state.dashTT = { ws, at: Date.now(), docs: state.dashTT.ws === ws ? state.dashTT.docs : [] };
+    loadWeekTimetables(ws, true).then((docs) => { state.dashTT = { ws, at: Date.now(), docs }; if (state.tab === 'admin') renderAdmin(); });
+  }
+  function dashSubsHtml() {
+    const date = state.adminDate;
+    const subs = []; const needs = {};
+    const leaveIds = (state.adminClasses || []).filter((c) => c.date === date && c.entryType === 'activity' && c.activityType === 'Leave / Holiday').map((c) => c.teacherId);
+    state.dashTT.docs.forEach((doc) => (doc.cells || []).forEach((c) => {
+      if (c.d !== date || c.ex) return;
+      const tm = cellTimes(doc, c);
+      if (c.sub) subs.push({ c, tm });
+      else if (c.t && leaveIds.indexOf(c.t) !== -1 && (doc.published || []).length) needs[c.t] = (needs[c.t] || 0) + 1;
+    }));
+    let html = '';
+    Object.keys(needs).forEach((t) => { html += `<div class="ad-alert"><div class="ad-alert-t">⚠️ ${escapeHtml(ttName(t))} is on leave · ${needs[t]} timetable class${needs[t] === 1 ? '' : 'es'} need a substitute</div><button type="button" class="hv-back" data-arrange="${t}" style="padding:0;">Arrange substitute →</button></div>`; });
+    if (subs.length) {
+      subs.sort((x, y) => ((x.tm && x.tm.start) || '').localeCompare((y.tm && y.tm.start) || ''));
+      html += `<div class="ad-subs"><div class="ad-alert-t">🔁 Substitutions · ${subs.length}</div>${subs.map((x) => `<div class="ad-alert-l">${x.tm ? escapeHtml(formatTimeStr(x.tm.start)) + ' · ' : ''}${escapeHtml(x.c.b)} · ${escapeHtml(x.c.s)}: <b>${escapeHtml(ttName(x.c.sub.t))}</b> for ${escapeHtml(ttName(x.c.sub.for))}</div>`).join('')}</div>`;
+    }
+    return html;
+  }
+  // ---------- Teacher leaves: move their mapping and upcoming timetable classes to another teacher ----------
+  async function reassignLeaver(uid) {
+    const name = ttName(uid);
+    const maps = Object.keys(state.teacherMap || {}).filter((k) => state.teacherMap[k] === uid);
+    const cur = mondayOf(todayStr());
+    const weeks = [cur, shiftDateStr(cur, 7), shiftDateStr(cur, 14), shiftDateStr(cur, 21)];
+    const docs = [];
+    for (const w of weeks) (await loadWeekTimetables(w, true)).forEach((d) => docs.push(d));
+    const cells = [];
+    docs.forEach((doc) => (doc.cells || []).forEach((c) => { if (c.t === uid && c.d >= todayStr()) cells.push({ doc, key: cellKey(c) }); }));
+    if (!maps.length && !cells.length) return;
+    const body = document.getElementById('hvSheetBody');
+    const ids = ttTeacherIds().filter((u) => u !== uid);
+    let pick = '';
+    const draw = () => {
+      body.innerHTML = `<div class="hv-d-title">⚠️ Reassignment required</div>
+        <div class="hv-d-wing">${escapeHtml(name)} is the regular teacher for ${maps.length} subject/batch mapping${maps.length === 1 ? '' : 's'} and ${cells.length} upcoming timetable class${cells.length === 1 ? '' : 'es'}.</div>
+        <div class="hv-d-rows" style="margin-top:8px;">${maps.map((k) => `<div class="hv-d-row"><span>${escapeHtml(k.split('|')[1])}</span><span>${escapeHtml(k.split('|')[0] === '*' ? 'All batches' : k.split('|')[0])}</span></div>`).join('')}</div>
+        <div class="sv-tlbl" style="margin:12px 0 6px;">New regular teacher</div>
+        <div class="chips">${ids.map((u) => `<button type="button" class="chip${pick === u ? ' active' : ''}" data-rl="${u}">${escapeHtml(ttName(u))}</button>`).join('')}</div>
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="rlLater" style="border-color: var(--line);">Later</button><button type="button" class="save-btn" id="rlGo" style="margin:0;"${pick ? '' : ' disabled'}>Reassign</button></div>`;
+      body.querySelectorAll('[data-rl]').forEach((x) => x.addEventListener('click', () => { pick = x.getAttribute('data-rl'); draw(); }));
+      document.getElementById('rlLater').addEventListener('click', closeHvSheet);
+      document.getElementById('rlGo').addEventListener('click', async () => {
+        try {
+          if (maps.length) { const map = Object.assign({}, state.teacherMap); maps.forEach((k) => { map[k] = pick; }); await state.db.doc('settings/teacherMap').set({ map }); state.teacherMap = map; }
+          for (const x of cells) await moveCell(x.doc, x.key, pick, 'replace');
+          closeHvSheet(); showToast(`Reassigned to ${ttName(pick)}`);
+        } catch (err) { flashOffline(err); }
+      });
+    };
+    draw();
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+  // ---------- Teacher: my weekly timetable (grid) ----------
+  function myWeekGridData(ws) {
+    const days = datesBetween(ws, shiftDateStr(ws, 5));
+    const slots = (state.scheduleSlots || []).filter((s) => !s.cancelled && s.date >= ws && s.date <= shiftDateStr(ws, 6));
+    if (slots.some((s) => dateObj(s.date).getDay() === 0)) days.push(shiftDateStr(ws, 6));
+    const times = slots.map((s) => s.time).filter((v, i, a) => v && a.indexOf(v) === i).sort();
+    return { days, times, slots };
+  }
+  function renderMyWeekGrid() {
+    const el = document.getElementById('svGrid'); if (!el) return;
+    const ws = svState().weekStart;
+    const { days, times, slots } = myWeekGridData(ws);
+    if (!slots.length) { el.innerHTML = '<div class="hv-note">No classes this week yet.</div>'; return; }
+    const cellOf = (d, t) => slots.filter((s) => s.date === d && s.time === t);
+    el.innerHTML = `<div class="tg-scroll"><table class="tg-table my-tt"><thead><tr><th>Day</th>${times.map((t) => `<th>${escapeHtml(formatTimeStr(t).replace(/\\s?(AM|PM)$/i, ''))}</th>`).join('')}</tr></thead><tbody>
+      ${days.map((d) => `<tr><th class="tg-b">${WD[dateObj(d).getDay()]}<span>${dateObj(d).getDate()}</span></th>${times.map((t) => { const cs = cellOf(d, t); return `<td class="tg-c${cs.length ? ' tg-full' : ''}">${cs.map((s) => `<b>${escapeHtml(gridBatchLabel(s.label || ''))}</b><small>${escapeHtml(s.subject ? shortSubj(s.subject) : '')}${s.test ? ' · Test' : ''}</small>${s.subFor ? '<i>Sub</i>' : ''}`).join('')}</td>`; }).join('')}</tr>`).join('')}
+      </tbody></table></div>
+      <button type="button" class="btn-secondary" id="myTTImg" style="border-color: var(--line); margin-top:10px;">Download / share as image</button>`;
+    document.getElementById('myTTImg').addEventListener('click', () => myWeekImage(ws));
+  }
+  function myWeekImage(ws) {
+    const { days, times, slots } = myWeekGridData(ws);
+    const colDay = 150, colT = 160, rowH = 64, headH = 120;
+    const W = colDay + times.length * colT + 40, H = headH + days.length * rowH + 30;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const txt = (t, cx, cy, size, bold, color, maxW) => { x.font = `${bold ? '700 ' : ''}${size}px Arial, sans-serif`; x.fillStyle = color || '#111'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(t), cx, cy, maxW); };
+    const box = (bx, by, bw, bh, fill) => { if (fill) { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); } x.strokeStyle = '#222'; x.lineWidth = 1.2; x.strokeRect(bx, by, bw, bh); };
+    const we = days[days.length - 1];
+    box(20, 12, W - 40, 40, '#FFFF00');
+    txt(`WEEKLY TIME-TABLE — ${((state.user && state.user.name) || '').toUpperCase()} (${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })} ${dateObj(we).getFullYear()})`, W / 2, 32, 20, true, '#000', W - 60);
+    box(20, 64, colDay, 44, '#F8CBAD'); txt('DAY', 20 + colDay / 2, 86, 15, true);
+    times.forEach((t, i) => { const cx = 20 + colDay + i * colT; box(cx, 64, colT, 44, '#F8CBAD'); txt(formatTimeStr(t), cx + colT / 2, 86, 14, true); });
+    days.forEach((d, di) => {
+      const ry = headH + di * rowH;
+      box(20, ry, colDay, rowH, '#E2EFDA'); txt(dateObj(d).toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase(), 20 + colDay / 2, ry + rowH / 2 - 9, 14, true); txt(`${dateObj(d).getDate()}.${String(dateObj(d).getMonth() + 1).padStart(2, '0')}.${dateObj(d).getFullYear()}`, 20 + colDay / 2, ry + rowH / 2 + 11, 12, false);
+      times.forEach((t, i) => {
+        const cx = 20 + colDay + i * colT; const cs = slots.filter((s) => s.date === d && s.time === t);
+        box(cx, ry, colT, rowH, di % 2 ? '#DDEBF7' : '#FFFFFF');
+        if (cs[0]) { const s = cs[0]; txt(s.label || '', cx + colT / 2, ry + rowH / 2 - 12, 13, true, '#000', colT - 8); txt(`${s.subject || ''}${s.test ? ' (Class Test)' : ''}`, cx + colT / 2, ry + rowH / 2 + 5, 12, false, '#000', colT - 8); txt(`${s.room || ''}${s.subFor ? (s.room ? ' · ' : '') + 'Substitute' : ''}`, cx + colT / 2, ry + rowH / 2 + 21, 11, true, '#C00000', colT - 8); }
+      });
+    });
+    cv.toBlob((blob) => {
+      const name = `My-Timetable-${ws}.png`;
+      const file = new File([blob], name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'My timetable' }).catch(() => saveFile(name, blob));
+      else saveFile(name, blob);
+    }, 'image/png');
   }
 
   // ---------- Settings: Periods & timings, Teacher mapping, Batch rooms ----------
@@ -5307,6 +5590,9 @@
     alertEl.innerHTML = alerts.length
       ? alerts.map((a) => `<div class="ad-alert${a.info ? ' info' : ''}"><div class="ad-alert-t">${a.info ? '' : '⚠️ '}${escapeHtml(a.t)}</div>${a.lines.map((l) => `<div class="ad-alert-l">${escapeHtml(l)}</div>`).join('')}${a.more > 0 ? `<div class="ad-alert-l">+${a.more} more</div>` : ''}</div>`).join('')
       : '<div class="ad-ok">✓ No issues requiring attention</div>';
+    // substitutions of the day, and leave that needs a substitute
+    try { refreshDashTT(); const sx = dashSubsHtml(); if (sx) alertEl.innerHTML = sx + (alerts.length ? alertEl.innerHTML : ''); } catch (e) { /* ignore */ }
+    alertEl.querySelectorAll('[data-arrange]').forEach((b) => b.addEventListener('click', () => openAbsent({ t: b.getAttribute('data-arrange'), date: state.adminDate })));
 
     // --- today's schedule (all teachers)
     const schedEl = document.getElementById('adminSchedList');
@@ -6074,7 +6360,9 @@
       return;
     }
     const editing = state.batchEditKey === elId + '|' + wing ? state.batchEditIdx : -1;
-    el.innerHTML = list.map((b, i) => i === editing ? `
+    const SESS_H = { morning: '☀️ Morning', evening: '🌙 Evening', special: '📌 Remedial / Special' };
+    const headOf = (b, i) => (i === 0 || batchSession(list[i - 1]) !== batchSession(b)) ? `<div class="bl-head">${SESS_H[batchSession(b)]}</div>` : '';
+    el.innerHTML = list.map((b, i) => headOf(b, i) + (i === editing ? `
       <div class="activity-row" style="gap:6px;">
         <input class="text-input" data-rename-input="${i}" value="${escapeHtml(b)}" style="flex:1; min-width:0; padding:8px 10px; font-size:14px;">
         <button class="add-entry-btn" data-rename-save="${i}" style="white-space:nowrap;">Save</button>
@@ -6086,7 +6374,7 @@
         ${(state.canAdmin || state.isCoordinator) ? `<button type="button" class="sess-pill ${batchSession(b)}" data-sess-batch="${i}" aria-label="Change session">${escapeHtml({ morning: 'Morning', evening: 'Evening', special: 'Special' }[batchSession(b)])}</button>` : ''}
         ${(state.canAdmin || state.isCoordinator) ? `<button class="del-btn" data-rename-batch="${i}" aria-label="Rename batch">${svgEdit()}</button>` : ''}
         <button class="del-btn" data-del-batch="${i}" aria-label="Remove batch">${svgTrash()}</button>
-      </div>`).join('');
+      </div>`)).join('');
     el.querySelectorAll('[data-room-batch]').forEach((btn) => btn.addEventListener('click', () => openBatchRoomSheet(list[+btn.getAttribute('data-room-batch')])));
     // Tap the session pill to cycle Morning → Evening → Special.
     el.querySelectorAll('[data-sess-batch]').forEach((btn) => btn.addEventListener('click', async () => {
@@ -6448,7 +6736,7 @@
     const topic = m.cls && m.cls.topic ? `<span class="sv-topic"> · ${escapeHtml(m.cls.topic)}</span>` : '';
     return `<div class="sv-row ${m.status}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${st != null ? escapeHtml(formatTimeStr(s.time)) : '—'}</span>
-      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${s.subject ? escapeHtml(s.subject) + (s.test ? ' (Class Test)' : '') + ' · ' : ''}${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${s.room ? ' · ' + escapeHtml(s.room) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
+      <span class="sv-main"><span class="sv-batch">${escapeHtml(s.label || 'Class')}</span><span class="sv-dur">${s.subFor ? `<span class="sv-coord">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span> · ` : ''}${s.subject ? escapeHtml(s.subject) + (s.test ? ' (Class Test)' : '') + ' · ' : ''}${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${s.room ? ' · ' + escapeHtml(s.room) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
       <span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span>
     </div>`;
   }
@@ -6474,10 +6762,16 @@
       <span class="sv-main"><span class="sv-batch">Invigilation · ${escapeHtml(x.room)}</span><span class="sv-dur">${escapeHtml(x.title)} · till ${escapeHtml(formatTimeStr(x.end))}</span></span>
       <span class="tl-pill duty">Duty</span></div>`).join('');
   }
+  document.querySelectorAll('[data-sv-view]').forEach((b) => b.addEventListener('click', () => { svState().view = b.getAttribute('data-sv-view'); renderScheduleList(); }));
   function renderScheduleList() {
     const el = document.getElementById('scheduleList');
     if (!el) return;
     const sv = svState();
+    const gridView = sv.view === 'grid';
+    document.querySelectorAll('[data-sv-view]').forEach((b) => b.classList.toggle('active', (b.getAttribute('data-sv-view') === 'grid') === gridView));
+    document.getElementById('svGrid').hidden = !gridView;
+    el.hidden = gridView;
+    if (gridView) { try { localStorage.setItem('ctd_tt_seen', String(Date.now())); } catch (e) { /* ignore */ } renderMyWeekGrid(); }
     const days = datesBetween(sv.weekStart, shiftDateStr(sv.weekStart, 6));
     document.getElementById('svLabel').textContent = `${dateObj(days[0]).getDate()} ${dateObj(days[0]).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(days[6]).getDate()} ${dateObj(days[6]).toLocaleDateString('en-GB', { month: 'short' })}`;
     document.getElementById('svWhich').textContent = svWeekLabel(sv.weekStart);
