@@ -830,6 +830,7 @@
   .tg-st.ok { background: rgba(22,163,74,.12); color: #15803D; }
   .tg-sun { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted-2); }
   .tg-days { display: grid; gap: 4px; }
+  .tg-day:disabled { opacity: .45; cursor: default; }
   .tg-day { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; cursor: pointer; min-width: 0; position: relative; }
   .tg-day b { font-size: 12px; font-weight: 600; }
   .tg-day small { font-size: 12px; color: var(--muted); }
@@ -870,6 +871,15 @@
   .ad-subs { border: 1px solid rgba(37,99,235,.25); background: rgba(37,99,235,.05); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
   .bl-head { font-size: 12.5px; font-weight: 700; color: var(--muted-2); padding: 10px 0 4px; border-bottom: 1px solid var(--line); }
   .bl-head:first-child { padding-top: 0; }
+  .tti-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  #adminTTImgSec[hidden] { display: none !important; }
+  .tti-tile { display: flex; flex-direction: column; gap: 6px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--card); overflow: hidden; cursor: pointer; font: inherit; text-align: left; }
+  .tti-tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: top; display: block; }
+  .tti-tile span { font-size: 12px; font-weight: 600; color: var(--ink); padding: 0 8px 8px; }
+  .tti-wide { display: flex; flex-direction: column; gap: 6px; padding: 0; border: 1px solid var(--gold); border-radius: 12px; background: var(--card); overflow: hidden; cursor: pointer; font: inherit; }
+  .tti-wide img { width: 100%; max-height: 150px; object-fit: cover; object-position: top; display: block; }
+  .tti-wide span { font-size: 12.5px; font-weight: 600; color: var(--gold); padding: 0 10px 8px; text-align: left; }
+  .tti-cap { font-size: 10.5px; font-weight: 600; color: var(--gold); text-align: center; line-height: 1.2; }
   .tt-notice { display: flex; flex-direction: column; gap: 2px; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; color: var(--ink); cursor: pointer; }
   .tt-notice span { font-size: 12.5px; color: var(--muted-2); }
   .my-tt td b { font-size: 10.5px; }
@@ -1695,6 +1705,10 @@
         </div>
       </section>
 
+      <section class="tsec" id="adminTTImgSec" data-atab="dash" hidden>
+        <div class="tsec-head"><div class="tsec-title">This Week's Timetable</div><div class="tsec-meta">tap to view</div></div>
+        <div class="tti-row" id="adminTTImgs"></div>
+      </section>
       <div class="teacher-card ad-oncampus" id="onCampusNowCard" data-atab="dash" style="display:none; cursor:pointer;">
         <div class="teacher-top">
           <div class="teacher-name"><span class="live-dot"></span>On Campus Right Now</div>
@@ -2183,7 +2197,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 5.0 · updated 2 Oct 2026</div>
+          <div class="dnote">Version 5.2 · updated 2 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4533,8 +4547,13 @@
       renderTimetable();
     } catch (err) { flashOffline(err); }
   }
-  document.getElementById('ttPrev').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, -7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; state.abs = null; renderAbsent(); renderTimetable(); });
-  document.getElementById('ttNext').addEventListener('click', () => { state.tt.weekStart = shiftDateStr(state.tt.weekStart, 7); state.tt.form = null; state.tg.day = null; state.tg.dirty = false; state.abs = null; renderAbsent(); renderTimetable(); });
+  function ttWeekMove(n) {
+    state.tt.weekStart = shiftDateStr(state.tt.weekStart, n); state.tt.form = null; state.tg.day = null; state.tg.dirty = false;
+    if (state.abs) { state.abs.days = []; state.abs.pick = {}; loadAbsentWeek().then(renderAbsent); }
+    renderTimetable();
+  }
+  document.getElementById('ttPrev').addEventListener('click', () => ttWeekMove(-7));
+  document.getElementById('ttNext').addEventListener('click', () => ttWeekMove(7));
   document.getElementById('ttAddBtn').addEventListener('click', () => openTtForm(null));
   document.querySelectorAll('[data-tt-mode]').forEach((b) => b.addEventListener('click', () => { state.tg.mode = b.getAttribute('data-tt-mode'); state.tt.key = ''; renderTimetable(); }));
   document.getElementById('ttCopyBtn').addEventListener('click', ttCopyLastWeek);
@@ -4584,6 +4603,7 @@
     const ws = state.tt.weekStart;
     const id = tgDocId(ws, g);
     if (state.tg.docKey === id) return;
+    if (tgSaveTimer) tgFlush();
     state.tg.docKey = id;
     state.tg.doc = null;
     if (tgUnsub) tgUnsub();
@@ -4603,18 +4623,24 @@
   }
   let tgSaveTimer = null;
   function ttCacheStale() { if (state.wk) state.wk.at = 0; if (state.dashTT) state.dashTT.at = 0; }
+  let tgSaveKey = null;
+  async function tgFlush() {
+    if (!tgSaveTimer) return;
+    clearTimeout(tgSaveTimer); tgSaveTimer = null;
+    const key = tgSaveKey; const doc = state.tg.docKey === key ? state.tg.doc : state.tg.pendingDoc;
+    if (!key || !doc) return;
+    state.tg.saving = true;
+    try { await state.db.collection('timetables').doc(key).set(doc); } catch (err) { flashOffline(err); }
+    state.tg.saving = false;
+  }
   function tgSave() {
     const doc = state.tg.doc; if (!doc) return;
     ttCacheStale();
     doc.status = 'draft'; doc.updatedAt = Date.now();
     state.tg.dirty = true;
     clearTimeout(tgSaveTimer);
-    tgSaveTimer = setTimeout(async () => {
-      state.tg.saving = true;
-      try { await state.db.collection('timetables').doc(state.tg.docKey).set(doc); } catch (err) { flashOffline(err); }
-      state.tg.saving = false;
-      tgSaveTimer = null;
-    }, 700);
+    tgSaveKey = state.tg.docKey; state.tg.pendingDoc = doc;
+    tgSaveTimer = setTimeout(() => { tgFlush(); }, 700);
   }
   function tgDays() {
     const ws = state.tt.weekStart;
@@ -4662,6 +4688,8 @@
     let html = `<div class="chips tt-teachers">${groups.map((x) => `<button type="button" class="chip${g && x.key === g.key ? ' active' : ''}" data-tg-group="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>`;
     if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
+    const pubImg = weekTtImages(state.tt.weekStart).find((x) => x.id === state.tg.docKey);
+    if (pubImg) html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>📅 Published timetable picture · tap to view</span></button>`;
     html += `<div class="tg-status"><span class="tg-st ${st === 'Published' ? 'ok' : 'draft'}">${st}</span><label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday</label></div>`;
     html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`; }).join('')}</div>`;
     // paint bar
@@ -4691,7 +4719,7 @@
       <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>
       <button type="button" class="btn-secondary" id="tgAbsent" style="border-color: var(--line);">Teacher absent</button>
       <button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);">Mark exam</button>
-      <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">Timetable image</button>
+      <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">${weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey) ? 'Share image' : 'Timetable image'}</button>
       <button type="button" class="btn-secondary hv-del" id="tgDelWeek" style="border-color: var(--line);">Delete week</button>
       <button type="button" class="save-btn" id="tgPublish" style="margin:0;">Publish week</button>
     </div>
@@ -4736,6 +4764,7 @@
     on('tgCopyWeek', tgCopyLastWeek);
     on('tgCopyDay', tgCopyDayPicker);
     on('tgImage', tgImage);
+    on('tgViewImg', () => { const x = weekTtImages(state.tt.weekStart).find((y) => y.id === state.tg.docKey); if (x) openImageViewer(x.image, false); });
     on('tgPublish', tgPublish);
     on('tgExam', tgStartExamSelect);
     on('tgAbsent', () => openAbsent({ date: tgDays().indexOf(todayStr()) !== -1 ? todayStr() : null }));
@@ -4845,13 +4874,14 @@
       state.tg.saving = false; state.tg.dirty = false;
       state.tt.key = '';
       ttCacheStale();
-      showToast(`✓ Published · ${cells.length} classes`);
+      await saveTtImage(docId, Object.keys(newIds).map((k) => k.split('/')[0]).filter((v, i, a) => a.indexOf(v) === i));
+      showToast(`✓ Published · ${cells.length} classes · timetable picture sent to teachers`);
       renderTgGrid();
     } catch (err) { state.tg.saving = false; flashOffline(err); }
   }
   // Timetable image (same layout as the printed timetable), for WhatsApp or printing.
-  function tgImage() {
-    const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return;
+  function tgImage(returnCanvas) {
+    const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return null;
     const per = periodsFor(g.key); const days = tgDays(); const bats = g.batches;
     const colDate = 150, colClass = 120, colP = 150, colBr = 70, rowH = 46, headH = 150;
     const cols = []; per.forEach((pp, i) => { if (i > 0 && hhmmToMin(pp.start) > hhmmToMin(per[i - 1].end)) cols.push({ br: true, a: per[i - 1].end, z: pp.start }); cols.push({ p: i, pp }); });
@@ -4929,6 +4959,7 @@
       });
       y += dh;
     });
+    if (returnCanvas === true) return cv;
     cv.toBlob((blob) => {
       const name = `Timetable-${g.wing}-${SESS_LABEL[g.session]}-${ws}.png`.replace(/\s+/g, '-');
       const file = new File([blob], name, { type: 'image/png' });
@@ -5046,6 +5077,7 @@
       }
       clearTimeout(tgSaveTimer); tgSaveTimer = null;
       await state.db.collection('timetables').doc(state.tg.docKey).delete();
+      try { await state.db.collection('timetableImages').doc(state.tg.docKey).delete(); delete state.ttImgs[state.tt.weekStart]; } catch (e) { /* none */ }
       state.tg.doc = { group: g.key, wing: g.wing, session: g.session, weekStart: state.tt.weekStart, sunday: false, cells: [], status: 'draft', published: [] };
       state.tg.dirty = false; state.tt.key = '';
       renderTgGrid(); showToast('Timetable deleted');
@@ -5077,7 +5109,7 @@
   // Is teacher u busy (another class, or on leave) at this time? Looks at all wings' timetables of the week.
   function teacherBusy(u, date, start, end, skip) {
     const a = hhmmToMin(start), z = hhmmToMin(end);
-    if ((state.adminClasses || []).some((c) => c.teacherId === u && c.date === date && c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) return 'on leave';
+    if ((state.wkLeaves && state.wkLeaves[u + '|' + date]) || (state.adminClasses || []).some((c) => c.teacherId === u && c.date === date && c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) return 'on leave';
     for (const doc of state.wk.docs) for (const c of (doc.cells || [])) {
       if (c.d !== date || c.ex || effT(c) !== u || (skip && doc._id === skip.doc && cellKey(c) === skip.key)) continue;
       const tm = cellTimes(doc, c); if (!tm) continue;
@@ -5086,9 +5118,20 @@
     return '';
   }
   // Move one cell to a teacher (substitute = for one class; permanent = replace the regular teacher).
-  async function moveCell(doc, key, newT, mode) {
+  async function moveCell(docIn, key, newT, mode) {
+    // save any pending grid change first, then work on the latest copy from the server
+    if (tgSaveTimer) await tgFlush();
+    let doc = docIn;
+    try {
+      const fresh = await state.db.collection('timetables').doc(docIn._id).get();
+      if (fresh.exists) {
+        doc = Object.assign({ _id: docIn._id, cells: [] }, fresh.data());
+        const i = state.wk.docs.findIndex((d) => d._id === docIn._id);
+        if (i !== -1) state.wk.docs[i] = doc;
+      }
+    } catch (e) { /* offline: use the copy we have */ }
     const c = (doc.cells || []).find((x) => cellKey(x) === key);
-    if (!c) return false;
+    if (!c) { showToast('This class was changed in the grid. Please check again.', 'error'); return false; }
     const before = effT(c);
     if (mode === 'sub') c.sub = { t: newT, for: c.t, by: state.teacherId, byName: (state.user && state.user.name) || '', at: Date.now() };
     else if (mode === 'undo') delete c.sub;
@@ -5114,12 +5157,23 @@
   }
   // ---------- Teacher absent screen ----------
   state.abs = null;
+  state.wkLeaves = state.wkLeaves || {};
+  async function loadAbsentWeek() {
+    const ws = state.tt.weekStart;
+    await loadWeekTimetables(ws, true);
+    try {
+      const snap = await state.db.collection('classes').where('date', '>=', ws).where('date', '<=', shiftDateStr(ws, 6)).get();
+      const lv = {};
+      snap.docs.map(normDoc).forEach((c) => { if (c.entryType === 'activity' && c.activityType === 'Leave / Holiday' && c.date >= ws && c.date <= shiftDateStr(ws, 6)) lv[c.teacherId + '|' + c.date] = 1; });
+      state.wkLeaves = lv;
+    } catch (e) { state.wkLeaves = {}; }
+  }
   function openAbsent(prefill) {
     const ws = mondayOf((prefill && prefill.date) || state.tt.weekStart);
     state.tt.weekStart = ws;
     state.abs = { t: (prefill && prefill.t) || '', days: prefill && prefill.date ? [prefill.date] : [], pick: {} };
     state.adminTab = 'tt'; state.tg.mode = 'grid';
-    loadWeekTimetables(ws, true).then(() => { renderAdmin(); renderAbsent(); });
+    loadAbsentWeek().then(() => { renderAdmin(); renderAbsent(); });
     renderAdmin();
     setTimeout(() => { const b = document.getElementById('absBox'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
   }
@@ -5132,11 +5186,18 @@
     const ws = state.tt.weekStart;
     const days = datesBetween(ws, shiftDateStr(ws, 6));
     const ids = ttTeacherIds();
+    // classes per teacher (whole week) and per day (chosen teacher), from every wing's timetable
+    const cnt = {}; const dayCnt = {};
+    state.wk.docs.forEach((doc) => (doc.cells || []).forEach((c) => { if (c.ex) return; const T = effT(c); if (!T) return; cnt[T] = (cnt[T] || 0) + 1; if (ab.t && (T === ab.t || c.t === ab.t)) dayCnt[c.d] = (dayCnt[c.d] || 0) + 1; }));
+    const we = shiftDateStr(ws, 6);
     let html = `<div class="sv-form-head"><div class="panel-title" style="margin:0;">Teacher absent</div><button type="button" class="hv-sheet-x" id="absClose" aria-label="Close">✕</button></div>
+      <div class="admin-sub" style="margin:0;">Week ${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })} · change the week with ‹ › above</div>
+      ${state.wk.docs.length ? '' : '<div class="ad-alert"><div class="ad-alert-t">No timetable made for this week yet</div></div>'}
       <div class="sv-tlbl" style="margin:0;">Who is absent?</div>
-      <div class="chips">${ids.map((u) => `<button type="button" class="chip${ab.t === u ? ' active' : ''}" data-ab-t="${u}">${escapeHtml(ttName(u))}</button>`).join('')}</div>
+      <div class="chips">${ids.map((u) => `<button type="button" class="chip${ab.t === u ? ' active' : ''}" data-ab-t="${u}">${escapeHtml(ttName(u))}${cnt[u] ? ` <span class="free-tag" style="color:var(--muted)">${cnt[u]}</span>` : ''}</button>`).join('')}</div>
       <div class="sv-tlbl" style="margin:0;">Which days?</div>
-      <div class="tg-days" style="grid-template-columns: repeat(7, minmax(0, 1fr));">${days.map((d) => `<button type="button" class="tg-day${ab.days.indexOf(d) !== -1 ? ' active' : ''}" data-ab-d="${d}"${d < todayStr() ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`).join('')}</div>`;
+      <div class="tg-days" style="grid-template-columns: repeat(7, minmax(0, 1fr));">${days.map((d) => `<button type="button" class="tg-day${ab.days.indexOf(d) !== -1 ? ' active' : ''}${dayCnt[d] ? ' has' : ''}" data-ab-d="${d}"${d < todayStr() ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`).join('')}</div>
+      ${ab.t ? `<div class="hv-note" style="text-align:left;">${Object.keys(dayCnt).length ? '• = days on which ' + escapeHtml(ttName(ab.t)) + ' has classes' : escapeHtml(ttName(ab.t)) + ' has no timetable classes this week'}</div>` : ''}`;
     if (ab.t && ab.days.length) {
       const rows = [];
       state.wk.docs.forEach((doc) => (doc.cells || []).forEach((c) => {
@@ -5299,6 +5360,66 @@
       if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'My timetable' }).catch(() => saveFile(name, blob));
       else saveFile(name, blob);
     }, 'image/png');
+  }
+
+  // ---------- Published timetable images (shared) ----------
+  // timetableImages/{timetableId} = { label, group, weekStart, image (JPEG data URL), publishedAt, teachers: [uid] }
+  // Stored once; shown in each teacher's "My Saved Photos" and on the Admin / Coordinator pages.
+  function canvasToSmallJpeg(cv) {
+    let scale = 1, url = cv.toDataURL('image/jpeg', 0.8);
+    while (url.length > 900000 && scale > 0.4) {
+      scale -= 0.15;
+      const c2 = document.createElement('canvas'); c2.width = Math.round(cv.width * scale); c2.height = Math.round(cv.height * scale);
+      c2.getContext('2d').drawImage(cv, 0, 0, c2.width, c2.height);
+      url = c2.toDataURL('image/jpeg', 0.75);
+    }
+    return url;
+  }
+  async function saveTtImage(docId, teachers) {
+    const g = tgGroup(); if (!g) return;
+    const cv = tgImage(true); if (!cv) return;
+    const ws = state.tt.weekStart; const dd = tgDays(); const we = dd[dd.length - 1];
+    const label = `${g.label} · ${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })}`;
+    try {
+      await state.db.collection('timetableImages').doc(docId).set({ label, group: g.key, weekStart: ws, image: canvasToSmallJpeg(cv), publishedAt: Date.now(), teachers });
+      state.ttImgs = state.ttImgs || {}; delete state.ttImgs[ws];
+    } catch (err) { /* the timetable itself is published; the picture can be shared from the grid */ }
+  }
+  // lead: images of a week (cached)
+  state.ttImgs = state.ttImgs || {};
+  function weekTtImages(ws) {
+    if (state.ttImgs[ws] && Date.now() - state.ttImgs[ws].at < 60000) return state.ttImgs[ws].list;
+    state.ttImgs[ws] = { at: Date.now(), list: (state.ttImgs[ws] && state.ttImgs[ws].list) || [] };
+    state.db.collection('timetableImages').where('weekStart', '==', ws).get().then((snap) => {
+      state.ttImgs[ws] = { at: Date.now(), list: snap.docs.map((d) => Object.assign({ id: d.id }, d.data())) };
+      if (state.tab === 'admin') { renderAdmin(); renderTtImgCard(); }
+    }).catch(() => {});
+    return state.ttImgs[ws].list;
+  }
+  function openImageViewer(src, canDelete) {
+    lightboxPhotoId = null;
+    document.getElementById('photoLightboxImg').src = src;
+    document.getElementById('photoLightboxDeleteBtn').style.display = canDelete ? '' : 'none';
+    document.getElementById('photoLightboxModal').classList.add('active');
+  }
+  function ttImgTiles(list) {
+    return list.map((x) => `<button type="button" class="tti-tile" data-tti="${escapeHtml(x.id)}"><img src="${x.image}" alt="Timetable"><span>${escapeHtml(x.label)}</span></button>`).join('');
+  }
+  function bindTtImgTiles(root, list) {
+    root.querySelectorAll('[data-tti]').forEach((b) => b.addEventListener('click', () => { const x = list.find((y) => y.id === b.getAttribute('data-tti')); if (x) openImageViewer(x.image, false); }));
+  }
+  // Admin / Coordinator Home card
+  function renderTtImgCard() {
+    const sec = document.getElementById('adminTTImgSec'); if (!sec) return;
+    const list = weekTtImages(mondayOf(state.adminDate));
+    sec.hidden = !list.length;
+    if (!list.length) return;
+    const key = list.map((x) => x.id + x.publishedAt).join('|');
+    const box = document.getElementById('adminTTImgs');
+    if (box._key === key) return;
+    box._key = key;
+    box.innerHTML = ttImgTiles(list);
+    bindTtImgTiles(box, list);
   }
 
   // ---------- Settings: Periods & timings, Teacher mapping, Batch rooms ----------
@@ -5591,6 +5712,7 @@
       ? alerts.map((a) => `<div class="ad-alert${a.info ? ' info' : ''}"><div class="ad-alert-t">${a.info ? '' : '⚠️ '}${escapeHtml(a.t)}</div>${a.lines.map((l) => `<div class="ad-alert-l">${escapeHtml(l)}</div>`).join('')}${a.more > 0 ? `<div class="ad-alert-l">+${a.more} more</div>` : ''}</div>`).join('')
       : '<div class="ad-ok">✓ No issues requiring attention</div>';
     // substitutions of the day, and leave that needs a substitute
+    try { renderTtImgCard(); } catch (e) { /* ignore */ }
     try { refreshDashTT(); const sx = dashSubsHtml(); if (sx) alertEl.innerHTML = sx + (alerts.length ? alertEl.innerHTML : ''); } catch (e) { /* ignore */ }
     alertEl.querySelectorAll('[data-arrange]').forEach((b) => b.addEventListener('click', () => openAbsent({ t: b.getAttribute('data-arrange'), date: state.adminDate })));
 
@@ -6576,11 +6698,13 @@
          </div>`
       : '';
 
-    gallery.innerHTML = photos.map((p) => `
+    const ttl = state.myTtImages || [];
+    gallery.innerHTML = ttl.map((x) => `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;"><img data-open-ttimg="${escapeHtml(x.id)}" src="${x.image}" alt="Timetable" style="width:100%; aspect-ratio:1; object-fit:cover; object-position:top; border-radius:10px; cursor:pointer; display:block; outline:2px solid var(--gold); outline-offset:-2px;"><span class="tti-cap">📅 Timetable · ${escapeHtml(dateObj(x.weekStart).getDate() + ' ' + dateObj(x.weekStart).toLocaleDateString('en-GB', { month: 'short' }))}</span></div>`).join('') + photos.map((p) => `
       <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
         <img data-open-photo="${p.id}" src="${p.imageBase64}" alt="Saved photo" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:pointer; display:block;">
         <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="padding:4px;">${svgTrash()}</button>
       </div>`).join('') + placeholderTile;
+    gallery.querySelectorAll('[data-open-ttimg]').forEach((img) => img.addEventListener('click', () => { const x = ttl.find((y) => y.id === img.getAttribute('data-open-ttimg')); if (x) openImageViewer(x.image, false); }));
     gallery.querySelectorAll('[data-open-photo]').forEach((img) => {
       img.addEventListener('click', () => openPhotoLightbox(img.getAttribute('data-open-photo')));
     });
@@ -6595,6 +6719,7 @@
     const photo = (state.scheduleNoticePhotos || []).find((p) => p.id === photoId);
     if (!photo) return;
     lightboxPhotoId = photoId;
+    document.getElementById('photoLightboxDeleteBtn').style.display = '';
     document.getElementById('photoLightboxImg').src = photo.imageBase64;
     document.getElementById('photoLightboxModal').classList.add('active');
   }
@@ -10139,6 +10264,11 @@
       if (emailInput && document.activeElement !== emailInput) emailInput.value = (state.directorContact && state.directorContact.email) || '';
     }, () => {}));
 
+    unsubscribers.push(db.collection('timetableImages').where('teachers', 'array-contains', tid).onSnapshot((snap) => {
+      const from = shiftDateStr(mondayOf(todayStr()), -7);
+      state.myTtImages = snap.docs.map((d) => Object.assign({ id: d.id }, d.data())).filter((x) => x.weekStart >= from).sort((a, b) => (b.weekStart + b.publishedAt).localeCompare(a.weekStart + a.publishedAt));
+      renderScheduleNotice();
+    }, () => {}));
     unsubscribers.push(db.collection('scheduleNotices/' + tid + '/photos').orderBy('uploadedAt', 'desc').limit(MAX_SCHEDULE_PHOTOS).onSnapshot((snap) => {
       state.scheduleNoticePhotos = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       renderScheduleNotice();
