@@ -756,6 +756,22 @@
   .ad-exam { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
   .ad-exam + .ad-exam { border-top: 1px solid var(--line); }
   .ad-exam.static { cursor: default; }
+  .ad-exam { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .ex-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .ex-st { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; background: var(--neutral-soft); color: var(--muted-2); }
+  .ex-st.ok { background: rgba(22,163,74,.12); color: #15803D; }
+  .ex-st.todo { background: rgba(220,38,38,.10); color: #B91C1C; }
+  .ex-open { background: var(--card); }
+  .ex-duty { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; cursor: default; }
+  .ex-room-h { font-size: 13px; margin-bottom: 6px; }
+  .ex-busy { opacity: .6; }
+  .ex-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ex-sel { background: var(--gold-soft); }
+  .ex-tick { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--gold); color: var(--gold); font-size: 12px; margin-right: 8px; vertical-align: -2px; }
+  .ex-sel .ex-tick { background: var(--gold); color: #fff; }
+  .ex-selbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; background: var(--neutral-soft); padding: 8px 12px; font-size: 13px; position: sticky; top: 0; z-index: 2; }
+  .ex-selbar span:last-child { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ex-selbar .btn-secondary { width: auto; padding: 7px 12px; }
   .ad-grp { font-size: 12px; font-weight: 600; color: var(--muted-2); background: var(--neutral-soft); padding: 6px 12px; }
   .ad-grp ~ .ad-exam, .ad-exam + .ad-grp { border-top: 1px solid var(--line); }
   #adminExamForm[hidden], #adminNewExamBtn[hidden] { display: none !important; }
@@ -825,7 +841,9 @@
   .tg-mode .chip { flex: 1; justify-content: center; text-align: center; }
   #tgWrap[hidden], #ttListWrap[hidden] { display: none !important; }
   .tg-wrap { display: flex; flex-direction: column; gap: 10px; }
-  .tg-status { display: flex; justify-content: space-between; align-items: center; }
+  .tg-status { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+  .tg-st { white-space: nowrap; }
+  #tgWrap { max-width: 100%; overflow-x: hidden; }
   .tg-st { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(217,119,6,.12); color: #B45309; }
   .tg-st.ok { background: rgba(22,163,74,.12); color: #15803D; }
   .tg-sun { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted-2); }
@@ -867,7 +885,7 @@
   .tt-tog { flex-shrink: 0; border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 999px; padding: 4px 9px; font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; }
   .tt-tog.on { border-color: rgba(22,163,74,.35); color: #15803D; background: rgba(22,163,74,.06); }
   .tg-paint-h { display: flex; justify-content: space-between; align-items: center; }
-  .tg-st-acts { display: inline-flex; gap: 6px; align-items: center; }
+  .tg-st-acts { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; align-items: center; margin-left: auto; }
   .tg-mini { border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
   .tg-mini-gold { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
   .tg-lock { text-align: left !important; margin: -2px 0 0 !important; }
@@ -2266,7 +2284,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 5.9 · updated 3 Oct 2026</div>
+          <div class="dnote">Version 6.0 · updated 4 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2559,7 +2577,17 @@
   const pendingDeleteRunners = new Map();
   function flushPendingDeletes() { Array.from(pendingDeleteRunners.values()).forEach((run) => run()); }
   window.addEventListener('pagehide', flushPendingDeletes);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPendingDeletes(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPendingDeletes(); else checkNewDay(); });
+  // If the app stayed open past midnight, start the new day fresh (never while a class form is being filled).
+  const bootDay = todayStr();
+  async function checkNewDay() {
+    if (todayStr() === bootDay || document.visibilityState !== 'visible') return;
+    if (state.tab === 'add') return;
+    try { if (typeof tgSaveTimer !== 'undefined' && tgSaveTimer) await tgFlush(); } catch (e) { /* ignore */ }
+    try { flushPendingDeletes(); } catch (e) { /* ignore */ }
+    location.reload();
+  }
+  setInterval(checkNewDay, 60000);
 
   async function confirmAndDeleteWithUndo(id, performDelete, confirmMsg, confirmTitle, deletedMsg, rerender, onFinalDelete, confirmLabel) {
     // Delete straight away, with a few seconds to Undo (no "are you sure?" popup).
@@ -5181,12 +5209,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         const bi = cs.map((c) => bats.indexOf(c.b)), pi = cs.map((c) => c.p);
         const b0 = Math.min(...bi), b1 = Math.max(...bi), p0 = Math.min(...pi), p1 = Math.max(...pi);
         const rect = cs.length === (b1 - b0 + 1) * (p1 - p0 + 1);
-        const [ea, ez] = String(cs[0].et || '-').split('-');
         const [type, subj] = String(cs[0].s).split(' · ');
         const drawEx = (bx, by, bw, bh) => {
           box(bx, by, bw, bh, '#FFFFFF');
-          const lines = [[type, '#000'], ...(subj ? [[subj.toUpperCase(), '#C00000']] : []), ...(ea ? [[`(Time ${fmtS(ea)} – ${fmtS(ez)})`, '#000']] : [])];
-          fitLines(x, lines.map(([t, col], li) => [t, col, li === 2 ? 12 : 15]), bx + bw / 2, by, bw, bh);
+          const lines = [[type, '#000'], ...(subj ? [[subj.toUpperCase(), '#C00000']] : [])];
+          fitLines(x, lines.map(([t, col]) => [t, col, 15]), bx + bw / 2, by, bw, bh);
         };
         if (rect) {
           const xa = pX(p0).x, xz = pX(p1).x + pX(p1).w;
@@ -5433,13 +5460,49 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     });
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
+  // exams belonging to this timetable week: the ones marked in the grid, and Exams-tab exams only for these batches
+  async function tgWeekExamIds(doc, g) {
+    const ids = (doc.cells || []).map((c) => c.ex).filter((e, i, a) => e && a.indexOf(e) === i);
+    try {
+      const ws = state.tt.weekStart; const we = shiftDateStr(ws, 6);
+      const snap = await state.db.collection('exams').where('date', '>=', ws).where('date', '<=', we).get();
+      snap.docs.forEach((d) => {
+        const e = d.data() || {}; if (ids.indexOf(d.id) !== -1) return;
+        if (e.fromTimetable === state.tg.docKey) { ids.push(d.id); return; }
+        const sc = expandScope(e.scope || []);
+        if (e.date >= ws && e.date <= we && sc.length && sc.every((b) => g.batches.indexOf(b) !== -1)) ids.push(d.id);
+      });
+    } catch (e) { /* offline: only the grid's own exams */ }
+    return ids;
+  }
+  // Delete exams from everywhere: the exam itself (rooms and duties live inside it) and its cells in any timetable,
+  // where the classes it replaced come back.
+  async function deleteExamsEverywhere(ids) {
+    const tts = {};
+    for (const id of ids) {
+      try { const snap = await state.db.collection('exams').doc(id).get(); const e = snap.exists ? snap.data() : null; if (e && e.fromTimetable) (tts[e.fromTimetable] = tts[e.fromTimetable] || []).push(id); } catch (e) { /* offline */ }
+      try { await state.db.collection('exams').doc(id).delete(); } catch (e) { /* already gone */ }
+    }
+    for (const tt of Object.keys(tts)) {
+      const gone = tts[tt];
+      const fix = (cells) => { const out = []; (cells || []).forEach((c) => { if (!c.ex || gone.indexOf(c.ex) === -1) { out.push(c); return; } if (c.was && c.was.s) { const r = { d: c.d, p: c.p, b: c.b, s: c.was.s, t: c.was.t || '' }; if (c.was.test) r.test = true; out.push(r); } }); return out; };
+      if (state.tg.docKey === tt && state.tg.doc) { state.tg.doc.cells = fix(state.tg.doc.cells); tgSave(); continue; }
+      try { const ref = state.db.collection('timetables').doc(tt); const snap = await ref.get(); if (snap.exists) { const d = snap.data(); await ref.set(Object.assign({}, d, { cells: fix(d.cells), status: 'draft', updatedAt: Date.now() })); } } catch (e) { /* offline */ }
+    }
+    if (state.tgExams) { state.tgExams.list = (state.tgExams.list || []).filter((x) => ids.indexOf(x.id) === -1); state.tgExams.at = 0; }
+    state.adminExams = (state.adminExams || []).filter((x) => ids.indexOf(x.id) === -1);
+    ttCacheStale();
+  }
   async function tgDeleteWeek() {
     const doc = state.tg.doc; if (!doc) return;
     const pub = (doc.published || []).length;
     const g = tgGroup();
-    const ok = await showConfirm(`${g.label}, week of ${dayHeading(state.tt.weekStart)}.\n${pub ? `${pub} published classes will also be removed from the teachers' schedules.\n` : ''}Exams stay in the Exams tab.`, 'Delete this week\'s timetable?', 'Delete');
+    const exIds = await tgWeekExamIds(doc, g);
+    const ok = await showConfirm(`${g.label}, week of ${dayHeading(state.tt.weekStart)}.\n${pub ? `${pub} published classes will also be removed from the teachers' schedules.\n` : ''}${exIds.length ? `${exIds.length} exam${exIds.length === 1 ? '' : 's'} of these batches this week will also be deleted everywhere (Exams tab, rooms and invigilation duties).` : 'There are no exams in this week.'}`, 'Delete this week\'s timetable?', 'Delete');
     if (!ok) return;
     try {
+      for (const id of exIds) { try { await state.db.collection('exams').doc(id).delete(); } catch (e) { /* already gone */ } }
+      if (state.tgExams) { state.tgExams.list = (state.tgExams.list || []).filter((x) => exIds.indexOf(x.id) === -1); state.tgExams.at = 0; }
       const keys = doc.published || [];
       for (let i = 0; i < keys.length; i += 400) {
         const batch = state.db.batch();
@@ -5960,6 +6023,13 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   function timetableTeachers(doc) {
     const out = [];
+    // everyone in this wing gets the picture (also when the week has only exams or notes)
+    const wing = doc.wing || ((ttGroups().find((x) => x.key === doc.group) || {}).wing) || '';
+    (state.adminTeacherIds || []).concat(Object.keys(state.team || {})).forEach((u) => {
+      if (!u || out.indexOf(u) !== -1 || isRemovedUid(u)) return;
+      const tw = teamWings(u); if (wing && tw.length && tw.indexOf(wing) === -1) return;
+      out.push(u);
+    });
     (doc.published || []).forEach((k) => { const u = k.split('/')[0]; if (out.indexOf(u) === -1) out.push(u); });
     (doc.cells || []).forEach((c) => { [c.t, c.sub && c.sub.t].forEach((u) => { if (u && out.indexOf(u) === -1) out.push(u); }); });
     return out;
@@ -6878,10 +6948,25 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const inv = Object.keys(loggedBy).map((t) => `${nameOf(t)} (${svDur(loggedBy[t])})`);
       const pr = planOf(e);
       const planLine = pr.length ? `Duty plan: ${pr.map((r) => r.room).join(', ')}${pr.some((r) => (r.slots || []).some((sl) => !(sl.teachers || []).length)) ? ' · ⚠️ a slot has no invigilator' : ''}` : 'No duty plan yet · tap → Edit to add rooms';
-      return `<div class="ad-exam" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
-        <div class="ad-tname">${escapeHtml(examTitle(e))}</div>
-        <div class="ad-tsub">${escapeHtml([scopeLabel(e.scope), e.room, `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
-        <div class="ad-tsub" style="color: var(--gold); font-weight: 600;">${escapeHtml(planLine)}</div>
+      const slotsAll = [].concat(...pr.map((r) => r.slots || []));
+      const slotsOk = slotsAll.filter((sl) => (sl.teachers || []).length).length;
+      const isSel = state.exSel && state.exSel.indexOf(e.id) !== -1;
+      const open = !state.exSel && state.exOpen === e.id;
+      const steps = `<div class="ex-steps"><span class="ex-st ${pr.length ? 'ok' : 'todo'}">① Rooms: ${pr.length ? escapeHtml(pr.map((r) => r.room).join(', ')) : 'not set'}</span>${pr.length ? `<span class="ex-st ${slotsOk === slotsAll.length ? 'ok' : 'todo'}">② Invigilators: ${slotsOk === slotsAll.length ? 'ready' : `${slotsOk} of ${slotsAll.length}`}</span>` : '<span class="ex-st">② Invigilators</span>'}</div>`;
+      let duty = '';
+      if (open) {
+        duty = '<div class="ex-duty">';
+        if (!pr.length) duty += '<div class="ad-tsub">Add the rooms first, then choose invigilators here.</div><button type="button" class="btn-secondary" data-ex-edit="' + escapeHtml(e.id) + '" style="border-color: var(--gold); color: var(--gold);">① Add rooms</button>';
+        pr.forEach((r, ri) => (r.slots || []).forEach((sl, si) => {
+          duty += `<div class="ex-room"><div class="ex-room-h"><b>Room ${escapeHtml(r.room)}</b>${(r.slots || []).length > 1 || sl.start !== e.start || sl.end !== e.end ? ` · ${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}` : ''}${(r.scope || []).length && expandScope(r.scope).length < expandScope(e.scope).length ? ' · ' + escapeHtml(scopeLabel(r.scope)) : ''}</div>
+            <div class="chips">${ids.map((u) => { const on = (sl.teachers || []).indexOf(u) !== -1; const busy = on ? '' : dutyBusy(u, sl, e.date); return `<button type="button" class="chip${on ? ' active' : ''}${busy ? ' ex-busy' : ''}" data-ex-t="${escapeHtml(e.id + '|' + ri + '|' + si + '|' + u)}">${escapeHtml(nameOf(u))}${busy ? ` <span class="free-tag" style="color: var(--muted);">${escapeHtml(busy)}</span>` : ''}</button>`; }).join('')}</div></div>`;
+        }));
+        duty += `<div class="ex-acts"><button type="button" class="btn-secondary" data-ex-edit="${escapeHtml(e.id)}" style="border-color: var(--line);">Edit rooms & time</button><button type="button" class="btn-secondary" data-ex-more="${escapeHtml(e.id)}" style="border-color: var(--line);">Details · PDF · Share</button></div></div>`;
+      }
+      return `<div class="ad-exam${isSel ? ' ex-sel' : ''}${open ? ' ex-open' : ''}" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
+        <div class="ad-tname">${state.exSel ? `<span class="ex-tick">${isSel ? '✓' : ''}</span>` : ''}${escapeHtml(examTitle(e))}</div>
+        <div class="ad-tsub">${escapeHtml([scopeLabel(e.scope), `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
+        ${steps}${duty}
         ${inv.length ? `<div class="ad-tsub">Invigilators: ${escapeHtml(inv.join(', '))}</div>` : ''}
         ${missing.length ? (ended(e) ? `<div class="ad-tsub" style="color:#B45309;">Assigned, not logged: ${escapeHtml(missing.map(nameOf).join(', '))}</div>` : `<div class="ad-tsub">Assigned: ${escapeHtml(missing.map(nameOf).join(', '))}</div>`) : ''}
       </div>`;
@@ -6903,12 +6988,68 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     });
 
     let html = '';
+    if (state.exSel) {
+      const live = state.exSel.filter((id) => exams.some((e) => e.id === id)); state.exSel = live;
+      html += `<div class="ex-selbar"><span><b>${live.length}</b> selected · tap more exams</span><span><button type="button" class="btn-secondary" id="exSelAll" style="border-color: var(--line);">All</button><button type="button" class="btn-secondary hv-del" id="exSelDel" style="border-color: var(--line);"${live.length ? '' : ' disabled'}>🗑 Delete${live.length ? ' (' + live.length + ')' : ''}</button><button type="button" class="btn-secondary" id="exSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
+    } else if (examRows.length) html += '<div class="hv-note" style="text-align:left; padding:6px 12px 0;">Tap an exam to choose invigilators · press and hold to select several</div>';
     if (classRows.length) html += `<div class="ad-grp">Class Tests · ${ct.reduce((s2, c) => s2 + testCount(c), 0) || classRows.length}</div>` + classRows.join('');
     if (examRows.length) html += `<div class="ad-grp">Exams · ${examRows.length}</div>` + examRows.join('');
     listEl.innerHTML = html || '<div class="hv-note" style="text-align:left; padding:10px 12px;">No tests or exams for this day.</div>';
-    listEl.querySelectorAll('[data-exam]').forEach((row) => row.addEventListener('click', () => openExamSheet(row.getAttribute('data-exam'), nameOf)));
+    bindAdminExamList(listEl, exams, nameOf);
     renderAdminExamForm(ids, nameOf);
     return alerts;
+  }
+  function bindAdminExamList(listEl, exams, nameOf) {
+    listEl.querySelectorAll('[data-exam]').forEach((row) => {
+      const id = row.getAttribute('data-exam');
+      let lpT = null; const stop = () => { if (lpT) { clearTimeout(lpT); lpT = null; } };
+      row.addEventListener('contextmenu', (e) => e.preventDefault());
+      row.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button')) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        stop(); const sx = e.clientX, sy = e.clientY;
+        row._mv = (ev) => { if (Math.abs(ev.clientX - sx) > 10 || Math.abs(ev.clientY - sy) > 10) stop(); };
+        lpT = setTimeout(() => { lpT = null; row._lp = true; if (state.exSel) return; try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ } state.exSel = [id]; state.exOpen = null; renderAdmin(); }, 480);
+      });
+      row.addEventListener('pointermove', (e) => { if (row._mv) row._mv(e); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => row.addEventListener(ev, stop));
+      row.addEventListener('click', (e) => {
+        if (row._lp) { row._lp = false; return; }
+        if (e.target.closest('[data-ex-t],[data-ex-edit],[data-ex-more]')) return;
+        if (state.exSel) { const k = state.exSel.indexOf(id); if (k === -1) state.exSel.push(id); else state.exSel.splice(k, 1); renderAdmin(); return; }
+        state.exOpen = state.exOpen === id ? null : id; renderAdmin();
+      });
+    });
+    listEl.querySelectorAll('[data-ex-edit]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-edit')); if (e) { state.exOpen = null; openAdminExamForm(e); } }));
+    listEl.querySelectorAll('[data-ex-more]').forEach((b) => b.addEventListener('click', () => openExamSheet(b.getAttribute('data-ex-more'), nameOf)));
+    listEl.querySelectorAll('[data-ex-t]').forEach((b) => b.addEventListener('click', async () => {
+      const [id, ri, si, ...u0] = b.getAttribute('data-ex-t').split('|'); const u = u0.join('|');
+      const e = exams.find((x) => x.id === id); if (!e) return;
+      const rooms = JSON.parse(JSON.stringify(planOf(e))); const sl = rooms[+ri] && rooms[+ri].slots[+si]; if (!sl) return;
+      sl.teachers = sl.teachers || []; const k = sl.teachers.indexOf(u);
+      if (k === -1) {
+        const other = rooms.some((r, r2) => (r.slots || []).some((x, s2) => (r2 !== +ri || s2 !== +si) && (x.teachers || []).indexOf(u) !== -1 && hhmmToMin(x.start) < hhmmToMin(sl.end) && hhmmToMin(sl.start) < hhmmToMin(x.end)));
+        if (other) { showToast(`${nameOf(u)} already has duty in another room at this time`, 'error'); return; }
+        sl.teachers.push(u);
+      } else sl.teachers.splice(k, 1);
+      const upd = { plan: { rooms }, invigilators: planTeachers(rooms), room: rooms.map((r) => r.room).join(', ') };
+      Object.assign(e, upd); renderAdmin();
+      try {
+        await state.db.collection('exams').doc(id).set(upd, { merge: true });
+        if (k === -1) notify(u, { type: 'duty', title: `Exam duty: ${examTitle(e)} · ${rooms[+ri].room}`, body: slotWhen(e.date, sl.start) + ` – ${formatTimeStr(sl.end)}`, link: { tab: 'today' } });
+        else notify(u, { type: 'duty', title: `Exam duty removed: ${examTitle(e)} · ${rooms[+ri].room}`, body: slotWhen(e.date, sl.start), link: { tab: 'today' } });
+      } catch (err) { flashOffline(err); }
+    }));
+    const on = (i, f) => { const el = document.getElementById(i); if (el) el.addEventListener('click', f); };
+    on('exSelX', () => { state.exSel = null; renderAdmin(); });
+    on('exSelAll', () => { state.exSel = exams.map((e) => e.id); renderAdmin(); });
+    on('exSelDel', async () => {
+      const list = (state.exSel || []).slice(); if (!list.length) return;
+      const names = list.map((id) => { const e = exams.find((x) => x.id === id); return e ? examTitle(e) + ' · ' + scopeLabel(e.scope) : ''; }).filter(Boolean);
+      const ok = await showConfirm(`${names.slice(0, 6).join('\n')}${names.length > 6 ? `\n+${names.length - 6} more` : ''}\n\nRemoved everywhere: Exams tab, rooms, invigilation duties and the timetable grid (the classes there come back).`, `Delete ${list.length} exam${list.length === 1 ? '' : 's'}?`, 'Delete');
+      if (!ok) return;
+      try { await deleteExamsEverywhere(list); state.exSel = null; renderAdmin(); showToast(`${list.length} exam${list.length === 1 ? '' : 's'} deleted`); } catch (err) { flashOffline(err); }
+    });
   }
   // ---------- Duty Plan inside the New / Edit Exam form ----------
   // Rooms only (the exam's classes are chosen once above). Built when the form opens and rebuilt only on taps,
@@ -7057,7 +7198,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const cw = document.getElementById('exChartWa'); if (cw) cw.addEventListener('click', () => window.open('https://wa.me/?text=' + encodeURIComponent(dutyChartText(e)), '_blank'));
     document.getElementById('exDelete').addEventListener('click', async () => {
       closeHvSheet();
-      await confirmAndDeleteWithUndo(e.id, () => state.db.collection('exams').doc(e.id).delete(), '', '', 'Exam deleted', renderAdmin, null, 'Delete');
+      const ok = await showConfirm(`${examTitle(e)} · ${scopeLabel(e.scope)}
+
+Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid (the classes there come back).`, 'Delete this exam?', 'Delete');
+      if (!ok) return;
+      try { await deleteExamsEverywhere([e.id]); state.exOpen = null; renderAdmin(); showToast('Exam deleted'); } catch (err) { flashOffline(err); }
     });
   }
   document.getElementById('adminNewExamBtn').addEventListener('click', () => openAdminExamForm(null));
