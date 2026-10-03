@@ -916,6 +916,9 @@
   .tg-chg { color: var(--gold) !important; background: var(--gold-soft) !important; }
   .tg-selbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--neutral-soft); border-radius: 10px; padding: 8px 10px; font-size: 13px; }
   .tg-selbar span:last-child { display: flex; gap: 6px; }
+  .tg-msel { flex-wrap: wrap; position: sticky; top: 0; z-index: 3; }
+  .tg-msel .tg-msel-btns { flex-wrap: wrap; justify-content: flex-end; }
+  .tg-c { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .tg-selbar .btn-secondary, .tg-selbar .save-btn { padding: 7px 12px; width: auto; }
   .tg-teacher { margin-top: 10px; font-size: 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .pe-row { display: grid; grid-template-columns: 28px 1fr 10px 1fr 36px; gap: 6px; align-items: center; }
@@ -2263,7 +2266,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 5.8 · updated 3 Oct 2026</div>
+          <div class="dnote">Version 5.9 · updated 3 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4760,7 +4763,12 @@
     if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
     const pubImg = weekTtImages(state.tt.weekStart).find((x) => x.id === state.tg.docKey);
-    if (pubImg) html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>🗓️ Published timetable picture · tap to view</span></button>`;
+    if (pubImg) {
+      const pDays = ((doc && doc.pubDays) || []).slice().sort();
+      const inPic = !pDays.length || pDays.indexOf(state.tg.day) !== -1;
+      html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>🗓️ Published timetable picture · tap to view</span></button>`;
+      if (pDays.length) html += `<div class="hv-note" style="text-align:left; margin-top:-2px;">In this picture: <b>${escapeHtml(shortDays(pDays))}</b>${inPic ? '' : ` · <span style="color: var(--gold); font-weight:600;">${escapeHtml(WD[dateObj(state.tg.day).getDay()])} ${dateObj(state.tg.day).getDate()} is not published yet</span>`}</div>`;
+    }
     const editable = tgEditable();
     const pend = tgPendingCount(); const chg = tgChanges();
     const st2 = tgEverPub(doc) ? (pend ? `${pend} change${pend === 1 ? '' : 's'} not published` : 'Published') : 'Draft';
@@ -4778,17 +4786,34 @@
     const d = state.tg.day;
     const perD = periodsForDay(g.key, d);
     const sel = state.tg.sel;
-    if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
+    const sw = state.tg.swap;
+    if (sw) html += `<div class="tg-selbar"><span>⇄ Tap the period to swap with (${escapeHtml(gridBatchLabel(sw.k.split('|').slice(2).join('|')))})</span><span><button type="button" class="btn-secondary" id="tgSwapCancel" style="border-color: var(--line);">Cancel</button></span></div>`;
+    if (sel && sel.multi) {
+      const selCells = sel.cells.map((k) => { const [dd, pp, ...rest] = k.split('|'); return tgCell(dd, Number(pp), rest.join('|')); });
+      const nEx = selCells.filter((c) => c && c.ex).length; const cls = selCells.filter((c) => c && !c.ex && c.s);
+      const allTest = cls.length && cls.every((c) => c.test);
+      html += `<div class="tg-selbar tg-msel"><span><b>${sel.cells.length}</b> selected · tap more cells</span>
+        <span class="tg-msel-btns">${cls.length ? `<button type="button" class="btn-secondary" id="tgMTest" style="border-color: var(--line);">${allTest ? 'Remove test' : 'Class test'}</button>` : ''}
+        ${nEx ? '<button type="button" class="btn-secondary" id="tgMExDel" style="border-color: var(--line);">Remove exam</button>' : (sel.cells.length ? '<button type="button" class="btn-secondary" id="tgMExam" style="border-color: var(--line);">Exam / note</button>' : '')}
+        ${sel.cells.length ? '<button type="button" class="btn-secondary hv-del" id="tgMClear" style="border-color: var(--line);">Clear</button>' : ''}
+        <button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
+    } else if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
     html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${i + 1}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
     g.batches.forEach((b) => {
       const rOn = batchRoomOn(b, d); const rMoved = rOn && rOn !== batchRoom(b);
       const rDup = rOn && g.batches.some((o) => o !== b && batchRoomOn(o, d) === rOn);
       html += `<tr><th class="tg-b" data-tg-room="${escapeHtml(b)}" role="button">${escapeHtml(gridBatchLabel(b))}${rOn ? `<span class="${rMoved ? 'tg-moved' : ''}${rDup ? ' tg-roomdup' : ''}">${escapeHtml(rOn)}${rDup ? ' ⚠️' : ''}</span>` : '<span class="tg-noroom">+ room</span>'}</th>`;
+      let skipTo = -1;
       perD.forEach((pp, i) => {
+        if (i <= skipTo) return;
         const c = tgCell(d, i, b);
         const k = `${d}|${i}|${b}`;
         const isSel = sel && sel.cells.indexOf(k) !== -1;
-        if (c && c.ex) { html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}" data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return; }
+        if (c && c.ex) {
+          let span = 1; while (i + span < perD.length) { const n2 = tgCell(d, i + span, b); if (n2 && n2.ex === c.ex) span++; else break; }
+          skipTo = i + span - 1;
+          html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${span > 1 ? ` colspan="${span}"` : ''} data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return;
+        }
         const exHere = examAt(b, d, pp.start, pp.end);
         if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small>📝 ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
         const cl = c ? (clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) : '';
@@ -4797,23 +4822,27 @@
       html += '</tr>';
     });
     html += '</tbody></table></div>';
+    if (chg && Object.keys(chg.keys).some((k) => k.startsWith(d + '|'))) html += '<div class="hv-note" style="text-align:left; margin-top:4px;"><span style="color: var(--gold);">●</span> = not sent to teachers yet · Publish to send</div>';
     const nClash = Object.keys(clash).length; const noT = (doc.cells || []).filter((c) => !c.t && !c.ex).length;
     if (nClash || noT) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Please check</div>${nClash ? `<div class="ad-alert-l">${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places — tap ⚠️ cells</div>` : ''}${noT ? `<div class="ad-alert-l">${noT} class${noT === 1 ? '' : 'es'} without a teacher (set Teacher Mapping)</div>` : ''}</div>`;
     const pdMap = tgPendDays(); const pdList = Object.keys(pdMap).sort(); const pdTotal = pdList.reduce((n, x) => n + pdMap[x], 0);
     const everPub = tgEverPub(doc);
     const dayPend = pdMap[d] && pdList.length > 1;
+    const dN = `${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}`;
     html += `<div class="tg-pubrow">${pdList.length
-        ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : (everPub ? `Publish all ${pdTotal} changes` : 'Publish filled days')}<small>${pdList.length === 1 ? `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')}` : escapeHtml(shortDays(pdList))}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--gold); color: var(--gold);">Publish only ${escapeHtml(WD[dateObj(d).getDay()])} ${dateObj(d).getDate()}<small style="display:block; font-size:11.5px; font-weight:600;">${pdMap[d]} ${everPub ? 'change' : 'class'}${pdMap[d] === 1 ? '' : (everPub ? 's' : 'es')}</small></button>` : ''}`
+        ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : 'Publish whole week'}<small>${pdList.length === 1 ? `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')}` : `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')} · ${escapeHtml(shortDays(pdList))}`}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--gold); color: var(--gold);">Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:11.5px; font-weight:600;">${pdMap[d]} ${everPub ? 'change' : 'class'}${pdMap[d] === 1 ? '' : (everPub ? 's' : 'es')}</small></button>` : ''}`
         : (everPub ? '<div class="tg-pubok">✓ Published · teachers have this timetable</div>' : '<div class="hv-note" style="text-align:center;">Nothing filled in yet · tap + in the grid, or use Paint, to add classes</div>')}</div>
-    <div class="tg-actions">
-      ${editable ? `<button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
-      <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>` : ''}
+    ${editable ? `<div class="tg-actions">
+      <button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
+      <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>
+    </div><div id="tgCopyDayBox"></div>` : ''}
+    <div class="tg-actions" style="margin-top:8px;">
       <button type="button" class="btn-secondary" id="tgAbsent" style="border-color: var(--line);">Teacher absent</button>
       ${editable ? '<button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);">Mark exam</button>' : ''}
       <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">${weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey) ? 'Share image' : 'Timetable image'}</button>
       ${editable ? '<button type="button" class="btn-secondary hv-del" id="tgDelWeek" style="border-color: var(--line);">Delete week</button>' : ''}
     </div>
-    ${editable ? '<div class="hv-note" style="text-align:left;">Tip: tap a period heading (P1, P2…) to change its time, or a batch name to change its room — for this day only.</div>' : ''}<div id="tgCopyDayBox"></div>`;
+    ${editable ? '<div class="hv-note" style="text-align:left;">Tips: press and hold a cell to select several (class test, exam, clear). Tap a period heading (P1, P2…) to change its time, or a batch name to change its room — for this day only.</div>' : '<div class="hv-note" style="text-align:left;">Tip: tap a class to give it to a substitute or swap it with another period.</div>'}`;
     if (box._html === html) { renderTgCopyBox(); return; } // nothing changed: keep the grid as it is
     box._html = html;
     box.innerHTML = html;
@@ -4833,19 +4862,40 @@
   function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase(); }
   function classOfBatchNum(b) { const m = String(b).match(/class\s*(\d+)/i); return m ? m[1] : ''; }
   function bindTg(box) {
-    box.querySelectorAll('[data-tg-group]').forEach((b) => b.addEventListener('click', () => { state.tg.group = b.getAttribute('data-tg-group'); state.tg.docKey = ''; state.tg.dirty = false; renderTgGrid(); }));
-    box.querySelectorAll('[data-tg-day]').forEach((b) => b.addEventListener('click', () => { state.tg.day = b.getAttribute('data-tg-day'); state.tg.copy = null; renderTgGrid(); }));
+    box.querySelectorAll('[data-tg-group]').forEach((b) => b.addEventListener('click', () => { state.tg.group = b.getAttribute('data-tg-group'); state.tg.docKey = ''; state.tg.dirty = false; state.tg.sel = null; state.tg.swap = null; if (state.abs) { state.abs = null; renderAbsent(); } renderTgGrid(); }));
+    box.querySelectorAll('[data-tg-day]').forEach((b) => b.addEventListener('click', () => { state.tg.day = b.getAttribute('data-tg-day'); state.tg.copy = null; state.tg.sel = null; state.tg.swap = null; renderTgGrid(); }));
     box.querySelectorAll('[data-tg-paint]').forEach((b) => b.addEventListener('click', () => { state.tg.paint = b.getAttribute('data-tg-paint') || null; renderTgGrid(); }));
     const sun = document.getElementById('tgSunday'); if (sun) sun.addEventListener('change', () => { state.tg.doc.sunday = sun.checked; tgSave(); renderTgGrid(); });
     const locked = () => { showToast('Tap “Edit timetable” first to make changes'); };
     box.querySelectorAll('[data-tg-ph]').forEach((th) => th.addEventListener('click', () => { if (state.tg.sel) return; if (!tgEditable()) { locked(); return; } openPeriodDaySheet(state.tg.day, Number(th.getAttribute('data-tg-ph'))); }));
     box.querySelectorAll('[data-tg-room]').forEach((th) => th.addEventListener('click', () => { if (state.tg.sel) return; if (!tgEditable()) { locked(); return; } openDayRoomSheet(state.tg.day, th.getAttribute('data-tg-room')); }));
-    box.querySelectorAll('[data-tg-cell]').forEach((td) => td.addEventListener('click', () => {
+    box.querySelectorAll('[data-tg-cell]').forEach((td) => {
+      let lpT = null;
+      const lpStop = () => { if (lpT) { clearTimeout(lpT); lpT = null; } };
+      td.addEventListener('contextmenu', (e) => e.preventDefault());
+      td.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        lpStop(); const sx = e.clientX, sy = e.clientY;
+        td._lpMove = (ev) => { if (Math.abs(ev.clientX - sx) > 10 || Math.abs(ev.clientY - sy) > 10) lpStop(); };
+        lpT = setTimeout(() => {
+          lpT = null; td._lpFired = true;
+          if (!tgEditable()) { locked(); return; }
+          if (state.tg.sel || state.tg.swap) return;
+          try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ }
+          state.tg.paint = null; state.tg.copy = null;
+          state.tg.sel = { cells: [td.getAttribute('data-tg-cell')], multi: true }; renderTgGrid();
+        }, 480);
+      });
+      td.addEventListener('pointermove', (e) => { if (td._lpMove) td._lpMove(e); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => td.addEventListener(ev, lpStop));
+      td.addEventListener('click', () => {
+      if (td._lpFired) { td._lpFired = false; return; }
       const [d, p, ...rest] = td.getAttribute('data-tg-cell').split('|'); const b = rest.join('|'); const pi = Number(p);
       if (state.tg.sel) { tgToggleSel(d, pi, b); return; }
+      if (state.tg.swap) { tgSwapPick(d, pi, b); return; }
       const cx = tgCell(d, pi, b);
       if (cx && cx.ex) { openExamBlockSheet(cx); return; }
-      if (!tgEditable()) { locked(); return; }
+      if (!tgEditable()) { if (cx && tgCellIsLive(cx)) openPubCellSheet(cx); else locked(); return; }
       if (state.tg.paint) {
         const c = tgCell(d, pi, b);
         if (c && c.s === state.tg.paint) { tgSetCell(d, pi, b, null); renderTgGrid(); return; }
@@ -4854,7 +4904,8 @@
         if (ex) showConfirm(`${b} has an exam then:\n${examLine(ex)}\n\nAdd ${state.tg.paint} anyway?`, '⚠️ Exam at this time', 'Add anyway').then((ok) => { if (ok) put(); });
         else put();
       } else openTgCellSheet(d, pi, b);
-    }));
+      });
+    });
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
     on('tgCopyWeek', tgCopyLastWeek);
     on('tgCopyDay', tgCopyDayPicker);
@@ -4872,6 +4923,11 @@
     on('tgDelWeek', tgDeleteWeek);
     on('tgSelCancel', () => { state.tg.sel = null; renderTgGrid(); });
     on('tgSelNext', openExamCellsSheet);
+    on('tgSwapCancel', () => { state.tg.swap = null; renderTgGrid(); });
+    on('tgMTest', tgMultiTest);
+    on('tgMExam', openExamCellsSheet);
+    on('tgMExDel', tgMultiRemoveExam);
+    on('tgMClear', tgMultiClear);
   }
   function openTgCellSheet(d, p, b) {
     const g = tgGroup(); const per = periodsForDay(g.key, d)[p];
@@ -4937,7 +4993,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (cells.some((c) => dateObj(c.d).getDay() === 0)) state.tg.doc.sunday = true;
     tgSave(); renderTgGrid(); showToast(`${cells.length} classes copied`);
   }
-  function tgCopyDayPicker() { state.tg.copy = { src: state.tg.day, pick: [] }; renderTgGrid(); }
+  function tgCopyDayPicker() { state.tg.copy = { src: state.tg.day, pick: [] }; renderTgGrid(); setTimeout(() => { const b = document.getElementById('tgCopyDayBox'); if (b && b.firstElementChild) b.firstElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60); }
   function renderTgCopyBox() {
     const box = document.getElementById('tgCopyDayBox');
     const cp = state.tg.copy;
@@ -5196,6 +5252,114 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   // Mark exam: pick cells (periods × batches), then type, subject and time. The exam is also created in the Exams tab.
+  // ----- several cells at once (press and hold a cell) -----
+  function tgSelCells() { const sel = state.tg.sel; if (!sel) return []; return sel.cells.map((k) => { const [dd, pp, ...rest] = k.split('|'); return { k, d: dd, p: Number(pp), b: rest.join('|'), c: tgCell(dd, Number(pp), rest.join('|')) }; }); }
+  function tgMultiTest() {
+    const list = tgSelCells().filter((x) => x.c && !x.c.ex && x.c.s); if (!list.length) return;
+    const allTest = list.every((x) => x.c.test);
+    tgRemember();
+    list.forEach((x) => { if (allTest) delete x.c.test; else x.c.test = true; });
+    state.tg.sel = null; tgSave(); renderTgGrid();
+    showToast(allTest ? `Class test removed from ${list.length} class${list.length === 1 ? '' : 'es'}` : `${list.length} class${list.length === 1 ? '' : 'es'} marked as class test · they still count as the teacher's class`);
+  }
+  async function tgMultiClear() {
+    const list = tgSelCells().filter((x) => x.c); if (!list.length) { state.tg.sel = null; renderTgGrid(); return; }
+    const exIds = list.map((x) => x.c.ex).filter((e, i, a) => e && a.indexOf(e) === i);
+    const ok = await showConfirm(`${list.length} cell${list.length === 1 ? '' : 's'} will be emptied.${exIds.length ? `\n${exIds.length} exam${exIds.length === 1 ? '' : 's'} will be removed everywhere (Exams tab and duties too).` : ''}`, 'Clear these cells?', 'Clear');
+    if (!ok) return;
+    tgRemember();
+    if (exIds.length) { await tgRemoveExams(exIds, true); }
+    const keys = list.map((x) => x.k);
+    state.tg.doc.cells = (state.tg.doc.cells || []).filter((c) => keys.indexOf(cellKey(c)) === -1 && !(c.ex && exIds.indexOf(c.ex) !== -1));
+    state.tg.sel = null; tgSave(); renderTgGrid(); showToast('Cells cleared');
+  }
+  async function tgMultiRemoveExam() {
+    const exIds = tgSelCells().map((x) => x.c && x.c.ex).filter((e, i, a) => e && a.indexOf(e) === i); if (!exIds.length) return;
+    const ok = await showConfirm(`${exIds.length} exam${exIds.length === 1 ? '' : 's'} will be removed everywhere: the timetable, the Exams tab, rooms and invigilation duties. The classes that were there before come back.`, 'Remove exam?', 'Remove');
+    if (!ok) return;
+    tgRemember();
+    await tgRemoveExams(exIds);
+    state.tg.sel = null; renderTgGrid(); showToast('Exam removed · the classes are back');
+  }
+  // delete exams (with their duty plans) and put back the classes their cells replaced
+  async function tgRemoveExams(ids, noRestore) {
+    for (const id of ids) { try { await state.db.collection('exams').doc(id).delete(); } catch (err) { /* already gone */ } }
+    const doc = state.tg.doc; const out = [];
+    (doc.cells || []).forEach((c) => {
+      if (!c.ex || ids.indexOf(c.ex) === -1) { out.push(c); return; }
+      if (!noRestore && c.was && c.was.s) { const r = { d: c.d, p: c.p, b: c.b, s: c.was.s, t: c.was.t || '' }; if (c.was.test) r.test = true; out.push(r); }
+    });
+    doc.cells = out;
+    if (state.tgExams) { state.tgExams.list = (state.tgExams.list || []).filter((x) => ids.indexOf(x.id) === -1); state.tgExams.at = 0; }
+    tgSave();
+  }
+  // ----- a published class: substitute or swap, without unlocking the grid -----
+  function tgCellIsLive(c) { const doc = state.tg.doc; return !!(doc && c && !c.ex && effT(c) && (doc.published || []).indexOf(effT(c) + '/' + slotIdFor(state.tg.docKey, c)) !== -1); }
+  function openPubCellSheet(c) {
+    const g = tgGroup(); const per = periodsForDay(g.key, c.d)[c.p] || {};
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">${escapeHtml(c.b)} · ${escapeHtml(effS(c))}${c.test ? ' (Class test)' : ''}</div>
+      <div class="hv-d-wing">${escapeHtml(WD[dateObj(c.d).getDay()])} ${dateObj(c.d).getDate()} · P${c.p + 1}${per.start ? ' · ' + escapeHtml(formatTimeStr(per.start)) + ' – ' + escapeHtml(formatTimeStr(per.end)) : ''} · 👤 ${escapeHtml(ttName(effT(c)))}${c.sub ? ' (substitute)' : ''}</div>
+      <div class="hv-d-btns" style="flex-direction:column; gap:8px;">
+        <button type="button" class="save-btn" id="pcSub" style="margin:0; width:100%;">🔁 Someone else takes this class (substitute)</button>
+        <button type="button" class="btn-secondary" id="pcSwap" style="border-color: var(--line); width:100%;">⇄ Swap with another period of ${escapeHtml(gridBatchLabel(c.b))}</button>
+        <button type="button" class="btn-secondary" id="pcEdit" style="border-color: var(--line); width:100%;">✏️ Edit timetable instead</button>
+      </div>
+      <div class="hv-note" style="text-align:left;">Substitute and swap reach the teachers' schedules at once — no need to publish again.</div>`;
+    document.getElementById('pcSub').addEventListener('click', () => { closeHvSheet(); openAbsent({ t: c.t, date: c.d }); });
+    document.getElementById('pcSwap').addEventListener('click', () => { closeHvSheet(); state.tg.swap = { k: cellKey(c) }; renderTgGrid(); showToast('Now tap the period to swap with'); });
+    document.getElementById('pcEdit').addEventListener('click', () => { closeHvSheet(); state.tg.editKey = state.tg.docKey; renderTgGrid(); });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+  async function tgSwapPick(d, p, b) {
+    const sw = state.tg.swap; if (!sw) return;
+    const [d0, p0, ...r0] = sw.k.split('|'); const b0 = r0.join('|');
+    if (d0 === d && Number(p0) === p && b0 === b) { state.tg.swap = null; renderTgGrid(); return; }
+    if (d0 !== d || b0 !== b) { showToast(`Choose another period of ${gridBatchLabel(b0)} on the same day`, 'error'); return; }
+    const A = tgCell(d0, Number(p0), b0); const B = tgCell(d, p, b);
+    if (!A || !B || A.ex || B.ex) { showToast('Only two classes can be swapped', 'error'); return; }
+    const ok = await showConfirm(`P${Number(p0) + 1}: ${effS(A)} (${ttName(effT(A))}) ⇄ P${p + 1}: ${effS(B)} (${ttName(effT(B))})\n\nBoth teachers' schedules change now and they get a message.`, 'Swap these periods?', 'Swap');
+    if (!ok) return;
+    state.tg.swap = null;
+    try { if (await tgSwapCells(Object.assign({ _id: state.tg.docKey }, state.tg.doc), sw.k, `${d}|${p}|${b}`)) showToast('Periods swapped'); } catch (err) { flashOffline(err); }
+    renderTgGrid();
+  }
+  // swap two classes of one batch (subject, teacher, test, substitute) and update both teachers' schedules
+  async function tgSwapCells(docIn, kA, kB) {
+    if (tgSaveTimer) await tgFlush();
+    let doc = docIn;
+    try { const fresh = await state.db.collection('timetables').doc(docIn._id).get(); if (fresh.exists) doc = Object.assign({ _id: docIn._id, cells: [] }, fresh.data()); } catch (e) { /* offline: use our copy */ }
+    const A = (doc.cells || []).find((x) => cellKey(x) === kA); const B = (doc.cells || []).find((x) => cellKey(x) === kB);
+    if (!A || !B) { showToast('These classes were changed. Please check again.', 'error'); return false; }
+    const beforeA = effT(A); const beforeB = effT(B);
+    ['s', 't', 'test', 'sub'].forEach((f) => { const va = A[f]; const vb = B[f]; if (vb === undefined) delete A[f]; else A[f] = vb; if (va === undefined) delete B[f]; else B[f] = va; });
+    doc.updatedAt = Date.now();
+    const batch = state.db.batch(); let pub = (doc.published || []).slice();
+    [[A, beforeA], [B, beforeB]].forEach(([c, before]) => {
+      const id = slotIdFor(doc._id, c); const after = effT(c); const tm = cellTimes(doc, c);
+      if (pub.indexOf(before + '/' + id) === -1) return;
+      batch.delete(state.db.doc(`schedule/${before}/slots/${id}`));
+      pub = pub.filter((k) => k !== before + '/' + id);
+      if (after && tm) {
+        batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: batchRoomOn(c.b, c.d, doc), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
+        pub.push(after + '/' + id);
+      }
+      if (doc.pubSnap && doc.pubSnap.cells) { doc.pubSnap.cells[cellKey(c)] = cellSig(c); if (doc.pubSnap.full) doc.pubSnap.full[cellKey(c)] = JSON.stringify(c); }
+    });
+    doc.published = pub;
+    const plain = Object.assign({}, doc); delete plain._id;
+    batch.set(state.db.collection('timetables').doc(doc._id), plain);
+    await waitForWrite(batch.commit());
+    if (state.tg.docKey === doc._id) state.tg.doc = plain;
+    ttCacheStale();
+    const link = { tab: 'schedule', ws: doc.weekStart };
+    [[A, beforeA], [B, beforeB]].forEach(([c, before]) => {
+      const tm = cellTimes(doc, c); const who = effT(c);
+      if (who && who !== before) notify(who, { type: 'sub', title: 'Your period has changed', body: `${slotWhen(c.d, tm && tm.start)} · ${c.b} · ${effS(c)} (periods swapped)`, link });
+    });
+    refreshTtImage(Object.assign({ _id: doc._id }, plain), true);
+    return true;
+  }
   function tgStartExamSelect() { state.tg.sel = { cells: [] }; state.tg.paint = null; state.tg.copy = null; renderTgGrid(); }
   function tgToggleSel(d, p, b) {
     const sel = state.tg.sel; const k = `${d}|${p}|${b}`; const i = sel.cells.indexOf(k);
@@ -5207,22 +5371,23 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const g = tgGroup(); const d = sel.cells[0].split('|')[0];
     const ps = sel.cells.map((k) => Number(k.split('|')[1])); const per = periodsForDay(g.key, d);
     const bats = sel.cells.map((k) => k.split('|').slice(2).join('|')).filter((v, i, a) => a.indexOf(v) === i);
-    const f = { type: '', subject: '', start: per[Math.min(...ps)].start, end: per[Math.max(...ps)].end };
+    const f = { type: '', subject: '', name: '', start: per[Math.min(...ps)].start, end: per[Math.max(...ps)].end };
     const body = document.getElementById('hvSheetBody');
     const draw = () => {
-      body.innerHTML = `<div class="hv-d-title">Exam</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · ${escapeHtml(bats.join(', '))}</div>
+      body.innerHTML = `<div class="hv-d-title">Exam / note</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · ${escapeHtml(bats.join(', '))}</div>
+        <div class="sv-tlbl" style="margin:12px 0 6px;">Name to show (optional)</div><input class="text-input" id="exName" maxlength="40" placeholder="e.g. Half-Yearly Exam" value="${escapeHtml(f.name)}">
         <div class="sv-tlbl" style="margin:12px 0 6px;">Test Type</div><div class="chips">${testTypesList().map((t) => `<button type="button" class="chip${f.type === t ? ' active' : ''}" data-ext="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div><div class="chips">${subjectsList().map((t) => `<button type="button" class="chip${f.subject === t ? ' active' : ''}" data-exs="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Exam Time</div>
         <div class="sv-times"><div><div class="sv-tlbl">From</div><input class="text-input" type="time" id="exS" value="${escapeHtml(f.start)}"></div><div><div class="sv-tlbl">To</div><input class="text-input" type="time" id="exE" value="${escapeHtml(f.end)}"></div></div>
-        <div class="hv-note" style="text-align:left; margin-top:8px;">Classes in these cells are replaced by the exam. Make the duty plan later in the Exams tab.</div>
+        <div class="hv-note" style="text-align:left; margin-top:8px;">The exam takes the place of these classes (they come back if you remove the exam). It also appears in the Exams tab for rooms and invigilators.</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="exOk" style="margin:0;">Mark exam</button></div>`;
-      body.querySelectorAll('[data-ext]').forEach((x) => x.addEventListener('click', () => { f.type = x.getAttribute('data-ext'); keepTimes(); draw(); }));
+      body.querySelectorAll('[data-ext]').forEach((x) => x.addEventListener('click', () => { f.type = f.type === x.getAttribute('data-ext') ? '' : x.getAttribute('data-ext'); keepTimes(); draw(); }));
       body.querySelectorAll('[data-exs]').forEach((x) => x.addEventListener('click', () => { f.subject = f.subject === x.getAttribute('data-exs') ? '' : x.getAttribute('data-exs'); keepTimes(); draw(); }));
       document.getElementById('exCancel').addEventListener('click', closeHvSheet);
       document.getElementById('exOk').addEventListener('click', async () => {
         keepTimes();
-        if (!f.type) { showToast('Choose the test type', 'error'); return; }
+        if (!f.type && !f.name) { showToast('Choose the test type or type a name', 'error'); return; }
         if (!f.start || !f.end || hhmmToMin(f.end) <= hhmmToMin(f.start)) { showToast('Check the exam time', 'error'); return; }
         const selKeys = sel.cells.slice();
         const others = (state.tg.doc.cells || []).filter((c) => c.d === d && !c.ex && bats.indexOf(c.b) !== -1 && selKeys.indexOf(cellKey(c)) === -1)
@@ -5231,16 +5396,17 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         if (others.length) { const ok = await showConfirm(`These classes are also during the exam time:\n${others.slice(0, 6).join('\n')}${others.length > 6 ? `\n+${others.length - 6} more` : ''}\n\nMark the exam anyway? (You can clear those cells after.)`, '⚠️ Classes during the exam', 'Mark exam'); if (!ok) return; }
         try {
           const ref = state.db.collection('exams').doc();
-          await waitForWrite(ref.set({ type: f.type, subject: f.subject, name: '', date: d, start: f.start, end: f.end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
+          await waitForWrite(ref.set({ type: f.type || f.name, subject: f.subject, name: f.name, date: d, start: f.start, end: f.end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
           tgRemember();
           const doc = state.tg.doc;
-          sel.cells.forEach((k) => { const [dd, pp, ...rest] = k.split('|'); const bb = rest.join('|'); doc.cells = (doc.cells || []).filter((c) => !(c.d === dd && c.p === Number(pp) && c.b === bb)); doc.cells.push({ d: dd, p: Number(pp), b: bb, ex: ref.id, s: `${f.type}${f.subject ? ' · ' + f.subject : ''}`, et: `${f.start}-${f.end}` }); });
+          const label = f.name || `${f.type}${f.subject ? ' · ' + f.subject : ''}`;
+          sel.cells.forEach((k) => { const [dd, pp, ...rest] = k.split('|'); const bb = rest.join('|'); const old = (doc.cells || []).find((c) => c.d === dd && c.p === Number(pp) && c.b === bb && !c.ex); doc.cells = (doc.cells || []).filter((c) => !(c.d === dd && c.p === Number(pp) && c.b === bb)); const nc = { d: dd, p: Number(pp), b: bb, ex: ref.id, s: label, et: `${f.start}-${f.end}` }; if (old && old.s) nc.was = { s: old.s, t: old.t || '', test: !!old.test }; doc.cells.push(nc); });
           state.tg.sel = null; tgSave(); closeHvSheet(); renderTgGrid();
           showToast('Exam marked · add the duty plan in Exams');
         } catch (err) { flashOffline(err); }
       });
     };
-    const keepTimes = () => { const a = document.getElementById('exS'), z = document.getElementById('exE'); if (a) f.start = a.value; if (z) f.end = z.value; };
+    const keepTimes = () => { const a = document.getElementById('exS'), z = document.getElementById('exE'), nm = document.getElementById('exName'); if (a) f.start = a.value; if (z) f.end = z.value; if (nm) f.name = nm.value.trim(); };
     draw();
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
@@ -5258,11 +5424,12 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       subscribeAdminDate(c.d); renderAdmin();
     });
     document.getElementById('ebDel').addEventListener('click', async () => {
-      const ok = await showConfirm('The exam is removed from the timetable and from the Exams tab (with its duty plan). The cells become empty.', 'Remove exam?', 'Remove');
+      const ok = await showConfirm('The exam is removed everywhere: the timetable, the Exams tab, its rooms and invigilation duties. The classes that were there before come back.', 'Remove exam?', 'Remove');
       if (!ok) return;
-      try { await state.db.collection('exams').doc(c.ex).delete(); } catch (err) { /* already gone */ }
-      state.tg.doc.cells = (state.tg.doc.cells || []).filter((x) => x.ex !== c.ex);
-      tgSave(); closeHvSheet(); renderTgGrid(); showToast('Exam removed');
+      if (!tgEditable()) { state.tg.editKey = state.tg.docKey; }
+      tgRemember();
+      await tgRemoveExams([c.ex]);
+      closeHvSheet(); renderTgGrid(); showToast('Exam removed · the classes are back');
     });
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
@@ -5454,8 +5621,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (rows.some((r) => r.c.sub && r.c.sub.for === ab.t)) html += `<button type="button" class="btn-secondary" id="absShare" style="border-color: var(--line);">Share substitutions on WhatsApp</button>`;
       html += '<div class="hv-note" style="text-align:left;">★ teaches this subject · free = no class at that time. Each "Apply" sends the class to that teacher only.</div>';
     }
+    html += '<button type="button" class="btn-secondary" id="absClose2" style="border-color: var(--line);">✕ Close this list</button>';
     box.innerHTML = html;
     document.getElementById('absClose').addEventListener('click', () => { state.abs = null; renderAbsent(); });
+    const ac2 = document.getElementById('absClose2'); if (ac2) ac2.addEventListener('click', () => { state.abs = null; renderAbsent(); const t = document.getElementById('tgWrap'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     box.querySelectorAll('[data-ab-t]').forEach((b) => b.addEventListener('click', () => { ab.t = b.getAttribute('data-ab-t'); ab.pick = {}; renderAbsent(); }));
     box.querySelectorAll('[data-ab-d]').forEach((b) => b.addEventListener('click', () => { const d = b.getAttribute('data-ab-d'); const k = ab.days.indexOf(d); if (k === -1) ab.days.push(d); else ab.days.splice(k, 1); renderAbsent(); }));
     box.querySelectorAll('[data-ab-pick]').forEach((b) => b.addEventListener('click', () => { ab.pick[b.getAttribute('data-ab-pick')] = b.getAttribute('data-v'); renderAbsent(); }));
