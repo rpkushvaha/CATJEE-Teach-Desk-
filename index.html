@@ -2262,7 +2262,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 5.6 · updated 3 Oct 2026</div>
+          <div class="dnote">Version 5.7 · updated 3 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6342,7 +6342,7 @@
       el.innerHTML = list.map((name, i) => {
         const editing = state.listEditing && state.listEditing.key === key && state.listEditing.i === i;
         return editing
-          ? `<div class="activity-row"><input class="text-input" data-list-edit value="${escapeHtml(name)}" style="flex:1; padding:8px 10px;"><button class="dedit-btn" data-list-save>Save</button></div>`
+          ? `<div class="activity-row" style="gap:6px;"><input class="text-input" data-list-edit value="${escapeHtml(name)}" style="flex:1; min-width:0; padding:8px 10px;"><button type="button" class="dedit-btn" data-list-save="${i}">Save</button><button type="button" class="del-btn" data-list-cancel aria-label="Cancel">✕</button></div>`
           : `<div class="activity-row"><div class="activity-row-text"><span class="activity-row-title">${escapeHtml(name)}</span></div>
               ${key === 'subjects' ? `<button type="button" class="tt-tog${notTTList().indexOf(name) === -1 ? ' on' : ''}" data-tt-tog="${escapeHtml(name)}" aria-label="Show in timetable">${notTTList().indexOf(name) === -1 ? '✓ In timetable' : 'Not in timetable'}</button>` : ''}
               <button class="del-btn" data-list-edit-i="${i}" aria-label="Rename">${svgEdit()}</button>
@@ -6357,14 +6357,41 @@
         showToast(`Removed "${gone}"`);
       }));
       const saveBtn = el.querySelector('[data-list-save]');
-      if (saveBtn) saveBtn.addEventListener('click', async () => {
-        const v = el.querySelector('[data-list-edit]').value.trim();
-        const i = state.listEditing.i;
-        state.listEditing = null;
-        if (!v || list.some((x, k) => k !== i && x.toLowerCase() === v.toLowerCase())) { renderListManagers(); return; }
-        const next = list.slice(); next[i] = v;
-        await saveList(key, next);
-      });
+      const editInp = el.querySelector('[data-list-edit]');
+      const cancelBtn = el.querySelector('[data-list-cancel]');
+      if (cancelBtn) cancelBtn.addEventListener('click', () => { state.listEditing = null; renderListManagers(); });
+      if (saveBtn) {
+        // The row index comes from the button itself, so a second tap or a background refresh can never break Save.
+        const i = +saveBtn.getAttribute('data-list-save');
+        const oldName = list[i];
+        let busy = false;
+        const doSave = async () => {
+          if (busy) return; busy = true;
+          const v = editInp ? editInp.value.trim() : '';
+          state.listEditing = null;
+          if (!v || v === oldName || oldName === undefined) { renderListManagers(); return; }
+          if (list.some((x, k) => k !== i && x.toLowerCase() === v.toLowerCase())) { renderListManagers(); showToast('Already in the list'); return; }
+          const next = list.slice(); next[i] = v;
+          if (key === 'subjects') {
+            // Keep the subject's "Not in timetable" setting and its default teachers under the new name.
+            const n = notTTList().map((x) => (x === oldName ? v : x));
+            state.subjectsNotTT = n;
+            const map = state.teacherMap || {};
+            const moved = Object.keys(map).filter((k) => k.split('|')[1] === oldName);
+            if (moved.length && state.db) {
+              const nm = {};
+              Object.keys(map).forEach((k) => { const p = k.split('|'); nm[p[1] === oldName ? p[0] + '|' + v : k] = map[k]; });
+              try { await state.db.doc('settings/teacherMap').set({ map: nm }); state.teacherMap = nm; } catch (err) { flashOffline(err); }
+            }
+          }
+          state[key === 'testTypes' ? 'testTypes' : key === 'subjects' ? 'subjects' : 'rooms'] = next;
+          renderListManagers();
+          await saveList(key, next);
+          showToast(`Renamed to "${v}"`);
+        };
+        saveBtn.addEventListener('click', doSave);
+        if (editInp) editInp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSave(); } });
+      }
     });
   }
   Object.keys(LIST_CFG).forEach((key) => {
