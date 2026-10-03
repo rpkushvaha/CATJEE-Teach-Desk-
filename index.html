@@ -1371,6 +1371,7 @@
           <div class="timer-label" id="sessionCountLabel" style="text-transform:none; letter-spacing:0; margin-top:3px; font-weight:500;"></div>
         </div>
         <button class="btn btn-checkin" id="checkBtn">Check In</button>
+        <button type="button" class="hv-back" id="lateInBtn" style="display:none; margin:10px auto 0; padding:0; font-size:14px;">Forgot to check in? Set the time you arrived</button>
         <div id="stuckCheckinWarning" style="display:none; background:#FEE2E2; border:1px solid #B91C1C; color:#B91C1C; border-radius:10px; padding:10px 12px; font-size:13px; font-weight:700; margin-top:10px; text-align:center; line-height:1.4;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>You've been checked in for over 24 hours. If you forgot to check out, please check out now.</div>
         <div class="loc-line" id="locLine"></div>
       </div>
@@ -2262,7 +2263,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 5.7 · updated 3 Oct 2026</div>
+          <div class="dnote">Version 5.8 · updated 3 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2738,6 +2739,7 @@
       btn.className = 'btn btn-checkin';
       btn.innerHTML = svgLogin() + 'Check In';
     }
+    const lateBtn = document.getElementById('lateInBtn'); if (lateBtn) lateBtn.style.display = c.checkedIn ? 'none' : 'block';
 
     const stuckWarning = document.getElementById('stuckCheckinWarning');
     if (stuckWarning) {
@@ -4694,6 +4696,8 @@
     try { await state.db.collection('timetables').doc(key).set(doc); } catch (err) { flashOffline(err); }
     state.tg.saving = false;
   }
+  // A timetable counts as published once Publish was pressed, even if no class had a teacher yet.
+  function tgEverPub(doc) { return !!doc && (((doc.published || []).length > 0) || !!doc.publishedAt || ((doc.pubDays || []).length > 0)); }
   function tgSave() {
     const doc = state.tg.doc; if (!doc) return;
     ttCacheStale();
@@ -4751,7 +4755,7 @@
     const per = g ? periodsFor(g.key) : [];
     const clash = tgClashes();
     const subjects = ttSubjectsList();
-    const st = doc ? (doc.status === 'published' && !state.tg.dirty ? 'Published' : ((doc.published || []).length ? 'Changes not published' : 'Draft')) : '';
+    const st = doc ? (doc.status === 'published' && !state.tg.dirty ? 'Published' : (tgEverPub(doc) ? 'Changes not published' : 'Draft')) : '';
     let html = `<div class="chips tt-teachers">${groups.map((x) => `<button type="button" class="chip${g && x.key === g.key ? ' active' : ''}" data-tg-group="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>`;
     if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
@@ -4759,11 +4763,12 @@
     if (pubImg) html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>🗓️ Published timetable picture · tap to view</span></button>`;
     const editable = tgEditable();
     const pend = tgPendingCount(); const chg = tgChanges();
-    const st2 = (doc.published || []).length ? (pend ? `${pend} change${pend === 1 ? '' : 's'} not published` : 'Published') : 'Draft';
+    const st2 = tgEverPub(doc) ? (pend ? `${pend} change${pend === 1 ? '' : 's'} not published` : 'Published') : 'Draft';
     const canUndo = editable && state.tg.undo.some((x) => x.key === state.tg.docKey);
     html += `<div class="tg-status"><span class="tg-st ${st2 === 'Published' ? 'ok' : 'draft'}">${st2}</span>
       <span class="tg-st-acts">${canUndo ? '<button type="button" class="tg-mini" id="tgUndo">↶ Undo</button>' : ''}
-      ${(doc.published || []).length ? (editable ? '<button type="button" class="tg-mini" id="tgEditDone">✓ Done</button>' : '<button type="button" class="tg-mini tg-mini-gold" id="tgEdit">✏️ Edit timetable</button>') : ''}</span></div>
+      ${editable && pend && doc.pubSnap && tgEverPub(doc) ? '<button type="button" class="tg-mini" id="tgDiscard">✕ Discard changes</button>' : ''}
+      ${tgEverPub(doc) ? (editable ? '<button type="button" class="tg-mini" id="tgEditDone">✓ Done</button>' : '<button type="button" class="tg-mini tg-mini-gold" id="tgEdit">✏️ Edit timetable</button>') : ''}</span></div>
       ${editable ? `<label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday this week</label>` : '<div class="hv-note tg-lock">🔒 Published timetable · tap “Edit timetable” to make changes</div>'}`;
     html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; const pn = tgPendDays()[d] || 0; const isPub = (doc.pubDays || []).indexOf(d) !== -1 || (!doc.pubDays && (doc.published || []).length && n); return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}${pn ? ' chg' : ''}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small>${pn ? `<i class="tg-dn">${pn}</i>` : (isPub ? '<i class="tg-dok">✓</i>' : '')}</button>`; }).join('')}</div>`;
     // paint bar
@@ -4795,11 +4800,11 @@
     const nClash = Object.keys(clash).length; const noT = (doc.cells || []).filter((c) => !c.t && !c.ex).length;
     if (nClash || noT) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Please check</div>${nClash ? `<div class="ad-alert-l">${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places — tap ⚠️ cells</div>` : ''}${noT ? `<div class="ad-alert-l">${noT} class${noT === 1 ? '' : 'es'} without a teacher (set Teacher Mapping)</div>` : ''}</div>`;
     const pdMap = tgPendDays(); const pdList = Object.keys(pdMap).sort(); const pdTotal = pdList.reduce((n, x) => n + pdMap[x], 0);
-    const everPub = (doc.published || []).length || (doc.pubDays || []).length;
+    const everPub = tgEverPub(doc);
     const dayPend = pdMap[d] && pdList.length > 1;
     html += `<div class="tg-pubrow">${pdList.length
         ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : (everPub ? `Publish all ${pdTotal} changes` : 'Publish filled days')}<small>${pdList.length === 1 ? `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')}` : escapeHtml(shortDays(pdList))}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--gold); color: var(--gold);">Publish only ${escapeHtml(WD[dateObj(d).getDay()])} ${dateObj(d).getDate()}<small style="display:block; font-size:11.5px; font-weight:600;">${pdMap[d]} ${everPub ? 'change' : 'class'}${pdMap[d] === 1 ? '' : (everPub ? 's' : 'es')}</small></button>` : ''}`
-        : '<div class="tg-pubok">✓ Published · teachers have this timetable</div>'}</div>
+        : (everPub ? '<div class="tg-pubok">✓ Published · teachers have this timetable</div>' : '<div class="hv-note" style="text-align:center;">Nothing filled in yet · tap + in the grid, or use Paint, to add classes</div>')}</div>
     <div class="tg-actions">
       ${editable ? `<button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
       <button type="button" class="btn-secondary" id="tgCopyDay" style="border-color: var(--line);">Copy this day to…</button>` : ''}
@@ -4861,6 +4866,7 @@
     on('tgEdit', () => { state.tg.editKey = state.tg.docKey; renderTgGrid(); showToast('Editing on · changes are saved as a draft until you publish'); });
     on('tgEditDone', () => { state.tg.editKey = null; state.tg.paint = null; renderTgGrid(); });
     on('tgUndo', tgUndo);
+    on('tgDiscard', tgDiscard);
     on('tgExam', tgStartExamSelect);
     on('tgAbsent', () => openAbsent({ date: tgDays().indexOf(todayStr()) !== -1 ? todayStr() : null }));
     on('tgDelWeek', tgDeleteWeek);
@@ -4877,7 +4883,7 @@
       if (!st.change && st.s) st.t = st.t && cur && cur.s === st.s ? st.t : defaultTeacher(b, st.s);
       body.innerHTML = `<div class="hv-d-title">${escapeHtml(b)}</div>
         <div class="hv-d-wing">${escapeHtml(WD[dateObj(d).getDay()])} ${dateObj(d).getDate()} · P${p + 1} · ${escapeHtml(formatTimeStr(per.start))} – ${escapeHtml(formatTimeStr(per.end))}${batchRoom(b) ? ' · ' + escapeHtml(batchRoom(b)) : ''}</div>
-        ${examAt(b, d, per.start, per.end) ? `<div class="ad-alert" style="margin-top:10px;"><div class="ad-alert-t">📝 Exam at this time</div><div class="ad-alert-l">${escapeHtml(examLine(examAt(b, d, per.start, per.end)))}</div></div>` : ''}
+        ${examAt(b, d, per.start, per.end) ? `<div class="ad-alert" style="margin-top:10px;"><div class="ad-alert-t">📝 Exam at this time</div><div class="ad-alert-l">${escapeHtml(examLine(examAt(b, d, per.start, per.end)))}</div><button type="button" class="hv-back" id="csDelExam" style="padding:0; margin-top:6px; color: var(--accent);">🗑 Remove this exam (also its duty plan)</button></div>` : ''}
         ${cur && cur.sub ? `<div class="abs-done" style="margin-top:10px;">🔁 ${escapeHtml(ttName(cur.sub.t))} is the substitute for ${escapeHtml(ttName(cur.sub.for))} <button type="button" class="hv-back" id="csUndoSub" style="padding:0;">Undo</button></div>` : ''}
         <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div>
         <div class="chips">${ttSubjectsList().concat(st.s && ttSubjectsList().indexOf(st.s) === -1 ? [st.s] : []).map((s) => `<button type="button" class="chip${st.s === s ? ' active' : ''}" data-cs="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>
@@ -4893,6 +4899,19 @@
       const cl = document.getElementById('csClear'); if (cl) cl.addEventListener('click', () => { tgSetCell(d, p, b, null); closeHvSheet(); renderTgGrid(); });
       const us = document.getElementById('csUndoSub'); if (us) us.addEventListener('click', async () => { closeHvSheet(); try { await moveCell(Object.assign({ _id: state.tg.docKey }, state.tg.doc), `${d}|${p}|${b}`, null, 'undo'); showToast('Substitute removed'); } catch (err) { flashOffline(err); } renderTgGrid(); });
       const cc = document.getElementById('csCancel'); if (cc) cc.addEventListener('click', closeHvSheet);
+      const dx = document.getElementById('csDelExam'); if (dx) dx.addEventListener('click', async () => {
+        const e = examAt(b, d, per.start, per.end); if (!e) return;
+        const ok = await showConfirm(`${examLine(e)}
+
+The exam is removed everywhere: the Exams tab, its rooms and invigilation duties. Classes in the timetable stay as they are.`, 'Remove this exam?', 'Remove');
+        if (!ok) return;
+        try {
+          await state.db.collection('exams').doc(e.id).delete();
+          if (state.tg.doc) state.tg.doc.cells = (state.tg.doc.cells || []).filter((x) => x.ex !== e.id);
+          state.tgExams.list = state.tgExams.list.filter((x) => x.id !== e.id); state.tgExams.at = 0;
+          closeHvSheet(); renderTgGrid(); showToast('Exam removed');
+        } catch (err) { flashOffline(err); }
+      });
       document.getElementById('csAssign').addEventListener('click', async () => {
         if (!st.s) return;
         const ex = examAt(b, d, per.start, per.end);
@@ -4990,6 +5009,9 @@
         const snap = doc.pubSnap; const now = snapOf(doc);
         Object.keys(snap.cells).forEach((k) => { if (k.startsWith(dayOnly + '|')) delete snap.cells[k]; });
         Object.keys(now.cells).forEach((k) => { if (k.startsWith(dayOnly + '|')) snap.cells[k] = now.cells[k]; });
+        snap.full = snap.full || {};
+        Object.keys(snap.full).forEach((k) => { if (k.startsWith(dayOnly + '|')) delete snap.full[k]; });
+        Object.keys(now.full).forEach((k) => { if (k.startsWith(dayOnly + '|')) snap.full[k] = now.full[k]; });
         const dt = JSON.parse(snap.dayTimes || '{}'); const dr = JSON.parse(snap.dayRooms || '{}');
         if ((doc.dayTimes || {})[dayOnly]) dt[dayOnly] = doc.dayTimes[dayOnly]; else delete dt[dayOnly];
         if ((doc.dayRooms || {})[dayOnly]) dr[dayOnly] = doc.dayRooms[dayOnly]; else delete dr[dayOnly];
@@ -5334,6 +5356,12 @@
       batch.delete(state.db.doc(`schedule/${before}/slots/${id}`));
       if (after && tm) batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: batchRoomOn(c.b, c.d, doc), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
       doc.published = pub.filter((k) => k !== before + '/' + id).concat(after ? [after + '/' + id] : []);
+    }
+    // A substitute on a published class goes live at once, so it is part of the published copy too
+    // (it is not shown as an unpublished change, and Discard never takes it back).
+    if (wasPub && doc.pubSnap && doc.pubSnap.cells) {
+      doc.pubSnap.cells[key] = cellSig(c);
+      if (doc.pubSnap.full) doc.pubSnap.full[key] = JSON.stringify(c);
     }
     const plain = Object.assign({}, doc); delete plain._id;
     batch.set(state.db.collection('timetables').doc(doc._id), plain);
@@ -5768,7 +5796,7 @@
     return out;
   }
   async function refreshTtImage(doc, updated) {
-    if (!doc || !(doc.published || []).length) return;
+    if (!doc || !tgEverPub(doc)) return;
     try {
       const plain = Object.assign({}, doc);
       const nw = new Date();
@@ -5781,8 +5809,8 @@
   // What a published timetable looked like, to show what has changed since.
   function cellSig(c) { return c ? [c.s, c.t, c.test ? 1 : 0, c.ex || '', c.sub ? c.sub.t + '/' + (c.sub.s || '') : ''].join('|') : ''; }
   function snapOf(doc) {
-    const cells = {}; (doc.cells || []).forEach((c) => { cells[cellKey(c)] = cellSig(c); });
-    return { cells, dayTimes: JSON.stringify(doc.dayTimes || {}), dayRooms: JSON.stringify(doc.dayRooms || {}) };
+    const cells = {}; const full = {}; (doc.cells || []).forEach((c) => { cells[cellKey(c)] = cellSig(c); full[cellKey(c)] = JSON.stringify(c); });
+    return { cells, full, dayTimes: JSON.stringify(doc.dayTimes || {}), dayRooms: JSON.stringify(doc.dayRooms || {}) };
   }
   // keys of changed cells and days with changes (null = never published with tracking)
   function tgChanges() {
@@ -5803,7 +5831,7 @@
       Object.keys(ch.days).forEach((d) => { if (!out[d]) out[d] = 1; });
       return out;
     }
-    if (doc.status === 'published' && (doc.published || []).length) return {};
+    if (doc.status === 'published' && tgEverPub(doc)) return {};
     (doc.cells || []).forEach((c) => { out[c.d] = (out[c.d] || 0) + 1; });
     return out;
   }
@@ -5818,10 +5846,38 @@
   function tgEditable() {
     const doc = state.tg.doc; if (!doc) return false;
     if (state.tg.editKey === state.tg.docKey) return true;
-    return !(doc.published || []).length; // never published → editing straight away
+    return !tgEverPub(doc); // never published → editing straight away
   }
   // Undo: remember the grid before each change.
   state.tg.undo = state.tg.undo || [];
+  // Discard: put the grid back to the last published timetable.
+  async function tgDiscard() {
+    const doc = state.tg.doc; const snap = doc && doc.pubSnap; if (!snap) return;
+    const ch = tgChanges(); const n = ch ? ch.n : 0; if (!n) return;
+    const nowMap = {}; (doc.cells || []).forEach((c) => { nowMap[cellKey(c)] = c; });
+    const snapEx = {}; Object.keys(snap.cells || {}).forEach((k) => { const e = String(snap.cells[k] || '').split('|')[3]; if (e) snapEx[e] = 1; });
+    const newEx = (doc.cells || []).map((c) => c.ex).filter((e, i, a) => e && !snapEx[e] && a.indexOf(e) === i);
+    const ok = await showConfirm(`${n} change${n === 1 ? '' : 's'} will be removed and the grid goes back to the last published timetable.${newEx.length ? `\n${newEx.length} exam${newEx.length === 1 ? '' : 's'} added after publishing will also be deleted (from the Exams tab too).` : ''}\nTeachers' schedules don't change.`, 'Discard changes?', 'Discard');
+    if (!ok) return;
+    tgRemember();
+    const full = snap.full || {}; const exList = weekExams(state.tt.weekStart); const cells = [];
+    Object.keys(snap.cells || {}).forEach((k) => {
+      const sig = snap.cells[k]; const cur = nowMap[k];
+      if (cur && cellSig(cur) === sig) { cells.push(cur); return; }
+      if (full[k]) { try { cells.push(JSON.parse(full[k])); return; } catch (e) { /* rebuild below */ } }
+      const parts = String(sig || '').split('|'); const [dd, pp, ...rest] = k.split('|');
+      const c = { d: dd, p: Number(pp), b: rest.join('|'), s: parts[0] || '', t: parts[1] || '' };
+      if (parts[2] === '1') c.test = true;
+      if (parts[3]) { const e = exList.find((x) => x.id === parts[3]); if (!e && !(cur && cur.ex === parts[3])) return; c.ex = parts[3]; c.et = (cur && cur.et) || (e ? `${e.start}-${e.end}` : ''); }
+      if (parts[4]) { const sl = parts[4].indexOf('/'); c.sub = { t: parts[4].slice(0, sl), s: parts[4].slice(sl + 1), for: c.t, by: state.teacherId, at: Date.now() }; }
+      cells.push(c);
+    });
+    for (const id of newEx) { try { await state.db.collection('exams').doc(id).delete(); } catch (e) { /* already gone */ } }
+    doc.cells = cells; doc.dayTimes = JSON.parse(snap.dayTimes || '{}'); doc.dayRooms = JSON.parse(snap.dayRooms || '{}');
+    state.tgExams.at = 0;
+    tgSave(); doc.status = 'published'; state.tg.dirty = false;
+    renderTgGrid(); showToast('Changes discarded · back to the published timetable');
+  }
   function tgRemember() {
     const doc = state.tg.doc; if (!doc) return;
     state.tg.undo.push({ key: state.tg.docKey, cells: JSON.stringify(doc.cells || []), dayTimes: JSON.stringify(doc.dayTimes || {}), dayRooms: JSON.stringify(doc.dayRooms || {}) });
@@ -8369,6 +8425,38 @@
     checkLocationOnce();
   }
 
+  // Forgot to check in: check in now with an earlier arrival time (today only).
+  function openLateCheckIn() {
+    if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
+    if (state.campusToday.checkedIn) return;
+    const sessions = (state.campusToday.sessions || []).slice();
+    const lastOut = sessions.reduce((m, s) => Math.max(m, s.out || 0), 0);
+    const now = new Date(); const def = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">When did you reach campus?</div>
+      <div class="hv-d-wing">Today · you'll be checked in from this time</div>
+      <div style="margin-top:12px;"><input class="text-input" type="time" id="lateInT" value="${def}"></div>
+      <div class="hv-note" id="lateInErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="lateInCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="lateInOk" style="margin:0;">Check in</button></div>`;
+    document.getElementById('lateInCancel').addEventListener('click', closeHvSheet);
+    document.getElementById('lateInT').addEventListener('input', () => { document.getElementById('lateInErr').textContent = ''; });
+    document.getElementById('lateInOk').addEventListener('click', async () => {
+      const v = document.getElementById('lateInT').value; const err = document.getElementById('lateInErr');
+      if (!v) { err.textContent = 'Choose the time you arrived'; return; }
+      const [hh, mm] = v.split(':').map(Number); const t = new Date(); t.setHours(hh, mm, 0, 0); const ts = t.getTime();
+      if (ts > Date.now() + 60000) { err.textContent = 'That time is still to come'; return; }
+      if (lastOut && ts < lastOut) { err.textContent = `Your last check-out was at ${formatTime(lastOut)}. Choose a later time.`; return; }
+      if (state.campusToday.checkedIn) { closeHvSheet(); return; }
+      closeHvSheet();
+      sessions.push({ id: genSessionId(), in: ts, out: null, setLater: true });
+      checkFeedback(true);
+      showToast('Checked in from ' + formatTime(ts));
+      await pushSessionUpdate(sessions);
+      checkLocationOnce();
+    });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+
   function checkFeedback(checkingIn) {
     try { if (navigator.vibrate) navigator.vibrate(checkingIn ? [25, 60, 25] : 35); } catch (err) { /* ignore */ }
     const card = document.getElementById('statusCard');
@@ -8438,7 +8526,7 @@
       return `
         <div class="class-card" style="padding:12px 14px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-            <div class="class-title" style="font-size:13px;">Session ${i + 1}${s.out == null ? ' · In progress' : ''}</div>
+            <div class="class-title" style="font-size:13px;">Session ${i + 1}${s.out == null ? ' · In progress' : ''}${s.setLater ? ' · <span style="color:var(--gold);">check-in time set later</span>' : ''}</div>
             <button class="del-btn" data-del-session="${s.id}" aria-label="Delete session">${svgTrash()}</button>
           </div>
           <div style="display:flex; gap:8px;">
@@ -8512,6 +8600,7 @@
   }
 
   document.getElementById('checkBtn').addEventListener('click', performCheckToggle);
+  document.getElementById('lateInBtn').addEventListener('click', openLateCheckIn);
   document.getElementById('sessToggle').addEventListener('click', () => {
     const list = document.getElementById('sessionsList');
     const btn = document.getElementById('sessToggle');
@@ -9627,7 +9716,8 @@
     const endMin = Math.min(match.startMin + duration, 23 * 60 + 59);
     document.getElementById('startTimeInput').value = match.slot.time;
     document.getElementById('endTimeInput').value = `${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`;
-    setSchedHint(`Filled in from your Schedule: ${batch} at ${formatTimeStr(match.slot.time)}. Change anything if needed.`);
+    if (slot.test) state.form.test = true;
+    setSchedHint(`Filled in from your Schedule: ${batch} at ${formatTimeStr(match.slot.time)}${slot.test ? ' · class test ticked' : ''}. Change anything if needed.`);
     syncDurChips();
   }
 
@@ -10835,11 +10925,16 @@
       snap.docs.forEach((d) => { const x = Object.assign({ id: d.id }, d.data()); if ((x.at || 0) < cutoff) d.ref.delete().catch(() => {}); else state.notices.push(x); });
       renderBell();
     }, () => {}));
-    unsubscribers.push(db.collection('timetableImages').where('teachers', 'array-contains', tid).onSnapshot((snap) => {
-      const from = shiftDateStr(mondayOf(todayStr()), -7);
+    const ttImgFrom = shiftDateStr(mondayOf(todayStr()), -7);
+    const ttImgOwnQ = db.collection('timetableImages').where('teachers', 'array-contains', tid);
+    const ttImgQ = (state.canAdmin || state.isCoordinator) ? db.collection('timetableImages').where('weekStart', '>=', ttImgFrom) : ttImgOwnQ;
+    const onTtImgs = (snap) => {
+      const from = ttImgFrom;
       state.myTtImages = snap.docs.map((d) => Object.assign({ id: d.id }, d.data())).filter((x) => x.weekStart >= from).sort((a, b) => (b.weekStart + b.publishedAt).localeCompare(a.weekStart + a.publishedAt));
       renderScheduleNotice();
-    }, () => {}));
+    };
+    // if the wider list can't be read, fall back to the teacher's own pictures
+    unsubscribers.push(ttImgQ.onSnapshot(onTtImgs, () => { if (ttImgQ !== ttImgOwnQ) unsubscribers.push(ttImgOwnQ.onSnapshot(onTtImgs, () => {})); }));
     unsubscribers.push(db.collection('scheduleNotices/' + tid + '/photos').orderBy('uploadedAt', 'desc').limit(MAX_SCHEDULE_PHOTOS).onSnapshot((snap) => {
       state.scheduleNoticePhotos = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
       renderScheduleNotice();
