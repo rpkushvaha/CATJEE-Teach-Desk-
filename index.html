@@ -2076,7 +2076,7 @@
           </button>
           <button class="drow" data-open="photos" style="--i:2">
             <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>
-            <span class="dlabel">My Saved Photos<small>Timetables, notes, anything</small></span>
+            <span class="dlabel">Gallery<small>Timetables, notes, anything</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
           <button class="drow" data-open="settings" style="--i:1">
@@ -2203,11 +2203,11 @@
 
     <!-- MY SAVED PHOTOS -->
     <section class="dpanel dsub" id="dpanel-photos">
-      <div class="dhead"><button class="dicon-btn dback" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><div class="dtitle">My Saved Photos</div></div>
+      <div class="dhead"><button class="dicon-btn dback" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><div class="dtitle">Gallery</div></div>
       <div class="dscroll dbody">
       <div id="scheduleNoticePanel">
         <div id="scheduleNoticeHeader" style="display:none;">
-          <div class="panel-title" style="margin-bottom:0;"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>My Saved Photos</div>
+          <div class="panel-title" style="margin-bottom:0;"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Gallery</div>
           <span id="scheduleNoticeCount" style="font-size:13px; color:var(--muted); font-weight:600;">0/6</span>
         </div>
         <div class="day-card-hint" id="scheduleNoticeHint" style="display:none;">Tap to expand</div>
@@ -2284,7 +2284,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 6.0 · updated 4 Oct 2026</div>
+          <div class="dnote">Version 6.1 · updated 4 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4790,9 +4790,12 @@
     let html = `<div class="chips tt-teachers">${groups.map((x) => `<button type="button" class="chip${g && x.key === g.key ? ' active' : ''}" data-tg-group="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>`;
     if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
-    const pubImg = weekTtImages(state.tt.weekStart).find((x) => x.id === state.tg.docKey);
+    const wImgs = weekTtImages(state.tt.weekStart);
+    const dayImg = wImgs.find((x) => x.id === state.tg.docKey + '~' + state.tg.day);
+    const pubImg = dayImg || wImgs.find((x) => x.id === state.tg.docKey);
+    if (!pubImg && wImgs.some((x) => x.id.indexOf(state.tg.docKey + '~') === 0)) html += `<div class="hv-note" style="text-align:left;">${escapeHtml(WD[dateObj(state.tg.day).getDay()])} ${dateObj(state.tg.day).getDate()} has no published picture yet · pictures of other days are in the Gallery</div>`;
     if (pubImg) {
-      const pDays = ((doc && doc.pubDays) || []).slice().sort();
+      const pDays = dayImg ? [state.tg.day] : ((doc && doc.pubDays) || []).slice().sort();
       const inPic = !pDays.length || pDays.indexOf(state.tg.day) !== -1;
       html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>🗓️ Published timetable picture · tap to view</span></button>`;
       if (pDays.length) html += `<div class="hv-note" style="text-align:left; margin-top:-2px;">In this picture: <b>${escapeHtml(shortDays(pDays))}</b>${inPic ? '' : ` · <span style="color: var(--gold); font-weight:600;">${escapeHtml(WD[dateObj(state.tg.day).getDay()])} ${dateObj(state.tg.day).getDate()} is not published yet</span>`}</div>`;
@@ -4820,7 +4823,7 @@
       const selCells = sel.cells.map((k) => { const [dd, pp, ...rest] = k.split('|'); return tgCell(dd, Number(pp), rest.join('|')); });
       const nEx = selCells.filter((c) => c && c.ex).length; const cls = selCells.filter((c) => c && !c.ex && c.s);
       const allTest = cls.length && cls.every((c) => c.test);
-      html += `<div class="tg-selbar tg-msel"><span><b>${sel.cells.length}</b> selected · tap more cells</span>
+      html += `<div class="tg-selbar tg-msel"><span>${sel.cells.length ? `<b>${sel.cells.length}</b> selected · tap more cells` : 'Tap the cells of the exam or class test'}</span>
         <span class="tg-msel-btns">${cls.length ? `<button type="button" class="btn-secondary" id="tgMTest" style="border-color: var(--line);">${allTest ? 'Remove test' : 'Class test'}</button>` : ''}
         ${nEx ? '<button type="button" class="btn-secondary" id="tgMExDel" style="border-color: var(--line);">Remove exam</button>' : (sel.cells.length ? '<button type="button" class="btn-secondary" id="tgMExam" style="border-color: var(--line);">Exam / note</button>' : '')}
         ${sel.cells.length ? '<button type="button" class="btn-secondary hv-del" id="tgMClear" style="border-color: var(--line);">Clear</button>' : ''}
@@ -4866,11 +4869,11 @@
     </div><div id="tgCopyDayBox"></div>` : ''}
     <div class="tg-actions" style="margin-top:8px;">
       <button type="button" class="btn-secondary" id="tgAbsent" style="border-color: var(--line);">Teacher absent</button>
-      ${editable ? '<button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);">Mark exam</button>' : ''}
+      ${editable ? '<button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);">📝 Exam / Class test</button>' : ''}
       <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">${weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey) ? 'Share image' : 'Timetable image'}</button>
       ${editable ? '<button type="button" class="btn-secondary hv-del" id="tgDelWeek" style="border-color: var(--line);">Delete week</button>' : ''}
     </div>
-    ${editable ? '<div class="hv-note" style="text-align:left;">Tips: press and hold a cell to select several (class test, exam, clear). Tap a period heading (P1, P2…) to change its time, or a batch name to change its room — for this day only.</div>' : '<div class="hv-note" style="text-align:left;">Tip: tap a class to give it to a substitute or swap it with another period.</div>'}`;
+    ${editable ? '<div class="hv-note" style="text-align:left;">Tips: press and hold a cell to select several (class test, exam, clear). Tap a period heading (P1, P2…) to change its time, or a batch name to change its room — for this day only.</div>' : ''}`;
     if (box._html === html) { renderTgCopyBox(); return; } // nothing changed: keep the grid as it is
     box._html = html;
     box.innerHTML = html;
@@ -4923,7 +4926,7 @@
       if (state.tg.swap) { tgSwapPick(d, pi, b); return; }
       const cx = tgCell(d, pi, b);
       if (cx && cx.ex) { openExamBlockSheet(cx); return; }
-      if (!tgEditable()) { if (cx && tgCellIsLive(cx)) openPubCellSheet(cx); else locked(); return; }
+      if (!tgEditable()) { locked(); return; }
       if (state.tg.paint) {
         const c = tgCell(d, pi, b);
         if (c && c.s === state.tg.paint) { tgSetCell(d, pi, b, null); renderTgGrid(); return; }
@@ -4938,7 +4941,7 @@
     on('tgCopyWeek', tgCopyLastWeek);
     on('tgCopyDay', tgCopyDayPicker);
     on('tgImage', tgImage);
-    on('tgViewImg', () => { const x = weekTtImages(state.tt.weekStart).find((y) => y.id === state.tg.docKey); if (x) openImageViewer(x.image, false); });
+    on('tgViewImg', () => { const L = weekTtImages(state.tt.weekStart); const x = L.find((y) => y.id === state.tg.docKey + '~' + state.tg.day) || L.find((y) => y.id === state.tg.docKey); if (x) openImageViewer(x.image, false); });
     on('tgPublish', () => { const pd = Object.keys(tgPendDays()); tgPublish(pd.length === 1 ? pd[0] : undefined); });
     on('tgEditSubj', () => { state.adminTab = 'settings'; state.adminSetOpen = 'adminSubjectsPanel'; renderAdmin(); setTimeout(() => { const p = document.getElementById('adminSubjectsPanel'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); });
     on('tgPublishDay', () => tgPublish(state.tg.day));
@@ -5106,14 +5109,25 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       doc.status = 'published'; doc.publishedAt = Date.now(); doc.periodsUsed = per;
       state.tg.editKey = null; state.tg.paint = null; state.tg.undo = state.tg.undo.filter((x) => x.key !== docId);
       state.tg.saving = true;
+      const wsPub = state.tt.weekStart;
       await state.db.collection('timetables').doc(docId).set(doc);
       state.tg.saving = false; state.tg.dirty = false;
       state.tt.key = '';
       ttCacheStale();
       const tch = timetableTeachers(Object.assign({}, doc));
       if (republish) { const nw = new Date(); state.tg.imgStamp = `Updated: ${nw.getDate()} ${nw.toLocaleDateString('en-GB', { month: 'short' })}, ${formatTimeStr(`${pad(nw.getHours())}:${pad(nw.getMinutes())}`)}`; }
-      const imgP = saveTtImage(docId, tch, republish); state.tg.imgStamp = '';
-      await imgP;
+      const stampTxt = state.tg.imgStamp; state.tg.imgStamp = '';
+      if (dayOnly) {
+        // only this day's picture goes to the gallery; the whole-week picture is kept up to date if there is one
+        const hadDay = await ttImageIds(docId, wsPub).then((ids) => ids);
+        state.tg.imgStamp = hadDay.indexOf(docId + '~' + dayOnly) !== -1 ? stampTxt || ttStampNow() : '';
+        await saveTtImage(docId, tch, hadDay.indexOf(docId + '~' + dayOnly) !== -1, [dayOnly], docId + '~' + dayOnly);
+        state.tg.imgStamp = '';
+        if (hadDay.indexOf(docId) !== -1) { state.tg.imgStamp = ttStampNow(); await saveTtImage(docId, tch, true); state.tg.imgStamp = ''; }
+      } else {
+        state.tg.imgStamp = stampTxt; await saveTtImage(docId, tch, republish); state.tg.imgStamp = '';
+        await deleteDayImages(docId, wsPub);
+      }
       const wsL = state.tt.weekStart;
       const wk = daysLabel(doc.pubDays && doc.pubDays.length ? doc.pubDays : filledDays(doc)) + (republish && dayOnly ? ` (${WD[dateObj(dayOnly).getDay()]} ${dateObj(dayOnly).getDate()} updated)` : '');
       tch.forEach((u) => notify(u, { key: 'tt_' + docId, type: republish ? 'ttu' : 'tt', title: `${republish ? 'Timetable updated' : 'Timetable ready'}: ${wk}`, body: g.label, link: { tab: 'schedule', view: 'grid', ws: wsL } }));
@@ -5387,7 +5401,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     refreshTtImage(Object.assign({ _id: doc._id }, plain), true);
     return true;
   }
-  function tgStartExamSelect() { state.tg.sel = { cells: [] }; state.tg.paint = null; state.tg.copy = null; renderTgGrid(); }
+  function tgStartExamSelect() { state.tg.sel = { cells: [], multi: true }; state.tg.paint = null; state.tg.copy = null; renderTgGrid(); setTimeout(() => { const b = document.querySelector('.tg-msel'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60); }
   function tgToggleSel(d, p, b) {
     const sel = state.tg.sel; const k = `${d}|${p}|${b}`; const i = sel.cells.indexOf(k);
     if (i === -1) sel.cells.push(k); else sel.cells.splice(i, 1);
@@ -5408,7 +5422,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         <div class="sv-tlbl" style="margin:12px 0 6px;">Exam Time</div>
         <div class="sv-times"><div><div class="sv-tlbl">From</div><input class="text-input" type="time" id="exS" value="${escapeHtml(f.start)}"></div><div><div class="sv-tlbl">To</div><input class="text-input" type="time" id="exE" value="${escapeHtml(f.end)}"></div></div>
         <div class="hv-note" style="text-align:left; margin-top:8px;">The exam takes the place of these classes (they come back if you remove the exam). It also appears in the Exams tab for rooms and invigilators.</div>
-        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="exOk" style="margin:0;">Mark exam</button></div>`;
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="exOk" style="margin:0;">Save exam</button></div>`;
       body.querySelectorAll('[data-ext]').forEach((x) => x.addEventListener('click', () => { f.type = f.type === x.getAttribute('data-ext') ? '' : x.getAttribute('data-ext'); keepTimes(); draw(); }));
       body.querySelectorAll('[data-exs]').forEach((x) => x.addEventListener('click', () => { f.subject = f.subject === x.getAttribute('data-exs') ? '' : x.getAttribute('data-exs'); keepTimes(); draw(); }));
       document.getElementById('exCancel').addEventListener('click', closeHvSheet);
@@ -5511,7 +5525,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       }
       clearTimeout(tgSaveTimer); tgSaveTimer = null;
       await state.db.collection('timetables').doc(state.tg.docKey).delete();
-      try { await state.db.collection('timetableImages').doc(state.tg.docKey).delete(); delete state.ttImgs[state.tt.weekStart]; } catch (e) { /* none */ }
+      try { await state.db.collection('timetableImages').doc(state.tg.docKey).delete(); await deleteDayImages(state.tg.docKey, state.tt.weekStart); delete state.ttImgs[state.tt.weekStart]; } catch (e) { /* none */ }
       state.tg.doc = { group: g.key, wing: g.wing, session: g.session, weekStart: state.tt.weekStart, sunday: false, cells: [], status: 'draft', published: [] };
       state.tg.dirty = false; state.tt.key = '';
       renderTgGrid(); showToast('Timetable deleted');
@@ -5633,9 +5647,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     state.tt.weekStart = ws;
     state.abs = { t: (prefill && prefill.t) || '', days: prefill && prefill.date ? [prefill.date] : [], pick: {} };
     state.adminTab = 'tt'; state.tg.mode = 'grid';
-    loadAbsentWeek().then(() => { renderAdmin(); renderAbsent(); });
-    renderAdmin();
-    setTimeout(() => { const b = document.getElementById('absBox'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+    const goAbs = () => { const b = document.getElementById('absBox'); if (b && !b.hidden) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    loadAbsentWeek().then(() => { renderAdmin(); renderAbsent(); setTimeout(goAbs, 80); });
+    renderAdmin(); renderAbsent();
+    setTimeout(goAbs, 80);
   }
   function renderAbsent() {
     const box = document.getElementById('absBox');
@@ -5827,7 +5842,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
 
   // ---------- Published timetable images (shared) ----------
   // timetableImages/{timetableId} = { label, group, weekStart, image (JPEG data URL), publishedAt, teachers: [uid] }
-  // Stored once; shown in each teacher's "My Saved Photos" and on the Admin / Coordinator pages.
+  // Stored once; shown in each teacher's "Gallery" and on the Admin / Coordinator pages.
   function canvasToSmallJpeg(cv) {
     let scale = 1, url = cv.toDataURL('image/jpeg', 0.8);
     while (url.length > 900000 && scale > 0.4) {
@@ -5838,15 +5853,15 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }
     return url;
   }
-  async function saveTtImage(docId, teachers, updated) {
+  async function saveTtImage(docId, teachers, updated, onlyDays, imgId) {
     const g = tgGroup(); if (!g) return;
     const doc0 = state.tg.doc || {};
-    state.tg.imgDays = (doc0.pubDays && doc0.pubDays.length) ? doc0.pubDays : null;
+    state.tg.imgDays = onlyDays && onlyDays.length ? onlyDays.slice() : ((doc0.pubDays && doc0.pubDays.length) ? doc0.pubDays : null);
     const cv = tgImage(true); const shownDays = state.tg.imgDays || tgDays(); state.tg.imgDays = null; if (!cv) return;
     const ws = state.tt.weekStart; const dd = tgDays(); const we = dd[dd.length - 1];
     const label = `${g.label} · ${daysLabel(shownDays)}`;
     try {
-      await state.db.collection('timetableImages').doc(docId).set({ label, group: g.key, weekStart: ws, image: canvasToSmallJpeg(cv), publishedAt: Date.now(), teachers, updated: !!updated });
+      await state.db.collection('timetableImages').doc(imgId || docId).set({ label, group: g.key, weekStart: ws, image: canvasToSmallJpeg(cv), publishedAt: Date.now(), teachers, updated: !!updated, ttId: docId, day: onlyDays && onlyDays.length === 1 ? onlyDays[0] : '' });
       state.ttImgs = state.ttImgs || {}; delete state.ttImgs[ws];
     } catch (err) { /* the timetable itself is published; the picture can be shared from the grid */ }
   }
@@ -6034,13 +6049,26 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     (doc.cells || []).forEach((c) => { [c.t, c.sub && c.sub.t].forEach((u) => { if (u && out.indexOf(u) === -1) out.push(u); }); });
     return out;
   }
+  function ttStampNow() { const nw = new Date(); return `Updated: ${nw.getDate()} ${nw.toLocaleDateString('en-GB', { month: 'short' })}, ${formatTimeStr(`${pad(nw.getHours())}:${pad(nw.getMinutes())}`)}`; }
+  // ids of the pictures saved for one timetable: the whole week (docId) and single days (docId~date)
+  async function ttImageIds(docId, ws) {
+    try { const snap = await state.db.collection('timetableImages').where('weekStart', '==', ws).get(); return snap.docs.map((d) => d.id).filter((id) => id === docId || id.indexOf(docId + '~') === 0); } catch (e) { return []; }
+  }
+  async function deleteDayImages(docId, ws) {
+    const ids = (await ttImageIds(docId, ws)).filter((id) => id !== docId);
+    for (const id of ids) { try { await state.db.collection('timetableImages').doc(id).delete(); } catch (e) { /* ignore */ } }
+    state.ttImgs = state.ttImgs || {}; delete state.ttImgs[ws];
+  }
   async function refreshTtImage(doc, updated) {
     if (!doc || !tgEverPub(doc)) return;
     try {
       const plain = Object.assign({}, doc);
-      const nw = new Date();
-      const stamp = updated ? `Updated: ${nw.getDate()} ${nw.toLocaleDateString('en-GB', { month: 'short' })}, ${formatTimeStr(`${pad(nw.getHours())}:${pad(nw.getMinutes())}`)}` : '';
-      await withTimetable(plain, () => { state.tg.imgStamp = stamp; const p = saveTtImage(doc._id, timetableTeachers(doc), updated); state.tg.imgStamp = ''; return p; });
+      const stamp = updated ? ttStampNow() : '';
+      const ids = await ttImageIds(doc._id, doc.weekStart);
+      for (const id of ids) {
+        const day = id === doc._id ? null : id.slice(doc._id.length + 1);
+        await withTimetable(plain, () => { state.tg.imgStamp = stamp; const p = saveTtImage(doc._id, timetableTeachers(doc), updated, day ? [day] : null, id); state.tg.imgStamp = ''; return p; });
+      }
     } catch (e) { state.tg.imgStamp = ''; }
   }
 
