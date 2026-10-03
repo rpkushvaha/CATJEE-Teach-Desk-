@@ -756,6 +756,24 @@
   .ad-exam { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
   .ad-exam + .ad-exam { border-top: 1px solid var(--line); }
   .ad-exam.static { cursor: default; }
+  .trep-nav { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
+  .trep-nav #trepLabel { text-align: center; font-weight: 700; font-size: 15px; }
+  .trep-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 10px; }
+  .trep-t { border-collapse: collapse; font-size: 11.5px; min-width: 100%; }
+  .trep-t th, .trep-t td { border: 1px solid #9CA3AF; padding: 4px 6px; text-align: center; white-space: nowrap; color: #111; }
+  .trep-t thead th { background: #FFFF00; font-weight: 700; }
+  .trep-t thead tr.trep-h0 th { background: #FFC000; font-size: 13px; }
+  .trep-t thead tr.trep-h1 th { background: #E26B0A; color: #111; font-size: 12.5px; }
+  .trep-t td.trep-n { text-align: left; }
+  .trep-t thead tr.trep-h0 th, .trep-t thead tr.trep-h1 th { text-align: left; }
+  .trep-stick { position: sticky; left: 8px; display: inline-block; }
+  .trep-nav #trepLabel { font-size: 14px; }
+  .trep-t tbody tr { background: #fff; }
+  .trep-t tfoot td { background: #fff; font-weight: 700; }
+  .trep-miss { font-size: 12.5px; color: var(--muted-2); }
+  .trep-t td.trep-n { cursor: pointer; }
+  .trep-tset { font-size: 10.5px; font-weight: 600; color: #B45309; background: rgba(217,119,6,.12); border-radius: 999px; padding: 1px 6px; margin-left: 4px; }
+  .trep-miss b { color: #B45309; }
   .ad-exam { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .ex-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .ex-st { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; background: var(--neutral-soft); color: var(--muted-2); }
@@ -1897,6 +1915,18 @@
         <div class="admin-sub" id="adminReportMsg" style="text-align:center;"></div>
       </section>
 
+      <section class="tsec" id="trepSec" data-atab="reports">
+        <div class="tsec-head"><div class="tsec-title">Teaching Report</div></div>
+        <div class="admin-sub" style="margin:0;">Classes of every teacher, batch-wise — from the published timetable, checked against the classes teachers filled in.</div>
+        <div class="chips" id="trepMode"><button type="button" class="chip active" data-trep="week">Weekly</button><button type="button" class="chip" data-trep="month">Monthly</button></div>
+        <div class="trep-nav"><button type="button" class="hv-arrow" id="trepPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div id="trepLabel"></div><button type="button" class="hv-arrow" id="trepNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+        <div id="trepBox"><div class="skel short"></div></div>
+        <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <button type="button" class="btn-secondary" id="trepImg" style="border-color: var(--line);">Share picture</button>
+          <button type="button" class="btn-secondary" id="trepCsv" style="border-color: var(--line);">Excel (CSV)</button>
+        </div>
+      </section>
+
       <div class="tsec-head" data-atab="settings"><div class="tsec-title">Settings</div><div class="tsec-meta">Tap a setting to open it</div></div>
       <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Class / Batch List</div>
@@ -2284,7 +2314,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 6.1 · updated 4 Oct 2026</div>
+          <div class="dnote">Version 6.4 · updated 4 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4106,7 +4136,7 @@
       snap.docs.forEach((d) => {
         const data = d.data() || {};
         list.push(d.id);
-        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher' };
+        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', sal: data.salutation || '' };
         resolvedAdminNameIds.add(d.id);
       });
       state.adminTeacherIds = list;
@@ -5489,6 +5519,22 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     } catch (e) { /* offline: only the grid's own exams */ }
     return ids;
   }
+  // exams shared with other groups' batches: only this group's batches come out of them
+  async function tgWeekSharedExams(g, skipIds) {
+    const out = [];
+    try {
+      const ws = state.tt.weekStart; const we = shiftDateStr(ws, 6);
+      const snap = await state.db.collection('exams').where('date', '>=', ws).where('date', '<=', we).get();
+      snap.docs.forEach((d) => {
+        if (skipIds.indexOf(d.id) !== -1) return;
+        const e = d.data() || {}; if (!(e.date >= ws && e.date <= we)) return;
+        const sc = expandScope(e.scope || []);
+        const mine = sc.filter((b) => g.batches.indexOf(b) !== -1);
+        if (mine.length && mine.length < sc.length) out.push({ id: d.id, e, keep: sc.filter((b) => g.batches.indexOf(b) === -1) });
+      });
+    } catch (e) { /* offline */ }
+    return out;
+  }
   // Delete exams from everywhere: the exam itself (rooms and duties live inside it) and its cells in any timetable,
   // where the classes it replaced come back.
   async function deleteExamsEverywhere(ids) {
@@ -5512,9 +5558,15 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const pub = (doc.published || []).length;
     const g = tgGroup();
     const exIds = await tgWeekExamIds(doc, g);
-    const ok = await showConfirm(`${g.label}, week of ${dayHeading(state.tt.weekStart)}.\n${pub ? `${pub} published classes will also be removed from the teachers' schedules.\n` : ''}${exIds.length ? `${exIds.length} exam${exIds.length === 1 ? '' : 's'} of these batches this week will also be deleted everywhere (Exams tab, rooms and invigilation duties).` : 'There are no exams in this week.'}`, 'Delete this week\'s timetable?', 'Delete');
+    const shared = await tgWeekSharedExams(g, exIds);
+    const ok = await showConfirm(`${g.label}, week of ${dayHeading(state.tt.weekStart)}.\n${pub ? `${pub} published classes will also be removed from the teachers' schedules.\n` : ''}${exIds.length ? `${exIds.length} exam${exIds.length === 1 ? '' : 's'} of these batches this week will also be deleted everywhere (Exams tab, rooms and invigilation duties).` : 'There are no exams only for these batches this week.'}${shared.length ? `\n${shared.length} exam${shared.length === 1 ? ' is' : 's are'} shared with other batches: only these batches are taken out, the exam stays for the others.` : ''}`, 'Delete this week\'s timetable?', 'Delete');
     if (!ok) return;
     try {
+      for (const x of shared) {
+        const rooms = planOf(x.e).map((r) => Object.assign({}, r, { scope: (r.scope || []).length ? expandScope(r.scope).filter((bb) => x.keep.indexOf(bb) !== -1) : (r.scope || []) })).filter((r, i) => !(planOf(x.e)[i].scope || []).length || r.scope.length);
+        const upd = { scope: x.keep, plan: { rooms }, invigilators: planTeachers(rooms), room: rooms.map((r) => r.room).join(', ') };
+        try { await state.db.collection('exams').doc(x.id).set(upd, { merge: true }); } catch (e) { /* offline */ }
+      }
       for (const id of exIds) { try { await state.db.collection('exams').doc(id).delete(); } catch (e) { /* already gone */ } }
       if (state.tgExams) { state.tgExams.list = (state.tgExams.list || []).filter((x) => exIds.indexOf(x.id) === -1); state.tgExams.at = 0; }
       const keys = doc.published || [];
@@ -6316,6 +6368,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     document.querySelectorAll('#view-admin [data-atab]').forEach((el) => {
       el.classList.toggle('atab-off', el.getAttribute('data-atab').split(' ').indexOf(t) === -1);
     });
+    if (t === 'reports' && typeof trepEnsure === 'function') trepEnsure();
     const dated = t !== 'settings' && t !== 'tt';
     document.getElementById('adminDateSub').classList.toggle('atab-off', !dated);
     document.getElementById('adminDateCalIcon').classList.toggle('atab-off', !dated);
@@ -7079,6 +7132,220 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       try { await deleteExamsEverywhere(list); state.exSel = null; renderAdmin(); showToast(`${list.length} exam${list.length === 1 ? '' : 's'} deleted`); } catch (err) { flashOffline(err); }
     });
   }
+  // =====================================================================
+  // Teaching Report: classes per teacher and batch for a week or a month.
+  // A class counts when it is in a published timetable AND the teacher filled it in; classes a teacher filled in
+  // that are not in a timetable (extra / remedial) count too. Timetable classes not filled in are listed apart.
+  // Units: up to 1 h 10 min = 1 class, up to 1 h 45 min = 1.5, then +0.5 for every further 30 min.
+  // =====================================================================
+  state.trep = state.trep || { mode: 'week', anchor: '', key: '', data: null, busy: false };
+  function trepUnits(min) { if (!(min > 0)) return 1; if (min <= 70) return 1; if (min <= 105) return 1.5; return 1.5 + Math.ceil((min - 105) / 30) * 0.5; }
+  function trepRange() {
+    const t = state.trep; const a = t.anchor || todayStr();
+    if (t.mode === 'month') { const d = dateObj(a); const from = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-01`; const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); return { from, to: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(last)}` }; }
+    const ws = mondayOf(a); return { from: ws, to: shiftDateStr(ws, 6) };
+  }
+  function trepTitle() {
+    const r = trepRange(); const f = dateObj(r.from), z = dateObj(r.to);
+    if (state.trep.mode === 'month') return f.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    const z2 = dateObj(shiftDateStr(r.to, -1));
+    return `${f.getDate()} ${f.toLocaleDateString('en-GB', { month: 'long' })} – ${pad(z2.getDate())} ${z2.toLocaleDateString('en-GB', { month: 'long' })} ${z.getFullYear()}`;
+  }
+  // columns: SCHOOL (morning, one per batch), REMEDIAL (special, one), COACHING (evening, one per batch), FOUNDATION (one per session)
+  function trepColumns() {
+    const cols = []; const heads = [];
+    ttGroups().forEach((g) => {
+      const fnd = /foundation/i.test(g.wing) && !/pre/i.test(g.wing);
+      const head = fnd ? 'FOUNDATION' : (g.session === 'morning' ? 'SCHOOL' : g.session === 'evening' ? 'COACHING' : 'SCHOOL');
+      const nth = (b) => { const n = classOfBatchNum(b); return n ? n + 'th' : ''; };
+      if (fnd || g.session === 'special') {
+        const nums = g.batches.map(nth).filter((v, i, a) => v && a.indexOf(v) === i);
+        cols.push({ key: g.key, head, label: fnd ? (nums.join(' & ') || g.label) : 'REMEDIAL CLASS', batches: g.batches.slice() });
+      } else {
+        g.batches.forEach((b) => { const m = String(b).match(/batch\s*(\d+)/i); cols.push({ key: g.key + '#' + b, head, label: `${nth(b)}${m ? ' B-' + m[1] : ''}` || b, batches: [b] }); });
+      }
+    });
+    cols.forEach((c, i) => { const prev = heads[heads.length - 1]; if (prev && prev.head === c.head && prev.end === i - 1 && cols[i - 1].key.split('#')[0] === c.key.split('#')[0]) prev.end = i; else heads.push({ head: c.head, start: i, end: i }); });
+    return { cols, heads };
+  }
+  async function trepBuild() {
+    const t = state.trep; const r = trepRange(); const key = t.mode + '|' + r.from;
+    if (t.busy) return; t.busy = true; t.key = key; trepRender();
+    try {
+      // published timetable classes of the period
+      const tt = [];
+      for (let ws = mondayOf(r.from); ws <= r.to; ws = shiftDateStr(ws, 7)) {
+        const docs = await loadWeekTimetables(ws, true);
+        docs.forEach((doc) => (doc.cells || []).forEach((c) => {
+          if (c.ex || c.d < r.from || c.d > r.to) return;
+          const T = effT(c); if (!T) return;
+          if ((doc.published || []).indexOf(T + '/' + slotIdFor(doc._id, c)) === -1) return;
+          const tm = cellTimes(doc, c); if (!tm) return;
+          tt.push({ t: T, d: c.d, b: c.b, a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p });
+        }));
+      }
+      // classes the teachers filled in
+      const snap = await state.db.collection('classes').where('date', '>=', r.from).where('date', '<=', r.to).get();
+      const logs = snap.docs.map(normDoc).filter((c) => c.entryType !== 'activity' && c.date >= r.from && c.date <= r.to && !c.cancelled)
+        .map((c) => ({ c, t: c.teacherId, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
+      const used = new Set(); const missing = [];
+      tt.forEach((x) => {
+        const hit = logs.find((l) => l.t === x.t && l.d === x.d && l.bs.indexOf(x.b) !== -1 && (l.a == null || l.z == null || (l.a < x.z && x.a < l.z)));
+        if (hit) used.add(hit); else missing.push(x);
+      });
+      t.data = { logs, missing, from: r.from, to: r.to, ttCount: tt.length };
+    } catch (err) { t.data = { error: true }; }
+    t.busy = false; trepRender();
+  }
+  function trepTable() {
+    const D = state.trep.data; if (!D || D.error) return null;
+    const { cols, heads } = trepColumns();
+    const colOf = (b) => cols.findIndex((c) => c.batches.indexOf(b) !== -1);
+    const rows = {}; const other = {};
+    const add = (u, i, v) => { rows[u] = rows[u] || {}; rows[u][i] = (rows[u][i] || 0) + v; };
+    const spans = {}; // combined classes spanning neighbour columns: u -> [{a,z,v}]
+    D.logs.forEach((l) => {
+      const v = trepUnits(l.a != null && l.z != null ? l.z - l.a : 0);
+      const idx = l.bs.map(colOf).filter((i) => i !== -1).filter((i, k, a) => a.indexOf(i) === k).sort((p, q) => p - q);
+      if (!idx.length) { other[l.t] = (other[l.t] || 0) + v; return; }
+      if (idx.length === 1) { add(l.t, idx[0], v); return; }
+      const contiguous = idx[idx.length - 1] - idx[0] === idx.length - 1;
+      if (contiguous) { (spans[l.t] = spans[l.t] || []).push({ a: idx[0], z: idx[idx.length - 1], v }); return; }
+      add(l.t, idx[0], v);
+    });
+    const ids = ttTeacherIds().slice();
+    Object.keys(rows).concat(Object.keys(spans), Object.keys(other)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u)) ids.push(u); });
+    ids.sort((a, b) => ttName(a).localeCompare(ttName(b)));
+    const hasOther = Object.keys(other).length > 0;
+    const list = ids.map((u) => {
+      const cells = cols.map((c, i) => (rows[u] && rows[u][i]) || 0);
+      const sp = spans[u] || [];
+      const total = cells.reduce((a, b) => a + b, 0) + sp.reduce((a, x) => a + x.v, 0) + (other[u] || 0);
+      return { u, name: trepName(u), cells, spans: sp, other: other[u] || 0, total };
+    });
+    return { cols, heads, list, hasOther, grand: list.reduce((a, x) => a + x.total, 0) };
+  }
+  const trepFmt = (v) => (v ? String(Math.round(v * 10) / 10) : '');
+  // Mr. / Ms. before the name: from "Address me as" (Sir → Mr., Ma'am → Ms.); a title tapped in the report wins
+  function trepTitleOf(u) { const t = (state.staffTitles || {})[u]; if (t) return t; const sal = state.adminNames[u] && state.adminNames[u].sal; return sal === 'sir' ? 'Mr.' : sal === 'maam' ? 'Ms.' : ''; }
+  function trepName(u) { const t = trepTitleOf(u); const n = ttName(u); return t ? `${t} ${n}` : n; }
+  async function trepToggleTitle(u) {
+    const cur = trepTitleOf(u); const next = cur === '' ? 'Mr.' : cur === 'Mr.' ? 'Ms.' : '';
+    const map = Object.assign({}, state.staffTitles || {}); if (next) map[u] = next; else delete map[u];
+    state.staffTitles = map; trepRender();
+    try { await state.db.doc('settings/staffTitles').set({ map }); } catch (err) { flashOffline(err); }
+  }
+  function trepRowCells(row, cols) {
+    // a class taken with neighbour batches together is one merged cell (when those cells are otherwise empty)
+    const cells = row.cells.slice(); const merges = [];
+    row.spans.forEach((x) => {
+      const same = merges.find((m) => m.a === x.a && m.z === x.z);
+      if (same) { same.v += x.v; return; }
+      const free = cells.slice(x.a, x.z + 1).every((v) => !v) && !merges.some((m) => m.a <= x.z && x.a <= m.z);
+      if (free) merges.push({ a: x.a, z: x.z, v: x.v }); else cells[x.a] += x.v;
+    });
+    const out = []; let i = 0;
+    while (i < cols.length) { const m = merges.find((q) => q.a === i); if (m) { out.push({ v: m.v, span: m.z - m.a + 1 }); i = m.z + 1; } else { out.push({ v: cells[i], span: 1 }); i++; } }
+    return out;
+  }
+  function trepRender() {
+    const box = document.getElementById('trepBox'); if (!box) return;
+    const t = state.trep;
+    document.getElementById('trepLabel').textContent = trepTitle();
+    document.querySelectorAll('#trepMode [data-trep]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep') === t.mode));
+    if (t.busy || !t.data) { box.innerHTML = '<div class="skel short"></div>'; return; }
+    if (t.data.error) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the report. Check the internet and try again.</div>'; return; }
+    const T = trepTable();
+    const ttl = state.trep.mode === 'month' ? 'Monthly Teaching Report' : 'Weekly Teaching Report';
+    const per = state.trep.mode === 'month' ? 'Month' : 'Week';
+    const nCols = T.cols.length + (T.hasOther ? 1 : 0);
+    let h = `<div class="trep-scroll"><table class="trep-t"><thead>
+      <tr class="trep-h0"><th colspan="${nCols + 3}"><span class="trep-stick">${escapeHtml(ttl)}</span></th></tr>
+      <tr class="trep-h1"><th colspan="${nCols + 3}"><span class="trep-stick">${per}: ${escapeHtml(trepTitle())}</span></th></tr>
+      <tr><th rowspan="2">S.N</th><th rowspan="2">NAME OF FACULTY</th>${T.heads.map((x) => `<th colspan="${x.end - x.start + 1}">${escapeHtml(x.head)}</th>`).join('')}${T.hasOther ? '<th>OTHER</th>' : ''}<th rowspan="2">TOTAL</th></tr>
+      <tr>${T.cols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('')}${T.hasOther ? '<th>Batches</th>' : ''}</tr></thead><tbody>`;
+    T.list.forEach((row, i) => {
+      h += `<tr><td>${i + 1}</td><td class="trep-n" data-trep-u="${escapeHtml(row.u)}" role="button">${escapeHtml(row.name)}${trepTitleOf(row.u) ? '' : ' <span class="trep-tset">+ Mr./Ms.</span>'}</td>${trepRowCells(row, T.cols).map((c) => `<td${c.span > 1 ? ` colspan="${c.span}"` : ''}>${trepFmt(c.v)}</td>`).join('')}${T.hasOther ? `<td>${trepFmt(row.other)}</td>` : ''}<td><b>${trepFmt(row.total) || ''}</b></td></tr>`;
+    });
+    h += `</tbody><tfoot><tr><td colspan="${nCols + 2}" style="text-align:right;">Total:</td><td>${trepFmt(T.grand) || '0'}</td></tr></tfoot></table></div>`;
+    const miss = t.data.missing || [];
+    if (miss.length) {
+      const by = {}; miss.forEach((x) => { (by[x.t] = by[x.t] || []).push(x); });
+      h += `<div class="trep-miss"><b>⚠️ Not filled in yet (${miss.length}) · not counted:</b> ${Object.keys(by).sort((a, b) => ttName(a).localeCompare(ttName(b))).map((u) => `${escapeHtml(trepName(u))} ${by[u].length}`).join(' · ')}</div>`;
+    }
+    if (T.list.some((row) => !trepTitleOf(row.u))) h += '<div class="hv-note" style="text-align:left;">Mr. / Ms. comes from Sir / Ma\'am chosen by the teacher. For a name without it, tap the name to set Mr. or Ms.</div>';
+    h += '<div class="hv-note" style="text-align:left;">1 class = up to 1 h 10 min · 1.5 = up to 1 h 45 min (e.g. 1 h 15 min) · a class taken with two batches together counts once.</div>';
+    box.innerHTML = h;
+    box.querySelectorAll('[data-trep-u]').forEach((td) => td.addEventListener('click', () => trepToggleTitle(td.getAttribute('data-trep-u'))));
+  }
+  function trepEnsure() { const r = trepRange(); if (state.trep.key !== state.trep.mode + '|' + r.from || !state.trep.data) trepBuild(); else trepRender(); }
+  function trepCanvas() {
+    const T = trepTable(); if (!T) return null;
+    const nC = T.cols.length + (T.hasOther ? 1 : 0);
+    const wSN = 50, wName = 220, wC = 92, wTot = 80; const W = wSN + wName + wC * nC + wTot + 2;
+    const hT = 36, hH = 28, hR = 26; const H = hT * 2 + hH * 2 + hR * (T.list.length + 1) + 2;
+    const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
+    const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#7F7F7F'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw, bh); };
+    const tx = (s, cx, cy, size, bold, align, maxW) => { x.fillStyle = '#000'; x.font = `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; let f = size; while (maxW && x.measureText(s).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(s, cx, cy); };
+    let y = 1;
+    box(1, y, W - 2, hT, '#FFC000'); tx(state.trep.mode === 'month' ? 'Monthly Teaching Report' : 'Weekly Teaching Report', W / 2, y + hT / 2, 20, true); y += hT;
+    box(1, y, W - 2, hT, '#E26B0A'); tx(`${state.trep.mode === 'month' ? 'Month' : 'Week'}: ${trepTitle()}`, W / 2, y + hT / 2, 18, true); y += hT;
+    const x0 = 1 + wSN + wName; const cx = (i) => x0 + wC * i;
+    box(1, y, wSN, hH * 2, '#FFFF00'); tx('S.N', 1 + wSN / 2, y + hH, 13, true);
+    box(1 + wSN, y, wName, hH * 2, '#FFFF00'); tx('NAME OF FACULTY', 1 + wSN + wName / 2, y + hH, 13, true);
+    T.heads.forEach((hd) => { box(cx(hd.start), y, wC * (hd.end - hd.start + 1), hH, '#FFFF00'); tx(hd.head, cx(hd.start) + wC * (hd.end - hd.start + 1) / 2, y + hH / 2, 13, true, 'center', wC * (hd.end - hd.start + 1) - 6); });
+    if (T.hasOther) { box(cx(T.cols.length), y, wC, hH, '#FFFF00'); tx('OTHER', cx(T.cols.length) + wC / 2, y + hH / 2, 13, true); }
+    T.cols.forEach((c, i) => { box(cx(i), y + hH, wC, hH, '#FFFF00'); tx(c.label, cx(i) + wC / 2, y + hH * 1.5, 13, true, 'center', wC - 6); });
+    if (T.hasOther) { box(cx(T.cols.length), y + hH, wC, hH, '#FFFF00'); tx('Batches', cx(T.cols.length) + wC / 2, y + hH * 1.5, 12, true); }
+    box(cx(nC), y, wTot, hH * 2, '#FFFF00'); tx('TOTAL', cx(nC) + wTot / 2, y + hH, 13, true);
+    y += hH * 2;
+    T.list.forEach((row, ri) => {
+      box(1, y, wSN, hR, '#fff'); tx(String(ri + 1), 1 + wSN / 2, y + hR / 2, 13);
+      box(1 + wSN, y, wName, hR, '#fff'); tx(row.name, 1 + wSN + 6, y + hR / 2, 13, false, 'left', wName - 10);
+      let i = 0; trepRowCells(row, T.cols).forEach((c) => { box(cx(i), y, wC * c.span, hR, '#fff'); tx(trepFmt(c.v), cx(i) + wC * c.span / 2, y + hR / 2, 13); i += c.span; });
+      if (T.hasOther) { box(cx(T.cols.length), y, wC, hR, '#fff'); tx(trepFmt(row.other), cx(T.cols.length) + wC / 2, y + hR / 2, 13); }
+      box(cx(nC), y, wTot, hR, '#fff'); tx(trepFmt(row.total), cx(nC) + wTot / 2, y + hR / 2, 13, true);
+      y += hR;
+    });
+    box(1, y, cx(nC) - 1, hR, '#fff'); tx('Total:', cx(nC) - 8, y + hR / 2, 13, true, 'right');
+    box(cx(nC), y, wTot, hR, '#fff'); tx(trepFmt(T.grand) || '0', cx(nC) + wTot / 2, y + hR / 2, 13, true);
+    return cv;
+  }
+  function trepFileTag() { const r = trepRange(); return state.trep.mode === 'month' ? r.from.slice(0, 7) : r.from; }
+  (function bindTeachingReport() {
+    const on = (id, f) => { const el = document.getElementById(id); if (el) el.addEventListener('click', f); };
+    document.querySelectorAll('#trepMode [data-trep]').forEach((b) => b.addEventListener('click', () => { state.trep.mode = b.getAttribute('data-trep'); state.trep.data = null; trepEnsure(); }));
+    const move = (dir) => {
+      const a = state.trep.anchor || todayStr();
+      if (state.trep.mode === 'month') { const d = dateObj(a); const n = new Date(d.getFullYear(), d.getMonth() + dir, 1); state.trep.anchor = `${n.getFullYear()}-${pad(n.getMonth() + 1)}-01`; }
+      else state.trep.anchor = shiftDateStr(mondayOf(a), 7 * dir);
+      state.trep.data = null; trepEnsure();
+    };
+    on('trepPrev', () => move(-1)); on('trepNext', () => move(1));
+    on('trepImg', () => {
+      if (state.trep.busy || !state.trep.data || state.trep.data.error) { showToast('The report is still loading', 'error'); return; }
+      const cv = trepCanvas(); if (!cv) return;
+      cv.toBlob((blob) => {
+        const name = `Teaching-Report-${trepFileTag()}.png`;
+        const file = new File([blob], name, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'Teaching Report' }).catch(() => saveFile(name, blob));
+        else saveFile(name, blob);
+      }, 'image/png');
+    });
+    on('trepCsv', () => {
+      const T = trepTable(); if (!T || state.trep.busy) { showToast('The report is still loading', 'error'); return; }
+      const q = (v) => `"${String(v).replace(/"/g, '""')}"`;
+      const L = [[state.trep.mode === 'month' ? 'Monthly Teaching Report' : 'Weekly Teaching Report'], [`${state.trep.mode === 'month' ? 'Month' : 'Week'}: ${trepTitle()}`],
+        ['S.N', 'NAME OF FACULTY', ...T.cols.map((c) => `${c.head} ${c.label}`), ...(T.hasOther ? ['OTHER'] : []), 'TOTAL']];
+      T.list.forEach((row, i) => {
+        const cells = row.cells.slice(); row.spans.forEach((x) => { cells[x.a] = (cells[x.a] || 0) + x.v; });
+        L.push([i + 1, row.name, ...cells.map(trepFmt), ...(T.hasOther ? [trepFmt(row.other)] : []), trepFmt(row.total)]);
+      });
+      L.push(['', 'Total', ...T.cols.map(() => ''), ...(T.hasOther ? [''] : []), trepFmt(T.grand) || '0']);
+      saveFile(`Teaching-Report-${trepFileTag()}.csv`, '\ufeff' + L.map((r) => r.map(q).join(',')).join('\n'), 'text/csv');
+    });
+  })();
   // ---------- Duty Plan inside the New / Edit Exam form ----------
   // Rooms only (the exam's classes are chosen once above). Built when the form opens and rebuilt only on taps,
   // never by the dashboard timer, so time pickers stay open.
@@ -7289,7 +7556,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const newNames = {};
       results.forEach(({ id, data }) => {
         resolvedAdminNameIds.add(id);
-        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher' };
+        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher', sal: (data && data.salutation) || '' };
       });
       state.adminNames = Object.assign({}, state.adminNames, newNames);
       const listEl = document.getElementById('adminTeacherList');
@@ -11231,6 +11498,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     unsubscribers.push(db.doc('settings/periods').onSnapshot((snap) => {
       state.periodSets = (snap.exists && snap.data().groups) || {};
       if (state.tab === 'admin') renderAdmin();
+    }, () => {}));
+    unsubscribers.push(db.doc('settings/staffTitles').onSnapshot((snap) => {
+      state.staffTitles = (snap.exists && snap.data().map) || {};
+      if (typeof trepRender === 'function' && state.trep && state.trep.data) trepRender();
     }, () => {}));
     unsubscribers.push(db.doc('settings/teacherMap').onSnapshot((snap) => {
       state.teacherMap = (snap.exists && snap.data().map) || {};
