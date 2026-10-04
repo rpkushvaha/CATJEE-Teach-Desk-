@@ -974,6 +974,9 @@
   .tg-msel { flex-wrap: wrap; position: sticky; top: 0; z-index: 3; }
   .tg-msel .tg-msel-btns { flex-wrap: wrap; justify-content: flex-end; }
   .tg-c { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .bwp-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+  .bwp { display: flex; flex-direction: column; gap: 6px; }
+  .bwp img { width: 100%; border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; background: #fff; }
   .install-card { display: grid; grid-template-columns: auto 1fr; gap: 10px 12px; align-items: center; }
   .install-card[hidden], #menuInstallRow[hidden] { display: none !important; }
   .install-ic { width: 48px; height: 48px; border-radius: 12px; }
@@ -2359,7 +2362,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 6.9 · updated 4 Oct 2026</div>
+          <div class="dnote">Version 7.0 · updated 4 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4894,6 +4897,7 @@
       const pDays = dayImg ? [state.tg.day] : ((doc && doc.pubDays) || []).slice().sort();
       const inPic = !pDays.length || pDays.indexOf(state.tg.day) !== -1;
       html += `<button type="button" class="tti-wide" id="tgViewImg"><img src="${pubImg.image}" alt="Published timetable"><span>🗓️ Published timetable picture · tap to view</span></button>`;
+      html += `<button type="button" class="btn-secondary" id="tgBatchPics" style="border-color: var(--line); margin-top:2px;">🖼️ Batch-wise pictures (one per batch)</button>`;
       if (pDays.length) html += `<div class="hv-note" style="text-align:left; margin-top:-2px;">In this picture: <b>${escapeHtml(shortDays(pDays))}</b>${inPic ? '' : ` · <span style="color: var(--gold); font-weight:600;">${escapeHtml(WD[dateObj(state.tg.day).getDay()])} ${dateObj(state.tg.day).getDate()} is not published yet</span>`}</div>`;
     }
     const editable = tgEditable();
@@ -5054,6 +5058,7 @@
     on('tgEditDone', () => { state.tg.editKey = null; state.tg.paint = null; renderTgGrid(); });
     on('tgUndo', tgUndo);
     on('tgDiscard', tgDiscard);
+    on('tgBatchPics', tgBatchPictures);
     on('tgExam', tgStartExamSelect);
     on('tgAbsent', () => openAbsent({ date: tgDays().indexOf(todayStr()) !== -1 ? todayStr() : null }));
     on('tgDelWeek', tgDeleteWeek);
@@ -5286,7 +5291,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function filledDays(doc) { return ((doc && doc.cells) || []).map((c) => c.d).concat(Object.keys((doc && doc.dayTimes) || {}).filter((d) => dayNoteOf(doc, d))).filter((v, i, a) => a.indexOf(v) === i).sort(); }
   function tgImage(returnCanvas) {
     const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return null;
-    const bats = g.batches;
+    const one = state.tg.imgBatch || '';
+    const bats = one ? [one] : g.batches;
     const days = (state.tg.imgDays && state.tg.imgDays.length) ? state.tg.imgDays.slice().sort() : tgDays();
     const per = periodsFor(g.key).slice();
     days.forEach((d) => { periodsForDay(g.key, d).forEach((pp, i) => { if (pp.extra && !per[i]) per[i] = pp; }); });
@@ -5298,7 +5304,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const used = days.some((d) => { const pd = periodsForDay(g.key, d); if (pd[i] && !pd[i].off && pd[i].start) return true; return pd.some((q, j) => j !== i && j < periodsFor(g.key).length && q && !q.off && q.start && hhmmToMin(q.start) < hhmmToMin(pp0.start) && hhmmToMin(q.end) > hhmmToMin(pp0.start)); });
       if (!used && perIdx.length > 1) perIdx.splice(k, 1);
     }
-    const colDate = 150, colClass = 120, colP = 150, colBr = 70, rowH = 46, headH = 150;
+    const colDate = 150, colClass = 120, colP = 150, colBr = 70, rowH = one ? 64 : 46, headH = one ? 196 : 150;
     const cols = []; perIdx.forEach(([i, pp], k) => { if (k > 0 && hhmmToMin(pp.start) > hhmmToMin(perIdx[k - 1][1].end)) cols.push({ br: true, a: perIdx[k - 1][1].end, z: pp.start }); cols.push({ p: i, pp, n: cols.filter((q) => !q.br).length + 1 }); });
     const W = colDate + colClass + cols.reduce((s, c) => s + (c.br ? colBr : colP), 0) + 40;
     const topX = state.tg.imgStamp ? 20 : 0;
@@ -5311,9 +5317,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     box(20, 12, W - 40, 40, '#FFFF00');
     txt(`${g.wing.toUpperCase()} (${SESS_LABEL[g.session].toUpperCase()} BATCH) TIME-TABLE (${daysLabel(days, true)})`, W / 2, 32, 22, true, '#000', W - 60);
     if (state.tg.imgStamp) { x.font = '700 13px Arial, sans-serif'; x.fillStyle = '#C00000'; x.textAlign = 'right'; x.textBaseline = 'middle'; x.fillText(state.tg.imgStamp, W - 24, 64); }
-    const rooms = bats.filter(batchRoom).map((b) => `${b}: ${batchRoom(b)} Room`).join('     ');
-    if (rooms) txt(rooms, W / 2, 68 + topX, 15, true, '#C00000', W - 60);
-    let cx = 20; const y0 = 86 + topX;
+    if (one) {
+      txt(one.toUpperCase(), W / 2, 78 + topX, 22, true, '#000', W - 60);
+      const rm = batchRoom(one); if (rm) txt(`${rm} ROOM`, W / 2, 110 + topX, 20, true, '#C00000', W - 60);
+    } else {
+      const rooms = bats.filter(batchRoom).map((b) => `${b}: ${batchRoom(b)} Room`).join('     ');
+      if (rooms) txt(rooms, W / 2, 68 + topX, 15, true, '#C00000', W - 60);
+    }
+    let cx = 20; const y0 = (one ? 132 : 86) + topX;
     box(cx, y0, colDate, 64, '#F8CBAD'); txt('DATE', cx + colDate / 2, y0 + 32, 15, true); cx += colDate;
     box(cx, y0, colClass, 64, '#F8CBAD'); txt('CLASS', cx + colClass / 2, y0 + 32, 15, true); cx += colClass;
     cols.forEach((c) => {
@@ -5344,12 +5355,13 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const exIds = (doc.cells || []).filter((c) => c.d === d && c.ex).map((c) => c.ex).filter((v, i, arr) => arr.indexOf(v) === i);
       exIds.forEach((id) => {
         const cs = (doc.cells || []).filter((c) => c.d === d && c.ex === id && bats.indexOf(c.b) !== -1);
+        if (!cs.length) return;
         const bi = cs.map((c) => bats.indexOf(c.b)), pi = cs.map((c) => c.p);
         const b0 = Math.min(...bi), b1 = Math.max(...bi), p0 = Math.min(...pi), p1 = Math.max(...pi);
         const rect = cs.length === (b1 - b0 + 1) * (p1 - p0 + 1);
         const [type, subj] = String(cs[0].s).split(' · ');
         const drawEx = (bx, by, bw, bh) => {
-          box(bx, by, bw, bh, '#FFFFFF');
+          box(bx, by, bw, bh, shade);
           const lines = [[type, '#000'], ...(subj ? [[subj.toUpperCase(), '#C00000']] : [])];
           fitLines(x, lines.map(([t, col]) => [t, col, 15]), bx + bw / 2, by, bw, bh);
         };
@@ -5386,10 +5398,12 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
             }
           }
           box(o.x, ry, o.w, rH, shade);
+          // a batch that has an exam this day: its empty periods show "–"
+          if (!cell && (doc.cells || []).some((c) => c.d === d && c.b === b && c.ex)) { txt('–', o.x + o.w / 2, ry + rowH / 2, 16, true); return; }
           if (!cell) return;
           if (cell.ex) { fitLines(x, [[cell.s, '#C00000', 12]], o.x + o.w / 2, ry, o.w, rowH); return; }
           const chg = perD[p] && perD[p].changed && (perD[p].start !== o.c.pp.start || perD[p].end !== o.c.pp.end);
-          const lines = [[effS(cell), cell.sub ? '#C00000' : '#000', 15], ...(cell.sub ? [['(Sub)', '#C00000', 11]] : []), ...(cell.test ? [['(Class Test)', '#000', 12]] : []), ...(chg ? [[`(${fmtS(perD[p].start)} – ${fmtS(perD[p].end)})`, '#C00000', 11]] : [])];
+          const lines = [[effS(cell), cell.sub ? '#C00000' : '#000', 15], ...(cell.sub ? [['(Sub)', '#C00000', 11]] : []), ...(cell.test ? [['(Class Test)', '#000', 12]] : []), ...(one && cell.cb ? [[`(with ${tgComboOf(doc.cells, cell).filter((m) => m.b !== b).map((m) => gridBatchLabel(m.b).replace(' · ', ' ')).join(', ')})`, '#1F4E79', 11]] : []), ...(chg ? [[`(${fmtS(perD[p].start)} – ${fmtS(perD[p].end)})`, '#C00000', 11]] : [])];
           const rDay = doc.dayRooms && doc.dayRooms[d] && doc.dayRooms[d][b];
           if (rDay) lines.push([`(Room ${rDay})`, '#C00000', 11]);
           fitLines(x, lines, o.x + o.w / 2, ry, o.w, rH);
@@ -6388,6 +6402,33 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     (doc.cells || []).forEach((c) => { [c.t, c.sub && c.sub.t].forEach((u) => { if (u && out.indexOf(u) === -1) out.push(u); }); });
     return out;
   }
+  // one picture per batch, each with only that batch's classes, its name and room — for the students' groups
+  async function tgBatchPictures() {
+    const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return;
+    if (tgPendingCount()) { showToast('Publish the changes first — the batch pictures show the published timetable', 'error'); return; }
+    const days = ((doc.pubDays || []).length ? doc.pubDays : tgDays()).slice().sort();
+    const bats = g.batches.filter((b) => (doc.cells || []).some((c) => c.b === b && days.indexOf(c.d) !== -1));
+    if (!bats.length) { showToast('No classes published yet', 'error'); return; }
+    const files = []; const urls = [];
+    for (const b of bats) {
+      state.tg.imgBatch = b; state.tg.imgDays = days;
+      let cv = null; try { cv = tgImage(true); } catch (e) { cv = null; console.error('batch picture', b, e); }
+      state.tg.imgBatch = ''; state.tg.imgDays = null;
+      if (!cv) continue;
+      const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
+      const name = `Timetable-${b}-${days[0]}.png`.replace(/[^\w.-]+/g, '-');
+      files.push(new File([blob], name, { type: 'image/png' })); urls.push({ b, url: cv.toDataURL('image/png'), blob, name });
+    }
+    if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files, title: 'Batch-wise timetable' }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">Batch-wise pictures</div><div class="hv-d-wing">${escapeHtml(g.label)} · ${escapeHtml(shortDays(days))}</div>
+      <div class="bwp-list">${urls.map((u, i) => `<div class="bwp"><img src="${u.url}" alt="${escapeHtml(u.b)}" data-bwp-v="${i}"><button type="button" class="btn-secondary" data-bwp-s="${i}" style="border-color: var(--line);">Save ${escapeHtml(gridBatchLabel(u.b))}</button></div>`).join('')}</div>
+      <div class="hv-d-btns"><button type="button" class="save-btn" id="bwpOk" style="margin:0;">Done</button></div>`;
+    body.querySelectorAll('[data-bwp-s]').forEach((b) => b.addEventListener('click', () => { const u = urls[+b.getAttribute('data-bwp-s')]; saveFile(u.name, u.blob); }));
+    body.querySelectorAll('[data-bwp-v]').forEach((im) => im.addEventListener('click', () => openZoomViewer(urls[+im.getAttribute('data-bwp-v')].url, { turn: true })));
+    document.getElementById('bwpOk').addEventListener('click', closeHvSheet);
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
   function ttStampNow() { const nw = new Date(); return `Updated: ${nw.getDate()} ${nw.toLocaleDateString('en-GB', { month: 'short' })}, ${formatTimeStr(`${pad(nw.getHours())}:${pad(nw.getMinutes())}`)}`; }
   // ids of the pictures saved for one timetable: the whole week (docId) and single days (docId~date)
   async function ttImageIds(docId, ws) {
@@ -7360,13 +7401,55 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (state.exSel) {
       const live = state.exSel.filter((id) => exams.some((e) => e.id === id)); state.exSel = live;
       html += `<div class="ex-selbar"><span><b>${live.length}</b> selected · tap more exams</span><span><button type="button" class="btn-secondary" id="exSelAll" style="border-color: var(--line);">All</button><button type="button" class="btn-secondary hv-del" id="exSelDel" style="border-color: var(--line);"${live.length ? '' : ' disabled'}>🗑 Delete${live.length ? ' (' + live.length + ')' : ''}</button><button type="button" class="btn-secondary" id="exSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
-    } else if (examRows.length) html += '<div class="hv-note" style="text-align:left; padding:6px 12px 0;">Tap an exam to choose invigilators · press and hold to select several</div>';
+    } else if (examRows.length) {
+      html += '<div class="hv-note" style="text-align:left; padding:6px 12px 0;">Tap an exam to choose invigilators · press and hold to select several</div>';
+      if (exams.some((e) => planOf(e).some((r) => (r.slots || []).some((sl) => (sl.teachers || []).length)))) html += '<div style="padding:6px 12px 0;"><button type="button" class="btn-secondary" id="exDutyPic" style="border-color: var(--line);">📄 Duty sheet picture</button></div>';
+    }
     if (classRows.length) html += `<div class="ad-grp">Class Tests · ${ct.reduce((s2, c) => s2 + testCount(c), 0) || classRows.length}</div>` + classRows.join('');
     if (examRows.length) html += `<div class="ad-grp">Exams · ${examRows.length}</div>` + examRows.join('');
     listEl.innerHTML = html || '<div class="hv-note" style="text-align:left; padding:10px 12px;">No tests or exams for this day.</div>';
     bindAdminExamList(listEl, exams, nameOf);
     renderAdminExamForm(ids, nameOf);
     return alerts;
+  }
+  // "Invigilation Duty of Monday (5th, Oct.)": every room of the day's exams with its invigilators and their timing
+  function dutySheetPicture(exams) {
+    const list = exams.filter((e) => planOf(e).some((r) => (r.slots || []).some((sl) => (sl.teachers || []).length)));
+    if (!list.length) { showToast('Choose invigilators first', 'error'); return; }
+    const date = list[0].date; const dd = dateObj(date);
+    const nth = (n) => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
+    const title = `Invigilation Duty of ${dd.toLocaleDateString('en-GB', { weekday: 'long' })} (${nth(dd.getDate())}, ${dd.toLocaleDateString('en-GB', { month: 'short' })}.)`;
+    const nm = (u) => (typeof trepName === 'function' ? trepName(u) : ttName(u));
+    const fmt = (t) => formatTimeStr(t).replace(/\s?(AM|PM)$/i, '');
+    const blocks = [];
+    list.forEach((e) => {
+      const info = `${examTitle(e)} · ${scopeLabel(e.scope)} · ${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`;
+      planOf(e).forEach((r) => {
+        const rows = []; (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => rows.push([nm(u), `${fmt(sl.start)} - ${fmt(sl.end)}`])));
+        if (rows.length) blocks.push({ room: r.room, info, rows });
+      });
+    });
+    const W = 1100, pad = 40, lh = 34, headH = 70;
+    const infos = list.map((e) => `${examTitle(e)} · ${scopeLabel(e.scope)} · ${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`);
+    let H = 40 + headH + infos.length * 30 + 20; blocks.forEach((b) => { H += 52 + b.rows.length * lh + 30; }); H += 20;
+    const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
+    const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const t = (s, tx, ty, size, bold, align, color) => { x.font = `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`; x.fillStyle = color || '#000'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; x.fillText(s, tx, ty, W - 2 * pad); };
+    let y = 40; t(title, W / 2, y + 20, 34, true, 'center'); y += headH;
+    infos.forEach((s2) => { t('▶  ' + s2, pad + 10, y, 20, true); y += 30; }); y += 20;
+    blocks.forEach((b) => {
+      const bh = 52 + b.rows.length * lh + 10;
+      x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, y, W - 2 * pad, bh);
+      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', W * 0.62, y + 26, 24, true, 'center');
+      b.rows.forEach((rw, i) => { const ry = y + 52 + i * lh + lh / 2; t(rw[0], pad + 14, ry, 22, true); t(rw[1], W * 0.62, ry, 22, false, 'center'); });
+      y += bh + 30;
+    });
+    cv.toBlob(async (blob) => {
+      const name = `Invigilation-Duty-${date}.png`; const file = new File([blob], name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Invigilation duty' }); return; } catch (err) { if (err && err.name === 'AbortError') return; } }
+      openZoomViewer(cv.toDataURL('image/png'));
+      saveFile(name, blob);
+    }, 'image/png');
   }
   function bindAdminExamList(listEl, exams, nameOf) {
     listEl.querySelectorAll('[data-exam]').forEach((row) => {
@@ -7411,6 +7494,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }));
     const on = (i, f) => { const el = document.getElementById(i); if (el) el.addEventListener('click', f); };
     on('exSelX', () => { state.exSel = null; renderAdmin(); });
+    on('exDutyPic', () => dutySheetPicture(exams));
     on('exSelAll', () => { state.exSel = exams.map((e) => e.id); renderAdmin(); });
     on('exSelDel', async () => {
       const list = (state.exSel || []).slice(); if (!list.length) return;
