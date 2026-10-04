@@ -771,6 +771,18 @@
   .trep-t tbody tr { background: #fff; }
   .trep-t tfoot td { background: #fff; font-weight: 700; }
   .trep-miss { font-size: 12.5px; color: var(--muted-2); }
+  .zv { position: fixed; inset: 0; z-index: 9999; background: #111; display: none; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .zv.open { display: flex; }
+  .zv-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; }
+  .zv-z { display: inline-flex; gap: 6px; }
+  .zv-bar button { border: 1px solid #555; background: #222; color: #fff; font: inherit; font-weight: 700; font-size: 14px; border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+  .zv-bar button.on { background: #fff; color: #111; border-color: #fff; }
+  .zv-scroll { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; display: block; }
+  .zv-scroll img { display: block; width: 100%; height: auto; background: #fff; }
+  .zv-hint { color: #bbb; font-size: 12px; text-align: center; padding: 8px; }
+  .trep-pic { display: block; width: 100%; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 0; overflow: hidden; cursor: zoom-in; }
+  .trep-pic img { display: block; width: 100%; height: auto; }
+  .trep-pic span { display: block; font-size: 12px; font-weight: 600; color: var(--gold); padding: 6px; background: var(--card); }
   .trep-t td.trep-n { cursor: pointer; }
   .trep-tset { font-size: 10.5px; font-weight: 600; color: #B45309; background: rgba(217,119,6,.12); border-radius: 999px; padding: 1px 6px; margin-left: 4px; }
   .trep-miss b { color: #B45309; }
@@ -952,6 +964,11 @@
   .tg-chg { color: var(--gold) !important; background: var(--gold-soft) !important; }
   .tg-selbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--neutral-soft); border-radius: 10px; padding: 8px 10px; font-size: 13px; }
   .tg-selbar span:last-child { display: flex; gap: 6px; }
+  .sv-row { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .sv-row.sv-picked { outline: 2.5px solid var(--gold); outline-offset: -2px; background: var(--gold-soft); border-radius: 10px; }
+  .gal-pick { outline: 3px solid var(--gold); outline-offset: -3px; border-radius: 10px; opacity: .85; }
+  .tg-dayacts { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+  .tg-daynote { background: var(--gold-soft); color: var(--gold); font-weight: 700; font-size: 14px; border-radius: 10px; padding: 8px 12px; text-align: center; }
   .tg-msel { flex-wrap: wrap; position: sticky; top: 0; z-index: 3; }
   .tg-msel .tg-msel-btns { flex-wrap: wrap; justify-content: flex-end; }
   .tg-c { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -2314,7 +2331,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 6.4 · updated 4 Oct 2026</div>
+          <div class="dnote">Version 6.5 · updated 4 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4859,19 +4876,22 @@
         ${sel.cells.length ? '<button type="button" class="btn-secondary hv-del" id="tgMClear" style="border-color: var(--line);">Clear</button>' : ''}
         <button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
     } else if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
-    html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${i + 1}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
+    const dNote = dayNoteOf(doc, d);
+    if (editable && !sel) html += `<div class="tg-dayacts"><button type="button" class="tg-mini" id="tgAddPer">＋ Period</button><button type="button" class="tg-mini" id="tgDayNote">📝 ${dNote ? 'Edit day note' : 'Day note'}</button></div>`;
+    if (dNote) html += `<div class="tg-daynote">📌 ${escapeHtml(dNote)}${(doc.cells || []).some((c) => c.d === d) ? '' : ' · whole day'}</div>`;
+    html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => pp.off ? '' : `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${tgDispNo(perD, i)}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
     g.batches.forEach((b) => {
       const rOn = batchRoomOn(b, d); const rMoved = rOn && rOn !== batchRoom(b);
       const rDup = rOn && g.batches.some((o) => o !== b && batchRoomOn(o, d) === rOn);
       html += `<tr><th class="tg-b" data-tg-room="${escapeHtml(b)}" role="button">${escapeHtml(gridBatchLabel(b))}${rOn ? `<span class="${rMoved ? 'tg-moved' : ''}${rDup ? ' tg-roomdup' : ''}">${escapeHtml(rOn)}${rDup ? ' ⚠️' : ''}</span>` : '<span class="tg-noroom">+ room</span>'}</th>`;
       let skipTo = -1;
       perD.forEach((pp, i) => {
-        if (i <= skipTo) return;
+        if (i <= skipTo || pp.off) return;
         const c = tgCell(d, i, b);
         const k = `${d}|${i}|${b}`;
         const isSel = sel && sel.cells.indexOf(k) !== -1;
         if (c && c.ex) {
-          let span = 1; while (i + span < perD.length) { const n2 = tgCell(d, i + span, b); if (n2 && n2.ex === c.ex) span++; else break; }
+          let span = 1; while (i + span < perD.length && !perD[i + span].off) { const n2 = tgCell(d, i + span, b); if (n2 && n2.ex === c.ex) span++; else break; }
           skipTo = i + span - 1;
           html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${span > 1 ? ` colspan="${span}"` : ''} data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return;
         }
@@ -4985,6 +5005,8 @@
     on('tgSelCancel', () => { state.tg.sel = null; renderTgGrid(); });
     on('tgSelNext', openExamCellsSheet);
     on('tgSwapCancel', () => { state.tg.swap = null; renderTgGrid(); });
+    on('tgAddPer', () => openAddPeriodSheet(state.tg.day));
+    on('tgDayNote', () => openDayNoteSheet(state.tg.day));
     on('tgMTest', tgMultiTest);
     on('tgMExam', openExamCellsSheet);
     on('tgMExDel', tgMultiRemoveExam);
@@ -5085,7 +5107,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const g = tgGroup(); const doc = state.tg.doc; if (!doc) return;
     if (dayOnly && !doc.pubSnap) doc.pubSnap = { cells: {}, dayTimes: '{}', dayRooms: '{}' }; // first publish can be a single day
     const per = periodsFor(g.key);
-    const cells = (doc.cells || []).filter((c) => effT(c) && !c.ex && per[c.p] && (!dayOnly || c.d === dayOnly));
+    const cells = (doc.cells || []).filter((c) => { const pp = periodsForDay(g.key, c.d)[c.p]; return effT(c) && !c.ex && pp && !pp.off && pp.start && (!dayOnly || c.d === dayOnly); });
     const noT = (doc.cells || []).filter((c) => !effT(c) && !c.ex).length;
     const clash = Object.keys(tgClashes()).length;
     const msg = `${cells.length} classes will go to the teachers' schedules${noT ? `\n${noT} class${noT === 1 ? '' : 'es'} without a teacher will be skipped` : ''}${clash ? `\n⚠️ ${clash} teacher clash${clash === 1 ? '' : 'es'}` : ''}`;
@@ -5135,7 +5157,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         snap.dayTimes = JSON.stringify(dt); snap.dayRooms = JSON.stringify(dr);
       } else { doc.published = Object.keys(newIds); doc.pubSnap = snapOf(doc); }
       // days the teachers have (only days with classes; a day-only publish adds that day)
-      doc.pubDays = (dayOnly ? (doc.pubDays || []).filter((d) => d !== dayOnly).concat((doc.cells || []).some((c) => c.d === dayOnly) ? [dayOnly] : []) : filledDays(doc)).sort();
+      doc.pubDays = (dayOnly ? (doc.pubDays || []).filter((d) => d !== dayOnly).concat(filledDays(doc).indexOf(dayOnly) !== -1 ? [dayOnly] : []) : filledDays(doc)).sort();
       doc.status = 'published'; doc.publishedAt = Date.now(); doc.periodsUsed = per;
       state.tg.editKey = null; state.tg.paint = null; state.tg.undo = state.tg.undo.filter((x) => x.key !== docId);
       state.tg.saving = true;
@@ -5153,9 +5175,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         state.tg.imgStamp = hadDay.indexOf(docId + '~' + dayOnly) !== -1 ? stampTxt || ttStampNow() : '';
         await saveTtImage(docId, tch, hadDay.indexOf(docId + '~' + dayOnly) !== -1, [dayOnly], docId + '~' + dayOnly);
         state.tg.imgStamp = '';
-        if (hadDay.indexOf(docId) !== -1) { state.tg.imgStamp = ttStampNow(); await saveTtImage(docId, tch, true); state.tg.imgStamp = ''; }
+        if (hadDay.indexOf(docId) !== -1) { state.tg.imgStamp = ttStampNow(); await saveTtImage(docId, tch, true, doc.pubDays); state.tg.imgStamp = ''; }
       } else {
-        state.tg.imgStamp = stampTxt; await saveTtImage(docId, tch, republish); state.tg.imgStamp = '';
+        state.tg.imgStamp = stampTxt; await saveTtImage(docId, tch, republish, doc.pubDays); state.tg.imgStamp = '';
         await deleteDayImages(docId, wsPub);
       }
       const wsL = state.tt.weekStart;
@@ -5198,15 +5220,26 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (ds.length === 1) return `${WD[D(ds[0]).getDay()]} ${D(ds[0]).getDate()} ${mon(ds[0])}${yr}`;
     const consec = ds.every((d, i) => i === 0 || shiftDateStr(ds[i - 1], 1) === d);
     if (consec) return `${D(ds[0]).getDate()}${mon(ds[0]) === mon(ds[ds.length - 1]) ? '' : ' ' + mon(ds[0])} – ${D(ds[ds.length - 1]).getDate()} ${mon(ds[ds.length - 1])}${yr}`;
+    if (mon(ds[0]) !== mon(ds[ds.length - 1])) return `${ds.map((d, i) => D(d).getDate() + ((i === ds.length - 1 || mon(d) !== mon(ds[i + 1])) ? ' ' + mon(d) : '')).join(', ')}${yr}`;
     return `${ds.map((d) => D(d).getDate()).join(', ')} ${mon(ds[ds.length - 1])}${yr}`;
   }
-  function filledDays(doc) { return ((doc && doc.cells) || []).map((c) => c.d).filter((v, i, a) => a.indexOf(v) === i).sort(); }
+  function filledDays(doc) { return ((doc && doc.cells) || []).map((c) => c.d).concat(Object.keys((doc && doc.dayTimes) || {}).filter((d) => dayNoteOf(doc, d))).filter((v, i, a) => a.indexOf(v) === i).sort(); }
   function tgImage(returnCanvas) {
     const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return null;
-    const per = periodsFor(g.key); const bats = g.batches;
+    const bats = g.batches;
     const days = (state.tg.imgDays && state.tg.imgDays.length) ? state.tg.imgDays.slice().sort() : tgDays();
+    const per = periodsFor(g.key).slice();
+    days.forEach((d) => { periodsForDay(g.key, d).forEach((pp, i) => { if (pp.extra && !per[i]) per[i] = pp; }); });
+    const perIdx = []; per.forEach((pp, i) => { if (pp && pp.start) perIdx.push([i, pp]); });
+    perIdx.sort((a, b2) => hhmmToMin(a[1].start) - hhmmToMin(b2[1].start));
+    // leave out a period that is switched off on every day shown (and not covered by a joined period)
+    for (let k = perIdx.length - 1; k >= 0; k--) {
+      const i = perIdx[k][0]; const pp0 = perIdx[k][1];
+      const used = days.some((d) => { const pd = periodsForDay(g.key, d); if (pd[i] && !pd[i].off && pd[i].start) return true; return pd.some((q, j) => j !== i && j < periodsFor(g.key).length && q && !q.off && q.start && hhmmToMin(q.start) < hhmmToMin(pp0.start) && hhmmToMin(q.end) > hhmmToMin(pp0.start)); });
+      if (!used && perIdx.length > 1) perIdx.splice(k, 1);
+    }
     const colDate = 150, colClass = 120, colP = 150, colBr = 70, rowH = 46, headH = 150;
-    const cols = []; per.forEach((pp, i) => { if (i > 0 && hhmmToMin(pp.start) > hhmmToMin(per[i - 1].end)) cols.push({ br: true, a: per[i - 1].end, z: pp.start }); cols.push({ p: i, pp }); });
+    const cols = []; perIdx.forEach(([i, pp], k) => { if (k > 0 && hhmmToMin(pp.start) > hhmmToMin(perIdx[k - 1][1].end)) cols.push({ br: true, a: perIdx[k - 1][1].end, z: pp.start }); cols.push({ p: i, pp, n: cols.filter((q) => !q.br).length + 1 }); });
     const W = colDate + colClass + cols.reduce((s, c) => s + (c.br ? colBr : colP), 0) + 40;
     const H = headH + days.length * bats.length * rowH + 40;
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
@@ -5224,7 +5257,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     box(cx, y0, colClass, 64, '#F8CBAD'); txt('CLASS', cx + colClass / 2, y0 + 32, 15, true); cx += colClass;
     cols.forEach((c) => {
       const w = c.br ? colBr : colP;
-      box(cx, y0, w, 30, '#FFFF00'); txt(c.br ? 'BREAK' : `PERIOD ${c.p + 1}`, cx + w / 2, y0 + 15, 13, true);
+      box(cx, y0, w, 30, '#FFFF00'); txt(c.br ? 'BREAK' : `PERIOD ${c.n}`, cx + w / 2, y0 + 15, 13, true);
       box(cx, y0 + 30, w, 34, '#F8CBAD'); const sh = (t) => formatTimeStr(t).replace(/\s?(AM|PM)$/i, ''); txt(c.br ? `${sh(c.a)}-${sh(c.z)}` : `${formatTimeStr(c.pp.start)} - ${formatTimeStr(c.pp.end)}`, cx + w / 2, y0 + 47, 12, false, '#000', w - 6);
       cx += w;
     });
@@ -5267,20 +5300,39 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       });
       bats.forEach((b, bi) => {
         const ry = y + bi * rowH;
-        colX.forEach((o) => {
+        colX.forEach((o, ci) => {
           if (o.c.br) return;
           const p = o.c.p; if (drawn[`${p}|${b}`]) return;
+          if (!perD[p] || perD[p].off || !perD[p].start) { box(o.x, ry, o.w, rowH, '#D9D9D9'); return; }
           const cell = tgCell(d, p, b);
+          // joined periods (this period runs over the next ones, which are off this day): one wide box
+          let wEnd = o.x + o.w;
+          if (hhmmToMin(perD[p].end) > hhmmToMin(o.c.pp.end)) {
+            for (let j = ci + 1; j < colX.length; j++) {
+              const q = colX[j];
+              if (q.c.br) { if (hhmmToMin(q.c.a) < hhmmToMin(perD[p].end)) continue; break; }
+              const pq = perD[q.c.p];
+              if ((!pq || pq.off) && hhmmToMin(q.c.pp.start) < hhmmToMin(perD[p].end)) { wEnd = q.x + q.w; drawn[`${q.c.p}|${b}`] = 1; } else break;
+            }
+          }
+          o = Object.assign({}, o, { w: wEnd - o.x });
           box(o.x, ry, o.w, rowH, shade);
           if (!cell) return;
           if (cell.ex) { fitLines(x, [[cell.s, '#C00000', 12]], o.x + o.w / 2, ry, o.w, rowH); return; }
-          const chg = perD[p] && perD[p].changed;
+          const chg = perD[p] && perD[p].changed && (perD[p].start !== o.c.pp.start || perD[p].end !== o.c.pp.end);
           const lines = [[effS(cell), cell.sub ? '#C00000' : '#000', 15], ...(cell.sub ? [['(Sub)', '#C00000', 11]] : []), ...(cell.test ? [['(Class Test)', '#000', 12]] : []), ...(chg ? [[`(${fmtS(perD[p].start)} – ${fmtS(perD[p].end)})`, '#C00000', 11]] : [])];
           const rDay = doc.dayRooms && doc.dayRooms[d] && doc.dayRooms[d][b];
           if (rDay) lines.push([`(Room ${rDay})`, '#C00000', 11]);
           fitLines(x, lines, o.x + o.w / 2, ry, o.w, rowH);
         });
       });
+      const note = dayNoteOf(doc, d);
+      if (note) {
+        const hasCls = (doc.cells || []).some((c) => c.d === d);
+        const pc = colX.filter((o) => !o.c.br);
+        if (!hasCls && pc.length) { const xa = colX[0].x, xz = colX[colX.length - 1].x + colX[colX.length - 1].w; box(xa, y, xz - xa, dh, shade); fitLines(x, [[note, '#000', 20]], xa + (xz - xa) / 2, y, xz - xa, dh); }
+        else txt(note, 20 + colDate / 2, y + dh - 14, 11, true, '#C00000', colDate - 8);
+      }
       y += dh;
     });
     if (returnCanvas === true) return cv;
@@ -5293,18 +5345,113 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
 
   // ---------- Stage 2: exams in the grid, day-only period times, delete week ----------
-  function periodsForDay(key, date) {
+  // Periods of one day. dayTimes[date][i] can change a period's time, switch it off ({ off: true }),
+  // or add an extra period (index after the normal ones, { start, end, extra: true }). dayTimes[date].note = whole-day note.
+  function periodsForDayOf(doc, key, date) {
     const base = periodsFor(key);
-    const ov = (state.tg.doc && state.tg.doc.dayTimes && state.tg.doc.dayTimes[date]) || {};
-    return base.map((p, i) => (ov[i] ? Object.assign({}, p, ov[i], { changed: true }) : p));
+    const ov = (doc && doc.dayTimes && doc.dayTimes[date]) || {};
+    const out = base.map((p, i) => (ov[i] ? (ov[i].off ? Object.assign({}, p, { off: true, changed: true }) : Object.assign({}, p, ov[i], { changed: true })) : p));
+    Object.keys(ov).map(Number).filter((i) => Number.isFinite(i) && i >= base.length).sort((a, b) => a - b).forEach((i) => { if (ov[i] && !ov[i].off) out[i] = Object.assign({}, ov[i], { changed: true, extra: true }); });
+    for (let i = 0; i < out.length; i++) if (!out[i]) out[i] = { start: '', end: '', off: true };
+    return out;
+  }
+  function periodsForDay(key, date) { return periodsForDayOf(state.tg.doc, key, date); }
+  // the number a period shows on one day: 1, 2, 3… in time order, skipping the ones switched off
+  function tgDispNo(perD, i) { const live = perD.map((pp, k) => ({ pp, k })).filter((x) => !x.pp.off && x.pp.start).sort((a, b) => hhmmToMin(a.pp.start) - hhmmToMin(b.pp.start)); const n = live.findIndex((x) => x.k === i); return n === -1 ? i + 1 : n + 1; }
+  function dayNoteOf(doc, d) { return (doc && doc.dayTimes && doc.dayTimes[d] && doc.dayTimes[d].note) || ''; }
+  function tgSetDayTimes(d, fn) {
+    tgRemember();
+    const doc = state.tg.doc;
+    doc.dayTimes = Object.assign({}, doc.dayTimes || {});
+    const day = Object.assign({}, doc.dayTimes[d] || {});
+    fn(day);
+    if (Object.keys(day).length) doc.dayTimes[d] = day; else delete doc.dayTimes[d];
+    tgSave(); closeHvSheet(); renderTgGrid();
+  }
+  // empty a period on one day; exams have to be removed first
+  async function tgClearPeriod(d, p, why) {
+    const cs = (state.tg.doc.cells || []).filter((c) => c.d === d && c.p === p);
+    if (cs.some((c) => c.ex)) { showToast('An exam is in this period · remove the exam first', 'error'); return false; }
+    if (cs.length) {
+      const ok = await showConfirm(`${cs.map((c) => `${gridBatchLabel(c.b)} · ${effS(c)}`).join('\n')}\n\nThese ${cs.length} class${cs.length === 1 ? '' : 'es'} in P${p + 1} will be removed.`, why, 'Remove');
+      if (!ok) return false;
+      tgRemember();
+      state.tg.doc.cells = (state.tg.doc.cells || []).filter((c) => !(c.d === d && c.p === p));
+    }
+    return true;
+  }
+  function openAddPeriodSheet(d) {
+    const g = tgGroup(); const perD = periodsForDay(g.key, d); const base = periodsFor(g.key);
+    const offs = perD.map((pp, i) => ({ pp, i })).filter((x) => x.pp.off && x.i < base.length);
+    const live = perD.filter((pp) => !pp.off && pp.end); const last = live[live.length - 1];
+    const dur = last ? Math.max(30, hhmmToMin(last.end) - hhmmToMin(last.start)) : 45;
+    const s0 = last ? last.end : '09:00'; const e0 = svMinToHHMM(Math.min(23 * 60 + 55, hhmmToMin(s0) + dur));
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">Add a period</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} only · other days stay as they are</div>
+      ${offs.length ? `<div class="sv-tlbl" style="margin:12px 0 6px;">Bring back</div><div class="chips">${offs.map((x) => `<button type="button" class="chip" data-pd-back="${x.i}">P${x.i + 1} · ${escapeHtml(formatTimeStr(base[x.i].start))}</button>`).join('')}</div>` : ''}
+      <div class="sv-tlbl" style="margin:12px 0 6px;">New period</div>
+      <div class="sv-times"><div><div class="sv-tlbl">From</div><input class="text-input" type="time" id="apS" value="${escapeHtml(s0)}"></div><div><div class="sv-tlbl">To</div><input class="text-input" type="time" id="apE" value="${escapeHtml(e0)}"></div></div>
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="apCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="apSave" style="margin:0;">Add period</button></div>`;
+    body.querySelectorAll('[data-pd-back]').forEach((b) => b.addEventListener('click', () => { const i = Number(b.getAttribute('data-pd-back')); tgSetDayTimes(d, (day) => { delete day[i]; }); showToast(`P${i + 1} is back for this day`); }));
+    document.getElementById('apCancel').addEventListener('click', closeHvSheet);
+    document.getElementById('apSave').addEventListener('click', () => {
+      const a = document.getElementById('apS').value, z = document.getElementById('apE').value;
+      if (!a || !z || hhmmToMin(z) <= hhmmToMin(a)) { showToast('Check the times', 'error'); return; }
+      if (live.some((pp) => hhmmToMin(pp.start) < hhmmToMin(z) && hhmmToMin(a) < hhmmToMin(pp.end))) { showToast('This time overlaps another period', 'error'); return; }
+      const idx = Math.max(base.length, perD.length);
+      tgSetDayTimes(d, (day) => { day[idx] = { start: a, end: z, extra: true }; });
+      showToast(`P${idx + 1} added for this day`);
+    });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+  function openDayNoteSheet(d) {
+    const cur = dayNoteOf(state.tg.doc, d);
+    const quick = ['Doubt Clearing Day', 'Holiday', 'PTM', 'Test Day', 'Revision Day'];
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">Note for the whole day</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · all batches</div>
+      <div class="chips" style="margin-top:12px;">${quick.map((q) => `<button type="button" class="chip${cur === q ? ' active' : ''}" data-dn-q="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}</div>
+      <input class="text-input" id="dnText" maxlength="60" placeholder="Or type your own" value="${escapeHtml(cur)}" style="margin-top:10px;">
+      <div class="hv-note" style="text-align:left; margin-top:8px;">With no classes that day, the timetable picture shows the note across the whole day.</div>
+      <div class="hv-d-btns">${cur ? '<button type="button" class="btn-secondary hv-del" id="dnDel" style="border-color: var(--line);">Remove note</button>' : '<button type="button" class="btn-secondary" id="dnCancel" style="border-color: var(--line);">Cancel</button>'}<button type="button" class="save-btn" id="dnSave" style="margin:0;">Save</button></div>`;
+    body.querySelectorAll('[data-dn-q]').forEach((b) => b.addEventListener('click', () => { document.getElementById('dnText').value = b.getAttribute('data-dn-q'); body.querySelectorAll('[data-dn-q]').forEach((x) => x.classList.toggle('active', x === b)); }));
+    const c0 = document.getElementById('dnCancel'); if (c0) c0.addEventListener('click', closeHvSheet);
+    const dl = document.getElementById('dnDel'); if (dl) dl.addEventListener('click', () => tgSetDayTimes(d, (day) => { delete day.note; }));
+    document.getElementById('dnSave').addEventListener('click', () => {
+      const v = document.getElementById('dnText').value.trim();
+      if (!v) { showToast('Choose or type the note', 'error'); return; }
+      tgSetDayTimes(d, (day) => { day.note = v; });
+    });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   function openPeriodDaySheet(d, p) {
-    const g = tgGroup(); const base = periodsFor(g.key)[p]; const cur = periodsForDay(g.key, d)[p];
+    const g = tgGroup(); const perD = periodsForDay(g.key, d); const cur = perD[p];
+    const base = periodsFor(g.key)[p] || cur; const isExtra = !!cur.extra;
+    let nx = p + 1; while (nx < perD.length && perD[nx].off) nx++;
+    const next = nx < perD.length ? perD[nx] : null;
     const body = document.getElementById('hvSheetBody');
-    body.innerHTML = `<div class="hv-d-title">Period ${p + 1}</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} only · normal time ${escapeHtml(formatTimeStr(base.start))} – ${escapeHtml(formatTimeStr(base.end))}</div>
+    body.innerHTML = `<div class="hv-d-title">Period ${p + 1}${isExtra ? ' (extra)' : ''}</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} only${isExtra ? '' : ` · normal time ${escapeHtml(formatTimeStr(base.start))} – ${escapeHtml(formatTimeStr(base.end))}`}</div>
       <div class="sv-times" style="margin-top:12px;"><div><div class="sv-tlbl">From</div><input class="text-input" type="time" id="pdS" value="${escapeHtml(cur.start)}"></div><div><div class="sv-tlbl">To</div><input class="text-input" type="time" id="pdE" value="${escapeHtml(cur.end)}"></div></div>
-      <div class="hv-note" style="text-align:left; margin-top:8px;">Use this for exam days. Other days keep the normal time.</div>
-      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="pdReset" style="border-color: var(--line);">Normal time</button><button type="button" class="save-btn" id="pdSave" style="margin:0;">Save for this day</button></div>`;
+      <div class="hv-d-btns">${isExtra ? '' : '<button type="button" class="btn-secondary" id="pdReset" style="border-color: var(--line);">Normal time</button>'}<button type="button" class="save-btn" id="pdSave" style="margin:0;">Save for this day</button></div>
+      <div class="hv-d-btns" style="margin-top:8px;">${next ? `<button type="button" class="btn-secondary" id="pdMerge" style="border-color: var(--line);">Join with P${nx + 1}</button>` : ''}<button type="button" class="btn-secondary hv-del" id="pdOff" style="border-color: var(--line);">Remove P${p + 1} for this day</button></div>
+      <div class="hv-note" style="text-align:left; margin-top:8px;">Only ${escapeHtml(dayHeading(d))} changes. Removed periods can be brought back with “+ Period”.</div>`;
+    if (isExtra) {
+      document.getElementById('pdSave').addEventListener('click', () => {
+        const s1 = document.getElementById('pdS').value, e1 = document.getElementById('pdE').value;
+        if (!s1 || !e1 || hhmmToMin(e1) <= hhmmToMin(s1)) { showToast('Check the times', 'error'); return; }
+        tgSetDayTimes(d, (day) => { day[p] = { start: s1, end: e1, extra: true }; });
+      });
+    }
+    document.getElementById('pdOff').addEventListener('click', async () => {
+      if (!(await tgClearPeriod(d, p, `Remove P${p + 1} on ${dayHeading(d)}?`))) return;
+      tgSetDayTimes(d, (day) => { if (isExtra) delete day[p]; else day[p] = { off: true }; });
+      showToast(`P${p + 1} removed for this day`);
+    });
+    const mg = document.getElementById('pdMerge'); if (mg) mg.addEventListener('click', async () => {
+      if (!(await tgClearPeriod(d, nx, `Join P${p + 1} and P${nx + 1}?`))) return;
+      tgSetDayTimes(d, (day) => { day[p] = Object.assign({ start: cur.start, end: next.end }, isExtra ? { extra: true } : {}); if (perD[nx].extra) delete day[nx]; else day[nx] = { off: true }; });
+      showToast(`P${p + 1} now runs ${formatTimeStr(cur.start)} – ${formatTimeStr(next.end)}`);
+    });
+    if (isExtra) { const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); return; }
     const setOv = (val) => {
       tgRemember();
       const doc = state.tg.doc; // always the current copy (it may have been refreshed while the sheet was open)
@@ -5606,6 +5753,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   function cellTimes(doc, c) {
     const ov = doc.dayTimes && doc.dayTimes[c.d] && doc.dayTimes[c.d][c.p];
+    if (ov && ov.off) return null;
     const pp = ov || (doc.periodsUsed && doc.periodsUsed[c.p]) || periodsFor(doc.group)[c.p];
     return pp ? { start: pp.start, end: pp.end } : null;
   }
@@ -6152,6 +6300,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }
     if (doc.status === 'published' && tgEverPub(doc)) return {};
     (doc.cells || []).forEach((c) => { out[c.d] = (out[c.d] || 0) + 1; });
+    filledDays(doc).forEach((d) => { if (!out[d]) out[d] = 1; });
     return out;
   }
   function shortDays(ds) { return ds.map((d) => `${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}`).join(', '); }
@@ -7185,8 +7334,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         }));
       }
       // classes the teachers filled in
-      const snap = await state.db.collection('classes').where('date', '>=', r.from).where('date', '<=', r.to).get();
-      const logs = snap.docs.map(normDoc).filter((c) => c.entryType !== 'activity' && c.date >= r.from && c.date <= r.to && !c.cancelled)
+      // one query per day (the same way the rest of the Admin pages read classes)
+      const dayList = datesBetween(r.from, r.to);
+      const parts = await Promise.all(dayList.map((d) => state.db.collection('classes').where('date', '==', d).limit(500).get().then((sn) => sn.docs.map(normDoc))));
+      const seen = {};
+      const logs = [].concat(...parts).filter((c) => (seen[c.id] ? false : (seen[c.id] = true))).filter((c) => c.entryType !== 'activity' && c.date >= r.from && c.date <= r.to && !c.cancelled)
         .map((c) => ({ c, t: c.teacherId, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
       const used = new Set(); const missing = [];
       tt.forEach((x) => {
@@ -7275,8 +7427,33 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }
     if (T.list.some((row) => !trepTitleOf(row.u))) h += '<div class="hv-note" style="text-align:left;">Mr. / Ms. comes from Sir / Ma\'am chosen by the teacher. For a name without it, tap the name to set Mr. or Ms.</div>';
     h += '<div class="hv-note" style="text-align:left;">1 class = up to 1 h 10 min · 1.5 = up to 1 h 45 min (e.g. 1 h 15 min) · a class taken with two batches together counts once.</div>';
-    box.innerHTML = h;
+    // a picture of the report that fits the screen; tap to open it big (zoom with two fingers)
+    let img = '';
+    try { const cv = trepCanvas(); if (cv) img = cv.toDataURL('image/png'); } catch (e) { img = ''; }
+    const noTitle = T.list.filter((row) => !trepTitleOf(row.u));
+    let out = img ? `<button type="button" class="trep-pic" id="trepPic"><img src="${img}" alt="Teaching report"><span>Tap to open big</span></button>` : h.split('<div class="trep-miss">')[0];
+    const tail = h.indexOf('<div class="trep-miss">') !== -1 ? '<div class="trep-miss">' + h.split('<div class="trep-miss">')[1] : h.slice(h.indexOf('</table></div>') + 14);
+    out += tail.replace(/<div class="hv-note" style="text-align:left;">Mr\. \/ Ms\.[^<]*<\/div>/, '');
+    if (noTitle.length) out += `<div class="trep-titles"><div class="sv-tlbl" style="margin:0 0 6px;">No Mr./Ms. yet · tap to set (tap again to change)</div><div class="chips">${noTitle.map((row) => `<button type="button" class="chip" data-trep-u="${escapeHtml(row.u)}">${escapeHtml(row.name)}</button>`).join('')}</div></div>`;
+    box.innerHTML = out;
+    const pic = document.getElementById('trepPic'); if (pic) pic.addEventListener('click', () => openZoomViewer(img));
     box.querySelectorAll('[data-trep-u]').forEach((td) => td.addEventListener('click', () => trepToggleTitle(td.getAttribute('data-trep-u'))));
+  }
+  // full-screen picture viewer with zoom steps (for wide pictures like the teaching report)
+  function openZoomViewer(src) {
+    let ov = document.getElementById('zoomViewer');
+    if (!ov) {
+      ov = document.createElement('div'); ov.id = 'zoomViewer'; ov.className = 'zv';
+      ov.innerHTML = '<div class="zv-bar"><span class="zv-z"><button type="button" data-zv="1">Fit</button><button type="button" data-zv="2">2×</button><button type="button" data-zv="3">3×</button></span><button type="button" class="zv-x" id="zvX" aria-label="Close">✕</button></div><div class="zv-scroll" id="zvScroll"><img id="zvImg" alt="Picture"></div><div class="zv-hint">Turn the phone sideways for a bigger view · tap the picture to zoom</div>';
+      document.body.appendChild(ov);
+      const setZ = (z) => { ov.dataset.z = z; document.getElementById('zvImg').style.width = (z * 100) + '%'; ov.querySelectorAll('[data-zv]').forEach((b) => b.classList.toggle('on', Number(b.getAttribute('data-zv')) === z)); };
+      ov._setZ = setZ;
+      ov.querySelectorAll('[data-zv]').forEach((b) => b.addEventListener('click', () => setZ(Number(b.getAttribute('data-zv')))));
+      document.getElementById('zvImg').addEventListener('click', () => setZ(Number(ov.dataset.z || 1) >= 3 ? 1 : Number(ov.dataset.z || 1) + 1));
+      document.getElementById('zvX').addEventListener('click', () => ov.classList.remove('open'));
+    }
+    document.getElementById('zvImg').src = src; ov._setZ(1); ov.classList.add('open');
+    const sc = document.getElementById('zvScroll'); sc.scrollTop = 0; sc.scrollLeft = 0;
   }
   function trepEnsure() { const r = trepRange(); if (state.trep.key !== state.trep.mode + '|' + r.from || !state.trep.data) trepBuild(); else trepRender(); }
   function trepCanvas() {
@@ -7872,10 +8049,36 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         <img data-open-photo="${p.id}" src="${p.imageBase64}" alt="Saved photo" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:pointer; display:block;">
         <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="padding:4px;">${svgTrash()}</button>
       </div>`).join('') + placeholderTile;
-    gallery.querySelectorAll('[data-open-ttimg]').forEach((img) => img.addEventListener('click', () => { const x = ttl.find((y) => y.id === img.getAttribute('data-open-ttimg')); if (x) openImageViewer(x.image, false); }));
+    gallery.querySelectorAll('[data-open-ttimg]').forEach((img) => img.addEventListener('click', () => { const x = ttl.find((y) => y.id === img.getAttribute('data-open-ttimg')); if (x) openZoomViewer(x.image); }));
     gallery.querySelectorAll('[data-open-photo]').forEach((img) => {
-      img.addEventListener('click', () => openPhotoLightbox(img.getAttribute('data-open-photo')));
+      const id = img.getAttribute('data-open-photo');
+      if (state.galSel && state.galSel.indexOf(id) !== -1) img.classList.add('gal-pick');
+      let lpT = null; const stop = () => { if (lpT) { clearTimeout(lpT); lpT = null; } };
+      img.addEventListener('contextmenu', (e) => e.preventDefault());
+      img.addEventListener('pointerdown', () => { stop(); lpT = setTimeout(() => { lpT = null; img._lp = true; if (state.galSel) return; try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ } state.galSel = [id]; renderScheduleNotice(); }, 480); });
+      ['pointerup', 'pointercancel', 'pointerleave', 'pointermove'].forEach((ev) => img.addEventListener(ev, stop));
+      img.addEventListener('click', () => {
+        if (img._lp) { img._lp = false; return; }
+        if (state.galSel) { const k = state.galSel.indexOf(id); if (k === -1) state.galSel.push(id); else state.galSel.splice(k, 1); renderScheduleNotice(); return; }
+        openPhotoLightbox(id);
+      });
     });
+    const gbar = document.getElementById('galSelBar');
+    if (gbar) gbar.remove();
+    if (state.galSel) {
+      state.galSel = state.galSel.filter((id) => photos.some((p0) => p0.id === id));
+      const bar = document.createElement('div'); bar.id = 'galSelBar'; bar.className = 'ex-selbar'; bar.style.borderRadius = '10px'; bar.style.margin = '8px 0';
+      bar.innerHTML = `<span><b>${state.galSel.length}</b> selected · tap more of your photos</span><span><button type="button" class="btn-secondary hv-del" id="galSelDel" style="border-color: var(--line);"${state.galSel.length ? '' : ' disabled'}>🗑 Delete${state.galSel.length ? ' (' + state.galSel.length + ')' : ''}</button><button type="button" class="btn-secondary" id="galSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span>`;
+      gallery.parentNode.insertBefore(bar, gallery);
+      document.getElementById('galSelX').addEventListener('click', () => { state.galSel = null; renderScheduleNotice(); });
+      document.getElementById('galSelDel').addEventListener('click', async () => {
+        const ids = state.galSel.slice(); if (!ids.length) return;
+        const ok = await showConfirm(`${ids.length} photo${ids.length === 1 ? '' : 's'} will be removed.`, 'Delete these photos?', 'Delete');
+        if (!ok) return;
+        try { for (const id of ids) await state.db.doc('scheduleNotices/' + state.teacherId + '/photos/' + id).delete(); state.galSel = null; renderScheduleNotice(); showToast('Removed'); }
+        catch (err) { showToast('Could not remove them. Please try again.', 'error'); }
+      });
+    }
     gallery.querySelectorAll('[data-remove-photo]').forEach((btn) => {
       btn.addEventListener('click', () => removeScheduleNoticePhoto(btn.getAttribute('data-remove-photo')));
     });
@@ -8133,11 +8336,54 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (counts.cancelled) parts.push(`${counts.cancelled} cancelled`);
     if (counts.leave + counts.covered) parts.push(`${counts.leave + counts.covered} on leave`);
     document.getElementById('svSummary').innerHTML = counts.total || counts.cancelled ? `<b>${counts.total} class${counts.total === 1 ? '' : 'es'} · ${escapeHtml(parts[0])}</b>${parts.length > 1 ? `<span>${escapeHtml(parts.slice(1).join(' · '))}</span>` : ''}` : 'No classes planned for this week yet.';
-    if (el._lastHtml !== html) {
-      el._lastHtml = html;
-      el.innerHTML = html;
-      el.querySelectorAll('[data-sv-slot]').forEach((row) => row.addEventListener('click', () => openSlotSheet(row.getAttribute('data-sv-slot'))));
+    const selKey = state.svSel ? '|sel:' + state.svSel.join(',') : '';
+    if (el._lastHtml !== html + selKey) {
+      el._lastHtml = html + selKey;
+      el.innerHTML = (state.svSel ? `<div class="ex-selbar"><span><b>${state.svSel.length}</b> selected · tap more of your slots</span><span><button type="button" class="btn-secondary hv-del" id="svSelDel" style="border-color: var(--line);"${state.svSel.length ? '' : ' disabled'}>🗑 Delete${state.svSel.length ? ' (' + state.svSel.length + ')' : ''}</button><button type="button" class="btn-secondary" id="svSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>` : '') + html;
+      bindSvRows(el);
     }
+  }
+  function svOwnSlot(id) { const s0 = (state.scheduleSlots || []).find((x) => x.id === id); return !!(s0 && !s0.setBy); }
+  function bindSvRows(el) {
+    el.querySelectorAll('[data-sv-slot]').forEach((row) => {
+      const id = row.getAttribute('data-sv-slot');
+      if (state.svSel && state.svSel.indexOf(id) !== -1) row.classList.add('sv-picked');
+      let lpT = null; const stop = () => { if (lpT) { clearTimeout(lpT); lpT = null; } };
+      row.addEventListener('contextmenu', (e) => e.preventDefault());
+      row.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        stop(); const sx = e.clientX, sy = e.clientY;
+        row._mv = (ev) => { if (Math.abs(ev.clientX - sx) > 10 || Math.abs(ev.clientY - sy) > 10) stop(); };
+        lpT = setTimeout(() => {
+          lpT = null; row._lp = true; if (state.svSel) return;
+          if (!svOwnSlot(id)) { showToast('Timetable classes come from the coordinator · only your own slots can be deleted'); return; }
+          try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ }
+          state.svSel = [id]; renderScheduleList();
+        }, 480);
+      });
+      row.addEventListener('pointermove', (e) => { if (row._mv) row._mv(e); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => row.addEventListener(ev, stop));
+      row.addEventListener('click', () => {
+        if (row._lp) { row._lp = false; return; }
+        if (state.svSel) {
+          if (!svOwnSlot(id)) { showToast('This class is from the timetable · it can\'t be deleted here'); return; }
+          const k = state.svSel.indexOf(id); if (k === -1) state.svSel.push(id); else state.svSel.splice(k, 1);
+          renderScheduleList(); return;
+        }
+        openSlotSheet(id);
+      });
+    });
+    const x = document.getElementById('svSelX'); if (x) x.addEventListener('click', () => { state.svSel = null; renderScheduleList(); });
+    const dl = document.getElementById('svSelDel'); if (dl) dl.addEventListener('click', async () => {
+      const ids = (state.svSel || []).filter(svOwnSlot); if (!ids.length) return;
+      const ok = await showConfirm(`${ids.length} slot${ids.length === 1 ? '' : 's'} will be removed from your schedule.`, 'Delete these slots?', 'Delete');
+      if (!ok) return;
+      try {
+        const batch = state.db.batch(); ids.forEach((id) => batch.delete(state.db.collection('schedule/' + state.teacherId + '/slots').doc(id)));
+        await waitForWrite(batch.commit());
+        state.svSel = null; renderScheduleList(); showToast(`${ids.length} slot${ids.length === 1 ? '' : 's'} deleted`);
+      } catch (err) { flashOffline(err); }
+    });
   }
   function openSlotSheet(id) {
     const slot = (state.scheduleSlots || []).find((s) => s.id === id);
