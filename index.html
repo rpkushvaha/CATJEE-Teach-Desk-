@@ -2359,7 +2359,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 6.8 · updated 4 Oct 2026</div>
+          <div class="dnote">Version 6.9 · updated 4 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -12071,7 +12071,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const b = document.getElementById('updGo'); if (b) b.addEventListener('click', async () => {
       try { if (typeof tgSaveTimer !== 'undefined' && tgSaveTimer) await tgFlush(); } catch (e) { /* ignore */ }
       try { flushPendingDeletes(); } catch (e) { /* ignore */ }
-      location.reload();
+      location.replace(location.pathname + '?v=' + Date.now());
     });
     const x = document.getElementById('updX'); if (x) x.addEventListener('click', () => { document.getElementById('updBar').hidden = true; });
   })();

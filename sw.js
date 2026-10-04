@@ -2,7 +2,7 @@
    The app page is always fetched fresh when online (so a new index.html shows up at once)
    and kept in the cache so the app still opens with a weak or no connection.
    Firebase and other servers are never cached here. */
-const CACHE = 'catjee-teachdesk-v1';
+const CACHE = 'catjee-teachdesk-v2';
 const SHELL = ['./', './manifest.json', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
@@ -22,7 +22,8 @@ self.addEventListener('fetch', (e) => {
   if (isPage) {
     // network first: newest version when online, saved copy when offline
     e.respondWith(
-      fetch(req, { cache: 'no-store' }).then((res) => {
+      // the "?fresh=" part makes GitHub's servers hand over the newest upload, not a copy kept for a few minutes
+      fetch(new Request(url.origin + url.pathname + '?fresh=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' })).then((res) => {
         if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put('./', copy)); }
         return res;
       }).catch(() => caches.match('./').then((r) => r || caches.match(req)))
