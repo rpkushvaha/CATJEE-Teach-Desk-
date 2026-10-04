@@ -975,6 +975,7 @@
   .tg-msel .tg-msel-btns { flex-wrap: wrap; justify-content: flex-end; }
   .tg-c { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .install-card { display: grid; grid-template-columns: auto 1fr; gap: 10px 12px; align-items: center; }
+  .install-card[hidden], #menuInstallRow[hidden] { display: none !important; }
   .install-ic { width: 48px; height: 48px; border-radius: 12px; }
   .install-tx { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--muted-2); }
   .install-tx b { font-size: 15px; color: var(--ink); }
@@ -2358,7 +2359,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 6.7 · updated 4 Oct 2026</div>
+          <div class="dnote">Version 6.8 · updated 4 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -12004,12 +12005,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   if ('serviceWorker' in navigator && window.isSecureContext && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* sw.js not uploaded yet: the app still works */ }); });
   }
-  const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  const isStandalone = () => (window.matchMedia && ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay'].some((m) => window.matchMedia(`(display-mode: ${m})`).matches)) || window.navigator.standalone === true || document.referrer.indexOf('android-app://') === 0;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   let installEvt = null;
   function renderInstallUi() {
     const row = document.getElementById('menuInstallRow'); const card = document.getElementById('installCard');
-    const can = !isStandalone() && (installEvt || isIOS);
+    const can = !isStandalone() && !!(installEvt || isIOS);
     if (row) row.hidden = !can;
     let dismissed = false; try { dismissed = localStorage.getItem('ctd_install_dismissed') === '1'; } catch (e) { /* ignore */ }
     if (card) card.hidden = !can || dismissed;
@@ -12019,6 +12020,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       installEvt.prompt();
       try { const r = await installEvt.userChoice; if (r && r.outcome === 'accepted') showToast('Installing… look for Teach Desk on your home screen'); } catch (e) { /* ignore */ }
       installEvt = null; renderInstallUi(); return;
+    }
+    if (!isIOS) {
+      const body = document.getElementById('hvSheetBody');
+      body.innerHTML = `<div class="hv-d-title">📲 Install Teach Desk</div><div class="hv-d-wing">Android · Chrome</div>
+        <ol class="inst-steps"><li>If Teach Desk is already on your home screen, open it from there</li><li>Otherwise tap Chrome's <b>⋮</b> menu (top right)</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>)</li></ol>
+        <div class="hv-d-btns"><button type="button" class="save-btn" id="instOk" style="margin:0;">OK</button></div>`;
+      document.getElementById('instOk').addEventListener('click', closeHvSheet);
+      const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+      return;
     }
     if (isIOS) {
       const body = document.getElementById('hvSheetBody');
