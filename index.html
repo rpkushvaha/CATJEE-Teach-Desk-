@@ -2506,7 +2506,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.8 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 8.0 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3914,6 +3914,9 @@
     html += `<div class="qa-row hv-tiles"><button type="button" class="qa-btn" data-report-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" data-whatsapp-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" data-csv-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div>`;
     const sessRO = !canEditSessionsOn(d);
     if (sessions.length) html += `<div class="hv-sub">Check-in sessions</div><div class="class-list" id="historySessionsList">${sessionsCardsHtml(sessions, sessRO)}</div>`;
+    else if (d < todayStr()) html += sessRO
+      ? '<div class="hv-sub">Check-in sessions</div><div class="hv-note" style="text-align:left;">No check-in recorded for this day. If you were there, ask the coordinator to add it.</div>'
+      : `<div class="hv-sub">Check-in sessions</div><div class="hv-note" style="text-align:left;">No check-in recorded for this day.</div><button type="button" class="btn-secondary" id="hvAddSess" style="border-color: var(--gold); color: var(--gold);">Forgot to check in? Add the times you were here</button>`;
     html += `<div class="hv-sub" style="display:flex; align-items:center; justify-content:space-between;"><span>Classes and activities</span>
       <span style="display:flex; gap:6px;"><button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button><button class="add-entry-btn" id="historyAddClassBtn">+ Class</button></span></div>`;
     html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No records found for this day.</div>';
@@ -3926,6 +3929,7 @@
     if (backBtn) backBtn.addEventListener('click', () => { state.historySelectedDate = null; renderHistory(); });
     const sl = document.getElementById('historySessionsList');
     if (sl && !sessRO) wireSessionsEvents(sl, d, sessions, () => showSelectedDay(d));
+    const addS = document.getElementById('hvAddSess'); if (addS) addS.addEventListener('click', () => openAddPastSession(d, () => showSelectedDay(d)));
     el.querySelectorAll('[data-report-date]').forEach((btn) => btn.addEventListener('click', () => downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'), true)));
     el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => btn.addEventListener('click', () => shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'), true)));
     el.querySelectorAll('[data-csv-date]').forEach((btn) => btn.addEventListener('click', () => downloadHvCsv(document.getElementById('historyReportMsg'))));
@@ -7100,7 +7104,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
             ${lines ? `<div class="class-checklist-notes" style="display:flex; flex-direction:column; gap:3px;"><div style="font-weight:600;">Batch-wise</div>${lines}</div>` : ''}
             ${r.entries.length ? entryListHtml(r.entries, true) : '<div class="hv-note" style="text-align:left;">No classes or activities logged.</div>'}
             ${stuckCheckedIn ? `<button class="action-btn" data-force-checkout="${r.tid}" style="color:#B91C1C; border-color:#B91C1C; align-self:flex-start;">Force check-out</button>` : ''}
-            ${campus && (campus.sessions || []).length ? `<button class="action-btn" data-adm-sess="${r.tid}" style="align-self:flex-start;">Correct check-in times</button>` : ''}
+            <button class="action-btn" data-adm-sess="${r.tid}" style="align-self:flex-start;">${campus && (campus.sessions || []).length ? 'Correct check-in times' : 'Add check-in times'}</button>
           </div>`;
         }
         return `<div class="ad-trow${expanded ? ' open' : ''}" data-teacher-id="${r.tid}" role="button" tabindex="0">
@@ -9713,14 +9717,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   async function openAdminSessionEdit(tid, date) {
     let sessions = [];
     try { const snap = await state.db.doc('campusHistory/' + tid).collection('days').doc(date).get(); sessions = ((snap.data() || {}).sessions || []).slice(); } catch (err) { flashOffline(err); return; }
-    if (!sessions.length) { showToast('No check-in on this day', 'error'); return; }
+    const isNew = !sessions.length;
+    if (isNew) sessions = [{ id: genSessionId(), in: null, out: null, addedBy: state.teacherId }];
     const body = document.getElementById('hvSheetBody');
     const nm = (state.adminNames[tid] && state.adminNames[tid].name) || 'Teacher';
-    body.innerHTML = `<div class="hv-d-title">Correct check-in times</div><div class="hv-d-wing">${escapeHtml(nm)} · ${escapeHtml(dayHeading(date))}</div>
+    body.innerHTML = `<div class="hv-d-title">${isNew ? 'Add check-in times' : 'Correct check-in times'}</div><div class="hv-d-wing">${escapeHtml(nm)} · ${escapeHtml(dayHeading(date))}</div>
       ${sessions.map((x, i) => `<div style="margin-top:12px;"><div class="sv-tlbl" style="margin-bottom:6px;">Session ${i + 1}${sessEdited(x) ? ' · <span style="color:var(--gold);">edited</span>' : ''}</div>
-        <div class="sv-times"><div><label class="sv-tlbl">Check-in</label><input class="text-input" type="time" data-asi="${i}" value="${toHHMM(x.in)}"></div><div><label class="sv-tlbl">Check-out</label><input class="text-input" type="time" data-aso="${i}" value="${x.out != null ? toHHMM(x.out) : ''}"></div></div></div>`).join('')}
+        <div class="sv-times"><div><label class="sv-tlbl">Check-in</label><input class="text-input" type="time" data-asi="${i}" value="${x.in != null ? toHHMM(x.in) : ''}"></div><div><label class="sv-tlbl">Check-out</label><input class="text-input" type="time" data-aso="${i}" value="${x.out != null ? toHHMM(x.out) : ''}"></div></div></div>`).join('')}
       <div class="hv-note" id="asErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
-      <div class="hv-note" style="text-align:left;">The first time is kept: admin and coordinator reports show "edited, was …".</div>
+
       <div class="hv-d-btns"><button type="button" class="btn-secondary" id="asCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="asSave" style="margin:0;">Save</button></div>`;
     document.getElementById('asCancel').addEventListener('click', closeHvSheet);
     document.getElementById('asSave').addEventListener('click', async () => {
@@ -9730,16 +9735,19 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       for (let i = 0; i < sessions.length; i++) {
         const vi = body.querySelector(`[data-asi="${i}"]`).value; const vo = body.querySelector(`[data-aso="${i}"]`).value;
         if (!vi) { err.textContent = 'Every session needs a check-in time'; return; }
-        let o = mark(sessions[i], 'in', ts(vi));
-        if (vo) { let to = ts(vo); if (to <= o.in) to = ts(vo, 1); o = mark(o, 'out', to); }
+        if (isNew && !vo && date < todayStr()) { err.textContent = 'Add the check-out time too'; return; }
+        let o = isNew ? Object.assign({}, sessions[i], { in: ts(vi) }) : mark(sessions[i], 'in', ts(vi));
+        if (vo) { let to = ts(vo); if (to <= o.in) to = ts(vo, 1); o = isNew ? Object.assign(o, { out: to }) : mark(o, 'out', to); }
         out.push(o);
       }
       const totalSeconds = sumSessions(out); const active = out.find((x) => x.out == null);
       const payload = { sessions: out, totalSeconds, checkedIn: !!active, checkInAt: active ? active.in : null, sessionCount: out.length };
+      // a day older than yesterday changed by the admin / coordinator shows "edited" once in admin reports
+      if (date < shiftDateStr(todayStr(), -1)) payload.adminEdited = { by: state.teacherId, at: Date.now() };
       try {
         await state.db.doc('campusHistory/' + tid).collection('days').doc(date).set(payload, { merge: true });
         try { await state.db.doc('campusLogs/' + date).collection('teachers').doc(tid).set(payload, { merge: true }); } catch (e2) { /* mirror is best-effort */ }
-        closeHvSheet(); showToast('Times corrected');
+        closeHvSheet(); showToast(isNew ? 'Check-in added' : 'Times corrected');
         try { if (typeof loadAdminDay === 'function') loadAdminDay(true); } catch (e3) { /* ignore */ }
         renderAdmin();
       } catch (e4) { err.textContent = 'Could not save. Check the internet and try again.'; }
@@ -9794,6 +9802,26 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     checkLocationOnce();
   }
 
+  // Forgot to check in on a past day (only yesterday for teachers): add the arrival and leaving time
+  function openAddPastSession(date, after) {
+    if (!canEditSessionsOn(date)) { showToast('Only yesterday can be added. Ask the coordinator for older days.', 'error'); return; }
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">Add check-in and check-out</div><div class="hv-d-wing">${escapeHtml(dayHeading(date))}</div>
+      <div class="sv-times" style="margin-top:12px;"><div><label class="sv-tlbl">Reached campus</label><input class="text-input" type="time" id="apsIn"></div><div><label class="sv-tlbl">Left campus</label><input class="text-input" type="time" id="apsOut"></div></div>
+      <div class="hv-note" id="apsErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="apsCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="apsSave" style="margin:0;">Save</button></div>`;
+    document.getElementById('apsCancel').addEventListener('click', closeHvSheet);
+    ['apsIn', 'apsOut'].forEach((id) => document.getElementById(id).addEventListener('input', () => { document.getElementById('apsErr').textContent = ''; }));
+    document.getElementById('apsSave').addEventListener('click', async () => {
+      const vi = document.getElementById('apsIn').value, vo = document.getElementById('apsOut').value, err = document.getElementById('apsErr');
+      if (!vi || !vo) { err.textContent = 'Enter both times'; return; }
+      const [y, m, d] = date.split('-').map(Number); const mk = (v, plus) => { const [hh, mm] = v.split(':').map(Number); return new Date(y, m - 1, d + (plus || 0), hh, mm, 0, 0).getTime(); };
+      const tin = mk(vi); let tout = mk(vo); if (tout <= tin) { err.textContent = 'Leaving time must be after the reaching time'; return; }
+      closeHvSheet();
+      try { await pushSessionUpdateForDate(date, [{ id: genSessionId(), in: tin, out: tout, setLater: true }]); showToast('Check-in added for ' + dayHeading(date)); if (after) after(); } catch (e) { flashOffline(e); }
+    });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
   // Forgot to check in: check in now with an earlier arrival time (today only).
   function openLateCheckIn() {
     if (!state.db || !state.teacherId) { flashOffline({ code: 'not-connected' }); return; }
@@ -9883,6 +9911,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   function canEditSessionsOn(date) { if (state.canAdmin || state.isCoordinator) return true; return date >= shiftDateStr(todayStr(), -1); }
   // "(edited 2×, was 9:40 AM)" — only when the time really differs from the first one
   function sessEditMark(s, field) {
+    return ''; // "edited" marks are switched off everywhere (decided by the admin)
+    // eslint-disable-next-line no-unreachable
     const o = field === 'in' ? s.origIn : s.origOut; const n = field === 'in' ? s.editsIn : s.editsOut; const cur = s[field];
     if (o === undefined || !n || o === cur) return '';
     const was = o == null ? 'not set' : formatTimeStr(toHHMM(o));
@@ -10293,7 +10323,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       leaves.forEach((a) => { const r = waClean(a.note); if (r && !/^on leave\.?$/i.test(r)) w.bodyLine(`Reason: ${r}`, { indent: 14 }); });
     }
     if (sessions.length) {
-      sec(`ATTENDANCE  (Total: ${reportCampus(campusSeconds(campus))})`);
+      sec(`ATTENDANCE  (Total: ${reportCampus(campusSeconds(campus))})${reportShowEdits && campus.adminEdited ? '   · edited' : ''}`);
       sessions.forEach((s, i) => {
         const a = formatTimeStr(toHHMM(s.in)) + (reportShowEdits ? sessEditMark(s, 'in') : '');
         const b = (s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress') + (reportShowEdits && s.out != null ? sessEditMark(s, 'out') : '');
@@ -10706,7 +10736,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const last = ss[ss.length - 1];
     const spans = ss.map((s) => `${formatTimeStr(toHHMM(s.in))}–${s.out != null ? formatTimeStr(toHHMM(s.out)) : 'in progress'}`).join('; ');
     const edits = reportShowEdits ? ss.map((s, i) => { const a = sessEditMark(s, 'in'), b = sessEditMark(s, 'out'); return a || b ? `${ss.length > 1 ? 'Session ' + (i + 1) + ': ' : ''}${a ? 'check-in ' + a.slice(2, -1) : ''}${a && b ? '; ' : ''}${b ? 'check-out ' + b.slice(2, -1) : ''}` : ''; }).filter(Boolean).join(' | ') : '';
-    const note = [ss.length > 1 ? `Sessions: ${spans}` : '', edits].filter(Boolean).join(' · ');
+    const note = [ss.length > 1 ? `Sessions: ${spans}` : '', edits, reportShowEdits && campus.adminEdited ? 'Edited by admin' : ''].filter(Boolean).join(' · ');
     return [date, csvDay(date), 'Attendance', '', '', '', formatTimeStr(toHHMM(ss[0].in)), last.out != null ? formatTimeStr(toHHMM(last.out)) : 'In progress',
       Math.round(campusSeconds(campus) / 60), '', '', '', '', '', note, '', ''];
   }
