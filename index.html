@@ -1062,10 +1062,10 @@
   .i-door { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2021h18%22/%3E%3Cpath%20d%3D%22M6%2021V4a1%201%200%200%201%201-1h10a1%201%200%200%201%201%201v17%22/%3E%3Ccircle%20cx%3D%2214.5%22%20cy%3D%2212%22%20r%3D%220.8%22/%3E%3C/svg%3E"); }
   .i-check { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%225%2012.5%2010%2017%2019%207%22/%3E%3C/svg%3E"); }
   .i-alert { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%2212%22%20y1%3D%228%22%20x2%3D%2212%22%20y2%3D%2212.5%22/%3E%3Cline%20x1%3D%2212%22%20y1%3D%2216%22%20x2%3D%2212.01%22%20y2%3D%2216%22/%3E%3C/svg%3E"); }
-  .i-book { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2019.5A2.5%202.5%200%200%201%206.5%2017H20V3H6.5A2.5%202.5%200%200%200%204%205.5z%22/%3E%3Cpath%20d%3D%22M4%2019.5A2.5%202.5%200%200%200%206.5%2022H20v-5%22/%3E%3C/svg%3E"); }
+  .i-book { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2019a9%209%200%200%201%209%200a9%209%200%200%201%209%200%22/%3E%3Cpath%20d%3D%22M3%206a9%209%200%200%201%209%200a9%209%200%200%201%209%200%22/%3E%3Cpath%20d%3D%22M3%206v13%22/%3E%3Cpath%20d%3D%22M12%206v13%22/%3E%3Cpath%20d%3D%22M21%206v13%22/%3E%3C/svg%3E"); }
   /* class cards: subject colour chips, session time strip, clear statuses */
   .schip, .mchip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 9px; line-height: 1.4; white-space: nowrap; }
-  .schip { background: var(--sb); color: var(--sf); }
+  .schip { background: transparent; color: var(--ink); border: 1px solid var(--line-strong, rgba(0,0,0,.18)); }
   .mchip { background: var(--neutral-soft); color: var(--muted-2); font-weight: 500; }
   .mchip.warn { background: rgba(217,119,6,.12); color: #B45309; }
   .chiprow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -1079,12 +1079,14 @@
   .sv-rows { background: none; border: 0; border-radius: 0; overflow: visible; display: flex; flex-direction: column; gap: 8px; }
   .sv-row { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0; gap: 0; align-items: stretch; overflow: hidden; min-height: 64px; }
   .sv-row + .sv-row { border-top: 1px solid var(--line); }
-  .sv-row .sv-time { width: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; padding: 8px 2px; background: rgba(230,57,70,.08); color: #C81E32; white-space: nowrap; }
+  .sv-row .sv-time { width: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; padding: 8px 2px; background: rgba(230,57,70,.08); color: #C81E32; white-space: nowrap; }
   .sv-row .sv-time small { font-size: 10.5px; font-weight: 600; opacity: .85; }
   .sv-row.ses-evening .sv-time { background: rgba(59,130,246,.10); color: #1D4ED8; }
   .sv-row.ses-special .sv-time { background: rgba(124,58,237,.09); color: #6D28D9; }
   .sv-row .sv-main { padding: 9px 10px 9px 12px; gap: 2px; justify-content: center; }
-  .sv-row .tl-pill { align-self: center; margin-right: 10px; }
+  .sv-row .sv-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .sv-row .sv-top .sv-batch { min-width: 0; }
+  .sv-row .tl-pill { flex: none; margin-top: 1px; }
   .sv-row.done, .sv-row.live, .sv-row.missed, .sv-row.leave, .sv-row.covered, .sv-row.tt-clash { box-shadow: none; }
   .sv-row.live { border-color: rgba(230,57,70,.55); }
   .sv-row.cancelled { opacity: .62; }
@@ -1092,10 +1094,10 @@
   .sv-row.ex-sel { background: var(--gold-soft); }
   .sv-row .sv-batch { font-size: 15px; font-weight: 700; }
   .sv-row .sv-ampm { align-self: flex-start; margin: 3px 0 0; }
-  :root[data-theme="dark"] .schip { filter: brightness(1.6) saturate(.9); }
+  :root[data-theme="dark"] .schip { border-color: rgba(255,255,255,.25); }
   :root[data-theme="dark"] .sv-row .sv-time { color: #FF7A85; } :root[data-theme="dark"] .sv-row.ses-evening .sv-time { color: #7DA8FF; } :root[data-theme="dark"] .sv-row.ses-special .sv-time { color: #B794FF; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sv-row .sv-time { color: #FF7A85; } :root:not([data-theme="light"]) .sv-row.ses-evening .sv-time { color: #7DA8FF; } :root:not([data-theme="light"]) .sv-row.ses-special .sv-time { color: #B794FF; } }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .schip { filter: brightness(1.6) saturate(.9); } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .schip { border-color: rgba(255,255,255,.25); } }
   .tg-cbtag { display: block; font-style: normal; font-size: 10px; font-weight: 700; color: #0369A1; }
   .tg-selbar .btn-secondary, .tg-selbar .save-btn { padding: 7px 12px; width: auto; }
   .tg-teacher { margin-top: 10px; font-size: 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -2490,7 +2492,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.5 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 7.6 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8643,9 +8645,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const topic = m.cls && m.cls.topic ? `<span class="sv-topic">${escapeHtml(m.cls.topic)}</span>` : '';
     return `<div class="sv-row ${m.status} ses-${ses}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : (t ? escapeHtml(t) : '—')}</span>
-      <span class="sv-main"><span class="sv-batch">${escapeHtml(slotLabelAll(s))}</span>
+      <span class="sv-main"><span class="sv-top"><span class="sv-batch">${escapeHtml(slotLabelAll(s))}</span>${pillHtml(m.status, SV_PILL[m.status])}</span>
         <span class="chiprow">${chips}${src}</span>${topic ? `<span class="srcline">${topic}</span>` : ''}${from ? `<span class="srcline">${I_CAL}${from}</span>` : ''}${ampm}</span>
-      ${pillHtml(m.status, SV_PILL[m.status])}
     </div>`;
   }
   // Invigilation duties planned for this teacher in a week (view-only in Schedule).
@@ -10969,7 +10970,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   const SUBJ_PAL = [['rgba(99,91,255,.13)', '#4338CA'], ['rgba(13,148,136,.13)', '#0F766E'], ['rgba(219,39,119,.12)', '#BE185D'], ['rgba(234,88,12,.12)', '#C2410C'], ['rgba(37,99,235,.12)', '#1D4ED8'], ['rgba(147,51,234,.12)', '#7E22CE'], ['rgba(120,113,108,.16)', '#57534E'], ['rgba(8,145,178,.13)', '#0E7490']];
   const SUBJ_FIX = { maths: 0, mathematics: 0, physics: 1, chemistry: 2, reasoning: 3, biology: 4, english: 5, hindi: 6, computer: 7, 'geo/eco': 3, 'his/pol. sc.': 5, science: 1, 'social science': 6 };
   function subjColor(sub) { const k = String(sub || '').trim().toLowerCase(); let i = SUBJ_FIX[k]; if (i == null) { let h = 0; for (let j = 0; j < k.length; j++) h = (h * 31 + k.charCodeAt(j)) >>> 0; i = h % SUBJ_PAL.length; } return SUBJ_PAL[i]; }
-  function subjChipHtml(sub) { if (!sub) return ''; const [b, f] = subjColor(sub); return `<span class="schip" style="--sb:${b};--sf:${f}"><span class="ico i-book" aria-hidden="true"></span>${escapeHtml(sub)}</span>`; }
+  function subjChipHtml(sub) { if (!sub) return ''; return `<span class="schip"><span class="ico i-book" aria-hidden="true"></span>${escapeHtml(sub)}</span>`; }
   function pillHtml(status, label) {
     const ic = { upcoming: 'clock', done: 'check', missed: 'alert', covered: 'check' }[status];
     return `<span class="tl-pill ${status}">${ic ? `<span class="ico i-${ic}" aria-hidden="true"></span>` : ''}${escapeHtml(label)}</span>`;
