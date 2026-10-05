@@ -989,6 +989,22 @@
   .tg-msel .tg-msel-btns { flex-wrap: wrap; justify-content: flex-end; }
   .tg-c { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .rep-opts { display: flex; flex-direction: column; gap: 8px; }
+  .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
+  .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
+  .rt-tile { position: relative; }
+  .rep-range-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .rep-range-row .chips { flex: 1; }
+  .cal-btn { flex: none; color: #C81E32; }
+  .ad-datelbl { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .ad-datelbl .cal-btn { width: 34px; height: 34px; }
+  .rt-tile .qa-l { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.2; text-align: center; }
+  .rt-tile .qa-s { white-space: normal; line-height: 1.25; }
+  #repLabel { text-align: center; font-weight: 700; font-size: 15px; }
+  .rt-tile.on { border-color: #E63946; background: rgba(230,57,70,.06); box-shadow: 0 0 0 1px #E63946 inset; }
+  .rt-tile.on .qa-l { color: #C81E32; }
+  .rt-tile.on::after { content: ""; position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; border-radius: 50%; background: #E63946 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 12.5 10 17 19 7'/%3E%3C/svg%3E") center / 11px no-repeat; }
+  .rt-tile:not(.on) .ic { opacity: .75; }
+  #adminReportRangeChips .chip:disabled { opacity: .35; }
   .rep-opts select { width: 100%; }
   .hv-attbtn { width: 100%; margin-bottom: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   html.ts-large body { zoom: 1.12; }
@@ -1852,7 +1868,7 @@
         <button type="button" id="hvFilterClear"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Clear</button>
       </div>
       <div class="sum-grid hv-sum" id="hvSum"></div>
-      <div id="hvActions"><button type="button" class="btn-secondary hv-attbtn" id="hvAttBtn" style="border-color: var(--line);"><span class="ico i-clock" aria-hidden="true"></span> Attendance report (check-in · check-out)</button><div class="qa-row hv-tiles"><button type="button" class="qa-btn" id="hvReportBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" id="hvWhatsAppBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" id="downloadCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div></div>
+      <div id="hvActions"><div class="rep-lbl">Report</div><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-hv-rt="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Classes, tests, work</span></button><button type="button" class="qa-btn rt-tile" data-hv-rt="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · check-out</span></button></div><div class="rep-lbl">Get it as</div><div class="qa-row hv-tiles"><button type="button" class="qa-btn" id="hvReportBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" id="hvWhatsAppBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" id="downloadCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div></div>
       <div class="admin-sub" id="historyReportMsg" style="text-align:center;"></div>
       <div id="historyList" class="hv-list">
         <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
@@ -1937,7 +1953,7 @@
           <div class="hv-title">Admin</div>
           <div class="sv-sub" id="adminDateSub"></div>
         </div></div>
-        <button type="button" class="hv-icon" id="adminDateCalIcon" aria-label="Open calendar"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+        <button type="button" class="hv-icon" id="adminDateCalIcon" aria-label="Open calendar" hidden style="display:none;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
       </div>
       <div class="ad-tabs" id="adminTabs" role="tablist">
         <button type="button" class="ad-tab" data-atab-btn="dash" role="tab">Home</button>
@@ -1946,12 +1962,12 @@
         <button type="button" class="ad-tab" data-atab-btn="reports" role="tab">Reports</button>
         <button type="button" class="ad-tab" data-atab-btn="settings" role="tab">Settings</button>
       </div>
-      <div class="hv-nav" data-atab="dash exams reports">
+      <div class="hv-nav" data-atab="dash exams">
         <button type="button" class="hv-arrow" id="adminDatePrev" aria-label="Previous day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div class="hv-label" id="adminDateLabelText">Today</div>
+        <div class="hv-label ad-datelbl"><span id="adminDateLabelText">Today</span><button type="button" class="hv-icon cal-btn" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams reports" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button>
+      <button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button>
 
       <div class="chips" id="adminWingChips" data-atab="dash tt reports">
         <button class="chip active" data-admin-wing="all">All</button>
@@ -2070,35 +2086,36 @@
       </section>
 
       <section class="tsec" id="adminReportsSec" data-atab="reports">
-        <div class="tsec-head"><div class="tsec-title">Institute Reports</div><span class="current-period-tag" id="adminReportWingTag" style="display:none;"></span></div>
-        <div class="admin-sub" id="adminReportRangeSub" style="margin:0;">Every teacher's activity for the selected date, in one file.</div>
-        <div class="chips" id="adminReportRangeChips">
+        <div class="tsec-head"><div class="tsec-title">Reports</div><span class="current-period-tag" id="adminReportWingTag" style="display:none;"></span></div>
+        <div class="rep-range-row"><div class="chips" id="adminReportRangeChips">
           <button class="chip active" data-report-range="day">Day</button>
           <button class="chip" data-report-range="week">Week</button>
           <button class="chip" data-report-range="month">Month</button>
-        </div>
-        <div class="rep-opts">
-          <label class="sv-tlbl" for="adminRepTeacher">Teacher</label>
+        </div><button type="button" class="hv-icon cal-btn" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
+        <div class="trep-nav"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div id="repLabel"></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+        <div class="rep-opts" id="repTeacherWrap">
+          <label class="rep-lbl" for="adminRepTeacher">Teacher</label>
           <select class="text-input" id="adminRepTeacher"><option value="">All teachers</option></select>
-          <div class="chips" id="adminRepKind"><button type="button" class="chip active" data-rep-kind="full">Full report</button><button type="button" class="chip" data-rep-kind="att">Attendance only</button></div>
         </div>
-        <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-          <button type="button" class="qa-btn" id="downloadAdminPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">All teachers</span></button>
-          <button type="button" class="qa-btn qa-xl" id="downloadAdminCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button>
+        <div class="rep-lbl">Report</div>
+        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(3, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button></div>
+        <div class="hv-note" id="repKindNote" style="text-align:left;"></div>
+        <div id="repStd">
+          <div class="rep-lbl">Get it as</div>
+          <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <button type="button" class="qa-btn" id="downloadAdminPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button>
+            <button type="button" class="qa-btn qa-xl" id="downloadAdminCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button>
+          </div>
+        </div>
+        <div id="repCount" hidden>
+          <div id="trepBox"><div class="skel short"></div></div>
+          <div class="rep-lbl">Get it as</div>
+          <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <button type="button" class="qa-btn qa-wa" id="trepImg"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
+            <button type="button" class="qa-btn qa-xl" id="trepCsv"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button>
+          </div>
         </div>
         <div class="admin-sub" id="adminReportMsg" style="text-align:center;"></div>
-      </section>
-
-      <section class="tsec" id="trepSec" data-atab="reports">
-        <div class="tsec-head"><div class="tsec-title">Teaching Report</div></div>
-        <div class="admin-sub" style="margin:0;">Classes of every teacher, batch-wise — from the published timetable, checked against the classes teachers filled in.</div>
-        <div class="chips" id="trepMode"><button type="button" class="chip active" data-trep="week">Weekly</button><button type="button" class="chip" data-trep="month">Monthly</button></div>
-        <div class="trep-nav"><button type="button" class="hv-arrow" id="trepPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div id="trepLabel"></div><button type="button" class="hv-arrow" id="trepNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-        <div id="trepBox"><div class="skel short"></div></div>
-        <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-          <button type="button" class="btn-secondary" id="trepImg" style="border-color: var(--line);">Share picture</button>
-          <button type="button" class="btn-secondary" id="trepCsv" style="border-color: var(--line);">Excel (CSV)</button>
-        </div>
       </section>
 
       <div class="tsec-head" data-atab="settings"><div class="tsec-title">Settings</div><div class="tsec-meta">Tap a setting to open it</div></div>
@@ -2514,7 +2531,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.1 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 8.3 · updated 6 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3918,7 +3935,7 @@
     const dCount = (onLeaveDay && !nClasses) ? 'On leave' : unitsTxt(all);
     const dCamp = secs >= 60 ? `${fmtTeaching(Math.round(secs / 60))} on campus` : '';
     const dDate = h.range === 'day' ? '' : `<span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta"> · </span>`;
-    html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-text"><span class="hv-day-l1">${dDate}<span class="${h.range === 'day' ? 'hv-day-date' : 'hv-day-meta'}">${dCount}</span></span>${dCamp ? `<span class="hv-day-camp">${dCamp}</span>` : ''}</span></div>`;
+    if (h.range !== 'day') html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-text"><span class="hv-day-l1">${dDate}<span class="${h.range === 'day' ? 'hv-day-date' : 'hv-day-meta'}">${dCount}</span></span>${dCamp ? `<span class="hv-day-camp">${dCamp}</span>` : ''}</span></div>`;
     html += `<div class="qa-row hv-tiles"><button type="button" class="qa-btn" data-report-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" data-whatsapp-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" data-csv-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div>`;
     const sessRO = !canEditSessionsOn(d);
     if (sessions.length) html += `<div class="hv-sub">Check-in sessions</div><div class="class-list" id="historySessionsList">${sessionsCardsHtml(sessions, sessRO)}</div>`;
@@ -4124,26 +4141,30 @@
     if (h.range === 'month') return { dates, title: 'Monthly Activity Report', period: `Month: ${hvLabelText()}`, fn: `CATJEE-Monthly-Report-${b.start.slice(0, 7)}.pdf` };
     return { dates, title: 'Activity Report', period: `Period: ${hvLabelText()}`, fn: `CATJEE-Report-${b.start}-to-${b.end}.pdf` };
   }
+  state.hvRepKind = 'full';
+  document.querySelectorAll('[data-hv-rt]').forEach((b) => b.addEventListener('click', () => {
+    state.hvRepKind = b.getAttribute('data-hv-rt');
+    document.querySelectorAll('[data-hv-rt]').forEach((x) => x.classList.toggle('on', x === b));
+    document.getElementById('historyReportMsg').textContent = '';
+  }));
+  const hvAtt = (kind) => {
+    const msg = document.getElementById('historyReportMsg'); const sp = hvReportSpec();
+    const dates = sp.single ? [sp.single] : sp.dates;
+    if (dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return true; }
+    attendanceReport(state.teacherId, kind, msg, dates, sp.period || (sp.single ? `Date: ${dayHeading(sp.single)}` : ''));
+    return true;
+  };
   document.getElementById('hvReportBtn').addEventListener('click', () => {
+    if (state.hvRepKind === 'att') { hvAtt('pdf'); return; }
     const msg = document.getElementById('historyReportMsg');
     const sp = hvReportSpec();
     if (sp.single) { downloadReportForDate(sp.single, msg, true); return; }
     if (sp.dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
     downloadRangeReport(sp.dates, sp.title, sp.period, 'Summary', sp.fn, msg, true);
   });
-  document.getElementById('hvAttBtn').addEventListener('click', () => {
-    const msg = document.getElementById('historyReportMsg'); const sp = hvReportSpec();
-    const dates = sp.single ? [sp.single] : sp.dates;
-    if (dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
-    const body = document.getElementById('hvSheetBody');
-    body.innerHTML = `<div class="hv-d-title">Attendance report</div><div class="hv-d-wing">Only check-in and check-out · ${escapeHtml(sp.period || '')}</div>
-      <div class="hv-d-btns" style="flex-direction:column; gap:8px;"><button type="button" class="save-btn" id="attPdf" style="margin:0; width:100%;">Download PDF</button><button type="button" class="btn-secondary" id="attWa" style="border-color: var(--line); width:100%;">Share on WhatsApp</button><button type="button" class="btn-secondary" id="attX" style="border-color: var(--line); width:100%;">Cancel</button></div>`;
-    document.getElementById('attX').addEventListener('click', closeHvSheet);
-    document.getElementById('attPdf').addEventListener('click', () => { closeHvSheet(); attendanceReport(state.teacherId, 'pdf', msg, dates, sp.period); });
-    document.getElementById('attWa').addEventListener('click', () => { closeHvSheet(); attendanceReport(state.teacherId, 'wa', msg, dates, sp.period); });
-    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
-  });
+
   document.getElementById('hvWhatsAppBtn').addEventListener('click', () => {
+    if (state.hvRepKind === 'att') { hvAtt('wa'); return; }
     const msg = document.getElementById('historyReportMsg');
     const sp = hvReportSpec();
     if (sp.single) { shareReportOnWhatsApp(sp.single, msg, true); return; }
@@ -6898,10 +6919,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     document.querySelectorAll('#view-admin [data-atab]').forEach((el) => {
       el.classList.toggle('atab-off', el.getAttribute('data-atab').split(' ').indexOf(t) === -1);
     });
-    if (t === 'reports' && typeof trepEnsure === 'function') trepEnsure();
+    if (t === 'reports' && typeof renderRepControls === 'function') renderRepControls();
     const dated = t !== 'settings' && t !== 'tt';
     document.getElementById('adminDateSub').classList.toggle('atab-off', !dated);
-    document.getElementById('adminDateCalIcon').classList.toggle('atab-off', !dated);
+
   }
   document.querySelectorAll('#adminTabs [data-atab-btn]').forEach((b) => b.addEventListener('click', () => {
     const nextTab = b.getAttribute('data-atab-btn');
@@ -7741,7 +7762,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   state.trep = state.trep || { mode: 'week', anchor: '', key: '', data: null, busy: false };
   function trepUnits(min) { if (!(min > 0)) return 1; if (min <= 70) return 1; if (min <= 105) return 1.5; return 1.5 + Math.ceil((min - 105) / 30) * 0.5; }
   function trepRange() {
-    const t = state.trep; const a = t.anchor || todayStr();
+    const t = state.trep; t.mode = state.adminReportRange === 'month' ? 'month' : 'week'; const a = state.adminDate || todayStr();
     if (t.mode === 'month') { const d = dateObj(a); const from = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-01`; const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); return { from, to: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(last)}` }; }
     const ws = mondayOf(a); return { from: ws, to: shiftDateStr(ws, 6) };
   }
@@ -7859,8 +7880,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function trepRender() {
     const box = document.getElementById('trepBox'); if (!box) return;
     const t = state.trep;
-    document.getElementById('trepLabel').textContent = trepTitle();
-    document.querySelectorAll('#trepMode [data-trep]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep') === t.mode));
+    const tl = document.getElementById('trepLabel'); if (tl) tl.textContent = trepTitle();
     if (t.busy || !t.data) { box.innerHTML = '<div class="skel short"></div>'; return; }
     if (t.data.error) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the report. Check the internet and try again.</div>'; return; }
     const T = trepTable();
@@ -9193,6 +9213,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   document.getElementById('navAdmin').addEventListener('click', () => switchTab('admin'));
   document.getElementById('navSchedule').addEventListener('click', () => switchTab('schedule'));
   document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+    if (state.hvRepKind === 'att') { hvAtt('csv'); return; }
     downloadHvCsv(document.getElementById('historyReportMsg'));
   });
   document.getElementById('downloadAdminPdfBtn').addEventListener('click', () => {
@@ -9209,25 +9230,19 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   });
   document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((b) => b.addEventListener('click', () => {
     state.adminRepKind = b.getAttribute('data-rep-kind');
-    document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('active', x === b));
+    if (state.adminRepKind === 'count' && (state.adminReportRange || 'day') === 'day') state.adminReportRange = 'week';
+    renderRepControls();
   }));
+  document.getElementById('repPrev').addEventListener('click', () => shiftRepPeriod(-1));
+  document.getElementById('repNext').addEventListener('click', () => shiftRepPeriod(1));
   document.getElementById('adminRepTeacher').addEventListener('focus', fillAdminRepTeachers);
   document.getElementById('adminRepTeacher').addEventListener('pointerdown', fillAdminRepTeachers);
   document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((chip) => {
     chip.addEventListener('click', () => {
+      if (chip.disabled) return;
       state.adminReportRange = chip.getAttribute('data-report-range');
-      document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((c) => {
-        c.classList.toggle('active', c === chip);
-      });
-      const subEl = document.getElementById('adminReportRangeSub');
-      if (state.adminReportRange === 'day') {
-        subEl.textContent = "Combines every teacher's activity for the selected date above into one file.";
-      } else if (state.adminReportRange === 'week') {
-        subEl.textContent = "Combines every teacher's activity for the week containing the selected date into one file.";
-      } else {
-        subEl.textContent = "Combines every teacher's activity for the month containing the selected date into one file.";
-      }
       document.getElementById('adminReportMsg').textContent = '';
+      renderRepControls();
     });
   });
 
@@ -10140,10 +10155,17 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const pageNum = pageNums[i];
       const contentNum = contentNums[i];
       objStrings[pageNum] = `<< /Type /Page /Parent ${pagesNode} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontF1} 0 R /F2 ${fontF2} 0 R >> >> /Contents ${contentNum} 0 R >>`;
-      let stream = 'BT\n';
+      let stream = '';
+      // shapes first (backgrounds and lines), then the text on top
       ops.forEach((op) => {
+        if (op.kind === 'rect') stream += `${op.fill.map((v) => v.toFixed(3)).join(' ')} rg\n${op.x} ${op.y} ${op.w} ${op.h} re f\n`;
+        else if (op.kind === 'line') stream += `${op.gray} G\n0.6 w\n${op.x1} ${op.y1} m ${op.x2} ${op.y2} l S\n`;
+      });
+      stream += 'BT\n';
+      ops.forEach((op) => {
+        if (op.kind) return;
         const fontKey = op.bold ? 'F2' : 'F1';
-        stream += `/${fontKey} ${op.size} Tf\n1 0 0 1 ${op.x} ${op.y} Tm\n(${pdfEscape(op.text)}) Tj\n`;
+        stream += `${op.color ? op.color.map((v) => v.toFixed(3)).join(' ') : '0 0 0'} rg\n/${fontKey} ${op.size} Tf\n1 0 0 1 ${op.x} ${op.y} Tm\n(${pdfEscape(op.text)}) Tj\n`;
       });
       stream += 'ET\n';
       objStrings[contentNum] = { stream };
@@ -10265,7 +10287,21 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       newPage();
       return buildMinimalPdf(pages);
     }
-    return { heading, bodyLine, pairRow, rule, addSpace, cols, finishBlob };
+    // a table row with an optional soft background and a thin line under it
+    // opts: { size, bold, fill: [r,g,b] (0-1), line: true/false, h, colors: { colIndex: [r,g,b] } }
+    function row(cells, xs, opts) {
+      opts = opts || {}; const size = opts.size || 10; const h = opts.h || 18;
+      ensure(h + 4);
+      const top = y + size + 2; const bottom = top - h;
+      if (opts.fill) currentOps.push({ kind: 'rect', x: marginX - 6, y: bottom, w: contentWidth + 12, h, fill: opts.fill });
+      if (opts.line !== false) currentOps.push({ kind: 'line', x1: marginX - 6, y1: bottom, x2: marginX + contentWidth + 6, y2: bottom, gray: 0.82 });
+      const base = bottom + (h - size) / 2 + 1.5;
+      cells.forEach((t, i) => { if (t == null || t === '') return; currentOps.push({ x: marginX + xs[i], y: base, size, bold: !!(opts.bold || opts.boldCol === i), text: toAsciiSafe(String(t)), color: (opts.colors && opts.colors[i]) || opts.color || null }); });
+      y = bottom - size - 2;
+    }
+    // a soft box around the next lines (call before writing them, with their total height)
+    function box(h, fill) { ensure(h + 4); const top = y + 12; currentOps.push({ kind: 'rect', x: marginX - 6, y: top - h, w: contentWidth + 12, h, fill }); }
+    return { heading, bodyLine, pairRow, rule, addSpace, cols, row, box, finishBlob };
   }
 
   // ---------- Reports (PDF + WhatsApp) — one shared engine for Day / Week / Month / Custom ----------
@@ -10685,6 +10721,34 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return downloadRangeReport(dates, 'Weekly Activity Report', `Week: ${weekLabel(mondayStr)}`, 'Summary', weeklyReportFilenameFor(mondayStr), msgEl, useFilter);
   }
 
+  // ---------- Reports page: one period, one teacher, one report type ----------
+  const REP_NOTE = { full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a week or a month.' };
+  function renderRepControls() {
+    const kind = state.adminRepKind || 'full'; let range = state.adminReportRange || 'day';
+    if (kind === 'count' && range === 'day') { range = 'week'; state.adminReportRange = 'week'; }
+    document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((c) => { const r = c.getAttribute('data-report-range'); c.classList.toggle('active', r === range); c.disabled = kind === 'count' && r === 'day'; });
+    document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
+    const { label } = adminReportRangeDates();
+    const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = range === 'day' ? `Day: ${label}` : (range === 'week' ? `Week: ${label}` : `Month: ${label}`);
+    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count';
+    const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
+    document.getElementById('repStd').hidden = kind === 'count';
+    document.getElementById('repCount').hidden = kind !== 'count';
+    if (kind === 'count' && typeof trepEnsure === 'function') trepEnsure();
+  }
+  // move the report period back or forward (the date above the page moves with it)
+  function shiftRepPeriod(dir) {
+    const range = state.adminReportRange || 'day'; let d = state.adminDate;
+    if (range === 'day') d = shiftDateStr(d, dir);
+    else if (range === 'week') d = shiftDateStr(mondayOf(d), 7 * dir);
+    else { const x = dateObj(d); const n = new Date(x.getFullYear(), x.getMonth() + dir, 1); d = `${n.getFullYear()}-${pad(n.getMonth() + 1)}-01`; }
+    if (d > todayStr()) d = todayStr();
+    state.adminDate = d; state.adminExpandedTeacher = null;
+    const t = document.getElementById('adminDateLabelText'); if (t) t.textContent = formatStepperDateLabel(d);
+    subscribeAdminDate(d);
+    document.getElementById('adminReportMsg').textContent = '';
+    renderRepControls();
+  }
   // ---------- one teacher (admin) and attendance-only reports ----------
   function fillAdminRepTeachers() {
     const sel = document.getElementById('adminRepTeacher'); if (!sel || sel._filled === (state.adminTeacherIds || []).length) return;
@@ -10776,32 +10840,42 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       }
       // PDF
       const w = createPdfWriter();
+      const HEAD = [0.93, 0.94, 0.96], ALT = [0.97, 0.975, 0.985], ABS = [0.99, 0.93, 0.93], LEAVE = [1, 0.965, 0.88], OFF = [0.94, 0.94, 0.94], TOT = [0.95, 0.96, 0.98];
+      const RED = [0.72, 0.11, 0.11], AMBER = [0.6, 0.38, 0.03], GRAY = [0.42, 0.45, 0.5];
       w.heading('ATTENDANCE REPORT', 17); w.addSpace(2);
       w.bodyLine(sp.period, { size: 11 });
       if (!tid) w.bodyLine(`Teachers: ${rows.length}`, { size: 11 });
       if (!tid) {
-        // register: one line per teacher
-        w.addSpace(4); w.rule();
-        const X = [0, 190, 250, 305, 350, 410];
-        w.cols(['Teacher', 'Present', 'Absent', 'Leave', 'Off', 'Time on campus'], X, { bold: true, size: 10 });
-        rows.forEach((r) => { const t = attTotals(r.days); w.cols([nameOfU(r.u) + (forAdmin && r.days.some((d) => d.edited) ? ' (edited)' : ''), t.n.present, t.n.absent, t.n.leave, t.n.off, hmm(t.secs)], X, { size: 10 }); });
-        w.rule();
+        // register: one row per teacher
+        w.addSpace(8);
+        const X = [0, 200, 262, 318, 368, 420];
+        w.row(['Teacher', 'Present', 'Absent', 'Leave', 'Off', 'Time on campus'], X, { bold: true, size: 9.5, fill: HEAD });
+        rows.forEach((r, ri) => { const t = attTotals(r.days); w.row([nameOfU(r.u) + (forAdmin && r.days.some((d) => d.edited) ? ' (edited)' : ''), t.n.present, t.n.absent || '-', t.n.leave || '-', t.n.off || '-', hmm(t.secs)], X, { size: 9.5, fill: ri % 2 ? ALT : null, colors: t.n.absent ? { 2: RED } : null }); });
+        w.addSpace(6);
       }
-      (tid ? rows : rows).forEach((r) => {
+      rows.forEach((r) => {
         if (!tid && !r.days.some((d) => d.st !== 'off')) return;
-        w.addSpace(6); w.bodyLine(nameOfU(r.u), { bold: true, size: 12 });
-        const X = [0, 70, 105, 230, 380];
-        w.cols(['Date', 'Day', 'Check-in – Check-out', '', 'Time on campus'], X, { bold: true, size: 9.5 });
-        r.days.forEach((d) => {
-          const dd = dateObj(d.dt); const dl = `${pad(dd.getDate())} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`;
-          if (d.st !== 'present') { w.cols([dl, WD[dateObj(d.dt).getDay()], ATT_TXT[d.st], '', '—'], X, { size: 9.5 }); return; }
-          d.ss.forEach((s, i) => w.cols([i === 0 ? dl : '', i === 0 ? WD[dateObj(d.dt).getDay()] : '', sesTxt(s) + (i === 0 && forAdmin && d.edited ? '   (edited)' : ''), '', i === 0 ? hmm(d.secs) : ''], X, { size: 9.5 }));
+        w.addSpace(10); w.bodyLine(nameOfU(r.u), { bold: true, size: 12.5 }); w.addSpace(2);
+        const X = [0, 62, 104, 360];
+        w.row(['Date', 'Day', 'Check-in  -  Check-out', 'Time on campus'], X, { bold: true, size: 9.5, fill: HEAD });
+        r.days.forEach((d, di) => {
+          const dd = dateObj(d.dt); const dl = `${pad(dd.getDate())} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`; const dw = WD[dd.getDay()];
+          const band = di % 2 ? ALT : null;
+          if (d.st !== 'present') {
+            const fill = d.st === 'absent' ? ABS : (d.st === 'leave' ? LEAVE : OFF); const col = d.st === 'absent' ? RED : (d.st === 'leave' ? AMBER : GRAY);
+            w.row([dl, dw, ATT_TXT[d.st], '-'], X, { size: 9.5, fill, colors: { 2: col, 3: GRAY } }); return;
+          }
+          d.ss.forEach((ss, i) => {
+            const last = i === d.ss.length - 1;
+            w.row([i === 0 ? dl : '', i === 0 ? dw : '', sesTxt(ss) + (i === 0 && forAdmin && d.edited ? '   (edited)' : ''), last ? hmm(d.secs) + (d.ss.length > 1 ? ' total' : '') : ''], X, { size: 9.5, fill: band, line: last, h: d.ss.length > 1 ? 15 : 18, boldCol: last && d.ss.length > 1 ? 3 : undefined });
+          });
         });
         const t = attTotals(r.days);
-        w.addSpace(2);
-        w.bodyLine(`Present: ${t.n.present} day${t.n.present === 1 ? '' : 's'}  |  Absent: ${t.n.absent}  |  Leave: ${t.n.leave}  |  Weekly off: ${t.n.off}`, { size: 10, bold: true });
-        w.bodyLine(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `  |  Average: ${hmm(t.avg)} a day` : ''}`, { size: 10 });
-        w.rule();
+        w.addSpace(8);
+        w.box(40, TOT);
+        w.bodyLine(`Present: ${t.n.present} day${t.n.present === 1 ? '' : 's'}    Absent: ${t.n.absent}    Leave: ${t.n.leave}    Weekly off: ${t.n.off}`, { size: 10, bold: true });
+        w.bodyLine(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `    Average: ${hmm(t.avg)} a day` : ''}`, { size: 10 });
+        w.addSpace(4);
       });
       saveFile(fileBase + '.pdf', w.finishBlob());
       msgEl.textContent = 'Saved.'; showToast('Attendance report saved');
@@ -11878,6 +11952,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     state.adminExpandedTeacher = null;
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
     subscribeAdminDate(state.adminDate);
+
   });
   document.getElementById('adminDateNext').addEventListener('click', () => {
     state.adminDate = shiftDateStr(state.adminDate, 1);
@@ -11885,6 +11960,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(state.adminDate);
     subscribeAdminDate(state.adminDate);
   });
+  // one date picker for the Admin pages: beside the date bar (Home, Exams) and beside Day / Week / Month (Reports)
+  const pickAdminDate = () => openCalendar(state.adminDate, (dateStr) => {
+    state.adminDate = dateStr; state.adminExpandedTeacher = null;
+    document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(dateStr);
+    subscribeAdminDate(dateStr);
+    if (state.adminTab === 'reports') { document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); }
+  });
+  document.getElementById('adminStepCal').addEventListener('click', (e) => { e.stopPropagation(); pickAdminDate(); });
+  document.getElementById('repCalBtn').addEventListener('click', pickAdminDate);
   document.getElementById('adminDateCalIcon').addEventListener('click', () => {
     openCalendar(state.adminDate, (dateStr) => {
       state.adminDate = dateStr;
@@ -12114,6 +12198,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       state.adminCampus = map;
       if (state.tab === 'admin') renderAdmin();
     }, (err) => flashOffline(err));
+    try { if (state.adminTab === 'reports' && typeof renderRepControls === 'function') setTimeout(renderRepControls, 0); } catch (e) { /* ignore */ }
   }
 
   // ---------- init ----------
