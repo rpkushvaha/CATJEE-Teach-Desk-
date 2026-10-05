@@ -1011,6 +1011,8 @@
   .bwp-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
   .bwp { display: flex; flex-direction: column; gap: 6px; }
   .bwp img { width: 100%; border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; background: #fff; }
+  .tl-card.tl-next { border-color: rgba(230,57,70,.55); background: linear-gradient(135deg, #FFF5F6, var(--card)); }
+  .tl-pill.tl-pill-next { background: rgba(230,57,70,.12); color: #C81E32; font-weight: 700; }
   .next-card { border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; background: linear-gradient(135deg, #FFF5F6, #FFFFFF); border: 1px solid rgba(230,57,70,.25); display: flex; flex-direction: column; gap: 4px; }
   .next-card.live { background: linear-gradient(135deg, #FDECEE, #FFF7F8); border-color: rgba(230,57,70,.5); }
   .next-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -2450,7 +2452,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.3 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 7.4 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3182,14 +3184,21 @@
     const parts = txt.split(' ');
     return `<div class="tl-time">${escapeHtml(parts[0])}<small>${escapeHtml(parts[1] || '')}</small></div>`;
   }
+  let tlNextId = '';
   function tlItemHtml(it) {
-    const pill = `<span class="tl-pill ${it.status}">${TL_LABEL[it.status]}</span>`;
+    const isNext = it.kind === 'slot' && it.slot.id === tlNextId && it.status === 'upcoming';
+    const pill = isNext ? '<span class="tl-pill tl-pill-next">Next</span>' : `<span class="tl-pill ${it.status}">${TL_LABEL[it.status]}</span>`;
     if (it.kind === 'slot') {
       const btnTxt = it.status === 'live' ? 'Log this class' : (it.status === 'missed' ? 'Log it now' : 'Log early');
+      const sl = it.slot;
+      const endM = sl.time && sl.duration ? hhmmToMin(sl.time) + Number(sl.duration) : null;
+      const range = sl.time ? `${formatTimeStr(sl.time)}${endM != null ? ' – ' + formatTimeStr(`${pad(Math.floor(endM / 60) % 24)}:${pad(endM % 60)}`) : ''}` : '';
+      const info = [sl.subject, sl.room ? 'Room ' + sl.room : '', sl.test ? 'Class test' : ''].filter(Boolean).join(' · ');
       return `<div class="tl-item">${tlTimeHtml(it.min)}
-        <div class="tl-card ${it.status}">
-          <div class="tl-top"><div class="tl-batch">${escapeHtml(slotLabelAll(it.slot))}</div>${pill}</div>
-          <div class="tl-topic faint">Scheduled class</div>
+        <div class="tl-card ${it.status}${isNext ? ' tl-next' : ''}">
+          <div class="tl-top"><div class="tl-batch">${escapeHtml(slotLabelAll(sl))}</div>${pill}</div>
+          <div class="tl-topic faint">${escapeHtml(info || 'Scheduled class')}</div>
+          ${range ? `<div class="tl-meta">${escapeHtml(range)}</div>` : ''}
           ${it.status === 'upcoming' ? '' : `<button class="tl-log" data-log-slot="${escapeHtml(it.slot.id)}">${btnTxt}</button>`}
         </div></div>`;
     }
@@ -3254,7 +3263,10 @@
         ? '<div class="tl-empty small"><div class="tl-empty-title">No classes scheduled for today</div></div>'
         : `<div class="tl-empty compact">${emptyIcon}<div><div class="tl-empty-title">No classes scheduled for today</div><div class="tl-empty-sub">Classes you schedule or log today will show here.</div></div></div>`;
     } else {
-      html = nextClassCardHtml(items) + items.map(tlItemHtml).join('');
+      // the class on now (or the next one) is marked in the list itself — no second copy of it
+      const nx = items.find((x) => x.kind === 'slot' && x.status === 'live') || items.find((x) => x.kind === 'slot' && x.status === 'upcoming');
+      tlNextId = nx ? nx.slot.id : '';
+      html = items.map(tlItemHtml).join('');
     }
     let duties = [];
     try { renderBell(); } catch (e) { /* ignore */ }
@@ -12250,7 +12262,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   const TOURS = {
     basics: { title: 'Quick tour', sub: 'The main things, in one minute', icon: 'spark', who: 'all', steps: [
       { go: goTab('today'), sel: '#checkBtn', t: 'Check in and out', x: 'Tap Check In when you reach campus, and Check Out when you leave.' },
-      { go: goTab('today'), sel: '#todayClassList', t: "Today's classes", x: 'Your classes for today. The next one is shown on top — tap Fill details after the class.' },
+      { go: goTab('today'), sel: '#todayClassList', t: "Today's classes", x: 'Your classes for today. The next one is marked Next — when it starts, tap Log this class to fill it in.' },
       { go: goTab('today'), sel: '.nav-item[data-tab="add"]', t: 'Add Class', x: 'Fill in a class you took: batch, time, topic, worksheet, test.' },
       { go: goTab('today'), sel: '.nav-item[data-tab="schedule"]', t: 'Schedule', x: 'Your week. Classes from the published timetable appear here by themselves.' },
       { go: goTab('today'), sel: '.nav-item[data-tab="history"]', t: 'History', x: 'Everything you filled in, day by day.' },
@@ -12260,7 +12272,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       { go: goTab('today'), sel: '#lateInBtn', t: 'Forgot to check in?', x: 'Tap here and choose the time you actually arrived.', ifMissing: 'This shows when you are not checked in.' },
       { go: goTab('today'), sel: '#sessionsSection', t: "Today's sessions", x: 'See or correct today’s check-in and check-out times.', ifMissing: 'This shows after your first check-in of the day.' } ] },
     fill: { title: 'Fill a class', sub: 'Log the class you took', icon: 'note', who: 'all', steps: [
-      { go: goTab('today'), sel: '#todayClassList', t: 'From Today', x: 'Easiest way: tap Fill details on a class here — batch and time are filled in for you.' },
+      { go: goTab('today'), sel: '#todayClassList', t: 'From Today', x: 'Easiest way: tap Log this class on a class here — batch and time are filled in for you.' },
       { go: goTab('add'), sel: '#batchChips', t: 'Choose the batch', x: 'Or open Add Class and tap the batch.' },
       { go: goTab('add'), sel: '#startTimeInput', t: 'Time', x: 'Start and end time of the class.' },
       { go: goTab('add'), sel: '#topicInput', t: 'Topic', x: 'What you taught today. Tick worksheet, test or homework below if given.' },
@@ -12363,7 +12375,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     let seenB = false, seenNew = false; try { seenB = localStorage.getItem(tourSeenKey('basics')) === '1'; seenNew = localStorage.getItem(tourSeenKey('new71')) === '1'; } catch (e) { seenB = true; seenNew = true; }
     if (!seenB) { setTimeout(() => startTour('basics'), 700); try { localStorage.setItem(tourSeenKey('new71'), '1'); } catch (e) { /* ignore */ } return; }
     if (!seenNew) {
-      TOURS.new71 = { title: "What's new", sub: '', icon: 'spark', who: 'none', steps: [{ go: goTab('today'), sel: '#menuOpenBtn', t: 'Help & guided tours', x: 'New: open Menu → Help & guided tours to see how anything works, step by step. The next class is now shown big on Today.' }] };
+      TOURS.new71 = { title: "What's new", sub: '', icon: 'spark', who: 'none', steps: [{ go: goTab('today'), sel: '#menuOpenBtn', t: 'Help & guided tours', x: 'New: open Menu → Help & guided tours to see how anything works, step by step. The next class is marked on Today.' }] };
       setTimeout(() => startTour('new71'), 900);
     }
   };
