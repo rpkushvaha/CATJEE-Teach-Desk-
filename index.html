@@ -974,6 +974,7 @@
   .tg-msel { flex-wrap: wrap; position: sticky; top: 0; z-index: 3; }
   .tg-msel .tg-msel-btns { flex-wrap: wrap; justify-content: flex-end; }
   .tg-c { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  html.ts-large body { zoom: 1.12; }
   /* consistent controls: comfortable touch size, one radius, calm focus ring, smooth press */
   .save-btn, .btn-secondary { min-height: 44px; border-radius: 12px; }
   .tg-mini { min-height: 34px; display: inline-flex; align-items: center; gap: 5px; }
@@ -2206,20 +2207,11 @@
       </div>
 
       <div class="dscroll">
+        <div class="dgroup-lbl">You</div>
         <div class="dgroup">
           <button class="drow" data-open="profile" style="--i:0">
             <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></span>
             <span class="dlabel">Profile<small>Name and subject</small></span>
-            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
-          </button>
-          <button class="drow" id="menuHelpRow" type="button" style="--i:1">
-            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
-            <span class="dlabel">Help &amp; guided tours<small>See how anything works, step by step</small></span>
-            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
-          </button>
-          <button class="drow" id="menuInstallRow" type="button" style="--i:1" hidden>
-            <span class="dtile"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M12 7v8"></path><polyline points="9 12 12 15 15 12"></polyline></svg></span>
-            <span class="dlabel">Install app<small>Put Teach Desk on your home screen</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
           <button class="drow" data-open="photos" style="--i:2">
@@ -2229,7 +2221,7 @@
           </button>
           <button class="drow" data-open="settings" style="--i:1">
             <span class="dtile"><svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="17" x2="20" y2="17"></line><circle cx="9" cy="7" r="2.2"></circle><circle cx="15" cy="17" r="2.2"></circle></svg></span>
-            <span class="dlabel">Settings<small>Reminders and appearance</small></span>
+            <span class="dlabel">Settings<small>Reminders, display, text size, update</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
           <button class="drow" data-open="password" style="--i:2">
@@ -2239,23 +2231,35 @@
           </button>
         </div>
 
+        <div class="dgroup-lbl">Help</div>
         <div class="dgroup">
+          <button class="drow" id="menuHelpRow" type="button" style="--i:1">
+            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <span class="dlabel">Help &amp; guided tours<small>Tours and the written guide</small></span>
+            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
+          <button class="drow" id="menuReportRow" type="button" style="--i:4">
+            <span class="dtile"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <span class="dlabel">Report a problem<small>Send it to the admin on WhatsApp</small></span>
+            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
           <button class="drow" data-open="contact" style="--i:3">
             <span class="dtile"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"></path></svg></span>
             <span class="dlabel">Contact director<small>WhatsApp or email</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-          <button class="drow" data-open="share" id="menuShareAppBtn" style="--i:4">
-            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line></svg></span>
-            <span class="dlabel">Share app<small>Send the link to a colleague</small></span>
-            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
-          </button>
         </div>
 
+        <div class="dgroup-lbl">More</div>
         <div class="dgroup">
-          <button class="drow" data-open="help" style="--i:5">
-            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
-            <span class="dlabel">How to use<small>A quick guide to each tab</small></span>
+          <button class="drow" data-open="share" id="menuShareAppBtn" style="--i:4">
+            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line></svg></span>
+            <span class="dlabel">Share app<small>Link for a new colleague</small></span>
+            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
+          <button class="drow" id="menuInstallRow" type="button" style="--i:1" hidden>
+            <span class="dtile"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M12 7v8"></path><polyline points="9 12 12 15 15 12"></polyline></svg></span>
+            <span class="dlabel">Install app<small>Put Teach Desk on your home screen</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
           <button class="drow" data-open="about" style="--i:6">
@@ -2346,6 +2350,19 @@
             <button class="chip active" data-theme-choice="auto">Match phone</button>
           </div>
         </div>
+        <div class="dcard">
+          <div class="dfield-label" style="margin-bottom:10px;">Text size</div>
+          <div class="chips" id="textSizeChips">
+            <button type="button" class="chip" data-ts="normal">Normal</button>
+            <button type="button" class="chip" data-ts="large">Large</button>
+          </div>
+          <div class="dnote" style="margin-top:8px;">Large makes all writing and buttons a little bigger.</div>
+        </div>
+        <div class="dcard">
+          <div class="dfield-label" style="margin-bottom:10px;">App</div>
+          <button type="button" class="btn-secondary" id="appUpdateNow" style="border-color: var(--line); width:100%;">Update app now</button>
+          <div class="dnote" style="margin-top:8px;" id="appVerNote">Loads the newest version of Teach Desk.</div>
+        </div>
       </div>
     </section>
 
@@ -2432,7 +2449,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.1 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 7.2 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3205,9 +3222,14 @@
   }
   window.addEventListener('resize', () => fitSummaryTiles(true));
 
+  // one class counts 1; a long one (up to 1 h 45 min) counts 1.5, and so on — the same rule as the Teaching Report
+  function classUnits(c) { const m = classDuration(c); if (!(m > 0)) return 1; if (m <= 70) return 1; if (m <= 105) return 1.5; return 1.5 + Math.ceil((m - 105) / 30) * 0.5; }
+  function fmtUnits(v) { const r = Math.round(v * 2) / 2; return String(r); }
+  // "2 classes" / "1.5 classes" for a list of entries (other work is left out)
+  function unitsTxt(list) { const u = (list || []).filter((c) => c.entryType !== 'activity').reduce((sum, c) => sum + classUnits(c), 0); return `${fmtUnits(u)} class${u === 1 ? '' : 'es'}`; }
   function renderTodaySummary(classes) {
     const set = (id, v) => { const e = document.getElementById(id); if (e && e.textContent !== String(v)) e.textContent = v; };
-    set('sumClasses', classes.length);
+    set('sumClasses', fmtUnits(classes.reduce((sum, c) => sum + classUnits(c), 0)));
     set('sumHours', fmtTeaching(classes.reduce((sum, c) => sum + classDuration(c), 0)));
     set('sumWorksheets', classes.filter((c) => c.worksheet).length);
     set('sumTests', classes.reduce((s, c) => s + testCount(c), 0) + coveredTestsFor(todayStr(), state.classesToday).count);
@@ -3693,14 +3715,14 @@
       day.classes.forEach((c) => {
         if (c.entryType === 'activity' || state.pendingDeleteIds.has(c.id) || !hvStartedOrPast(c)) return;
         if (!hvMatchesFilters(c)) return;
-        classes++; mins += classDuration(c);
+        classes += classUnits(c); mins += classDuration(c);
         if (c.worksheet) ws++;
         tests += testCount(c);
         if (c.homework) hw++;
       });
     });
     const set = (id, v) => { document.getElementById(id).textContent = v; };
-    set('hvsClasses', classes); set('hvsTeaching', fmtTeaching(mins)); set('hvsCampus', fmtTeaching(Math.round(campus / 60)));
+    set('hvsClasses', fmtUnits(classes)); set('hvsTeaching', fmtTeaching(mins)); set('hvsCampus', fmtTeaching(Math.round(campus / 60)));
     set('hvsWorksheets', ws); set('hvsTests', tests); set('hvsHomework', hw);
   }
   function renderHvControls() {
@@ -3783,7 +3805,7 @@
       if (!recs.length && (q || h.batch !== 'all' || h.kind !== 'all' || !secs)) return;
       const nClasses = all.filter((c) => c.entryType !== 'activity').length;
       const onLeave = all.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday');
-      const countTxt = (onLeave && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`;
+      const countTxt = (onLeave && !nClasses) ? 'On leave' : unitsTxt(all);
       const campTxt = secs >= 60 ? `${fmtTeaching(Math.round(secs / 60))} on campus` : '';
       html += `<button type="button" class="hv-day" data-hv-day="${d}"><span class="hv-day-text"><span class="hv-day-l1"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta"> · ${countTxt}</span></span>${campTxt ? `<span class="hv-day-camp">${campTxt}</span>` : ''}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>`;
       html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No classes logged</div>';
@@ -3815,7 +3837,7 @@
     const back = h.range === 'day' ? '' : '<button type="button" class="hv-back" id="hvDayBack"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>All dates</button>';
     let html = back;
     const onLeaveDay = all.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday');
-    const dCount = (onLeaveDay && !nClasses) ? 'On leave' : `${nClasses} class${nClasses === 1 ? '' : 'es'}`;
+    const dCount = (onLeaveDay && !nClasses) ? 'On leave' : unitsTxt(all);
     const dCamp = secs >= 60 ? `${fmtTeaching(Math.round(secs / 60))} on campus` : '';
     const dDate = h.range === 'day' ? '' : `<span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta"> · </span>`;
     html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-text"><span class="hv-day-l1">${dDate}<span class="${h.range === 'day' ? 'hv-day-date' : 'hv-day-meta'}">${dCount}</span></span>${dCamp ? `<span class="hv-day-camp">${dCamp}</span>` : ''}</span></div>`;
@@ -6907,7 +6929,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     set('adCompleted', slotsReady ? planned.filter((x) => x.status === 'done' || x.status === 'covered').length : '…');
     set('adUpcoming', slotsReady ? planned.filter((x) => x.status === 'upcoming' || x.status === 'live').length : '…');
     set('adNotLogged', slotsReady ? planned.filter((x) => x.status === 'missed').length : '…');
-    set('adLoggedMeta', `${started.length} class${started.length === 1 ? '' : 'es'} logged · ${fmtTeaching(teachMin)} teaching`);
+    set('adLoggedMeta', `${unitsTxt(started)} logged · ${fmtTeaching(teachMin)} teaching`);
     set('adPresent', presentN);
     set('adLeave', leaveN);
     set('adNotIn', statuses.filter((s2) => s2.key === 'notin' || s2.key === 'absent').length);
@@ -6999,8 +7021,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         let detail = '';
         if (expanded) {
           const counts = {};
-          r.cls.forEach((c) => { const b = c.batch || 'Unknown'; counts[b] = (counts[b] || 0) + 1; });
-          const lines = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map((b) => `<div style="display:flex; justify-content:space-between;"><span>${escapeHtml(b)}</span><span style="font-weight:600;">${counts[b]}</span></div>`).join('');
+          r.cls.forEach((c) => { const b = c.batch || 'Unknown'; counts[b] = (counts[b] || 0) + classUnits(c); });
+          const lines = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map((b) => `<div style="display:flex; justify-content:space-between;"><span>${escapeHtml(b)}</span><span style="font-weight:600;">${fmtUnits(counts[b])}</span></div>`).join('');
           detail = `<div class="ad-detail">
             ${r.st.secs > 0 ? `<div class="hv-note" style="text-align:left;">On campus: ${fmtTeaching(Math.round(r.st.secs / 60))}</div>` : ''}
             ${lines ? `<div class="class-checklist-notes" style="display:flex; flex-direction:column; gap:3px;"><div style="font-weight:600;">Batch-wise</div>${lines}</div>` : ''}
@@ -7011,7 +7033,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         return `<div class="ad-trow${expanded ? ' open' : ''}" data-teacher-id="${r.tid}" role="button" tabindex="0">
           <div class="ad-tmain">
             <span class="ad-tname">${escapeHtml(nameOf(r.tid))}</span>
-            <span class="ad-tsub">${r.cls.length} class${r.cls.length === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${invMin ? ` · ${svDur(invMin)} invigilation` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
+            <span class="ad-tsub">${fmtUnits(r.cls.reduce((sum, c) => sum + classUnits(c), 0))} class${r.cls.length === 1 && classUnits(r.cls[0]) === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${invMin ? ` · ${svDur(invMin)} invigilation` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
           </div>
           <span class="ad-pill ${r.st.key}">${r.st.label}</span>
         </div>${detail}`;
@@ -9380,7 +9402,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const cu = firebase.auth().currentUser;
     document.getElementById('menuHeadEmail').textContent = (cu && cu.email) || '';
     document.getElementById('menuAvatar').innerHTML = document.getElementById('avatarBox').innerHTML;
-    document.getElementById('menuShareAppBtn').style.display = state.canAdmin ? 'flex' : 'none';
+    document.getElementById('menuShareAppBtn').style.display = (state.canAdmin || state.isCoordinator) ? 'flex' : 'none';
     renderProfileSal();
     renderReminderLead();
   }
@@ -10039,15 +10061,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
           return;
         }
         if (!hvStartedOrPast(c)) return; // not held yet — listed, but not counted
-        const m = classDuration(c);
-        t.classes++; t.mins += m;
+        const m = classDuration(c); const u = classUnits(c);
+        t.classes += u; t.mins += m;
         if (c.worksheet) t.ws++;
         t.tests += testCount(c);
         if (c.material) t.mat = (t.mat || 0) + 1;
         if (c.homework) t.hw++;
         const b = entryBatchLabel(c);
         if (!t.batches[b]) t.batches[b] = { n: 0, mins: 0 };
-        t.batches[b].n++; t.batches[b].mins += m;
+        t.batches[b].n += u; t.batches[b].mins += m;
       });
     });
     return t;
@@ -10129,7 +10151,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   function writeSummaryBlock(w, t, f) {
     f = f || reportFilter(false);
     const rows = [];
-    if (f.showClasses) rows.push([['Classes taken', t.classes], ['Teaching time', reportHm(t.mins)]]);
+    if (f.showClasses) rows.push([['Classes taken', fmtUnits(t.classes)], ['Teaching time', reportHm(t.mins)]]);
     rows.push([['On-campus time', reportCampus(t.campusSec)], f.showActivities ? ['Invigilation', `${reportHm(t.invigMin)}${t.invig ? ` (${t.invig} dut${t.invig === 1 ? 'y' : 'ies'})` : ''}`] : null]);
     if (f.showClasses) {
       rows.push([['Worksheets given', t.ws], ['Study material given', t.mat || 0]]);
@@ -10158,7 +10180,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (f.showClasses && bk.length > 1) {
       w.addSpace(4);
       w.bodyLine('Batch-wise', { bold: true });
-      bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`${b2}:  ${t.batches[b2].n} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`, { indent: 14 }));
+      bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`${b2}:  ${fmtUnits(t.batches[b2].n)} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`, { indent: 14 }));
     }
     w.addSpace(4);
     w.rule();
@@ -10188,7 +10210,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (f.label) L.push(`🔎 _${f.label}_`);
     L.push('');
     if (f.showClasses) {
-      L.push(`📚 *Classes:* ${t.classes}   ⏱ *Teaching:* ${reportHm(t.mins)}`);
+      L.push(`📚 *Classes:* ${fmtUnits(t.classes)}   ⏱ *Teaching:* ${reportHm(t.mins)}`);
     }
     L.push(`🕐 *On campus:* ${reportCampus(t.campusSec)}`);
     if (f.showClasses) L.push(`📄 Worksheets: ${t.ws}   📝 Tests: ${t.tests}   🏠 Homework: ${t.hw}`);
@@ -10732,7 +10754,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const bk = Object.keys(t.batches || {});
       if (bk.length) {
         w.bodyLine('Batch-wise', { bold: true });
-        bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`${b2}:  ${t.batches[b2].n} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`, { indent: 14 }));
+        bk.sort((a2, b2) => t.batches[b2].n - t.batches[a2].n).forEach((b2) => w.bodyLine(`${b2}:  ${fmtUnits(t.batches[b2].n)} class${t.batches[b2].n === 1 ? '' : 'es'}, ${reportHm(t.batches[b2].mins)}`, { indent: 14 }));
       }
       w.addSpace(4);
       w.rule();
@@ -12280,13 +12302,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.getElementById('tourText').textContent = el ? st.x : (st.ifMissing ? `${st.x} ${st.ifMissing}` : st.x);
     document.getElementById('tourBack').style.visibility = tourState.i ? 'visible' : 'hidden';
     document.getElementById('tourNext').textContent = tourState.i === tourState.steps.length - 1 ? 'Done' : 'Next';
-    const vh = window.innerHeight;
+    // with "Large" text the page is zoomed; screen positions are turned back into page units
+    const z = document.documentElement.classList.contains('ts-large') ? 1.12 : 1;
+    const vh = window.innerHeight / z;
     if (!el) { hole.classList.add('none'); hole.style.left = '50%'; hole.style.top = '50%'; card.style.top = Math.max(80, vh / 2 - 90) + 'px'; return; }
     hole.classList.remove('none');
-    const r = el.getBoundingClientRect(); const padd = 6;
+    const r0 = el.getBoundingClientRect(); const r = { top: r0.top / z, left: r0.left / z, width: r0.width / z, height: r0.height / z }; const padd = 6;
     const top = Math.max(4, r.top - padd), h = Math.min(r.height + padd * 2, vh * 0.55);
     hole.style.left = Math.max(4, r.left - padd) + 'px'; hole.style.top = top + 'px';
-    hole.style.width = Math.min(r.width + padd * 2, window.innerWidth - 8) + 'px'; hole.style.height = h + 'px';
+    hole.style.width = Math.min(r.width + padd * 2, window.innerWidth / z - 8) + 'px'; hole.style.height = h + 'px';
     const below = top + h + 14; const cardH = card.offsetHeight || 170;
     card.style.top = (below + cardH < vh - 10 ? below : Math.max(10, top - cardH - 14)) + 'px';
   }
@@ -12322,10 +12346,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const leadK = Object.keys(TOURS).filter((k) => TOURS[k].who === 'lead');
     const body = document.getElementById('hvSheetBody');
     body.innerHTML = `<div class="hv-d-title">Help &amp; guided tours</div><div class="hv-d-wing">Tap a topic — the app shows you, step by step, on the real screen</div>
-      <div class="help-list"><div class="help-grp">For everyone</div>${all.map(item).join('')}${lead ? `<div class="help-grp">Timetable &amp; exams</div>${leadK.map(item).join('')}` : ''}</div>
+      <div class="help-list"><div class="help-grp">For everyone</div>${all.map(item).join('')}${lead ? `<div class="help-grp">Timetable &amp; exams</div>${leadK.map(item).join('')}` : ''}
+        <div class="help-grp">Prefer reading?</div><button type="button" class="help-item" id="helpGuide"><span class="ico i-file" aria-hidden="true"></span><span><b>Written guide</b><small>A short guide to each tab</small></span></button></div>
       <div class="hv-d-btns"><button type="button" class="btn-secondary" id="helpClose" style="border-color: var(--line);">Close</button></div>`;
     body.querySelectorAll('[data-tour]').forEach((b) => b.addEventListener('click', () => startTour(b.getAttribute('data-tour'))));
     document.getElementById('helpClose').addEventListener('click', closeHvSheet);
+    document.getElementById('helpGuide').addEventListener('click', () => { closeHvSheet(); setTimeout(() => { try { openMenu(); } catch (e) { /* ignore */ } setTimeout(() => openMenuPanel('help'), 200); }, 200); });
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   (function bindHelp() {
@@ -12340,6 +12366,47 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       setTimeout(() => startTour('new71'), 900);
     }
   };
+  // ---------- Text size and "Update app now" (Menu → Settings) ----------
+  (function textSizeAndUpdate() {
+    const KEY = 'ctd_text_size';
+    const apply = (v) => { document.documentElement.classList.toggle('ts-large', v === 'large'); document.querySelectorAll('#textSizeChips [data-ts]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-ts') === v)); };
+    let cur = 'normal'; try { cur = localStorage.getItem(KEY) === 'large' ? 'large' : 'normal'; } catch (e) { /* ignore */ }
+    apply(cur);
+    document.querySelectorAll('#textSizeChips [data-ts]').forEach((b) => b.addEventListener('click', () => { const v = b.getAttribute('data-ts'); try { localStorage.setItem(KEY, v); } catch (e) { /* ignore */ } apply(v); showToast(v === 'large' ? 'Larger text on' : 'Normal text'); }));
+    const vn = document.getElementById('appVerNote'); const mv = (document.body.innerHTML.match(/Version (\d+(?:\.\d+)+) · updated/) || [])[1];
+    if (vn && mv) vn.textContent = `This phone has version ${mv}. Tap to load the newest one.`;
+    const up = document.getElementById('appUpdateNow'); if (up) up.addEventListener('click', async () => {
+      if (!navigator.onLine) { showToast('Connect to the internet first', 'error'); return; }
+      up.disabled = true; up.textContent = 'Updating…';
+      try { if (typeof tgSaveTimer !== 'undefined' && tgSaveTimer) await tgFlush(); } catch (e) { /* ignore */ }
+      try { flushPendingDeletes(); } catch (e) { /* ignore */ }
+      try { if (window.caches) { const ks = await caches.keys(); await Promise.all(ks.filter((k) => k.indexOf('catjee-teachdesk') === 0).map((k) => caches.delete(k))); } } catch (e) { /* ignore */ }
+      try { if (navigator.serviceWorker) { const r = await navigator.serviceWorker.getRegistration(); if (r) await r.update(); } } catch (e) { /* ignore */ }
+      location.replace(location.pathname + '?v=' + Date.now());
+    });
+  })();
+  // ---------- Report a problem (to the admin on WhatsApp — nothing new is stored) ----------
+  function openReportProblem() {
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">Report a problem</div><div class="hv-d-wing">Opens WhatsApp with your message ready, plus the app version and phone details · choose the admin and send</div>
+      <div class="sv-tlbl" style="margin:12px 0 6px;">What went wrong?</div><textarea class="text-input" id="rpText" rows="4" placeholder="The Save button does nothing on the Add Class page" style="resize:vertical; font-family:inherit;"></textarea>
+      <div class="hv-note" id="rpErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
+      <div class="hv-note" style="text-align:left;">Tip: take a screenshot first and attach it in WhatsApp.</div>
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="rpCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="rpSend" style="margin:0;">Send on WhatsApp</button></div>`;
+    document.getElementById('rpCancel').addEventListener('click', closeHvSheet);
+    document.getElementById('rpText').addEventListener('input', () => { document.getElementById('rpErr').textContent = ''; });
+    document.getElementById('rpSend').addEventListener('click', () => {
+      const t = document.getElementById('rpText').value.trim(); if (!t) { document.getElementById('rpErr').textContent = 'Write a line about the problem'; return; }
+      const v = (document.body.innerHTML.match(/Version (\d+(?:\.\d+)+) · updated/) || [])[1] || '?';
+      const who = (state.user && state.user.name) || ''; const scr = (state.tab || '') + (state.tab === 'admin' && state.adminTab ? '/' + state.adminTab : '');
+      const msg = `*Teach Desk — problem report*\n${t}\n\n— ${who}\nVersion ${v} · screen: ${scr || 'today'}\n${navigator.userAgent.replace(/\s+/g, ' ').slice(0, 160)}`;
+      // WhatsApp opens with the message ready; choose the admin's chat and send
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+      closeHvSheet();
+    });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+  (function bindReport() { const r = document.getElementById('menuReportRow'); if (r) r.addEventListener('click', () => { try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(openReportProblem, 250); }); })();
   // ---------- "New version available" ----------
   // After a new index.html is uploaded, an app that is already open notices it and offers a refresh.
   const myVersion = (document.body.innerHTML.match(/Version (\d+(?:\.\d+)+) · updated/) || [])[1] || '';
