@@ -1058,6 +1058,44 @@
   #updGo { background: #E63946; color: #fff; }
   #updX { background: transparent; color: #fff; padding: 7px 8px; }
   .tg-combo { background: rgba(14,165,233,.08); }
+  .i-clock { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cpolyline%20points%3D%2212%207%2012%2012%2015%2014%22/%3E%3C/svg%3E"); }
+  .i-door { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2021h18%22/%3E%3Cpath%20d%3D%22M6%2021V4a1%201%200%200%201%201-1h10a1%201%200%200%201%201%201v17%22/%3E%3Ccircle%20cx%3D%2214.5%22%20cy%3D%2212%22%20r%3D%220.8%22/%3E%3C/svg%3E"); }
+  .i-check { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%225%2012.5%2010%2017%2019%207%22/%3E%3C/svg%3E"); }
+  .i-alert { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%2212%22%20y1%3D%228%22%20x2%3D%2212%22%20y2%3D%2212.5%22/%3E%3Cline%20x1%3D%2212%22%20y1%3D%2216%22%20x2%3D%2212.01%22%20y2%3D%2216%22/%3E%3C/svg%3E"); }
+  .i-book { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2019.5A2.5%202.5%200%200%201%206.5%2017H20V3H6.5A2.5%202.5%200%200%200%204%205.5z%22/%3E%3Cpath%20d%3D%22M4%2019.5A2.5%202.5%200%200%200%206.5%2022H20v-5%22/%3E%3C/svg%3E"); }
+  /* class cards: subject colour chips, session time strip, clear statuses */
+  .schip, .mchip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 9px; line-height: 1.4; white-space: nowrap; }
+  .schip { background: var(--sb); color: var(--sf); }
+  .mchip { background: var(--neutral-soft); color: var(--muted-2); font-weight: 500; }
+  .mchip.warn { background: rgba(217,119,6,.12); color: #B45309; }
+  .chiprow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .srcline { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+  .tl-pill { display: inline-flex; align-items: center; gap: 4px; }
+  .tl-pill.upcoming { background: transparent; border: 1px solid var(--line); color: var(--muted-2); }
+  .tl-pill.live { background: #E63946; color: #fff; font-weight: 700; }
+  .tl-pill.live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: nextPulse 1.4s ease-in-out infinite; }
+  .tl-pill.missed { background: transparent; border: 1px solid rgba(230,57,70,.55); color: #C81E32; }
+  .tl-pill.cancelled { background: var(--neutral-soft); color: var(--muted); text-decoration: line-through; }
+  .sv-rows { background: none; border: 0; border-radius: 0; overflow: visible; display: flex; flex-direction: column; gap: 8px; }
+  .sv-row { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0; gap: 0; align-items: stretch; overflow: hidden; min-height: 64px; }
+  .sv-row + .sv-row { border-top: 1px solid var(--line); }
+  .sv-row .sv-time { width: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; padding: 8px 2px; background: rgba(230,57,70,.08); color: #C81E32; white-space: nowrap; }
+  .sv-row .sv-time small { font-size: 10.5px; font-weight: 600; opacity: .85; }
+  .sv-row.ses-evening .sv-time { background: rgba(59,130,246,.10); color: #1D4ED8; }
+  .sv-row.ses-special .sv-time { background: rgba(124,58,237,.09); color: #6D28D9; }
+  .sv-row .sv-main { padding: 9px 10px 9px 12px; gap: 2px; justify-content: center; }
+  .sv-row .tl-pill { align-self: center; margin-right: 10px; }
+  .sv-row.done, .sv-row.live, .sv-row.missed, .sv-row.leave, .sv-row.covered, .sv-row.tt-clash { box-shadow: none; }
+  .sv-row.live { border-color: rgba(230,57,70,.55); }
+  .sv-row.cancelled { opacity: .62; }
+  .sv-row.tt-clash { border-color: #D97706; }
+  .sv-row.ex-sel { background: var(--gold-soft); }
+  .sv-row .sv-batch { font-size: 15px; font-weight: 700; }
+  .sv-row .sv-ampm { align-self: flex-start; margin: 3px 0 0; }
+  :root[data-theme="dark"] .schip { filter: brightness(1.6) saturate(.9); }
+  :root[data-theme="dark"] .sv-row .sv-time { color: #FF7A85; } :root[data-theme="dark"] .sv-row.ses-evening .sv-time { color: #7DA8FF; } :root[data-theme="dark"] .sv-row.ses-special .sv-time { color: #B794FF; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sv-row .sv-time { color: #FF7A85; } :root:not([data-theme="light"]) .sv-row.ses-evening .sv-time { color: #7DA8FF; } :root:not([data-theme="light"]) .sv-row.ses-special .sv-time { color: #B794FF; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .schip { filter: brightness(1.6) saturate(.9); } }
   .tg-cbtag { display: block; font-style: normal; font-size: 10px; font-weight: 700; color: #0369A1; }
   .tg-selbar .btn-secondary, .tg-selbar .save-btn { padding: 7px 12px; width: auto; }
   .tg-teacher { margin-top: 10px; font-size: 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -2452,7 +2490,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.4 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 7.5 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3187,18 +3225,17 @@
   let tlNextId = '';
   function tlItemHtml(it) {
     const isNext = it.kind === 'slot' && it.slot.id === tlNextId && it.status === 'upcoming';
-    const pill = isNext ? '<span class="tl-pill tl-pill-next">Next</span>' : `<span class="tl-pill ${it.status}">${TL_LABEL[it.status]}</span>`;
+    const pill = isNext ? '<span class="tl-pill tl-pill-next">Next</span>' : pillHtml(it.status, TL_LABEL[it.status]);
     if (it.kind === 'slot') {
       const btnTxt = it.status === 'live' ? 'Log this class' : (it.status === 'missed' ? 'Log it now' : 'Log early');
       const sl = it.slot;
       const endM = sl.time && sl.duration ? hhmmToMin(sl.time) + Number(sl.duration) : null;
       const range = sl.time ? `${formatTimeStr(sl.time)}${endM != null ? ' – ' + formatTimeStr(`${pad(Math.floor(endM / 60) % 24)}:${pad(endM % 60)}`) : ''}` : '';
-      const info = [sl.subject, sl.room ? 'Room ' + sl.room : '', sl.test ? 'Class test' : ''].filter(Boolean).join(' · ');
+      const info = '';
       return `<div class="tl-item">${tlTimeHtml(it.min)}
         <div class="tl-card ${it.status}${isNext ? ' tl-next' : ''}">
           <div class="tl-top"><div class="tl-batch">${escapeHtml(slotLabelAll(sl))}</div>${pill}</div>
-          <div class="tl-topic faint">${escapeHtml(info || 'Scheduled class')}</div>
-          ${range ? `<div class="tl-meta">${escapeHtml(range)}</div>` : ''}
+          <div class="chiprow">${subjChipHtml(sl.subject)}${sl.test ? '<span class="mchip">Class test</span>' : ''}${sl.room ? `<span class="mchip"><span class="ico i-door" aria-hidden="true"></span>${escapeHtml(sl.room)}</span>` : ''}${range ? `<span class="mchip"><span class="ico i-clock" aria-hidden="true"></span>${escapeHtml(range)}</span>` : ''}</div>${info}
           ${it.status === 'upcoming' ? '' : `<button class="tl-log" data-log-slot="${escapeHtml(it.slot.id)}">${btnTxt}</button>`}
         </div></div>`;
     }
@@ -3212,6 +3249,7 @@
     return `<div class="tl-item hv-rec" data-today-rec="${escapeHtml(c.id)}" role="button" tabindex="0">${tlTimeHtml(it.min)}
       <div class="tl-card ${it.status}">
         <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${pill}</div>
+        ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
         ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
         ${it.status === 'upcoming' ? '<div class="tl-meta"><span class="tl-filled">✓ Details filled</span></div>' : ''}
         <div class="tl-bottom">
@@ -3681,7 +3719,8 @@
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}">${tlTimeHtml(st)}
       <div class="tl-card">
-        <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : '<span class="tl-pill upcoming">Upcoming</span>'}</div>
+        <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : pillHtml('upcoming', 'Upcoming')}</div>
+        ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
         ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
         ${range ? `<div class="tl-meta">${range}</div>` : ''}
         ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
@@ -8586,6 +8625,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (ws === shiftDateStr(t, -7)) return 'Last week';
     return '';
   }
+  const I_DOOR = '<span class="ico i-door" aria-hidden="true"></span>'; const I_CLOCK = '<span class="ico i-clock" aria-hidden="true"></span>'; const I_CAL = '<span class="ico i-cal" aria-hidden="true"></span>';
   const SV_PILL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged', cancelled: 'Cancelled', leave: 'On leave', covered: 'Test held' };
   function svDur(m) { const h = Math.floor(m / 60), r = m % 60; return h ? (r ? `${h}h ${pad(r)}m` : `${h}h`) : `${r}m`; }
   function svSlotHtml(m) {
@@ -8593,11 +8633,19 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const dur = slotDuration(s);
     const st = hhmmToMin(s.time);
     const ampm = st != null && st < SV_EARLY ? '<span class="sv-ampm">Check AM/PM</span>' : '';
-    const topic = m.cls && m.cls.topic ? `<span class="sv-topic"> · ${escapeHtml(m.cls.topic)}</span>` : '';
-    return `<div class="sv-row ${m.status}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
-      <span class="sv-time">${st != null ? escapeHtml(formatTimeStr(s.time)) : '—'}</span>
-      <span class="sv-main"><span class="sv-batch">${escapeHtml(slotLabelAll(s))}</span><span class="sv-dur">${s.subFor ? `<span class="sv-coord">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span> · ` : ''}${slotSubject(s) ? escapeHtml(slotSubject(s)) + (s.test ? ' (Class Test)' : '') + ' · ' : ''}${svDur(dur)}${st != null ? ` · till ${svEndStr(s)}` : ''}${slotRoom(s) ? ' · ' + escapeHtml(slotRoom(s)) : ''}${s.setBy ? ' · <span class="sv-coord">Coordinator</span>' : ''}</span>${ampm}</span>
-      <span class="tl-pill ${m.status}">${SV_PILL[m.status]}</span>
+    const t = st != null ? formatTimeStr(s.time) : '';
+    const tm = t.match(/^(.*?)\s?(AM|PM)$/i);
+    const ses = batchSession(s.label || '') || 'morning';
+    const chips = [subjChipHtml(slotSubject(s)), s.test ? `<span class="mchip">Class test</span>` : '', slotRoom(s) ? `<span class="mchip">${I_DOOR}${escapeHtml(slotRoom(s))}</span>` : '',
+      `<span class="mchip">${I_CLOCK}${escapeHtml(svDur(dur))}${st != null ? ' · till ' + escapeHtml(svEndStr(s).replace(/\s?(AM|PM)$/i, '')) : ''}</span>`].filter(Boolean).join('');
+    const src = s.subFor ? `<span class="mchip warn">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span>` : '';
+    const from = s.setBy ? (Array.isArray(s.batches) && s.batches.length > 1 ? 'Combined class · from timetable' : 'From timetable') : '';
+    const topic = m.cls && m.cls.topic ? `<span class="sv-topic">${escapeHtml(m.cls.topic)}</span>` : '';
+    return `<div class="sv-row ${m.status} ses-${ses}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
+      <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : (t ? escapeHtml(t) : '—')}</span>
+      <span class="sv-main"><span class="sv-batch">${escapeHtml(slotLabelAll(s))}</span>
+        <span class="chiprow">${chips}${src}</span>${topic ? `<span class="srcline">${topic}</span>` : ''}${from ? `<span class="srcline">${I_CAL}${from}</span>` : ''}${ampm}</span>
+      ${pillHtml(m.status, SV_PILL[m.status])}
     </div>`;
   }
   // Invigilation duties planned for this teacher in a week (view-only in Schedule).
@@ -10917,6 +10965,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     fillClassFromSlot(match.slot, match.startMin);
   }
 
+  // each subject keeps one soft colour (never green, red or yellow — those mean done, attention and pending)
+  const SUBJ_PAL = [['rgba(99,91,255,.13)', '#4338CA'], ['rgba(13,148,136,.13)', '#0F766E'], ['rgba(219,39,119,.12)', '#BE185D'], ['rgba(234,88,12,.12)', '#C2410C'], ['rgba(37,99,235,.12)', '#1D4ED8'], ['rgba(147,51,234,.12)', '#7E22CE'], ['rgba(120,113,108,.16)', '#57534E'], ['rgba(8,145,178,.13)', '#0E7490']];
+  const SUBJ_FIX = { maths: 0, mathematics: 0, physics: 1, chemistry: 2, reasoning: 3, biology: 4, english: 5, hindi: 6, computer: 7, 'geo/eco': 3, 'his/pol. sc.': 5, science: 1, 'social science': 6 };
+  function subjColor(sub) { const k = String(sub || '').trim().toLowerCase(); let i = SUBJ_FIX[k]; if (i == null) { let h = 0; for (let j = 0; j < k.length; j++) h = (h * 31 + k.charCodeAt(j)) >>> 0; i = h % SUBJ_PAL.length; } return SUBJ_PAL[i]; }
+  function subjChipHtml(sub) { if (!sub) return ''; const [b, f] = subjColor(sub); return `<span class="schip" style="--sb:${b};--sf:${f}"><span class="ico i-book" aria-hidden="true"></span>${escapeHtml(sub)}</span>`; }
+  function pillHtml(status, label) {
+    const ic = { upcoming: 'clock', done: 'check', missed: 'alert', covered: 'check' }[status];
+    return `<span class="tl-pill ${status}">${ic ? `<span class="ico i-${ic}" aria-hidden="true"></span>` : ''}${escapeHtml(label)}</span>`;
+  }
   function slotLabelAll(s) { return s && Array.isArray(s.batches) && s.batches.length > 1 ? s.batches.join(' + ') : ((s && s.label) || 'Class'); }
   function fillClassFromSlot(slot, startMin) {
     const batch = slot.label;
