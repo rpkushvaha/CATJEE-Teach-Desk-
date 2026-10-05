@@ -988,6 +988,9 @@
   .tg-msel { flex-wrap: wrap; position: sticky; top: 0; z-index: 3; }
   .tg-msel .tg-msel-btns { flex-wrap: wrap; justify-content: flex-end; }
   .tg-c { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .rep-opts { display: flex; flex-direction: column; gap: 8px; }
+  .rep-opts select { width: 100%; }
+  .hv-attbtn { width: 100%; margin-bottom: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   html.ts-large body { zoom: 1.12; }
   /* consistent controls: comfortable touch size, one radius, calm focus ring, smooth press */
   .save-btn, .btn-secondary { min-height: 44px; border-radius: 12px; }
@@ -1849,7 +1852,7 @@
         <button type="button" id="hvFilterClear"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Clear</button>
       </div>
       <div class="sum-grid hv-sum" id="hvSum"></div>
-      <div id="hvActions"><div class="qa-row hv-tiles"><button type="button" class="qa-btn" id="hvReportBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" id="hvWhatsAppBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" id="downloadCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div></div>
+      <div id="hvActions"><button type="button" class="btn-secondary hv-attbtn" id="hvAttBtn" style="border-color: var(--line);"><span class="ico i-clock" aria-hidden="true"></span> Attendance report (check-in · check-out)</button><div class="qa-row hv-tiles"><button type="button" class="qa-btn" id="hvReportBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" id="hvWhatsAppBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" id="downloadCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div></div>
       <div class="admin-sub" id="historyReportMsg" style="text-align:center;"></div>
       <div id="historyList" class="hv-list">
         <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
@@ -2073,6 +2076,11 @@
           <button class="chip active" data-report-range="day">Day</button>
           <button class="chip" data-report-range="week">Week</button>
           <button class="chip" data-report-range="month">Month</button>
+        </div>
+        <div class="rep-opts">
+          <label class="sv-tlbl" for="adminRepTeacher">Teacher</label>
+          <select class="text-input" id="adminRepTeacher"><option value="">All teachers</option></select>
+          <div class="chips" id="adminRepKind"><button type="button" class="chip active" data-rep-kind="full">Full report</button><button type="button" class="chip" data-rep-kind="att">Attendance only</button></div>
         </div>
         <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
           <button type="button" class="qa-btn" id="downloadAdminPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">All teachers</span></button>
@@ -2506,7 +2514,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.0 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 8.1 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4122,6 +4130,18 @@
     if (sp.single) { downloadReportForDate(sp.single, msg, true); return; }
     if (sp.dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
     downloadRangeReport(sp.dates, sp.title, sp.period, 'Summary', sp.fn, msg, true);
+  });
+  document.getElementById('hvAttBtn').addEventListener('click', () => {
+    const msg = document.getElementById('historyReportMsg'); const sp = hvReportSpec();
+    const dates = sp.single ? [sp.single] : sp.dates;
+    if (dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return; }
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">Attendance report</div><div class="hv-d-wing">Only check-in and check-out · ${escapeHtml(sp.period || '')}</div>
+      <div class="hv-d-btns" style="flex-direction:column; gap:8px;"><button type="button" class="save-btn" id="attPdf" style="margin:0; width:100%;">Download PDF</button><button type="button" class="btn-secondary" id="attWa" style="border-color: var(--line); width:100%;">Share on WhatsApp</button><button type="button" class="btn-secondary" id="attX" style="border-color: var(--line); width:100%;">Cancel</button></div>`;
+    document.getElementById('attX').addEventListener('click', closeHvSheet);
+    document.getElementById('attPdf').addEventListener('click', () => { closeHvSheet(); attendanceReport(state.teacherId, 'pdf', msg, dates, sp.period); });
+    document.getElementById('attWa').addEventListener('click', () => { closeHvSheet(); attendanceReport(state.teacherId, 'wa', msg, dates, sp.period); });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   });
   document.getElementById('hvWhatsAppBtn').addEventListener('click', () => {
     const msg = document.getElementById('historyReportMsg');
@@ -9176,11 +9196,23 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     downloadHvCsv(document.getElementById('historyReportMsg'));
   });
   document.getElementById('downloadAdminPdfBtn').addEventListener('click', () => {
+    const tid = document.getElementById('adminRepTeacher').value; const kind = state.adminRepKind || 'full';
+    if (kind === 'att') { attendanceReport(tid || null, 'pdf', document.getElementById('adminReportMsg')); return; }
+    if (tid) { adminOneTeacherReport(tid, 'pdf', document.getElementById('adminReportMsg')); return; }
     downloadAdminReport(document.getElementById('adminReportMsg'));
   });
   document.getElementById('downloadAdminCsvBtn').addEventListener('click', () => {
+    const tid = document.getElementById('adminRepTeacher').value; const kind = state.adminRepKind || 'full';
+    if (kind === 'att') { attendanceReport(tid || null, 'csv', document.getElementById('adminReportMsg')); return; }
+    if (tid) { adminOneTeacherReport(tid, 'csv', document.getElementById('adminReportMsg')); return; }
     downloadAdminCsv(document.getElementById('adminReportMsg'));
   });
+  document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((b) => b.addEventListener('click', () => {
+    state.adminRepKind = b.getAttribute('data-rep-kind');
+    document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('active', x === b));
+  }));
+  document.getElementById('adminRepTeacher').addEventListener('focus', fillAdminRepTeachers);
+  document.getElementById('adminRepTeacher').addEventListener('pointerdown', fillAdminRepTeachers);
   document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((chip) => {
     chip.addEventListener('click', () => {
       state.adminReportRange = chip.getAttribute('data-report-range');
@@ -9920,6 +9952,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
   function sessEdited(s) { return !!(sessEditMark(s, 'in') || sessEditMark(s, 'out')); }
   let reportShowEdits = false; // on only while an admin / coordinator report is being made
+  let reportShareWa = false; // on while a report is being shared on WhatsApp (shows an admin's later change of an old day)
   async function deleteSessionForDate(date, sessions, sessionId) {
     if (!state.db || !state.teacherId) return;
     if (!canEditSessionsOn(date)) { showToast('Only today and yesterday can be changed.', 'error'); return; }
@@ -10142,21 +10175,24 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return new Blob([pdf], { type: 'application/pdf' });
   }
 
+  // reportFor: set while an admin makes one teacher's report ({ tid, name, subject })
+  let reportFor = null;
   async function fetchDayData(date) {
-    if (date === todayStr()) {
+    const tid = (reportFor && reportFor.tid) || state.teacherId;
+    if (date === todayStr() && !reportFor) {
       return { classes: state.classesToday, campus: state.campusToday };
     }
     let classes = [];
     let campus = { totalSeconds: 0, checkedIn: false, checkInAt: null, sessions: [] };
-    if (!state.db || !state.teacherId) return { classes, campus };
+    if (!state.db || !tid) return { classes, campus };
     try {
-      const snap = await state.db.collection('classes').where('teacherId', '==', state.teacherId).where('date', '==', date).get();
-      classes = snap.docs.map((d) => normDoc(d));
+      const snap = await state.db.collection('classes').where('teacherId', '==', tid).where('date', '==', date).get();
+      classes = snap.docs.map((d) => normDoc(d)).filter((c) => c.teacherId === tid && c.date === date);
     } catch (err) { /* leave empty on failure */ }
     try {
-      const csnap = await state.db.doc('campusHistory/' + state.teacherId).collection('days').doc(date).get();
+      const csnap = await state.db.doc('campusHistory/' + tid).collection('days').doc(date).get();
       const data = csnap.data();
-      if (data) campus = { totalSeconds: data.totalSeconds || 0, checkedIn: !!data.checkedIn, checkInAt: data.checkInAt || null, sessions: data.sessions || [] };
+      if (data) campus = { totalSeconds: data.totalSeconds || 0, checkedIn: !!data.checkedIn, checkInAt: data.checkInAt || null, sessions: data.sessions || [], adminEdited: data.adminEdited || null };
     } catch (err) { /* leave default on failure */ }
     return { classes, campus };
   }
@@ -10219,11 +10255,17 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       y -= 14;
     }
     function addSpace(px) { y -= px; }
+    // one table row: texts at fixed x positions (points from the left margin)
+    function cols(cells, xs, opts) {
+      opts = opts || {}; const size = opts.size || 10; ensure(15);
+      cells.forEach((t, i) => { if (t == null || t === '') return; currentOps.push({ x: marginX + xs[i], y, size, bold: !!(opts.bold || (opts.boldCol === i)), text: toAsciiSafe(String(t)) }); });
+      y -= 15;
+    }
     function finishBlob() {
       newPage();
       return buildMinimalPdf(pages);
     }
-    return { heading, bodyLine, pairRow, rule, addSpace, finishBlob };
+    return { heading, bodyLine, pairRow, rule, addSpace, cols, finishBlob };
   }
 
   // ---------- Reports (PDF + WhatsApp) — one shared engine for Day / Week / Month / Custom ----------
@@ -10323,7 +10365,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       leaves.forEach((a) => { const r = waClean(a.note); if (r && !/^on leave\.?$/i.test(r)) w.bodyLine(`Reason: ${r}`, { indent: 14 }); });
     }
     if (sessions.length) {
-      sec(`ATTENDANCE  (Total: ${reportCampus(campusSeconds(campus))})${reportShowEdits && campus.adminEdited ? '   · edited' : ''}`);
+      sec(`ATTENDANCE  (Total: ${reportCampus(campusSeconds(campus))})${(reportShowEdits || reportShareWa) && campus.adminEdited ? '   · edited' : ''}`);
       sessions.forEach((s, i) => {
         const a = formatTimeStr(toHHMM(s.in)) + (reportShowEdits ? sessEditMark(s, 'in') : '');
         const b = (s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress') + (reportShowEdits && s.out != null ? sessEditMark(s, 'out') : '');
@@ -10384,13 +10426,14 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   function buildReportPdf(dates, results, title, periodLine, f) {
-    const teacherName = (state.user && state.user.name) || 'Teacher';
+    const teacherName = (reportFor && reportFor.name) || (state.user && state.user.name) || 'Teacher';
     const t = reportTotals(dates, results, f);
     const w = createPdfWriter();
     w.heading(title.toUpperCase(), 17);
     w.addSpace(2);
     w.bodyLine(`Teacher: ${teacherName}`, { bold: true, size: 11 });
-    if (state.teacherSubject) w.bodyLine(`Subject: ${state.teacherSubject}`, { size: 11 });
+    const subj = reportFor ? reportFor.subject : state.teacherSubject;
+    if (subj) w.bodyLine(`Subject: ${subj}`, { size: 11 });
     w.bodyLine(periodLine, { size: 11 });
     if (f.label) w.bodyLine(`${f.label} (summary and records follow this filter)`, { bold: true, size: 10 });
     w.addSpace(4);
@@ -10450,6 +10493,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       days.push(`• *${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}:* ${parts.join(' | ')}`);
     });
     if (days.length) { L.push(''); L.push('*Day-wise*'); days.forEach((x) => L.push(x)); }
+    const edDays = dates.filter((dt, i) => results[i] && results[i].campus && results[i].campus.adminEdited);
+    if (edDays.length) { L.push(''); L.push(`_Attendance edited: ${edDays.map((dt) => { const d = dateObj(dt); return `${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}`; }).join(', ')}_`); }
     return L.join('\n');
   }
   async function reportData(dates) {
@@ -10559,7 +10604,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       sections.push(L);
     }
     if (sessions.length) {
-      const L = ['🕘 *ATTENDANCE*'];
+      const L = ['🕘 *ATTENDANCE*' + (campus && campus.adminEdited ? ' _(edited)_' : '')];
       sessions.forEach((s) => {
         const inStr = formatTimeStr(toHHMM(s.in));
         L.push(s.out != null ? waRange(toHHMM(s.in), toHHMM(s.out)) : `${inStr} – _in progress_`);
@@ -10640,6 +10685,128 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return downloadRangeReport(dates, 'Weekly Activity Report', `Week: ${weekLabel(mondayStr)}`, 'Summary', weeklyReportFilenameFor(mondayStr), msgEl, useFilter);
   }
 
+  // ---------- one teacher (admin) and attendance-only reports ----------
+  function fillAdminRepTeachers() {
+    const sel = document.getElementById('adminRepTeacher'); if (!sel || sel._filled === (state.adminTeacherIds || []).length) return;
+    const cur = sel.value; const ids = ttTeacherIds().concat((state.adminTeacherIds || []).filter((u) => isCoordUid(u)));
+    sel.innerHTML = '<option value="">All teachers</option>' + ids.filter((u, i, a) => a.indexOf(u) === i).map((u) => `<option value="${escapeHtml(u)}">${escapeHtml(ttName(u))}</option>`).join('');
+    sel.value = cur; sel._filled = (state.adminTeacherIds || []).length;
+  }
+  function adminRepSpec() {
+    const { dates, label, fileTag } = adminReportRangeDates();
+    const range = state.adminReportRange || 'day';
+    const period = range === 'day' ? `Date: ${label}` : (range === 'week' ? `Week: ${label}` : `Month: ${label}`);
+    return { dates, label, fileTag, range, period };
+  }
+  function repTeacherInfo(tid) {
+    const nm = (state.adminNames[tid] && state.adminNames[tid].name) || (tid === state.teacherId ? (state.user && state.user.name) : '') || 'Teacher';
+    return { tid, name: nm, subject: (state.adminSubjects && state.adminSubjects[tid]) || '' };
+  }
+  async function adminOneTeacherReport(tid, kind, msgEl) {
+    const sp = adminRepSpec(); const info = repTeacherInfo(tid);
+    msgEl.textContent = 'Preparing report…';
+    reportFor = info; reportShowEdits = true;
+    try {
+      const f = reportFilter(false);
+      const results = await reportData(sp.dates);
+      const safe = info.name.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      if (kind === 'pdf') {
+        const title = sp.range === 'day' ? 'Daily Report' : (sp.range === 'week' ? 'Weekly Report' : 'Monthly Report');
+        const { blob } = buildReportPdf(sp.dates, results, title, sp.period, f);
+        saveFile(`CATJEE-${safe}-${sp.fileTag}.pdf`, blob);
+      } else {
+        const records = []; results.forEach((r) => reportDayRecords(r.classes).forEach((c) => { if (f.match(c)) records.push(c); }));
+        const campusByDate = {}; sp.dates.forEach((d, i) => { if (results[i].campus && (results[i].campus.sessions || []).length) campusByDate[d] = results[i].campus; });
+        state.csvCampusByDate = campusByDate;
+        await downloadHistoryCsv(msgEl, records, `CATJEE-${safe}-${sp.fileTag}.csv`);
+      }
+      msgEl.textContent = 'Report saved.'; showToast('Report saved');
+    } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
+    finally { reportFor = null; reportShowEdits = false; }
+  }
+  // one row per day: present (with sessions), leave, weekly off, absent; days still to come are left out
+  function attendanceDays(dates, results) {
+    const today = todayStr();
+    return dates.map((dt, i) => {
+      const r = results[i] || {}; const c = r.campus || {}; const ss = c.sessions || [];
+      const leave = (r.classes || []).some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday');
+      let st = ss.length ? 'present' : (leave ? 'leave' : (isWeeklyOff(dt) ? 'off' : 'absent'));
+      if (dt > today || (dt === today && !ss.length)) st = 'future';
+      return { dt, ss, secs: ss.length ? campusSeconds(c) : 0, st, edited: !!(c && c.adminEdited) };
+    }).filter((x) => x.st !== 'future');
+  }
+  const ATT_TXT = { present: '', leave: 'Leave', off: 'Weekly off', absent: 'Absent' };
+  function attTotals(days) {
+    const n = { present: 0, leave: 0, off: 0, absent: 0 }; let secs = 0; days.forEach((d) => { n[d.st]++; secs += d.secs; });
+    return { n, secs, avg: n.present ? Math.round(secs / n.present) : 0 };
+  }
+  async function attendanceFetch(tid, dates) {
+    const prev = reportFor; reportFor = tid === state.teacherId ? null : repTeacherInfo(tid);
+    try { return await reportData(dates); } finally { reportFor = prev; }
+  }
+  async function attendanceReport(tid, kind, msgEl, datesIn, periodIn) {
+    const sp = datesIn ? { dates: datesIn, period: periodIn || '', fileTag: datesIn.length === 1 ? datesIn[0] : `${datesIn[0]}-to-${datesIn[datesIn.length - 1]}`, range: datesIn.length > 7 ? 'month' : 'week' } : adminRepSpec();
+    const forAdmin = !datesIn; // admin reports show "edited" once beside a day changed later by the admin
+    msgEl.textContent = 'Preparing attendance report…';
+    try {
+      const people = tid ? [tid] : (() => { fillAdminRepTeachers(); return Array.from(document.getElementById('adminRepTeacher').options).map((o) => o.value).filter(Boolean); })();
+      const rows = [];
+      for (const u of people) { const res = await attendanceFetch(u, sp.dates); rows.push({ u, days: attendanceDays(sp.dates, res) }); }
+      const nameOfU = (u) => (u === state.teacherId && !forAdmin ? ((state.user && state.user.name) || 'Teacher') : trepName(u));
+      const hmm = (secs) => reportCampus(secs);
+      const sesTxt = (s) => `${formatTimeStr(toHHMM(s.in))} – ${s.out != null ? formatTimeStr(toHHMM(s.out)) : 'in progress'}`;
+      const fileBase = `CATJEE-Attendance-${tid ? nameOfU(tid).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' : ''}${sp.fileTag}`;
+      if (kind === 'csv') {
+        const L = [['Teacher', 'Date', 'Day', 'Status', 'Check-in', 'Check-out', 'Time on campus (min)', 'Note']];
+        rows.forEach((r) => r.days.forEach((d) => {
+          if (d.st !== 'present') { L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], ATT_TXT[d.st], '', '', '', '']); return; }
+          d.ss.forEach((s, i) => L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], 'Present', formatTimeStr(toHHMM(s.in)), s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress', i === 0 ? Math.round(d.secs / 60) : '', i === 0 && d.edited && forAdmin ? 'Edited by admin' : '']));
+        }));
+        saveFile(fileBase + '.csv', '\ufeff' + L.map((x) => x.map(csvEscape).join(',')).join('\n'), 'text/csv');
+        msgEl.textContent = 'Saved.'; showToast('Attendance saved'); return;
+      }
+      if (kind === 'wa') {
+        const r = rows[0]; const t = attTotals(r.days);
+        const L = [`*Attendance · ${nameOfU(r.u)}*`, sp.period, ''];
+        r.days.forEach((d) => { const dd = dateObj(d.dt); const lbl = `${dd.toLocaleDateString('en-GB', { weekday: 'short' })} ${dd.getDate()} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`;
+          L.push(d.st === 'present' ? `• *${lbl}:* ${d.ss.map(sesTxt).join(', ')} (${hmm(d.secs)})${d.edited ? ' _(edited)_' : ''}` : `• *${lbl}:* ${ATT_TXT[d.st]}`); });
+        L.push(''); L.push(`*Present:* ${t.n.present} · *Absent:* ${t.n.absent} · *Leave:* ${t.n.leave} · *Weekly off:* ${t.n.off}`);
+        L.push(`*Total on campus:* ${hmm(t.secs)}${t.n.present ? ` · *Average:* ${hmm(t.avg)} a day` : ''}`);
+        await shareReportText(L.join('\n'), msgEl); return;
+      }
+      // PDF
+      const w = createPdfWriter();
+      w.heading('ATTENDANCE REPORT', 17); w.addSpace(2);
+      w.bodyLine(sp.period, { size: 11 });
+      if (!tid) w.bodyLine(`Teachers: ${rows.length}`, { size: 11 });
+      if (!tid) {
+        // register: one line per teacher
+        w.addSpace(4); w.rule();
+        const X = [0, 190, 250, 305, 350, 410];
+        w.cols(['Teacher', 'Present', 'Absent', 'Leave', 'Off', 'Time on campus'], X, { bold: true, size: 10 });
+        rows.forEach((r) => { const t = attTotals(r.days); w.cols([nameOfU(r.u) + (forAdmin && r.days.some((d) => d.edited) ? ' (edited)' : ''), t.n.present, t.n.absent, t.n.leave, t.n.off, hmm(t.secs)], X, { size: 10 }); });
+        w.rule();
+      }
+      (tid ? rows : rows).forEach((r) => {
+        if (!tid && !r.days.some((d) => d.st !== 'off')) return;
+        w.addSpace(6); w.bodyLine(nameOfU(r.u), { bold: true, size: 12 });
+        const X = [0, 70, 105, 230, 380];
+        w.cols(['Date', 'Day', 'Check-in – Check-out', '', 'Time on campus'], X, { bold: true, size: 9.5 });
+        r.days.forEach((d) => {
+          const dd = dateObj(d.dt); const dl = `${pad(dd.getDate())} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`;
+          if (d.st !== 'present') { w.cols([dl, WD[dateObj(d.dt).getDay()], ATT_TXT[d.st], '', '—'], X, { size: 9.5 }); return; }
+          d.ss.forEach((s, i) => w.cols([i === 0 ? dl : '', i === 0 ? WD[dateObj(d.dt).getDay()] : '', sesTxt(s) + (i === 0 && forAdmin && d.edited ? '   (edited)' : ''), '', i === 0 ? hmm(d.secs) : ''], X, { size: 9.5 }));
+        });
+        const t = attTotals(r.days);
+        w.addSpace(2);
+        w.bodyLine(`Present: ${t.n.present} day${t.n.present === 1 ? '' : 's'}  |  Absent: ${t.n.absent}  |  Leave: ${t.n.leave}  |  Weekly off: ${t.n.off}`, { size: 10, bold: true });
+        w.bodyLine(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `  |  Average: ${hmm(t.avg)} a day` : ''}`, { size: 10 });
+        w.rule();
+      });
+      saveFile(fileBase + '.pdf', w.finishBlob());
+      msgEl.textContent = 'Saved.'; showToast('Attendance report saved');
+    } catch (err) { msgEl.textContent = 'Could not make the attendance report. Please try again.'; }
+  }
   async function downloadRangeReport(dates, title, periodLine, summaryTitle, filename, msgEl, useFilter) {
     msgEl.textContent = 'Preparing report…';
     try {
@@ -10659,7 +10826,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     try {
       const f = reportFilter(!!useFilter);
       const results = await reportData(dates);
-      const { blob } = buildReportPdf(dates, results, title, periodLine, f);
+      reportShareWa = true;
+      let blob;
+      try { ({ blob } = buildReportPdf(dates, results, title, periodLine, f)); } finally { reportShareWa = false; }
       const text = buildWhatsAppRangeText(dates, results, title, periodLine, f);
       await shareReportFileOrText(blob, filename, text, msgEl);
     } catch (err) {
