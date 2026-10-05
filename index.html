@@ -1011,16 +1011,17 @@
   .bwp-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
   .bwp { display: flex; flex-direction: column; gap: 6px; }
   .bwp img { width: 100%; border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; background: #fff; }
-  .next-card { border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; background: linear-gradient(135deg, #FFF5F6, #FFFFFF); border: 1px solid rgba(230,57,70,.25); display: flex; flex-direction: column; gap: 4px; }
+  .next-card { border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; background: linear-gradient(135deg, #FFF5F6, #FFFFFF); border: 1px solid rgba(230,57,70,.25); display: flex; flex-direction: column; gap: 4px; }
   .next-card.live { background: linear-gradient(135deg, #FDECEE, #FFF7F8); border-color: rgba(230,57,70,.5); }
   .next-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .next-lbl { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #C81E32; }
   .next-card.live .next-lbl::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #E63946; margin-right: 6px; animation: nextPulse 1.4s ease-in-out infinite; }
   @keyframes nextPulse { 50% { opacity: .3; } }
   .next-time { font-size: 13px; font-weight: 700; color: var(--muted-2); }
-  .next-batch { font-size: 19px; font-weight: 800; color: var(--ink); }
-  .next-sub { font-size: 14px; color: var(--muted-2); }
-  .next-go { margin: 8px 0 0 !important; }
+  .next-batch { font-size: 16.5px; font-weight: 800; color: var(--ink); }
+  .next-mid { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .next-sub { font-size: 13.5px; color: var(--muted-2); }
+  .next-go { flex: none; border: 1px solid #E63946; background: #E63946; color: #fff; font: inherit; font-size: 13.5px; font-weight: 700; padding: 7px 14px; min-height: 34px; border-radius: 999px; cursor: pointer; }
   .tour { position: fixed; inset: 0; z-index: 200; }
   .tour[hidden] { display: none; }
   .tour-hole { position: fixed; border-radius: 14px; box-shadow: 0 0 0 9999px rgba(17,24,39,.62); transition: all .25s ease; pointer-events: none; }
@@ -2449,7 +2450,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.2 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 7.3 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3170,9 +3171,9 @@
     const bits = [sl.subject, sl.room ? 'Room ' + sl.room : ''].filter(Boolean).join(' · ');
     return `<div class="next-card${live ? ' live' : ''}">
       <div class="next-top"><span class="next-lbl">${live ? 'Now' : 'Next class'}</span><span class="next-time">${escapeHtml(formatTimeStr(sl.time))}${end ? ' – ' + escapeHtml(formatTimeStr(end)) : ''}</span></div>
-      <div class="next-batch">${escapeHtml(slotLabelAll(sl))}</div>
-      ${bits ? `<div class="next-sub">${escapeHtml(bits)}${sl.test ? ' · Class test' : ''}</div>` : ''}
-      <button type="button" class="save-btn next-go" data-log-slot="${escapeHtml(sl.id)}">${live ? 'Fill details now' : 'Fill details'}</button>
+      <div class="next-mid"><div><div class="next-batch">${escapeHtml(slotLabelAll(sl))}</div>
+      ${bits ? `<div class="next-sub">${escapeHtml(bits)}${sl.test ? ' · Class test' : ''}</div>` : ''}</div>
+      ${live ? `<button type="button" class="next-go" data-log-slot="${escapeHtml(sl.id)}">Fill details</button>` : ''}</div>
     </div>`;
   }
   function tlTimeHtml(min) {
