@@ -796,7 +796,13 @@
   .ex-open { background: var(--card); }
   .ex-duty { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; cursor: default; }
   .ex-room-h { font-size: 13px; margin-bottom: 6px; }
+  .ex-room + .ex-room { border-top: 1px dashed var(--line); padding-top: 10px; }
   .ex-busy { opacity: .6; }
+  .ex-dline { font-size: 12.5px; margin-top: 6px; color: var(--muted-2); }
+  .exd.done { color: #15803D; font-weight: 600; } .exd.live { color: #C81E32; font-weight: 700; } .exd.miss { color: #C81E32; font-weight: 600; } .exd.up { color: var(--muted-2); }
+  .ex-whos { display: flex; flex-direction: column; gap: 6px; }
+  .ex-who { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; font-size: 13.5px; }
+  .ex-who-t { font-size: 12px; color: var(--muted-2); white-space: nowrap; }
   .ex-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .ex-sel { background: var(--gold-soft); }
   .ex-tick { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--gold); color: var(--gold); font-size: 12px; margin-right: 8px; vertical-align: -2px; }
@@ -2492,7 +2498,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.6 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 7.7 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3044,11 +3050,13 @@
       </div>`;
   }
 
+  function invigTimesTxt(c) { return (c.parts || []).filter((p) => p.start && p.end).map((p) => `${formatTimeStr(p.start)} – ${formatTimeStr(p.end)}${p.room ? ' · Room ' + p.room : ''}`).join(', '); }
   function mergedActivitiesCardHtml(items, readonly) {
     const rows = items.map((item) => `
         <div class="activity-row">
           <div class="activity-row-text">
-            <span class="activity-row-title">${escapeHtml(activityLabel(item.activityType))}</span>
+            <span class="activity-row-title">${escapeHtml(isInvig(item) ? invigSummary(item).title : activityLabel(item.activityType))}</span>
+            ${isInvig(item) ? `<span class="activity-row-note">${escapeHtml([item.testName || '', invigTimesTxt(item)].filter(Boolean).join(' · '))}</span>` : ''}
             ${item.note ? `<span class="activity-row-note">${escapeHtml(item.note)}</span>` : ''}
           </div>
           ${readonly ? '' : `<div class="activity-row-actions">
@@ -3896,7 +3904,8 @@
     const dDate = h.range === 'day' ? '' : `<span class="hv-day-date">${escapeHtml(dayHeading(d))}</span><span class="hv-day-meta"> · </span>`;
     html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-text"><span class="hv-day-l1">${dDate}<span class="${h.range === 'day' ? 'hv-day-date' : 'hv-day-meta'}">${dCount}</span></span>${dCamp ? `<span class="hv-day-camp">${dCamp}</span>` : ''}</span></div>`;
     html += `<div class="qa-row hv-tiles"><button type="button" class="qa-btn" data-report-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" data-whatsapp-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" data-csv-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div>`;
-    if (sessions.length) html += `<div class="hv-sub">Check-in sessions</div><div class="class-list" id="historySessionsList">${sessionsCardsHtml(sessions)}</div>`;
+    const sessRO = !canEditSessionsOn(d);
+    if (sessions.length) html += `<div class="hv-sub">Check-in sessions</div><div class="class-list" id="historySessionsList">${sessionsCardsHtml(sessions, sessRO)}</div>`;
     html += `<div class="hv-sub" style="display:flex; align-items:center; justify-content:space-between;"><span>Classes and activities</span>
       <span style="display:flex; gap:6px;"><button class="add-entry-btn" id="historyAddActivityBtn">+ Activity</button><button class="add-entry-btn" id="historyAddClassBtn">+ Class</button></span></div>`;
     html += recs.length ? recs.map(hvRecordHtml).join('') : '<div class="hv-note" style="text-align:left;">No records found for this day.</div>';
@@ -3908,7 +3917,7 @@
     const backBtn = document.getElementById('hvDayBack');
     if (backBtn) backBtn.addEventListener('click', () => { state.historySelectedDate = null; renderHistory(); });
     const sl = document.getElementById('historySessionsList');
-    if (sl) wireSessionsEvents(sl, d, sessions, () => showSelectedDay(d));
+    if (sl && !sessRO) wireSessionsEvents(sl, d, sessions, () => showSelectedDay(d));
     el.querySelectorAll('[data-report-date]').forEach((btn) => btn.addEventListener('click', () => downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'), true)));
     el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => btn.addEventListener('click', () => shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'), true)));
     el.querySelectorAll('[data-csv-date]').forEach((btn) => btn.addEventListener('click', () => downloadHvCsv(document.getElementById('historyReportMsg'))));
@@ -7079,14 +7088,16 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           const lines = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map((b) => `<div style="display:flex; justify-content:space-between;"><span>${escapeHtml(b)}</span><span style="font-weight:600;">${fmtUnits(counts[b])}</span></div>`).join('');
           detail = `<div class="ad-detail">
             ${r.st.secs > 0 ? `<div class="hv-note" style="text-align:left;">On campus: ${fmtTeaching(Math.round(r.st.secs / 60))}</div>` : ''}
+            ${campus && (campus.sessions || []).some(sessEdited) ? `<div class="hv-note" style="text-align:left; color: var(--gold);">${(campus.sessions || []).filter(sessEdited).map((s2) => `Check-in ${escapeHtml(formatTimeStr(toHHMM(s2.in)))}${escapeHtml(sessEditMark(s2, 'in'))} · Check-out ${s2.out != null ? escapeHtml(formatTimeStr(toHHMM(s2.out))) + escapeHtml(sessEditMark(s2, 'out')) : 'in progress'}`).join('<br>')}</div>` : ''}
             ${lines ? `<div class="class-checklist-notes" style="display:flex; flex-direction:column; gap:3px;"><div style="font-weight:600;">Batch-wise</div>${lines}</div>` : ''}
             ${r.entries.length ? entryListHtml(r.entries, true) : '<div class="hv-note" style="text-align:left;">No classes or activities logged.</div>'}
             ${stuckCheckedIn ? `<button class="action-btn" data-force-checkout="${r.tid}" style="color:#B91C1C; border-color:#B91C1C; align-self:flex-start;">Force check-out</button>` : ''}
+            ${campus && (campus.sessions || []).length ? `<button class="action-btn" data-adm-sess="${r.tid}" style="align-self:flex-start;">Correct check-in times</button>` : ''}
           </div>`;
         }
         return `<div class="ad-trow${expanded ? ' open' : ''}" data-teacher-id="${r.tid}" role="button" tabindex="0">
           <div class="ad-tmain">
-            <span class="ad-tname">${escapeHtml(nameOf(r.tid))}</span>
+            <span class="ad-tname">${escapeHtml(nameOf(r.tid))}${campus && (campus.sessions || []).some(sessEdited) ? ' <span class="mchip warn" style="font-size:10.5px; padding:1px 7px;">edited</span>' : ''}</span>
             <span class="ad-tsub">${fmtUnits(r.cls.reduce((sum, c) => sum + classUnits(c), 0))} class${r.cls.length === 1 && classUnits(r.cls[0]) === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${invMin ? ` · ${svDur(invMin)} invigilation` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
           </div>
           <span class="ad-pill ${r.st.key}">${r.st.label}</span>
@@ -7100,6 +7111,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       listEl.querySelectorAll('[data-force-checkout]').forEach((btn) => btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         await adminForceCheckout(btn.getAttribute('data-force-checkout'), state.adminDate);
+      }));
+      listEl.querySelectorAll('[data-adm-sess]').forEach((btn) => btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openAdminSessionEdit(btn.getAttribute('data-adm-sess'), state.adminDate);
       }));
     }
 
@@ -7522,23 +7537,43 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const slotsOk = slotsAll.filter((sl) => (sl.teachers || []).length).length;
       const isSel = state.exSel && state.exSel.indexOf(e.id) !== -1;
       const open = !state.exSel && state.exOpen === e.id;
+      // duty status per room and time (done = the teacher filled the invigilation in)
+      const nowM = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })(); const tday = todayStr();
+      const partsBy = {}; logs.forEach((x) => (x.parts || []).forEach((pp) => { if (pp.start && pp.end) (partsBy[x.teacherId] = partsBy[x.teacherId] || []).push([hhmmToMin(pp.start), hhmmToMin(pp.end)]); }));
+      const dutySt = (sl, u) => {
+        if (loggedBy[u] !== undefined) { const ps = partsBy[u]; if (!ps || !ps.length) return 'done'; const a0 = hhmmToMin(sl.start), z0 = hhmmToMin(sl.end); if (ps.some(([a, z]) => a < z0 && z > a0)) return 'done'; } if (e.date > tday) return 'upcoming'; if (e.date < tday) return 'missed'; const a = hhmmToMin(sl.start), z = hhmmToMin(sl.end); return nowM >= z ? 'missed' : (nowM >= a ? 'live' : 'upcoming'); };
+      const cnt = { done: 0, live: 0, upcoming: 0, missed: 0 };
+      pr.forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { cnt[dutySt(sl, u)]++; })));
+      const planned = planTeachers(pr);
+      const extra = Object.keys(loggedBy).filter((u) => planned.indexOf(u) === -1);
+      const dutyLine = pr.length && (cnt.done + cnt.live + cnt.upcoming + cnt.missed) ? `<div class="ex-dline">Duty: ${[cnt.done ? `<span class="exd done">✓ ${cnt.done} done</span>` : '', cnt.live ? `<span class="exd live">● ${cnt.live} now</span>` : '', cnt.upcoming ? `<span class="exd up">◷ ${cnt.upcoming} upcoming</span>` : '', cnt.missed ? `<span class="exd miss">⚠ ${cnt.missed} not logged</span>` : ''].filter(Boolean).join(' · ')}${extra.length ? ` · <span class="exd up">${extra.length} done, not in plan</span>` : ''}</div>` : '';
       const steps = `<div class="ex-steps"><span class="ex-st ${pr.length ? 'ok' : 'todo'}">① Rooms: ${pr.length ? escapeHtml(pr.map((r) => r.room).join(', ')) : 'not set'}</span>${pr.length ? `<span class="ex-st ${slotsOk === slotsAll.length ? 'ok' : 'todo'}">② Invigilators: ${slotsOk === slotsAll.length ? 'ready' : `${slotsOk} of ${slotsAll.length}`}</span>` : '<span class="ex-st">② Invigilators</span>'}</div>`;
       let duty = '';
       if (open) {
         duty = '<div class="ex-duty">';
         if (!pr.length) duty += '<div class="ad-tsub">Add the rooms first, then choose invigilators here.</div><button type="button" class="btn-secondary" data-ex-edit="' + escapeHtml(e.id) + '" style="border-color: var(--gold); color: var(--gold);">① Add rooms</button>';
-        pr.forEach((r, ri) => (r.slots || []).forEach((sl, si) => {
-          duty += `<div class="ex-room"><div class="ex-room-h"><b>Room ${escapeHtml(r.room)}</b>${(r.slots || []).length > 1 || sl.start !== e.start || sl.end !== e.end ? ` · ${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}` : ''}${(r.scope || []).length && expandScope(r.scope).length < expandScope(e.scope).length ? ' · ' + escapeHtml(scopeLabel(r.scope)) : ''}</div>
-            <div class="chips">${ids.map((u) => { const on = (sl.teachers || []).indexOf(u) !== -1; const busy = on ? '' : dutyBusy(u, sl, e.date); return `<button type="button" class="chip${on ? ' active' : ''}${busy ? ' ex-busy' : ''}" data-ex-t="${escapeHtml(e.id + '|' + ri + '|' + si + '|' + u)}">${escapeHtml(nameOf(u))}${busy ? ` <span class="free-tag" style="color: var(--muted);">${escapeHtml(busy)}</span>` : ''}</button>`; }).join('')}</div></div>`;
-        }));
+        // room by room: who is on duty when, and how it went; "Change" opens the name chips
+        const editing = state.exEditRooms === e.id;
+        pr.forEach((r, ri) => {
+          const slots = r.slots || [];
+          const who = [].concat(...slots.map((sl) => (sl.teachers || []).map((u) => { const st0 = dutySt(sl, u); return `<div class="ex-who"><span>${escapeHtml(nameOf(u))}</span><span class="ex-who-t">${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}</span>${pillHtml(st0, { done: 'Done', live: 'Now', upcoming: 'Upcoming', missed: 'Not logged' }[st0])}</div>`; }))).join('');
+          duty += `<div class="ex-room"><div class="ex-room-h"><b>Room ${escapeHtml(r.room)}</b>${(r.scope || []).length && expandScope(r.scope).length < expandScope(e.scope).length ? ' · ' + escapeHtml(scopeLabel(r.scope)) : ''}</div>
+            ${who ? `<div class="ex-whos">${who}</div>` : (editing ? '' : '<div class="ad-tsub" style="color:#C81E32;">No invigilator yet</div>')}`;
+          if (editing) slots.forEach((sl, si) => {
+            duty += `<div class="ex-room-h" style="font-size:12.5px; color: var(--muted-2); margin-top:8px;">${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))} · tap names</div>
+              <div class="chips">${ids.map((u) => { const on = (sl.teachers || []).indexOf(u) !== -1; const busy = on ? '' : dutyBusy(u, sl, e.date); return `<button type="button" class="chip${on ? ' active' : ''}${busy ? ' ex-busy' : ''}" data-ex-t="${escapeHtml(e.id + '|' + ri + '|' + si + '|' + u)}">${escapeHtml(nameOf(u))}${busy ? ` <span class="free-tag" style="color: var(--muted);">${escapeHtml(busy)}</span>` : ''}</button>`; }).join('')}</div>`;
+          });
+          duty += '</div>';
+        });
+        if (pr.length) duty += `<button type="button" class="btn-secondary" data-ex-chg="${escapeHtml(e.id)}" style="border-color: var(--line);">${editing ? 'Done changing' : 'Change invigilators'}</button>`;
         duty += `<div class="ex-acts"><button type="button" class="btn-secondary" data-ex-edit="${escapeHtml(e.id)}" style="border-color: var(--line);">Edit rooms & time</button><button type="button" class="btn-secondary" data-ex-more="${escapeHtml(e.id)}" style="border-color: var(--line);">Details · PDF · Share</button></div></div>`;
       }
       return `<div class="ad-exam${isSel ? ' ex-sel' : ''}${open ? ' ex-open' : ''}" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${state.exSel ? `<span class="ex-tick">${isSel ? '✓' : ''}</span>` : ''}${escapeHtml(examTitle(e))}</div>
         <div class="ad-tsub">${escapeHtml([scopeLabel(e.scope), `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
-        ${steps}${duty}
-        ${inv.length ? `<div class="ad-tsub">Invigilators: ${escapeHtml(inv.join(', '))}</div>` : ''}
-        ${missing.length ? (ended(e) ? `<div class="ad-tsub" style="color:#B45309;">Assigned, not logged: ${escapeHtml(missing.map(nameOf).join(', '))}</div>` : `<div class="ad-tsub">Assigned: ${escapeHtml(missing.map(nameOf).join(', '))}</div>`) : ''}
+        ${steps}${dutyLine}${duty}
+        ${open && extra.length ? `<div class="ad-tsub">Done, not in plan: ${escapeHtml(extra.map((u) => `${nameOf(u)} (${svDur(loggedBy[u])})`).join(', '))}</div>` : ''}
+        ${!pr.length && inv.length ? `<div class="ad-tsub">Invigilation filled in: ${escapeHtml(inv.join(', '))}</div>` : ''}
       </div>`;
     });
     const groups = [];
@@ -7627,13 +7662,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => row.addEventListener(ev, stop));
       row.addEventListener('click', (e) => {
         if (row._lp) { row._lp = false; return; }
-        if (e.target.closest('[data-ex-t],[data-ex-edit],[data-ex-more]')) return;
+        if (e.target.closest('[data-ex-t],[data-ex-edit],[data-ex-more],[data-ex-chg]')) return;
         if (state.exSel) { const k = state.exSel.indexOf(id); if (k === -1) state.exSel.push(id); else state.exSel.splice(k, 1); renderAdmin(); return; }
         state.exOpen = state.exOpen === id ? null : id; renderAdmin();
       });
     });
     listEl.querySelectorAll('[data-ex-edit]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-edit')); if (e) { state.exOpen = null; openAdminExamForm(e); } }));
     listEl.querySelectorAll('[data-ex-more]').forEach((b) => b.addEventListener('click', () => openExamSheet(b.getAttribute('data-ex-more'), nameOf)));
+    listEl.querySelectorAll('[data-ex-chg]').forEach((b) => b.addEventListener('click', () => { const id = b.getAttribute('data-ex-chg'); state.exEditRooms = state.exEditRooms === id ? null : id; renderAdmin(); }));
     listEl.querySelectorAll('[data-ex-t]').forEach((b) => b.addEventListener('click', async () => {
       const [id, ri, si, ...u0] = b.getAttribute('data-ex-t').split('|'); const u = u0.join('|');
       const e = exams.find((x) => x.id === id); if (!e) return;
@@ -9645,6 +9681,43 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     } catch (err) { flashOffline(err); }
   }
 
+  // Admin / coordinator: correct a teacher's check-in and check-out on any day (kept as "edited" in admin reports)
+  async function openAdminSessionEdit(tid, date) {
+    let sessions = [];
+    try { const snap = await state.db.doc('campusHistory/' + tid).collection('days').doc(date).get(); sessions = ((snap.data() || {}).sessions || []).slice(); } catch (err) { flashOffline(err); return; }
+    if (!sessions.length) { showToast('No check-in on this day', 'error'); return; }
+    const body = document.getElementById('hvSheetBody');
+    const nm = (state.adminNames[tid] && state.adminNames[tid].name) || 'Teacher';
+    body.innerHTML = `<div class="hv-d-title">Correct check-in times</div><div class="hv-d-wing">${escapeHtml(nm)} · ${escapeHtml(dayHeading(date))}</div>
+      ${sessions.map((x, i) => `<div style="margin-top:12px;"><div class="sv-tlbl" style="margin-bottom:6px;">Session ${i + 1}${sessEdited(x) ? ' · <span style="color:var(--gold);">edited</span>' : ''}</div>
+        <div class="sv-times"><div><label class="sv-tlbl">Check-in</label><input class="text-input" type="time" data-asi="${i}" value="${toHHMM(x.in)}"></div><div><label class="sv-tlbl">Check-out</label><input class="text-input" type="time" data-aso="${i}" value="${x.out != null ? toHHMM(x.out) : ''}"></div></div></div>`).join('')}
+      <div class="hv-note" id="asErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
+      <div class="hv-note" style="text-align:left;">The first time is kept: admin and coordinator reports show "edited, was …".</div>
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="asCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="asSave" style="margin:0;">Save</button></div>`;
+    document.getElementById('asCancel').addEventListener('click', closeHvSheet);
+    document.getElementById('asSave').addEventListener('click', async () => {
+      const [y, m, d] = date.split('-').map(Number); const ts = (v, plus) => { const [hh, mm] = v.split(':').map(Number); return new Date(y, m - 1, d + (plus || 0), hh, mm, 0, 0).getTime(); };
+      const mark = (o, field, nv) => { if (o[field] === nv) return o; const oKey = field === 'in' ? 'origIn' : 'origOut'; const nKey = field === 'in' ? 'editsIn' : 'editsOut'; const r2 = Object.assign({}, o, { [field]: nv }); if (r2[oKey] === undefined) r2[oKey] = o[field] == null ? null : o[field]; r2[nKey] = (o[nKey] || 0) + 1; r2.editLog = (o.editLog || []).concat([{ f: field, from: o[field] == null ? null : o[field], to: nv, at: Date.now(), by: state.teacherId }]).slice(-20); return r2; };
+      const out = []; const err = document.getElementById('asErr');
+      for (let i = 0; i < sessions.length; i++) {
+        const vi = body.querySelector(`[data-asi="${i}"]`).value; const vo = body.querySelector(`[data-aso="${i}"]`).value;
+        if (!vi) { err.textContent = 'Every session needs a check-in time'; return; }
+        let o = mark(sessions[i], 'in', ts(vi));
+        if (vo) { let to = ts(vo); if (to <= o.in) to = ts(vo, 1); o = mark(o, 'out', to); }
+        out.push(o);
+      }
+      const totalSeconds = sumSessions(out); const active = out.find((x) => x.out == null);
+      const payload = { sessions: out, totalSeconds, checkedIn: !!active, checkInAt: active ? active.in : null, sessionCount: out.length };
+      try {
+        await state.db.doc('campusHistory/' + tid).collection('days').doc(date).set(payload, { merge: true });
+        try { await state.db.doc('campusLogs/' + date).collection('teachers').doc(tid).set(payload, { merge: true }); } catch (e2) { /* mirror is best-effort */ }
+        closeHvSheet(); showToast('Times corrected');
+        try { if (typeof loadAdminDay === 'function') loadAdminDay(true); } catch (e3) { /* ignore */ }
+        renderAdmin();
+      } catch (e4) { err.textContent = 'Could not save. Check the internet and try again.'; }
+    });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
   async function adminForceCheckout(tid, date) {
     const ok = await showConfirm(
       "This will close their currently open check-in for this date, using the current time as check-out. Use this only if a teacher forgot to check out.",
@@ -9763,12 +9836,35 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (field === 'out' && session && !dayOffset && newTs <= session.in) {
       newTs = new Date(y, m - 1, d + 1, hh, mm, 0, 0).getTime();
     }
-    const updated = sessions.map((s) => (s.id === sessionId ? Object.assign({}, s, { [field]: newTs }) : s));
+    if (!canEditSessionsOn(date)) { showToast('Only today and yesterday can be changed. Ask the coordinator for older days.', 'error'); return; }
+    // remember the first time and how often it was changed (shown in admin / coordinator reports only)
+    const updated = sessions.map((s) => {
+      if (s.id !== sessionId) return s;
+      if (s[field] === newTs) return s;
+      const o = Object.assign({}, s, { [field]: newTs });
+      const oKey = field === 'in' ? 'origIn' : 'origOut'; const nKey = field === 'in' ? 'editsIn' : 'editsOut';
+      if (o[oKey] === undefined) o[oKey] = s[field] == null ? null : s[field];
+      o[nKey] = (s[nKey] || 0) + 1;
+      o.editLog = (s.editLog || []).concat([{ f: field, from: s[field] == null ? null : s[field], to: newTs, at: Date.now() }]).slice(-20);
+      return o;
+    });
     await pushSessionUpdateForDate(date, updated);
   }
 
+  // teachers change their check-in / check-out only for today and yesterday; admin and coordinators any day
+  function canEditSessionsOn(date) { if (state.canAdmin || state.isCoordinator) return true; return date >= shiftDateStr(todayStr(), -1); }
+  // "(edited 2×, was 9:40 AM)" — only when the time really differs from the first one
+  function sessEditMark(s, field) {
+    const o = field === 'in' ? s.origIn : s.origOut; const n = field === 'in' ? s.editsIn : s.editsOut; const cur = s[field];
+    if (o === undefined || !n || o === cur) return '';
+    const was = o == null ? 'not set' : formatTimeStr(toHHMM(o));
+    return ` (edited${n > 1 ? ' ' + n + 'x' : ''}, was ${was})`;
+  }
+  function sessEdited(s) { return !!(sessEditMark(s, 'in') || sessEditMark(s, 'out')); }
+  let reportShowEdits = false; // on only while an admin / coordinator report is being made
   async function deleteSessionForDate(date, sessions, sessionId) {
     if (!state.db || !state.teacherId) return;
+    if (!canEditSessionsOn(date)) { showToast('Only today and yesterday can be changed.', 'error'); return; }
     const updated = sessions.filter((s) => s.id !== sessionId);
     await pushSessionUpdateForDate(date, updated);
   }
@@ -9786,7 +9882,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
-  function sessionsCardsHtml(sessions) {
+  function sessionsCardsHtml(sessions, readOnly) {
+    if (readOnly) {
+      return sessions.map((s, i) => `<div class="class-card" style="padding:12px 14px;"><div class="class-title" style="font-size:13px;">Session ${i + 1}${sessEdited(s) ? ' · <span style="color:var(--gold);">edited</span>' : ''}</div>
+        <div style="font-size:15px; font-weight:600; margin-top:4px;">${escapeHtml(formatTimeStr(toHHMM(s.in)))} – ${s.out != null ? escapeHtml(formatTimeStr(toHHMM(s.out))) : 'in progress'}</div></div>`).join('')
+        + '<div class="hv-note" style="text-align:left;">Older days can only be viewed. If a time is wrong, ask the coordinator to correct it.</div>';
+    }
     return sessions.map((s, i) => {
       const inVal = toHHMM(s.in);
       const outVal = s.out != null ? toHHMM(s.out) : '';
@@ -9794,7 +9895,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       return `
         <div class="class-card" style="padding:12px 14px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-            <div class="class-title" style="font-size:13px;">Session ${i + 1}${s.out == null ? ' · In progress' : ''}${s.setLater ? ' · <span style="color:var(--gold);">check-in time set later</span>' : ''}</div>
+            <div class="class-title" style="font-size:13px;">Session ${i + 1}${s.out == null ? ' · In progress' : ''}${s.setLater ? ' · <span style="color:var(--gold);">check-in time set later</span>' : ''}${sessEdited(s) ? ' · <span style="color:var(--gold);">edited</span>' : ''}</div>
             <button class="del-btn" data-del-session="${s.id}" aria-label="Delete session">${svgTrash()}</button>
           </div>
           <div style="display:flex; gap:8px;">
@@ -10166,8 +10267,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (sessions.length) {
       sec(`ATTENDANCE  (Total: ${reportCampus(campusSeconds(campus))})`);
       sessions.forEach((s, i) => {
-        const a = formatTimeStr(toHHMM(s.in));
-        const b = s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress';
+        const a = formatTimeStr(toHHMM(s.in)) + (reportShowEdits ? sessEditMark(s, 'in') : '');
+        const b = (s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress') + (reportShowEdits && s.out != null ? sessEditMark(s, 'out') : '');
         w.bodyLine(`${sessions.length > 1 ? (i + 1) + '. ' : ''}${a}  -  ${b}`, { indent: 14 });
       });
     } else if (!leaves.length && hasWork && !f.label) {
@@ -10576,8 +10677,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!ss.length) return null;
     const last = ss[ss.length - 1];
     const spans = ss.map((s) => `${formatTimeStr(toHHMM(s.in))}–${s.out != null ? formatTimeStr(toHHMM(s.out)) : 'in progress'}`).join('; ');
+    const edits = reportShowEdits ? ss.map((s, i) => { const a = sessEditMark(s, 'in'), b = sessEditMark(s, 'out'); return a || b ? `${ss.length > 1 ? 'Session ' + (i + 1) + ': ' : ''}${a ? 'check-in ' + a.slice(2, -1) : ''}${a && b ? '; ' : ''}${b ? 'check-out ' + b.slice(2, -1) : ''}` : ''; }).filter(Boolean).join(' | ') : '';
+    const note = [ss.length > 1 ? `Sessions: ${spans}` : '', edits].filter(Boolean).join(' · ');
     return [date, csvDay(date), 'Attendance', '', '', '', formatTimeStr(toHHMM(ss[0].in)), last.out != null ? formatTimeStr(toHHMM(last.out)) : 'In progress',
-      Math.round(campusSeconds(campus) / 60), '', '', '', '', '', ss.length > 1 ? `Sessions: ${spans}` : '', '', ''];
+      Math.round(campusSeconds(campus) / 60), '', '', '', '', '', note, '', ''];
   }
   function csvSortRows(rows) {
     // rows: arrays whose first cell may be a teacher name (withTeacher) — sort by date, then entry order, then start time.
@@ -10753,7 +10856,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return { dates, label: monthLabel(key), fileTag: `Month-${key}` };
   }
 
-  async function downloadAdminReport(msgEl) {
+  async function downloadAdminReport(msgEl) { reportShowEdits = true; try { return await downloadAdminReportInner(msgEl); } finally { reportShowEdits = false; } }
+  async function downloadAdminReportInner(msgEl) {
     if (!state.adminReportRange || state.adminReportRange === 'day') {
       return downloadAdminCombinedReport(msgEl);
     }
@@ -10833,7 +10937,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     }
   }
 
-  async function downloadAdminCsv(msgEl) {
+  async function downloadAdminCsv(msgEl) { reportShowEdits = true; try { return await downloadAdminCsvInner(msgEl); } finally { reportShowEdits = false; } }
+  async function downloadAdminCsvInner(msgEl) {
     if (!state.adminReportRange || state.adminReportRange === 'day') {
       return downloadAdminCombinedCsv(msgEl);
     }
@@ -12274,7 +12379,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   function renderInstallUi() {
     const row = document.getElementById('menuInstallRow'); const card = document.getElementById('installCard');
     const can = !isStandalone() && !!(installEvt || isIOS);
-    if (row) row.hidden = !can;
+    if (row) row.hidden = isStandalone();
     let dismissed = false; try { dismissed = localStorage.getItem('ctd_install_dismissed') === '1'; } catch (e) { /* ignore */ }
     if (card) card.hidden = !can || dismissed;
   }
@@ -12283,6 +12388,17 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       installEvt.prompt();
       try { const r = await installEvt.userChoice; if (r && r.outcome === 'accepted') showToast('Installing… look for Teach Desk on your home screen'); } catch (e) { /* ignore */ }
       installEvt = null; renderInstallUi(); return;
+    }
+    let already = false;
+    try { if (navigator.getInstalledRelatedApps) { const l = await navigator.getInstalledRelatedApps(); already = !!(l && l.length); } } catch (e) { /* ignore */ }
+    if (already) {
+      const body = document.getElementById('hvSheetBody');
+      body.innerHTML = `<div class="hv-d-title">Teach Desk is already installed</div><div class="hv-d-wing">On this phone</div>
+        <div class="hv-note" style="text-align:left; margin-top:10px;">Open it from the red CATJEE icon on your home screen — it opens full screen. No need to install again.</div>
+        <div class="hv-d-btns"><button type="button" class="save-btn" id="instOk" style="margin:0;">OK</button></div>`;
+      document.getElementById('instOk').addEventListener('click', closeHvSheet);
+      const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+      return;
     }
     if (!isIOS) {
       const body = document.getElementById('hvSheetBody');
@@ -12357,7 +12473,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       { go: goAdmin('exams'), sel: '#exDutyPic', t: 'Duty sheet', x: 'After choosing invigilators, make the duty sheet picture in one tap.', ifMissing: 'Shows when a day has invigilators.' } ] },
     exams: { title: 'Exams tab', sub: 'Rooms and invigilators', icon: 'file', who: 'lead', steps: [
       { go: goAdmin('exams'), sel: '#adminNewExamBtn', t: 'New exam', x: 'Add an exam here, or mark it in the timetable grid.' },
-      { go: goAdmin('exams'), sel: '#adminExamList', t: 'Rooms, then invigilators', x: 'Tap an exam: step ① rooms, step ② tap teacher names under each room. Press and hold to select several exams.' } ] },
+      { go: goAdmin('exams'), sel: '#adminExamList', t: 'Rooms, then invigilators', x: 'Tap an exam to see who is on duty in each room and how it went. Tap Change invigilators to pick names. Press and hold to select several exams.' } ] },
     reports: { title: 'Teaching Report', sub: 'Weekly and monthly', icon: 'file', who: 'lead', steps: [
       { go: goAdmin('reports'), sel: '#trepSec', t: 'Teaching Report', x: 'Classes of every teacher, batch-wise. Choose Weekly or Monthly and the week or month.' },
       { go: goAdmin('reports'), sel: '#trepImg', t: 'Share', x: 'Share the picture on WhatsApp or download Excel.' } ] }

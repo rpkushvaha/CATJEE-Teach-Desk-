@@ -29,5 +29,11 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://rpkushvaha.github.io/CATJEE-Teach-Desk-/manifest.json"
+    }
   ]
 }
