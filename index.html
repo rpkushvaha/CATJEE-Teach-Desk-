@@ -770,7 +770,15 @@
   .trep-nav #trepLabel { font-size: 14px; }
   .trep-t tbody tr { background: #fff; }
   .trep-t tfoot td { background: #fff; font-weight: 700; }
-  .trep-miss { font-size: 12.5px; color: var(--muted-2); }
+  .trep-miss { font-size: 12.5px; color: var(--muted-2); border: 1px solid rgba(217,119,6,.35); background: rgba(217,119,6,.06); border-radius: 12px; padding: 10px 12px; }
+  .trep-miss-h { display: flex; align-items: center; gap: 6px; color: #B45309; font-weight: 700; font-size: 13.5px; }
+  .trep-miss-l { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .trep-mchip { border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 12.5px; border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+  .trep-mchip b { color: #B45309; margin-left: 2px; }
+  .trep-ok { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #15803D; font-weight: 600; }
+  .trep-mlist { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .trep-mrow { display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 13.5px; }
+  .trep-mrow span:last-child { color: var(--muted-2); font-size: 12.5px; }
   .zv { position: fixed; inset: 0; z-index: 9999; background: #111; display: none; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   .zv.open { display: flex; }
   .zv-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; }
@@ -2498,7 +2506,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 7.7 · updated 5 Oct 2026</div>
+          <div class="dnote">Version 7.8 · updated 5 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7760,12 +7768,16 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const seen = {};
       const logs = [].concat(...parts).filter((c) => (seen[c.id] ? false : (seen[c.id] = true))).filter((c) => c.entryType !== 'activity' && c.date >= r.from && c.date <= r.to && !c.cancelled)
         .map((c) => ({ c, t: c.teacherId, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
-      const used = new Set(); const missing = [];
+      const used = new Set(); const missing = []; const upcoming = [];
       tt.forEach((x) => {
         const hit = logs.find((l) => l.t === x.t && l.d === x.d && l.bs.indexOf(x.b) !== -1 && (l.a == null || l.z == null || (l.a < x.z && x.a < l.z)));
-        if (hit) used.add(hit); else missing.push(x);
+        if (hit) { used.add(hit); return; }
+        // a class still to come is not "missing" yet
+        const endTs = dateObj(x.d).getTime() + (x.z || 0) * 60000;
+        if (endTs > Date.now()) { upcoming.push(x); return; }
+        missing.push(x);
       });
-      t.data = { logs, missing, from: r.from, to: r.to, ttCount: tt.length };
+      t.data = { logs, missing, upcoming, from: r.from, to: r.to, ttCount: tt.length };
     } catch (err) { t.data = { error: true }; }
     t.busy = false; trepRender();
   }
@@ -7843,8 +7855,12 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const miss = t.data.missing || [];
     if (miss.length) {
       const by = {}; miss.forEach((x) => { (by[x.t] = by[x.t] || []).push(x); });
-      h += `<div class="trep-miss"><b>⚠️ Not filled in yet (${miss.length}) · not counted:</b> ${Object.keys(by).sort((a, b) => ttName(a).localeCompare(ttName(b))).map((u) => `${escapeHtml(trepName(u))} ${by[u].length}`).join(' · ')}</div>`;
-    }
+      h += `<div class="trep-miss"><div class="trep-miss-h"><span class="ico i-alert" aria-hidden="true"></span> Not filled in (${miss.length}) · not counted</div>
+        <div class="trep-miss-l">${Object.keys(by).sort((a, b) => ttName(a).localeCompare(ttName(b))).map((u) => `<button type="button" class="trep-mchip" data-trep-miss="${escapeHtml(u)}">${escapeHtml(trepName(u))} <b>${by[u].length}</b></button>`).join('')}</div>
+        <div class="hv-note" style="text-align:left; margin-top:4px;">Classes whose time is over but the teacher hasn't filled them in. Tap a name to see which.</div></div>`;
+    } else if ((t.data.ttCount || 0) > 0) h += '<div class="trep-ok"><span class="ico i-check" aria-hidden="true"></span> Every class that has happened is filled in</div>';
+    const upc = (t.data.upcoming || []).length;
+    if (upc) h += `<div class="hv-note" style="text-align:left;">Still to come in this ${state.trep.mode === 'month' ? 'month' : 'week'}: ${upc} class${upc === 1 ? '' : 'es'} (counted once they are taken and filled in)</div>`;
     if (T.list.some((row) => !trepTitleOf(row.u))) h += '<div class="hv-note" style="text-align:left;">Mr. / Ms. comes from Sir / Ma\'am chosen by the teacher. For a name without it, tap the name to set Mr. or Ms.</div>';
     h += '<div class="hv-note" style="text-align:left;">1 class = up to 1 h 10 min · 1.5 = up to 1 h 45 min (e.g. 1 h 15 min) · a class taken with two batches together counts once.</div>';
     // a picture of the report that fits the screen; tap to open it big (zoom with two fingers)
@@ -7858,6 +7874,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     box.innerHTML = out;
     const pic = document.getElementById('trepPic'); if (pic) pic.addEventListener('click', () => openZoomViewer(img));
     box.querySelectorAll('[data-trep-u]').forEach((td) => td.addEventListener('click', () => trepToggleTitle(td.getAttribute('data-trep-u'))));
+    box.querySelectorAll('[data-trep-miss]').forEach((b) => b.addEventListener('click', () => trepShowMissing(b.getAttribute('data-trep-miss'))));
   }
   // full-screen picture viewer with zoom steps (for wide pictures like the teaching report)
   // Full-screen picture viewer. A wide picture on an upright phone is turned sideways so it fills the screen;
@@ -7895,6 +7912,17 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     probe.src = src;
     ov.classList.add('open');
     const sc = document.getElementById('zvScroll'); sc.scrollTop = 0; sc.scrollLeft = 0;
+  }
+  // which classes a teacher hasn't filled in yet (time already over)
+  function trepShowMissing(u) {
+    const list = ((state.trep.data && state.trep.data.missing) || []).filter((x) => x.t === u).sort((a, b) => (a.d + pad(a.a)).localeCompare(b.d + pad(b.a)));
+    const hm = (m) => formatTimeStr(`${pad(Math.floor(m / 60))}:${pad(m % 60)}`);
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">${escapeHtml(trepName(u))}</div><div class="hv-d-wing">Not filled in yet · ${list.length} class${list.length === 1 ? '' : 'es'}</div>
+      <div class="trep-mlist">${list.map((x) => `<div class="trep-mrow"><span><b>${escapeHtml(WD[dateObj(x.d).getDay()])} ${dateObj(x.d).getDate()}</b> · ${escapeHtml(hm(x.a))} – ${escapeHtml(hm(x.z))}</span><span>${escapeHtml(gridBatchLabel(x.b))}${x.s ? ' · ' + escapeHtml(x.s) : ''}</span></div>`).join('')}</div>
+      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="tmClose" style="border-color: var(--line);">Close</button></div>`;
+    document.getElementById('tmClose').addEventListener('click', closeHvSheet);
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   function trepEnsure() { const r = trepRange(); if (state.trep.key !== state.trep.mode + '|' + r.from || !state.trep.data) trepBuild(); else trepRender(); }
   function trepCanvas() {
