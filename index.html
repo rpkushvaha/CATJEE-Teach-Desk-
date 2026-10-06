@@ -2539,7 +2539,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.4 · updated 6 Oct 2026</div>
+          <div class="dnote">Version 8.5 · updated 6 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9941,6 +9941,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       checkInAt: activeSession ? activeSession.in : null,
       sessionCount: sessions.length
     };
+    // an admin / coordinator changing their own day older than yesterday is marked like any other admin change
+    if ((state.canAdmin || state.isCoordinator) && date < shiftDateStr(todayStr(), -1)) payload.adminEdited = { by: state.teacherId, at: Date.now() };
     const historyRef = state.db.doc('campusHistory/' + state.teacherId).collection('days').doc(date);
     const logRef = state.db.doc('campusLogs/' + date).collection('teachers').doc(state.teacherId);
     try {
