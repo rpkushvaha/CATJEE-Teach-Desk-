@@ -992,6 +992,12 @@
   .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
   .rt-tile { position: relative; }
+  .att-prev { margin-top: 10px; }
+  .att-prev[hidden] { display: none !important; }
+  #repAttShare[hidden] { display: none !important; }
+  .att-pic { display: block; width: 100%; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; padding: 0; cursor: pointer; }
+  .att-pic img { display: block; width: 100%; height: auto; }
+  .att-pic span { display: block; padding: 8px; font-weight: 700; color: #C81E32; background: var(--card); font-size: 14px; }
   .rep-range-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .rep-range-row .chips { flex: 1; }
   .cal-btn { flex: none; color: #C81E32; }
@@ -1868,7 +1874,7 @@
         <button type="button" id="hvFilterClear"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Clear</button>
       </div>
       <div class="sum-grid hv-sum" id="hvSum"></div>
-      <div id="hvActions"><div class="rep-lbl">Report</div><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-hv-rt="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Classes, tests, work</span></button><button type="button" class="qa-btn rt-tile" data-hv-rt="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · check-out</span></button></div><div class="rep-lbl">Get it as</div><div class="qa-row hv-tiles"><button type="button" class="qa-btn" id="hvReportBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" id="hvWhatsAppBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" id="downloadCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div></div>
+      <div id="hvActions"><div class="rep-lbl">Report</div><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-hv-rt="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Classes, tests, work</span></button><button type="button" class="qa-btn rt-tile" data-hv-rt="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · check-out</span></button></div><div id="hvAttPrev" class="att-prev" hidden></div><div class="rep-lbl">Get it as</div><div class="qa-row hv-tiles"><button type="button" class="qa-btn" id="hvReportBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" id="hvWhatsAppBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" id="downloadCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div></div>
       <div class="admin-sub" id="historyReportMsg" style="text-align:center;"></div>
       <div id="historyList" class="hv-list">
         <div class="skel"></div><div class="skel"></div><div class="skel short"></div>
@@ -2101,8 +2107,10 @@
         <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(3, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button></div>
         <div class="hv-note" id="repKindNote" style="text-align:left;"></div>
         <div id="repStd">
+          <div id="repAttPrev" class="att-prev" hidden></div>
           <div class="rep-lbl">Get it as</div>
-          <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <div class="qa-row" id="repStdTiles" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <button type="button" class="qa-btn qa-wa" id="repAttShare" hidden><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
             <button type="button" class="qa-btn" id="downloadAdminPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button>
             <button type="button" class="qa-btn qa-xl" id="downloadAdminCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button>
           </div>
@@ -2531,7 +2539,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.3 · updated 6 Oct 2026</div>
+          <div class="dnote">Version 8.4 · updated 6 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3915,6 +3923,7 @@
       html += '<div class="hv-note">Loading older records…</div>';
     }
     if (el._lastHtml !== html) { el._lastHtml = html; el.innerHTML = html; hvWireRecords(el); }
+    try { if (state.hvRepKind === 'att' && window.__hvAttPreview) window.__hvAttPreview(); } catch (e) { /* ignore */ }
   }
 
   function renderHistoryDay(el) {
@@ -4146,7 +4155,16 @@
     state.hvRepKind = b.getAttribute('data-hv-rt');
     document.querySelectorAll('[data-hv-rt]').forEach((x) => x.classList.toggle('on', x === b));
     document.getElementById('historyReportMsg').textContent = '';
+    hvAttPreview();
   }));
+  function hvAttPreview() {
+    const box = document.getElementById('hvAttPrev'); if (!box) return;
+    if (state.hvRepKind !== 'att') { box.hidden = true; box.innerHTML = ''; return; }
+    const sp = hvReportSpec(); const dates = sp.single ? [sp.single] : sp.dates;
+    if (dates.length > 93) { box.hidden = false; box.innerHTML = '<div class="hv-note">Choose a range of up to 3 months.</div>'; return; }
+    showAttPreview('hvAttPrev', state.teacherId, dates, sp.period || (sp.single ? `Date: ${dayHeading(sp.single)}` : ''));
+  }
+  window.__hvAttPreview = hvAttPreview;
   const hvAtt = (kind) => {
     const msg = document.getElementById('historyReportMsg'); const sp = hvReportSpec();
     const dates = sp.single ? [sp.single] : sp.dates;
@@ -4164,7 +4182,7 @@
   });
 
   document.getElementById('hvWhatsAppBtn').addEventListener('click', () => {
-    if (state.hvRepKind === 'att') { hvAtt('wa'); return; }
+    if (state.hvRepKind === 'att') { hvAtt('share-img'); return; }
     const msg = document.getElementById('historyReportMsg');
     const sp = hvReportSpec();
     if (sp.single) { shareReportOnWhatsApp(sp.single, msg, true); return; }
@@ -9234,6 +9252,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     renderRepControls();
   }));
   document.getElementById('repPrev').addEventListener('click', () => shiftRepPeriod(-1));
+  document.getElementById('repAttShare').addEventListener('click', () => attendanceReport(document.getElementById('adminRepTeacher').value || null, 'share-img', document.getElementById('adminReportMsg')));
+  document.getElementById('adminRepTeacher').addEventListener('change', () => { document.getElementById('adminReportMsg').textContent = ''; if ((state.adminRepKind || 'full') === 'att') renderRepControls(); });
   document.getElementById('repNext').addEventListener('click', () => shiftRepPeriod(1));
   document.getElementById('adminRepTeacher').addEventListener('focus', fillAdminRepTeachers);
   document.getElementById('adminRepTeacher').addEventListener('pointerdown', fillAdminRepTeachers);
@@ -10733,6 +10753,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
     document.getElementById('repStd').hidden = kind === 'count';
+    const shareT = document.getElementById('repAttShare'); if (shareT) shareT.hidden = kind !== 'att';
+    const tiles = document.getElementById('repStdTiles'); if (tiles) tiles.style.gridTemplateColumns = kind === 'att' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
+    const ap = document.getElementById('repAttPrev');
+    if (ap) { if (kind === 'att') { const sp = adminRepSpec(); showAttPreview('repAttPrev', document.getElementById('adminRepTeacher').value || null, null, null); void sp; } else { ap.hidden = true; ap.innerHTML = ''; } }
     document.getElementById('repCount').hidden = kind !== 'count';
     if (kind === 'count' && typeof trepEnsure === 'function') trepEnsure();
   }
@@ -10800,6 +10824,77 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     }).filter((x) => x.st !== 'future');
   }
   const ATT_TXT = { present: '', leave: 'Leave', off: 'Weekly off', absent: 'Absent' };
+  // Attendance as a picture (same colours as the Class count picture): one teacher day by day, or a register for all
+  function attCanvas(rows, tid, period, nameOfU, forAdmin, sesTxt, hmm) {
+    const one = !!tid; const r0 = rows[0] || { days: [] };
+    const W = 760, hT = 34, hR = 26; const SC = 2;
+    const lines = one ? r0.days.reduce((n, d) => n + Math.max(1, d.st === 'present' ? d.ss.length : 1), 0) : rows.length;
+    const H = hT * 2 + (one ? 30 : 0) + 30 + lines * hR + 64 + 12;
+    const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC;
+    const x = cv.getContext('2d'); x.scale(SC, SC); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const box = (bx, by, bw, bh, fill, stroke) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); if (stroke !== false) { x.strokeStyle = '#B5B5B5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); } };
+    const tx = (t, tx0, ty, size, bold, color, align, maxW) => { x.fillStyle = color || '#111'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; while (maxW && x.measureText(t).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(t, tx0, ty); };
+    let y = 1;
+    box(1, y, W - 2, hT, '#FFC000'); tx('Attendance Report', W / 2, y + hT / 2, 19, true, '#000', 'center'); y += hT;
+    box(1, y, W - 2, hT, '#E26B0A'); tx(period || '', W / 2, y + hT / 2, 16, true, '#000', 'center'); y += hT;
+    if (one) { box(1, y, W - 2, 30, '#FFFFFF'); tx(nameOfU(tid), 14, y + 15, 16, true); y += 30; }
+    const RED = '#B91C1C', AMB = '#92400E', GRY = '#6B7280';
+    if (one) {
+      const X = [1, 110, 180, 560]; const Wc = [109, 70, 380, W - 2 - 560];
+      ['Date', 'Day', 'Check-in  –  Check-out', 'Time on campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
+      y += 30;
+      r0.days.forEach((d, di) => {
+        const dd = dateObj(d.dt); const dl = `${pad(dd.getDate())} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`; const dw = WD[dd.getDay()];
+        const n = d.st === 'present' ? d.ss.length : 1; const bh = n * hR;
+        const fill = d.st === 'absent' ? '#FDECEC' : d.st === 'leave' ? '#FFF4D6' : d.st === 'off' ? '#EFEFEF' : (di % 2 ? '#F4F7FB' : '#FFFFFF');
+        X.forEach((xx, i) => box(xx, y, Wc[i], bh, fill));
+        tx(dl, X[0] + Wc[0] / 2, y + bh / 2, 13, true, '#111', 'center'); tx(dw, X[1] + Wc[1] / 2, y + bh / 2, 13, false, '#111', 'center');
+        if (d.st !== 'present') { tx(ATT_TXT[d.st], X[2] + Wc[2] / 2, y + bh / 2, 13, true, d.st === 'absent' ? RED : d.st === 'leave' ? AMB : GRY, 'center'); tx('–', X[3] + Wc[3] / 2, y + bh / 2, 13, false, GRY, 'center'); }
+        else {
+          d.ss.forEach((ss, i) => tx(sesTxt(ss), X[2] + Wc[2] / 2, y + hR * i + hR / 2, 13, false, '#111', 'center'));
+          tx(hmm(d.secs) + (forAdmin && d.edited ? '  (edited)' : ''), X[3] + Wc[3] / 2, y + bh / 2, 13, true, '#111', 'center', Wc[3] - 8);
+        }
+        y += bh;
+      });
+      const t = attTotals(r0.days);
+      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Present: ${t.n.present}   ·   Absent: ${t.n.absent}   ·   Leave: ${t.n.leave}   ·   Weekly off: ${t.n.off}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
+      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `   ·   Average: ${hmm(t.avg)} a day` : ''}`, W / 2, y + 16, 14, false, '#111', 'center'); y += 32;
+    } else {
+      const X = [1, 60, 330, 410, 490, 570, 640]; const Wc = [59, 270, 80, 80, 80, 70, W - 2 - 640];
+      ['S.N', 'Name of faculty', 'Present', 'Absent', 'Leave', 'Off', 'On campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
+      y += 30; let P = 0, A = 0, Lv = 0, S = 0;
+      rows.forEach((r, ri) => {
+        const t = attTotals(r.days); P += t.n.present; A += t.n.absent; Lv += t.n.leave; S += t.secs;
+        const fill = ri % 2 ? '#F4F7FB' : '#FFFFFF';
+        X.forEach((xx, i) => box(xx, y, Wc[i], hR, fill));
+        tx(String(ri + 1), X[0] + Wc[0] / 2, y + hR / 2, 13, false, '#111', 'center');
+        tx(nameOfU(r.u) + (forAdmin && r.days.some((d) => d.edited) ? ' (edited)' : ''), X[1] + 8, y + hR / 2, 13, false, '#111', 'left', Wc[1] - 12);
+        [t.n.present, t.n.absent || '–', t.n.leave || '–', t.n.off || '–'].forEach((v, i) => tx(String(v), X[2 + i] + Wc[2 + i] / 2, y + hR / 2, 13, i === 0, i === 1 && t.n.absent ? RED : '#111', 'center'));
+        tx(hmm(t.secs), X[6] + Wc[6] / 2, y + hR / 2, 13, true, '#111', 'center');
+        y += hR;
+      });
+      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Teachers: ${rows.length}   ·   Present days: ${P}   ·   Absent days: ${A}   ·   Leave: ${Lv}   ·   Total on campus: ${hmm(S)}`, W / 2, y + 16, 13, true, '#111', 'center', W - 20); y += 32;
+      tx('Day-by-day times for every teacher are in the PDF.', W / 2, y + 16, 12, false, GRY, 'center'); y += 32;
+    }
+    // trim to what was drawn
+    const out = document.createElement('canvas'); out.width = W * SC; out.height = Math.ceil((y + 2) * SC);
+    out.getContext('2d').drawImage(cv, 0, 0); return out;
+  }
+  // preview picture under the report choice (tap: full screen)
+  let attPrevTok = 0;
+  async function showAttPreview(boxId, tid, dates, period) {
+    const box = document.getElementById(boxId); if (!box) return;
+    const key = [tid || 'all', (dates || adminRepSpec().dates).join(','), period || ''].join('|');
+    if (box.dataset.key === key && box.querySelector('img') && !box.hidden) return; // already showing this one
+    box.dataset.key = key;
+    const tok = ++attPrevTok; box.hidden = false; box.innerHTML = '<div class="skel short"></div>';
+    const dummy = { textContent: '' };
+    let url = null; try { url = await attendanceReport(tid, 'img', dummy, dates, period); } catch (e) { url = null; }
+    if (tok !== attPrevTok) return;
+    if (!url) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the picture. Check the internet and try again.</div>'; return; }
+    box.innerHTML = `<button type="button" class="att-pic" aria-label="Open the attendance picture"><img src="${url}" alt="Attendance"><span>Tap to open big</span></button>`;
+    box.querySelector('.att-pic').addEventListener('click', () => openZoomViewer(url, { turn: false }));
+  }
   function attTotals(days) {
     const n = { present: 0, leave: 0, off: 0, absent: 0 }; let secs = 0; days.forEach((d) => { n[d.st]++; secs += d.secs; });
     return { n, secs, avg: n.present ? Math.round(secs / n.present) : 0 };
@@ -10820,6 +10915,17 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const hmm = (secs) => reportCampus(secs);
       const sesTxt = (s) => `${formatTimeStr(toHHMM(s.in))} – ${s.out != null ? formatTimeStr(toHHMM(s.out)) : 'in progress'}`;
       const fileBase = `CATJEE-Attendance-${tid ? nameOfU(tid).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' : ''}${sp.fileTag}`;
+      if (kind === 'img' || kind === 'share-img') {
+        // a picture shared on WhatsApp shows an admin's later change of an old day once, like the WhatsApp reports
+        const cv = attCanvas(rows, tid, sp.period, nameOfU, forAdmin || kind === 'share-img', sesTxt, hmm);
+        if (kind === 'img') { msgEl.textContent = ''; return cv.toDataURL('image/png'); }
+        await new Promise((res) => cv.toBlob(async (blob) => {
+          const name = fileBase + '.png'; const file = new File([blob], name, { type: 'image/png' });
+          try { if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Attendance' }); else saveFile(name, blob); } catch (e) { /* closed */ }
+          res();
+        }, 'image/png'));
+        msgEl.textContent = ''; return null;
+      }
       if (kind === 'csv') {
         const L = [['Teacher', 'Date', 'Day', 'Status', 'Check-in', 'Check-out', 'Time on campus (min)', 'Note']];
         rows.forEach((r) => r.days.forEach((d) => {
