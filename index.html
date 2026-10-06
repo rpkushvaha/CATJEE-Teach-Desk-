@@ -2539,7 +2539,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.5 · updated 6 Oct 2026</div>
+          <div class="dnote">Version 8.6 · updated 6 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10912,7 +10912,19 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     try {
       const people = tid ? [tid] : (() => { fillAdminRepTeachers(); return Array.from(document.getElementById('adminRepTeacher').options).map((o) => o.value).filter(Boolean); })();
       const rows = [];
-      for (const u of people) { const res = await attendanceFetch(u, sp.dates); rows.push({ u, days: attendanceDays(sp.dates, res) }); }
+      if (people.length > 1) {
+        // all teachers: read each day once for everybody (2 reads a day) instead of every teacher one by one
+        const perDay = await Promise.all(sp.dates.map(async (d) => {
+          const [camp, cls] = await Promise.all([
+            state.db.collection('campusLogs/' + d + '/teachers').limit(300).get().then((sn) => { const m = {}; sn.docs.forEach((x) => { m[x.id] = x.data(); }); return m; }).catch(() => ({})),
+            state.db.collection('classes').where('date', '==', d).limit(500).get().then((sn) => sn.docs.map(normDoc).filter((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday')).catch(() => [])
+          ]);
+          return { camp, cls };
+        }));
+        people.forEach((u) => { const res = perDay.map((x) => ({ campus: x.camp[u] || null, classes: x.cls.filter((c) => c.teacherId === u) })); rows.push({ u, days: attendanceDays(sp.dates, res) }); });
+      } else {
+        for (const u of people) { const res = await attendanceFetch(u, sp.dates); rows.push({ u, days: attendanceDays(sp.dates, res) }); }
+      }
       const nameOfU = (u) => (u === state.teacherId && !forAdmin ? ((state.user && state.user.name) || 'Teacher') : trepName(u));
       const hmm = (secs) => reportCampus(secs);
       const sesTxt = (s) => `${formatTimeStr(toHHMM(s.in))} – ${s.out != null ? formatTimeStr(toHHMM(s.out)) : 'in progress'}`;
