@@ -993,6 +993,22 @@
   .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
   .rt-tile { position: relative; }
+  .gal-sec { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; margin: 2px 2px 4px; }
+  .gal-cnt { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--muted-2); }
+  .gal-wk { font-size: 12.5px; font-weight: 700; color: var(--muted-2); margin: 10px 2px 6px; }
+  .gal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .gal-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; position: relative; }
+  .gal-card.gal-pick { border-color: #E63946; box-shadow: 0 0 0 2px #E63946 inset; }
+  .gal-card.gal-pick::after { content: ""; position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%; background: #E63946 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 12.5 10 17 19 7'/%3E%3C/svg%3E") center / 13px no-repeat; }
+  .gal-th { aspect-ratio: 16 / 10; background: #fff; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--line); }
+  .gal-th img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .gal-th.mine img { object-fit: cover; }
+  .gal-bd { padding: 7px 9px 8px; }
+  .gal-bdrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 6px 4px 9px; }
+  .gal-t { font-size: 13px; font-weight: 700; line-height: 1.25; }
+  .gal-s { font-size: 12px; color: var(--muted-2); margin-top: 2px; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+  .gal-day { font-size: 10.5px; font-weight: 700; background: rgba(217,119,6,.14); color: #B45309; border-radius: 999px; padding: 1px 7px; }
+  .gal-up { font-size: 10.5px; font-weight: 700; background: rgba(230,57,70,.12); color: #C81E32; border-radius: 999px; padding: 1px 7px; }
   .rt-row { margin-top: 14px; }
   .att-prev { margin-top: 10px; }
   .att-prev[hidden] { display: none !important; }
@@ -2468,8 +2484,8 @@
         </div>
         <div class="day-card-hint" id="scheduleNoticeHint" style="display:none;">Tap to expand</div>
         <div id="scheduleNoticeBody" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
-          <div class="admin-sub" style="margin-top:0;">Personal — only you can see these. Save any photo for quick reference (schedule, notes, anything). Tap a photo to view it full size.</div>
-          <div id="scheduleNoticeGallery" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px 12px;"></div>
+          <div class="admin-sub" style="margin-top:0;">Timetable pictures published for you, and your own saved photos (only you can see those). Tap a picture to see it full screen.</div>
+          <div id="scheduleNoticeGallery"></div>
           <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
           <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Add Photo</button>
         </div>
@@ -2540,7 +2556,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.7 · updated 6 Oct 2026</div>
+          <div class="dnote">Version 8.8 · updated 7 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7970,7 +7986,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     };
     ov._rot = false;
     const probe = new Image();
-    probe.onload = () => { const portrait = window.innerHeight > window.innerWidth; ov._rot = !!(opts && opts.turn) && portrait && probe.width > probe.height * 1.3; ov._show(); };
+    probe.onload = () => { ov._rot = false; ov._show(); };
     probe.onerror = () => { ov._rot = false; ov._show(); };
     probe.src = src;
     ov.classList.add('open');
@@ -8576,38 +8592,71 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       : '';
 
     const ttl = state.myTtImages || [];
-    gallery.innerHTML = ttl.map((x) => `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;"><img data-open-ttimg="${escapeHtml(x.id)}" src="${x.image}" alt="Timetable" style="width:100%; aspect-ratio:1; object-fit:cover; object-position:top; border-radius:10px; cursor:pointer; display:block; outline:2px solid var(--gold); outline-offset:-2px;"><span class="tti-cap"><span class="ico i-cal" aria-hidden="true"></span> Timetable · ${escapeHtml(dateObj(x.weekStart).getDate() + ' ' + dateObj(x.weekStart).toLocaleDateString('en-GB', { month: 'short' }))}${x.updated ? '<em>Updated</em>' : ''}</span></div>`).join('') + photos.map((p) => `
-      <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
-        <img data-open-photo="${p.id}" src="${p.imageBase64}" alt="Saved photo" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:pointer; display:block;">
-        <button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="padding:4px;">${svgTrash()}</button>
-      </div>`).join('') + placeholderTile;
-    gallery.querySelectorAll('[data-open-ttimg]').forEach((img) => img.addEventListener('click', () => { const x = ttl.find((y) => y.id === img.getAttribute('data-open-ttimg')); if (x) openZoomViewer(x.image, { turn: true }); }));
-    gallery.querySelectorAll('[data-open-photo]').forEach((img) => {
-      const id = img.getAttribute('data-open-photo');
-      if (state.galSel && state.galSel.indexOf(id) !== -1) img.classList.add('gal-pick');
+    const lead = !!(state.canAdmin || state.isCoordinator);
+    const picked = (k) => state.galSel && state.galSel.indexOf(k) !== -1;
+    const thisWs = mondayOf(todayStr());
+    const wkTxt = (ws) => { const a = dateObj(ws), z = dateObj(shiftDateStr(ws, 6)); const m = (d) => d.toLocaleDateString('en-GB', { month: 'short' }); return a.getMonth() === z.getMonth() ? `${a.getDate()} – ${z.getDate()} ${m(z)}` : `${a.getDate()} ${m(a)} – ${z.getDate()} ${m(z)}`; };
+    const ttCard = (x) => {
+      const g = ttGroups().find((q) => q.key === x.group); const gl = g ? g.label : String(x.label || 'Timetable').split(' · ').slice(0, 2).join(' · ');
+      let what = 'Whole week'; let dayOnly = false;
+      if (x.day) { const d = dateObj(x.day); what = `${WD[d.getDay()]} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} only`; dayOnly = true; }
+      else {
+        // days the picture covers: "Whole week" when it runs Monday to Saturday, otherwise the days themselves
+        const rest = String(x.label || '').split(' · ').slice(2).join(' · ');
+        const sat = dateObj(shiftDateStr(x.weekStart, 5)); const mon = dateObj(x.weekStart);
+        const full = rest && new RegExp('^' + mon.getDate() + '\\s*[–-]\\s*(' + sat.getDate() + '|' + (sat.getDate() + 1) + ')\\b').test(rest);
+        what = full || !rest ? 'Whole week' : rest;
+      }
+      const k = 'tt:' + x.id;
+      return `<div class="gal-card${picked(k) ? ' gal-pick' : ''}" data-gal-k="${escapeHtml(k)}"><div class="gal-th"><img src="${x.image}" alt="Timetable"></div>
+        <div class="gal-bd"><div class="gal-t">${escapeHtml(gl)}</div><div class="gal-s">${dayOnly ? `<span class="gal-day">${escapeHtml(what)}</span>` : escapeHtml(what)}${x.updated ? '<span class="gal-up">Updated</span>' : ''}</div></div></div>`;
+    };
+    const byWeek = {}; ttl.forEach((x) => { (byWeek[x.weekStart] = byWeek[x.weekStart] || []).push(x); });
+    const order = (a, b) => (a.group || '').localeCompare(b.group || '') || ((a.day || '') ? 1 : 0) - ((b.day || '') ? 1 : 0) || String(a.day || '').localeCompare(String(b.day || ''));
+    let gh = '';
+    if (ttl.length) {
+      gh += '<div class="gal-sec"><span class="ico i-cal" aria-hidden="true"></span> Timetables</div>';
+      Object.keys(byWeek).sort().reverse().forEach((ws) => { gh += `<div class="gal-wk">${ws === thisWs ? 'This week' : (ws < thisWs ? 'Last week' : 'Next week')} · ${escapeHtml(wkTxt(ws))}</div><div class="gal-grid">${byWeek[ws].sort(order).map(ttCard).join('')}</div>`; });
+    }
+    gh += `<div class="gal-sec" style="margin-top:${ttl.length ? 16 : 0}px;"><span class="ico i-image" aria-hidden="true"></span> My photos <span class="gal-cnt">${photos.length} of ${MAX_SCHEDULE_PHOTOS}</span></div>`;
+    gh += photos.length || placeholderTile ? `<div class="gal-grid">${photos.map((p) => `<div class="gal-card${picked(p.id) ? ' gal-pick' : ''}" data-gal-k="${p.id}"><div class="gal-th mine"><img src="${p.imageBase64}" alt="Saved photo"></div>
+        <div class="gal-bd gal-bdrow"><span class="gal-s">${p.uploadedAt ? 'Saved ' + escapeHtml(new Date(p.uploadedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })) : 'Saved'}</span><button class="del-btn" data-remove-photo="${p.id}" aria-label="Remove photo" style="padding:4px;">${svgTrash()}</button></div></div>`).join('')}${placeholderTile ? `<div class="gal-card">${placeholderTile}</div>` : ''}</div>` : '<div class="hv-note" style="text-align:left;">No photos yet. Save any photo for quick reference.</div>';
+    gallery.innerHTML = gh;
+    // tap = open big · press and hold = select (your own photos; admins and coordinators also timetable pictures)
+    gallery.querySelectorAll('[data-gal-k]').forEach((card) => {
+      const k = card.getAttribute('data-gal-k'); const isTt = k.indexOf('tt:') === 0;
+      const canPick = !isTt || lead;
       let lpT = null; const stop = () => { if (lpT) { clearTimeout(lpT); lpT = null; } };
-      img.addEventListener('contextmenu', (e) => e.preventDefault());
-      img.addEventListener('pointerdown', () => { stop(); lpT = setTimeout(() => { lpT = null; img._lp = true; if (state.galSel) return; try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ } state.galSel = [id]; renderScheduleNotice(); }, 480); });
-      ['pointerup', 'pointercancel', 'pointerleave', 'pointermove'].forEach((ev) => img.addEventListener(ev, stop));
-      img.addEventListener('click', () => {
-        if (img._lp) { img._lp = false; return; }
-        if (state.galSel) { const k = state.galSel.indexOf(id); if (k === -1) state.galSel.push(id); else state.galSel.splice(k, 1); renderScheduleNotice(); return; }
-        openPhotoLightbox(id);
+      card.addEventListener('contextmenu', (e) => e.preventDefault());
+      card.addEventListener('pointerdown', (e) => { if (e.target.closest('[data-remove-photo]')) return; stop(); if (!canPick) return; lpT = setTimeout(() => { lpT = null; card._lp = true; if (state.galSel) return; try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ } state.galSel = [k]; renderScheduleNotice(); }, 480); });
+      ['pointerup', 'pointercancel', 'pointerleave', 'pointermove'].forEach((ev) => card.addEventListener(ev, stop));
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('[data-remove-photo]')) return;
+        if (card._lp) { card._lp = false; return; }
+        if (state.galSel) { if (!canPick) return; const i = state.galSel.indexOf(k); if (i === -1) state.galSel.push(k); else state.galSel.splice(i, 1); renderScheduleNotice(); return; }
+        if (isTt) { const x = ttl.find((y) => 'tt:' + y.id === k); if (x) openZoomViewer(x.image); } else openPhotoLightbox(k);
       });
     });
     const gbar = document.getElementById('galSelBar');
     if (gbar) gbar.remove();
     if (state.galSel) {
-      state.galSel = state.galSel.filter((id) => photos.some((p0) => p0.id === id));
+      state.galSel = state.galSel.filter((id) => photos.some((p0) => p0.id === id) || (id.indexOf('tt:') === 0 && (state.myTtImages || []).some((x) => 'tt:' + x.id === id)));
       const bar = document.createElement('div'); bar.id = 'galSelBar'; bar.className = 'ex-selbar'; bar.style.borderRadius = '10px'; bar.style.margin = '8px 0';
-      bar.innerHTML = `<span><b>${state.galSel.length}</b> selected · tap more of your photos</span><span><button type="button" class="btn-secondary hv-del" id="galSelDel" style="border-color: var(--line);"${state.galSel.length ? '' : ' disabled'}><span class="ico i-trash" aria-hidden="true"></span> Delete${state.galSel.length ? ' (' + state.galSel.length + ')' : ''}</button><button type="button" class="btn-secondary" id="galSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span>`;
+      bar.innerHTML = `<span><b>${state.galSel.length}</b> selected · tap more${(state.canAdmin || state.isCoordinator) ? '' : ' of your photos'}</span><span><button type="button" class="btn-secondary hv-del" id="galSelDel" style="border-color: var(--line);"${state.galSel.length ? '' : ' disabled'}><span class="ico i-trash" aria-hidden="true"></span> Delete${state.galSel.length ? ' (' + state.galSel.length + ')' : ''}</button><button type="button" class="btn-secondary" id="galSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span>`;
       gallery.parentNode.insertBefore(bar, gallery);
       document.getElementById('galSelX').addEventListener('click', () => { state.galSel = null; renderScheduleNotice(); });
       document.getElementById('galSelDel').addEventListener('click', async () => {
         const ids = state.galSel.slice(); if (!ids.length) return;
-        const ok = await showConfirm(`${ids.length} photo${ids.length === 1 ? '' : 's'} will be removed.`, 'Delete these photos?', 'Delete');
+        const nTt = ids.filter((id) => id.indexOf('tt:') === 0).length;
+        const ok = await showConfirm(`${ids.length} photo${ids.length === 1 ? '' : 's'} will be removed.${nTt ? `\n${nTt} timetable picture${nTt === 1 ? '' : 's'} will be removed from everyone's Gallery. The timetable and teachers' schedules don't change — publish again to make the picture again.` : ''}`, 'Delete these photos?', 'Delete');
         if (!ok) return;
-        try { for (const id of ids) await state.db.doc('scheduleNotices/' + state.teacherId + '/photos/' + id).delete(); state.galSel = null; renderScheduleNotice(); showToast('Removed'); }
+        try {
+          for (const id of ids) {
+            if (id.indexOf('tt:') === 0) { await state.db.collection('timetableImages').doc(id.slice(3)).delete(); state.myTtImages = (state.myTtImages || []).filter((x) => 'tt:' + x.id !== id); try { if (state.ttImgs) Object.keys(state.ttImgs).forEach((w) => { delete state.ttImgs[w]; }); } catch (e2) { /* ignore */ } }
+            else await state.db.doc('scheduleNotices/' + state.teacherId + '/photos/' + id).delete();
+          }
+          state.galSel = null; renderScheduleNotice(); showToast('Removed');
+        }
         catch (err) { showToast('Could not remove them. Please try again.', 'error'); }
       });
     }
