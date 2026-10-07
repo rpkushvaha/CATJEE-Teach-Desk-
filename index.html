@@ -993,6 +993,12 @@
   .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
   .rt-tile { position: relative; }
+  .i-vlo { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2211%205%206%209%202%209%202%2015%206%2015%2011%2019%2011%205%22/%3E%3C/svg%3E"); }
+  .i-vhi { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2211%205%206%209%202%209%202%2015%206%2015%2011%2019%2011%205%22/%3E%3Cpath%20d%3D%22M15.5%208.5a5%205%200%200%201%200%207%22/%3E%3Cpath%20d%3D%22M19%205a10%2010%200%200%201%200%2014%22/%3E%3C/svg%3E"); }
+  .rv-row { display: flex; align-items: center; gap: 8px; }
+  .rv-row input[type=range] { flex: 1; accent-color: #E63946; height: 28px; }
+  .rv-ic { font-size: 18px; color: var(--muted-2); }
+  .rv-val { min-width: 42px; text-align: right; font-weight: 700; font-size: 13px; color: var(--ink); }
   .gal-sec { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; margin: 2px 2px 4px; }
   .gal-cnt { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--muted-2); }
   .gal-wk { font-size: 12.5px; font-weight: 700; color: var(--muted-2); margin: 10px 2px 6px; }
@@ -2453,8 +2459,10 @@
             <button type="button" class="chip" data-rsound="soft">Soft</button>
             <button type="button" class="chip" data-rsound="loud">Loud</button>
           </div>
+          <div class="dfield-label" style="margin:14px 0 6px;">Reminder volume</div>
+          <div class="rv-row"><span class="ico i-vlo rv-ic" aria-hidden="true"></span><input type="range" id="remVol" min="10" max="100" step="5" value="100" aria-label="Reminder volume"><span class="ico i-vhi rv-ic" aria-hidden="true"></span><span class="rv-val" id="remVolVal">100%</span></div>
           <button type="button" class="btn-secondary" id="remSoundTest" style="border-color: var(--line); width:100%; margin-top:10px;">Test sound</button>
-          <div class="dnote" style="margin-top:8px;">Loud plays an alarm tone and vibrates. It follows the phone's media volume — turn that up if you can't hear it.</div>
+          <div class="dnote" style="margin-top:8px;">Loud plays an alarm tone and vibrates. Still quiet at 100%? Turn up the phone's media volume with the side buttons.</div>
         </div>
         <div class="dcard">
           <div class="dfield-label" style="margin-bottom:10px;">Appearance</div>
@@ -2563,7 +2571,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.9 · updated 7 Oct 2026</div>
+          <div class="dnote">Version 9.0 · updated 7 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2956,6 +2964,8 @@
   // Reminder sound: "Loud" (default) is a two-tone alarm through a compressor, with vibration; "Soft" is the old gentle beep.
   const REM_SOUND_KEY = 'ctd_rem_sound';
   function remSound() { try { return localStorage.getItem(REM_SOUND_KEY) === 'soft' ? 'soft' : 'loud'; } catch (e) { return 'loud'; } }
+  const REM_VOL_KEY = 'ctd_rem_vol';
+  function remVol() { try { const v = Number(localStorage.getItem(REM_VOL_KEY)); return v >= 10 && v <= 100 ? v / 100 : 1; } catch (e) { return 1; } }
   let beepVibe = null;
   function playBeep(seconds) {
     try {
@@ -2969,7 +2979,7 @@
             const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
             o.type = 'sine'; o.frequency.value = 880;
             g.gain.value = 0.001;
-            g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+            g.gain.exponentialRampToValueAtTime(Math.max(0.002, 0.2 * remVol()), audioCtx.currentTime + 0.02);
             g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.38);
             o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.4);
           }, i * 500);
@@ -2980,7 +2990,7 @@
       // loud: high–low alarm, about 7 seconds (or the test length)
       const comp = audioCtx.createDynamicsCompressor();
       comp.threshold.value = -18; comp.knee.value = 6; comp.ratio.value = 8; comp.attack.value = 0.003; comp.release.value = 0.1;
-      const master = audioCtx.createGain(); master.gain.value = 1;
+      const master = audioCtx.createGain(); master.gain.value = remVol();
       comp.connect(master); master.connect(audioCtx.destination);
       const tone = (freq, at, len) => {
         const o1 = audioCtx.createOscillator(); const o2 = audioCtx.createOscillator(); const g = audioCtx.createGain();
@@ -3005,6 +3015,12 @@
     chips.forEach((c) => c.addEventListener('click', () => { try { localStorage.setItem(REM_SOUND_KEY, c.getAttribute('data-rsound')); } catch (e) { /* ignore */ } mark(); unlockAudio(); playBeep(2.6); }));
     const tb = document.getElementById('remSoundTest'); if (tb) tb.addEventListener('click', () => { unlockAudio(); playBeep(2.6); });
     mark();
+    const rv = document.getElementById('remVol'), rvv = document.getElementById('remVolVal');
+    if (rv) {
+      rv.value = Math.round(remVol() * 100); rvv.textContent = rv.value + '%';
+      rv.addEventListener('input', () => { rvv.textContent = rv.value + '%'; try { localStorage.setItem(REM_VOL_KEY, rv.value); } catch (e) { /* ignore */ } });
+      rv.addEventListener('change', () => { unlockAudio(); playBeep(0.9); });
+    }
   })();
 
   // Unlock audio on the very first tap anywhere, since browsers block audio
