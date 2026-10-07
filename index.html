@@ -2448,6 +2448,13 @@
             <button type="button" class="chip" data-lead="10">10 min</button>
             <button type="button" class="chip" data-lead="15">15 min</button>
           </div>
+          <div class="dfield-label" style="margin:14px 0 8px;">Reminder sound</div>
+          <div class="chips" id="remSoundChips">
+            <button type="button" class="chip" data-rsound="soft">Soft</button>
+            <button type="button" class="chip" data-rsound="loud">Loud</button>
+          </div>
+          <button type="button" class="btn-secondary" id="remSoundTest" style="border-color: var(--line); width:100%; margin-top:10px;">Test sound</button>
+          <div class="dnote" style="margin-top:8px;">Loud plays an alarm tone and vibrates. It follows the phone's media volume — turn that up if you can't hear it.</div>
         </div>
         <div class="dcard">
           <div class="dfield-label" style="margin-bottom:10px;">Appearance</div>
@@ -2556,7 +2563,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 8.8 · updated 7 Oct 2026</div>
+          <div class="dnote">Version 8.9 · updated 7 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2943,31 +2950,62 @@
   function stopBeep() {
     beepTimeouts.forEach((t) => clearTimeout(t));
     beepTimeouts = [];
+    try { if (beepVibe && navigator.vibrate) navigator.vibrate(0); } catch (e) { /* ignore */ }
+    beepVibe = null;
   }
-  function playBeep() {
+  // Reminder sound: "Loud" (default) is a two-tone alarm through a compressor, with vibration; "Soft" is the old gentle beep.
+  const REM_SOUND_KEY = 'ctd_rem_sound';
+  function remSound() { try { return localStorage.getItem(REM_SOUND_KEY) === 'soft' ? 'soft' : 'loud'; } catch (e) { return 'loud'; } }
+  let beepVibe = null;
+  function playBeep(seconds) {
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       stopBeep();
-      const beepCount = 10;
-      for (let i = 0; i < beepCount; i++) {
-        const t = setTimeout(() => {
-          const o = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          o.type = 'sine';
-          o.frequency.value = 880;
-          g.gain.value = 0.001;
-          g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.38);
-          o.connect(g);
-          g.connect(audioCtx.destination);
-          o.start();
-          o.stop(audioCtx.currentTime + 0.4);
-        }, i * 500);
+      if (remSound() === 'soft') {
+        const beepCount = seconds ? Math.max(1, Math.round(seconds * 2)) : 10;
+        for (let i = 0; i < beepCount; i++) {
+          const t = setTimeout(() => {
+            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            o.type = 'sine'; o.frequency.value = 880;
+            g.gain.value = 0.001;
+            g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.38);
+            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.4);
+          }, i * 500);
+          beepTimeouts.push(t);
+        }
+        return;
+      }
+      // loud: high–low alarm, about 7 seconds (or the test length)
+      const comp = audioCtx.createDynamicsCompressor();
+      comp.threshold.value = -18; comp.knee.value = 6; comp.ratio.value = 8; comp.attack.value = 0.003; comp.release.value = 0.1;
+      const master = audioCtx.createGain(); master.gain.value = 1;
+      comp.connect(master); master.connect(audioCtx.destination);
+      const tone = (freq, at, len) => {
+        const o1 = audioCtx.createOscillator(); const o2 = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o1.type = 'square'; o1.frequency.value = freq; o2.type = 'sine'; o2.frequency.value = freq * 2;
+        const t0 = audioCtx.currentTime + at;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.9, t0 + 0.015);
+        g.gain.setValueAtTime(0.9, t0 + len - 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t0 + len);
+        o1.connect(g); o2.connect(g); g.connect(comp);
+        o1.start(t0); o2.start(t0); o1.stop(t0 + len + 0.02); o2.stop(t0 + len + 0.02);
+      };
+      const cycles = seconds ? Math.max(1, Math.round(seconds / 0.9)) : 8;
+      for (let c = 0; c < cycles; c++) {
+        const t = setTimeout(() => { tone(988, 0, 0.2); tone(740, 0.22, 0.2); tone(988, 0.44, 0.2); }, c * 900);
         beepTimeouts.push(t);
       }
+      try { if (navigator.vibrate) { const pat = []; for (let c = 0; c < cycles; c++) pat.push(500, 400); navigator.vibrate(pat); beepVibe = true; } } catch (e) { /* no vibration */ }
     } catch (err) { /* audio not available — banner still shows silently */ }
   }
+  (function bindRemSound() {
+    const chips = document.querySelectorAll('#remSoundChips [data-rsound]');
+    const mark = () => chips.forEach((c) => c.classList.toggle('active', c.getAttribute('data-rsound') === remSound()));
+    chips.forEach((c) => c.addEventListener('click', () => { try { localStorage.setItem(REM_SOUND_KEY, c.getAttribute('data-rsound')); } catch (e) { /* ignore */ } mark(); unlockAudio(); playBeep(2.6); }));
+    const tb = document.getElementById('remSoundTest'); if (tb) tb.addEventListener('click', () => { unlockAudio(); playBeep(2.6); });
+    mark();
+  })();
 
   // Unlock audio on the very first tap anywhere, since browsers block audio
   // that isn't started by a direct user gesture — timer-fired beeps need
