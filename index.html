@@ -993,6 +993,13 @@
   .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
   .rt-tile { position: relative; }
+  .ck-chips .chip { display: inline-flex; align-items: center; gap: 5px; }
+  .kf-lbl { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .kf-lbl small { font-size: 11.5px; font-weight: 600; color: var(--muted-2); }
+  .kf-lbl span { display: inline-flex; align-items: center; gap: 5px; }
+  #topicField[hidden] { display: none !important; }
+  .ck-lines { font-size: 13px; color: var(--ink); margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
+  .ck-lines b { font-weight: 700; }
   .i-vlo { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2211%205%206%209%202%209%202%2015%206%2015%2011%2019%2011%205%22/%3E%3C/svg%3E"); }
   .i-vhi { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2211%205%206%209%202%209%202%2015%206%2015%2011%2019%2011%205%22/%3E%3Cpath%20d%3D%22M15.5%208.5a5%205%200%200%201%200%207%22/%3E%3Cpath%20d%3D%22M19%205a10%2010%200%200%201%200%2014%22/%3E%3C/svg%3E"); }
   .rv-row { display: flex; align-items: center; gap: 8px; }
@@ -1755,10 +1762,16 @@
         </div>
 
         <div class="field">
-          <label for="topicInput">Chapter / Topic</label>
+          <label>What happened in class?</label>
+          <div class="chips ck-chips" id="classKindChips"></div>
+        </div>
+        <div class="field" id="topicField">
+          <label for="topicInput" class="kf-lbl"><span>Chapter / Topic</span><small>Required</small></label>
           <textarea class="text-input topic-input" id="topicInput" rows="2" style="resize:vertical; font-family:inherit;" placeholder="Type today's topic" autocapitalize="sentences"></textarea>
           <button type="button" class="topic-suggest" id="topicSuggest" hidden><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 15 14"/></svg><span id="topicSuggestText"></span></button>
         </div>
+        <div id="classKindFields"></div>
+        <div class="hv-note" style="text-align:left; margin-top:-4px;">Other work outside a class (paper checking, leave, invigilation) still goes in Today → Activity.</div>
 
         <div class="field">
           <label>Checklist</label>
@@ -2571,7 +2584,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.0 · updated 7 Oct 2026</div>
+          <div class="dnote">Version 9.1 · updated 7 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3372,7 +3385,8 @@
       <div class="tl-card ${it.status}">
         <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${pill}</div>
         ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
-        ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
+        ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : (classKindsOf(c).indexOf('teach') !== -1 ? '<div class="tl-topic faint">Topic not added</div>' : '')}
+        ${classKindHtml(c)}
         ${it.status === 'upcoming' ? '<div class="tl-meta"><span class="tl-filled">✓ Details filled</span></div>' : ''}
         <div class="tl-bottom">
           ${range ? `<div class="tl-meta">${range}</div>` : ''}
@@ -3843,7 +3857,8 @@
       <div class="tl-card">
         <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : pillHtml('upcoming', 'Upcoming')}</div>
         ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
-        ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : '<div class="tl-topic faint">Topic not added</div>'}
+        ${c.topic ? `<div class="tl-topic">${escapeHtml(c.topic)}</div>` : (classKindsOf(c).indexOf('teach') !== -1 ? '<div class="tl-topic faint">Topic not added</div>' : '')}
+        ${classKindHtml(c)}
         ${range ? `<div class="tl-meta">${range}</div>` : ''}
         ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
       </div></div>`;
@@ -4081,7 +4096,7 @@
       const dur = classDuration(c);
       body.innerHTML = `<div class="hv-d-title">${escapeHtml(entryBatchLabel(c))}</div>
         <div class="hv-d-wing">${escapeHtml(wingForBatch(c.batch) || 'Wing not recorded')}${c.subject ? ' · ' + escapeHtml(c.subject) : ''}</div>
-        <div class="hv-d-topic">${c.topic ? escapeHtml(c.topic) : '<span style="color:var(--muted); font-style:italic;">Topic not added</span>'}</div>
+        <div class="hv-d-topic">${c.topic ? escapeHtml(c.topic) : (classKindsOf(c).indexOf('teach') !== -1 ? '<span style="color:var(--muted); font-style:italic;">Topic not added</span>' : '')}</div>${classKindHtml(c)}
         <div class="hv-d-rows">
           <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dateTxt)}</span></div>
           <div class="hv-d-row"><span>Start</span><span>${c.startTimeStr ? formatTimeStr(c.startTimeStr) : '—'}</span></div>
@@ -4365,6 +4380,7 @@
     renderRecentAndAllBatches();
     renderTopicSuggest();
     syncDurChips();
+    try { renderClassKinds(); } catch (e) { /* ignore */ }
     document.getElementById('saveClassBtn').disabled = state.saving;
     if (state.saving) document.getElementById('saveClassBtn').textContent = 'Saving…';
     showFormMsg('');
@@ -9564,6 +9580,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     syncDurChips();
   });
   document.getElementById('topicInput').addEventListener('input', renderTopicSuggest);
+
   document.getElementById('topicSuggest').addEventListener('click', () => {
     const last = state.form.batch ? findLastClassForBatch(state.form.batch) : null;
     if (!last || !last.topic) return;
@@ -10544,6 +10561,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         w.bodyLine(`${i + 1}. ${entryBatchLabel(c)}${up}${ed}`, { bold: true, indent: 14 });
         if (c.startTimeStr && c.endTimeStr) w.bodyLine(`Time: ${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}  (${reportHm(classDuration(c))})`, { indent: 28 });
         if (c.topic) w.bodyLine(`Topic: ${waClean(c.topic)}`, { indent: 28 });
+        classKindLines(c).forEach(([a, b]) => w.bodyLine(`${a}${b ? ': ' + waClean(b) : ''}`, { indent: 28 }));
         if (c.worksheet) w.bodyLine(`Worksheet given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`, { indent: 28 });
         if (c.material) w.bodyLine(`Study material given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`, { indent: 28 });
         if (c.test) {
@@ -10650,7 +10668,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (!cls.length && !acts.length) return;
       const d = dateObj(dt);
       const parts = [];
-      if (cls.length) parts.push(cls.map((c) => `${entryBatchLabel(c)}${c.topic ? ' (' + c.topic + ')' : ''}${hvStartedOrPast(c) ? '' : ' _upcoming_'}`).join(', '));
+      if (cls.length) parts.push(cls.map((c) => `${entryBatchLabel(c)}${c.topic || classKindText(c) ? ' (' + [c.topic, classKindText(c)].filter(Boolean).join(' · ') + ')' : ''}${hvStartedOrPast(c) ? '' : ' _upcoming_'}`).join(', '));
       if (acts.length) parts.push(acts.map((a) => (isInvig(a) ? invigSummary(a).title + ' · ' + invigSummary(a).sub : activityLabel(a.activityType)) + (a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : '')).join(', '));
       days.push(`• *${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}:* ${parts.join(' | ')}`);
     });
@@ -10784,6 +10802,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         L.push(`*${i + 1}. ${entryBatchLabel(c)}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
         if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
         if (c.topic) L.push(`📌 Topic: ${waClean(c.topic)}`);
+      classKindLines(c).forEach(([a, b]) => L.push(`• ${a}${b ? ': ' + waClean(b) : ''}`));
         if (c.worksheet) L.push(`📄 Worksheet Given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`);
         if (c.material) L.push(`📖 Study Material Given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`);
         if (c.test) {
@@ -11195,7 +11214,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       return base('Other Work').concat(['', '', work, '', '', '', '', '', '', '', '', ''], csvStamp(c));
     }
     const nb = entryBatches(c).length;
-    return base('Class').concat([entryBatchLabel(c), c.subject || '', waClean(c.topic),
+    return base('Class').concat([entryBatchLabel(c), c.subject || '', [waClean(c.topic), waClean(classKindText(c))].filter(Boolean).join(' · '),
       c.startTimeStr ? formatTimeStr(c.startTimeStr) : '', c.endTimeStr ? formatTimeStr(c.endTimeStr) : '', classDuration(c) || '',
       c.worksheet ? (waClean(c.worksheetNote) || 'Given') : '',
       c.material ? (waClean(c.materialNote) || 'Given') : '',
@@ -11530,8 +11549,44 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     }, { timeout: 8000 });
   }
 
+  // ----- "What happened in class?" -----
+  const CLASS_KINDS = [
+    { k: 'teach', n: 'Teaching', ic: 'book', f: 'Chapter / Topic', req: true, out: 'Topic' },
+    { k: 'rev', n: 'Revision', ic: 'swap', f: 'Revised', ph: 'e.g. Ch-3, Ch-4', out: 'Revision' },
+    { k: 'doubt', n: 'Doubt clearing', ic: 'help', f: null, out: 'Doubt clearing' },
+    { k: 'quiz', n: 'Quiz', ic: 'check', f: 'Quiz on', ph: 'e.g. Ch-4 identities', out: 'Quiz' },
+    { k: 'copies', n: 'Test copies shown', ic: 'file', f: 'Copies of', ph: 'e.g. Half-yearly Science', out: 'Test copies shown' },
+    { k: 'paper', n: 'Question paper discussion', ic: 'note', f: 'Paper', ph: 'e.g. Half-yearly Maths paper', out: 'Question paper discussion' },
+    { k: 'else', n: 'Something else', ic: 'edit', f: 'What', ph: 'Write one line', req: true, out: 'Something else' }
+  ];
+  function classKindsOf(c) { return c && Array.isArray(c.kinds) && c.kinds.length ? c.kinds : ['teach']; }
+  // lines for History / reports besides the topic: [label, text]
+  function classKindLines(c) {
+    const ks = classKindsOf(c); const notes = (c && c.kindNotes) || {};
+    return CLASS_KINDS.filter((x) => x.k !== 'teach' && ks.indexOf(x.k) !== -1).map((x) => [x.out, String(notes[x.k] || '').trim()]);
+  }
+  function classKindHtml(c) { const L = classKindLines(c); return L.length ? `<div class="ck-lines">${L.map(([a, b]) => `<div><b>${escapeHtml(a)}</b>${b ? ': ' + escapeHtml(b) : ''}</div>`).join('')}</div>` : ''; }
+  function classKindText(c) { return classKindLines(c).map(([a, b]) => a + (b ? ': ' + b : '')).join(' · '); }
+  function renderClassKinds() {
+    const ks = state.form.kinds && state.form.kinds.length ? state.form.kinds : ['teach'];
+    state.form.kinds = ks; state.form.kindNotes = state.form.kindNotes || {};
+    const box = document.getElementById('classKindChips'); if (!box) return;
+    box.innerHTML = CLASS_KINDS.map((x) => `<button type="button" class="chip${ks.indexOf(x.k) !== -1 ? ' active' : ''}" data-ck="${x.k}"><span class="ico i-${x.ic}" aria-hidden="true"></span>${escapeHtml(x.n)}</button>`).join('');
+    box.querySelectorAll('[data-ck]').forEach((b) => b.addEventListener('click', () => {
+      const k = b.getAttribute('data-ck'); const cur = (state.form.kinds || ['teach']).slice(); const i = cur.indexOf(k);
+      if (i === -1) cur.push(k); else cur.splice(i, 1);
+      state.form.kinds = cur.length ? CLASS_KINDS.map((x) => x.k).filter((q) => cur.indexOf(q) !== -1) : ['teach'];
+      renderClassKinds(); showFormMsg('');
+    }));
+    document.getElementById('topicField').hidden = ks.indexOf('teach') === -1;
+    const fb = document.getElementById('classKindFields');
+    fb.innerHTML = CLASS_KINDS.filter((x) => x.k !== 'teach' && x.f && ks.indexOf(x.k) !== -1).map((x) => `<div class="field"><label class="kf-lbl" for="ckf-${x.k}"><span><span class="ico i-${x.ic}" aria-hidden="true"></span> ${escapeHtml(x.f)}</span><small>${x.req ? 'Required' : 'Optional'}</small></label><input class="text-input" id="ckf-${x.k}" data-ckf="${x.k}" maxlength="120" placeholder="${escapeHtml(x.ph || '')}" value="${escapeHtml(state.form.kindNotes[x.k] || '')}"></div>`).join('');
+    fb.querySelectorAll('[data-ckf]').forEach((inp) => inp.addEventListener('input', () => { state.form.kindNotes = state.form.kindNotes || {}; state.form.kindNotes[inp.getAttribute('data-ckf')] = inp.value; showFormMsg(''); }));
+  }
+  try { if (!state.form.kinds) state.form.kinds = ['teach']; renderClassKinds(); } catch (e) { /* ignore */ }
   function resetClassForm() {
-    state.form = { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false, extra: [], combineOpen: false };
+    state.form = { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false, extra: [], combineOpen: false, kinds: ['teach'], kindNotes: {} };
+    try { renderClassKinds(); } catch (e) { /* ignore */ }
     document.getElementById('topicInput').value = '';
     document.getElementById('startTimeInput').value = '';
     document.getElementById('endTimeInput').value = '';
@@ -11694,9 +11749,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       worksheet: !!cls.worksheet,
       material: !!cls.material,
       test: !!cls.test,
-      homework: !!cls.homework
+      homework: !!cls.homework,
+      kinds: classKindsOf(cls).slice(),
+      kindNotes: Object.assign({}, cls.kindNotes || {})
     };
     renderForm();
+    renderClassKinds();
     document.getElementById('topicInput').value = cls.topic || '';
     document.getElementById('startTimeInput').value = cls.startTimeStr || '';
     document.getElementById('endTimeInput').value = cls.endTimeStr || '';
@@ -12076,8 +12134,17 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       return;
     }
     if (!state.form.batch) { showFormMsg('Please select a batch.'); return; }
-    const topic = document.getElementById('topicInput').value.trim();
-    if (!topic) { showFormMsg('Please enter the chapter / topic.'); document.getElementById('topicInput').focus(); return; }
+    const kinds = state.form.kinds && state.form.kinds.length ? state.form.kinds : ['teach'];
+    const teaching = kinds.indexOf('teach') !== -1;
+    const topic = teaching ? document.getElementById('topicInput').value.trim() : '';
+    if (teaching && !topic) { showFormMsg('Please enter the chapter / topic.'); document.getElementById('topicInput').focus(); return; }
+    const kindNotes = {};
+    for (const x of CLASS_KINDS) {
+      if (x.k === 'teach' || kinds.indexOf(x.k) === -1 || !x.f) continue;
+      const v = String((state.form.kindNotes || {})[x.k] || '').trim();
+      if (x.req && !v) { showFormMsg(`Please fill "${x.f}" for ${x.n}.`); const el = document.getElementById('ckf-' + x.k); if (el) el.focus(); return; }
+      if (v) kindNotes[x.k] = v;
+    }
     const startTimeStr = document.getElementById('startTimeInput').value;
     const endTimeStr = document.getElementById('endTimeInput').value;
     if (!startTimeStr || !endTimeStr) {
@@ -12123,6 +12190,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         batch: state.form.batch,
         batches: extraB.length ? [state.form.batch].concat(extraB) : null,
         topic,
+        kinds: kinds.length === 1 && kinds[0] === 'teach' ? null : kinds,
+        kindNotes: Object.keys(kindNotes).length ? kindNotes : null,
         startTimeStr,
         endTimeStr,
         worksheet: state.form.worksheet,
