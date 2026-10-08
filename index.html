@@ -535,9 +535,10 @@
   .topic-input { font-size: 15px; min-height: 64px; }
   .topic-suggest { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; background: var(--gold-soft); color: var(--gold);
     border: none; border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; text-align: left; }
-  .topic-suggest span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topic-suggest span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .topic-suggest svg { flex: none; }
   .topic-suggest[hidden] { display: none; }
-  #view-add .checklist-grid { grid-template-columns: 1fr; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--card); }
+  #view-add .checklist-grid { grid-template-columns: minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--card); }
   #view-add .toggle-row.checklist-item { border: none; border-radius: 0; padding: 11px 14px; background: none; }
   #view-add .toggle-row.checklist-item + .toggle-row.checklist-item { border-top: 1px solid var(--line); }
   #view-add .toggle-row.checklist-item:has(.switch.on) { background: none; border-color: var(--line); }
@@ -992,6 +993,25 @@
   .rep-tagrow { display: flex; justify-content: flex-end; min-height: 4px; margin-bottom: 2px; }
   .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
+  /* ---- iPhone (Safari) fixes: no sideways overflow, no zoom on typing, no text blow-up ---- */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  html, body { overflow-x: hidden; }
+  input, select, textarea { max-width: 100%; min-width: 0; box-sizing: border-box; }
+  input[type="time"], input[type="date"], input[type="month"] { -webkit-appearance: none; appearance: none; min-width: 0; display: block; width: 100%; min-height: 44px; }
+  input[type="time"]::-webkit-date-and-time-value, input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+  [style*="flex:1"], [style*="flex: 1"] { min-width: 0; }
+  .sv-times > *, .grid-2 > * { min-width: 0; }
+  #view-add .toggle-row .checklist-toggle-trigger { min-width: 0; }
+  #view-add .toggle-row, #view-add .ck-slot { min-width: 0; max-width: 100%; }
+  .checklist-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  #view-add .toggle-row .toggle-label { flex: 1; min-width: 0; }
+  #view-add .toggle-row .switch { flex: none; }
+  #view-add .ck-list .ck-fld, #view-add .ck-list .ck-topic { width: auto; min-width: 0; max-width: calc(100% - 28px); }
+  #view-add .ck-topic .topic-suggest, #view-add .ck-topic [class*="suggest"] { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Safari zooms the page when a box with text smaller than 16px is tapped, which made rows look huge and cut off */
+  @supports (-webkit-touch-callout: none) {
+    input, select, textarea, .text-input { font-size: 16px !important; }
+  }
   .rt-tile { position: relative; }
   #view-add .ck-list .ck-fld, #view-add .ck-list .ck-topic { margin: 8px 0 2px 28px; }
   #view-add .ck-list .ck-topic[hidden] { display: none; }
@@ -2599,7 +2619,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.5 · updated 8 Oct 2026</div>
+          <div class="dnote">Version 9.7 · updated 9 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
