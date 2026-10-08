@@ -2619,7 +2619,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.7 · updated 9 Oct 2026</div>
+          <div class="dnote">Version 9.8 · updated 9 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5194,6 +5194,9 @@
       // a combined class stays combined: subject, teacher and test change for every batch in it
       if (old && old.cb && !nc.ex && !nc.cb) {
         nc.cb = old.cb;
+        const room = 'cbRoom' in val ? val.cbRoom : old.cbRoom;
+        if (room) nc.cbRoom = room; else delete nc.cbRoom;
+        doc.cells.forEach((m) => { if (m.cb === old.cb && m.d === d && m.p === p) { if (room) m.cbRoom = room; else delete m.cbRoom; } });
         doc.cells.forEach((m) => { if (m.cb === old.cb && m.d === d && m.p === p) { m.s = nc.s; m.t = nc.t || ''; if (nc.test) m.test = true; else delete m.test; delete m.sub; } });
       }
       doc.cells.push(nc);
@@ -5202,6 +5205,22 @@
   }
   // members of a combined class: same id, same day, same period
   function tgCombo(c) { if (!c || !c.cb) return []; return ((state.tg.doc && state.tg.doc.cells) || []).filter((m) => m.cb === c.cb && m.d === c.d && m.p === c.p); }
+  // one room for a combined class (chosen in the Combine sheet); older combined classes keep "E3 + G2"
+  function comboRoom(cells, c, d, doc) {
+    const ms = tgComboOf(cells, c); const r = (ms.find((m) => m.cbRoom) || {}).cbRoom;
+    if (r) return r;
+    return ms.map((m) => batchRoomOn(m.b, d, doc)).filter((x, i, a) => x && a.indexOf(x) === i).join(' + ');
+  }
+  // room choices for a combined class: each batch's room that day, plus any other room typed earlier
+  function comboRoomChoices(bats, d) { const L = []; bats.forEach((b) => { const r = batchRoomOn(b, d); if (r && !L.some((x) => x.r === r)) L.push({ r, lbl: `${r} · ${gridBatchLabel(b)}` }); }); return L; }
+  function comboRoomChipsHtml(bats, d, cur) {
+    const L = comboRoomChoices(bats, d); const other = cur && !L.some((x) => x.r === cur);
+    return `<div class="chips">${L.map((x) => `<button type="button" class="chip${cur === x.r ? ' active' : ''}" data-cbr="${escapeHtml(x.r)}">${escapeHtml(x.lbl)}</button>`).join('')}<button type="button" class="chip${other ? ' active' : ''}" data-cbr-other="1">${other ? escapeHtml(cur) + ' · change' : 'Other…'}</button></div>`;
+  }
+  function bindComboRoomChips(root, get, set, redraw) {
+    root.querySelectorAll('[data-cbr]').forEach((b) => b.addEventListener('click', () => { set(b.getAttribute('data-cbr')); redraw(); }));
+    const o = root.querySelector('[data-cbr-other]'); if (o) o.addEventListener('click', () => { const v = window.prompt('Room for this combined class (for example D2 or Hall)', get() || ''); if (v != null && v.trim()) { set(v.trim().slice(0, 20)); redraw(); } });
+  }
   function tgComboOf(cells, c) { if (!c || !c.cb) return []; return (cells || []).filter((m) => m.cb === c.cb && m.d === c.d && m.p === c.p); }
   // a combined class with only one batch left is just a class again
   function tgFixCombos(doc) {
@@ -5317,7 +5336,7 @@
         const exHere = examAt(b, d, pp.start, pp.end);
         if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small><span class="ico i-note" aria-hidden="true"></span> ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
         const cl = c ? (clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? '<i class="tg-cbtag">🔗 Combined</i>' : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
@@ -5438,9 +5457,10 @@
   function openTgCellSheet(d, p, b) {
     const g = tgGroup(); const per = periodsForDay(g.key, d)[p];
     const cur = tgCell(d, p, b);
-    const st = { s: cur ? cur.s : '', t: cur ? cur.t : '', test: !!(cur && cur.test), change: false };
+    const st = { s: cur ? cur.s : '', t: cur ? cur.t : '', test: !!(cur && cur.test), change: false, r: cur && cur.cb ? (comboRoom(state.tg.doc.cells, cur, d) || '') : '' };
     const body = document.getElementById('hvSheetBody');
     const ids = ttTeacherIds();
+    const comboBats = cur && cur.cb ? tgCombo(cur).map((m) => m.b) : [];
     const draw = () => {
       if (!st.change && st.s) st.t = st.t && cur && cur.s === st.s ? st.t : defaultTeacher(b, st.s);
       body.innerHTML = `<div class="hv-d-title">${escapeHtml(b)}</div>
@@ -5453,11 +5473,13 @@
           <button type="button" class="hv-back" id="csChange" style="padding:0;">${st.change ? 'Hide' : 'Change teacher'}</button></div>` : ''}
         ${st.s && st.change ? `<div class="chips" style="margin-top:6px;">${ids.map((u) => `<button type="button" class="chip${st.t === u ? ' active' : ''}" data-ct="${u}">${escapeHtml(ttName(u))}</button>`).join('')}</div>` : ''}
         ${st.s ? `<label class="tg-sun" style="margin-top:10px;"><input type="checkbox" id="csTest"${st.test ? ' checked' : ''}> Class test</label>` : ''}
+        ${comboBats.length > 1 ? `<div class="sv-tlbl" style="margin:12px 0 6px;">Room for this combined class</div>${comboRoomChipsHtml(comboBats, d, st.r)}` : ''}
         <div class="hv-d-btns">${cur ? '<button type="button" class="btn-secondary hv-del" id="csClear" style="border-color: var(--line);">Clear</button>' : '<button type="button" class="btn-secondary" id="csCancel" style="border-color: var(--line);">Cancel</button>'}<button type="button" class="save-btn" id="csAssign" style="margin:0;"${st.s ? '' : ' disabled'}>Assign</button></div>`;
       body.querySelectorAll('[data-cs]').forEach((x) => x.addEventListener('click', () => { st.s = x.getAttribute('data-cs'); st.change = false; st.t = defaultTeacher(b, st.s); draw(); }));
       body.querySelectorAll('[data-ct]').forEach((x) => x.addEventListener('click', () => { st.t = x.getAttribute('data-ct'); draw(); }));
       const ch = document.getElementById('csChange'); if (ch) ch.addEventListener('click', () => { st.change = !st.change; draw(); });
       const tc = document.getElementById('csTest'); if (tc) tc.addEventListener('change', () => { st.test = tc.checked; });
+      if (comboBats.length > 1) bindComboRoomChips(body, () => st.r, (v) => { st.r = v; }, draw);
       const cl = document.getElementById('csClear'); if (cl) cl.addEventListener('click', () => { tgSetCell(d, p, b, null); closeHvSheet(); renderTgGrid(); });
       const us = document.getElementById('csUndoSub'); if (us) us.addEventListener('click', async () => { closeHvSheet(); try { await moveCell(Object.assign({ _id: state.tg.docKey }, state.tg.doc), `${d}|${p}|${b}`, null, 'undo'); showToast('Substitute removed'); } catch (err) { flashOffline(err); } renderTgGrid(); });
       const cc = document.getElementById('csCancel'); if (cc) cc.addEventListener('click', closeHvSheet);
@@ -5478,7 +5500,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         if (!st.s) return;
         const ex = examAt(b, d, per.start, per.end);
         if (ex && !(cur && cur.s === st.s)) { const ok = await showConfirm(`${b} has an exam then:\n${examLine(ex)}\n\nAdd ${st.s} anyway?`, '⚠️ Exam at this time', 'Add anyway'); if (!ok) return; }
-        tgSetCell(d, p, b, { s: st.s, t: st.t || '', test: st.test || false }); closeHvSheet(); renderTgGrid();
+        tgSetCell(d, p, b, Object.assign({ s: st.s, t: st.t || '', test: st.test || false }, comboBats.length > 1 ? { cbRoom: st.r || '' } : {})); closeHvSheet(); renderTgGrid();
       });
     };
     draw();
@@ -5546,7 +5568,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const pp = periodsForDay(g.key, c.d)[c.p]; const id = slotIdFor(docId, c);
       const T = effT(c);
       newIds[T + '/' + id] = 1;
-      ops.push(['set', `schedule/${T}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, batches: combo.length > 1 ? combo : null, room: combo.length > 1 ? combo.map((b) => batchRoomOn(b, c.d)).filter((r, i, a) => r && a.indexOf(r) === i).join(' + ') : batchRoomOn(c.b, c.d), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: me, ttId: docId, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() }]);
+      ops.push(['set', `schedule/${T}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, batches: combo.length > 1 ? combo : null, room: combo.length > 1 ? comboRoom(doc.cells, c, c.d, doc) : batchRoomOn(c.b, c.d), subject: effS(c), test: !!c.test, setBy: state.teacherId, setByName: me, ttId: docId, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() }]);
     });
     // classes that were published before (whole week, or only that day) and are no longer there
     let oldKeys = doc.published || [];
@@ -5765,7 +5787,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           const chg = perD[p] && perD[p].changed && (perD[p].start !== o.c.pp.start || perD[p].end !== o.c.pp.end);
           const lines = [[effS(cell), cell.sub ? '#C00000' : '#000', 15], ...(cell.sub ? [['(Sub)', '#C00000', 11]] : []), ...(cell.test ? [['(Class Test)', '#000', 12]] : []), ...(one && cell.cb ? [[`(with ${tgComboOf(doc.cells, cell).filter((m) => m.b !== b).map((m) => gridBatchLabel(m.b).replace(' · ', ' ')).join(', ')})`, '#1F4E79', 11]] : []), ...(chg ? [[`(${fmtS(perD[p].start)} – ${fmtS(perD[p].end)})`, '#C00000', 11]] : [])];
           const rDay = doc.dayRooms && doc.dayRooms[d] && doc.dayRooms[d][b];
-          if (rDay) lines.push([`(Room ${rDay})`, '#C00000', 11]);
+          if (cell.cb && tgComboOf(doc.cells, cell).length > 1) { const cr = comboRoom(doc.cells, cell, d, doc); if (cr) lines.push([`(Room ${cr})`, '#C00000', 11]); }
+          else if (rDay) lines.push([`(Room ${rDay})`, '#C00000', 11]);
           fitLines(x, lines, o.x + o.w / 2, ry, o.w, rH);
         });
       });
@@ -5935,17 +5958,19 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function openCombineSheet() {
     const ks = tgSelCells(); if (ks.length < 2) return;
     const first = (ks.find((x) => x.c && x.c.s) || {}).c || {};
-    const f = { s: first.s || '', t: first.t || '' };
+    const f = { s: first.s || '', t: first.t || '', r: (ks.map((x) => x.c && x.c.cbRoom).find(Boolean)) || batchRoomOn(ks[0].b, ks[0].d) || '' };
     const subs = subjectsList(); const ids = ttTeacherIds();
     const body = document.getElementById('hvSheetBody');
     const draw = () => {
       body.innerHTML = `<div class="hv-d-title"><span class="ico i-link" aria-hidden="true"></span> Combined class</div><div class="hv-d-wing">${escapeHtml(dayHeading(ks[0].d))} · P${ks[0].p + 1} · ${escapeHtml(ks.map((x) => gridBatchLabel(x.b)).join(' + '))}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div><div class="chips">${subs.map((x) => `<button type="button" class="chip${f.s === x ? ' active' : ''}" data-cbs="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Teacher</div><div class="chips">${ids.map((u) => `<button type="button" class="chip${f.t === u ? ' active' : ''}" data-cbt="${escapeHtml(u)}">${escapeHtml(ttName(u))}</button>`).join('')}</div>
-        <div class="hv-note" style="text-align:left; margin-top:8px;">One class for all these batches: it shows as one cell, goes to the teacher's schedule once and counts once in the Teaching Report.</div>
+        <div class="sv-tlbl" style="margin:12px 0 6px;">Room for this class</div>${comboRoomChipsHtml(ks.map((x) => x.b), ks[0].d, f.r)}
+        <div class="hv-note" style="text-align:left; margin-top:8px;">One class for all these batches in one room: it shows as one cell, goes to the teacher's schedule once and counts once in the Teaching Report.</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="cbCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="cbSave" style="margin:0;">Combine</button></div>`;
       body.querySelectorAll('[data-cbs]').forEach((b) => b.addEventListener('click', () => { f.s = b.getAttribute('data-cbs'); draw(); }));
       body.querySelectorAll('[data-cbt]').forEach((b) => b.addEventListener('click', () => { f.t = f.t === b.getAttribute('data-cbt') ? '' : b.getAttribute('data-cbt'); draw(); }));
+      bindComboRoomChips(body, () => f.r, (v) => { f.r = v; }, draw);
       document.getElementById('cbCancel').addEventListener('click', closeHvSheet);
       document.getElementById('cbSave').addEventListener('click', () => {
         if (!f.s) { showToast('Choose the subject', 'error'); return; }
@@ -5954,7 +5979,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         const keep = {}; ks.forEach((x) => { if (x.c && x.c.test) keep.test = true; });
         ks.forEach((x) => {
           doc.cells = (doc.cells || []).filter((c) => !(c.d === x.d && c.p === x.p && c.b === x.b));
-          const nc = { d: x.d, p: x.p, b: x.b, s: f.s, t: f.t, cb: id }; if (keep.test) nc.test = true; doc.cells.push(nc);
+          const nc = { d: x.d, p: x.p, b: x.b, s: f.s, t: f.t, cb: id }; if (keep.test) nc.test = true; if (f.r) nc.cbRoom = f.r; doc.cells.push(nc);
         });
         state.tg.sel = null; tgSave(); closeHvSheet(); renderTgGrid();
         showToast(`${ks.length} batches combined into one class`);
@@ -5966,7 +5991,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function tgMultiSplit() {
     const ks = tgSelCells().filter((x) => x.c && x.c.cb); if (!ks.length) return;
     tgRemember();
-    ks.forEach((x) => tgCombo(x.c).forEach((m) => { delete m.cb; }));
+    ks.forEach((x) => tgCombo(x.c).forEach((m) => { delete m.cb; delete m.cbRoom; }));
     state.tg.sel = null; tgSave(); renderTgGrid(); showToast('Separated · each batch has its own class again');
   }
   // add a batch to this session straight from the grid
