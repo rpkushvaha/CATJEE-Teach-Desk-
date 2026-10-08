@@ -2599,7 +2599,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.5 · updated 8 Oct 2026</div>
+          <div class="dnote">Version 9.6 · updated 8 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4281,7 +4281,7 @@
   });
 
   document.getElementById('hvWhatsAppBtn').addEventListener('click', () => {
-    if (state.hvRepKind === 'att') { hvAtt('share-img'); return; }
+    if (state.hvRepKind === 'att') { hvAtt('wa'); return; }
     const msg = document.getElementById('historyReportMsg');
     const sp = hvReportSpec();
     if (sp.single) { shareReportOnWhatsApp(sp.single, msg, true); return; }
@@ -11163,11 +11163,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     try {
       const f = reportFilter(!!useFilter);
       const results = await reportData(dates);
-      reportShareWa = true;
-      let blob;
-      try { ({ blob } = buildReportPdf(dates, results, title, periodLine, f)); } finally { reportShareWa = false; }
+      // WhatsApp always gets the report as a text message (never a file), for a day, a week or a month
       const text = buildWhatsAppRangeText(dates, results, title, periodLine, f);
-      await shareReportFileOrText(blob, filename, text, msgEl);
+      await shareReportText(text, msgEl);
     } catch (err) {
       msgEl.textContent = 'Could not prepare the report. Please try again.';
     }
