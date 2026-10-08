@@ -1774,7 +1774,7 @@
         <div class="hv-note" style="text-align:left; margin-top:-4px;">Other work outside a class (paper checking, leave, invigilation) still goes in Today → Activity.</div>
 
         <div class="field">
-          <label>Checklist</label>
+          <label>Class deliverables</label>
           <div class="checklist-grid">
             <div class="toggle-row checklist-item" data-key="worksheet">
               <div class="checklist-toggle-trigger">
@@ -2584,7 +2584,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.1 · updated 7 Oct 2026</div>
+          <div class="dnote">Version 9.2 · updated 8 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11568,14 +11568,14 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   function classKindHtml(c) { const L = classKindLines(c); return L.length ? `<div class="ck-lines">${L.map(([a, b]) => `<div><b>${escapeHtml(a)}</b>${b ? ': ' + escapeHtml(b) : ''}</div>`).join('')}</div>` : ''; }
   function classKindText(c) { return classKindLines(c).map(([a, b]) => a + (b ? ': ' + b : '')).join(' · '); }
   function renderClassKinds() {
-    const ks = state.form.kinds && state.form.kinds.length ? state.form.kinds : ['teach'];
+    const ks = Array.isArray(state.form.kinds) ? state.form.kinds : ['teach'];
     state.form.kinds = ks; state.form.kindNotes = state.form.kindNotes || {};
     const box = document.getElementById('classKindChips'); if (!box) return;
     box.innerHTML = CLASS_KINDS.map((x) => `<button type="button" class="chip${ks.indexOf(x.k) !== -1 ? ' active' : ''}" data-ck="${x.k}"><span class="ico i-${x.ic}" aria-hidden="true"></span>${escapeHtml(x.n)}</button>`).join('');
     box.querySelectorAll('[data-ck]').forEach((b) => b.addEventListener('click', () => {
       const k = b.getAttribute('data-ck'); const cur = (state.form.kinds || ['teach']).slice(); const i = cur.indexOf(k);
       if (i === -1) cur.push(k); else cur.splice(i, 1);
-      state.form.kinds = cur.length ? CLASS_KINDS.map((x) => x.k).filter((q) => cur.indexOf(q) !== -1) : ['teach'];
+      state.form.kinds = CLASS_KINDS.map((x) => x.k).filter((q) => cur.indexOf(q) !== -1);
       renderClassKinds(); showFormMsg('');
     }));
     document.getElementById('topicField').hidden = ks.indexOf('teach') === -1;
@@ -12134,7 +12134,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       return;
     }
     if (!state.form.batch) { showFormMsg('Please select a batch.'); return; }
-    const kinds = state.form.kinds && state.form.kinds.length ? state.form.kinds : ['teach'];
+    const kinds = Array.isArray(state.form.kinds) ? state.form.kinds : ['teach'];
+    if (!kinds.length) { showFormMsg('Choose what happened in class (Teaching, Quiz…).'); const kc = document.getElementById('classKindChips'); if (kc) kc.scrollIntoView({ block: 'center' }); return; }
     const teaching = kinds.indexOf('teach') !== -1;
     const topic = teaching ? document.getElementById('topicInput').value.trim() : '';
     if (teaching && !topic) { showFormMsg('Please enter the chapter / topic.'); document.getElementById('topicInput').focus(); return; }
@@ -12231,7 +12232,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       } else {
         switchTab('today');
       }
-      showToast(editingId ? '✓ Class updated' : '✓ Class saved');
+      showToast(editingId ? '✓ Class updated' : '✓ Class logged');
     } catch (err) {
       flashOffline(err);
     } finally {
