@@ -1013,6 +1013,8 @@
     input, select, textarea, .text-input { font-size: 16px !important; }
   }
   .rt-tile { position: relative; }
+  .tg-c.tg-note { background: rgba(59,130,246,.08); }
+  .tg-c.tg-note b { color: var(--ink); }
   #view-add .ck-list .ck-fld, #view-add .ck-list .ck-topic { margin: 8px 0 2px 28px; }
   #view-add .ck-list .ck-topic[hidden] { display: none; }
   #view-add .ck-list .kf-lbl { font-size: 12.5px; margin-bottom: 5px; }
@@ -2619,7 +2621,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.8 · updated 9 Oct 2026</div>
+          <div class="dnote">Version 9.9 · updated 9 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5306,7 +5308,7 @@
         <span class="tg-msel-btns">${cls.length ? `<button type="button" class="btn-secondary" id="tgMTest" style="border-color: var(--line);">${allTest ? 'Remove test' : 'Class test'}</button>` : ''}
         ${tgCanCombine(selCells) ? '<button type="button" class="btn-secondary" id="tgMCombine" style="border-color: var(--line);"><span class="ico i-link" aria-hidden="true"></span> Combine</button>' : ''}
         ${selCells.some((c) => c && c.cb) ? '<button type="button" class="btn-secondary" id="tgMSplit" style="border-color: var(--line);">Separate</button>' : ''}
-        ${nEx ? '<button type="button" class="btn-secondary" id="tgMExDel" style="border-color: var(--line);">Remove exam</button>' : (sel.cells.length ? '<button type="button" class="btn-secondary" id="tgMExam" style="border-color: var(--line);">Exam / note</button>' : '')}
+        ${nEx ? `<button type="button" class="btn-secondary" id="tgMExDel" style="border-color: var(--line);">${selCells.every((c) => !c || !c.ex || isNoteId(c.ex)) ? 'Remove note' : 'Remove exam'}</button>` : (sel.cells.length ? '<button type="button" class="btn-secondary" id="tgMExam" style="border-color: var(--line);">Exam / Test</button><button type="button" class="btn-secondary" id="tgMNote" style="border-color: var(--line);">Note</button>' : '')}
         ${sel.cells.length ? '<button type="button" class="btn-secondary hv-del" id="tgMClear" style="border-color: var(--line);">Clear</button>' : ''}
         <button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
     } else if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
@@ -5331,7 +5333,7 @@
         if (c && c.ex) {
           let span = 1; while (i + span < perD.length && !perD[i + span].off) { const n2 = tgCell(d, i + span, b); if (n2 && n2.ex === c.ex) span++; else break; }
           skipTo = i + span - 1;
-          html += `<td class="tg-c tg-exam${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${span > 1 ? ` colspan="${span}"` : ''} data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b><small>Exam</small></td>`; return;
+          html += `<td class="tg-c tg-exam${isNoteId(c.ex) ? ' tg-note' : ''}${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${span > 1 ? ` colspan="${span}"` : ''} data-tg-cell="${escapeHtml(k)}"><b>${escapeHtml(c.s)}</b>${isNoteId(c.ex) ? '' : `<small>${escapeHtml(examTimeTxt(c) || 'Exam')}</small>`}</td>`; return;
         }
         const exHere = examAt(b, d, pp.start, pp.end);
         if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small><span class="ico i-note" aria-hidden="true"></span> ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
@@ -5451,6 +5453,7 @@
     on('tgMSplit', tgMultiSplit);
     on('tgAddBatch', openAddBatchSheet);
     on('tgMExam', openExamCellsSheet);
+  on('tgMNote', openNoteCellsSheet);
     on('tgMExDel', tgMultiRemoveExam);
     on('tgMClear', tgMultiClear);
   }
@@ -5742,10 +5745,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         const b0 = Math.min(...bi), b1 = Math.max(...bi), p0 = Math.min(...pi), p1 = Math.max(...pi);
         const rect = cs.length === (b1 - b0 + 1) * (p1 - p0 + 1);
         const [type, subj] = String(cs[0].s).split(' · ');
+        const tm = isNoteId(id) ? '' : examTimeTxt(cs[0]);
         const drawEx = (bx, by, bw, bh) => {
           box(bx, by, bw, bh, shade);
-          const lines = [[type, '#000'], ...(subj ? [[subj.toUpperCase(), '#C00000']] : [])];
-          fitLines(x, lines.map(([t, col]) => [t, col, 15]), bx + bw / 2, by, bw, bh);
+          const lines = isNoteId(id) ? [[cs[0].s, '#000', 15]] : [[type, '#000', 15], ...(subj ? [[subj.toUpperCase(), '#C00000', 15]] : []), ...(tm ? [[tm, '#C00000', 11]] : [])];
+          fitLines(x, lines, bx + bw / 2, by, bw, bh);
         };
         if (rect) {
           const xa = pX(p0).x, xz = pX(p1).x + pX(p1).w;
@@ -5783,7 +5787,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           // a batch that has an exam this day: its empty periods show "–"
           if (!cell && (doc.cells || []).some((c) => c.d === d && c.b === b && c.ex)) { txt('–', o.x + o.w / 2, ry + rowH / 2, 16, true); return; }
           if (!cell) return;
-          if (cell.ex) { fitLines(x, [[cell.s, '#C00000', 12]], o.x + o.w / 2, ry, o.w, rowH); return; }
+          if (cell.ex) { fitLines(x, isNoteId(cell.ex) ? [[cell.s, '#000', 12]] : [[cell.s, '#C00000', 12], ...(examTimeTxt(cell) ? [[examTimeTxt(cell), '#C00000', 10]] : [])], o.x + o.w / 2, ry, o.w, rowH); return; }
           const chg = perD[p] && perD[p].changed && (perD[p].start !== o.c.pp.start || perD[p].end !== o.c.pp.end);
           const lines = [[effS(cell), cell.sub ? '#C00000' : '#000', 15], ...(cell.sub ? [['(Sub)', '#C00000', 11]] : []), ...(cell.test ? [['(Class Test)', '#000', 12]] : []), ...(one && cell.cb ? [[`(with ${tgComboOf(doc.cells, cell).filter((m) => m.b !== b).map((m) => gridBatchLabel(m.b).replace(' · ', ' ')).join(', ')})`, '#1F4E79', 11]] : []), ...(chg ? [[`(${fmtS(perD[p].start)} – ${fmtS(perD[p].end)})`, '#C00000', 11]] : [])];
           const rDay = doc.dayRooms && doc.dayRooms[d] && doc.dayRooms[d][b];
@@ -6031,15 +6035,16 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   async function tgMultiRemoveExam() {
     const exIds = tgSelCells().map((x) => x.c && x.c.ex).filter((e, i, a) => e && a.indexOf(e) === i); if (!exIds.length) return;
-    const ok = await showConfirm(`${exIds.length} exam${exIds.length === 1 ? '' : 's'} will be removed everywhere: the timetable, the Exams tab, rooms and invigilation duties. The classes that were there before come back.`, 'Remove exam?', 'Remove');
+    const notesOnly = exIds.every(isNoteId);
+    const ok = await showConfirm(notesOnly ? 'The note is removed and the classes that were there before come back.' : `${exIds.length} exam${exIds.length === 1 ? '' : 's'} will be removed everywhere: the timetable, the Exams tab, rooms and invigilation duties. The classes that were there before come back.`, notesOnly ? 'Remove note?' : 'Remove exam?', 'Remove');
     if (!ok) return;
     tgRemember();
     await tgRemoveExams(exIds);
-    state.tg.sel = null; renderTgGrid(); showToast('Exam removed · the classes are back');
+    state.tg.sel = null; renderTgGrid(); showToast(notesOnly ? 'Note removed · the classes are back' : 'Exam removed · the classes are back');
   }
   // delete exams (with their duty plans) and put back the classes their cells replaced
   async function tgRemoveExams(ids, noRestore) {
-    for (const id of ids) { try { await state.db.collection('exams').doc(id).delete(); } catch (err) { /* already gone */ } }
+    for (const id of ids) { if (isNoteId(id)) continue; try { await state.db.collection('exams').doc(id).delete(); } catch (err) { /* already gone */ } }
     const doc = state.tg.doc; const out = [];
     (doc.cells || []).forEach((c) => {
       if (!c.ex || ids.indexOf(c.ex) === -1) { out.push(c); return; }
@@ -6122,6 +6127,37 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (i === -1) sel.cells.push(k); else sel.cells.splice(i, 1);
     renderTgGrid();
   }
+  // a note in the grid (Doubt Clearing, Holiday…) is kept like an exam block, but it is not an exam
+  const isNoteId = (id) => String(id || '').indexOf('note:') === 0;
+  function examTimeTxt(c) { const [a, z] = String((c && c.et) || '').split('-'); return a && z ? `(${formatTimeStr(a)} – ${formatTimeStr(z)})` : ''; }
+  const NOTE_CHIPS = ['Doubt Clearing', 'Holiday', 'PTM', 'Revision', 'Activity', 'Sports'];
+  function openNoteCellsSheet() {
+    const sel = state.tg.sel; if (!sel || !sel.cells.length) return;
+    const d = sel.cells[0].split('|')[0];
+    const bats = sel.cells.map((k) => k.split('|').slice(2).join('|')).filter((v, i, a) => a.indexOf(v) === i);
+    let txt = '';
+    const body = document.getElementById('hvSheetBody');
+    const draw = () => {
+      body.innerHTML = `<div class="hv-d-title">Note</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · ${escapeHtml(bats.map(gridBatchLabel).join(', '))}</div>
+        <div class="sv-tlbl" style="margin:12px 0 6px;">What happens in these periods?</div>
+        <div class="chips">${NOTE_CHIPS.map((t) => `<button type="button" class="chip${txt === t ? ' active' : ''}" data-nt="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
+        <input class="text-input" id="ntText" maxlength="40" placeholder="Or type your own" value="${escapeHtml(NOTE_CHIPS.indexOf(txt) === -1 ? txt : '')}" style="margin-top:8px;">
+        <div class="hv-note" style="text-align:left; margin-top:8px;">These periods become one block with this note. No class goes to the teachers' schedules for them, and nothing is added to the Exams tab.</div>
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="ntCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="ntOk" style="margin:0;">Save</button></div>`;
+      body.querySelectorAll('[data-nt]').forEach((x) => x.addEventListener('click', () => { txt = x.getAttribute('data-nt'); draw(); }));
+      const inp = document.getElementById('ntText'); inp.addEventListener('input', () => { txt = inp.value.trim(); body.querySelectorAll('[data-nt]').forEach((x) => x.classList.toggle('active', x.getAttribute('data-nt') === txt)); });
+      document.getElementById('ntCancel').addEventListener('click', closeHvSheet);
+      document.getElementById('ntOk').addEventListener('click', () => {
+        if (!txt) { showToast('Choose or type the note', 'error'); return; }
+        tgRemember();
+        const doc = state.tg.doc; const id = 'note:' + Date.now().toString(36);
+        sel.cells.forEach((k) => { const [dd, pp, ...rest] = k.split('|'); const bb = rest.join('|'); const old = (doc.cells || []).find((c) => c.d === dd && c.p === Number(pp) && c.b === bb && !c.ex); doc.cells = (doc.cells || []).filter((c) => !(c.d === dd && c.p === Number(pp) && c.b === bb)); const nc = { d: dd, p: Number(pp), b: bb, s: txt, ex: id }; if (old) nc.was = { s: old.s, t: old.t || '' }; doc.cells.push(nc); });
+        state.tg.sel = null; tgSave(); closeHvSheet(); renderTgGrid(); showToast('Note added');
+      });
+    };
+    draw();
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
   function openExamCellsSheet() {
     const sel = state.tg.sel; if (!sel || !sel.cells.length) { showToast('Tap the cells of the exam first', 'error'); return; }
     const g = tgGroup(); const d = sel.cells[0].split('|')[0];
@@ -6130,14 +6166,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const f = { type: '', subject: '', name: '', start: per[Math.min(...ps)].start, end: per[Math.max(...ps)].end };
     const body = document.getElementById('hvSheetBody');
     const draw = () => {
-      body.innerHTML = `<div class="hv-d-title">Exam / note</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · ${escapeHtml(bats.join(', '))}</div>
+      body.innerHTML = `<div class="hv-d-title">Exam / Test</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · ${escapeHtml(bats.join(', '))}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Name to show (optional)</div><input class="text-input" id="exName" maxlength="40" placeholder="e.g. Half-Yearly Exam" value="${escapeHtml(f.name)}">
         <div class="sv-tlbl" style="margin:12px 0 6px;">Test Type</div><div class="chips">${testTypesList().map((t) => `<button type="button" class="chip${f.type === t ? ' active' : ''}" data-ext="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div><div class="chips">${subjectsList().map((t) => `<button type="button" class="chip${f.subject === t ? ' active' : ''}" data-exs="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Exam Time</div>
         <div class="sv-times"><div><div class="sv-tlbl">From</div><input class="text-input" type="time" id="exS" value="${escapeHtml(f.start)}"></div><div><div class="sv-tlbl">To</div><input class="text-input" type="time" id="exE" value="${escapeHtml(f.end)}"></div></div>
         <div class="hv-note" style="text-align:left; margin-top:8px;">The exam takes the place of these classes (they come back if you remove the exam). It also appears in the Exams tab for rooms and invigilators.</div>
-        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="exOk" style="margin:0;">Save exam</button></div>`;
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="exOk" style="margin:0;">Save</button></div>`;
       body.querySelectorAll('[data-ext]').forEach((x) => x.addEventListener('click', () => { f.type = f.type === x.getAttribute('data-ext') ? '' : x.getAttribute('data-ext'); keepTimes(); draw(); }));
       body.querySelectorAll('[data-exs]').forEach((x) => x.addEventListener('click', () => { f.subject = f.subject === x.getAttribute('data-exs') ? '' : x.getAttribute('data-exs'); keepTimes(); draw(); }));
       document.getElementById('exCancel').addEventListener('click', closeHvSheet);
@@ -6166,7 +6202,20 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     draw();
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
+  function openNoteBlockSheet(c) {
+    const body = document.getElementById('hvSheetBody');
+    const cells = (state.tg.doc.cells || []).filter((x) => x.ex === c.ex);
+    body.innerHTML = `<div class="hv-d-title">${escapeHtml(c.s)}</div><div class="hv-d-wing">${escapeHtml(dayHeading(c.d))} · Note</div>
+      <div class="hv-d-rows" style="margin-top:10px;"><div class="hv-d-row"><span>Batches</span><span>${escapeHtml(cells.map((x) => gridBatchLabel(x.b)).filter((v, i, arr) => arr.indexOf(v) === i).join(', '))}</span></div><div class="hv-d-row"><span>Periods</span><span>${escapeHtml(cells.map((x) => 'P' + (x.p + 1)).filter((v, i, arr) => arr.indexOf(v) === i).join(', '))}</span></div></div>
+      <div class="sv-tlbl" style="margin:12px 0 6px;">Change the note</div><input class="text-input" id="nbText" maxlength="40" value="${escapeHtml(c.s)}">
+      <div class="hv-d-btns"><button type="button" class="btn-secondary hv-del" id="nbDel" style="border-color: var(--line);">Remove note</button><button type="button" class="save-btn" id="nbSave" style="margin:0;">Save</button></div>`;
+    const unlock = () => { if (!tgEditable()) { state.tg.editKey = state.tg.docKey; } };
+    document.getElementById('nbSave').addEventListener('click', () => { const v = document.getElementById('nbText').value.trim(); if (!v) { showToast('Type the note', 'error'); return; } unlock(); tgRemember(); cells.forEach((x) => { x.s = v; }); tgSave(); closeHvSheet(); renderTgGrid(); showToast('Note saved'); });
+    document.getElementById('nbDel').addEventListener('click', async () => { unlock(); tgRemember(); await tgRemoveExams([c.ex]); closeHvSheet(); renderTgGrid(); showToast('Note removed · the classes are back'); });
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
   function openExamBlockSheet(c) {
+    if (isNoteId(c.ex)) { openNoteBlockSheet(c); return; }
     const body = document.getElementById('hvSheetBody');
     const cells = (state.tg.doc.cells || []).filter((x) => x.ex === c.ex);
     const [a, z] = String(c.et || '-').split('-');
@@ -6191,7 +6240,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   // exams belonging to this timetable week: the ones marked in the grid, and Exams-tab exams only for these batches
   async function tgWeekExamIds(doc, g) {
-    const ids = (doc.cells || []).map((c) => c.ex).filter((e, i, a) => e && a.indexOf(e) === i);
+    const ids = (doc.cells || []).map((c) => c.ex).filter((e, i, a) => e && !isNoteId(e) && a.indexOf(e) === i);
     try {
       const ws = state.tt.weekStart; const we = shiftDateStr(ws, 6);
       const snap = await state.db.collection('exams').where('date', '>=', ws).where('date', '<=', we).get();
@@ -13155,7 +13204,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       { go: goAdmin('tt'), sel: '#tgPublish', t: 'Publish', x: 'Send this day or the whole week to the teachers. The picture is made by itself.', ifMissing: 'Publish shows when there is something new to send.' } ] },
     exam: { title: 'Exam, class test, combine', sub: 'Several cells at once', icon: 'note', who: 'lead', steps: [
       { go: goAdmin('tt'), sel: '#tgExam', t: 'Exam / Class test', x: 'Tap this (or press and hold a cell), then tap all the cells of the exam or test.', ifMissing: 'Tap Edit timetable first.' },
-      { go: goAdmin('tt'), sel: '.tg-table', t: 'Then choose', x: 'Class test keeps the class (it counts for the teacher). Exam / note makes one block and adds it to the Exams tab. Combine joins batches into one class.' },
+      { go: goAdmin('tt'), sel: '.tg-table', t: 'Then choose', x: 'Class test keeps the class (it counts for the teacher). Exam / Test makes one block and adds it to the Exams tab; Note makes a block like Doubt Clearing. Combine joins batches into one class.' },
       { go: goAdmin('tt'), sel: '[data-tg-ph]', t: 'Periods of this day', x: 'Tap a period heading to change its time, remove it or join it with the next one — for this day only.' },
       { go: goAdmin('tt'), sel: '#tgAddPer', t: '＋ Period, Day note, ＋ Batch', x: 'Add a period, write a whole-day note (like Doubt Clearing Day) or add a new batch.', ifMissing: 'These show in edit mode.' } ] },
     pictures: { title: 'Pictures to share', sub: 'Timetable, batch-wise, duty sheet', icon: 'image', who: 'lead', steps: [
