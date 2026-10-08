@@ -993,6 +993,11 @@
   .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
   .rt-tile { position: relative; }
+  #view-add .ck-list .ck-fld, #view-add .ck-list .ck-topic { margin: 8px 0 2px 28px; }
+  #view-add .ck-list .ck-topic[hidden] { display: none; }
+  #view-add .ck-list .kf-lbl { font-size: 12.5px; margin-bottom: 5px; }
+  #view-add .ck-list .ck-fld .text-input, #view-add .ck-list .ck-topic textarea { font-size: 14px; }
+  #view-add .ck-list .checklist-icon .ico { width: 18px; height: 18px; }
   .ck-chips .chip { display: inline-flex; align-items: center; gap: 5px; }
   .kf-lbl { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .kf-lbl small { font-size: 11.5px; font-weight: 600; color: var(--muted-2); }
@@ -1763,15 +1768,15 @@
 
         <div class="field">
           <label>What happened in class?</label>
-          <div class="chips ck-chips" id="classKindChips"></div>
+          <div class="checklist-grid ck-list" id="classKindChips"></div>
         </div>
-        <div class="field" id="topicField">
+        <div class="ck-topic" id="topicField">
           <label for="topicInput" class="kf-lbl"><span>Chapter / Topic</span><small>Required</small></label>
           <textarea class="text-input topic-input" id="topicInput" rows="2" style="resize:vertical; font-family:inherit;" placeholder="Type today's topic" autocapitalize="sentences"></textarea>
           <button type="button" class="topic-suggest" id="topicSuggest" hidden><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 15 14"/></svg><span id="topicSuggestText"></span></button>
         </div>
-        <div id="classKindFields"></div>
-        <div class="hv-note" style="text-align:left; margin-top:-4px;">Other work outside a class (paper checking, leave, invigilation) still goes in Today → Activity.</div>
+        <div id="classKindFields" hidden></div>
+        <div class="hv-note" style="text-align:left; margin-top:-4px;"><span class="ico i-help" aria-hidden="true"></span> Non-class work (paper checking, leave, invigilation) → Today → Activity</div>
 
         <div class="field">
           <label>Class deliverables</label>
@@ -2584,7 +2589,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.2 · updated 8 Oct 2026</div>
+          <div class="dnote">Version 9.3 · updated 8 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11571,17 +11576,28 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const ks = Array.isArray(state.form.kinds) ? state.form.kinds : ['teach'];
     state.form.kinds = ks; state.form.kindNotes = state.form.kindNotes || {};
     const box = document.getElementById('classKindChips'); if (!box) return;
-    box.innerHTML = CLASS_KINDS.map((x) => `<button type="button" class="chip${ks.indexOf(x.k) !== -1 ? ' active' : ''}" data-ck="${x.k}"><span class="ico i-${x.ic}" aria-hidden="true"></span>${escapeHtml(x.n)}</button>`).join('');
-    box.querySelectorAll('[data-ck]').forEach((b) => b.addEventListener('click', () => {
-      const k = b.getAttribute('data-ck'); const cur = (state.form.kinds || ['teach']).slice(); const i = cur.indexOf(k);
-      if (i === -1) cur.push(k); else cur.splice(i, 1);
-      state.form.kinds = CLASS_KINDS.map((x) => x.k).filter((q) => cur.indexOf(q) !== -1);
-      renderClassKinds(); showFormMsg('');
-    }));
-    document.getElementById('topicField').hidden = ks.indexOf('teach') === -1;
-    const fb = document.getElementById('classKindFields');
-    fb.innerHTML = CLASS_KINDS.filter((x) => x.k !== 'teach' && x.f && ks.indexOf(x.k) !== -1).map((x) => `<div class="field"><label class="kf-lbl" for="ckf-${x.k}"><span><span class="ico i-${x.ic}" aria-hidden="true"></span> ${escapeHtml(x.f)}</span><small>${x.req ? 'Required' : 'Optional'}</small></label><input class="text-input" id="ckf-${x.k}" data-ckf="${x.k}" maxlength="120" placeholder="${escapeHtml(x.ph || '')}" value="${escapeHtml(state.form.kindNotes[x.k] || '')}"></div>`).join('');
-    fb.querySelectorAll('[data-ckf]').forEach((inp) => inp.addEventListener('input', () => { state.form.kindNotes = state.form.kindNotes || {}; state.form.kindNotes[inp.getAttribute('data-ckf')] = inp.value; showFormMsg(''); }));
+    const topicField = document.getElementById('topicField');
+    // keep the topic box safe while the rows are rebuilt
+    if (topicField && box.contains(topicField)) box.parentNode.appendChild(topicField);
+    box.innerHTML = CLASS_KINDS.map((x) => {
+      const on = ks.indexOf(x.k) !== -1;
+      const fld = x.k === 'teach' ? '<div class="ck-slot" data-slot="teach"></div>' : (x.f && on ? `<div class="ck-fld"><label class="kf-lbl" for="ckf-${x.k}"><span>${escapeHtml(x.f)}</span><small>${x.req ? 'Required' : 'Optional'}</small></label><input type="text" class="text-input" id="ckf-${x.k}" data-ckf="${x.k}" placeholder="${escapeHtml(x.ph || '')}" value="${escapeHtml((state.form.kindNotes || {})[x.k] || '')}" autocapitalize="sentences"></div>` : '');
+      return `<div class="toggle-row checklist-item" data-ckrow="${x.k}"><div class="checklist-toggle-trigger" data-ck="${x.k}" role="switch" aria-checked="${on}" tabindex="0"><span class="checklist-icon"><span class="ico i-${x.ic}" aria-hidden="true"></span></span><span class="toggle-label">${escapeHtml(x.n)}</span><span class="switch${on ? ' on' : ''}"><span class="knob"></span></span></div>${fld}</div>`;
+    }).join('');
+    const slot = box.querySelector('[data-slot="teach"]');
+    if (slot && topicField) { slot.appendChild(topicField); topicField.hidden = ks.indexOf('teach') === -1; }
+    box.querySelectorAll('[data-ck]').forEach((b) => {
+      const flip = () => {
+        const k = b.getAttribute('data-ck'); const cur = (state.form.kinds || []).slice(); const i = cur.indexOf(k);
+        if (i === -1) cur.push(k); else cur.splice(i, 1);
+        state.form.kinds = CLASS_KINDS.map((x) => x.k).filter((q) => cur.indexOf(q) !== -1);
+        renderClassKinds(); showFormMsg('');
+        if (i === -1) { const el = k === 'teach' ? document.getElementById('topicInput') : document.getElementById('ckf-' + k); if (el && !el.value) setTimeout(() => { try { el.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 50); }
+      };
+      b.addEventListener('click', flip);
+      b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+    });
+    box.querySelectorAll('[data-ckf]').forEach((inp) => inp.addEventListener('input', () => { state.form.kindNotes = state.form.kindNotes || {}; state.form.kindNotes[inp.getAttribute('data-ckf')] = inp.value; showFormMsg(''); }));
   }
   try { if (!state.form.kinds) state.form.kinds = ['teach']; renderClassKinds(); } catch (e) { /* ignore */ }
   function resetClassForm() {
