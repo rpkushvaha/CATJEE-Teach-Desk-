@@ -995,7 +995,7 @@
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
   /* ---- iPhone (Safari) fixes: no sideways overflow, no zoom on typing, no text blow-up ---- */
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  html, body { overflow-x: hidden; }
+  @supports (overflow: clip) { html, body { overflow-x: clip; } }
   input, select, textarea { max-width: 100%; min-width: 0; box-sizing: border-box; }
   input[type="time"], input[type="date"], input[type="month"] { -webkit-appearance: none; appearance: none; min-width: 0; display: block; width: 100%; min-height: 44px; }
   input[type="time"]::-webkit-date-and-time-value, input[type="date"]::-webkit-date-and-time-value { text-align: left; }
@@ -1013,6 +1013,20 @@
     input, select, textarea, .text-input { font-size: 16px !important; }
   }
   .rt-tile { position: relative; }
+  .tg-lvtag { color: #B45309 !important; font-weight: 700; font-size: 10px; }
+  .tg-pubrow { display: flex; gap: 8px; align-items: stretch; }
+  .tg-pubrow .tg-prevbtn { flex: 0 0 auto; width: auto; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; }
+  .tg-pubrow .tg-pubmain { flex: 1; }
+  #zvPreviewBar { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 12px); background: rgba(17,24,39,.92); color: #fff; display: flex; flex-direction: column; gap: 8px; z-index: 3; }
+  #zvPreviewBar .zvp-t { font-weight: 700; font-size: 14px; display: flex; flex-direction: column; }
+  #zvPreviewBar .zvp-t small { font-weight: 500; font-size: 12px; color: #FDE68A; }
+  #zvPreviewBar .zvp-b { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  #zvPreviewBar .btn-secondary { background: transparent; color: #fff; border-color: rgba(255,255,255,.4); }
+  .uplv { display: flex; flex-direction: column; gap: 8px; }
+  .uplv-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid rgba(217,119,6,.35); background: rgba(217,119,6,.06); border-radius: 12px; padding: 10px 12px; font-size: 14px; }
+  .uplv-row .mut { color: var(--muted-2); }
+  .uplv-x { width: auto; min-height: 34px; padding: 0 14px; flex: none; border-color: var(--line); }
+  .sv-lv { font-size: 11.5px; font-weight: 700; background: rgba(217,119,6,.14); color: #B45309; border-radius: 999px; padding: 2px 9px; margin-left: 6px; cursor: pointer; border: 0; font-family: inherit; }
   .tg-c.tg-note { background: rgba(59,130,246,.08); }
   .tg-c.tg-note b { color: var(--ink); }
   #view-add .ck-list .ck-fld, #view-add .ck-list .ck-topic { margin: 8px 0 2px 28px; }
@@ -2621,7 +2635,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 9.9 · updated 9 Oct 2026</div>
+          <div class="dnote">Version 10.0 · updated 10 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3425,8 +3439,8 @@
         ${classKindHtml(c, true)}
         ${it.status === 'upcoming' ? '<div class="tl-meta"><span class="tl-filled">✓ Details filled</span></div>' : ''}
         <div class="tl-bottom">
-          ${range ? `<div class="tl-meta">${range}</div>` : ''}
           ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
+          ${range ? `<div class="tl-meta">${range}</div>` : ''}
         </div>
       </div></div>`;
   }
@@ -3482,6 +3496,8 @@
     try { renderBell(); } catch (e) { /* ignore */ }
     try { ensureTodayExams(); duties = plannedDutiesToday(); } catch (e) { duties = []; }
     if (activities.length || duties.length) html += '<div class="tl-sub">Activities</div>' + duties.map(dutyRowHtml).join('') + activities.map(todayActivityRowHtml).join('');
+    const upLv = upcomingLeaves();
+    if (upLv.length) html += `<div class="tl-sub">Upcoming leave</div><div class="uplv">${upLv.map((c) => `<div class="uplv-row"><span><b>${escapeHtml(dayHeading(c.date))}</b> · Leave / Holiday${c.note ? ` · <span class="mut">${escapeHtml(c.note)}</span>` : ''}</span><button type="button" class="btn-secondary uplv-x" data-cancel-leave="${escapeHtml(c.id)}">Cancel</button></div>`).join('')}</div>`;
     const cvT = coveredTestsFor(todayStr(), state.classesToday);
     if (cvT.count) html += `<div class="ad-ok" style="margin-top:4px;">✓ Class test held in your class while you were on leave: ${escapeHtml(cvT.batches.join(', '))}</div>`;
     if (el._lastHtml === html) return;
@@ -3505,6 +3521,18 @@
     });
   }
   // ---------- Step 3 helpers: combined batches, classes, invigilation, covered tests ----------
+  // the teacher's own leave on days still to come (only the teacher cancels these)
+  function upcomingLeaves() {
+    const t = todayStr();
+    return (state.historyClasses || []).filter((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday' && c.teacherId === state.teacherId && c.date > t).sort((a, b) => a.date.localeCompare(b.date));
+  }
+  async function cancelLeave(id) {
+    const c = (state.historyClasses || []).find((x) => x.id === id); if (!c) return;
+    const ok = await showConfirm(`Leave on ${dayHeading(c.date)} will be cancelled.`, 'Cancel this leave?', 'Cancel leave');
+    if (!ok) return;
+    try { await state.db.collection('classes').doc(id).delete(); state.historyClasses = (state.historyClasses || []).filter((x) => x.id !== id); showToast('Leave cancelled'); renderToday(); if (state.tab === 'schedule') renderScheduleList(); } catch (e) { flashOffline(e); }
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-cancel-leave]'); if (b) { e.preventDefault(); e.stopPropagation(); cancelLeave(b.getAttribute('data-cancel-leave')); } }, true);
   function entryBatches(c) { return (c && c.batches && c.batches.length) ? c.batches : (c && c.batch ? [c.batch] : []); }
   function entryBatchLabel(c) { const b = entryBatches(c); return b.length > 1 ? b.join(' + ') : (b[0] || 'Class'); }
   function testCount(c) { return c && c.test ? Math.max(1, entryBatches(c).length) : 0; }
@@ -3894,8 +3922,8 @@
         <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : pillHtml('upcoming', 'Upcoming')}</div>
         ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
         ${classKindHtml(c, true)}
-        ${range ? `<div class="tl-meta">${range}</div>` : ''}
         ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
+        ${range ? `<div class="tl-meta">${range}</div>` : ''}
       </div></div>`;
   }
   function hvSortRecords(list) {
@@ -5338,20 +5366,23 @@
         const exHere = examAt(b, d, pp.start, pp.end);
         if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small><span class="ico i-note" aria-hidden="true"></span> ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
         const cl = c ? (clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '⚠️'}</small>${c.sub ? '<i>Sub</i>' : ''}${ttLeaveOf(effT(c), d) ? '<i class="tg-lvtag">⚠ On leave</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
     html += '</tbody></table></div>';
     if (chg && Object.keys(chg.keys).some((k) => k.startsWith(d + '|'))) html += '<div class="hv-note" style="text-align:left; margin-top:4px;"><span style="color: var(--gold);">●</span> = not sent to teachers yet · Publish to send</div>';
     const nClash = Object.keys(clash).length; const noT = (doc.cells || []).filter((c) => !c.t && !c.ex).length;
+    loadTtLeaves();
+    const lvCls = ttLeaveClasses(doc); const lvKeys = Object.keys(lvCls);
+    if (lvKeys.length) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Teacher on leave</div>${lvKeys.map((k) => { const [u, dd] = k.split('|'); const n = lvCls[k].length; return `<div class="ad-alert-l">${escapeHtml(ttName(u))} is on leave on ${escapeHtml(dayHeading(dd))} · ${n} class${n === 1 ? '' : 'es'} <button type="button" class="hv-back" data-lv-give="${escapeHtml(dd)}" style="padding:0; margin-left:4px;">Give to someone</button></div>`; }).join('')}</div>`;
     if (nClash || noT) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Please check</div>${nClash ? `<div class="ad-alert-l">${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places — tap ⚠️ cells</div>` : ''}${noT ? `<div class="ad-alert-l">${noT} class${noT === 1 ? '' : 'es'} without a teacher (set Teacher Mapping)</div>` : ''}</div>`;
     const pdMap = tgPendDays(); const pdList = Object.keys(pdMap).sort(); const pdTotal = pdList.reduce((n, x) => n + pdMap[x], 0);
     const everPub = tgEverPub(doc);
     const dayPend = pdMap[d] && pdList.length > 1;
     const dN = `${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}`;
     html += `<div class="tg-pubrow">${pdList.length
-        ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : 'Publish whole week'}<small>${pdList.length === 1 ? `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')}` : `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')} · ${escapeHtml(shortDays(pdList))}`}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--gold); color: var(--gold);">Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:11.5px; font-weight:600;">${pdMap[d]} ${everPub ? 'change' : 'class'}${pdMap[d] === 1 ? '' : (everPub ? 's' : 'es')}</small></button>` : ''}`
+        ? `<button type="button" class="btn-secondary tg-prevbtn" id="tgPreview" style="border-color: var(--line);"><span class="ico i-eye" aria-hidden="true"></span> Preview</button><button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : 'Publish whole week'}<small>${pdList.length === 1 ? `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')}` : `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')} · ${escapeHtml(shortDays(pdList))}`}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--gold); color: var(--gold);">Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:11.5px; font-weight:600;">${pdMap[d]} ${everPub ? 'change' : 'class'}${pdMap[d] === 1 ? '' : (everPub ? 's' : 'es')}</small></button>` : ''}`
         : (everPub ? '<div class="tg-pubok">✓ Published · teachers have this timetable</div>' : '<div class="hv-note" style="text-align:center;">Nothing filled in yet · tap + in the grid, or use Paint, to add classes</div>')}</div>
     ${editable ? `<div class="tg-actions">
       <button type="button" class="btn-secondary" id="tgCopyWeek" style="border-color: var(--line);">Copy last week</button>
@@ -5432,7 +5463,7 @@
     on('tgCopyDay', tgCopyDayPicker);
     on('tgImage', tgImage);
     on('tgViewImg', () => { const L = weekTtImages(state.tt.weekStart); const x = L.find((y) => y.id === state.tg.docKey + '~' + state.tg.day) || L.find((y) => y.id === state.tg.docKey); if (x) openZoomViewer(x.image, { turn: true }); });
-    on('tgPublish', () => { const pd = Object.keys(tgPendDays()); tgPublish(pd.length === 1 ? pd[0] : undefined); });
+    on('tgPublish', () => tgPublishAsk());
     on('tgEditSubj', () => { state.adminTab = 'settings'; state.adminSetOpen = 'adminSubjectsPanel'; renderAdmin(); setTimeout(() => { const p = document.getElementById('adminSubjectsPanel'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); });
     on('tgPublishDay', () => tgPublish(state.tg.day));
     on('tgEdit', () => { state.tg.editKey = state.tg.docKey; renderTgGrid(); showToast('Editing on · changes are saved as a draft until you publish'); });
@@ -5442,6 +5473,8 @@
     on('tgBatchPics', tgBatchPictures);
     on('tgExam', tgStartExamSelect);
     on('tgAbsent', () => openAbsent({ date: tgDays().indexOf(todayStr()) !== -1 ? todayStr() : null }));
+  document.querySelectorAll('[data-lv-give]').forEach((b) => b.addEventListener('click', () => openAbsent({ date: b.getAttribute('data-lv-give') })));
+  on('tgPreview', tgPreview);
     on('tgDelWeek', tgDeleteWeek);
     on('tgSelCancel', () => { state.tg.sel = null; renderTgGrid(); });
     on('tgSelNext', openExamCellsSheet);
@@ -5676,6 +5709,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function filledDays(doc) { return ((doc && doc.cells) || []).map((c) => c.d).concat(Object.keys((doc && doc.dayTimes) || {}).filter((d) => dayNoteOf(doc, d))).filter((v, i, a) => a.indexOf(v) === i).sort(); }
   function tgImage(returnCanvas) {
     const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return null;
+    state.tg.prevChg = state.tg.previewMarks ? (tgChanges() || null) : null;
     const one = state.tg.imgBatch || '';
     const bats = one ? [one] : g.batches;
     const days = (state.tg.imgDays && state.tg.imgDays.length) ? state.tg.imgDays.slice().sort() : tgDays();
@@ -5783,7 +5817,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
               for (let q = ci + 1; q < colX.length; q++) { const qx = colX[q]; if (qx.c.br) continue; if (qx.x >= o.x + o.w) break; drawn[`${qx.c.p}|${bats[j]}`] = 1; }
             }
           }
-          box(o.x, ry, o.w, rH, shade);
+          const pvChg = state.tg.previewMarks && cell && state.tg.prevChg && state.tg.prevChg.keys && state.tg.prevChg.keys[`${d}|${p}|${b}`];
+          box(o.x, ry, o.w, rH, pvChg ? '#FFF2B3' : shade);
           // a batch that has an exam this day: its empty periods show "–"
           if (!cell && (doc.cells || []).some((c) => c.d === d && c.b === b && c.ex)) { txt('–', o.x + o.w / 2, ry + rowH / 2, 16, true); return; }
           if (!cell) return;
@@ -6415,6 +6450,45 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       refreshTtImage(plain && Object.assign({ _id: doc._id }, plain), true);
     }
     return true;
+  }
+  // teachers' leave for the timetable week (warning only — the admin decides)
+  state.ttLeaves = { ws: '', map: {} };
+  function ttLeaveOf(u, d) { return !!(u && state.ttLeaves.ws === state.tt.weekStart && state.ttLeaves.map[u + '|' + d]); }
+  async function loadTtLeaves() {
+    const ws = state.tt.weekStart; if (!ws || state.ttLeaves.ws === ws || state.ttLeaves.loading === ws) return;
+    state.ttLeaves.loading = ws;
+    try {
+      const snap = await state.db.collection('classes').where('date', '>=', ws).where('date', '<=', shiftDateStr(ws, 6)).get();
+      const map = {}; snap.docs.map(normDoc).forEach((c) => { if (c.entryType === 'activity' && c.activityType === 'Leave / Holiday') map[c.teacherId + '|' + c.date] = 1; });
+      state.ttLeaves = { ws, map };
+      if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid();
+    } catch (e) { state.ttLeaves.loading = ''; }
+  }
+  function ttLeaveClasses(doc) {
+    const out = {}; ((doc && doc.cells) || []).forEach((c) => { if (c.ex) return; const u = effT(c); if (u && ttLeaveOf(u, c.d)) { const k = u + '|' + c.d; (out[k] = out[k] || []).push(c); } });
+    return out;
+  }
+  async function tgPublishAsk() {
+    const pd = Object.keys(tgPendDays()); const day = pd.length === 1 ? pd[0] : undefined;
+    const lv = ttLeaveClasses(state.tg.doc); const n = Object.keys(lv).filter((k) => !day || k.endsWith('|' + day)).reduce((a, k) => a + lv[k].length, 0);
+    if (n) { const ok = await showConfirm(`${n} class${n === 1 ? ' is' : 'es are'} with a teacher who is on leave that day. Use "Give to someone" to change them, or publish as it is.`, 'Teacher on leave', 'Publish anyway'); if (!ok) return; }
+    tgPublish(day);
+  }
+  // Preview the timetable picture before publishing (changes not sent yet are marked)
+  function tgPreview() {
+    state.tg.previewMarks = true;
+    let cv = null; try { cv = tgImage(true); } finally { state.tg.previewMarks = false; }
+    if (!cv) { showToast('Nothing to preview yet', 'error'); return; }
+    openZoomViewer(cv.toDataURL('image/jpeg', 0.92));
+    const ov = document.getElementById('zoomViewer'); if (!ov) return;
+    let bar = document.getElementById('zvPreviewBar');
+    if (!bar) { bar = document.createElement('div'); bar.id = 'zvPreviewBar'; ov.appendChild(bar); }
+    const hasChg = !!(state.tg.prevChg && Object.keys(state.tg.prevChg.keys || {}).length);
+    const hint = ov.querySelector('.zv-hint'); if (hint) hint.style.display = 'none';
+    bar.innerHTML = `<div class="zvp-t">Preview · not published yet${hasChg ? '<small>Yellow = changes not sent to teachers</small>' : ''}</div><div class="zvp-b"><button type="button" class="btn-secondary" id="zvpEdit">Edit</button><button type="button" class="save-btn" id="zvpPub" style="margin:0;">Publish</button></div>`;
+    const close = () => { const x = document.getElementById('zvX'); if (x) x.click(); };
+    document.getElementById('zvpEdit').addEventListener('click', close);
+    document.getElementById('zvpPub').addEventListener('click', () => { close(); setTimeout(tgPublishAsk, 150); });
   }
   // ---------- Teacher absent screen ----------
   state.abs = null;
@@ -7132,6 +7206,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       el.classList.toggle('atab-off', el.getAttribute('data-atab').split(' ').indexOf(t) === -1);
     });
     if (t === 'reports' && typeof renderRepControls === 'function') renderRepControls();
+    if (t === 'tt' && state.ttLeaves) { state.ttLeaves.ws = ''; state.ttLeaves.loading = ''; } // read leaves again each time the timetable opens
     const dated = t !== 'settings' && t !== 'tt';
     document.getElementById('adminDateSub').classList.toggle('atab-off', !dated);
 
@@ -9079,7 +9154,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       }
       const today = d === todayStr();
       const live = daySlots.filter((x) => !x.cancelled).length;
-      html += `<div class="sv-day${today ? ' today' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : ' · No classes'}</span></div>`;
+      const lvHere = (state.historyClasses || []).find((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday' && c.teacherId === state.teacherId && c.date === d);
+      html += `<div class="sv-day${today ? ' today' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}${lvHere ? (d > todayStr() ? `<button type="button" class="sv-lv" data-cancel-leave="${escapeHtml(lvHere.id)}" title="Tap to cancel this leave">On leave ✕</button>` : '<span class="sv-lv">On leave</span>') : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : ' · No classes'}</span></div>`;
       if (daySlots.length || dutyHtml) html += `<div class="sv-rows">${dutyHtml}${matched.map(svSlotHtml).join('')}</div>`;
     });
     if (sv.weekStart === mondayOf(todayStr()) && pastAny) {
@@ -9093,6 +9169,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!weekHasSlots) {
       const canCopy = !pastWeek && svCopyCandidates().length;
       html = `<div class="tl-empty compact sv-empty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><div class="tl-empty-title">${pastWeek ? 'No classes were scheduled this week.' : 'No classes planned for this week yet.'}</div>${pastWeek ? '' : `<div class="tl-empty-sub">${canCopy ? 'Tap + Add Slot, or Copy last week to start from last week\'s plan.' : 'Tap + Add Slot to plan your classes.'}</div>`}</div></div>`;
+      const wkLv = upcomingLeaves().filter((c) => days.indexOf(c.date) !== -1);
+      if (wkLv.length) html += `<div class="uplv" style="margin-top:10px;">${wkLv.map((c) => `<div class="uplv-row"><span><b>${escapeHtml(dayHeading(c.date))}</b> · On leave</span><button type="button" class="btn-secondary uplv-x" data-cancel-leave="${escapeHtml(c.id)}">Cancel</button></div>`).join('')}</div>`;
     }
     const parts = [`${fmtTeaching(counts.mins)} teaching`];
     if (counts.done) parts.push(`${counts.done} done`);
@@ -12199,6 +12277,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         ? (state.leave.to >= state.leave.from ? datesBetween(state.leave.from, state.leave.to) : []) : null;
       if (leaveDates && !leaveDates.length) { showFormMsg('The "To" date must be on or after "From".'); flagField('leaveFields'); return; }
       if (leaveDates && leaveDates.length > 31) { showFormMsg('Choose up to 31 days at a time.'); flagField('leaveFields'); return; }
+      if (state.activityForm.activityType === 'Leave / Holiday' && !editingId) {
+        const ds = leaveDates || [entryDate]; const first = ds[0], last = ds[ds.length - 1];
+        if (first > todayStr()) {
+          const inD = Math.round((dateObj(first) - dateObj(todayStr())) / 86400000);
+          const what = ds.length > 1 ? `Leave from ${dayHeading(first)} to ${dayHeading(last)} (${ds.length} days)` : `Leave on ${dayHeading(first)}`;
+          const ok = await showConfirm(`${what}, starting in ${inD} day${inD === 1 ? '' : 's'}.`, 'Save this leave?', 'Save');
+          if (!ok) return;
+        }
+      }
       showFormMsg('');
       state.saving = true;
       renderForm();
