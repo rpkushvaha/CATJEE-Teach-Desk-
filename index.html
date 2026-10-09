@@ -2635,7 +2635,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 10.0 · updated 10 Oct 2026</div>
+          <div class="dnote">Version 10.1 · updated 10 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5409,7 +5409,7 @@
     return rest ? `${m[1]} · ${rest}` : m[1];
   }
   // Short subject names for the narrow grid cells only (full names everywhere else).
-  const SUBJ_SHORT = { mathematics: 'Maths', maths: 'Maths', physics: 'Phy', chemistry: 'Chem', biology: 'Bio', english: 'Eng', hindi: 'Hindi', computer: 'Comp', 'social science': 'SSt', science: 'Sci', reasoning: 'Reas', 'geo/eco': 'Geo/Eco', 'his/pol.sc.': 'His/Pol', 'his/pol.sc': 'His/Pol', sanskrit: 'Skt' };
+  const SUBJ_SHORT = { mathematics: 'Maths', maths: 'Maths', physics: 'Phy', chemistry: 'Chem', biology: 'Bio', english: 'Eng', hindi: 'Hindi', computer: 'Comp', 'social science': 'SSt', science: 'Sci', reasoning: 'Reas', 'geo/eco': 'Geo/Eco', 'his/pol.sc.': 'His/Pol', 'his/pol.sc': 'His/Pol', 'his/pol. sc.': 'His/Pol', 'his/pol. sc': 'His/Pol', 'his/pol': 'His/Pol', 'history': 'Hist', 'geography': 'Geo', 'political science': 'Pol Sc', sanskrit: 'Skt' };
   function shortSubj(x) { const k = String(x || '').trim().toLowerCase(); if (SUBJ_SHORT[k]) return SUBJ_SHORT[k]; return x.length > 7 ? x.slice(0, 5) + '.' : x; }
   function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase(); }
   function classOfBatchNum(b) { const m = String(b).match(/class\s*(\d+)/i); return m ? m[1] : ''; }
@@ -5765,6 +5765,18 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       txt(`(${String(dateObj(d).getDate()).padStart(2, '0')}.${String(dateObj(d).getMonth() + 1).padStart(2, '0')}.${dateObj(d).getFullYear()})`, 20 + colDate / 2, y + dh / 2 + 10, 13, true);
       const shade = di % 2 ? '#DDEBF7' : '#FFFFFF';
       const drawn = {};
+      // A day with its own period times is laid out by the clock, like the printed sheet:
+      // each period covers the header columns that start inside its time, and the break column stays grey.
+      const liveD = perD.map((pp, i) => ({ pp, i })).filter((q) => q.pp && !q.pp.off && q.pp.start && q.pp.end);
+      const span = {};
+      liveD.forEach((q) => {
+        const ps = hhmmToMin(q.pp.start), pe = hhmmToMin(q.pp.end); const idx = [];
+        colX.forEach((o, j) => { if (o.c.br) return; const t = hhmmToMin(o.c.pp.start); if (t >= ps - 5 && t < pe) idx.push(j); });
+        if (!idx.length) { let best = -1, bo = 0; colX.forEach((o, j) => { if (o.c.br) return; const ov = Math.min(hhmmToMin(o.c.pp.end), pe) - Math.max(hhmmToMin(o.c.pp.start), ps); if (ov > bo) { bo = ov; best = j; } }); if (best >= 0) idx.push(best); }
+        if (idx.length) span[q.i] = [Math.min(...idx), Math.max(...idx)];
+      });
+      const timeMode = liveD.some((q) => span[q.i] && colX[span[q.i][0]].c.p !== q.i);
+      const colsOf = (pp) => (timeMode && span[pp] ? [colX[span[pp][0]], colX[span[pp][1]]] : [pX(pp), pX(pp)]);
       bats.forEach((b, bi) => {
         const ry = y + bi * rowH;
         box(20 + colDate, ry, colClass, rowH, '#FFFFFF'); txt(gridBatchLabel(b).replace(' · ', ' '), 20 + colDate + colClass / 2, ry + rowH / 2, 13, true, '#000', colClass - 8);
@@ -5786,21 +5798,16 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           fitLines(x, lines, bx + bw / 2, by, bw, bh);
         };
         if (rect) {
-          const xa = pX(p0).x, xz = pX(p1).x + pX(p1).w;
+          const xa = colsOf(p0)[0].x, xz = colsOf(p1)[1].x + colsOf(p1)[1].w;
           drawEx(xa, y + b0 * rowH, xz - xa, (b1 - b0 + 1) * rowH);
           cs.forEach((c) => { drawn[`${c.p}|${c.b}`] = 1; });
         }
       });
-      bats.forEach((b, bi) => {
-        const ry = y + bi * rowH;
-        colX.forEach((o, ci) => {
-          if (o.c.br) return;
-          const p = o.c.p; if (drawn[`${p}|${b}`]) return;
-          if (!perD[p] || perD[p].off || !perD[p].start) { box(o.x, ry, o.w, rowH, '#D9D9D9'); return; }
+      const drawCell = (o, p, ci, b, bi, ry, join) => {
           const cell = tgCell(d, p, b);
           // joined periods (this period runs over the next ones, which are off this day): one wide box
           let wEnd = o.x + o.w;
-          if (hhmmToMin(perD[p].end) > hhmmToMin(o.c.pp.end)) {
+          if (join && hhmmToMin(perD[p].end) > hhmmToMin(o.c.pp.end)) {
             for (let j = ci + 1; j < colX.length; j++) {
               const q = colX[j];
               if (q.c.br) { if (hhmmToMin(q.c.a) < hhmmToMin(perD[p].end)) continue; break; }
@@ -5829,6 +5836,24 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           if (cell.cb && tgComboOf(doc.cells, cell).length > 1) { const cr = comboRoom(doc.cells, cell, d, doc); if (cr) lines.push([`(Room ${cr})`, '#C00000', 11]); }
           else if (rDay) lines.push([`(Room ${rDay})`, '#C00000', 11]);
           fitLines(x, lines, o.x + o.w / 2, ry, o.w, rH);
+      };
+      bats.forEach((b, bi) => {
+        const ry = y + bi * rowH;
+        if (timeMode) {
+          const covered = {}; Object.keys(span).forEach((k) => { for (let j = span[k][0]; j <= span[k][1]; j++) covered[j] = 1; });
+          colX.forEach((o, j) => { if (!o.c.br && !covered[j]) box(o.x, ry, o.w, rowH, '#D9D9D9'); });
+          liveD.forEach((q) => {
+            const sp = span[q.i]; if (!sp || drawn[`${q.i}|${b}`]) return;
+            const a = colX[sp[0]], z = colX[sp[1]];
+            drawCell({ x: a.x, w: z.x + z.w - a.x, c: a.c }, q.i, sp[1], b, bi, ry, false);
+          });
+          return;
+        }
+        colX.forEach((o, ci) => {
+          if (o.c.br) return;
+          const p = o.c.p; if (drawn[`${p}|${b}`]) return;
+          if (!perD[p] || perD[p].off || !perD[p].start) { box(o.x, ry, o.w, rowH, '#D9D9D9'); return; }
+          drawCell(o, p, ci, b, bi, ry, true);
         });
       });
       const note = dayNoteOf(doc, d);
