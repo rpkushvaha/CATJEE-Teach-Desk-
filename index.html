@@ -6,7 +6,8 @@
 <title>CATJEE Teach Desk</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#E63946">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2638,7 +2639,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 10.3 · updated 10 Oct 2026</div>
+          <div class="dnote">Version 10.4 · updated 11 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9897,6 +9898,11 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.querySelectorAll('#themeChips [data-theme-choice]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-theme-choice') === pref);
     });
+    // the phone's top and bottom bars follow the app's light / dark choice
+    try {
+      const dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.setAttribute('content', dark ? '#111111' : '#FFFFFF'); m.removeAttribute('media'); });
+    } catch (e) { /* ignore */ }
   }
   applyThemePref();
 
