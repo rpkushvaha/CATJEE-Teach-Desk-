@@ -1041,9 +1041,32 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  /* one look for every card: a 3px coloured edge on the left (class status / activity type) */
+  .tl-card { border-left-width: 3px !important; border-left-style: solid; }
+  .tl-card.upcoming { border-left-color: #CBD5E1; }
+  .tl-card.done { border-left-color: #16A34A; }
+  .tl-card.live, .tl-card.tl-next { border-left-color: #E63946; }
+  .tl-card.missed { border-left-color: #D97706; }
+  [data-hv-open] > .tl-card { border-left-color: #16A34A; }
+  .hv-act-card { border-left-width: 3px; }
+  /* same weight for class names everywhere */
+  .sv-row .sv-batch { font-weight: 600; font-size: 15px; }
+  .pv-row b { font-weight: 600; font-size: 14px; }
+  #adminNewExamBtn[hidden] { display: none !important; }
+  #adminExamForm:not([hidden]) ~ #adminExamList .empty-state { display: none; }
+  /* date in one tappable pill, arrows at equal distance */
+  .date-pill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font: inherit; font-size: 14.5px; font-weight: 600; color: var(--ink); cursor: pointer; max-width: 100%; }
+  .date-pill .ic { color: #C81E32; flex: none; }
+  .date-pill:active { transform: scale(.98); }
+  .ad-datelbl { justify-content: center; }
+  /* bigger clock in time boxes; the whole box opens it */
+  input[type="time"]::-webkit-calendar-picker-indicator, input[type="date"]::-webkit-calendar-picker-indicator { width: 22px; height: 22px; padding: 4px; margin-left: 4px; cursor: pointer; opacity: 1; filter: invert(23%) sepia(84%) saturate(3300%) hue-rotate(345deg) brightness(92%); }
+  input[type="time"], input[type="date"] { cursor: pointer; }
+  textarea.text-input { overflow-y: auto; }
   /* 2) quiet "forgot to check in" */
   #lateInBtn { font-size: 13px !important; font-weight: 500; color: var(--muted-2); gap: 5px; }
-  #lateInBtn .ico { color: #C81E32; }
+  #lateInBtn .ico { color: #C81E32; margin-right: 2px; }
+  #lateInBtn { align-items: center; gap: 6px; }
   /* 3) activity cards like class cards */
   .hv-act-card { border-left: 3px solid rgba(59,130,246,.55); }
   .hv-act-card.leave { border-left-color: rgba(217,119,6,.65); }
@@ -1963,7 +1986,7 @@
         </div>
         <section class="act-card" id="activityNoteCard">
           <label for="activityNoteInput" id="activityNoteLabel" class="act-card-t" style="margin:0;">Work Details</label>
-          <textarea class="text-input" id="activityNoteInput" rows="4" style="resize:none; font-family:inherit;" placeholder="Describe the work completed…"></textarea>
+          <textarea class="text-input" id="activityNoteInput" rows="4" style="resize:none; font-family:inherit;" placeholder="Describe the work…"></textarea>
         </section>
       </div>
 
@@ -2116,7 +2139,7 @@
       </div>
       <div class="hv-nav" data-atab="dash exams">
         <button type="button" class="hv-arrow" id="adminDatePrev" aria-label="Previous day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div class="hv-label ad-datelbl"><span id="adminDateLabelText">Today</span><button type="button" class="hv-icon cal-btn" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
+        <div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="adminDateLabelText">Today</span></button></div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
       <button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button>
@@ -2687,7 +2710,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 10.7 · updated 11 Oct 2026</div>
+          <div class="dnote">Version 10.8 · updated 12 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3212,7 +3235,7 @@
       btn.className = 'btn btn-checkin';
       btn.innerHTML = svgLogin() + 'Check In';
     }
-    const lateBtn = document.getElementById('lateInBtn'); if (lateBtn) lateBtn.style.display = c.checkedIn ? 'none' : 'block';
+    const lateBtn = document.getElementById('lateInBtn'); if (lateBtn) lateBtn.style.display = c.checkedIn ? 'none' : 'flex';
 
     const stuckWarning = document.getElementById('stuckCheckinWarning');
     if (stuckWarning) {
@@ -7467,7 +7490,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const rows = showAll ? sched : sched.slice(0, 8);
     document.getElementById('adminSchedMeta').textContent = sched.length ? `${sched.length} class${sched.length === 1 ? '' : 'es'}` : '';
     schedEl.innerHTML = !slotsReady ? '<div class="skel short"></div>'
-      : !sched.length ? `<div class="empty-state"><span class="ico i-cal" aria-hidden="true"></span>No classes scheduled for this day</div>`
+      : !sched.length ? `<div class="empty-state"><span class="ico i-cal" aria-hidden="true"></span>${state.adminDate < todayStr() ? 'No classes were scheduled for this day' : 'No classes are scheduled for this day'}</div>`
       : `<div class="sv-rows">${rows.map((x) => { const st = x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status); const t = formatTimeStr(x.slot.time); const tm = t.match(/^(.*?)\s?(AM|PM)$/i); const ses = batchSession(x.slot.label || '') || 'morning'; return `<div class="sv-row ${st} ses-${ses}">
           <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : escapeHtml(t)}</span>
           <span class="sv-main"><span class="sv-top"><span class="sv-batch">${escapeHtml(slotLabelAll(x.slot))}</span>${pillHtml(st, ADMIN_PILL[x.status])}</span>
@@ -8021,6 +8044,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }
     if (classRows.length) html += `<div class="ad-grp">Class Tests · ${ct.reduce((s2, c) => s2 + testCount(c), 0) || classRows.length}</div>` + classRows.join('');
     if (examRows.length) html += `<div class="ad-grp">Exams · ${examRows.length}</div>` + examRows.join('');
+    state.adminExamHasAny = !!html; // an empty day has its own "+ New Exam" button
+    const nb = document.getElementById('adminNewExamBtn'); const fOpen = !document.getElementById('adminExamForm').hidden; if (nb) nb.hidden = fOpen || !html;
     listEl.innerHTML = html || `<div class="empty-state"><span class="ico i-fileck" aria-hidden="true"></span>No tests or exams on this day<button type="button" class="btn-secondary" data-empty-newexam style="border-color: var(--line); width:auto; padding:6px 14px; min-height:36px;">+ New Exam</button></div>`;
     const ne = listEl.querySelector('[data-empty-newexam]'); if (ne) ne.addEventListener('click', () => { const b = document.getElementById('adminNewExamBtn'); if (b) b.click(); });
     bindAdminExamList(listEl, exams, nameOf);
@@ -8493,7 +8518,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const box = document.getElementById('adminExamForm');
     const f = state.adminExamForm;
     box.hidden = !f;
-    document.getElementById('adminNewExamBtn').hidden = !!f;
+    document.getElementById('adminNewExamBtn').hidden = !!f || !state.adminExamHasAny;
     if (!f) return;
     document.getElementById('adminExamFormTitle').textContent = f.id ? 'Edit Exam' : 'New Exam';
     chipRow(document.getElementById('adminExamType'), testTypesList(), f.type, 'data-extype', (v) => { f.type = v; renderAdminExamForm(ids, nameOf); });
@@ -12180,7 +12205,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const at = state.activityForm.activityType;
     const isLeave = state.entryMode === 'activity' && at === 'Leave / Holiday';
     const NOTE = { 'Invigilation': ['Notes (optional)', 'Add instructions, observations or remarks…'], 'Leave / Holiday': ['Reason (optional)', 'Add reason or remarks…'] };
-    const nt = NOTE[at] || ['Work Details', 'Describe the work completed…'];
+    const nt = NOTE[at] || ['Work Details', 'Describe the work…'];
     document.getElementById('activityNoteLabel').textContent = nt[0];
     document.getElementById('activityNoteInput').placeholder = nt[1];
     renderLeaveBox(isLeave);
@@ -13466,6 +13491,18 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     }
   };
   (function bindPreviewRow() { const b = document.getElementById('pvToggle'); if (!b) return; b.addEventListener('click', () => { const pn = document.getElementById('adminPreviewPanel'); const o = !pn.classList.contains('open'); pn.classList.toggle('open', o); b.setAttribute('aria-expanded', String(o)); }); })();
+  // ---------- Writing boxes grow with the text (iPhone and Android), up to a limit, then scroll ----------
+  (function autoGrow() {
+    const fit = (t) => { if (!t || t.tagName !== 'TEXTAREA') return; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, Math.round(window.innerHeight * 0.45)) + 'px'; };
+    document.addEventListener('input', (e) => fit(e.target), true);
+    document.addEventListener('focusin', (e) => fit(e.target), true);
+    window.__ctdFitTextarea = fit;
+  })();
+  // ---------- Time boxes: tap anywhere in the box to open the clock ----------
+  document.addEventListener('click', (e) => {
+    const t = e.target; if (!t || t.tagName !== 'INPUT' || !/^(time|date)$/.test(t.type)) return;
+    try { if (typeof t.showPicker === 'function') t.showPicker(); } catch (err) { /* some phones open it themselves */ }
+  });
   // ---------- Text size and "Update app now" (Menu → Settings) ----------
   (function textSizeAndUpdate() {
     const KEY = 'ctd_text_size';
