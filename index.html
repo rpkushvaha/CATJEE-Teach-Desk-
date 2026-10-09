@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CATJEE Teach Desk</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -996,7 +996,9 @@
   .rep-opts[hidden], #repStd[hidden], #repCount[hidden] { display: none !important; }
   .rep-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); letter-spacing: .02em; margin: 12px 2px 6px; display: block; }
   /* ---- iPhone (Safari) fixes: no sideways overflow, no zoom on typing, no text blow-up ---- */
-  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--card); }
+  /* the phone's own bottom bar shows the page behind it: keep that white (the tab bar's colour), never red */
+  .bottom-nav { box-shadow: 0 40px 0 0 var(--card); }
   @supports (overflow: clip) { html, body { overflow-x: clip; } }
   input, select, textarea { max-width: 100%; min-width: 0; box-sizing: border-box; }
   input[type="time"], input[type="date"], input[type="month"] { -webkit-appearance: none; appearance: none; min-width: 0; display: block; width: 100%; min-height: 44px; }
@@ -2636,7 +2638,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 10.2 · updated 10 Oct 2026</div>
+          <div class="dnote">Version 10.3 · updated 10 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
