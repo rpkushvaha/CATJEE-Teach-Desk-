@@ -1041,6 +1041,14 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  .ad-trow { border-left: 3px solid transparent; padding-left: 10px !important; }
+  .ad-trow.st-oncampus, .ad-trow.st-present { border-left-color: #16A34A; }
+  .ad-trow.st-absent { border-left-color: #E63946; }
+  .ad-trow.st-notin { border-left-color: #CBD5E1; }
+  .ad-trow.st-leave { border-left-color: #D97706; }
+  .ad-trow.st-nocheck, .ad-trow.st-off { border-left-color: #CBD5E1; }
+  .hv-icons .hv-icon { flex-direction: column; gap: 1px; height: auto; min-height: 44px; padding: 5px 8px; width: auto; min-width: 46px; border-radius: 12px; }
+  .hv-icon-lbl { font-size: 10px; font-weight: 600; color: var(--muted-2); line-height: 1; }
   /* one look for every card: a 3px coloured edge on the left (class status / activity type) */
   .tl-card { border-left-width: 3px !important; border-left-style: solid; }
   .tl-card.upcoming { border-left-color: #CBD5E1; }
@@ -1083,9 +1091,10 @@
   /* 7) lighter Add Slot */
   #svAddBtn { background: transparent; color: #C81E32; border: 1.5px solid rgba(230,57,70,.55); box-shadow: none; }
   /* 8) Preview as Coordinator as a row */
-  .pv-row { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; font: inherit; color: var(--ink); padding: 0; cursor: pointer; text-align: left; }
-  .pv-row .ico { color: #E63946; width: 18px; height: 18px; }
-  .pv-row b { flex: 1; font-weight: 700; font-size: 15px; }
+  .pv-row { display: flex; align-items: center; gap: 8px; min-height: 28px; width: 100%; background: none; border: 0; font: inherit; color: var(--ink); padding: 0; cursor: pointer; text-align: left; }
+  .pv-row .ico { color: #E63946; width: 17px; height: 17px; flex: none; }
+  .pv-row .chev { display: inline-flex; align-items: center; }
+  .pv-row b { flex: 1; font-weight: 600; font-size: 14px; }
   .pv-row .chev { color: var(--muted); transition: transform .2s ease; }
   #adminPreviewPanel.open .pv-row .chev { transform: rotate(90deg); }
   #adminPreviewPanel .pv-body { margin-top: 10px; }
@@ -1295,7 +1304,7 @@
   .sv-row.cancelled { opacity: .62; }
   .sv-row.tt-clash { border-color: #D97706; }
   .sv-row.ex-sel { background: var(--gold-soft); }
-  .sv-row .sv-batch { font-size: 15px; font-weight: 700; }
+  .sv-row .sv-batch { font-size: 15px; font-weight: 600; }
   .sv-row .sv-ampm { align-self: flex-start; margin: 3px 0 0; }
   :root[data-theme="dark"] .schip { border-color: rgba(255,255,255,.25); }
   :root[data-theme="dark"] .sv-row .sv-time { color: #FF7A85; } :root[data-theme="dark"] .sv-row.ses-evening .sv-time { color: #7DA8FF; } :root[data-theme="dark"] .sv-row.ses-special .sv-time { color: #B794FF; }
@@ -1999,9 +2008,9 @@
       <div class="hv-head">
         <div class="pg-title-row"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title">History</div></div>
         <div class="hv-icons">
-          <button class="hv-icon" id="hvCalBtn" aria-label="Jump to a date"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
-          <button class="hv-icon" id="hvSearchBtn" aria-label="Search" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-          <button class="hv-icon" id="hvFilterBtn" aria-label="Filters" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg><span class="hv-dot" id="hvFilterDot" hidden></span></button>
+          <button class="hv-icon" id="hvCalBtn" aria-label="Jump to a date"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="hv-icon-lbl">Date</span></button>
+          <button class="hv-icon" id="hvSearchBtn" aria-label="Search" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="hv-icon-lbl">Search</span></button>
+          <button class="hv-icon" id="hvFilterBtn" aria-label="Filters" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg><span class="hv-icon-lbl">Filter</span><span class="hv-dot" id="hvFilterDot" hidden></span></button>
         </div>
       </div>
       <div class="hv-search" id="hvSearchRow" hidden>
@@ -2238,7 +2247,7 @@
           <div id="adminExamPlan" class="plan-box"></div>
           <div class="sv-form-btns">
             <button type="button" class="btn-secondary" id="adminExamCancel" style="border-color: var(--line);">Cancel</button>
-            <button type="button" class="save-btn" id="adminExamSave" style="margin:0;">Save Exam</button>
+            <button type="button" class="save-btn" id="adminExamSave" style="margin:0;">Save</button>
           </div>
         </div>
         <div class="panel plan-box" id="examPlanBox" hidden></div>
@@ -2710,7 +2719,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 10.8 · updated 12 Oct 2026</div>
+          <div class="dnote">Version 10.9 · updated 12 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7537,7 +7546,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
             <button class="action-btn" data-adm-sess="${r.tid}" style="align-self:flex-start;">${campus && (campus.sessions || []).length ? 'Correct check-in times' : 'Add check-in times'}</button>
           </div>`;
         }
-        return `<div class="ad-trow${expanded ? ' open' : ''}" data-teacher-id="${r.tid}" role="button" tabindex="0">
+        return `<div class="ad-trow st-${r.st.key}${expanded ? ' open' : ''}" data-teacher-id="${r.tid}" role="button" tabindex="0">
           <div class="ad-tmain">
             <span class="ad-tname">${escapeHtml(nameOf(r.tid))}${campus && (campus.sessions || []).some(sessEdited) ? ' <span class="mchip warn" style="font-size:10.5px; padding:1px 7px;">edited</span>' : ''}</span>
             <span class="ad-tsub">${fmtUnits(r.cls.reduce((sum, c) => sum + classUnits(c), 0))} class${r.cls.length === 1 && classUnits(r.cls[0]) === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${invMin ? ` · ${svDur(invMin)} invigilation` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
