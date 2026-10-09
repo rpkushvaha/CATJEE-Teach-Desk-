@@ -1018,6 +1018,11 @@
     input, select, textarea, .text-input { font-size: 16px !important; }
   }
   .rt-tile { position: relative; }
+  .wk-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; font-size: 13.5px; color: var(--muted-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); }
+  .wk-line > b { color: var(--ink); font-weight: 700; }
+  .wk-line .wk-dim { color: var(--muted); font-size: 12.5px; margin-right: auto; }
+  .wk-line span b { color: var(--ink); font-weight: 700; }
+  .tg-help-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 13px; }
   .tg-lvtag { color: #B45309 !important; font-weight: 700; font-size: 10px; }
   .tg-pubrow { display: flex; gap: 8px; align-items: stretch; }
   .tg-pubrow .tg-prevbtn { flex: 0 0 auto; width: auto; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; }
@@ -1834,7 +1839,7 @@
             <div class="toggle-row checklist-item" data-key="worksheet">
               <div class="checklist-toggle-trigger">
                 <span class="checklist-icon"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>
-                <span class="toggle-label">Worksheet Given</span>
+                <span class="toggle-label">Worksheet</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
               <input type="text" class="checklist-note-input" id="worksheetNoteInput" placeholder="Which worksheet? (optional)">
@@ -1842,7 +1847,7 @@
             <div class="toggle-row checklist-item" data-key="material">
               <div class="checklist-toggle-trigger">
                 <span class="checklist-icon"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg></span>
-                <span class="toggle-label">Study Material Given</span>
+                <span class="toggle-label">Study material</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
               <input type="text" class="checklist-note-input" id="materialNoteInput" placeholder="Which chapter? (optional)">
@@ -1850,7 +1855,7 @@
             <div class="toggle-row checklist-item" data-key="test">
               <div class="checklist-toggle-trigger">
                 <span class="checklist-icon"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H6.5A1.5 1.5 0 0 0 5 5.5v14A1.5 1.5 0 0 0 6.5 21H12"/><path d="M15 4h2.5A1.5 1.5 0 0 1 19 5.5V10"/><rect x="9" y="2.5" width="6" height="3" rx="1"/><line x1="8" y1="10" x2="15" y2="10"/><line x1="8" y1="13.5" x2="12" y2="13.5"/><path d="M19.6 13.4a1.4 1.4 0 0 1 2 2L16.2 20.8 13.5 21.5l.7-2.7z"/></svg></span>
-                <span class="toggle-label">Class Test Conducted</span>
+                <span class="toggle-label">Class test</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
               <input type="text" class="checklist-note-input" id="testNoteInput" placeholder="Test on which topic? (optional)">
@@ -1859,7 +1864,7 @@
             <div class="toggle-row checklist-item" data-key="homework">
               <div class="checklist-toggle-trigger">
                 <span class="checklist-icon"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5z"/><polyline points="15 3 15 9 21 9"/></svg></span>
-                <span class="toggle-label">Homework Given</span>
+                <span class="toggle-label">Homework</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
               <input type="text" class="checklist-note-input" id="homeworkNoteInput" placeholder="What homework? (optional)">
@@ -1986,7 +1991,7 @@
     <div class="tab-view" id="view-schedule">
       <div class="pg-title-row"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div>
         <div class="hv-title">Schedule</div>
-        <div class="sv-sub" id="svSub">Your weekly classes · Reminder 5 min before each</div>
+        <div class="sv-sub" id="svSub">Your weekly classes</div>
       </div></div>
       <div class="hv-nav">
         <button type="button" class="hv-arrow" id="svPrev" aria-label="Previous week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -2049,7 +2054,7 @@
       <div class="hv-head">
         <div class="pg-title-row"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div>
           <div class="hv-title">Admin</div>
-          <div class="sv-sub" id="adminDateSub"></div>
+          <div class="sv-sub" id="adminDateSub" hidden style="display:none;"></div>
         </div></div>
         <button type="button" class="hv-icon" id="adminDateCalIcon" aria-label="Open calendar" hidden style="display:none;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
       </div>
@@ -2076,7 +2081,7 @@
 
 
       <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">Classes</div><div class="tsec-meta" id="adLoggedMeta"></div></div>
+        <div class="tsec-head"><div class="tsec-title">Classes</div><div class="tsec-meta" id="adLoggedMeta" hidden></div></div>
         <div class="sum-grid">
           <div class="sum-tile"><div class="sum-num" id="adScheduled">0</div><div class="sum-lbl">Scheduled</div></div>
           <div class="sum-tile"><div class="sum-num" id="adCompleted">0</div><div class="sum-lbl">Completed</div></div>
@@ -2112,7 +2117,7 @@
       </section>
 
       <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">Teacher Activity</div><div class="tsec-meta" id="adminTeacherMeta"></div></div>
+        <div class="tsec-head"><div class="tsec-title">Teacher Activity</div><div class="tsec-meta" id="adminTeacherMeta" hidden></div></div>
         <div id="adminTeacherList"><div class="skel short"></div><div class="skel short"></div></div>
       </section>
 
@@ -2174,13 +2179,7 @@
       </section>
 
       <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">This Week</div><div class="tsec-meta" id="adWeekLabel"></div></div>
-        <div class="sum-grid" id="adWeekGrid">
-          <div class="sum-tile"><div class="sum-num" id="adWkClasses">0</div><div class="sum-lbl">Classes</div></div>
-          <div class="sum-tile"><div class="sum-num" id="adWkTeaching">0m</div><div class="sum-lbl">Teaching</div></div>
-          <div class="sum-tile"><div class="sum-num" id="adWkWorksheets">0</div><div class="sum-lbl">Worksheets</div></div>
-          <div class="sum-tile"><div class="sum-num" id="adWkTests">0</div><div class="sum-lbl">Tests</div></div>
-        </div>
+        <div class="wk-line"><b>This week</b> <span class="wk-dim" id="adWeekLabel"></span><span>Classes <b id="adWkClasses">0</b></span><span>Teaching <b id="adWkTeaching">0m</b></span><span>Worksheets <b id="adWkWorksheets">0</b></span><span>Tests <b id="adWkTests">0</b></span><div id="adWeekGrid" hidden></div></div>
       </section>
 
       <section class="tsec" id="adminReportsSec" data-atab="reports">
@@ -2217,7 +2216,7 @@
         <div class="admin-sub" id="adminReportMsg" style="text-align:center;"></div>
       </section>
 
-      <div class="tsec-head" data-atab="settings"><div class="tsec-title">Settings</div><div class="tsec-meta">Tap a setting to open it</div></div>
+      <div class="tsec-head" data-atab="settings"><div class="tsec-title">Settings</div></div>
       <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
@@ -2268,7 +2267,7 @@
 
       <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
         <div class="panel-title" style="margin:0 0 6px;">Preview as Coordinator</div>
-        <div class="admin-sub" style="margin:0 0 10px;">See the app exactly as a coordinator sees it, to check their screens. Anything you add or change in preview is real, so delete test entries afterwards.</div>
+        <div class="admin-sub" style="margin:0 0 10px;">See the coordinator's screens. Changes made here are real.</div>
         <div class="chips">
           <button type="button" class="chip" data-preview-wing="Pre-Foundation">Pre-Foundation</button>
           <button type="button" class="chip" data-preview-wing="Foundation">Foundation</button>
@@ -2639,7 +2638,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 10.4 · updated 11 Oct 2026</div>
+          <div class="dnote">Version 10.5 · updated 11 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5395,14 +5394,15 @@
     <div class="tg-actions" style="margin-top:8px;">
       <button type="button" class="btn-secondary" id="tgAbsent" style="border-color: var(--line);">Teacher absent</button>
       ${editable ? '<button type="button" class="btn-secondary" id="tgExam" style="border-color: var(--line);"><span class="ico i-note" aria-hidden="true"></span> Exam / Class test</button>' : ''}
-      <button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">${weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey) ? 'Share image' : 'Timetable image'}</button>
+      ${weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey) ? '<button type="button" class="btn-secondary" id="tgImage" style="border-color: var(--line);">Share image</button>' : ''}
       ${editable ? '<button type="button" class="btn-secondary hv-del" id="tgDelWeek" style="border-color: var(--line);">Delete week</button>' : ''}
     </div>
-    ${editable ? '<div class="hv-note" style="text-align:left;">Tips: press and hold a cell to select several (class test, exam, clear). Tap a period heading (P1, P2…) to change its time, or a batch name to change its room — for this day only.</div>' : ''}`;
+    ${editable ? '<button type="button" class="hv-back tg-help-link" data-tour-open="timetable"><span class="ico i-help" aria-hidden="true"></span> How to use the grid</button>' : ''}`;
     if (box._html === html) { renderTgCopyBox(); return; } // nothing changed: keep the grid as it is
     box._html = html;
     box.innerHTML = html;
     bindTg(box);
+    box.querySelectorAll('[data-tour-open]').forEach((b) => b.addEventListener('click', () => { try { startTour(b.getAttribute('data-tour-open')); } catch (e) { /* ignore */ } }));
     renderTgCopyBox();
   }
   // "Class 9 - Batch 1" → "9 · B1", "Class 10 - Evening" → "10 · Eve", others unchanged
@@ -9098,7 +9098,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const chips = [subjChipHtml(slotSubject(s)), s.test ? `<span class="mchip">Class test</span>` : '', slotRoom(s) ? `<span class="mchip">${I_DOOR}${escapeHtml(slotRoom(s))}</span>` : '',
       `<span class="mchip">${I_CLOCK}${escapeHtml(svDur(dur))}${st != null ? ' · till ' + escapeHtml(svEndStr(s).replace(/\s?(AM|PM)$/i, '')) : ''}</span>`].filter(Boolean).join('');
     const src = s.subFor ? `<span class="mchip warn">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span>` : '';
-    const from = s.setBy ? (Array.isArray(s.batches) && s.batches.length > 1 ? 'Combined class · from timetable' : 'From timetable') : '';
+    const from = s.setBy ? (Array.isArray(s.batches) && s.batches.length > 1 ? 'Combined class' : '') : 'Added by you';
     const topic = m.cls && m.cls.topic ? `<span class="sv-topic">${escapeHtml(m.cls.topic)}</span>` : '';
     return `<div class="sv-row ${m.status} ses-${ses}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : (t ? escapeHtml(t) : '—')}</span>
@@ -9335,7 +9335,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const v = reminderLead();
     document.querySelectorAll('#reminderLeadChips [data-lead]').forEach((b) => b.classList.toggle('active', Number(b.getAttribute('data-lead')) === v));
     const sub = document.getElementById('svSub');
-    if (sub) sub.textContent = `Your weekly classes · Reminder ${v} min before each`;
+    if (sub) sub.textContent = 'Your weekly classes';
   }
   document.querySelectorAll('#reminderLeadChips [data-lead]').forEach((b) => b.addEventListener('click', () => {
     try { localStorage.setItem(LEAD_KEY, b.getAttribute('data-lead')); } catch (err) { /* ignore */ }
