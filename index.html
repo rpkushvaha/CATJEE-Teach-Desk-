@@ -1041,6 +1041,10 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  .add-sess-btn { width: 100%; margin-top: 10px; border: 1.5px dashed rgba(230,57,70,.45) !important; color: #C81E32; background: transparent; }
+  .ps-row { margin-top: 12px; }
+  .ps-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .ps-del { border: 0; background: var(--paper-2, rgba(0,0,0,.05)); color: var(--muted-2); width: 28px; height: 28px; border-radius: 50%; font-size: 13px; cursor: pointer; padding: 0; min-height: 0; }
   .ad-trow { border-left: 3px solid transparent; padding-left: 10px !important; }
   .ad-trow.st-oncampus, .ad-trow.st-present { border-left-color: #16A34A; }
   .ad-trow.st-absent { border-left-color: #E63946; }
@@ -2719,7 +2723,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 10.9 · updated 12 Oct 2026</div>
+          <div class="dnote">Version 11.0 · updated 12 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4181,7 +4185,7 @@
     if (h.range !== 'day') html += `<div class="hv-day" style="cursor:default; padding-top:2px;"><span class="hv-day-text"><span class="hv-day-l1">${dDate}<span class="${h.range === 'day' ? 'hv-day-date' : 'hv-day-meta'}">${dCount}</span></span>${dCamp ? `<span class="hv-day-camp">${dCamp}</span>` : ''}</span></div>`;
     html += `<div class="qa-row hv-tiles"><button type="button" class="qa-btn" data-report-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF report</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-wa" data-whatsapp-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button><button type="button" class="qa-btn qa-xl" data-csv-date="${d}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel sheet</span><span class="qa-s">CSV file</span></button></div>`;
     const sessRO = !canEditSessionsOn(d);
-    if (sessions.length) html += `<div class="hv-sub">Check-in sessions</div><div class="class-list" id="historySessionsList">${sessionsCardsHtml(sessions, sessRO)}</div>`;
+    if (sessions.length) html += `<div class="hv-sub">Check-in sessions</div><div class="class-list" id="historySessionsList">${sessionsCardsHtml(sessions, sessRO)}</div>${!sessRO && d < todayStr() && !sessions.some((x) => x.out == null) ? '<button type="button" class="btn-secondary add-sess-btn" id="hvMoreSess">+ Add another session</button>' : ''}`;
     else if (d < todayStr()) html += sessRO
       ? '<div class="hv-sub">Check-in sessions</div><div class="hv-note" style="text-align:left;">No check-in recorded for this day. If you were there, ask the coordinator to add it.</div>'
       : `<div class="hv-sub">Check-in sessions</div><div class="hv-note" style="text-align:left;">No check-in recorded for this day.</div><button type="button" class="btn-secondary" id="hvAddSess" style="border-color: var(--gold); color: var(--gold);">Forgot to check in? Add the times you were here</button>`;
@@ -4198,6 +4202,7 @@
     const sl = document.getElementById('historySessionsList');
     if (sl && !sessRO) wireSessionsEvents(sl, d, sessions, () => showSelectedDay(d));
     const addS = document.getElementById('hvAddSess'); if (addS) addS.addEventListener('click', () => openAddPastSession(d, () => showSelectedDay(d)));
+    const moreS = document.getElementById('hvMoreSess'); if (moreS) moreS.addEventListener('click', () => openAddPastSession(d, () => showSelectedDay(d), sessions));
     el.querySelectorAll('[data-report-date]').forEach((btn) => btn.addEventListener('click', () => downloadReportForDate(btn.getAttribute('data-report-date'), document.getElementById('historyReportMsg'), true)));
     el.querySelectorAll('[data-whatsapp-date]').forEach((btn) => btn.addEventListener('click', () => shareReportOnWhatsApp(btn.getAttribute('data-whatsapp-date'), document.getElementById('historyReportMsg'), true)));
     el.querySelectorAll('[data-csv-date]').forEach((btn) => btn.addEventListener('click', () => downloadHvCsv(document.getElementById('historyReportMsg'))));
@@ -10213,37 +10218,53 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (isNew) sessions = [{ id: genSessionId(), in: null, out: null, addedBy: state.teacherId }];
     const body = document.getElementById('hvSheetBody');
     const nm = (state.adminNames[tid] && state.adminNames[tid].name) || 'Teacher';
-    body.innerHTML = `<div class="hv-d-title">${isNew ? 'Add check-in times' : 'Correct check-in times'}</div><div class="hv-d-wing">${escapeHtml(nm)} · ${escapeHtml(dayHeading(date))}</div>
-      ${sessions.map((x, i) => `<div style="margin-top:12px;"><div class="sv-tlbl" style="margin-bottom:6px;">Session ${i + 1}${sessEdited(x) ? ' · <span style="color:var(--gold);">edited</span>' : ''}</div>
-        <div class="sv-times"><div><label class="sv-tlbl">Check-in</label><input class="text-input" type="time" data-asi="${i}" value="${x.in != null ? toHHMM(x.in) : ''}"></div><div><label class="sv-tlbl">Check-out</label><input class="text-input" type="time" data-aso="${i}" value="${x.out != null ? toHHMM(x.out) : ''}"></div></div></div>`).join('')}
+    const vals = sessions.map((x) => ({ i: x.in != null ? toHHMM(x.in) : '', o: x.out != null ? toHHMM(x.out) : '' }));
+    const readA = () => vals.forEach((v, i) => { const a = body.querySelector(`[data-asi="${i}"]`), b = body.querySelector(`[data-aso="${i}"]`); if (a) v.i = a.value; if (b) v.o = b.value; });
+    const drawA = () => {
+      body.innerHTML = `<div class="hv-d-title">${isNew ? 'Add check-in times' : 'Correct check-in times'}</div><div class="hv-d-wing">${escapeHtml(nm)} · ${escapeHtml(dayHeading(date))}</div>
+      ${sessions.map((x, i) => `<div style="margin-top:12px;"><div class="sv-tlbl ps-head" style="margin-bottom:6px;"><span>Session ${i + 1}${sessEdited(x) ? ' · <span style="color:var(--gold);">edited</span>' : ''}</span>${x._added ? `<button type="button" class="ps-del" data-asdel="${i}" aria-label="Remove this session">✕</button>` : ''}</div>
+        <div class="sv-times"><div><label class="sv-tlbl">Check-in</label><input class="text-input" type="time" data-asi="${i}" value="${vals[i].i}"></div><div><label class="sv-tlbl">Check-out</label><input class="text-input" type="time" data-aso="${i}" value="${vals[i].o}"></div></div></div>`).join('')}
+      <button type="button" class="btn-secondary add-sess-btn" id="asMore">+ Add another session</button>
       <div class="hv-note" id="asErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
 
       <div class="hv-d-btns"><button type="button" class="btn-secondary" id="asCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="asSave" style="margin:0;">Save</button></div>`;
-    document.getElementById('asCancel').addEventListener('click', closeHvSheet);
+      bindA();
+    };
+    const bindA = () => {
+      document.getElementById('asCancel').addEventListener('click', closeHvSheet);
     document.getElementById('asSave').addEventListener('click', async () => {
-      const [y, m, d] = date.split('-').map(Number); const ts = (v, plus) => { const [hh, mm] = v.split(':').map(Number); return new Date(y, m - 1, d + (plus || 0), hh, mm, 0, 0).getTime(); };
-      const mark = (o, field, nv) => { if (o[field] === nv) return o; const oKey = field === 'in' ? 'origIn' : 'origOut'; const nKey = field === 'in' ? 'editsIn' : 'editsOut'; const r2 = Object.assign({}, o, { [field]: nv }); if (r2[oKey] === undefined) r2[oKey] = o[field] == null ? null : o[field]; r2[nKey] = (o[nKey] || 0) + 1; r2.editLog = (o.editLog || []).concat([{ f: field, from: o[field] == null ? null : o[field], to: nv, at: Date.now(), by: state.teacherId }]).slice(-20); return r2; };
-      const out = []; const err = document.getElementById('asErr');
-      for (let i = 0; i < sessions.length; i++) {
-        const vi = body.querySelector(`[data-asi="${i}"]`).value; const vo = body.querySelector(`[data-aso="${i}"]`).value;
-        if (!vi) { err.textContent = 'Every session needs a check-in time'; return; }
-        if (isNew && !vo && date < todayStr()) { err.textContent = 'Add the check-out time too'; return; }
-        let o = isNew ? Object.assign({}, sessions[i], { in: ts(vi) }) : mark(sessions[i], 'in', ts(vi));
-        if (vo) { let to = ts(vo); if (to <= o.in) to = ts(vo, 1); o = isNew ? Object.assign(o, { out: to }) : mark(o, 'out', to); }
-        out.push(o);
-      }
-      const totalSeconds = sumSessions(out); const active = out.find((x) => x.out == null);
-      const payload = { sessions: out, totalSeconds, checkedIn: !!active, checkInAt: active ? active.in : null, sessionCount: out.length };
-      // a day older than yesterday changed by the admin / coordinator shows "edited" once in admin reports
-      if (date < shiftDateStr(todayStr(), -1)) payload.adminEdited = { by: state.teacherId, at: Date.now() };
-      try {
-        await state.db.doc('campusHistory/' + tid).collection('days').doc(date).set(payload, { merge: true });
-        try { await state.db.doc('campusLogs/' + date).collection('teachers').doc(tid).set(payload, { merge: true }); } catch (e2) { /* mirror is best-effort */ }
-        closeHvSheet(); showToast(isNew ? 'Check-in added' : 'Times corrected');
-        try { if (typeof loadAdminDay === 'function') loadAdminDay(true); } catch (e3) { /* ignore */ }
-        renderAdmin();
-      } catch (e4) { err.textContent = 'Could not save. Check the internet and try again.'; }
-    });
+        const [y, m, d] = date.split('-').map(Number); const ts = (v, plus) => { const [hh, mm] = v.split(':').map(Number); return new Date(y, m - 1, d + (plus || 0), hh, mm, 0, 0).getTime(); };
+        const mark = (o, field, nv) => { if (o[field] === nv) return o; const oKey = field === 'in' ? 'origIn' : 'origOut'; const nKey = field === 'in' ? 'editsIn' : 'editsOut'; const r2 = Object.assign({}, o, { [field]: nv }); if (r2[oKey] === undefined) r2[oKey] = o[field] == null ? null : o[field]; r2[nKey] = (o[nKey] || 0) + 1; r2.editLog = (o.editLog || []).concat([{ f: field, from: o[field] == null ? null : o[field], to: nv, at: Date.now(), by: state.teacherId }]).slice(-20); return r2; };
+        const out = []; const err = document.getElementById('asErr');
+        for (let i = 0; i < sessions.length; i++) {
+          readA(); const vi = vals[i].i; const vo = vals[i].o;
+          if (!vi) { err.textContent = 'Every session needs a check-in time'; return; }
+          if (isNew && !vo && date < todayStr()) { err.textContent = 'Add the check-out time too'; return; }
+          const fresh = isNew || sessions[i]._added;
+          if (fresh && !vo && date < todayStr()) { err.textContent = `Add the check-out time for session ${i + 1}`; return; }
+          let o = fresh ? Object.assign({}, sessions[i], { in: ts(vi) }) : mark(sessions[i], 'in', ts(vi));
+          if (vo) { let to = ts(vo); if (to <= o.in) to = ts(vo, 1); o = fresh ? Object.assign(o, { out: to }) : mark(o, 'out', to); }
+          delete o._added;
+          out.push(o);
+        }
+        out.sort((a, b) => a.in - b.in);
+        for (let k = 1; k < out.length; k++) { if (out[k].in < (out[k - 1].out || Infinity)) { err.textContent = 'Two sessions overlap — check the times'; return; } }
+        const totalSeconds = sumSessions(out); const active = out.find((x) => x.out == null);
+        const payload = { sessions: out, totalSeconds, checkedIn: !!active, checkInAt: active ? active.in : null, sessionCount: out.length };
+        // a day older than yesterday changed by the admin / coordinator shows "edited" once in admin reports
+        if (date < shiftDateStr(todayStr(), -1)) payload.adminEdited = { by: state.teacherId, at: Date.now() };
+        try {
+          await state.db.doc('campusHistory/' + tid).collection('days').doc(date).set(payload, { merge: true });
+          try { await state.db.doc('campusLogs/' + date).collection('teachers').doc(tid).set(payload, { merge: true }); } catch (e2) { /* mirror is best-effort */ }
+          closeHvSheet(); showToast(isNew ? 'Check-in added' : 'Times corrected');
+          try { if (typeof loadAdminDay === 'function') loadAdminDay(true); } catch (e3) { /* ignore */ }
+          renderAdmin();
+        } catch (e4) { err.textContent = 'Could not save. Check the internet and try again.'; }
+      });
+      document.getElementById('asMore').addEventListener('click', () => { readA(); sessions.push({ id: genSessionId(), in: null, out: null, addedBy: state.teacherId, _added: true }); vals.push({ i: '', o: '' }); drawA(); });
+      body.querySelectorAll('[data-asdel]').forEach((b) => b.addEventListener('click', () => { readA(); const k = Number(b.getAttribute('data-asdel')); sessions.splice(k, 1); vals.splice(k, 1); drawA(); }));
+    };
+    drawA();
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   async function adminForceCheckout(tid, date) {
@@ -10295,23 +10316,44 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   // Forgot to check in on a past day (only yesterday for teachers): add the arrival and leaving time
-  function openAddPastSession(date, after) {
+  // Forgot to check in on a past day (only yesterday for teachers): add one or more sessions (arrived – left)
+  function openAddPastSession(date, after, existing) {
     if (!canEditSessionsOn(date)) { showToast('Only yesterday can be added. Ask the coordinator for older days.', 'error'); return; }
+    const have = (existing || []).slice();
+    const rows = [{ i: '', o: '' }];
     const body = document.getElementById('hvSheetBody');
-    body.innerHTML = `<div class="hv-d-title">Add check-in and check-out</div><div class="hv-d-wing">${escapeHtml(dayHeading(date))}</div>
-      <div class="sv-times" style="margin-top:12px;"><div><label class="sv-tlbl">Reached campus</label><input class="text-input" type="time" id="apsIn"></div><div><label class="sv-tlbl">Left campus</label><input class="text-input" type="time" id="apsOut"></div></div>
-      <div class="hv-note" id="apsErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
-      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="apsCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="apsSave" style="margin:0;">Save</button></div>`;
-    document.getElementById('apsCancel').addEventListener('click', closeHvSheet);
-    ['apsIn', 'apsOut'].forEach((id) => document.getElementById(id).addEventListener('input', () => { document.getElementById('apsErr').textContent = ''; }));
-    document.getElementById('apsSave').addEventListener('click', async () => {
-      const vi = document.getElementById('apsIn').value, vo = document.getElementById('apsOut').value, err = document.getElementById('apsErr');
-      if (!vi || !vo) { err.textContent = 'Enter both times'; return; }
-      const [y, m, d] = date.split('-').map(Number); const mk = (v, plus) => { const [hh, mm] = v.split(':').map(Number); return new Date(y, m - 1, d + (plus || 0), hh, mm, 0, 0).getTime(); };
-      const tin = mk(vi); let tout = mk(vo); if (tout <= tin) { err.textContent = 'Leaving time must be after the reaching time'; return; }
-      closeHvSheet();
-      try { await pushSessionUpdateForDate(date, [{ id: genSessionId(), in: tin, out: tout, setLater: true }]); showToast('Check-in added for ' + dayHeading(date)); if (after) after(); } catch (e) { flashOffline(e); }
-    });
+    const [y, m, d] = date.split('-').map(Number);
+    const mk = (v, plus) => { const [hh, mm] = v.split(':').map(Number); return new Date(y, m - 1, d + (plus || 0), hh, mm, 0, 0).getTime(); };
+    const read = () => rows.forEach((r, k) => { const a = body.querySelector(`[data-psi="${k}"]`), b = body.querySelector(`[data-pso="${k}"]`); if (a) r.i = a.value; if (b) r.o = b.value; });
+    const draw = () => {
+      body.innerHTML = `<div class="hv-d-title">${have.length ? 'Add another session' : 'Add check-in and check-out'}</div><div class="hv-d-wing">${escapeHtml(dayHeading(date))}</div>
+        ${have.length ? `<div class="hv-note" style="text-align:left; margin-top:8px;">Already there: ${have.map((x) => `${formatTime(x.in)} – ${x.out ? formatTime(x.out) : 'now'}`).join(', ')}</div>` : ''}
+        ${rows.map((r, k) => `<div class="ps-row"><div class="sv-tlbl ps-head"><span>Session ${have.length + k + 1}</span>${rows.length > 1 ? `<button type="button" class="ps-del" data-psdel="${k}" aria-label="Remove this session">✕</button>` : ''}</div>
+          <div class="sv-times"><div><label class="sv-tlbl">Reached campus</label><input class="text-input" type="time" data-psi="${k}" value="${r.i}"></div><div><label class="sv-tlbl">Left campus</label><input class="text-input" type="time" data-pso="${k}" value="${r.o}"></div></div></div>`).join('')}
+        <button type="button" class="btn-secondary add-sess-btn" id="psMore">+ Add another session</button>
+        <div class="hv-note" id="apsErr" style="text-align:left; color: var(--accent); min-height:18px;"></div>
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="apsCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="apsSave" style="margin:0;">Save</button></div>`;
+      document.getElementById('apsCancel').addEventListener('click', closeHvSheet);
+      document.getElementById('psMore').addEventListener('click', () => { read(); rows.push({ i: '', o: '' }); draw(); });
+      body.querySelectorAll('[data-psdel]').forEach((b) => b.addEventListener('click', () => { read(); rows.splice(Number(b.getAttribute('data-psdel')), 1); draw(); }));
+      body.querySelectorAll('input').forEach((x) => x.addEventListener('input', () => { document.getElementById('apsErr').textContent = ''; }));
+      document.getElementById('apsSave').addEventListener('click', async () => {
+        read(); const err = document.getElementById('apsErr');
+        const add = [];
+        for (let k = 0; k < rows.length; k++) {
+          const r = rows[k];
+          if (!r.i || !r.o) { err.textContent = `Enter both times for session ${have.length + k + 1}`; return; }
+          const tin = mk(r.i), tout = mk(r.o);
+          if (tout <= tin) { err.textContent = `Session ${have.length + k + 1}: leaving time must be after the reaching time`; return; }
+          add.push({ id: genSessionId(), in: tin, out: tout, setLater: true });
+        }
+        const all = have.concat(add).slice().sort((a, b) => a.in - b.in);
+        for (let k = 1; k < all.length; k++) { if (all[k].in < (all[k - 1].out || Infinity)) { err.textContent = 'Two sessions overlap — check the times'; return; } }
+        closeHvSheet();
+        try { await pushSessionUpdateForDate(date, all); showToast(add.length > 1 ? `${add.length} sessions added for ${dayHeading(date)}` : 'Check-in added for ' + dayHeading(date)); if (after) after(); } catch (e) { flashOffline(e); }
+      });
+    };
+    draw();
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   // Forgot to check in: check in now with an earlier arrival time (today only).
