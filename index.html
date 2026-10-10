@@ -1041,6 +1041,33 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  .i-megaphone { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2011v2a1%201%200%200%200%201%201h2l5%204V6L6%2010H4a1%201%200%200%200-1%201z%22/%3E%3Cpath%20d%3D%22M15.5%208.5a5%205%200%200%201%200%207%22/%3E%3Cpath%20d%3D%22M18.5%205.5a9%209%200%200%201%200%2013%22/%3E%3C/svg%3E"); }
+  .i-usersck { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M17%2021v-2a4%204%200%200%200-4-4H5a4%204%200%200%200-4%204v2%22/%3E%3Ccircle%20cx%3D%229%22%20cy%3D%227%22%20r%3D%224%22/%3E%3Cpolyline%20points%3D%2216%2011%2018%2013%2022%209%22/%3E%3C/svg%3E"); }
+  .ad-alert-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; font-size: 13px; color: var(--muted-2); }
+  .ad-alert-row > span:first-child { flex: 1; min-width: 0; }
+  .ad-btnrow { display: flex; gap: 6px; flex: none; }
+  .ad-rem { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 11px; min-height: 30px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; white-space: nowrap; }
+  .ad-rem.wa { border-color: #25D366; color: #128C7E; }
+  .ad-rem.go { border-color: rgba(230,57,70,.5); color: #C81E32; }
+  .notice-card { border: 1px solid var(--line); border-left: 3px solid rgba(59,130,246,.55); border-radius: 14px; padding: 12px; background: var(--card); margin: 0 0 12px; }
+  .nc-top { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted-2); }
+  .nc-top .ico { color: #1D4ED8; width: 16px; height: 16px; }
+  .nc-top b { color: var(--ink); font-weight: 700; font-size: 13.5px; }
+  .nc-meta { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .nc-text { margin: 6px 0 10px; font-size: 14.5px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+  .nc-btn { width: auto; min-height: 36px; padding: 6px 16px; }
+  .nb-card { border: 1px solid var(--line); border-left: 3px solid rgba(59,130,246,.55); border-radius: 12px; padding: 10px 12px; background: var(--card); margin-bottom: 8px; cursor: pointer; }
+  .nb-card .nb-text { font-size: 14px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .nb-card.open .nb-text { -webkit-line-clamp: unset; }
+  .nb-card .nb-meta { font-size: 12px; color: var(--muted-2); margin-top: 4px; }
+  .nb-card .nb-more { margin-top: 8px; font-size: 13px; color: var(--muted-2); }
+  .nb-card .nb-acts { display: flex; gap: 6px; margin-top: 8px; }
+  .nt-row .nt-ic.nt-megaphone { background: rgba(59,130,246,.12); color: #1D4ED8; }
+  .team-phone { display: flex; align-items: center; gap: 8px; margin: 6px 0 2px; }
+  .team-phone input { flex: 1; min-height: 38px; font-size: 14px; }
+  .act-seg.act-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #coordTagsBox { margin-bottom: 10px; }
+
   .add-sess-btn { width: 100%; margin-top: 10px; border: 1.5px dashed rgba(230,57,70,.45) !important; color: #C81E32; background: transparent; }
   .ps-row { margin-top: 12px; }
   .ps-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
@@ -1765,6 +1792,7 @@
         </div>
         <button type="button" class="bell-btn" id="bellBtn" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-count" id="bellCount" hidden>0</span></button>
       </div>
+      <div id="todayNotices"></div>
 
       <div class="status-card" id="statusCard">
         <div class="status-row">
@@ -1998,6 +2026,7 @@
           </section>
         </div>
         <section class="act-card" id="activityNoteCard">
+          <div id="coordTagsBox" hidden><div class="act-card-t" style="margin:0 0 8px;">What did you handle?</div><div class="chips" id="coordTags"></div></div>
           <label for="activityNoteInput" id="activityNoteLabel" class="act-card-t" style="margin:0;">Work Details</label>
           <textarea class="text-input" id="activityNoteInput" rows="4" style="resize:none; font-family:inherit;" placeholder="Describe the work…"></textarea>
         </section>
@@ -2199,6 +2228,11 @@
       <section class="tsec" data-atab="dash">
         <div class="tsec-head"><div class="tsec-title">Attention Required</div></div>
         <div id="adminAlerts"></div>
+      </section>
+
+      <section class="tsec" data-atab="dash" id="noticesSec">
+        <div class="tsec-head"><div class="tsec-title">Notices</div><button type="button" class="hv-back" id="nbNewTop" hidden style="padding:0;">+ New</button></div>
+        <div id="adminNotices"></div>
       </section>
 
       <section class="tsec" data-atab="dash">
@@ -2723,7 +2757,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 11.0 · updated 12 Oct 2026</div>
+          <div class="dnote">Version 11.2 · updated 12 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -2768,12 +2802,15 @@
     'Foundation': []
   };
   const DEFAULT_BATCHES = DEFAULT_BATCHES_BY_WING['Pre-Foundation'];
-  const ACTIVITY_TYPES = ['Other Activity', 'Invigilation', 'Leave / Holiday'];
+  const ACTIVITY_TYPES = ['Other Activity', 'Invigilation', 'Leave / Holiday', 'Coordination'];
+  const COORD_TAGS = ['Timetable', 'Arrangement', 'Teacher follow-up', 'Parent calls', 'Exam / duty', 'Meeting', 'Other'];
+  const isLeadNow = () => !!(state.canAdmin || state.isCoordinator);
   const ACT_ICONS = {"Other Activity": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/></svg>", "Invigilation": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2\"/><rect x=\"9\" y=\"3\" width=\"6\" height=\"4\" rx=\"1\"/><polyline points=\"9 14 11 16 15 12\"/></svg>", "Leave / Holiday": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"/><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"/><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"/><line x1=\"9\" y1=\"14\" x2=\"15\" y2=\"18\"/><line x1=\"15\" y1=\"14\" x2=\"9\" y2=\"18\"/></svg>"};
+  ACT_ICONS['Coordination'] = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><polyline points=\"16 11 18 13 22 9\"/></svg>';
   const DEFAULT_TEST_TYPES = ['Class Test', 'Unit Test', 'Half-Yearly', 'Pre-Board 1', 'Pre-Board 2', 'Annual Exam'];
   const DEFAULT_SUBJECTS = ['Maths', 'Physics', 'Chemistry', 'Biology', 'Science', 'English', 'Hindi', 'Social Science', 'Computer', 'Reasoning'];
   // Saved value stays 'Other Activity' (older records use it); it is shown as 'Other Work'.
-  function activityLabel(t) { return t === 'Other Activity' ? 'Other Work' : (t || 'Activity'); }
+  function activityLabel(t) { return t === 'Other Activity' ? 'Other Work' : (t === 'Coordination' ? 'Coordination Work' : (t || 'Activity')); }
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const REMINDER_PREF_KEY = 'catjee_reminders_enabled';
 
@@ -2816,7 +2853,7 @@
     editingSourceTab: null,
     addTargetDate: null,
     pendingDeleteIds: new Set(),
-    activityForm: { activityType: ACTIVITY_TYPES[0], note: '' },
+    activityForm: { activityType: ACTIVITY_TYPES[0], note: '', coordTags: [] },
     scheduleSlots: [],
     scheduleDay: 'Mon',
     scheduleWing: 'Pre-Foundation',
@@ -4487,7 +4524,9 @@
     });
 
     const actChipsEl = document.getElementById('activityChips');
-    actChipsEl.innerHTML = ACTIVITY_TYPES.map((t) => {
+    const actTypes = ACTIVITY_TYPES.filter((t) => t !== 'Coordination' || isLeadNow());
+    actChipsEl.classList.toggle('act-4', actTypes.length > 3);
+    actChipsEl.innerHTML = actTypes.map((t) => {
       const active = t === state.activityForm.activityType;
       return `<button type="button" class="act-seg-btn${active ? ' active' : ''}" data-activity-type="${escapeHtml(t)}">${ACT_ICONS[t] || ''}<span>${escapeHtml(activityLabel(t))}</span></button>`;
     }).join('');
@@ -4742,6 +4781,7 @@
       return `<div class="team-row">
         <div class="team-name">${escapeHtml(name)}${uid === state.teacherId ? ' <span class="team-you">(you)</span>' : ''}</div>
         <div class="team-id">${(state.team[uid] && state.team[uid].staffId) ? `ID: <b>${escapeHtml(state.team[uid].staffId)}</b>` : `<button type="button" class="hv-back" data-team-mkid="${uid}" style="padding:0;">Create Staff ID</button>`}</div>
+        <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}"></div>
         <div class="chips team-chips">
           <button type="button" class="chip${coord ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
           <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
@@ -4780,6 +4820,10 @@
       const uid = b.getAttribute('data-team-restore');
       const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person';
       save(uid, { status: 'active' }, `${name}'s access restored`);
+    }));
+    el.querySelectorAll('[data-team-phone]').forEach((inp) => inp.addEventListener('change', () => {
+      const v = inp.value.replace(/[^0-9]/g, '').slice(0, 13);
+      save(inp.getAttribute('data-team-phone'), { phone: v }, v ? 'Number saved' : 'Number removed');
     }));
     el.querySelectorAll('[data-team-wing]').forEach((b) => b.addEventListener('click', () => {
       const uid = b.getAttribute('data-uid'); const wing = b.getAttribute('data-team-wing');
@@ -6729,7 +6773,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     Object.keys(needs).forEach((t) => { html += `<div class="ad-alert"><div class="ad-alert-t">⚠️ ${escapeHtml(ttName(t))} is on leave · ${needs[t]} timetable class${needs[t] === 1 ? '' : 'es'} need a substitute</div><button type="button" class="hv-back" data-arrange="${t}" style="padding:0;">Arrange substitute →</button></div>`; });
     if (subs.length) {
       subs.sort((x, y) => ((x.tm && x.tm.start) || '').localeCompare((y.tm && y.tm.start) || ''));
-      html += `<div class="ad-subs"><div class="ad-alert-t"><span class="ico i-swap" aria-hidden="true"></span> Substitutions · ${subs.length}</div>${subs.map((x) => `<div class="ad-alert-l">${x.tm ? escapeHtml(formatTimeStr(x.tm.start)) + ' · ' : ''}${escapeHtml(x.c.b)} · ${escapeHtml(effS(x.c))}: <b>${escapeHtml(ttName(x.c.sub.t))}</b> for ${escapeHtml(ttName(x.c.sub.for))}</div>`).join('')}</div>`;
+      html += `<div class="ad-subs"><div class="ad-alert-t"><span class="ico i-swap" aria-hidden="true"></span> Substitutions · ${subs.length}</div>${subs.map((x) => `<div class="ad-alert-l">${x.tm ? escapeHtml(formatTimeStr(x.tm.start)) + ' · ' : ''}${escapeHtml(x.c.b)} · ${escapeHtml(effS(x.c))}: <b>${escapeHtml(ttName(x.c.sub.t))}</b> for ${escapeHtml(ttName(x.c.sub.for))}</div>`).join('')}<button type="button" class="ad-rem wa" data-arr-img style="margin-top:8px;">Share picture</button></div>`;
     }
     return html;
   }
@@ -6944,7 +6988,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     let seen = {}; try { seen = JSON.parse(localStorage.getItem('ctd_lead_seen') || '{}'); } catch (e) { seen = {}; }
     return out.map((n) => Object.assign(n, { read: !!seen[n.id], lead: true }));
   }
-  function allNotices() { return leadNotices().concat(state.notices || []).sort((a, b) => (a.read - b.read) || (b.at - a.at)); }
+  function allNotices() { return leadNotices().concat((state.notices || []).filter((x) => x.type !== 'sent')).sort((a, b) => (a.read - b.read) || (b.at - a.at)); }
   function renderBell() {
     const b = document.getElementById('bellBtn'); if (!b) return;
     const n = allNotices().filter((x) => !x.read).length;
@@ -6952,8 +6996,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     dot.textContent = n > 9 ? '9+' : String(n);
     dot.hidden = !n;
     b.setAttribute('aria-label', n ? `Notifications, ${n} new` : 'Notifications');
+    try { renderTodayNotices(); } catch (e) { /* ignore */ }
   }
-  const N_ICON = { tt: 'calendar', ttu: 'refresh', sub: 'repeat', subout: 'back', subback: 'back', duty: 'clip', leave: 'alert', cancel: 'x' };
+  const N_ICON = { tt: 'calendar', ttu: 'refresh', sub: 'repeat', subout: 'back', subback: 'back', duty: 'clip', leave: 'alert', cancel: 'x', notice: 'megaphone' };
   const N_SVG = {
     calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
     refresh: '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
@@ -6963,6 +7008,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     alert: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
     x: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'
   };
+  N_SVG.megaphone = '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>';
   function noticeAgo(t) {
     const m = Math.round((Date.now() - t) / 60000);
     if (m < 1) return 'Just now'; if (m < 60) return `${m} min ago`;
@@ -7005,6 +7051,162 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (L.tab === 'admin') { switchTab('admin'); if (L.sub) { state.adminTab = L.sub; renderAdmin(); } return; }
       if (L.tab) switchTab(L.tab);
     }));
+  }
+
+
+  // ---------- Coordinator tools: remind on WhatsApp, arrangement picture, notices ----------
+  function personName(uid) { return (state.adminNames[uid] && state.adminNames[uid].name) || 'Teacher'; }
+  function callName(uid) { const f = personName(uid).split(' ')[0]; return salutedName(f, (state.adminNames[uid] && state.adminNames[uid].sal) || '') || f; }
+  function greetNow() { const h = new Date().getHours(); return h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening'); }
+  function waNumber(uid) {
+    const d = String((state.team[uid] && state.team[uid].phone) || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.length === 10) return '91' + d;
+    if (d.length === 11 && d[0] === '0') return '91' + d.slice(1);
+    return d;
+  }
+  function remindText(kind, tid, ctx) {
+    const hi = `${greetNow()} ${callName(tid)},`;
+    if (kind === 'arrive') return `${hi} you have not checked in yet today in Teach Desk. Your first class is at ${formatTimeStr(ctx.first.slot.time)}. Please check in. Thank you.`;
+    const when = ctx.date === todayStr() ? "today's" : `${dayHeading(ctx.date)}'s`;
+    return `${hi} ${when} entry for ${ctx.list.map((x) => `${x.slot.label} (${formatTimeStr(x.slot.time)})`).join(', ')} is still pending in Teach Desk. Please fill it in when you can. Thank you.`;
+  }
+  let remindTipShown = false;
+  function remindTeacher(uid, text) {
+    const n = waNumber(uid);
+    window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(text), '_blank');
+    if (!n && !remindTipShown) { remindTipShown = true; showToast('Tip: save the WhatsApp number in Settings → Team to open the chat directly'); }
+  }
+  function alertRowsHtml(a) {
+    return (a.rows || []).map((r) => `<div class="ad-alert-row"><span>${escapeHtml(r.txt)}</span><span class="ad-btnrow">${r.btns.map((b) => `<button type="button" class="ad-rem ${b.cls || ''}" ${b.attr}>${escapeHtml(b.label)}</button>`).join('')}</span></div>`).join('');
+  }
+  // next week's timetable: a group published this week but not yet next week
+  state.nextWkTT = state.nextWkTT || { ws: '', at: 0, docs: null };
+  function refreshNextWk() {
+    const ws = shiftDateStr(mondayOf(todayStr()), 7); const st = state.nextWkTT;
+    if (st.ws === ws && Date.now() - st.at < 60000) return;
+    state.nextWkTT = { ws, at: Date.now(), docs: st.ws === ws ? st.docs : null };
+    loadWeekTimetables(ws, true).then((docs) => { state.nextWkTT = { ws, at: Date.now(), docs }; if (state.tab === 'admin') renderAdmin(); }).catch(() => {});
+  }
+  function unpublishedNextWeek() {
+    const nx = state.nextWkTT; const cur = state.dashTT;
+    if (!nx.docs || !cur || cur.ws !== mondayOf(todayStr())) return [];
+    const day = new Date().getDay(); if ([1, 2, 3].indexOf(day) !== -1) return []; // only from Thursday
+    const lw = leadWings(); const out = [];
+    cur.docs.filter((d) => (d.published || []).length).forEach((d) => {
+      const g = ttGroups().find((q) => q.key === d.group); if (!g || (g.wing && lw.indexOf(g.wing) === -1)) return;
+      if (!nx.docs.some((x) => x.group === d.group && (x.published || []).length) && !out.some((o) => o.key === g.key)) out.push({ key: g.key, label: g.label });
+    });
+    return out;
+  }
+  function openTimetableWeek(ws) { state.tt.weekStart = ws; state.adminTab = 'tt'; state.tg.mode = 'grid'; renderAdmin(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  // arrangement picture of the day (from "Teacher absent")
+  function shareArrangementPicture() {
+    const date = state.adminDate; const rows = [];
+    ((state.dashTT && state.dashTT.docs) || []).forEach((doc) => (doc.cells || []).forEach((c) => {
+      if (c.d !== date || c.ex || !c.sub) return;
+      const tm = cellTimes(doc, c);
+      rows.push({ ts: tm ? tm.start : '', t: tm ? `${formatTimeStr(tm.start)} – ${formatTimeStr(tm.end)}` : '', cls: gridBatchLabel(c.b), subj: effS(c) || '', absent: ttName(c.sub.for), by: ttName(c.sub.t), room: batchRoomOn(c.b, date, doc) || '' });
+    }));
+    if (!rows.length) { showToast('No substitutions on this day'); return; }
+    rows.sort((a, b) => a.ts.localeCompare(b.ts) || a.cls.localeCompare(b.cls));
+    const cols = [['Time', 210], ['Class', 110], ['Subject', 150], ['Absent', 200], ['Taken by', 200], ['Room', 90]];
+    const tw = cols.reduce((n, c) => n + c[1], 0); const W = tw + 40, rowH = 46, hdrH = 44, titleH = 56, H = 20 + titleH + hdrH + rows.length * rowH + 56;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.lineWidth = 1.5; x.strokeStyle = '#444'; x.textBaseline = 'middle'; x.textAlign = 'center';
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeRect(bx, by, bw, bh); };
+    box(20, 20, tw, titleH, '#FFFF00'); x.fillStyle = '#000'; x.font = 'bold 24px Arial, sans-serif'; x.fillText(`ARRANGEMENT · ${dayHeading(date).toUpperCase()}`, 20 + tw / 2, 20 + titleH / 2);
+    let cx = 20; const hy = 20 + titleH;
+    cols.forEach(([h, w]) => { box(cx, hy, w, hdrH, '#F8CBAD'); x.fillStyle = '#000'; x.font = 'bold 18px Arial, sans-serif'; x.fillText(h, cx + w / 2, hy + hdrH / 2); cx += w; });
+    rows.forEach((r, i) => {
+      const y = hy + hdrH + i * rowH; const vals = [r.t, r.cls, r.subj, r.absent, r.by, r.room]; cx = 20;
+      cols.forEach(([h, w], k) => { box(cx, y, w, rowH, i % 2 ? '#DDEBF7' : '#FFFFFF'); x.fillStyle = k === 3 ? '#C00000' : '#000'; x.font = (k === 4 ? 'bold ' : '') + '18px Arial, sans-serif'; x.fillText(String(vals[k]).slice(0, 26), cx + w / 2, y + rowH / 2); cx += w; });
+    });
+    x.fillStyle = '#C00000'; x.font = '14px Arial, sans-serif'; x.textAlign = 'right';
+    x.fillText(`Updated: ${new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`, W - 20, H - 24);
+    cv.toBlob((blob) => {
+      const name = `Arrangement-${date}.png`; const file = new File([blob], name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'Arrangement' }).catch(() => saveFile(name, blob));
+      else saveFile(name, blob);
+    }, 'image/png');
+  }
+  // ----- notices: sent into each teacher's existing notifications (bell); the sender keeps a "sent" record
+  function renderTodayNotices() {
+    const el = document.getElementById('todayNotices'); if (!el) return;
+    const list = (state.notices || []).filter((n) => n.type === 'notice' && !n.read).sort((a, b) => b.at - a.at).slice(0, 3);
+    el.innerHTML = list.map((n) => `<div class="notice-card"><div class="nc-top"><span class="ico i-megaphone" aria-hidden="true"></span><b>Notice</b><span class="nc-meta">${escapeHtml(n.byName || '')}${n.byName ? ' · ' : ''}${escapeHtml(noticeAgo(n.at))}</span></div><div class="nc-text">${escapeHtml(n.body || '')}</div><button type="button" class="btn-secondary nc-btn" data-nc="${escapeHtml(n.id)}" style="border-color: var(--line);">Got it</button></div>`).join('');
+    el.querySelectorAll('[data-nc]').forEach((b) => b.addEventListener('click', () => { const n = list.find((x) => x.id === b.getAttribute('data-nc')); if (n) { markNoticeRead(n); renderBell(); } }));
+  }
+  function noticeRecipients(aud) {
+    return (state.adminTeacherIds || []).filter((u) => u !== state.teacherId && !isRemovedUid(u)).filter((u) => { if (aud === 'all') return true; const tw = teamWings(u); return !tw.length || tw.indexOf(aud) !== -1; });
+  }
+  function openNewNotice() {
+    const lw = leadWings(); const opts = lw.map((w) => ({ k: w, l: w })).concat([{ k: 'all', l: 'All teachers' }]);
+    let aud = opts[0].k, txt = '';
+    const body = document.getElementById('hvSheetBody');
+    const draw = () => {
+      const n = noticeRecipients(aud).length;
+      body.innerHTML = `<div class="hv-d-title">New notice</div><div class="hv-d-wing">Shows on the teachers' Today page and in their notifications</div>
+        <textarea class="text-input" id="nnText" rows="4" maxlength="400" placeholder="Write the notice…" style="resize:none; font-family:inherit; margin-top:12px;">${escapeHtml(txt)}</textarea>
+        <div class="sv-tlbl" style="margin:12px 0 6px;">Send to</div>
+        <div class="chips">${opts.map((o) => `<button type="button" class="chip${aud === o.k ? ' active' : ''}" data-nna="${escapeHtml(o.k)}">${escapeHtml(o.l)}</button>`).join('')}</div>
+        <div class="hv-note" id="nnErr" style="text-align:left; min-height:18px; color: var(--accent);">${n ? `${n} teacher${n === 1 ? '' : 's'} will get it.` : 'No teachers to send to yet.'}</div>
+        <div class="hv-d-btns"><button type="button" class="btn-secondary" id="nnCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="nnPost" style="margin:0;">Send notice</button></div>`;
+      const ta = document.getElementById('nnText'); ta.addEventListener('input', () => { txt = ta.value; });
+      body.querySelectorAll('[data-nna]').forEach((b) => b.addEventListener('click', () => { txt = ta.value; aud = b.getAttribute('data-nna'); draw(); }));
+      document.getElementById('nnCancel').addEventListener('click', closeHvSheet);
+      document.getElementById('nnPost').addEventListener('click', async () => {
+        txt = ta.value.trim(); const err = document.getElementById('nnErr');
+        if (!txt) { err.textContent = 'Write the notice first.'; return; }
+        const to = noticeRecipients(aud); if (!to.length) { err.textContent = 'No teachers to send to.'; return; }
+        const btn = document.getElementById('nnPost'); btn.disabled = true;
+        const id = Date.now().toString(36); const nkey = 'n_' + id; const at = Date.now(); const by = (state.user && state.user.name) || 'Coordinator';
+        const ok = await Promise.all(to.map((u) => state.db.doc('notices/' + u + '/items/' + nkey).set({ at, read: false, type: 'notice', title: 'Notice', body: txt, by: state.teacherId, byName: by, aud }).then(() => 1).catch(() => 0)));
+        const sent = ok.reduce((a, b) => a + b, 0);
+        if (!sent) { btn.disabled = false; err.textContent = 'Could not send. Check the internet and try again.'; return; }
+        try { await state.db.doc('notices/' + state.teacherId + '/items/sent_' + id).set({ at, read: true, type: 'sent', title: 'Notice sent', body: txt, nkey, aud, to: to.filter((u, i) => ok[i]) }); } catch (e) { /* the notice itself was sent */ }
+        closeHvSheet(); showToast(sent === to.length ? `Notice sent to ${sent} teacher${sent === 1 ? '' : 's'}` : `Sent to ${sent} of ${to.length} teachers`);
+      });
+    };
+    draw();
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  }
+  state.noticeReads = state.noticeReads || {}; state.openNotice = state.openNotice || null;
+  function loadNoticeReads(n) {
+    const cur = state.noticeReads[n.nkey]; if (cur && (cur.loading || Date.now() - cur.at < 45000)) return;
+    state.noticeReads[n.nkey] = { loading: true, at: Date.now(), read: [], ok: false };
+    Promise.all((n.to || []).map((u) => state.db.doc('notices/' + u + '/items/' + n.nkey).get().then((sn) => ({ u, ok: true, read: !!(sn.exists && (sn.data() || {}).read) })).catch(() => ({ u, ok: false }))))
+      .then((rs) => { state.noticeReads[n.nkey] = { at: Date.now(), ok: rs.every((r) => r.ok), read: rs.filter((r) => r.read).map((r) => r.u) }; renderAdminNotices(); });
+  }
+  async function removeNotice(n) {
+    const ok = await showConfirm("This notice will be removed from every teacher's notifications.", 'Remove notice?', 'Remove');
+    if (!ok) return;
+    await Promise.all((n.to || []).map((u) => state.db.doc('notices/' + u + '/items/' + n.nkey).delete().catch(() => {})));
+    try { await state.db.doc('notices/' + state.teacherId + '/items/' + n.id).delete(); } catch (e) { /* ignore */ }
+    state.notices = (state.notices || []).filter((x) => x.id !== n.id); state.openNotice = null;
+    renderAdminNotices(); showToast('Notice removed');
+  }
+  function renderAdminNotices() {
+    const el = document.getElementById('adminNotices'); if (!el) return;
+    const top = document.getElementById('nbNewTop');
+    const sent = (state.notices || []).filter((n) => n.type === 'sent' && (n.at || 0) > Date.now() - 14 * 86400000).sort((a, b) => b.at - a.at).slice(0, 3);
+    if (top) { top.hidden = !sent.length; top.onclick = openNewNotice; }
+    if (!sent.length) {
+      el.innerHTML = `<div class="empty-state"><span class="ico i-megaphone" aria-hidden="true"></span>No notice sent in the last 2 weeks<button type="button" class="btn-secondary" data-nb-new style="border-color: var(--line); width:auto; padding:6px 14px; min-height:36px;">+ New notice</button></div>`;
+      const nb = el.querySelector('[data-nb-new]'); if (nb) nb.addEventListener('click', openNewNotice);
+      return;
+    }
+    el.innerHTML = sent.map((n) => {
+      const open = state.openNotice === n.id; if (open) loadNoticeReads(n);
+      const rd = state.noticeReads[n.nkey]; const total = (n.to || []).length;
+      const stat = rd && rd.ok ? `Read by ${rd.read.length} of ${total}` : `Sent to ${total}`;
+      const unread = rd && rd.ok ? (n.to || []).filter((u) => rd.read.indexOf(u) === -1).map(personName) : [];
+      return `<div class="nb-card${open ? ' open' : ''}" data-nb="${escapeHtml(n.id)}"><div class="nb-text">${escapeHtml(n.body || '')}</div><div class="nb-meta">${escapeHtml(noticeAgo(n.at))} · ${escapeHtml(n.aud === 'all' ? 'All teachers' : (n.aud || ''))} · ${escapeHtml(stat)}</div>
+        ${open ? `${unread.length ? `<div class="nb-more">Not yet: ${escapeHtml(unread.join(', '))}</div>` : ''}<div class="nb-acts"><button type="button" class="ad-rem wa" data-nb-remind="${escapeHtml(n.id)}">Remind</button><button type="button" class="ad-rem" data-nb-del="${escapeHtml(n.id)}">Remove</button></div>` : ''}</div>`;
+    }).join('');
+    el.querySelectorAll('[data-nb]').forEach((c) => c.addEventListener('click', (e) => { if (e.target.closest('button')) return; const id = c.getAttribute('data-nb'); state.openNotice = state.openNotice === id ? null : id; renderAdminNotices(); }));
+    el.querySelectorAll('[data-nb-remind]').forEach((b) => b.addEventListener('click', () => { const n = sent.find((x) => x.id === b.getAttribute('data-nb-remind')); if (n) window.open('https://wa.me/?text=' + encodeURIComponent(`Please read the notice in Teach Desk: "${n.body}"`), '_blank'); }));
+    el.querySelectorAll('[data-nb-del]').forEach((b) => b.addEventListener('click', () => { const n = sent.find((x) => x.id === b.getAttribute('data-nb-del')); if (n) removeNotice(n); }));
   }
 
   // ---------- Timetable picture: rebuild for any timetable (used after substitutes) ----------
@@ -7472,8 +7674,41 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
 
     // --- attention required
     const alerts = [];
-    const notLogged = sched.filter((x) => x.status === 'missed');
-    if (notLogged.length) alerts.push({ t: `${notLogged.length} scheduled class${notLogged.length === 1 ? '' : 'es'} not logged`, lines: notLogged.slice(0, 4).map((x) => `${formatTimeStr(x.slot.time)} · ${x.slot.label} · ${nameOf(x.tid)}`), more: notLogged.length - 4 });
+    const remindTexts = {};
+    const lateIds = {};
+    if (isToday && slotsReady) {
+      // a teacher whose class has started but who has not checked in: give the classes to someone, or remind
+      const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+      const late = [];
+      ids.forEach((tid) => {
+        const stt = adminStatusOfTeacher(tid, byTeacherAll[tid]);
+        if (!stt || stt.key !== 'notin') return;
+        const mine = sched.filter((x) => x.tid === tid && (x.status === 'missed' || x.status === 'live' || x.status === 'upcoming') && hhmmToMin(x.slot.time) <= nowMin);
+        if (mine.length) late.push({ tid, first: mine[0] });
+      });
+      late.forEach((l) => { lateIds[l.tid] = 1; });
+      if (late.length) alerts.push({ t: `${late.length} teacher${late.length === 1 ? ' has' : 's have'} not arrived`, rows: late.slice(0, 6).map(({ tid, first }) => {
+        const key = 'arrive:' + tid; remindTexts[key] = remindText('arrive', tid, { first });
+        return { txt: `${nameOf(tid)} · class at ${formatTimeStr(first.slot.time)}`, btns: [{ label: 'Give classes', cls: 'go', attr: `data-arrange="${tid}"` }, { label: 'Remind', cls: 'wa', attr: `data-remind="${tid}" data-rkey="${key}"` }] };
+      }) });
+    }
+    // a teacher who has not arrived is already listed above, so his or her classes are not listed again here
+    const notLogged = sched.filter((x) => x.status === 'missed' && !lateIds[x.tid]);
+    if (notLogged.length) {
+      const nlBy = {}; notLogged.forEach((x) => { (nlBy[x.tid] = nlBy[x.tid] || []).push(x); });
+      const nlIds = Object.keys(nlBy);
+      alerts.push({ t: `${notLogged.length} scheduled class${notLogged.length === 1 ? '' : 'es'} not logged`, rows: nlIds.slice(0, 6).map((tid) => {
+        const list = nlBy[tid]; const key = 'entry:' + tid; remindTexts[key] = remindText('entry', tid, { date, list });
+        return { txt: `${nameOf(tid)} · ${list.map((x) => `${gridBatchLabel(x.slot.label)} ${formatTimeStr(x.slot.time)}`).join(', ')}`, btns: [{ label: 'Remind', cls: 'wa', attr: `data-remind="${tid}" data-rkey="${key}"` }] };
+      }), more: nlIds.length - 6 });
+    }
+    try {
+      if (isToday && isLeadNow()) {
+        refreshNextWk();
+        const miss = unpublishedNextWeek();
+        if (miss.length) alerts.push({ t: "Next week's timetable is not published yet", rows: miss.map((g) => ({ txt: g.label, btns: [{ label: 'Open', cls: 'go', attr: `data-open-ttweek="${state.nextWkTT.ws}"` }] })) });
+      }
+    } catch (e) { /* ignore */ }
     const stuck = Object.keys(state.adminCampus || {}).filter((tid) => { const c = state.adminCampus[tid]; return c && c.checkedIn && c.checkInAt && Date.now() - c.checkInAt >= 24 * 3600 * 1000; });
     stuck.forEach((tid) => alerts.push({ t: `${nameOf(tid)} is still checked in from an earlier day`, lines: ['Open the teacher below to force a check-out.'] }));
     const clashes = [];
@@ -7491,12 +7726,16 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     renderTestsHeld(dayAll, nameOf);
     const alertEl = document.getElementById('adminAlerts');
     alertEl.innerHTML = alerts.length
-      ? alerts.map((a) => `<div class="ad-alert${a.info ? ' info' : ''}"><div class="ad-alert-t">${a.info ? '' : '⚠️ '}${escapeHtml(a.t)}</div>${a.lines.map((l) => `<div class="ad-alert-l">${escapeHtml(l)}</div>`).join('')}${a.more > 0 ? `<div class="ad-alert-l">+${a.more} more</div>` : ''}</div>`).join('')
+      ? alerts.map((a) => `<div class="ad-alert${a.info ? ' info' : ''}"><div class="ad-alert-t">${a.info ? '' : '⚠️ '}${escapeHtml(a.t)}</div>${(a.lines || []).map((l) => `<div class="ad-alert-l">${escapeHtml(l)}</div>`).join('')}${alertRowsHtml(a)}${a.more > 0 ? `<div class="ad-alert-l">+${a.more} more</div>` : ''}</div>`).join('')
       : '<div class="ad-ok">✓ No issues requiring attention</div>';
     // substitutions of the day, and leave that needs a substitute
     try { renderTtImgCard(); } catch (e) { /* ignore */ }
     try { refreshDashTT(); const sx = dashSubsHtml(); if (sx) alertEl.innerHTML = sx + (alerts.length ? alertEl.innerHTML : ''); } catch (e) { /* ignore */ }
     alertEl.querySelectorAll('[data-arrange]').forEach((b) => b.addEventListener('click', () => openAbsent({ t: b.getAttribute('data-arrange'), date: state.adminDate })));
+    alertEl.querySelectorAll('[data-remind]').forEach((b) => b.addEventListener('click', () => remindTeacher(b.getAttribute('data-remind'), remindTexts[b.getAttribute('data-rkey')] || '')));
+    alertEl.querySelectorAll('[data-open-ttweek]').forEach((b) => b.addEventListener('click', () => openTimetableWeek(b.getAttribute('data-open-ttweek'))));
+    alertEl.querySelectorAll('[data-arr-img]').forEach((b) => b.addEventListener('click', () => shareArrangementPicture()));
+    try { renderAdminNotices(); } catch (e) { /* ignore */ }
 
     // --- today's schedule (all teachers)
     const schedEl = document.getElementById('adminSchedList');
@@ -10927,13 +11166,14 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         if (a.note) w.bodyLine(`Notes: ${waClean(a.note)}`, { indent: 28 });
       });
     }
-    if (others.length) {
-      sec('OTHER WORK');
-      others.forEach((a) => {
+    [['COORDINATION WORK', others.filter((a) => a.activityType === 'Coordination')], ['OTHER WORK', others.filter((a) => a.activityType !== 'Coordination')]].forEach(([title, list]) => {
+      if (!list.length) return;
+      sec(title);
+      list.forEach((a) => {
         const lines = String(a.note || '').split(/\n+/).map(waSentence).filter(Boolean);
         (lines.length ? lines : [activityLabel(a.activityType) + '.']).forEach((x) => w.bodyLine(`-  ${x}`, { indent: 14 }));
       });
-    }
+    });
     if (!wrote) w.bodyLine(isWeeklyOff(date) && !f.label ? 'WEEKLY OFF' : 'No activity recorded for this day.', { bold: isWeeklyOff(date) && !f.label });
   }
   // Summary block used by every PDF (teacher and institute).
@@ -11175,14 +11415,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       sections.push(L);
     }
     // Other work
-    if (others.length) {
-      const L = ['🗂 *OTHER WORK*'];
-      others.forEach((a) => {
+    [['🧭 *COORDINATION WORK*', others.filter((a) => a.activityType === 'Coordination')], ['🗂 *OTHER WORK*', others.filter((a) => a.activityType !== 'Coordination')]].forEach(([title, list]) => {
+      if (!list.length) return;
+      const L = [title];
+      list.forEach((a) => {
         const lines = String(a.note || '').split(/\n+/).map(waSentence).filter(Boolean);
         if (lines.length) lines.forEach((x) => L.push('• ' + x)); else L.push('• ' + activityLabel(a.activityType) + '.');
       });
       sections.push(L);
-    }
+    });
     if (!sections.length) {
       sections.push(isWeeklyOff(date) && !f.label ? ['🗓️ *WEEKLY OFF*'] : ['_No activity recorded for this day._']);
     }
@@ -11540,7 +11781,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   // One row per entry, plus one "Attendance" row per day. A cell is filled only when there is something to say
   // (e.g. the Worksheet cell holds the worksheet name, or "Given"), so there is no column of "No"s to read through.
   const CSV_HEADER = ['Date', 'Day', 'Entry', 'Batch / Class', 'Subject', 'Topic / Test / Work', 'Start', 'End', 'Duration (min)', 'Worksheet', 'Study Material', 'Class Test', 'Homework', 'Room(s)', 'Remarks', 'Logged At', 'Last Edited'];
-  const CSV_ORDER = { Attendance: 0, Class: 1, Invigilation: 2, 'Other Work': 3, Leave: 4 };
+  const CSV_ORDER = { Attendance: 0, Class: 1, Invigilation: 2, 'Other Work': 3, 'Coordination Work': 3, Leave: 4 };
   function csvDay(date) { return dateObj(date).toLocaleDateString('en-GB', { weekday: 'short' }); }
   function csvStamp(c) { return [c.createdAt && c.createdAt > 1e12 ? stampTxt(c.createdAt) : '', c.editedAt ? stampTxt(c.editedAt) : '']; }
   function csvRowFor(c) {
@@ -11558,7 +11799,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         return base('Leave').concat(['', '', '', '', '', '', '', '', '', '', '', /^on leave\.?$/i.test(r) ? '' : r], csvStamp(c));
       }
       const work = String(c.note || '').split(/\n+/).map(waSentence).filter(Boolean).join(' ');
-      return base('Other Work').concat(['', '', work, '', '', '', '', '', '', '', '', ''], csvStamp(c));
+      return base(c.activityType === 'Coordination' ? 'Coordination Work' : 'Other Work').concat(['', '', work, '', '', '', '', '', '', '', '', ''], csvStamp(c));
     }
     const nb = entryBatches(c).length;
     return base('Class').concat([entryBatchLabel(c), c.subject || '', [waClean(c.topic), waClean(classKindText(c))].filter(Boolean).join(' · '),
@@ -11964,7 +12205,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   function resetActivityForm() {
-    state.activityForm = { activityType: ACTIVITY_TYPES[0], note: '' };
+    state.activityForm = { activityType: ACTIVITY_TYPES[0], note: '', coordTags: [] };
     state.leave = { multi: false, from: '', to: '' };
     state.invig = newInvig();
     document.getElementById('activityNoteInput').value = '';
@@ -12091,7 +12332,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   function prefillActivityFromLast() {
     const last = findLastActivity();
     state.activityForm = last
-      ? { activityType: last.activityType || ACTIVITY_TYPES[0], note: last.note || '' }
+      ? (last.activityType === 'Coordination' ? { activityType: isLeadNow() ? 'Coordination' : ACTIVITY_TYPES[0], note: '', coordTags: [] } : { activityType: last.activityType || ACTIVITY_TYPES[0], note: last.note || '', coordTags: [] })
       : { activityType: ACTIVITY_TYPES[0], note: '' };
     renderForm();
     document.getElementById('activityNoteInput').value = state.activityForm.note;
@@ -12255,10 +12496,24 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     box.hidden = !show;
     const at = state.activityForm.activityType;
     const isLeave = state.entryMode === 'activity' && at === 'Leave / Holiday';
-    const NOTE = { 'Invigilation': ['Notes (optional)', 'Add instructions, observations or remarks…'], 'Leave / Holiday': ['Reason (optional)', 'Add reason or remarks…'] };
+    const NOTE = { 'Invigilation': ['Notes (optional)', 'Add instructions, observations or remarks…'], 'Leave / Holiday': ['Reason (optional)', 'Add reason or remarks…'], 'Coordination': ['Details (optional)', 'Add a few words, if needed…'] };
     const nt = NOTE[at] || ['Work Details', 'Describe the work…'];
     document.getElementById('activityNoteLabel').textContent = nt[0];
     document.getElementById('activityNoteInput').placeholder = nt[1];
+    const cbox = document.getElementById('coordTagsBox');
+    if (cbox) {
+      const isCoord = state.entryMode === 'activity' && at === 'Coordination';
+      cbox.hidden = !isCoord;
+      if (isCoord) {
+        const selT = state.activityForm.coordTags || [];
+        document.getElementById('coordTags').innerHTML = COORD_TAGS.map((t) => `<button type="button" class="chip${selT.indexOf(t) !== -1 ? ' active' : ''}" data-ctag="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
+        document.querySelectorAll('#coordTags [data-ctag]').forEach((b) => b.addEventListener('click', () => {
+          const t = b.getAttribute('data-ctag'); const cur = (state.activityForm.coordTags || []).slice(); const k = cur.indexOf(t);
+          if (k === -1) cur.push(t); else cur.splice(k, 1);
+          state.activityForm.coordTags = cur; showFormMsg(''); renderInvig();
+        }));
+      }
+    }
     renderLeaveBox(isLeave);
     if (!show) return;
     const iv = state.invig;
@@ -12396,7 +12651,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     state.editingSourceTab = sourceTab || 'today';
     state.addTargetDate = null;
     state.entryMode = 'activity';
-    state.activityForm = { activityType: item.activityType || ACTIVITY_TYPES[0], note: item.note || '' };
+    state.activityForm = { activityType: item.activityType || ACTIVITY_TYPES[0], note: item.note || '', coordTags: Array.isArray(item.coordTags) ? item.coordTags.slice() : [] };
     state.invigEditDate = item.date || todayStr();
     if (isInvig(item)) {
       const sc = (item.scope && item.scope.length) ? item.scope.slice() : [].concat(...(item.parts || []).map((p) => p.scope || [])).filter((v, i, a) => a.indexOf(v) === i);
@@ -12406,7 +12661,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     } else state.invig = newInvig();
     if (state.invig) state.invig.open = openFromScope(state.invig.scope);
     renderForm();
-    document.getElementById('activityNoteInput').value = item.note || '';
+    document.getElementById('activityNoteInput').value = (item.activityType === 'Coordination' && item.coordNote != null) ? item.coordNote : (item.note || '');
     switchTab('add');
   }
 
@@ -12434,6 +12689,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
           if (!ok) return;
         }
       }
+      if (state.activityForm.activityType === 'Coordination' && !(state.activityForm.coordTags || []).length && !document.getElementById('activityNoteInput').value.trim()) { showFormMsg('Choose what you handled, or write a few words.'); flagField('activityNoteCard'); return; }
       const leaveDates = (state.activityForm.activityType === 'Leave / Holiday' && !editingId && state.leave.multi)
         ? (state.leave.to >= state.leave.from ? datesBetween(state.leave.from, state.leave.to) : []) : null;
       if (leaveDates && !leaveDates.length) { showFormMsg('The "To" date must be on or after "From".'); flagField('leaveFields'); return; }
@@ -12465,6 +12721,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
           activityType: state.activityForm.activityType,
           note: document.getElementById('activityNoteInput').value.trim()
         };
+        if (payload.activityType === 'Coordination') {
+          // the day's coordination work: what was handled (chips) + a few words; the joined text flows into every report as Other Work
+          const tags = (state.activityForm.coordTags || []).slice(); const det = payload.note;
+          payload.coordTags = tags; payload.coordNote = det;
+          payload.note = [tags.join(' · '), det].filter(Boolean).join('\n');
+        }
         const iv = state.invig;
         if (invig) {
           Object.assign(payload, {
