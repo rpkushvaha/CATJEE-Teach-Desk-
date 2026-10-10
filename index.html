@@ -1388,7 +1388,11 @@
   .team-remove { align-self: flex-start; border: none; background: none; padding: 2px 0; font: inherit; font-size: 12.5px; font-weight: 600; color: #B91C1C; cursor: pointer; }
   .team-removed { border-top: 1px dashed var(--line); margin-top: 6px; padding-top: 6px; }
   .team-rm-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13.5px; color: var(--muted); }
-  body.coord-mode #view-today > .tsec { display: none !important; }
+  body.coord-mode #todaySummarySec { display: none !important; }
+  body.coord-mode #modeChips { display: none !important; }
+  /* a coordinator with no classes of his own does not need an empty "Today's Classes" box */
+  body.coord-mode #todayClassesSec:has(.tl-empty) > .tsec-head { display: none; }
+  body.coord-mode #todayClassesSec .tl-empty { display: none; }
   /* ---------- Header row: back button + title ---------- */
   .pg-title-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
   .pg-title-row .back-btn { width: 36px; height: 36px; }
@@ -1823,7 +1827,7 @@
         <div class="tsec-head"><div class="tsec-title">My Invigilation Duty</div></div>
         <div id="myDutyList" style="display:flex; flex-direction:column; gap:8px;"></div>
       </section>
-      <section class="tsec">
+      <section class="tsec" id="todaySummarySec">
         <div class="tsec-head"><div class="tsec-title">Today's Summary</div></div>
         <div class="sum-grid" id="sumGrid">
           <div class="sum-tile"><div class="sum-num" id="sumClasses">0</div><div class="sum-lbl">Classes</div></div>
@@ -1833,7 +1837,7 @@
         </div>
       </section>
 
-      <section class="tsec">
+      <section class="tsec" id="todayClassesSec">
         <div class="tsec-head">
           <div class="tsec-title" id="todayHeading">Today's Classes</div>
           <div class="tsec-meta" id="todayClassesMeta"></div>
@@ -2757,7 +2761,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 11.2 · updated 12 Oct 2026</div>
+          <div class="dnote">Version 11.3 · updated 12 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7138,7 +7142,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     el.querySelectorAll('[data-nc]').forEach((b) => b.addEventListener('click', () => { const n = list.find((x) => x.id === b.getAttribute('data-nc')); if (n) { markNoticeRead(n); renderBell(); } }));
   }
   function noticeRecipients(aud) {
-    return (state.adminTeacherIds || []).filter((u) => u !== state.teacherId && !isRemovedUid(u)).filter((u) => { if (aud === 'all') return true; const tw = teamWings(u); return !tw.length || tw.indexOf(aud) !== -1; });
+    return (state.adminTeacherIds || []).concat(state.adminTeacherIds && state.adminTeacherIds.indexOf(state.teacherId) === -1 ? [state.teacherId] : []).filter((u) => !isRemovedUid(u)).filter((u) => { if (aud === 'all') return true; const tw = teamWings(u); return !tw.length || tw.indexOf(aud) !== -1; });
   }
   function openNewNotice() {
     const lw = leadWings(); const opts = lw.map((w) => ({ k: w, l: w })).concat([{ k: 'all', l: 'All teachers' }]);
@@ -10066,7 +10070,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     renderSvForm();
   });
   document.getElementById('addClassLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'class'; prefillClassFromLast(); switchTab('add'); });
-  document.getElementById('addActivityLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast(); switchTab('add'); });
+  document.getElementById('addActivityLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast(); if (coordView() && !state.editingId) { state.activityForm = { activityType: 'Coordination', note: '', coordTags: [] }; renderForm(); document.getElementById('activityNoteInput').value = ''; } switchTab('add'); });
   setInterval(() => { if (state.tab === 'today') { renderTodayList(); renderMyDuties(); } }, 30000);
   document.getElementById('downloadReportBtn').addEventListener('click', () => {
     downloadReportForDate(todayStr(), document.getElementById('reportMsg'));
