@@ -1041,6 +1041,12 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  .nb-stat { font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 6px; }
+  .nb-bar { height: 5px; border-radius: 99px; background: var(--paper-2, rgba(0,0,0,.07)); margin-top: 6px; overflow: hidden; }
+  .nb-bar span { display: block; height: 100%; background: #16A34A; border-radius: 99px; }
+  .nb-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0 5px 10px; font-size: 13.5px; }
+  .nn-pick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; max-height: 190px; overflow-y: auto; }
+  .nn-pick-acts { display: flex; gap: 16px; margin-top: 6px; }
   .i-megaphone { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2011v2a1%201%200%200%200%201%201h2l5%204V6L6%2010H4a1%201%200%200%200-1%201z%22/%3E%3Cpath%20d%3D%22M15.5%208.5a5%205%200%200%201%200%207%22/%3E%3Cpath%20d%3D%22M18.5%205.5a9%209%200%200%201%200%2013%22/%3E%3C/svg%3E"); }
   .i-usersck { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M17%2021v-2a4%204%200%200%200-4-4H5a4%204%200%200%200-4%204v2%22/%3E%3Ccircle%20cx%3D%229%22%20cy%3D%227%22%20r%3D%224%22/%3E%3Cpolyline%20points%3D%2216%2011%2018%2013%2022%209%22/%3E%3C/svg%3E"); }
   .ad-alert-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; font-size: 13px; color: var(--muted-2); }
@@ -2652,6 +2658,12 @@
           <div class="dfield-label" style="margin:14px 0 6px;">Reminder volume</div>
           <div class="rv-row"><span class="ico i-vlo rv-ic" aria-hidden="true"></span><input type="range" id="remVol" min="10" max="100" step="5" value="100" aria-label="Reminder volume"><span class="ico i-vhi rv-ic" aria-hidden="true"></span><span class="rv-val" id="remVolVal">100%</span></div>
           <button type="button" class="btn-secondary" id="remSoundTest" style="border-color: var(--line); width:100%; margin-top:10px;">Test sound</button>
+          <div class="dfield-label" style="margin:14px 0 8px;">Notice sound</div>
+          <div class="chips" id="noticeSoundChips">
+            <button type="button" class="chip" data-nsound="on">On</button>
+            <button type="button" class="chip" data-nsound="off">Off</button>
+          </div>
+          <div class="dnote" style="margin-top:8px;">A soft tone when a new notice arrives while the app is open.</div>
           <div class="dnote" style="margin-top:8px;">Loud plays an alarm tone and vibrates. Still quiet at 100%? Turn up the phone's media volume with the side buttons.</div>
         </div>
         <div class="dcard">
@@ -2761,7 +2773,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 11.3 · updated 12 Oct 2026</div>
+          <div class="dnote">Version 11.4 · updated 13 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3202,6 +3214,29 @@
       try { if (navigator.vibrate) { const pat = []; for (let c = 0; c < cycles; c++) pat.push(500, 400); navigator.vibrate(pat); beepVibe = true; } } catch (e) { /* no vibration */ }
     } catch (err) { /* audio not available — banner still shows silently */ }
   }
+  // a short, soft two-note tone (different from the class reminder) when a new notice arrives while the app is open
+  const NOTICE_SOUND_KEY = 'ctd_notice_sound';
+  function noticeSoundOn() { try { return localStorage.getItem(NOTICE_SOUND_KEY) !== 'off'; } catch (e) { return true; } }
+  function playNoticeTone(force) {
+    if (!force && !noticeSoundOn()) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const t0 = audioCtx.currentTime; const vol = Math.max(0.02, 0.45 * remVol());
+      [[659.25, 0, 0.22], [880, 0.2, 0.34]].forEach(([f, at, len]) => {
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0 + at); g.gain.exponentialRampToValueAtTime(vol, t0 + at + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + len);
+        o.connect(g); g.connect(audioCtx.destination); o.start(t0 + at); o.stop(t0 + at + len + 0.02);
+      });
+      try { if (navigator.vibrate) navigator.vibrate([140, 80, 140]); } catch (e) { /* no vibration */ }
+    } catch (err) { /* audio not available */ }
+  }
+  (function bindNoticeSound() {
+    const chips = document.querySelectorAll('#noticeSoundChips [data-nsound]');
+    const mark = () => chips.forEach((c) => c.classList.toggle('active', (c.getAttribute('data-nsound') === 'on') === noticeSoundOn()));
+    chips.forEach((c) => c.addEventListener('click', () => { try { localStorage.setItem(NOTICE_SOUND_KEY, c.getAttribute('data-nsound')); } catch (e) { /* ignore */ } mark(); if (c.getAttribute('data-nsound') === 'on') { unlockAudio(); playNoticeTone(true); } }));
+    mark();
+  })();
   (function bindRemSound() {
     const chips = document.querySelectorAll('#remSoundChips [data-rsound]');
     const mark = () => chips.forEach((c) => c.classList.toggle('active', c.getAttribute('data-rsound') === remSound()));
@@ -7145,24 +7180,33 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     return (state.adminTeacherIds || []).concat(state.adminTeacherIds && state.adminTeacherIds.indexOf(state.teacherId) === -1 ? [state.teacherId] : []).filter((u) => !isRemovedUid(u)).filter((u) => { if (aud === 'all') return true; const tw = teamWings(u); return !tw.length || tw.indexOf(aud) !== -1; });
   }
   function openNewNotice() {
-    const lw = leadWings(); const opts = lw.map((w) => ({ k: w, l: w })).concat([{ k: 'all', l: 'All teachers' }]);
-    let aud = opts[0].k, txt = '';
+    const lw = leadWings(); const opts = lw.map((w) => ({ k: w, l: w })).concat([{ k: 'all', l: 'All teachers' }, { k: 'pick', l: 'Choose teachers' }]);
+    let aud = opts[0].k, txt = '', pick = [];
     const body = document.getElementById('hvSheetBody');
+    // teachers one can pick: those in the lead's wings (people with no wing set too), without himself
+    const pickable = () => noticeRecipients('all').filter((u) => u !== state.teacherId && (!teamWings(u).length || teamWings(u).some((w) => lw.indexOf(w) !== -1)));
+    const targets = () => (aud === 'pick' ? pick.filter((u) => pickable().indexOf(u) !== -1) : noticeRecipients(aud));
     const draw = () => {
-      const n = noticeRecipients(aud).length;
+      const n = targets().length;
+      const msg = aud === 'pick' && !n ? 'Choose at least one teacher.' : (n ? `${n} teacher${n === 1 ? '' : 's'} will get it.` : 'No teachers to send to yet.');
       body.innerHTML = `<div class="hv-d-title">New notice</div><div class="hv-d-wing">Shows on the teachers' Today page and in their notifications</div>
         <textarea class="text-input" id="nnText" rows="4" maxlength="400" placeholder="Write the notice…" style="resize:none; font-family:inherit; margin-top:12px;">${escapeHtml(txt)}</textarea>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Send to</div>
         <div class="chips">${opts.map((o) => `<button type="button" class="chip${aud === o.k ? ' active' : ''}" data-nna="${escapeHtml(o.k)}">${escapeHtml(o.l)}</button>`).join('')}</div>
-        <div class="hv-note" id="nnErr" style="text-align:left; min-height:18px; color: var(--accent);">${n ? `${n} teacher${n === 1 ? '' : 's'} will get it.` : 'No teachers to send to yet.'}</div>
+        ${aud === 'pick' ? `<div class="nn-pick">${pickable().map((u) => `<button type="button" class="chip${pick.indexOf(u) !== -1 ? ' active' : ''}" data-nnp="${escapeHtml(u)}">${escapeHtml(personName(u))}</button>`).join('') || '<div class="hv-note" style="text-align:left;">No teachers found.</div>'}</div>
+          <div class="nn-pick-acts"><button type="button" class="hv-back" id="nnAll">Select all</button><button type="button" class="hv-back" id="nnNone">Clear</button></div>` : ''}
+        <div class="hv-note" id="nnErr" style="text-align:left; min-height:18px; color: var(--accent);">${msg}</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="nnCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="nnPost" style="margin:0;">Send notice</button></div>`;
       const ta = document.getElementById('nnText'); ta.addEventListener('input', () => { txt = ta.value; });
       body.querySelectorAll('[data-nna]').forEach((b) => b.addEventListener('click', () => { txt = ta.value; aud = b.getAttribute('data-nna'); draw(); }));
+      body.querySelectorAll('[data-nnp]').forEach((b) => b.addEventListener('click', () => { txt = ta.value; const u = b.getAttribute('data-nnp'); const i = pick.indexOf(u); if (i === -1) pick.push(u); else pick.splice(i, 1); draw(); }));
+      const all = document.getElementById('nnAll'); if (all) all.addEventListener('click', () => { txt = ta.value; pick = pickable(); draw(); });
+      const none = document.getElementById('nnNone'); if (none) none.addEventListener('click', () => { txt = ta.value; pick = []; draw(); });
       document.getElementById('nnCancel').addEventListener('click', closeHvSheet);
       document.getElementById('nnPost').addEventListener('click', async () => {
         txt = ta.value.trim(); const err = document.getElementById('nnErr');
         if (!txt) { err.textContent = 'Write the notice first.'; return; }
-        const to = noticeRecipients(aud); if (!to.length) { err.textContent = 'No teachers to send to.'; return; }
+        const to = targets(); if (!to.length) { err.textContent = aud === 'pick' ? 'Choose at least one teacher.' : 'No teachers to send to.'; return; }
         const btn = document.getElementById('nnPost'); btn.disabled = true;
         const id = Date.now().toString(36); const nkey = 'n_' + id; const at = Date.now(); const by = (state.user && state.user.name) || 'Coordinator';
         const ok = await Promise.all(to.map((u) => state.db.doc('notices/' + u + '/items/' + nkey).set({ at, read: false, type: 'notice', title: 'Notice', body: txt, by: state.teacherId, byName: by, aud }).then(() => 1).catch(() => 0)));
@@ -7176,40 +7220,59 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   state.noticeReads = state.noticeReads || {}; state.openNotice = state.openNotice || null;
+  // the teachers a notice went to, without the sender (he gets his own copy too, but he is not "a reader to chase")
+  const noticeOthers = (n) => (n.to || []).filter((u) => u !== state.teacherId);
   function loadNoticeReads(n) {
     const cur = state.noticeReads[n.nkey]; if (cur && (cur.loading || Date.now() - cur.at < 45000)) return;
     state.noticeReads[n.nkey] = { loading: true, at: Date.now(), read: [], ok: false };
-    Promise.all((n.to || []).map((u) => state.db.doc('notices/' + u + '/items/' + n.nkey).get().then((sn) => ({ u, ok: true, read: !!(sn.exists && (sn.data() || {}).read) })).catch(() => ({ u, ok: false }))))
+    Promise.all(noticeOthers(n).map((u) => state.db.doc('notices/' + u + '/items/' + n.nkey).get().then((sn) => ({ u, ok: true, read: !!(sn.exists && (sn.data() || {}).read) })).catch(() => ({ u, ok: false }))))
       .then((rs) => { state.noticeReads[n.nkey] = { at: Date.now(), ok: rs.every((r) => r.ok), read: rs.filter((r) => r.read).map((r) => r.u) }; renderAdminNotices(); });
   }
+  // removed at once (UNDO for 5 seconds, like deleting a class); then taken out of every teacher's notifications
   async function removeNotice(n) {
-    const ok = await showConfirm("This notice will be removed from every teacher's notifications.", 'Remove notice?', 'Remove');
-    if (!ok) return;
-    await Promise.all((n.to || []).map((u) => state.db.doc('notices/' + u + '/items/' + n.nkey).delete().catch(() => {})));
-    try { await state.db.doc('notices/' + state.teacherId + '/items/' + n.id).delete(); } catch (e) { /* ignore */ }
-    state.notices = (state.notices || []).filter((x) => x.id !== n.id); state.openNotice = null;
-    renderAdminNotices(); showToast('Notice removed');
+    const performDelete = async () => {
+      const res = await Promise.all((n.to || []).map((u) => state.db.doc('notices/' + u + '/items/' + n.nkey).delete().then(() => 1).catch(() => 0)));
+      const failed = (n.to || []).filter((u, i) => u !== state.teacherId && !res[i]).length;
+      if (noticeOthers(n).length && failed === noticeOthers(n).length) throw new Error('not allowed');
+      await state.db.doc('notices/' + state.teacherId + '/items/' + n.id).delete();
+      if (failed) showToast(`Removed, but ${failed} teacher${failed === 1 ? '' : 's'} could not be updated`, 'error');
+    };
+    await confirmAndDeleteWithUndo(n.id, performDelete, '', '', 'Notice removed', renderAdminNotices, () => { state.notices = (state.notices || []).filter((x) => x.id !== n.id); state.openNotice = null; renderAdminNotices(); });
+  }
+  function noticeAudLabel(n) {
+    if (n.aud === 'all') return 'All teachers';
+    if (n.aud === 'pick') { const nm = noticeOthers(n).map(personName); return 'To ' + (nm.length <= 2 ? nm.join(', ') : nm.slice(0, 2).join(', ') + ` +${nm.length - 2}`); }
+    return n.aud || '';
   }
   function renderAdminNotices() {
     const el = document.getElementById('adminNotices'); if (!el) return;
     const top = document.getElementById('nbNewTop');
-    const sent = (state.notices || []).filter((n) => n.type === 'sent' && (n.at || 0) > Date.now() - 14 * 86400000).sort((a, b) => b.at - a.at).slice(0, 3);
+    const sent = (state.notices || []).filter((n) => n.type === 'sent' && (n.at || 0) > Date.now() - 14 * 86400000 && !state.pendingDeleteIds.has(n.id)).sort((a, b) => b.at - a.at).slice(0, 3);
     if (top) { top.hidden = !sent.length; top.onclick = openNewNotice; }
     if (!sent.length) {
       el.innerHTML = `<div class="empty-state"><span class="ico i-megaphone" aria-hidden="true"></span>No notice sent in the last 2 weeks<button type="button" class="btn-secondary" data-nb-new style="border-color: var(--line); width:auto; padding:6px 14px; min-height:36px;">+ New notice</button></div>`;
       const nb = el.querySelector('[data-nb-new]'); if (nb) nb.addEventListener('click', openNewNotice);
       return;
     }
-    el.innerHTML = sent.map((n) => {
-      const open = state.openNotice === n.id; if (open) loadNoticeReads(n);
-      const rd = state.noticeReads[n.nkey]; const total = (n.to || []).length;
-      const stat = rd && rd.ok ? `Read by ${rd.read.length} of ${total}` : `Sent to ${total}`;
-      const unread = rd && rd.ok ? (n.to || []).filter((u) => rd.read.indexOf(u) === -1).map(personName) : [];
-      return `<div class="nb-card${open ? ' open' : ''}" data-nb="${escapeHtml(n.id)}"><div class="nb-text">${escapeHtml(n.body || '')}</div><div class="nb-meta">${escapeHtml(noticeAgo(n.at))} · ${escapeHtml(n.aud === 'all' ? 'All teachers' : (n.aud || ''))} · ${escapeHtml(stat)}</div>
-        ${open ? `${unread.length ? `<div class="nb-more">Not yet: ${escapeHtml(unread.join(', '))}</div>` : ''}<div class="nb-acts"><button type="button" class="ad-rem wa" data-nb-remind="${escapeHtml(n.id)}">Remind</button><button type="button" class="ad-rem" data-nb-del="${escapeHtml(n.id)}">Remove</button></div>` : ''}</div>`;
+    el.innerHTML = sent.map((n, idx) => {
+      const open = state.openNotice === n.id; if (open || idx < 2) loadNoticeReads(n);
+      const others = noticeOthers(n); const total = others.length;
+      const rd = state.noticeReads[n.nkey]; const known = !!(rd && rd.ok);
+      const readIds = known ? others.filter((u) => rd.read.indexOf(u) !== -1) : []; const unreadIds = known ? others.filter((u) => rd.read.indexOf(u) === -1) : [];
+      const stat = !total ? 'Sent to you only' : (known ? `Read ${readIds.length} of ${total}` : `Sent to ${total}`);
+      const bar = known && total ? `<div class="nb-bar"><span style="width:${Math.round(readIds.length / total * 100)}%"></span></div>` : '';
+      let detail = '';
+      if (open && total) {
+        detail = known
+          ? `${readIds.length ? `<div class="nb-more"><b>Read (${readIds.length}):</b> ${escapeHtml(readIds.map(personName).join(', '))}</div>` : ''}${unreadIds.length ? `<div class="nb-more"><b>Not read yet (${unreadIds.length}):</b></div>${unreadIds.map((u) => `<div class="nb-row"><span>${escapeHtml(personName(u))}</span><button type="button" class="ad-rem wa" data-nb-r1="${escapeHtml(u)}" data-nb-id="${escapeHtml(n.id)}">Remind</button></div>`).join('')}` : '<div class="nb-more">Everyone has read it ✓</div>'}`
+          : '<div class="nb-more">Read status is not available right now.</div>';
+      }
+      const acts = open ? `<div class="nb-acts">${!known || unreadIds.length > 1 ? `<button type="button" class="ad-rem wa" data-nb-remind="${escapeHtml(n.id)}">Remind all</button>` : ''}<button type="button" class="ad-rem" data-nb-del="${escapeHtml(n.id)}">Remove</button></div>` : '';
+      return `<div class="nb-card${open ? ' open' : ''}" data-nb="${escapeHtml(n.id)}"><div class="nb-text">${escapeHtml(n.body || '')}</div><div class="nb-meta">${escapeHtml(noticeAgo(n.at))} · ${escapeHtml(noticeAudLabel(n))}</div><div class="nb-stat">${escapeHtml(stat)}</div>${bar}${detail}${acts}</div>`;
     }).join('');
     el.querySelectorAll('[data-nb]').forEach((c) => c.addEventListener('click', (e) => { if (e.target.closest('button')) return; const id = c.getAttribute('data-nb'); state.openNotice = state.openNotice === id ? null : id; renderAdminNotices(); }));
-    el.querySelectorAll('[data-nb-remind]').forEach((b) => b.addEventListener('click', () => { const n = sent.find((x) => x.id === b.getAttribute('data-nb-remind')); if (n) window.open('https://wa.me/?text=' + encodeURIComponent(`Please read the notice in Teach Desk: "${n.body}"`), '_blank'); }));
+    el.querySelectorAll('[data-nb-remind]').forEach((b) => b.addEventListener('click', () => { const n = sent.find((x) => x.id === b.getAttribute('data-nb-remind')); if (n) window.open('https://wa.me/?text=' + encodeURIComponent(`Please read the notice in Teach Desk: \"${n.body}\"`), '_blank'); }));
+    el.querySelectorAll('[data-nb-r1]').forEach((b) => b.addEventListener('click', () => { const n = sent.find((x) => x.id === b.getAttribute('data-nb-id')); const u = b.getAttribute('data-nb-r1'); if (n) remindTeacher(u, `${greetNow()} ${callName(u)}, please read the notice in Teach Desk: \"${n.body}\". Thank you.`); }));
     el.querySelectorAll('[data-nb-del]').forEach((b) => b.addEventListener('click', () => { const n = sent.find((x) => x.id === b.getAttribute('data-nb-del')); if (n) removeNotice(n); }));
   }
 
@@ -7693,7 +7756,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       late.forEach((l) => { lateIds[l.tid] = 1; });
       if (late.length) alerts.push({ t: `${late.length} teacher${late.length === 1 ? ' has' : 's have'} not arrived`, rows: late.slice(0, 6).map(({ tid, first }) => {
         const key = 'arrive:' + tid; remindTexts[key] = remindText('arrive', tid, { first });
-        return { txt: `${nameOf(tid)} · class at ${formatTimeStr(first.slot.time)}`, btns: [{ label: 'Give classes', cls: 'go', attr: `data-arrange="${tid}"` }, { label: 'Remind', cls: 'wa', attr: `data-remind="${tid}" data-rkey="${key}"` }] };
+        return { txt: `${nameOf(tid)} · class at ${formatTimeStr(first.slot.time)}`, btns: [{ label: 'Remind', cls: 'wa', attr: `data-remind="${tid}" data-rkey="${key}"` }] };
       }) });
     }
     // a teacher who has not arrived is already listed above, so his or her classes are not listed again here
@@ -13565,8 +13628,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
 
     unsubscribers.push(db.collection('notices/' + tid + '/items').orderBy('at', 'desc').limit(30).onSnapshot((snap) => {
       const cutoff = Date.now() - 30 * 86400000;
+      const prevIds = new Set((state.notices || []).map((x) => x.id)); const firstLoad = !state.noticesLoaded; state.noticesLoaded = true;
       state.notices = [];
       snap.docs.forEach((d) => { const x = Object.assign({ id: d.id }, d.data()); if ((x.at || 0) < cutoff) d.ref.delete().catch(() => {}); else state.notices.push(x); });
+      if (!firstLoad && state.notices.some((x) => !prevIds.has(x.id) && x.type === 'notice' && !x.read && x.by !== tid && (x.at || 0) > Date.now() - 120000)) playNoticeTone();
       renderBell();
     }, () => {}));
     const ttImgFrom = shiftDateStr(mondayOf(todayStr()), -7);
