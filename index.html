@@ -1041,6 +1041,30 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  .hv-act-card.duty-planned .tl-log { margin-top: 8px; }
+  .hv-act-card.duty-planned.live .tl-log { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .sv-row.ses-duty .sv-time { background: var(--gold-soft); color: var(--gold); }
+  .plan-room { padding: 10px; }
+  .plan-slot { padding: 8px; }
+  .plan-slot .sv-times { grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 8px; }
+  /* exam form: its time boxes sit in narrower cards, so a slimmer clock and padding keep the whole time visible */
+  #adminExamForm input[type="time"] { padding-left: 10px; padding-right: 6px; }
+  #adminExamForm input[type="time"]::-webkit-calendar-picker-indicator { width: 18px; height: 18px; padding: 2px; margin-left: 2px; }
+  .qa-row.ex-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ex-actions .btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .ex-actions .ex-edit { color: #C81E32; border-color: rgba(230,57,70,.45) !important; background: rgba(230,57,70,.06); font-weight: 700; }
+  .ex-actions .ex-del { color: var(--muted-2); border-color: var(--line) !important; font-weight: 600; }
+  .dsp-card { margin: 8px 12px 4px; border: 1.5px solid rgba(230,57,70,.45); border-radius: 14px; padding: 8px; background: var(--card); }
+  .dsp-img { display: block; width: 100%; padding: 0; border: 0; background: #fff; border-radius: 8px; overflow: hidden; cursor: pointer; min-height: 60px; }
+  .dsp-img img { display: block; width: 100%; height: auto; max-height: 220px; object-fit: cover; object-position: top; }
+  .dsp-cap { display: flex; align-items: center; gap: 6px; color: #C81E32; font-weight: 700; font-size: 13.5px; margin: 8px 2px 0; }
+  .dsp-st { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 8px 2px 0; font-size: 12.5px; }
+  .dsp-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 9px; font-weight: 700; font-size: 12px; }
+  .dsp-badge.ok { background: rgba(22,163,74,.12); color: #15803D; }
+  .dsp-badge.wn { background: rgba(217,119,6,.14); color: #B45309; }
+  .dsp-note { color: var(--muted-2); }
+  .dsp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .dsp-btns.one { grid-template-columns: 1fr; }
   .nb-stat { font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 6px; }
   .nb-bar { height: 5px; border-radius: 99px; background: var(--paper-2, rgba(0,0,0,.07)); margin-top: 6px; overflow: hidden; }
   .nb-bar span { display: block; height: 100%; background: #16A34A; border-radius: 99px; }
@@ -2773,7 +2797,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 11.4 · updated 13 Oct 2026</div>
+          <div class="dnote">Version 11.5 · updated 14 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3762,9 +3786,10 @@
   function dutyRowHtml(d) {
     const st = dutyStatus(d.slots, todayStr());
     return `<div class="tl-item hv-rec" data-today-duty="${escapeHtml(d.exam.id)}" role="button" tabindex="0"><div class="tl-time"></div>
-      <div class="hv-act-card duty-planned">
+      <div class="hv-act-card duty-planned ${st}">
         <div class="hv-act-top"><span class="hv-act-title">Invigilation · ${escapeHtml(examTitle(d.exam))}</span><span class="tl-pill ${st}">${DUTY_PILL[st]}</span></div>
         ${d.slots.map((s) => `<div class="hv-act-note">${escapeHtml(s.room)} · ${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))}</div>`).join('')}
+        ${st === 'upcoming' ? '' : `<button type="button" class="tl-log" data-duty-log="${escapeHtml(d.exam.id)}">${st === 'live' ? 'Log this duty' : 'Log it now'}</button>`}
       </div></div>`;
   }
   async function logPlannedDuty(exam, slots) {
@@ -5313,8 +5338,10 @@
     }));
     return out;
   }
+  // the groups of the wing chosen at the top (All = every group)
+  function ttGroupsShown() { const all = ttGroups(); const w = state.adminReportWing; if (!w || w === 'all') return all; const f = all.filter((g) => g.wing === w); return f.length ? f : all; }
   function tgGroup() {
-    const gs = ttGroups();
+    const gs = ttGroupsShown();
     let g = gs.find((x) => x.key === state.tg.group);
     if (!g) { g = gs[0] || null; state.tg.group = g ? g.key : null; }
     return g;
@@ -5453,7 +5480,7 @@
   function renderTgGrid() {
     const box = document.getElementById('tgWrap');
     if (!box) return;
-    const groups = ttGroups();
+    const groups = ttGroupsShown();
     const g = tgGroup();
     subscribeTgDoc();
     const days = tgDays();
@@ -8360,7 +8387,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       html += `<div class="ex-selbar"><span><b>${live.length}</b> selected · tap more exams</span><span><button type="button" class="btn-secondary" id="exSelAll" style="border-color: var(--line);">All</button><button type="button" class="btn-secondary hv-del" id="exSelDel" style="border-color: var(--line);"${live.length ? '' : ' disabled'}><span class="ico i-trash" aria-hidden="true"></span> Delete${live.length ? ' (' + live.length + ')' : ''}</button><button type="button" class="btn-secondary" id="exSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
     } else if (examRows.length) {
       html += '<div class="hv-note" style="text-align:left; padding:6px 12px 0;">Tap an exam to choose invigilators · press and hold to select several</div>';
-      if (exams.some((e) => planOf(e).some((r) => (r.slots || []).some((sl) => (sl.teachers || []).length)))) html += '<div style="padding:6px 12px 0;"><button type="button" class="btn-secondary" id="exDutyPic" style="border-color: var(--line);"><span class="ico i-file" aria-hidden="true"></span> Duty sheet picture</button></div>';
+      const dl = dutyDayList(exams); if (dl.length) html += dutyPicCardHtml(dl);
     }
     if (classRows.length) html += `<div class="ad-grp">Class Tests · ${ct.reduce((s2, c) => s2 + testCount(c), 0) || classRows.length}</div>` + classRows.join('');
     if (examRows.length) html += `<div class="ad-grp">Exams · ${examRows.length}</div>` + examRows.join('');
@@ -8372,44 +8399,125 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     renderAdminExamForm(ids, nameOf);
     return alerts;
   }
-  // "Invigilation Duty of Monday (5th, Oct.)": every room of the day's exams with its invigilators and their timing
-  function dutySheetPicture(exams) {
-    const list = exams.filter((e) => planOf(e).some((r) => (r.slots || []).some((sl) => (sl.teachers || []).length)));
-    if (!list.length) { showToast('Choose invigilators first', 'error'); return; }
+  // ---------- Exam duty sheet picture ----------
+  // Rooms in time order; invigilators with the same time share one row; a grey "Break" row where a room has a gap;
+  // then a "By teacher" box (every invigilator once, all duties in order, with the breaks between).
+  function dutyDayList(exams) { return (exams || []).filter((e) => planOf(e).some((r) => (r.slots || []).some((sl) => (sl.teachers || []).length))); }
+  // invigilators of the day whose names are not loaded yet (the picture would say "Teacher")
+  function dutyNameKey(list) { const ids = []; list.forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { if (ids.indexOf(u) === -1) ids.push(u); })))); return ids.map((u) => (state.adminNames[u] && state.adminNames[u].name) || '?').join(','); }
+  function dutySig(list) { return JSON.stringify(list.map((e) => [e.id, e.start, e.end, planOf(e).map((r) => [r.room, (r.slots || []).map((sl) => [sl.start, sl.end, (sl.teachers || []).slice().sort()])])])); }
+  function dutyImgId(date) { return 'duty~' + date + '~' + leadWings().map((w) => String(w).replace(/[^A-Za-z0-9]+/g, '')).join('_'); }
+  function buildDutyCanvas(list) {
     const date = list[0].date; const dd = dateObj(date);
     const nth = (n) => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
     const title = `Invigilation Duty of ${dd.toLocaleDateString('en-GB', { weekday: 'long' })} (${nth(dd.getDate())}, ${dd.toLocaleDateString('en-GB', { month: 'short' })}.)`;
     const nm = (u) => (typeof trepName === 'function' ? trepName(u) : ttName(u));
-    const fmt = (t) => formatTimeStr(t).replace(/\s?(AM|PM)$/i, '');
-    const blocks = [];
-    list.forEach((e) => {
-      const info = `${examTitle(e)} · ${scopeLabel(e.scope)} · ${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`;
-      planOf(e).forEach((r) => {
-        const rows = []; (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => rows.push([nm(u), `${fmt(sl.start)} - ${fmt(sl.end)}`])));
-        if (rows.length) blocks.push({ room: r.room, info, rows });
-      });
-    });
-    const W = 1100, pad = 40, lh = 34, headH = 70;
+    const hm = (v) => formatTimeStr(v).replace(/\s?(AM|PM)$/i, '');
+    const span = (a, b) => `${hm(a)} - ${hm(b)}`;
     const infos = list.map((e) => `${examTitle(e)} · ${scopeLabel(e.scope)} · ${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`);
-    let H = 40 + headH + infos.length * 30 + 20; blocks.forEach((b) => { H += 52 + b.rows.length * lh + 30; }); H += 20;
-    const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
-    const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const t = (s, tx, ty, size, bold, align, color) => { x.font = `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`; x.fillStyle = color || '#000'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; x.fillText(s, tx, ty, W - 2 * pad); };
+    const rooms = {}; const order = [];
+    list.forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => {
+      if (!(sl.teachers || []).length || !sl.start || !sl.end) return;
+      const k = String(r.room || '—'); if (!rooms[k]) { rooms[k] = []; order.push(k); }
+      const same = rooms[k].find((q) => q.start === sl.start && q.end === sl.end);
+      if (same) sl.teachers.forEach((u) => { if (same.who.indexOf(u) === -1) same.who.push(u); }); else rooms[k].push({ start: sl.start, end: sl.end, who: sl.teachers.slice() });
+    })));
+    const blocks = order.map((k) => {
+      const sl = rooms[k].sort((a, b) => hhmmToMin(a.start) - hhmmToMin(b.start)); const rows = [];
+      sl.forEach((q, i) => { if (i && hhmmToMin(sl[i - 1].end) < hhmmToMin(q.start)) rows.push({ brk: `Break · ${span(sl[i - 1].end, q.start)}` }); rows.push({ names: q.who.map(nm), time: span(q.start, q.end) }); });
+      return { room: k, rows };
+    });
+    const byT = {}; order.forEach((k) => rooms[k].forEach((q) => q.who.forEach((u) => { (byT[u] = byT[u] || []).push({ room: k, start: q.start, end: q.end }); })));
+    const invig = Object.keys(byT).sort((a, b) => ttName(a).localeCompare(ttName(b)));
+    const tRows = invig.map((u) => {
+      const d = byT[u].sort((a, b) => hhmmToMin(a.start) - hhmmToMin(b.start)); const parts = [];
+      d.forEach((q, i) => { if (i) { const gap = hhmmToMin(q.start) - hhmmToMin(d[i - 1].end); if (gap > 0) parts.push(`break ${svDur(gap)}`); } parts.push(`${q.room} · ${span(q.start, q.end)}`); });
+      return { name: nm(u), text: parts.join('   |   ') };
+    });
+    const W = 1100, pad = 40, lh = 32, headH = 70, timeX = W * 0.62, nameCol = 300;
+    const cv = document.createElement('canvas'); const x = cv.getContext('2d');
+    const font = (size, bold) => `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`;
+    const wrap = (txt, size, maxW) => { x.font = font(size, false); const words = txt.split(' '); const L = []; let cur = ''; words.forEach((w) => { const tst = cur ? cur + ' ' + w : w; if (x.measureText(tst).width > maxW && cur) { L.push(cur); cur = w; } else cur = tst; }); if (cur) L.push(cur); return L; };
+    const tLines = tRows.map((r) => wrap(r.text, 19, W - 2 * pad - nameCol - 30));
+    let H = 40 + headH + infos.length * 30 + 20;
+    blocks.forEach((b) => { H += 52 + b.rows.reduce((a, r) => a + (r.brk ? 30 : Math.max(1, r.names.length) * lh + 10), 0) + 10 + 30; });
+    if (tRows.length) H += 52 + tLines.reduce((a, L) => a + L.length * 26 + 12, 0) + 10 + 30;
+    H += 20;
+    const sc = 2; cv.width = W * sc; cv.height = H * sc; x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const t = (str, tx, ty, size, bold, align, color) => { x.font = font(size, bold); x.fillStyle = color || '#000'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; x.fillText(str, tx, ty, W - 2 * pad - 20); };
+    const ln = (x1, y1, x2, y2, col, lw) => { x.strokeStyle = col; x.lineWidth = lw || 1; x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2, y2); x.stroke(); };
     let y = 40; t(title, W / 2, y + 20, 34, true, 'center'); y += headH;
     infos.forEach((s2) => { t('▶  ' + s2, pad + 10, y, 20, true); y += 30; }); y += 20;
     blocks.forEach((b) => {
-      const bh = 52 + b.rows.length * lh + 10;
-      x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, y, W - 2 * pad, bh);
-      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', W * 0.62, y + 26, 24, true, 'center');
-      b.rows.forEach((rw, i) => { const ry = y + 52 + i * lh + lh / 2; t(rw[0], pad + 14, ry, 22, true); t(rw[1], W * 0.62, ry, 22, false, 'center'); });
-      y += bh + 30;
+      const top = y; let yy = y + 52;
+      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', (timeX + W - pad) / 2, y + 26, 24, true, 'center');
+      ln(pad, y + 52, W - pad, y + 52, '#000', 2);
+      b.rows.forEach((r, i) => {
+        if (r.brk) { x.fillStyle = '#E7E7E7'; x.fillRect(pad + 1.5, yy, W - 2 * pad - 3, 30); x.font = 'italic ' + font(18, false); x.fillStyle = '#333'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(r.brk, W / 2, yy + 15); ln(pad, yy, W - pad, yy, '#AAA'); ln(pad, yy + 30, W - pad, yy + 30, '#AAA'); yy += 30; return; }
+        const h = Math.max(1, r.names.length) * lh + 10;
+        r.names.forEach((n, k) => t(n, pad + 14, yy + 5 + k * lh + lh / 2, 22, true));
+        t(r.time, (timeX + W - pad) / 2, yy + h / 2, 22, false, 'center');
+        ln(timeX, yy, timeX, yy + h, '#CCC');
+        if (i < b.rows.length - 1 && !b.rows[i + 1].brk) ln(pad, yy + h, W - pad, yy + h, '#DDD');
+        yy += h;
+      });
+      const bh = yy - top + 10; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, top, W - 2 * pad, bh);
+      y = top + bh + 30;
     });
+    if (tRows.length) {
+      const top = y; let yy = y + 52;
+      t('BY TEACHER', pad + 14, y + 26, 24, true); t('Room · Time', pad + nameCol + 16, y + 26, 22, true);
+      ln(pad, y + 52, W - pad, y + 52, '#000', 2);
+      tRows.forEach((r, i) => { const L = tLines[i]; const h = L.length * 26 + 12; t(r.name, pad + 14, yy + h / 2, 20, true); L.forEach((s2, k) => t(s2, pad + nameCol + 16, yy + 6 + k * 26 + 13, 19, false)); ln(pad + nameCol, yy, pad + nameCol, yy + h, '#CCC'); if (i < tRows.length - 1) ln(pad, yy + h, W - pad, yy + h, '#DDD'); yy += h; });
+      const bh = yy - top + 10; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, top, W - 2 * pad, bh);
+    }
+    return { cv, invig, date };
+  }
+  // share the duty sheet picture (WhatsApp / save)
+  function dutySheetPicture(exams) {
+    const list = dutyDayList(exams);
+    if (!list.length) { showToast('Choose invigilators first', 'error'); return; }
+    const { cv, date } = buildDutyCanvas(list);
     cv.toBlob(async (blob) => {
       const name = `Invigilation-Duty-${date}.png`; const file = new File([blob], name, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Invigilation duty' }); return; } catch (err) { if (err && err.name === 'AbortError') return; } }
       openZoomViewer(cv.toDataURL('image/png'));
       saveFile(name, blob);
     }, 'image/png');
+  }
+  // the preview card on the Exams tab (above the list), with Publish / Update and Share
+  state.dutyPrev = state.dutyPrev || { sig: '', url: '' };
+  function dutyPicCardHtml(list) {
+    const sig = dutySig(list); const ck = sig + '|' + dutyNameKey(list);
+    if (state.dutyPrev.sig !== ck) { try { const { cv } = buildDutyCanvas(list); state.dutyPrev = { sig: ck, url: cv.toDataURL('image/jpeg', 0.72) }; } catch (e) { state.dutyPrev = { sig: ck, url: '' }; } }
+    const date = list[0].date; const id = dutyImgId(date);
+    const pub = weekTtImages(mondayOf(date)).find((q) => q.id === id);
+    const fresh = pub && pub.sig === sig;
+    const st = !pub ? '<span class="dsp-badge wn">Not published yet</span><span class="dsp-note">Teachers cannot see it</span>'
+      : (fresh ? `<span class="dsp-badge ok"><span class="ico i-check" aria-hidden="true"></span>Published</span><span class="dsp-note">In every teacher's Gallery · ${escapeHtml(formatTime(pub.publishedAt))}</span>`
+        : '<span class="dsp-badge wn">Changed since publishing</span><span class="dsp-note">Update so teachers see the new duties</span>');
+    const pubBtn = !isLeadNow() || fresh ? '' : `<button type="button" class="save-btn dsp-pub" id="dspPublish" style="margin:0;">${pub ? 'Update' : 'Publish'}</button>`;
+    return `<div class="dsp-card" id="exDutyPic"><button type="button" class="dsp-img" id="dspView" aria-label="View the duty sheet">${state.dutyPrev.url ? `<img src="${state.dutyPrev.url}" alt="Duty sheet">` : ''}</button>
+      <div class="dsp-cap"><span class="ico i-cal" aria-hidden="true"></span>Duty sheet picture · tap to view</div>
+      <div class="dsp-st">${st}</div>
+      <div class="dsp-btns${pubBtn ? '' : ' one'}">${pubBtn}<button type="button" class="btn-secondary" id="dspShare" style="border-color: var(--line); margin:0;">Share picture</button></div></div>`;
+  }
+  async function publishDutySheet(exams) {
+    const list = dutyDayList(exams); if (!list.length) return;
+    if (dutyNameKey(list).split(',').indexOf('?') !== -1) { showToast('Teacher names are still loading · try again in a moment', 'error'); return; }
+    const btn = document.getElementById('dspPublish'); if (btn) btn.disabled = true;
+    try {
+      const { cv, invig, date } = buildDutyCanvas(list);
+      const lw = leadWings();
+      const wingT = noticeRecipients('all').filter((u) => !teamWings(u).length || teamWings(u).some((w) => lw.indexOf(w) !== -1));
+      const teachers = wingT.concat(invig.filter((u) => wingT.indexOf(u) === -1));
+      const id = dutyImgId(date); const ws = mondayOf(date); const dd = dateObj(date);
+      const had = weekTtImages(ws).some((q) => q.id === id);
+      await state.db.collection('timetableImages').doc(id).set({ kind: 'duty', group: 'duty', label: `Exam duty sheet · ${WD[dd.getDay()]} ${dd.getDate()} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`, weekStart: ws, day: date, image: canvasToSmallJpeg(cv), publishedAt: Date.now(), teachers, updated: had, sig: dutySig(list) });
+      delete state.ttImgs[ws];
+      showToast(had ? 'Duty sheet updated · teachers see the new one' : 'Duty sheet published · teachers can see it in the Gallery');
+      renderAdmin();
+    } catch (err) { if (btn) btn.disabled = false; flashOffline(err); }
   }
   function bindAdminExamList(listEl, exams, nameOf) {
     listEl.querySelectorAll('[data-exam]').forEach((row) => {
@@ -8455,7 +8563,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }));
     const on = (i, f) => { const el = document.getElementById(i); if (el) el.addEventListener('click', f); };
     on('exSelX', () => { state.exSel = null; renderAdmin(); });
-    on('exDutyPic', () => dutySheetPicture(exams));
+    on('dspShare', () => dutySheetPicture(exams));
+    on('dspView', () => { if (state.dutyPrev.url) openZoomViewer(state.dutyPrev.url); });
+    on('dspPublish', () => publishDutySheet(exams));
     on('exSelAll', () => { state.exSel = exams.map((e) => e.id); renderAdmin(); });
     on('exSelDel', async () => {
       const list = (state.exSel || []).slice(); if (!list.length) return;
@@ -8880,12 +8990,12 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         <div class="hv-d-row"><span>Time</span><span>${escapeHtml(formatTimeStr(e.start))} – ${escapeHtml(formatTimeStr(e.end))}</span></div>
         ${planOf(e).length ? '' : `<div class="hv-d-row"><span>Room / Hall</span><span>${escapeHtml(e.room || '—')}</span></div>`}
         <div class="hv-d-row"><span>Classes</span><span>${escapeHtml(scopeLabel(e.scope) || '—')}</span></div>
-        <div class="hv-d-row"><span>Invigilators</span><span>${escapeHtml((e.invigilators || []).map(nameOf).join(', ') || '—')}</span></div>
+        ${planOf(e).length ? '' : `<div class="hv-d-row"><span>Invigilators</span><span>${escapeHtml((e.invigilators || []).map(nameOf).join(', ') || '—')}</span></div>`}
       </div>
       ${planOf(e).length ? `<div class="plan-sum">${planOf(e).map((r) => `<div class="plan-sum-r"><b>${escapeHtml(r.room)}</b>${(r.scope || []).length ? ' · ' + escapeHtml(scopeLabel(r.scope)) : ''}${(r.slots || []).map((sl) => `<div class="ad-tsub">${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}: ${escapeHtml((sl.teachers || []).map(nameOf).join(', ') || '—')}</div>`).join('')}</div>`).join('')}</div>` : ''}
 
-      ${planOf(e).length ? `<div class="sid-actions" style="margin-top:8px;"><button type="button" class="btn-secondary" id="exChartPdf" style="border-color: var(--line);">Chart PDF</button><button type="button" class="btn-secondary" id="exChartWa" style="border-color: var(--line);">Share on WhatsApp</button></div>` : ''}
-      <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exEdit" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary hv-del" id="exDelete" style="border-color: var(--line);">Delete</button></div>`;
+      ${planOf(e).length ? `<div class="rep-lbl" style="margin-top:14px;">Get it as</div><div class="qa-row hv-tiles ex-tiles"><button type="button" class="qa-btn" id="exChartPdf"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF</span><span class="qa-s">Duty chart</span></button><button type="button" class="qa-btn qa-wa" id="exChartWa"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share duty</span></button></div>` : ''}
+      <div class="hv-d-btns ex-actions"><button type="button" class="btn-secondary ex-edit" id="exEdit"><span class="ico i-edit" aria-hidden="true"></span>Edit</button><button type="button" class="btn-secondary ex-del" id="exDelete"><span class="ico i-trash" aria-hidden="true"></span>Delete</button></div>`;
     const root = document.getElementById('hvSheet');
     root.classList.add('open');
     root.setAttribute('aria-hidden', 'false');
@@ -9274,7 +9384,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const thisWs = mondayOf(todayStr());
     const wkTxt = (ws) => { const a = dateObj(ws), z = dateObj(shiftDateStr(ws, 6)); const m = (d) => d.toLocaleDateString('en-GB', { month: 'short' }); return a.getMonth() === z.getMonth() ? `${a.getDate()} – ${z.getDate()} ${m(z)}` : `${a.getDate()} ${m(a)} – ${z.getDate()} ${m(z)}`; };
     const ttCard = (x) => {
-      const g = ttGroups().find((q) => q.key === x.group); const gl = g ? g.label : String(x.label || 'Timetable').split(' · ').slice(0, 2).join(' · ');
+      const g = ttGroups().find((q) => q.key === x.group); let gl = g ? g.label : String(x.label || 'Timetable').split(' · ').slice(0, 2).join(' · ');
       let what = 'Whole week'; let dayOnly = false;
       if (x.day) { const d = dateObj(x.day); what = `${WD[d.getDay()]} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} only`; dayOnly = true; }
       else {
@@ -9284,6 +9394,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const full = rest && new RegExp('^' + mon.getDate() + '\\s*[–-]\\s*(' + sat.getDate() + '|' + (sat.getDate() + 1) + ')\\b').test(rest);
         what = full || !rest ? 'Whole week' : rest;
       }
+      if (x.kind === 'duty') { gl = 'Exam duty sheet'; what = what.replace(/ only$/, ''); }
       const k = 'tt:' + x.id;
       return `<div class="gal-card${picked(k) ? ' gal-pick' : ''}" data-gal-k="${escapeHtml(k)}"><div class="gal-th"><img src="${x.image}" alt="Timetable"></div>
         <div class="gal-bd"><div class="gal-t">${escapeHtml(gl)}</div><div class="gal-s">${dayOnly ? `<span class="gal-day">${escapeHtml(what)}</span>` : escapeHtml(what)}${x.updated ? '<span class="gal-up">Updated</span>' : ''}</div></div></div>`;
@@ -9512,7 +9623,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     state.db.collection('exams').where('date', '>=', ws).where('date', '<=', shiftDateStr(ws, 6)).get().then((snap) => {
       const list = [];
       snap.docs.map(normDoc).filter((e) => e.date >= ws && e.date <= shiftDateStr(ws, 6)).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => {
-        if ((sl.teachers || []).indexOf(state.teacherId) !== -1) list.push({ date: e.date, start: sl.start, end: sl.end, room: r.room, title: examTitle(e) });
+        if ((sl.teachers || []).indexOf(state.teacherId) !== -1) list.push({ date: e.date, start: sl.start, end: sl.end, room: r.room, title: examTitle(e), examId: e.id });
       })));
       state.weekDuties.list = list;
       if (state.tab === 'schedule') renderScheduleList();
@@ -9520,9 +9631,18 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
   function weekDutyRowsHtml(d) {
     const rows = (state.weekDuties.list || []).filter((x) => x.date === d).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
-    return rows.map((x) => `<div class="sv-row sv-duty"><span class="sv-time">${escapeHtml(formatTimeStr(x.start))}</span>
-      <span class="sv-main"><span class="sv-batch">Invigilation · ${escapeHtml(x.room)}</span><span class="sv-dur">${escapeHtml(x.title)} · till ${escapeHtml(formatTimeStr(x.end))}</span></span>
-      <span class="tl-pill duty">Duty</span></div>`).join('');
+    return rows.map((x) => {
+      const dayCls = (hvDay(x.date).classes || []);
+      const logged = dayCls.some((c) => c.entryType === 'activity' && c.activityType === 'Invigilation' && (!x.examId || !c.examId || c.examId === x.examId));
+      const st = logged ? 'done' : dutyStatus([{ start: x.start, end: x.end }], x.date);
+      const t = formatTimeStr(x.start); const tm = t.match(/^(.*?)\s?(AM|PM)$/i);
+      const dur = Math.max(0, (hhmmToMin(x.end) || 0) - (hhmmToMin(x.start) || 0));
+      return `<div class="sv-row ${st} ses-duty">
+      <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : escapeHtml(t)}</span>
+      <span class="sv-main"><span class="sv-top"><span class="sv-batch">Invigilation · ${escapeHtml(x.room)}</span>${pillHtml(st, SV_PILL[st])}</span>
+        <span class="chiprow"><span class="schip"><span class="ico i-cbpen" aria-hidden="true"></span>${escapeHtml(x.title)}</span><span class="mchip">${I_DOOR}${escapeHtml(x.room)}</span><span class="mchip">${I_CLOCK}${escapeHtml(svDur(dur))} · till ${escapeHtml(formatTimeStr(x.end).replace(/\s?(AM|PM)$/i, ''))}</span></span></span>
+    </div>`;
+    }).join('');
   }
   document.querySelectorAll('[data-sv-view]').forEach((b) => b.addEventListener('click', () => { svState().view = b.getAttribute('data-sv-view'); renderScheduleList(); }));
   document.getElementById('scheduleList').addEventListener('click', (e) => { const b = e.target.closest('[data-sv-past]'); if (!b) return; svState().showPast = b.getAttribute('data-sv-past') === '1'; renderScheduleList(); });
@@ -9580,7 +9700,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const today = d === todayStr();
       const live = daySlots.filter((x) => !x.cancelled).length;
       const lvHere = (state.historyClasses || []).find((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday' && c.teacherId === state.teacherId && c.date === d);
-      html += `<div class="sv-day${today ? ' today' : ''}${!daySlots.length && !dutyHtml && !lvHere ? ' sv-noclass' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}${lvHere ? (d > todayStr() ? `<button type="button" class="sv-lv" data-cancel-leave="${escapeHtml(lvHere.id)}" title="Tap to cancel this leave">On leave ✕</button>` : '<span class="sv-lv">On leave</span>') : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : ' · No classes'}</span></div>`;
+      html += `<div class="sv-day${today ? ' today' : ''}${!daySlots.length && !dutyHtml && !lvHere ? ' sv-noclass' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}${lvHere ? (d > todayStr() ? `<button type="button" class="sv-lv" data-cancel-leave="${escapeHtml(lvHere.id)}" title="Tap to cancel this leave">On leave ✕</button>` : '<span class="sv-lv">On leave</span>') : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : (dutyHtml ? '' : ' · No classes')}${dutyHtml ? ` · ${(state.weekDuties.list || []).filter((x) => x.date === d).length} duty${(state.weekDuties.list || []).filter((x) => x.date === d).length === 1 ? '' : ' slots'}` : ''}</span></div>`;
       if (daySlots.length || dutyHtml) html += `<div class="sv-rows">${dutyHtml}${matched.map(svSlotHtml).join('')}</div>`;
     });
     if (sv.weekStart === mondayOf(todayStr()) && pastAny) {
@@ -9591,7 +9711,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const weekHasSlots = days.some((d) => slots.some((x) => slotDate(x) === d));
     const sumEl = document.getElementById('svSummary');
     sumEl.hidden = !weekHasSlots;
-    if (!weekHasSlots) {
+    // a week with only invigilation duties still lists its days (the duties are real plans)
+    if (!weekHasSlots && !(state.weekDuties.list || []).some((x) => days.indexOf(x.date) !== -1)) {
       const canCopy = !pastWeek && svCopyCandidates().length;
       html = `<div class="tl-empty compact sv-empty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><div class="tl-empty-title">${pastWeek ? 'No classes were scheduled this week.' : 'No classes planned for this week yet.'}</div>${pastWeek ? '' : `<div class="tl-empty-sub">${canCopy ? 'Tap + Add Slot, or Copy last week to start from last week\'s plan.' : 'Tap + Add Slot to plan your classes.'}</div>`}</div></div>`;
       const wkLv = upcomingLeaves().filter((c) => days.indexOf(c.date) !== -1);
