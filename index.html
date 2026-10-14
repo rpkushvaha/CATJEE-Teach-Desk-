@@ -1063,6 +1063,7 @@
   .xp-oname { flex: 1; min-width: 0; }
   .xp-ob { padding: 0; align-self: flex-start; font-size: 12.5px; }
   .xp-soft { font-size: 12px; color: var(--muted-2); line-height: 1.4; }
+  .duty-tag { display: inline-block; margin-left: 4px; font-size: 11px; font-weight: 600; color: var(--muted-2); background: var(--paper-2, rgba(0,0,0,.06)); border-radius: 999px; padding: 1px 7px; }
   .hv-act-card.duty-planned .tl-log { margin-top: 8px; }
   .hv-act-card.duty-planned.live .tl-log { background: var(--gold); border-color: var(--gold); color: #fff; }
   .sv-row.ses-duty .sv-time { background: var(--gold-soft); color: var(--gold); }
@@ -2819,7 +2820,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 11.6 · updated 14 Oct 2026</div>
+          <div class="dnote">Version 11.7 · updated 14 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8444,7 +8445,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const span = (a, b) => `${hm(a)} - ${hm(b)}`;
     // header: each exam, then its paper times (Reporting time, distributions, reading / writing time)
     const head = [];
-    list.forEach((e) => { head.push({ k: 'exam', txt: `${examTitle(e)} · ${scopeLabel(e.scope)} · ${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}` }); examTimeLines(e).forEach((x) => head.push({ k: 'time', txt: x })); });
+    list.forEach((e) => { head.push({ k: 'exam', txt: `(${examTitle(e)} · ${scopeLabel(e.scope)} · ${formatTimeStr(e.start)} – ${formatTimeStr(e.end)})` }); examTimeLines(e).forEach((x) => head.push({ k: 'time', txt: x })); });
     // rooms: one block per room (across the day's exams); app teachers with the same time share a row,
     // people not in the app get their own row; each person's break sits in the Break column
     const rooms = {}; const order = []; const byT = {};
@@ -8476,19 +8477,17 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const cv = document.createElement('canvas'); const x = cv.getContext('2d');
     const font = (size, bold, fam) => `${bold ? '700 ' : ''}${size}px ${fam || 'Calibri, Arial, sans-serif'}`;
     const wrap = (txt, size, maxW) => { x.font = font(size, false); const words = txt.split(' '); const L = []; let cur = ''; words.forEach((w) => { const tst = cur ? cur + ' ' + w : w; if (x.measureText(tst).width > maxW && cur) { L.push(cur); cur = w; } else cur = tst; }); if (cur) L.push(cur); return L; };
-    const tLines = tRows.map((r) => wrap(r.text, 19, W - 2 * pad - nameCol - 30));
     const rowH = (r) => Math.max(1, r.people.length) * lh + 10;
-    let H = 40 + headH + head.length * 31 + 20;
+    let H = 40 + headH - 14 + head.length * 31 + 20;
     blocks.forEach((b) => { H += 52 + b.rows.reduce((a, r) => a + rowH(r), 0) + (b.staff ? lh + 10 : 0) + 10 + 30; });
-    if (tRows.length) H += 52 + tLines.reduce((a, L) => a + L.length * 26 + 12, 0) + 10 + 30;
-    H += 20;
+    H += 0;
     const sc = 2; cv.width = W * sc; cv.height = H * sc; x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
     const t = (str, tx, ty, size, bold, align, fam) => { x.font = font(size, bold, fam); x.fillStyle = '#000'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; x.fillText(str, tx, ty, W - 2 * pad - 20); };
     const ln = (x1, y1, x2, y2, col, lw) => { x.strokeStyle = col; x.lineWidth = lw || 1; x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2, y2); x.stroke(); };
     const ff = (cx, cy) => { x.fillStyle = '#000'; [0, 9].forEach((dx) => { x.beginPath(); x.moveTo(cx + dx, cy - 7); x.lineTo(cx + dx + 9, cy); x.lineTo(cx + dx, cy + 7); x.closePath(); x.fill(); }); };
-    let y = 40; t(title, W / 2, y + 20, 36, true, 'center'); y += headH;
+    let y = 40; t(title, W / 2, y + 20, 36, true, 'center'); y += headH - 14;
     head.forEach((h) => {
-      if (h.k === 'exam') t('▶  ' + h.txt, pad + 10, y, 19, true);
+      if (h.k === 'exam') t(h.txt, W / 2, y, 19, true, 'center');
       else { ff(pad + 30, y); t(h.txt, pad + 58, y, 22, true, 'left', '"Times New Roman", Times, serif'); }
       y += 31;
     });
@@ -8509,13 +8508,6 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const bh = yy - top + 10; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, top, W - 2 * pad, bh);
       y = top + bh + 30;
     });
-    if (tRows.length) {
-      const top = y; let yy = y + 52;
-      t('BY TEACHER', pad + 14, y + 26, 24, true); t('Room · Time', pad + nameCol + 16, y + 26, 22, true);
-      ln(pad, y + 52, W - pad, y + 52, '#000', 2);
-      tRows.forEach((r, i) => { const L = tLines[i]; const h = L.length * 26 + 12; t(r.name, pad + 14, yy + h / 2, 20, true); L.forEach((s2, k) => t(s2, pad + nameCol + 16, yy + 6 + k * 26 + 13, 19, false)); ln(pad + nameCol, yy, pad + nameCol, yy + h, '#CCC'); if (i < tRows.length - 1) ln(pad, yy + h, W - pad, yy + h, '#DDD'); yy += h; });
-      const bh = yy - top + 10; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, top, W - 2 * pad, bh);
-    }
     return { cv, invig, date };
   }
   // share the duty sheet picture (WhatsApp / save)
@@ -8989,7 +8981,30 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const rl = roomsList();
     const date = state.adminDate;
     const nameOf = planNameOf;
-    const chipsHtml = (sl, ri, si) => ids.map((u) => { const busy = dutyBusy(u, sl, date); const on = (sl.teachers || []).indexOf(u) !== -1; return `<button type="button" class="chip${on ? ' active' : ''}${busy ? ' chip-busy' : ''}" data-xp-t="${ri}:${si}" data-v="${u}" title="${escapeHtml(busy)}">${escapeHtml(nameOf(u))}${busy ? ` <span class="busy-tag">⚠️ ${escapeHtml(busy)}</span>` : ''}</button>`; }).join('');
+    // the teacher's other duties that day: other rooms / slots of this exam and the day's other exams
+    const hm0 = (v) => formatTimeStr(v).replace(/\s?(AM|PM)$/i, '');
+    const otherDuties = (u, ri, si) => {
+      const out = [];
+      f.rooms.forEach((r, rj) => r.slots.forEach((sl2, sj) => { if ((rj !== ri || sj !== si) && (sl2.teachers || []).indexOf(u) !== -1) out.push({ room: r.room || `Room ${rj + 1}`, start: sl2.start, end: sl2.end }); }));
+      (state.adminExams || []).filter((e) => e.date === date && e.id !== f.id).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl2) => { if ((sl2.teachers || []).indexOf(u) !== -1) out.push({ room: r.room || 'a room', start: sl2.start, end: sl2.end, other: examTitle(e) }); })));
+      return out;
+    };
+    const clash = (sl, d) => { const a = hhmmToMin(sl.start), b = hhmmToMin(sl.end), c = hhmmToMin(d.start), e = hhmmToMin(d.end); return a != null && b != null && c != null && e != null && a < e && c < b; };
+    const dutyTxt = (d) => `${d.room}${d.start && d.end ? ' ' + hm0(d.start) + '–' + hm0(d.end) : ''}`;
+    const chipsHtml = (sl, ri, si) => ids.map((u) => {
+      const busy = dutyBusy(u, sl, date); const on = (sl.teachers || []).indexOf(u) !== -1;
+      const od = otherDuties(u, ri, si); const hit = od.filter((d) => clash(sl, d)); const rest = od.filter((d) => !clash(sl, d));
+      const tags = `${busy ? ` <span class="busy-tag">⚠️ ${escapeHtml(busy)}</span>` : ''}${hit.map((d) => ` <span class="busy-tag">⚠️ ${escapeHtml(dutyTxt(d))}</span>`).join('')}${rest.map((d) => ` <span class="duty-tag">${escapeHtml(dutyTxt(d))}</span>`).join('')}`;
+      return `<button type="button" class="chip${on ? ' active' : ''}${busy || hit.length ? ' chip-busy' : ''}" data-xp-t="${ri}:${si}" data-v="${u}" title="${escapeHtml(busy)}">${escapeHtml(nameOf(u))}${tags}</button>`;
+    }).join('');
+    // adding someone who is already on duty at the same time asks first
+    const toggleT = async (ri, si, u) => {
+      const sl = f.rooms[ri].slots[si]; const k = sl.teachers.indexOf(u);
+      if (k !== -1) { sl.teachers.splice(k, 1); if (sl.breaks) delete sl.breaks[u]; renderExamPlanSection(); return; }
+      const hit = otherDuties(u, ri, si).filter((d) => clash(sl, d));
+      if (hit.length) { const ok = await showConfirm(`${nameOf(u)} already has duty in ${hit.map(dutyTxt).join(', ')}${hit[0].other ? ` (${hit[0].other})` : ''} at the same time.\n\nAdd here as well?`, 'Already on duty', 'Add'); if (!ok) return; }
+      sl.teachers.push(u); renderExamPlanSection();
+    };
     const tin = (attr, v) => `<input class="text-input" type="time" ${attr} value="${escapeHtml(v || '')}">`;
     const breaksHtml = (sl, ri, si) => {
       const on = sl.teachers || []; if (!on.length) return '';
@@ -9028,19 +9043,16 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const at = (v) => v.split(':');
     const n = (v) => Number(v);
     box.querySelectorAll('[data-xp-room]').forEach((b) => b.addEventListener('click', () => { f.rooms[n(b.getAttribute('data-xp-room'))].room = b.getAttribute('data-v'); renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => {
-      const [ri, si] = at(b.getAttribute('data-xp-t')).map(n); const sl = f.rooms[ri].slots[si]; const u = b.getAttribute('data-v');
-      const k = sl.teachers.indexOf(u); if (k === -1) sl.teachers.push(u); else { sl.teachers.splice(k, 1); if (sl.breaks) delete sl.breaks[u]; }
-      renderExamPlanSection();
-    }));
+    box.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = at(b.getAttribute('data-xp-t')).map(n); toggleT(ri, si, b.getAttribute('data-v')); }));
     // after a time change, refresh only that slot's teacher chips (busy marks) and the warnings
     const refreshChips = (ri, si) => {
       const c = box.querySelector(`[data-xp-chips="${ri}:${si}"]`); if (!c) return;
       c.innerHTML = chipsHtml(f.rooms[ri].slots[si], ri, si);
-      c.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => { const sl = f.rooms[ri].slots[si]; const u = b.getAttribute('data-v'); const k = sl.teachers.indexOf(u); if (k === -1) sl.teachers.push(u); else { sl.teachers.splice(k, 1); if (sl.breaks) delete sl.breaks[u]; } renderExamPlanSection(); }));
+      c.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => toggleT(ri, si, b.getAttribute('data-v'))));
     };
-    box.querySelectorAll('[data-xp-start]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-start')).map(n); const sl = f.rooms[ri].slots[si]; sl.start = inp.value; sl._auto = false; refreshChips(ri, si); renderExamPlanWarnings(); }));
-    box.querySelectorAll('[data-xp-end]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-end')).map(n); const sl = f.rooms[ri].slots[si]; sl.end = inp.value; sl._autoE = false; refreshChips(ri, si); renderExamPlanWarnings(); }));
+    const refreshAllChips = () => f.rooms.forEach((r, rj) => r.slots.forEach((x, sj) => refreshChips(rj, sj)));
+    box.querySelectorAll('[data-xp-start]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-start')).map(n); const sl = f.rooms[ri].slots[si]; sl.start = inp.value; sl._auto = false; refreshAllChips(); renderExamPlanWarnings(); }));
+    box.querySelectorAll('[data-xp-end]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-end')).map(n); const sl = f.rooms[ri].slots[si]; sl.end = inp.value; sl._autoE = false; refreshAllChips(); renderExamPlanWarnings(); }));
     // breaks of app teachers
     box.querySelectorAll('[data-xp-badd]').forEach((b) => b.addEventListener('click', () => { const [ri, si, u] = at(b.getAttribute('data-xp-badd')); const sl = f.rooms[n(ri)].slots[n(si)]; sl.breaks = sl.breaks || {}; sl.breaks[u] = { start: '', end: '' }; renderExamPlanSection(); }));
     box.querySelectorAll('[data-xp-brm]').forEach((b) => b.addEventListener('click', () => { const [ri, si, u] = at(b.getAttribute('data-xp-brm')); const sl = f.rooms[n(ri)].slots[n(si)]; if (sl.breaks) delete sl.breaks[u]; renderExamPlanSection(); }));
@@ -9048,7 +9060,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     // support staff count
     box.querySelectorAll('[data-xp-staff]').forEach((b) => b.addEventListener('click', () => { const r = f.rooms[n(b.getAttribute('data-xp-staff'))]; r.staff = Math.max(0, Math.min(9, (r.staff || 0) + n(b.getAttribute('data-d')))); renderExamPlanSection(); }));
     // people not in the app
-    box.querySelectorAll('[data-xp-oadd]').forEach((b) => b.addEventListener('click', () => { const r = f.rooms[n(b.getAttribute('data-xp-oadd'))]; const t = examFormTimes(); r.others = r.others || []; r.others.push({ name: '', start: t.start, end: t.end }); renderExamPlanSection(); }));
+    box.querySelectorAll('[data-xp-oadd]').forEach((b) => b.addEventListener('click', () => { const r = f.rooms[n(b.getAttribute('data-xp-oadd'))]; r.others = r.others || []; r.others.push({ name: '', start: '', end: '' }); renderExamPlanSection(); }));
     box.querySelectorAll('[data-xp-orm]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = at(b.getAttribute('data-xp-orm')).map(n); f.rooms[ri].others.splice(oi, 1); renderExamPlanSection(); }));
     box.querySelectorAll('[data-xp-on]').forEach((inp) => { inp.addEventListener('input', () => { const [ri, oi] = at(inp.getAttribute('data-xp-on')).map(n); f.rooms[ri].others[oi].name = inp.value; }); inp.addEventListener('change', renderExamPlanWarnings); });
     box.querySelectorAll('[data-xp-os],[data-xp-oe],[data-xp-obs],[data-xp-obe]').forEach((inp) => inp.addEventListener('change', () => {
@@ -9057,18 +9069,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }));
     box.querySelectorAll('[data-xp-obadd]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = at(b.getAttribute('data-xp-obadd')).map(n); f.rooms[ri].others[oi]._b = true; renderExamPlanSection(); }));
     box.querySelectorAll('[data-xp-obrm]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = at(b.getAttribute('data-xp-obrm')).map(n); const o = f.rooms[ri].others[oi]; o.bStart = ''; o.bEnd = ''; o._b = false; renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-addslot]').forEach((b) => b.addEventListener('click', () => {
-      const r = f.rooms[n(b.getAttribute('data-xp-addslot'))]; const last = r.slots[r.slots.length - 1]; const t = examFormTimes();
-      if (last && t.start && t.end && last.start && last.end && last.end === t.end) {
-        // split the last slot in half
-        const mid = svMinToHHMM(Math.round((hhmmToMin(last.start) + hhmmToMin(last.end)) / 2 / 5) * 5);
-        last.end = mid; r.slots.push({ start: mid, end: t.end, teachers: [] });
-      } else r.slots.push({ start: (last && last.end) || t.start, end: t.end, teachers: [] });
-      renderExamPlanSection();
-    }));
+    box.querySelectorAll('[data-xp-addslot]').forEach((b) => b.addEventListener('click', () => { f.rooms[n(b.getAttribute('data-xp-addslot'))].slots.push({ start: '', end: '', teachers: [] }); renderExamPlanSection(); }));
     box.querySelectorAll('[data-xp-rmslot]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = at(b.getAttribute('data-xp-rmslot')).map(n); f.rooms[ri].slots.splice(si, 1); renderExamPlanSection(); }));
     box.querySelectorAll('[data-xp-rmroom]').forEach((b) => b.addEventListener('click', () => { f.rooms.splice(n(b.getAttribute('data-xp-rmroom')), 1); renderExamPlanSection(); }));
-    document.getElementById('xpAddRoom').addEventListener('click', () => { const t = examFormTimes(); f.rooms.push({ room: '', staff: 0, others: [], slots: [{ start: t.start, end: t.end, teachers: [] }] }); renderExamPlanSection(); });
+    document.getElementById('xpAddRoom').addEventListener('click', () => { f.rooms.push({ room: '', staff: 0, others: [], slots: [{ start: '', end: '', teachers: [] }] }); renderExamPlanSection(); });
     renderExamPlanWarnings();
   }
   // breaks inside the duty, a name for everyone typed in by hand, sensible times
@@ -9093,7 +9097,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   // times inside the exam when nobody is listed in a room (it may be someone not in the app, so it is only a hint)
   function roomGaps(r, t) {
     const s0 = hhmmToMin(t.start), e0 = hhmmToMin(t.end); if (s0 == null || e0 == null || e0 <= s0 || !r.room) return [];
-    const iv = r.slots.filter((sl) => (sl.teachers || []).length).map((sl) => [hhmmToMin(sl.start || t.start), hhmmToMin(sl.end || t.end)])
+    const iv = r.slots.filter((sl) => (sl.teachers || []).length && sl.start && sl.end).map((sl) => [hhmmToMin(sl.start), hhmmToMin(sl.end)])
       .concat((r.others || []).filter((o) => (o.name || '').trim()).map((o) => [hhmmToMin(o.start), hhmmToMin(o.end)]))
       .filter((x) => x[0] != null && x[1] != null && x[1] > x[0]).sort((a, b) => a[0] - b[0]);
     const gaps = []; let cur = s0;
@@ -9106,7 +9110,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (!el || !f) return;
     if (!f.rooms.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">Add rooms to plan who invigilates where (optional).</div>'; return; }
     const t = examFormTimes();
-    const rooms = f.rooms.map((r) => ({ room: r.room, scope: ['x'], slots: r.slots.map((sl) => ({ start: sl.start || t.start, end: sl.end || t.end, teachers: sl.teachers })) }));
+    // a slot not started yet (no time, nobody chosen) is not checked
+    const rooms = f.rooms.map((r) => ({ room: r.room, scope: ['x'], slots: r.slots.filter((sl) => sl.start || sl.end || (sl.teachers || []).length).map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers })) }));
     const w = planWarnings({ date: state.adminDate, start: t.start, end: t.end }, rooms).filter((x) => !/choose the class|no invigilator/.test(x)).concat(planExtraWarnings(f));
     el.innerHTML = w.length ? `<div class="ad-alert"><div class="ad-alert-t">⚠️ Please check</div>${w.map((x) => `<div class="ad-alert-l">${escapeHtml(x)}</div>`).join('')}</div>` : '<div class="ad-ok">✓ No clashes found</div>';
     f.rooms.forEach((r, ri) => {
@@ -9115,12 +9120,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     });
   }
   // When the exam time is set or changed, empty duty slots follow it.
-  ['adminExamStart', 'adminExamEnd'].forEach((id) => document.getElementById(id).addEventListener('change', () => {
-    const f = state.adminExamForm; if (!f) return;
-    const t = examFormTimes();
-    f.rooms.forEach((r) => { if (r.slots.length === 1) { const sl = r.slots[0]; if (!sl.start || sl._auto) { sl.start = t.start; sl._auto = true; } if (!sl.end || sl._autoE) { sl.end = t.end; sl._autoE = true; } } });
-    renderExamPlanSection();
-  }));
+  // (duty slots are not filled from the exam time any more: the duty chart starts empty; only the hints follow it)
+  ['adminExamStart', 'adminExamEnd'].forEach((id) => document.getElementById(id).addEventListener('change', () => { if (state.adminExamForm) renderExamPlanWarnings(); }));
 
   function renderAdminExamForm(ids, nameOf) {
     const box = document.getElementById('adminExamForm');
@@ -9203,6 +9204,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!start || !end || hhmmToMin(end) <= hhmmToMin(start)) { showToast('Check the Reporting time and when Writing time ends', 'error'); return; }
     { const tt = cleanExamTimes(f); const bad = [['read', 'Reading time'], ['write', 'Writing time']].find(([k]) => tt[k + 'From'] && tt[k + 'To'] && hhmmToMin(tt[k + 'To']) <= hhmmToMin(tt[k + 'From'])); if (bad) { showToast(`Check the ${bad[1]}`, 'error'); return; } }
     { const xw = planExtraWarnings(f); if (xw.length) { showToast(xw[0], 'error'); return; } }
+    f.rooms.forEach((r) => { r.slots = r.slots.filter((sl) => sl.start || sl.end || (sl.teachers || []).length); });
+    { const miss = f.rooms.find((r) => r.slots.some((sl) => !sl.start || !sl.end)); if (miss) { showToast(`Fill the duty time in ${miss.room || 'every room'}`, 'error'); renderExamPlanSection(); return; } }
     if (!f.scope.length) { showToast('Choose the class or batches', 'error'); return; }
     const rooms = f.rooms.map((r) => ({ room: r.room, scope: f.scope.slice(), staff: Math.max(0, Math.min(9, r.staff || 0)),
       others: (r.others || []).filter((o) => (o.name || '').trim()).map((o) => ({ name: o.name.trim(), start: o.start || start, end: o.end || end, bStart: o.bStart || '', bEnd: o.bEnd || '' })),
