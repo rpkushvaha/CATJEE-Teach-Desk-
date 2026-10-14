@@ -1041,10 +1041,119 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  /* ---------- exam planner (4 steps) ---------- */
+  body.xw-open #adminExamList, body.xw-open #adminTestsHeldSec { display: none !important; }
+  .xw { gap: 14px !important; padding: 14px !important; border-radius: 22px !important; border: 1px solid var(--line) !important; background: var(--paper) !important; box-shadow: 0 12px 34px rgba(16,24,40,.08); display: flex; flex-direction: column; }
+  .xw[hidden] { display: none !important; }
+  .xw-head { display: flex; align-items: center; gap: 12px; }
+  .xw-title { flex: 1; min-width: 0; }
+  .xw-t1 { font-size: 19px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; line-height: 1.2; }
+  .xw-t2 { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .xw-prev { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-weight: 700; font-size: 13.5px; box-shadow: 0 1px 2px rgba(16,24,40,.06); cursor: pointer; flex: none; }
+  .xw-prev .ic { color: var(--gold); }
+  .xw-steps { display: flex; align-items: center; gap: 6px; }
+  .xw-st { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-size: 12.5px; font-weight: 700; cursor: pointer; flex: none; transition: background .18s ease, border-color .18s ease, color .18s ease; }
+  .xw-dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--neutral-soft); color: var(--muted-2); font-size: 12px; font-weight: 800; }
+  .xw-st.on { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+  .xw-st.on .xw-dot { background: var(--gold); color: #fff; }
+  .xw-st.done .xw-dot { background: var(--switch-on); color: #fff; }
+  .xw-line { flex: 1; height: 2px; border-radius: 2px; background: var(--line); min-width: 4px; }
+  @media (max-width: 400px) { .xw-st:not(.on) .xw-sl { display: none; } .xw-st:not(.on) { padding: 4px; } }
+  .xw-pane { display: flex; flex-direction: column; gap: 12px; animation: xwIn .22s ease; }
+  .xw-pane[hidden] { display: none !important; }
+  @keyframes xwIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .xw-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 22px rgba(16,24,40,.05); }
+  .xw-ch { font-size: 15.5px; font-weight: 800; color: var(--ink); letter-spacing: -.005em; }
+  .xw-cs { font-size: 12.5px; color: var(--muted); margin-top: -6px; }
+  .xw-card .sv-tlbl { margin: 2px 0 -2px; font-size: 12.5px; font-weight: 700; color: var(--muted-2); }
+  .xw-staff { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 4px; border-top: 1px solid var(--line); }
+  .xw-staff:first-of-type { border-top: 0; }
+  .xw-rn { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .xw-bar { position: sticky; bottom: calc(var(--nav-h, 66px) - 1px); z-index: 6; display: grid; grid-template-columns: 1fr 1.7fr; gap: 10px; padding: 10px 0 4px; margin: 0 -2px; background: linear-gradient(to top, var(--paper) 78%, transparent); }
+  .xw-b { height: 50px; border-radius: 15px; font-size: 15.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; letter-spacing: .005em; transition: transform .12s ease, box-shadow .18s ease; font-family: inherit; }
+  .xw-b:active { transform: scale(.98); }
+  .xw-b.ghost { background: var(--card); border: 1.5px solid var(--line); color: var(--ink); }
+  .xw-b.main { background: var(--gold); border: 0; color: #fff; box-shadow: 0 8px 18px rgba(230,57,70,.30); }
+  .xw-b:disabled { opacity: .45; box-shadow: none; cursor: default; }
+  .xw-del { background: none; border: 0; color: #C81E32; font-size: 13.5px; font-weight: 700; padding: 10px; cursor: pointer; align-self: center; font-family: inherit; }
+  .xw-empty { text-align: center; color: var(--muted); font-size: 13.5px; padding: 22px 10px; border: 1px dashed var(--line); border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .xw-av { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; border: 2px solid var(--card); flex: none; letter-spacing: .02em; }
+  .xw-av.plain { background: var(--neutral-soft); color: var(--muted-2); }
+  .xw-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .xw-tool { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+  .xw-tool .ic { color: var(--gold); }
+  .xd-room { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 10px 26px rgba(16,24,40,.06); }
+  .xd-rh { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .xd-rname { font-size: 19px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; display: flex; align-items: center; gap: 9px; }
+  .xd-rname::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px var(--gold-soft); }
+  .xd-meta { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .xd-axis { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .xd-bar { position: relative; height: 14px; border-radius: 999px; border: 1px solid var(--line); overflow: hidden; background: repeating-linear-gradient(135deg, var(--neutral-soft) 0 6px, var(--card) 6px 12px); }
+  .xd-seg { position: absolute; top: 0; bottom: 0; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .xd-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .xd-row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 11px 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; font-family: inherit; transition: transform .12s ease, border-color .18s ease, box-shadow .18s ease; }
+  .xd-row:active { transform: scale(.99); }
+  .xd-row:hover { border-color: var(--gold); box-shadow: 0 4px 14px rgba(230,57,70,.10); }
+  .xd-avs { display: flex; flex: none; align-items: center; }
+  .xd-avs .xw-av + .xw-av { margin-left: -11px; }
+  .xd-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .xd-txt b { font-size: 14.5px; font-weight: 700; overflow-wrap: anywhere; line-height: 1.3; }
+  .xd-time { font-size: 13.5px; color: var(--muted-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .xd-brk { font-size: 12.5px; color: var(--muted); }
+  .xd-tag { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; background: var(--neutral-soft); color: var(--muted-2); margin-left: 6px; vertical-align: middle; }
+  .xd-warn { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 2px 9px; background: rgba(217,119,6,.14); color: #B45309; width: fit-content; }
+  .xd-chev { color: var(--muted); font-size: 22px; line-height: 1; flex: none; }
+  .xd-row.xd-none .xd-txt b { color: var(--gold); }
+  .xd-add { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 2px; }
+  .xd-add button { background: none; border: 0; padding: 4px 0; color: var(--gold); font-weight: 800; font-size: 13.5px; cursor: pointer; font-family: inherit; }
+  .xw-stats { display: flex; flex-wrap: wrap; gap: 8px; }
+  .xw-stat { border-radius: 999px; padding: 5px 12px; background: var(--neutral-soft); font-size: 13px; font-weight: 700; color: var(--ink); }
+  .xw-ck { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; line-height: 1.4; padding: 10px 12px; border-radius: 14px; }
+  .xw-ck.ok { background: var(--switch-on-soft); color: #15803D; }
+  .xw-ck.wn { background: rgba(217,119,6,.13); color: #B45309; }
+  .xw-ck.in { background: var(--neutral-soft); color: var(--muted-2); }
+  .xw-pic { display: block; width: 100%; padding: 0; border: 1px solid var(--line); background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer; }
+  .xw-pic img { display: block; width: 100%; height: auto; }
+  .xw-picnote { font-size: 12.5px; color: var(--muted); text-align: center; }
+  /* picker sheet */
+  .xs-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .xs-two input[type="time"], .xs-time input[type="time"] { padding-left: 12px; padding-right: 8px; }
+  .xs-lbl { font-size: 12.5px; font-weight: 700; color: var(--muted-2); margin: 12px 2px 6px; }
+  .xs-search { position: relative; margin-top: 14px; }
+  .xs-search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .xs-search input { width: 100%; height: 46px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); padding: 0 14px 0 40px; color: var(--ink); font-family: inherit; }
+  .xs-grp { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 16px 2px 6px; }
+  .xs-pw { margin-bottom: 8px; }
+  .xs-p { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 9px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font-family: inherit; }
+  .xs-p.on { border-color: var(--gold); background: var(--gold-soft); }
+  .xs-pn { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .xs-pn b { font-size: 14.5px; font-weight: 700; overflow-wrap: anywhere; }
+  .xs-pn small { font-size: 12px; color: var(--muted); }
+  .xs-pn small.why { color: #B45309; font-weight: 600; }
+  .xs-ck { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 800; flex: none; }
+  .xs-p.on .xs-ck { background: var(--gold); border-color: var(--gold); }
+  .xs-badd { background: none; border: 0; padding: 6px 4px 2px 8px; color: var(--gold); font-weight: 700; font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .xs-brk .xs-two { gap: 8px; }
+  .xs-brk { margin: 6px 0 0 0; padding: 8px; border: 1px dashed var(--line); border-radius: 14px; background: var(--paper); }
+  .xs-bt { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; font-weight: 700; color: var(--muted-2); margin-bottom: 6px; }
+  .xs-bt button, .xs-link { background: none; border: 0; padding: 0; color: #C81E32; font-weight: 700; font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .xs-foot { display: grid; gap: 8px; margin-top: 16px; }
+  .xs-foot .xw-b { width: 100%; }
+  .xs-foot .xs-link { text-align: center; padding: 8px; font-size: 13.5px; }
+  .xs-name { width: 100%; height: 48px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); padding: 0 14px; color: var(--ink); font-family: inherit; font-size: 16px; }
+  .xs-ex { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 11px 12px; margin-bottom: 8px; text-align: left; width: 100%; color: var(--ink); cursor: pointer; font-family: inherit; }
+  .xs-ex b { display: block; font-size: 14.5px; font-weight: 700; }
+  .xs-ex small { color: var(--muted); font-size: 12.5px; }
+  .xs-exb { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .xs-exb .xw-b { height: 42px; font-size: 13.5px; }
+  /* exam card: one clear Edit button */
+  .ex-get { font-size: 12.5px; font-weight: 700; color: var(--muted-2); margin: 12px 2px 6px; }
+  .ex-edit-main { width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border-radius: 14px; border: 1.5px solid rgba(230,57,70,.45); background: rgba(230,57,70,.07); color: #C81E32; font-weight: 800; font-size: 15px; cursor: pointer; font-family: inherit; }
+
   .xt-box { display: grid; gap: 4px 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   .xt-f .sv-tlbl { margin: 6px 0 4px; }
   .xt-f.rng { grid-column: 1 / -1; }
-  .xt-f .sv-times, .xp-brk .sv-times, .xp-other .sv-times { grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 8px; }
+  .xt-f .sv-times { grid-template-columns: repeat(auto-fit, minmax(138px, 1fr)); gap: 8px; }
   .xt-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--ink); margin: 2px 0 4px; }
   .xt-sum b { font-weight: 700; }
   .xt-sum .ico { color: #E63946; }
@@ -2325,25 +2434,36 @@
 
       <section class="tsec" id="adminExamsSec" data-atab="exams">
         <div class="tsec-head"><div class="tsec-title">Tests &amp; Exams</div><button type="button" class="hv-back" id="adminNewExamBtn" style="padding:0;">+ New Exam</button></div>
-        <div class="panel" id="adminExamForm" hidden style="display:flex; flex-direction:column; gap:12px;">
-          <div class="panel-title" id="adminExamFormTitle">New Exam</div>
-          <div class="sv-tlbl" style="margin:0;">Test Type</div>
-          <div class="chips inv-scope" id="adminExamType"></div>
-          <div class="sv-tlbl" style="margin:0;">Subject (optional)</div>
-          <div class="chips inv-scope" id="adminExamSubject"></div>
-          <div class="sv-tlbl" style="margin:0;">Classes</div>
-          <div id="adminExamScope"></div>
-          <div class="sv-tlbl" style="margin:0;">Paper type</div>
-          <div class="chips" id="adminExamPtype"></div>
-          <div id="adminExamTimes" class="xt-box"></div>
-          <div class="xt-sum" id="adminExamTimeSum"></div>
-          <div hidden><input id="adminExamStart" type="time"><input id="adminExamEnd" type="time"></div>
-          <div class="xp-head"><span>Duty Plan</span><span class="xp-sub">rooms &amp; invigilators</span></div>
-          <div id="adminExamPlan" class="plan-box"></div>
-          <div class="sv-form-btns">
-            <button type="button" class="btn-secondary" id="adminExamCancel" style="border-color: var(--line);">Cancel</button>
-            <button type="button" class="save-btn" id="adminExamSave" style="margin:0;">Save</button>
+        <div class="panel xw" id="adminExamForm" hidden>
+          <div class="xw-head">
+            <button type="button" class="back-btn" id="xwBack" aria-label="Close"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+            <div class="xw-title"><div class="xw-t1" id="adminExamFormTitle">New Exam</div><div class="xw-t2" id="xwSub">Step 1 of 4 · Exam</div></div>
+            <button type="button" class="xw-prev" id="xwPreview" aria-label="Preview the duty sheet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Preview</span></button>
           </div>
+          <div class="xw-steps" id="xwSteps"></div>
+          <div class="xw-pane" data-xw="1">
+            <div class="xw-card">
+              <div class="xw-ch">The exam</div>
+              <div class="sv-tlbl">Test type</div>
+              <div class="chips inv-scope" id="adminExamType"></div>
+              <div class="sv-tlbl">Subject <span class="xt-note">optional</span></div>
+              <div class="chips inv-scope" id="adminExamSubject"></div>
+              <div class="sv-tlbl">Classes</div>
+              <div id="adminExamScope"></div>
+            </div>
+            <div class="xw-card">
+              <div class="xw-ch">Paper &amp; timings</div>
+              <div class="sv-tlbl">Paper type</div>
+              <div class="chips" id="adminExamPtype"></div>
+              <div id="adminExamTimes" class="xt-box"></div>
+              <div class="xt-sum" id="adminExamTimeSum"></div>
+            </div>
+          </div>
+          <div class="xw-pane" data-xw="2" hidden><div id="xwRooms"></div></div>
+          <div class="xw-pane" data-xw="3" hidden><div id="xwDuty"></div></div>
+          <div class="xw-pane" data-xw="4" hidden><div id="xwCheck"></div></div>
+          <div hidden><input id="adminExamStart" type="time"><input id="adminExamEnd" type="time"><div id="adminExamPlan"></div><button type="button" id="adminExamSave">Save</button></div>
+          <div class="xw-bar" id="xwBar"></div>
         </div>
         <div class="panel plan-box" id="examPlanBox" hidden></div>
         <div id="adminExamList" class="sv-rows"></div>
@@ -2820,7 +2940,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 11.7 · updated 14 Oct 2026</div>
+          <div class="dnote">Version 11.8 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8369,7 +8489,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       let duty = '';
       if (open) {
         duty = '<div class="ex-duty">';
-        if (!pr.length) duty += '<div class="ad-tsub">Add the rooms first, then choose invigilators here.</div><button type="button" class="btn-secondary" data-ex-edit="' + escapeHtml(e.id) + '" style="border-color: var(--gold); color: var(--gold);">① Add rooms</button>';
+        if (!pr.length) duty += '<div class="ad-tsub">Add the rooms first, then choose invigilators here.</div><button type="button" class="btn-secondary" data-ex-edit="' + escapeHtml(e.id) + '" data-ex-step="2" style="border-color: var(--gold); color: var(--gold);">① Add rooms</button>';
         // room by room: who is on duty when, and how it went; "Change" opens the name chips
         const editing = state.exEditRooms === e.id;
         pr.forEach((r, ri) => {
@@ -8383,8 +8503,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           });
           duty += '</div>';
         });
-        if (pr.length) duty += `<button type="button" class="btn-secondary" data-ex-chg="${escapeHtml(e.id)}" style="border-color: var(--line);">${editing ? 'Done changing' : 'Change invigilators'}</button>`;
-        duty += `<div class="ex-acts"><button type="button" class="btn-secondary" data-ex-edit="${escapeHtml(e.id)}" style="border-color: var(--line);">Edit rooms & time</button><button type="button" class="btn-secondary" data-ex-more="${escapeHtml(e.id)}" style="border-color: var(--line);">Details · PDF · Share</button></div></div>`;
+        if (pr.length) duty += `<div class="ex-get">Get it as</div><div class="qa-row hv-tiles ex-tiles"><button type="button" class="qa-btn" data-ex-pdf="${escapeHtml(e.id)}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF</span><span class="qa-s">Duty chart</span></button><button type="button" class="qa-btn qa-wa" data-ex-wa="${escapeHtml(e.id)}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share duty</span></button></div>`;
+        duty += `<button type="button" class="ex-edit-main" data-ex-edit="${escapeHtml(e.id)}"><span class="ico i-edit" aria-hidden="true"></span>Edit exam</button></div>`;
       }
       return `<div class="ad-exam${isSel ? ' ex-sel' : ''}${open ? ' ex-open' : ''}" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${state.exSel ? `<span class="ex-tick">${isSel ? '✓' : ''}</span>` : ''}${escapeHtml(examTitle(e))}</div>
@@ -8415,7 +8535,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const live = state.exSel.filter((id) => exams.some((e) => e.id === id)); state.exSel = live;
       html += `<div class="ex-selbar"><span><b>${live.length}</b> selected · tap more exams</span><span><button type="button" class="btn-secondary" id="exSelAll" style="border-color: var(--line);">All</button><button type="button" class="btn-secondary hv-del" id="exSelDel" style="border-color: var(--line);"${live.length ? '' : ' disabled'}><span class="ico i-trash" aria-hidden="true"></span> Delete${live.length ? ' (' + live.length + ')' : ''}</button><button type="button" class="btn-secondary" id="exSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
     } else if (examRows.length) {
-      html += '<div class="hv-note" style="text-align:left; padding:6px 12px 0;">Tap an exam to choose invigilators · press and hold to select several</div>';
+      html += '<div class="hv-note" style="text-align:left; padding:6px 12px 0;">Tap an exam to open it · press and hold to select several</div>';
       const dl = dutyDayList(exams); if (dl.length) html += dutyPicCardHtml(dl);
     }
     if (classRows.length) html += `<div class="ad-grp">Class Tests · ${ct.reduce((s2, c) => s2 + testCount(c), 0) || classRows.length}</div>` + classRows.join('');
@@ -8434,7 +8554,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function dutyDayList(exams) { return (exams || []).filter((e) => planOf(e).some((r) => (r.slots || []).some((sl) => (sl.teachers || []).length) || (r.others || []).some((o) => (o.name || '').trim()))); }
   // invigilators of the day whose names are not loaded yet (the picture would say "Teacher")
   function dutyNameKey(list) { const ids = []; list.forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { if (ids.indexOf(u) === -1) ids.push(u); })))); return ids.map((u) => (state.adminNames[u] && state.adminNames[u].name) || '?').join(','); }
-  function dutySig(list) { return JSON.stringify(list.map((e) => [e.id, e.start, e.end, e.ptype || '', e.times || {}, planOf(e)])); }
+  const stableJson = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v).sort().reduce((a, x) => { a[x] = v[x]; return a; }, {}) : v));
+  // the same exam gives the same signature whether it comes from the form or from the database
+  function dutySig(list) { return stableJson(list.map((e) => [examTitle(e), scopeLabel(e.scope), e.start, e.end, e.ptype || 'sub', e.times || {}, planOf(e)])); }
   function dutyImgId(date) { return 'duty~' + date + '~' + leadWings().map((w) => String(w).replace(/[^A-Za-z0-9]+/g, '')).join('_'); }
   function buildDutyCanvas(list) {
     const date = list[0].date; const dd = dateObj(date);
@@ -8445,7 +8567,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const span = (a, b) => `${hm(a)} - ${hm(b)}`;
     // header: each exam, then its paper times (Reporting time, distributions, reading / writing time)
     const head = [];
-    list.forEach((e) => { head.push({ k: 'exam', txt: `(${examTitle(e)} · ${scopeLabel(e.scope)} · ${formatTimeStr(e.start)} – ${formatTimeStr(e.end)})` }); examTimeLines(e).forEach((x) => head.push({ k: 'time', txt: x })); });
+    list.forEach((e) => {
+      const parts = [examTitle(e), scopeLabel(e.scope), e.start && e.end ? `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}` : ''].filter((x) => x && String(x).trim());
+      if (parts.length) head.push({ k: 'exam', txt: `(${parts.join(' · ')})` });
+      examTimeLines(e).forEach((x) => head.push({ k: 'time', txt: x }));
+    });
     // rooms: one block per room (across the day's exams); app teachers with the same time share a row,
     // people not in the app get their own row; each person's break sits in the Break column
     const rooms = {}; const order = []; const byT = {};
@@ -8473,7 +8599,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const blocks = order.map((k) => ({ room: k, staff: rooms[k].staff, rows: rooms[k].rows.sort((a, b) => (hhmmToMin(a.start) - hhmmToMin(b.start)) || (hhmmToMin(a.end) - hhmmToMin(b.end))) }));
     const tRows = Object.keys(byT).map((k) => byT[k]).sort((a, b) => a.sort.localeCompare(b.sort)).map((q) => ({ name: q.name, text: q.d.sort((a, b) => hhmmToMin(a.start) - hhmmToMin(b.start)).map((d) => `${d.room} · ${span(d.start, d.end)}${d.brk ? ` (break ${d.brk})` : ''}`).join('   |   ') }));
     const invig = Object.keys(byT).filter((k) => k.indexOf('u:') === 0).map((k) => k.slice(2));
-    const W = 1100, pad = 40, lh = 32, headH = 70, nameCol = 300, cT = W * 0.56, cB = W * 0.78;
+    // the Break column is drawn only when somebody has a break
+    const anyBreak = blocks.some((b) => b.rows.some((r) => r.people.some((q) => q.brk)));
+    const W = 1100, pad = 40, lh = 32, headH = 70, nameCol = 300, cT = W * (anyBreak ? 0.56 : 0.72), cB = anyBreak ? W * 0.78 : W - pad;
     const cv = document.createElement('canvas'); const x = cv.getContext('2d');
     const font = (size, bold, fam) => `${bold ? '700 ' : ''}${size}px ${fam || 'Calibri, Arial, sans-serif'}`;
     const wrap = (txt, size, maxW) => { x.font = font(size, false); const words = txt.split(' '); const L = []; let cur = ''; words.forEach((w) => { const tst = cur ? cur + ' ' + w : w; if (x.measureText(tst).width > maxW && cur) { L.push(cur); cur = w; } else cur = tst; }); if (cur) L.push(cur); return L; };
@@ -8494,17 +8622,17 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     y += 20;
     blocks.forEach((b) => {
       const top = y; let yy = y + 52;
-      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', (cT + cB) / 2, y + 26, 24, true, 'center'); t('Break', (cB + W - pad) / 2, y + 26, 24, true, 'center');
+      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', (cT + cB) / 2, y + 26, 24, true, 'center'); if (anyBreak) t('Break', (cB + W - pad) / 2, y + 26, 24, true, 'center');
       ln(pad, y + 52, W - pad, y + 52, '#000', 2);
       b.rows.forEach((r, i) => {
         const h = rowH(r);
         r.people.forEach((q, k) => { const ly = yy + 5 + k * lh + lh / 2; t(q.name, pad + 14, ly, 22, true); if (q.brk) t(q.brk, (cB + W - pad) / 2, ly, 22, false, 'center'); });
         t(span(r.start, r.end), (cT + cB) / 2, yy + h / 2, 22, false, 'center');
-        ln(cT, yy, cT, yy + h, '#CCC'); ln(cB, yy, cB, yy + h, '#CCC');
+        ln(cT, yy, cT, yy + h, '#CCC'); if (anyBreak) ln(cB, yy, cB, yy + h, '#CCC');
         if (i < b.rows.length - 1 || b.staff) ln(pad, yy + h, W - pad, yy + h, '#DDD');
         yy += h;
       });
-      if (b.staff) { const h = lh + 10; t(`${b.staff} Staff`, pad + 14, yy + h / 2, 22, true); ln(cT, yy, cT, yy + h, '#CCC'); ln(cB, yy, cB, yy + h, '#CCC'); yy += h; }
+      if (b.staff) { const h = lh + 10; t(`${b.staff} Staff`, pad + 14, yy + h / 2, 22, true); ln(cT, yy, cT, yy + h, '#CCC'); if (anyBreak) ln(cB, yy, cB, yy + h, '#CCC'); yy += h; }
       const bh = yy - top + 10; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, top, W - 2 * pad, bh);
       y = top + bh + 30;
     });
@@ -8539,8 +8667,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       <div class="dsp-st">${st}</div>
       <div class="dsp-btns${pubBtn ? '' : ' one'}">${pubBtn}<button type="button" class="btn-secondary" id="dspShare" style="border-color: var(--line); margin:0;">Share picture</button></div></div>`;
   }
-  async function publishDutySheet(exams) {
-    const list = dutyDayList(exams); if (!list.length) return;
+  async function publishDutyList(list) {
+    if (!list.length) return;
     if (dutyNameKey(list).split(',').indexOf('?') !== -1) { showToast('Teacher names are still loading · try again in a moment', 'error'); return; }
     const btn = document.getElementById('dspPublish'); if (btn) btn.disabled = true;
     try {
@@ -8555,6 +8683,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       showToast(had ? 'Duty sheet updated · teachers see the new one' : 'Duty sheet published · teachers can see it in the Gallery');
       renderAdmin();
     } catch (err) { if (btn) btn.disabled = false; flashOffline(err); }
+  }
+  async function publishDutySheet(exams) { return publishDutyList(dutyDayList(exams)); }
+  // after "Save & Publish": the day's exams with the one just saved
+  async function publishAfterSave(ex) {
+    const others = (state.adminExams || []).filter((e) => e.date === ex.date && e.id !== ex.id);
+    const list = dutyDayList(others.concat([ex])).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+    if (!list.some((e) => e.id === ex.id)) { showToast('Saved · add a duty to publish the sheet', 'error'); return; }
+    await publishDutyList(list);
   }
   function bindAdminExamList(listEl, exams, nameOf) {
     listEl.querySelectorAll('[data-exam]').forEach((row) => {
@@ -8572,12 +8708,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => row.addEventListener(ev, stop));
       row.addEventListener('click', (e) => {
         if (row._lp) { row._lp = false; return; }
-        if (e.target.closest('[data-ex-t],[data-ex-edit],[data-ex-more],[data-ex-chg]')) return;
+        if (e.target.closest('[data-ex-t],[data-ex-edit],[data-ex-more],[data-ex-chg],[data-ex-pdf],[data-ex-wa]')) return;
         if (state.exSel) { const k = state.exSel.indexOf(id); if (k === -1) state.exSel.push(id); else state.exSel.splice(k, 1); renderAdmin(); return; }
         state.exOpen = state.exOpen === id ? null : id; renderAdmin();
       });
     });
-    listEl.querySelectorAll('[data-ex-edit]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-edit')); if (e) { state.exOpen = null; openAdminExamForm(e); } }));
+    listEl.querySelectorAll('[data-ex-edit]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-edit')); if (e) { state.exOpen = null; openAdminExamForm(e, b.hasAttribute('data-ex-step') ? Number(b.getAttribute('data-ex-step')) : 1); } }));
+    listEl.querySelectorAll('[data-ex-pdf]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-pdf')); if (e) dutyChartPdf(e); }));
+    listEl.querySelectorAll('[data-ex-wa]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-wa')); if (e) window.open('https://wa.me/?text=' + encodeURIComponent(dutyChartText(e)), '_blank'); }));
     listEl.querySelectorAll('[data-ex-more]').forEach((b) => b.addEventListener('click', () => openExamSheet(b.getAttribute('data-ex-more'), nameOf)));
     listEl.querySelectorAll('[data-ex-chg]').forEach((b) => b.addEventListener('click', () => { const id = b.getAttribute('data-ex-chg'); state.exEditRooms = state.exEditRooms === id ? null : id; renderAdmin(); }));
     listEl.querySelectorAll('[data-ex-t]').forEach((b) => b.addEventListener('click', async () => {
@@ -8973,108 +9111,311 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const cls = day.find((c) => c.entryType !== 'activity' && hhmmToMin(c.startTimeStr) < b && a < hhmmToMin(c.endTimeStr));
     return cls ? `class ${formatTimeStr(cls.startTimeStr)}` : '';
   }
-  function renderExamPlanSection() {
-    const box = document.getElementById('adminExamPlan');
-    const f = state.adminExamForm;
-    if (!box || !f) return;
-    const ids = invigIds();
-    const rl = roomsList();
-    const date = state.adminDate;
-    const nameOf = planNameOf;
-    // the teacher's other duties that day: other rooms / slots of this exam and the day's other exams
-    const hm0 = (v) => formatTimeStr(v).replace(/\s?(AM|PM)$/i, '');
-    const otherDuties = (u, ri, si) => {
-      const out = [];
-      f.rooms.forEach((r, rj) => r.slots.forEach((sl2, sj) => { if ((rj !== ri || sj !== si) && (sl2.teachers || []).indexOf(u) !== -1) out.push({ room: r.room || `Room ${rj + 1}`, start: sl2.start, end: sl2.end }); }));
-      (state.adminExams || []).filter((e) => e.date === date && e.id !== f.id).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl2) => { if ((sl2.teachers || []).indexOf(u) !== -1) out.push({ room: r.room || 'a room', start: sl2.start, end: sl2.end, other: examTitle(e) }); })));
-      return out;
-    };
-    const clash = (sl, d) => { const a = hhmmToMin(sl.start), b = hhmmToMin(sl.end), c = hhmmToMin(d.start), e = hhmmToMin(d.end); return a != null && b != null && c != null && e != null && a < e && c < b; };
-    const dutyTxt = (d) => `${d.room}${d.start && d.end ? ' ' + hm0(d.start) + '–' + hm0(d.end) : ''}`;
-    const chipsHtml = (sl, ri, si) => ids.map((u) => {
-      const busy = dutyBusy(u, sl, date); const on = (sl.teachers || []).indexOf(u) !== -1;
-      const od = otherDuties(u, ri, si); const hit = od.filter((d) => clash(sl, d)); const rest = od.filter((d) => !clash(sl, d));
-      const tags = `${busy ? ` <span class="busy-tag">⚠️ ${escapeHtml(busy)}</span>` : ''}${hit.map((d) => ` <span class="busy-tag">⚠️ ${escapeHtml(dutyTxt(d))}</span>`).join('')}${rest.map((d) => ` <span class="duty-tag">${escapeHtml(dutyTxt(d))}</span>`).join('')}`;
-      return `<button type="button" class="chip${on ? ' active' : ''}${busy || hit.length ? ' chip-busy' : ''}" data-xp-t="${ri}:${si}" data-v="${u}" title="${escapeHtml(busy)}">${escapeHtml(nameOf(u))}${tags}</button>`;
-    }).join('');
-    // adding someone who is already on duty at the same time asks first
-    const toggleT = async (ri, si, u) => {
-      const sl = f.rooms[ri].slots[si]; const k = sl.teachers.indexOf(u);
-      if (k !== -1) { sl.teachers.splice(k, 1); if (sl.breaks) delete sl.breaks[u]; renderExamPlanSection(); return; }
-      const hit = otherDuties(u, ri, si).filter((d) => clash(sl, d));
-      if (hit.length) { const ok = await showConfirm(`${nameOf(u)} already has duty in ${hit.map(dutyTxt).join(', ')}${hit[0].other ? ` (${hit[0].other})` : ''} at the same time.\n\nAdd here as well?`, 'Already on duty', 'Add'); if (!ok) return; }
-      sl.teachers.push(u); renderExamPlanSection();
-    };
-    const tin = (attr, v) => `<input class="text-input" type="time" ${attr} value="${escapeHtml(v || '')}">`;
-    const breaksHtml = (sl, ri, si) => {
-      const on = sl.teachers || []; if (!on.length) return '';
-      const br = sl.breaks || {};
-      const rows = on.filter((u) => br[u]).map((u) => `<div class="xp-brk"><div class="xp-brk-h"><span>${escapeHtml(nameOf(u))} · Break</span><button type="button" class="team-remove" data-xp-brm="${ri}:${si}:${u}">Remove</button></div><div class="sv-times">${tin(`data-xp-bs="${ri}:${si}:${u}"`, br[u].start)}${tin(`data-xp-be="${ri}:${si}:${u}"`, br[u].end)}</div></div>`).join('');
-      const add = on.filter((u) => !br[u]);
-      return `${rows}${add.length ? `<div class="xp-badd"><span>+ Break for</span>${add.map((u) => `<button type="button" class="hv-back" data-xp-badd="${ri}:${si}:${u}">${escapeHtml(nameOf(u))}</button>`).join('')}</div>` : ''}`;
-    };
-    const othersHtml = (r, ri) => `<div class="xp-sub">People not in the app <span>non-teaching staff, guests</span></div>
-      ${(r.others || []).map((o, oi) => `<div class="xp-other">
-        <div class="xp-brk-h"><input class="text-input xp-oname" type="text" maxlength="40" placeholder="Name" data-xp-on="${ri}:${oi}" value="${escapeHtml(o.name || '')}"><button type="button" class="team-remove" data-xp-orm="${ri}:${oi}">Remove</button></div>
-        <div class="sv-times">${tin(`data-xp-os="${ri}:${oi}"`, o.start)}${tin(`data-xp-oe="${ri}:${oi}"`, o.end)}</div>
-        ${o.bStart || o.bEnd || o._b ? `<div class="xp-brk"><div class="xp-brk-h"><span>Break</span><button type="button" class="team-remove" data-xp-obrm="${ri}:${oi}">Remove</button></div><div class="sv-times">${tin(`data-xp-obs="${ri}:${oi}"`, o.bStart)}${tin(`data-xp-obe="${ri}:${oi}"`, o.bEnd)}</div></div>` : `<button type="button" class="hv-back xp-ob" data-xp-obadd="${ri}:${oi}">+ Break (optional)</button>`}
-      </div>`).join('')}
-      <button type="button" class="hv-back" data-xp-oadd="${ri}" style="padding:0; align-self:flex-start;">+ Add a person not in the app</button>`;
-    box.innerHTML = `${f.rooms.map((r, ri) => `<div class="plan-room">
-        <div class="plan-room-h"><span>Room ${ri + 1}</span><button type="button" class="team-remove" data-xp-rmroom="${ri}">Remove</button></div>
-        <div class="chips">${rl.map((n) => `<button type="button" class="chip${r.room === n ? ' active' : ''}" data-xp-room="${ri}" data-v="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join('') || '<span class="hv-note">Add your rooms in Settings → Rooms first.</span>'}</div>
-        <div class="xp-staff"><span>Support staff needed</span><span class="xp-step"><button type="button" data-xp-staff="${ri}" data-d="-1" aria-label="One less">−</button><b>${r.staff || 0}</b><button type="button" data-xp-staff="${ri}" data-d="1" aria-label="One more">+</button></span></div>
-        ${r.slots.map((sl, si) => `<div class="plan-slot">
-          <div class="sv-times">
-            <div><div class="sv-tlbl">From</div>${tin(`data-xp-start="${ri}:${si}"`, sl.start)}</div>
-            <div><div class="sv-tlbl">To</div>${tin(`data-xp-end="${ri}:${si}"`, sl.end)}</div>
-          </div>
-          <div class="sv-tlbl" style="margin:0;">Invigilators</div>
-          <div class="chips inv-scope" data-xp-chips="${ri}:${si}">${chipsHtml(sl, ri, si)}</div>
-          ${breaksHtml(sl, ri, si)}
-          ${r.slots.length > 1 ? `<button type="button" class="team-remove" data-xp-rmslot="${ri}:${si}">Remove slot</button>` : ''}
-        </div>`).join('')}
-        <button type="button" class="hv-back" data-xp-addslot="${ri}" style="padding:0; align-self:flex-start;">+ Split time (add duty slot)</button>
-        ${othersHtml(r, ri)}
-        <div class="xp-gaps" data-xp-gap="${ri}"></div>
-      </div>`).join('')}
-      <button type="button" class="btn-secondary" id="xpAddRoom" style="border-color: var(--line);">+ Add room</button>
-      <div id="xpWarn"></div>`;
-    const at = (v) => v.split(':');
-    const n = (v) => Number(v);
-    box.querySelectorAll('[data-xp-room]').forEach((b) => b.addEventListener('click', () => { f.rooms[n(b.getAttribute('data-xp-room'))].room = b.getAttribute('data-v'); renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = at(b.getAttribute('data-xp-t')).map(n); toggleT(ri, si, b.getAttribute('data-v')); }));
-    // after a time change, refresh only that slot's teacher chips (busy marks) and the warnings
-    const refreshChips = (ri, si) => {
-      const c = box.querySelector(`[data-xp-chips="${ri}:${si}"]`); if (!c) return;
-      c.innerHTML = chipsHtml(f.rooms[ri].slots[si], ri, si);
-      c.querySelectorAll('[data-xp-t]').forEach((b) => b.addEventListener('click', () => toggleT(ri, si, b.getAttribute('data-v'))));
-    };
-    const refreshAllChips = () => f.rooms.forEach((r, rj) => r.slots.forEach((x, sj) => refreshChips(rj, sj)));
-    box.querySelectorAll('[data-xp-start]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-start')).map(n); const sl = f.rooms[ri].slots[si]; sl.start = inp.value; sl._auto = false; refreshAllChips(); renderExamPlanWarnings(); }));
-    box.querySelectorAll('[data-xp-end]').forEach((inp) => inp.addEventListener('change', () => { const [ri, si] = at(inp.getAttribute('data-xp-end')).map(n); const sl = f.rooms[ri].slots[si]; sl.end = inp.value; sl._autoE = false; refreshAllChips(); renderExamPlanWarnings(); }));
-    // breaks of app teachers
-    box.querySelectorAll('[data-xp-badd]').forEach((b) => b.addEventListener('click', () => { const [ri, si, u] = at(b.getAttribute('data-xp-badd')); const sl = f.rooms[n(ri)].slots[n(si)]; sl.breaks = sl.breaks || {}; sl.breaks[u] = { start: '', end: '' }; renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-brm]').forEach((b) => b.addEventListener('click', () => { const [ri, si, u] = at(b.getAttribute('data-xp-brm')); const sl = f.rooms[n(ri)].slots[n(si)]; if (sl.breaks) delete sl.breaks[u]; renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-bs],[data-xp-be]').forEach((inp) => inp.addEventListener('change', () => { const isS = inp.hasAttribute('data-xp-bs'); const [ri, si, u] = at(inp.getAttribute(isS ? 'data-xp-bs' : 'data-xp-be')); const sl = f.rooms[n(ri)].slots[n(si)]; sl.breaks = sl.breaks || {}; sl.breaks[u] = sl.breaks[u] || { start: '', end: '' }; sl.breaks[u][isS ? 'start' : 'end'] = inp.value; renderExamPlanWarnings(); }));
-    // support staff count
-    box.querySelectorAll('[data-xp-staff]').forEach((b) => b.addEventListener('click', () => { const r = f.rooms[n(b.getAttribute('data-xp-staff'))]; r.staff = Math.max(0, Math.min(9, (r.staff || 0) + n(b.getAttribute('data-d')))); renderExamPlanSection(); }));
-    // people not in the app
-    box.querySelectorAll('[data-xp-oadd]').forEach((b) => b.addEventListener('click', () => { const r = f.rooms[n(b.getAttribute('data-xp-oadd'))]; r.others = r.others || []; r.others.push({ name: '', start: '', end: '' }); renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-orm]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = at(b.getAttribute('data-xp-orm')).map(n); f.rooms[ri].others.splice(oi, 1); renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-on]').forEach((inp) => { inp.addEventListener('input', () => { const [ri, oi] = at(inp.getAttribute('data-xp-on')).map(n); f.rooms[ri].others[oi].name = inp.value; }); inp.addEventListener('change', renderExamPlanWarnings); });
-    box.querySelectorAll('[data-xp-os],[data-xp-oe],[data-xp-obs],[data-xp-obe]').forEach((inp) => inp.addEventListener('change', () => {
-      const key = ['data-xp-os', 'data-xp-oe', 'data-xp-obs', 'data-xp-obe'].find((k) => inp.hasAttribute(k)); const [ri, oi] = at(inp.getAttribute(key)).map(n);
-      f.rooms[ri].others[oi][{ 'data-xp-os': 'start', 'data-xp-oe': 'end', 'data-xp-obs': 'bStart', 'data-xp-obe': 'bEnd' }[key]] = inp.value; renderExamPlanWarnings();
-    }));
-    box.querySelectorAll('[data-xp-obadd]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = at(b.getAttribute('data-xp-obadd')).map(n); f.rooms[ri].others[oi]._b = true; renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-obrm]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = at(b.getAttribute('data-xp-obrm')).map(n); const o = f.rooms[ri].others[oi]; o.bStart = ''; o.bEnd = ''; o._b = false; renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-addslot]').forEach((b) => b.addEventListener('click', () => { f.rooms[n(b.getAttribute('data-xp-addslot'))].slots.push({ start: '', end: '', teachers: [] }); renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-rmslot]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = at(b.getAttribute('data-xp-rmslot')).map(n); f.rooms[ri].slots.splice(si, 1); renderExamPlanSection(); }));
-    box.querySelectorAll('[data-xp-rmroom]').forEach((b) => b.addEventListener('click', () => { f.rooms.splice(n(b.getAttribute('data-xp-rmroom')), 1); renderExamPlanSection(); }));
-    document.getElementById('xpAddRoom').addEventListener('click', () => { f.rooms.push({ room: '', staff: 0, others: [], slots: [{ start: '', end: '', teachers: [] }] }); renderExamPlanSection(); });
-    renderExamPlanWarnings();
+  // ======================= Exam planner: 4 steps (Exam · Rooms · Duty · Check) =======================
+  const XW_LABELS = ['Exam', 'Rooms', 'Duty', 'Check'];
+  const XW_TINT = [['#FDE2E4', '#9F1239'], ['#E0F2FE', '#075985'], ['#DCFCE7', '#166534'], ['#FEF3C7', '#92400E'], ['#EDE9FE', '#5B21B6'], ['#FFE4D6', '#9A3412']];
+  const xwTint = (key) => { let h = 0; String(key || '').split('').forEach((c) => { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return XW_TINT[h % XW_TINT.length]; };
+  const xwInitials = (name) => { const w = String(name || '?').replace(/^(Mr\.?|Ms\.?|Mrs\.?|Dr\.?)\s+/i, '').trim().split(/\s+/); return ((w[0] || '?')[0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase(); };
+  const xwAvatar = (key, name) => { const t = xwTint(key); return `<span class="xw-av" style="background:${t[0]};color:${t[1]}" aria-hidden="true">${escapeHtml(xwInitials(name))}</span>`; };
+  const xwPlain = (name) => `<span class="xw-av plain" aria-hidden="true">${escapeHtml(xwInitials(name))}</span>`;
+  const xwFmt = (v) => (v ? formatTimeStr(v) : '');
+  const xwClone = (o) => JSON.parse(JSON.stringify(o || {}));
+  const xwSnap = (f) => JSON.stringify({ type: f.type, subject: f.subject, name: f.name, scope: f.scope, ptype: f.ptype, times: Object.assign({}, f.times, { _auto: undefined }), rooms: f.rooms });
+  const xwRoomUsed = (r) => !!((r.staff || 0) || (r.others || []).length || (r.slots || []).some((sl) => sl.start || sl.end || (sl.teachers || []).length));
+  function syncNavH() { const n = document.querySelector('.bottom-nav'); if (n) document.documentElement.style.setProperty('--nav-h', n.offsetHeight + 'px'); }
+  window.addEventListener('resize', syncNavH); syncNavH();
+
+  function xwGo(n) {
+    const f = state.adminExamForm; if (!f) return;
+    closeHvSheet();
+    f.step = Math.max(1, Math.min(4, n)); renderExamPlanSection();
+    const box = document.getElementById('adminExamForm'); if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+  async function xwClose() {
+    const f = state.adminExamForm; if (!f) return;
+    if (f._snap && f._snap !== xwSnap(f)) { const ok = await showConfirm('Your changes are not saved yet.', 'Close without saving?', 'Close'); if (!ok) return; }
+    closeHvSheet(); state.adminExamForm = null; renderAdmin();
+  }
+  // the exam as it is right now in the form (what would be saved), only the filled-in parts
+  function examDraft() {
+    const f = state.adminExamForm; const t = examFormTimes();
+    const rooms = f.rooms.map((r) => ({ room: r.room, scope: f.scope.slice(), staff: Math.max(0, Math.min(9, r.staff || 0)),
+      others: (r.others || []).filter((o) => (o.name || '').trim() && o.start && o.end).map((o) => ({ name: o.name.trim(), start: o.start, end: o.end, bStart: o.bStart || '', bEnd: o.bEnd || '' })),
+      slots: r.slots.filter((sl) => sl.start && sl.end && (sl.teachers || []).length).map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers.slice(), breaks: xwClone(sl.breaks) })) }))
+      .filter((r) => r.slots.length || r.others.length || r.staff);
+    return { id: f.id || 'draft', type: f.type || '', subject: f.subject || '', name: f.name || '', date: state.adminDate, start: t.start, end: t.end, ptype: f.ptype === 'mcq' ? 'mcq' : 'sub', times: cleanExamTimes(f), scope: f.scope.slice(), plan: { rooms } };
+  }
+  function xwDutyList() {
+    const f = state.adminExamForm; if (!f) return [];
+    const others = (state.adminExams || []).filter((e) => e.date === state.adminDate && e.id !== f.id);
+    return dutyDayList(others.concat([examDraft()])).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+  }
+  function xwPreview() {
+    const list = xwDutyList();
+    if (!list.length) { showToast('Fill at least one duty first', 'error'); return; }
+    if (dutyNameKey(list).split(',').indexOf('?') !== -1) { showToast('Teacher names are still loading · try again in a moment', 'error'); return; }
+    try { const { cv } = buildDutyCanvas(list); openZoomViewer(cv.toDataURL('image/jpeg', 0.92)); } catch (e) { showToast('Could not draw the picture', 'error'); }
+  }
+  const ARROW = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+  function renderExamWizard() {
+    const f = state.adminExamForm; const box = document.getElementById('adminExamForm'); if (!f || !box) return;
+    f.step = f.step || 1;
+    box.querySelectorAll('.xw-pane').forEach((pn) => { pn.hidden = Number(pn.getAttribute('data-xw')) !== f.step; });
+    document.getElementById('xwSub').textContent = `Step ${f.step} of 4 · ${XW_LABELS[f.step - 1]}`;
+    const st = document.getElementById('xwSteps');
+    st.innerHTML = XW_LABELS.map((l, i) => `<button type="button" class="xw-st${f.step === i + 1 ? ' on' : ''}${f.step > i + 1 ? ' done' : ''}" data-xw-go="${i + 1}"><span class="xw-dot">${f.step > i + 1 ? '✓' : i + 1}</span><span class="xw-sl">${l}</span></button>`).join('<span class="xw-line"></span>');
+    st.querySelectorAll('[data-xw-go]').forEach((b) => b.addEventListener('click', () => xwGo(Number(b.getAttribute('data-xw-go')))));
+    const bar = document.getElementById('xwBar');
+    const hasDuty = !!dutyDayList([examDraft()]).length;
+    bar.innerHTML = f.step < 4
+      ? `<button type="button" class="xw-b ghost" id="xwSave">Save</button><button type="button" class="xw-b main" id="xwNext">Next${ARROW}</button>`
+      : `<button type="button" class="xw-b ghost" id="xwSave">Save</button><button type="button" class="xw-b main" id="xwPub"${hasDuty ? '' : ' disabled'}>Save &amp; Publish</button>`;
+    const sv = document.getElementById('xwSave'); if (sv) sv.addEventListener('click', () => { f._publish = false; document.getElementById('adminExamSave').click(); });
+    const nx = document.getElementById('xwNext'); if (nx) nx.addEventListener('click', () => xwGo(f.step + 1));
+    const pb = document.getElementById('xwPub'); if (pb) pb.addEventListener('click', () => { f._publish = true; document.getElementById('adminExamSave').click(); });
+    syncNavH();
+  }
+  document.getElementById('xwBack').addEventListener('click', xwClose);
+  document.getElementById('xwPreview').addEventListener('click', xwPreview);
+
+  // ---------- step 2: rooms ----------
+  function renderXwRooms() {
+    const f = state.adminExamForm; const box = document.getElementById('xwRooms'); if (!f || !box) return;
+    const rl = roomsList(); const names = rl.concat(f.rooms.map((r) => r.room).filter((x) => x && rl.indexOf(x) === -1));
+    const has = (n) => f.rooms.some((r) => r.room === n);
+    box.innerHTML = `<div class="xw-card"><div class="xw-ch">Rooms</div><div class="xw-cs">Tap the rooms used for this exam</div>
+        <div class="chips">${names.map((n) => `<button type="button" class="chip${has(n) ? ' active' : ''}" data-xr-room="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join('') || '<span class="hv-note">Add your rooms in Settings → Rooms first.</span>'}</div></div>
+      ${f.rooms.length ? `<div class="xw-card"><div class="xw-ch">Support staff</div><div class="xw-cs">How many staff each room needs</div>${f.rooms.map((r, ri) => `<div class="xw-staff"><span class="xw-rn">${escapeHtml(r.room)}</span><span class="xp-step"><button type="button" data-xr-staff="${ri}" data-d="-1" aria-label="One less">−</button><b>${r.staff || 0}</b><button type="button" data-xr-staff="${ri}" data-d="1" aria-label="One more">+</button></span></div>`).join('')}</div>` : ''}`;
+    box.querySelectorAll('[data-xr-room]').forEach((b) => b.addEventListener('click', async () => {
+      const n = b.getAttribute('data-xr-room'); const i = f.rooms.findIndex((r) => r.room === n);
+      if (i === -1) f.rooms.push({ room: n, staff: 0, others: [], slots: [{ start: '', end: '', teachers: [] }] });
+      else { if (xwRoomUsed(f.rooms[i])) { const ok = await showConfirm(`${n} has duty set. Remove the room and its duty?`, 'Remove room?', 'Remove'); if (!ok) return; } f.rooms.splice(i, 1); }
+      renderExamPlanSection();
+    }));
+    box.querySelectorAll('[data-xr-staff]').forEach((b) => b.addEventListener('click', () => { const r = f.rooms[Number(b.getAttribute('data-xr-staff'))]; r.staff = Math.max(0, Math.min(9, (r.staff || 0) + Number(b.getAttribute('data-d')))); renderExamPlanSection(); }));
+  }
+
+  // ---------- step 3: duty, room by room ----------
+  function xwOtherDuties(f, u, ri, si) {
+    const out = []; const date = state.adminDate;
+    f.rooms.forEach((r, rj) => r.slots.forEach((sl2, sj) => { if ((rj !== ri || sj !== si) && (sl2.teachers || []).indexOf(u) !== -1) out.push({ room: r.room || `Room ${rj + 1}`, start: sl2.start, end: sl2.end }); }));
+    (state.adminExams || []).filter((e) => e.date === date && e.id !== f.id).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl2) => { if ((sl2.teachers || []).indexOf(u) !== -1) out.push({ room: r.room || 'a room', start: sl2.start, end: sl2.end, other: examTitle(e) }); })));
+    return out;
+  }
+  const xwClash = (sl, d) => { const a = hhmmToMin(sl.start), b = hhmmToMin(sl.end), c = hhmmToMin(d.start), e = hhmmToMin(d.end); return a != null && b != null && c != null && e != null && a < e && c < b; };
+  const xwDutyTxt = (d) => `${d.room}${d.start && d.end ? ' ' + formatTimeStr(d.start).replace(/\s?(AM|PM)$/i, '') + '–' + formatTimeStr(d.end).replace(/\s?(AM|PM)$/i, '') : ''}`;
+  function xwWindow(f) {
+    const t = examFormTimes(); const a = hhmmToMin(t.start), b = hhmmToMin(t.end);
+    if (a != null && b != null && b > a) return [a, b];
+    const all = []; f.rooms.forEach((r) => { r.slots.forEach((sl) => { all.push(hhmmToMin(sl.start), hhmmToMin(sl.end)); }); (r.others || []).forEach((o) => { all.push(hhmmToMin(o.start), hhmmToMin(o.end)); }); });
+    const v = all.filter((x) => x != null); if (v.length < 2) return null; const lo = Math.min(...v), hi = Math.max(...v); return hi > lo ? [lo, hi] : null;
+  }
+  function xwBarHtml(r, win) {
+    if (!win) return '';
+    const span = win[1] - win[0]; const segs = [];
+    const add = (a, b, col) => { if (a == null || b == null || b <= a) return; const l = Math.max(0, Math.min(98, (a - win[0]) / span * 100)); const w = Math.max(2, Math.min(100 - l, (b - a) / span * 100)); segs.push(`<span class="xd-seg" style="left:${l}%;width:${w}%;background:${col}"></span>`); };
+    r.slots.forEach((sl) => { const u = (sl.teachers || [])[0]; if (u) add(hhmmToMin(sl.start), hhmmToMin(sl.end), xwTint(u)[0]); });
+    (r.others || []).forEach((o) => { if ((o.name || '').trim()) add(hhmmToMin(o.start), hhmmToMin(o.end), xwTint(o.name)[0]); });
+    return `<div class="xd-axis"><span>${escapeHtml(formatTimeStr(svMinToHHMM(win[0])))}</span><span>${escapeHtml(formatTimeStr(svMinToHHMM(win[1])))}</span></div><div class="xd-bar">${segs.join('')}</div>`;
+  }
+  function renderXwDuty() {
+    const f = state.adminExamForm; const box = document.getElementById('xwDuty'); if (!f || !box) return;
+    if (!f.rooms.length) {
+      box.innerHTML = `<div class="xw-empty">Choose the rooms first, then plan who is on duty.<button type="button" class="xw-b main" style="width:auto; padding:0 24px; height:46px;" data-xw-go2="2">Choose rooms</button></div>`;
+      box.querySelector('[data-xw-go2]').addEventListener('click', () => xwGo(2)); return;
+    }
+    const win = xwWindow(f);
+    const tools = `<div class="xw-tools">${f.rooms.length > 1 ? '<button type="button" class="xw-tool" data-xd-copyrooms><span class="ico i-swap" aria-hidden="true"></span>Copy to other rooms</button>' : ''}<button type="button" class="xw-tool" data-xd-copyexam><span class="ico i-clock" aria-hidden="true"></span>Copy from an earlier exam</button></div>`;
+    box.innerHTML = tools + f.rooms.map((r, ri) => {
+      const people = new Set(); r.slots.forEach((sl) => (sl.teachers || []).forEach((u) => people.add(u))); (r.others || []).forEach((o) => { if ((o.name || '').trim()) people.add('o:' + o.name); });
+      const meta = [`${people.size} ${people.size === 1 ? 'person' : 'people'}`, r.staff ? `${r.staff} Staff` : ''].filter(Boolean).join(' · ');
+      const rows = r.slots.map((sl, si) => {
+        const tt = sl.teachers || []; const nm = tt.map(planNameOf);
+        const av = tt.slice(0, 3).map((u) => xwAvatar(u, planNameOf(u))).join('') + (tt.length > 3 ? `<span class="xw-av plain">+${tt.length - 3}</span>` : '');
+        const time = sl.start && sl.end ? `${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}` : 'Set the time';
+        const brk = tt.filter((u) => (sl.breaks || {})[u] && sl.breaks[u].start && sl.breaks[u].end).map((u) => `${escapeHtml(planNameOf(u).replace(/^(Mr\.?|Ms\.?|Mrs\.?|Dr\.?)\s+/i, '').split(' ')[0])} ${escapeHtml(formatTimeStr(sl.breaks[u].start))} – ${escapeHtml(formatTimeStr(sl.breaks[u].end))}`);
+        const bad = tt.filter((u) => dutyBusy(u, sl, state.adminDate) || xwOtherDuties(f, u, ri, si).some((d) => xwClash(sl, d))).length;
+        const empty = !tt.length;
+        return `<button type="button" class="xd-row${empty ? ' xd-none' : ''}" data-xd-slot="${ri}:${si}"><span class="xd-avs">${empty ? '<span class="xw-av plain">＋</span>' : av}</span>
+          <span class="xd-txt"><b>${empty ? 'Choose invigilators' : escapeHtml(nm.join(', '))}</b><span class="xd-time">${time}</span>${brk.length ? `<span class="xd-brk">Break · ${brk.join(' · ')}</span>` : ''}${bad ? `<span class="xd-warn">⚠ ${bad} to check</span>` : ''}</span><span class="xd-chev">›</span></button>`;
+      }).join('');
+      const oth = (r.others || []).map((o, oi) => `<button type="button" class="xd-row" data-xd-other="${ri}:${oi}"><span class="xd-avs">${xwPlain((o.name || '').trim() || '?')}</span>
+          <span class="xd-txt"><b>${(o.name || '').trim() ? escapeHtml(o.name) : 'Add the name'}<span class="xd-tag">Not in the app</span></b><span class="xd-time">${o.start && o.end ? `${escapeHtml(formatTimeStr(o.start))} – ${escapeHtml(formatTimeStr(o.end))}` : 'Set the time'}</span>${o.bStart && o.bEnd ? `<span class="xd-brk">Break · ${escapeHtml(formatTimeStr(o.bStart))} – ${escapeHtml(formatTimeStr(o.bEnd))}</span>` : ''}</span><span class="xd-chev">›</span></button>`).join('');
+      return `<div class="xd-room"><div class="xd-rh"><div class="xd-rname">${escapeHtml(r.room)}</div><div class="xd-meta">${escapeHtml(meta)}</div></div>${xwBarHtml(r, win)}
+        <div class="xd-rows">${rows}${oth}</div>
+        <div class="xd-add"><button type="button" data-xd-addslot="${ri}">+ Add slot</button><button type="button" data-xd-addother="${ri}">+ Person not in the app</button></div></div>`;
+    }).join('');
+    box.querySelectorAll('[data-xd-slot]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = b.getAttribute('data-xd-slot').split(':').map(Number); openXs({ kind: 'slot', ri, si, q: '' }); }));
+    box.querySelectorAll('[data-xd-other]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = b.getAttribute('data-xd-other').split(':').map(Number); openXs({ kind: 'other', ri, oi }); }));
+    box.querySelectorAll('[data-xd-addslot]').forEach((b) => b.addEventListener('click', () => { const ri = Number(b.getAttribute('data-xd-addslot')); f.rooms[ri].slots.push({ start: '', end: '', teachers: [] }); renderExamPlanSection(); openXs({ kind: 'slot', ri, si: f.rooms[ri].slots.length - 1, q: '' }); }));
+    box.querySelectorAll('[data-xd-addother]').forEach((b) => b.addEventListener('click', () => { const ri = Number(b.getAttribute('data-xd-addother')); const r = f.rooms[ri]; r.others = r.others || []; r.others.push({ name: '', start: '', end: '' }); renderExamPlanSection(); openXs({ kind: 'other', ri, oi: r.others.length - 1 }); }));
+    const cr = box.querySelector('[data-xd-copyrooms]'); if (cr) cr.addEventListener('click', () => openXs({ kind: 'copyRooms', from: Math.max(0, f.rooms.findIndex((r) => r.slots.some((sl) => sl.start && sl.end))), to: null, names: false }));
+    const ce = box.querySelector('[data-xd-copyexam]'); if (ce) ce.addEventListener('click', () => { openXs({ kind: 'copyExam', list: null, pick: null }); xsLoadExams(); });
+  }
+
+  // ---------- the picker sheet (slot · person not in the app · copy) ----------
+  function openXs(x) { state.xs = x; xsRender(); const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
+  const xsTin = (attr, v) => `<input class="text-input" type="time" ${attr} value="${escapeHtml(v || '')}">`;
+  const XS_SEARCH = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>';
+  function xsRender() {
+    const x = state.xs; const f = state.adminExamForm; const body = document.getElementById('hvSheetBody'); if (!x || !f || !body) return;
+    const sheet = document.querySelector('#hvSheet .hv-sheet'); const top = sheet ? sheet.scrollTop : 0;
+    const act = document.activeElement; const keep = act && act.hasAttribute && act.hasAttribute('data-xs-q') ? [act.selectionStart, act.selectionEnd] : null;
+    if (x.kind === 'slot') { body.innerHTML = xsSlotHtml(f, x.ri, x.si); bindXsSlot(body, f, x); }
+    else if (x.kind === 'other') { body.innerHTML = xsOtherHtml(f, x.ri, x.oi); bindXsOther(body, f, x); }
+    else if (x.kind === 'copyRooms') { body.innerHTML = xsCopyRoomsHtml(f, x); bindXsCopyRooms(body, f, x); }
+    else if (x.kind === 'copyExam') { body.innerHTML = xsCopyExamHtml(f, x); bindXsCopyExam(body, f, x); }
+    if (sheet) sheet.scrollTop = top;
+    if (keep) { const q = body.querySelector('[data-xs-q]'); if (q) { q.focus(); try { q.setSelectionRange(keep[0], keep[1]); } catch (e) { /* ignore */ } } }
+  }
+  const xsRefresh = () => { xsRender(); renderXwDuty(); renderXwCheck(); renderExamWizard(); };
+  function xsSlotHtml(f, ri, si) {
+    const r = f.rooms[ri]; const sl = r && r.slots[si]; if (!sl) return '';
+    const date = state.adminDate; const q = (state.xs.q || '').trim().toLowerCase(); const ids = invigIds(); const sel = (sl.teachers || []).slice();
+    const status = (u) => { const busy = dutyBusy(u, sl, date); const od = xwOtherDuties(f, u, ri, si); return { busy, hit: od.filter((d) => xwClash(sl, d)), rest: od.filter((d) => !xwClash(sl, d)) }; };
+    const person = (u, on) => {
+      const st = status(u); const why = [st.busy].concat(st.hit.map((d) => 'duty ' + xwDutyTxt(d))).filter(Boolean);
+      const sub = why.length ? `<small class="why">⚠ ${escapeHtml(why.join(' · '))}</small>` : (st.rest.length ? `<small>${escapeHtml(st.rest.map(xwDutyTxt).join(' · '))}</small>` : '');
+      return { busy: !!why.length, html: `<button type="button" class="xs-p${on ? ' on' : ''}" data-xs-t="${escapeHtml(u)}">${xwAvatar(u, planNameOf(u))}<span class="xs-pn"><b>${escapeHtml(planNameOf(u))}</b>${sub}</span><span class="xs-ck">${on ? '✓' : ''}</span></button>` };
+    };
+    const selHtml = sel.map((u) => { const br = (sl.breaks || {})[u]; const e = escapeHtml(u);
+      return `<div class="xs-pw">${person(u, true).html}${br ? `<div class="xs-brk"><div class="xs-bt"><span>Break</span><button type="button" data-xs-brm="${e}">Remove</button></div><div class="xs-two">${xsTin(`data-xs-bs="${e}"`, br.start)}${xsTin(`data-xs-be="${e}"`, br.end)}</div></div>` : `<button type="button" class="xs-badd" data-xs-badd="${e}">+ Add break</button>`}</div>`; }).join('');
+    const rest = ids.filter((u) => sel.indexOf(u) === -1 && (!q || planNameOf(u).toLowerCase().indexOf(q) !== -1)).map((u) => person(u, false));
+    const free = rest.filter((x) => !x.busy), busy = rest.filter((x) => x.busy);
+    return `<div class="hv-d-title">${escapeHtml(r.room || 'Room')} · ${r.slots.length > 1 ? 'Slot ' + (si + 1) : 'Duty'}</div><div class="hv-d-wing">When, and who is on duty</div>
+      <div class="xs-two" style="margin-top:12px;"><div><div class="sv-tlbl">From</div>${xsTin('data-xs-s', sl.start)}</div><div><div class="sv-tlbl">To</div>${xsTin('data-xs-e', sl.end)}</div></div>
+      <div class="xs-search">${XS_SEARCH}<input type="search" data-xs-q placeholder="Search a name" value="${escapeHtml(state.xs.q || '')}" autocomplete="off"></div>
+      ${sel.length ? `<div class="xs-grp">On duty · ${sel.length}</div>${selHtml}` : ''}
+      ${free.length ? `<div class="xs-grp">Free</div>${free.map((x) => x.html).join('')}` : ''}
+      ${busy.length ? `<div class="xs-grp">Busy at this time</div>${busy.map((x) => x.html).join('')}` : ''}
+      ${!sel.length && !free.length && !busy.length ? '<div class="xw-empty" style="margin-top:12px;">No name matches</div>' : ''}
+      <div class="xs-foot"><button type="button" class="xw-b main" id="xsDone">Done</button>${r.slots.length > 1 ? '<button type="button" class="xs-link" id="xsRmSlot">Remove this slot</button>' : ''}</div>`;
+  }
+  function bindXsSlot(body, f, x) {
+    const r = f.rooms[x.ri]; const sl = r.slots[x.si];
+    const on = (sel, ev, fn) => body.querySelectorAll(sel).forEach((el) => el.addEventListener(ev, () => fn(el)));
+    on('[data-xs-s]', 'change', (el) => { sl.start = el.value; xsRefresh(); });
+    on('[data-xs-e]', 'change', (el) => { sl.end = el.value; xsRefresh(); });
+    const q = body.querySelector('[data-xs-q]'); if (q) q.addEventListener('input', () => { x.q = q.value; xsRender(); });
+    on('[data-xs-t]', 'click', async (el) => {
+      const u = el.getAttribute('data-xs-t'); const k = sl.teachers.indexOf(u);
+      if (k !== -1) { sl.teachers.splice(k, 1); if (sl.breaks) delete sl.breaks[u]; }
+      else {
+        const hit = xwOtherDuties(f, u, x.ri, x.si).filter((d) => xwClash(sl, d));
+        if (hit.length) { const ok = await showConfirm(`${planNameOf(u)} already has duty in ${hit.map(xwDutyTxt).join(', ')}${hit[0].other ? ` (${hit[0].other})` : ''} at the same time.\n\nAdd here as well?`, 'Already on duty', 'Add'); if (!ok) return; }
+        sl.teachers.push(u);
+      }
+      xsRefresh();
+    });
+    on('[data-xs-badd]', 'click', (el) => { sl.breaks = sl.breaks || {}; sl.breaks[el.getAttribute('data-xs-badd')] = { start: '', end: '' }; xsRefresh(); });
+    on('[data-xs-brm]', 'click', (el) => { if (sl.breaks) delete sl.breaks[el.getAttribute('data-xs-brm')]; xsRefresh(); });
+    on('[data-xs-bs]', 'change', (el) => { const u = el.getAttribute('data-xs-bs'); sl.breaks = sl.breaks || {}; sl.breaks[u] = sl.breaks[u] || { start: '', end: '' }; sl.breaks[u].start = el.value; xsRefresh(); });
+    on('[data-xs-be]', 'change', (el) => { const u = el.getAttribute('data-xs-be'); sl.breaks = sl.breaks || {}; sl.breaks[u] = sl.breaks[u] || { start: '', end: '' }; sl.breaks[u].end = el.value; xsRefresh(); });
+    const dn = body.querySelector('#xsDone'); if (dn) dn.addEventListener('click', closeHvSheet);
+    const rm = body.querySelector('#xsRmSlot'); if (rm) rm.addEventListener('click', () => { r.slots.splice(x.si, 1); closeHvSheet(); renderExamPlanSection(); });
+  }
+  function xsOtherHtml(f, ri, oi) {
+    const r = f.rooms[ri]; const o = r && (r.others || [])[oi]; if (!o) return '';
+    const hasB = !!(o.bStart || o.bEnd || o._b);
+    return `<div class="hv-d-title">Person not in the app</div><div class="hv-d-wing">${escapeHtml(r.room)} · non-teaching staff or a guest</div>
+      <div class="xs-lbl">Name</div><input class="xs-name" type="text" maxlength="40" placeholder="e.g. C.B. Mishra Ji" data-xs-on value="${escapeHtml(o.name || '')}">
+      <div class="xs-two" style="margin-top:14px;"><div><div class="sv-tlbl">From</div>${xsTin('data-xs-os', o.start)}</div><div><div class="sv-tlbl">To</div>${xsTin('data-xs-oe', o.end)}</div></div>
+      ${hasB ? `<div class="xs-brk" style="margin-left:0; margin-top:12px;"><div class="xs-bt"><span>Break</span><button type="button" data-xs-obrm>Remove</button></div><div class="xs-two">${xsTin('data-xs-obs', o.bStart)}${xsTin('data-xs-obe', o.bEnd)}</div></div>` : '<button type="button" class="xs-badd" style="padding-left:2px; margin-top:6px;" data-xs-obadd>+ Add break</button>'}
+      <div class="xs-foot"><button type="button" class="xw-b main" id="xsDone">Done</button><button type="button" class="xs-link" id="xsRmOther">Remove this person</button></div>`;
+  }
+  function bindXsOther(body, f, x) {
+    const r = f.rooms[x.ri]; const o = r.others[x.oi];
+    const nm = body.querySelector('[data-xs-on]'); if (nm) { nm.addEventListener('input', () => { o.name = nm.value; }); nm.addEventListener('change', () => { renderXwDuty(); renderXwCheck(); renderExamWizard(); }); }
+    const set = (sel, key) => { const el = body.querySelector(sel); if (el) el.addEventListener('change', () => { o[key] = el.value; xsRefresh(); }); };
+    set('[data-xs-os]', 'start'); set('[data-xs-oe]', 'end'); set('[data-xs-obs]', 'bStart'); set('[data-xs-obe]', 'bEnd');
+    const ba = body.querySelector('[data-xs-obadd]'); if (ba) ba.addEventListener('click', () => { o._b = true; xsRender(); });
+    const br = body.querySelector('[data-xs-obrm]'); if (br) br.addEventListener('click', () => { o.bStart = ''; o.bEnd = ''; o._b = false; xsRefresh(); });
+    const dn = body.querySelector('#xsDone'); if (dn) dn.addEventListener('click', () => { closeHvSheet(); renderExamPlanSection(); });
+    const rm = body.querySelector('#xsRmOther'); if (rm) rm.addEventListener('click', () => { r.others.splice(x.oi, 1); closeHvSheet(); renderExamPlanSection(); });
+  }
+  function xsCopyRoomsHtml(f, x) {
+    if (x.to == null) x.to = f.rooms.map((r, i) => i).filter((i) => i !== x.from);
+    const chip = (i, on, attr) => `<button type="button" class="chip${on ? ' active' : ''}" ${attr}="${i}">${escapeHtml(f.rooms[i].room)}</button>`;
+    return `<div class="hv-d-title">Copy to other rooms</div><div class="hv-d-wing">Use one room's duty times for the others</div>
+      <div class="xs-lbl">Copy from</div><div class="chips">${f.rooms.map((r, i) => chip(i, x.from === i, 'data-xc-from')).join('')}</div>
+      <div class="xs-lbl">Copy to</div><div class="chips">${f.rooms.map((r, i) => i === x.from ? '' : chip(i, x.to.indexOf(i) !== -1, 'data-xc-to')).join('')}</div>
+      <div class="xs-lbl">What to copy</div><div class="chips"><button type="button" class="chip${x.names ? '' : ' active'}" data-xc-names="0">Times only</button><button type="button" class="chip${x.names ? ' active' : ''}" data-xc-names="1">Times and names</button></div>
+      <div class="xs-foot"><button type="button" class="xw-b main" id="xcGo"${x.to.length ? '' : ' disabled'}>Copy</button></div>`;
+  }
+  function bindXsCopyRooms(body, f, x) {
+    body.querySelectorAll('[data-xc-from]').forEach((b) => b.addEventListener('click', () => { x.from = Number(b.getAttribute('data-xc-from')); x.to = null; xsRender(); }));
+    body.querySelectorAll('[data-xc-to]').forEach((b) => b.addEventListener('click', () => { const i = Number(b.getAttribute('data-xc-to')); const k = x.to.indexOf(i); if (k === -1) x.to.push(i); else x.to.splice(k, 1); xsRender(); }));
+    body.querySelectorAll('[data-xc-names]').forEach((b) => b.addEventListener('click', () => { x.names = b.getAttribute('data-xc-names') === '1'; xsRender(); }));
+    const go = body.querySelector('#xcGo'); if (go) go.addEventListener('click', async () => {
+      const src = f.rooms[x.from]; const targets = x.to.filter((i) => i !== x.from && f.rooms[i]);
+      const filled = targets.filter((i) => xwRoomUsed(f.rooms[i]) && f.rooms[i].slots.some((sl) => sl.start || sl.end || (sl.teachers || []).length));
+      if (filled.length) { const ok = await showConfirm(`${filled.map((i) => f.rooms[i].room).join(', ')} already ${filled.length > 1 ? 'have' : 'has'} duty set. Replace it?`, 'Replace duty?', 'Replace'); if (!ok) return; }
+      targets.forEach((i) => {
+        const t = f.rooms[i]; t.slots = src.slots.filter((sl) => sl.start || sl.end).map((sl) => ({ start: sl.start, end: sl.end, teachers: x.names ? sl.teachers.slice() : [], breaks: x.names ? xwClone(sl.breaks) : {} }));
+        if (!t.slots.length) t.slots = [{ start: '', end: '', teachers: [] }];
+        if (x.names) t.others = (src.others || []).map((o) => Object.assign({}, o));
+      });
+      closeHvSheet(); renderExamPlanSection(); showToast(`Copied to ${targets.length} room${targets.length === 1 ? '' : 's'}`);
+    });
+  }
+  async function xsLoadExams() {
+    const x = state.xs; const f = state.adminExamForm; if (!x || x.kind !== 'copyExam') return;
+    try {
+      const sn = await state.db.collection('exams').get();
+      x.list = sn.docs.map((d) => Object.assign({ id: d.id }, d.data())).filter((e) => (!f || e.id !== f.id) && planOf(e).length).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.start || '').localeCompare(a.start || '')).slice(0, 12);
+    } catch (e) { x.list = []; x.err = true; }
+    if (state.xs === x) xsRender();
+  }
+  function xsCopyExamHtml(f, x) {
+    const head = '<div class="hv-d-title">Copy from an earlier exam</div><div class="hv-d-wing">Bring its rooms and duty times, then change what differs</div>';
+    if (x.list == null) return head + '<div class="xw-empty" style="margin-top:14px;">Loading…</div>';
+    if (!x.list.length) return head + `<div class="xw-empty" style="margin-top:14px;">${x.err ? 'Could not load earlier exams. Check the internet.' : 'No earlier exam with a duty plan yet.'}</div>`;
+    return head + `<div style="margin-top:14px;">${x.list.map((e, i) => `<div><button type="button" class="xs-ex" data-xe="${i}"><b>${escapeHtml(examTitle(e))}</b><small>${escapeHtml(dayHeading(e.date))} · ${planOf(e).length} room${planOf(e).length === 1 ? '' : 's'}</small></button>${x.pick === i ? `<div class="xs-exb"><button type="button" class="xw-b ghost" data-xe-go="0">Rooms &amp; times</button><button type="button" class="xw-b main" data-xe-go="1">With names</button></div>` : ''}</div>`).join('')}</div>`;
+  }
+  function bindXsCopyExam(body, f, x) {
+    body.querySelectorAll('[data-xe]').forEach((b) => b.addEventListener('click', () => { const i = Number(b.getAttribute('data-xe')); x.pick = x.pick === i ? null : i; xsRender(); }));
+    body.querySelectorAll('[data-xe-go]').forEach((b) => b.addEventListener('click', async () => {
+      const names = b.getAttribute('data-xe-go') === '1'; const e = x.list[x.pick]; if (!e) return;
+      if (f.rooms.some(xwRoomUsed)) { const ok = await showConfirm('The rooms and duty in this exam will be replaced.', 'Replace duty?', 'Replace'); if (!ok) return; }
+      f.rooms = planOf(e).map((r) => ({ room: r.room, staff: r.staff || 0, others: names ? (r.others || []).map((o) => Object.assign({}, o)) : [],
+        slots: (r.slots || []).length ? r.slots.map((sl) => ({ start: sl.start, end: sl.end, teachers: names ? (sl.teachers || []).slice() : [], breaks: names ? xwClone(sl.breaks) : {} })) : [{ start: '', end: '', teachers: [] }] }));
+      closeHvSheet(); renderExamPlanSection(); showToast(names ? 'Copied with names' : 'Copied rooms and times');
+    }));
+  }
+
+  // ---------- step 4: check ----------
+  function renderXwCheck() {
+    const f = state.adminExamForm; const box = document.getElementById('xwCheck'); if (!f || !box) return;
+    if (f.step !== 4) { box.innerHTML = ''; return; }
+    const t = examFormTimes();
+    const rooms = f.rooms.map((r) => ({ room: r.room, scope: ['x'], slots: r.slots.filter((sl) => sl.start || sl.end || (sl.teachers || []).length).map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers })) }));
+    const warns = planWarnings({ date: state.adminDate, start: t.start, end: t.end }, rooms).filter((x) => !/choose the class|no invigilator/.test(x)).concat(planExtraWarnings(f));
+    f.rooms.forEach((r) => { if (r.slots.some((sl) => (sl.teachers || []).length && (!sl.start || !sl.end))) warns.push(`${r.room}: set the duty time`); });
+    const nobody = f.rooms.filter((r) => !r.slots.some((sl) => (sl.teachers || []).length) && !(r.others || []).some((o) => (o.name || '').trim())).map((r) => r.room);
+    const hints = []; f.rooms.forEach((r) => roomGaps(r, t).forEach((g) => hints.push(`${r.room} ${formatTimeStr(g[0])} – ${formatTimeStr(g[1])}: nobody listed (fine if someone not in the app covers it)`)));
+    const people = new Set(); let staff = 0; f.rooms.forEach((r) => { staff += r.staff || 0; r.slots.forEach((sl) => (sl.teachers || []).forEach((u) => people.add(u))); (r.others || []).forEach((o) => { if ((o.name || '').trim()) people.add('o:' + o.name.trim().toLowerCase()); }); });
+    const list = xwDutyList(); let pic = '';
+    if (list.length && dutyNameKey(list).split(',').indexOf('?') === -1) {
+      const key = JSON.stringify(list.map((e) => [e.id, e.start, e.end, e.ptype, e.times, planOf(e)])) + '|' + dutyNameKey(list);
+      state.xwPrev = state.xwPrev || {};
+      if (state.xwPrev.key !== key) { try { const { cv } = buildDutyCanvas(list); state.xwPrev = { key, url: cv.toDataURL('image/jpeg', 0.8) }; } catch (e) { state.xwPrev = { key, url: '' }; } }
+      pic = state.xwPrev.url ? `<button type="button" class="xw-pic" id="xwPic" aria-label="View the duty sheet"><img src="${state.xwPrev.url}" alt="Duty sheet"></button><div class="xw-picnote">Tap the picture to view it full screen</div>` : '';
+    }
+    box.innerHTML = `<div class="xw-card"><div class="xw-ch">Check</div>
+        <div class="xw-stats"><span class="xw-stat">${f.rooms.length} room${f.rooms.length === 1 ? '' : 's'}</span><span class="xw-stat">${people.size} ${people.size === 1 ? 'person' : 'people'}</span>${staff ? `<span class="xw-stat">${staff} Staff</span>` : ''}</div>
+        ${warns.length ? warns.map((x) => `<div class="xw-ck wn"><span>⚠</span><span>${escapeHtml(x)}</span></div>`).join('') : '<div class="xw-ck ok"><span>✓</span><span>No clashes found</span></div>'}
+        ${nobody.length ? `<div class="xw-ck in"><span>ⓘ</span><span>${escapeHtml(nobody.join(', '))}: nobody chosen yet (you can add this later)</span></div>` : ''}
+        ${hints.map((x) => `<div class="xw-ck in"><span>ⓘ</span><span>${escapeHtml(x)}</span></div>`).join('')}</div>
+      <div class="xw-card"><div class="xw-ch">Duty sheet picture</div>${pic || '<div class="xw-empty" style="padding:16px;">Fill at least one duty to see the picture</div>'}</div>
+      ${f.id ? '<button type="button" class="xw-del" id="xwDelete">Delete this exam</button>' : ''}`;
+    const pc = box.querySelector('#xwPic'); if (pc) pc.addEventListener('click', xwPreview);
+    const dl = box.querySelector('#xwDelete'); if (dl) dl.addEventListener('click', async () => {
+      const ok = await showConfirm(`${examTitle(f)} · ${scopeLabel(f.scope)}\n\nRemoved everywhere: Exams tab, rooms, invigilation duties and the timetable grid (the classes there come back).`, 'Delete this exam?', 'Delete');
+      if (!ok) return;
+      try { await deleteExamsEverywhere([f.id]); state.adminExamForm = null; state.exOpen = null; renderAdmin(); showToast('Exam deleted'); } catch (err) { flashOffline(err); }
+    });
+  }
+  function renderExamPlanSection() { renderXwRooms(); renderXwDuty(); renderXwCheck(); renderExamWizard(); }
   // breaks inside the duty, a name for everyone typed in by hand, sensible times
   function planExtraWarnings(f, nameOf) {
     const w = []; const nm = nameOf || planNameOf;
@@ -9105,21 +9446,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (cur < e0) gaps.push([cur, e0]);
     return gaps.filter((g) => g[1] - g[0] >= 1).map((g) => [svMinToHHMM(g[0]), svMinToHHMM(g[1])]);
   }
-  function renderExamPlanWarnings() {
-    const el = document.getElementById('xpWarn'); const f = state.adminExamForm;
-    if (!el || !f) return;
-    if (!f.rooms.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">Add rooms to plan who invigilates where (optional).</div>'; return; }
-    const t = examFormTimes();
-    // a slot not started yet (no time, nobody chosen) is not checked
-    const rooms = f.rooms.map((r) => ({ room: r.room, scope: ['x'], slots: r.slots.filter((sl) => sl.start || sl.end || (sl.teachers || []).length).map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers })) }));
-    const w = planWarnings({ date: state.adminDate, start: t.start, end: t.end }, rooms).filter((x) => !/choose the class|no invigilator/.test(x)).concat(planExtraWarnings(f));
-    el.innerHTML = w.length ? `<div class="ad-alert"><div class="ad-alert-t">⚠️ Please check</div>${w.map((x) => `<div class="ad-alert-l">${escapeHtml(x)}</div>`).join('')}</div>` : '<div class="ad-ok">✓ No clashes found</div>';
-    f.rooms.forEach((r, ri) => {
-      const g = document.querySelector(`[data-xp-gap="${ri}"]`); if (!g) return;
-      g.innerHTML = roomGaps(r, t).map((x) => `<div class="xp-soft">ⓘ ${escapeHtml(formatTimeStr(x[0]))} – ${escapeHtml(formatTimeStr(x[1]))}: nobody listed in ${escapeHtml(r.room)} · fine if someone not in the list covers it</div>`).join('');
-    });
-  }
-  // When the exam time is set or changed, empty duty slots follow it.
+  function renderExamPlanWarnings() { renderXwCheck(); renderExamWizard(); }
   // (duty slots are not filled from the exam time any more: the duty chart starts empty; only the hints follow it)
   ['adminExamStart', 'adminExamEnd'].forEach((id) => document.getElementById(id).addEventListener('change', () => { if (state.adminExamForm) renderExamPlanWarnings(); }));
 
@@ -9128,6 +9455,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const f = state.adminExamForm;
     box.hidden = !f;
     document.getElementById('adminNewExamBtn').hidden = !!f || !state.adminExamHasAny;
+    document.body.classList.toggle('xw-open', !!f);
     if (!f) return;
     document.getElementById('adminExamFormTitle').textContent = f.id ? 'Edit Exam' : 'New Exam';
     chipRow(document.getElementById('adminExamType'), testTypesList(), f.type, 'data-extype', (v) => { f.type = v; renderAdminExamForm(ids, nameOf); });
@@ -9147,8 +9475,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }));
     const pb = document.getElementById('adminExamPlan');
     if (pb._key !== f.key) { pb._key = f.key; renderExamTimes(); renderExamPlanSection(); }
+    renderExamWizard();
   }
-  function openAdminExamForm(exam) {
+  function openAdminExamForm(exam, step) {
     state.adminExamForm = exam
       ? { id: exam.id, type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
           ptype: exam.ptype === 'mcq' ? 'mcq' : 'sub', times: Object.assign({}, exam.times || {}, (exam.times && exam.times.report) ? {} : { report: exam.start || '', writeTo: exam.end || '' }),
@@ -9156,6 +9485,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
             : (exam.room ? [{ room: exam.room, slots: [{ start: exam.start, end: exam.end, teachers: (exam.invigilators || []).slice() }] }] : []) }
       : { id: null, type: '', subject: '', name: '', scope: [], invigilators: [], rooms: [], ptype: 'sub', times: {} };
     state.adminExamForm.key = 'x' + Date.now();
+    state.adminExamForm.step = step || 1; state.adminExamForm._snap = xwSnap(state.adminExamForm);
     document.getElementById('adminExamStart').value = exam ? exam.start || '' : '';
     document.getElementById('adminExamEnd').value = exam ? exam.end || '' : '';
     renderAdmin();
@@ -9193,25 +9523,25 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     });
   }
   document.getElementById('adminNewExamBtn').addEventListener('click', () => openAdminExamForm(null));
-  document.getElementById('adminExamCancel').addEventListener('click', () => { state.adminExamForm = null; renderAdmin(); });
   document.getElementById('adminExamSave').addEventListener('click', async () => {
     const f = state.adminExamForm;
     if (!f || !state.db) return;
-    if (!f.type && !f.name) { showToast('Choose the test type', 'error'); return; }
+    const fail = (msg, st) => { showToast(msg, 'error'); if (state.adminExamForm) { state.adminExamForm.step = st; renderExamPlanSection(); } };
+    if (!f.type && !f.name) { fail('Choose the test type', 1); return; }
     const name = f.type ? `${f.type}${f.subject ? ' · ' + f.subject : ''}` : f.name;
     const start = document.getElementById('adminExamStart').value;
     const end = document.getElementById('adminExamEnd').value;
-    if (!start || !end || hhmmToMin(end) <= hhmmToMin(start)) { showToast('Check the Reporting time and when Writing time ends', 'error'); return; }
-    { const tt = cleanExamTimes(f); const bad = [['read', 'Reading time'], ['write', 'Writing time']].find(([k]) => tt[k + 'From'] && tt[k + 'To'] && hhmmToMin(tt[k + 'To']) <= hhmmToMin(tt[k + 'From'])); if (bad) { showToast(`Check the ${bad[1]}`, 'error'); return; } }
-    { const xw = planExtraWarnings(f); if (xw.length) { showToast(xw[0], 'error'); return; } }
+    if (!start || !end || hhmmToMin(end) <= hhmmToMin(start)) { fail('Check the Reporting time and when Writing time ends', 1); return; }
+    { const tt = cleanExamTimes(f); const bad = [['read', 'Reading time'], ['write', 'Writing time']].find(([k]) => tt[k + 'From'] && tt[k + 'To'] && hhmmToMin(tt[k + 'To']) <= hhmmToMin(tt[k + 'From'])); if (bad) { fail(`Check the ${bad[1]}`, 1); return; } }
+    { const xw = planExtraWarnings(f); if (xw.length) { fail(xw[0], 3); return; } }
     f.rooms.forEach((r) => { r.slots = r.slots.filter((sl) => sl.start || sl.end || (sl.teachers || []).length); });
-    { const miss = f.rooms.find((r) => r.slots.some((sl) => !sl.start || !sl.end)); if (miss) { showToast(`Fill the duty time in ${miss.room || 'every room'}`, 'error'); renderExamPlanSection(); return; } }
-    if (!f.scope.length) { showToast('Choose the class or batches', 'error'); return; }
+    { const miss = f.rooms.find((r) => r.slots.some((sl) => !sl.start || !sl.end)); if (miss) { fail(`Fill the duty time in ${miss.room || 'every room'}`, 3); renderExamPlanSection(); return; } }
+    if (!f.scope.length) { fail('Choose the class or batches', 1); return; }
     const rooms = f.rooms.map((r) => ({ room: r.room, scope: f.scope.slice(), staff: Math.max(0, Math.min(9, r.staff || 0)),
       others: (r.others || []).filter((o) => (o.name || '').trim()).map((o) => ({ name: o.name.trim(), start: o.start || start, end: o.end || end, bStart: o.bStart || '', bEnd: o.bEnd || '' })),
       slots: r.slots.map((sl) => { const br = {}; Object.keys(sl.breaks || {}).forEach((u) => { const b = sl.breaks[u]; if ((sl.teachers || []).indexOf(u) !== -1 && b && b.start && b.end) br[u] = { start: b.start, end: b.end }; }); return { start: sl.start || start, end: sl.end || end, teachers: sl.teachers.slice(), breaks: br }; }) }));
-    if (rooms.some((r) => !r.room)) { showToast('Choose the room in every room card', 'error'); return; }
-    if (rooms.some((r) => r.slots.some((sl) => hhmmToMin(sl.end) <= hhmmToMin(sl.start)))) { showToast('Check the duty slot times', 'error'); return; }
+    if (rooms.some((r) => !r.room)) { fail('Choose the room in every room card', 2); return; }
+    if (rooms.some((r) => r.slots.some((sl) => hhmmToMin(sl.end) <= hhmmToMin(sl.start)))) { fail('Check the duty slot times', 3); return; }
     // classes in the timetable for these batches during the exam
     try {
       const during = await classesDuringExam(state.adminDate, f.scope, start, end, f.id);
@@ -9229,11 +9559,13 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     // each invigilator is told about their duty
     rooms.forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => notify(u, { type: 'duty', title: `${f.id ? 'Exam duty updated' : 'Exam duty'}: ${examTitle(data)} · ${r.room}`, body: slotWhen(state.adminDate, sl.start) + ` – ${formatTimeStr(sl.end)}`, link: { tab: 'today' } }))));
     try {
+      let savedId = f.id; const wantPub = !!f._publish;
       if (f.id) await state.db.collection('exams').doc(f.id).set(data, { merge: true });
-      else await state.db.collection('exams').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId }, data));
-      state.adminExamForm = null;
+      else { const ref = await state.db.collection('exams').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId }, data)); savedId = ref && ref.id; }
+      closeHvSheet(); state.adminExamForm = null;
       showToast(f.id ? 'Exam updated' : 'Exam added');
       renderAdmin();
+      if (wantPub) { try { await publishAfterSave(Object.assign({ id: savedId || 'new' }, data)); } catch (e2) { /* the exam itself is saved */ } }
     } catch (err) { flashOffline(err); }
   });
 
