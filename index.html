@@ -1051,6 +1051,22 @@
   .xw-t2 { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
   .xw-prev { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-weight: 700; font-size: 13.5px; box-shadow: 0 1px 2px rgba(16,24,40,.06); cursor: pointer; flex: none; }
   .xw-prev .ic { color: var(--gold); }
+  .xw-trash { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(230,57,70,.4); background: var(--card); color: #C81E32; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; padding: 0; }
+  body.xw-open #adminDateNav, body.xw-open #adminDateClearBtn { display: none !important; }
+  .xw-date { display: flex; align-items: center; gap: 10px; width: 100%; height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: left; }
+  .xw-date .ico { color: var(--gold); }
+  .xw-date span:nth-child(2) { flex: 1; }
+  .xd-nobody { font-size: 13px; color: var(--muted); padding: 10px 4px; }
+  .xs-p.dim { opacity: .55; cursor: default; }
+  .xs-who { display: flex; align-items: center; gap: 12px; padding-right: 40px; }
+  .xs-who .xw-av { width: 44px; height: 44px; font-size: 14px; }
+  .xs-who .hv-d-title { padding-right: 0; }
+  .xs-sl { border: 1px solid var(--line); border-radius: 16px; padding: 8px; margin-top: 12px; background: var(--card); }
+  .xs-sl .xs-two { gap: 8px; }
+  .xs-slh { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; color: var(--muted-2); margin-bottom: 8px; }
+  .xs-warn { margin-top: 8px; font-size: 12.5px; font-weight: 600; color: #B45309; background: rgba(217,119,6,.12); border-radius: 10px; padding: 6px 10px; }
+  .xs-addsl { background: none; border: 0; padding: 12px 2px 4px; color: var(--gold); font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .xs-err { color: #C81E32; font-size: 13px; font-weight: 600; min-height: 18px; margin-top: 6px; }
   .xw-steps { display: flex; align-items: center; gap: 6px; }
   .xw-st { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-size: 12.5px; font-weight: 700; cursor: pointer; flex: none; transition: background .18s ease, border-color .18s ease, color .18s ease; }
   .xw-dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--neutral-soft); color: var(--muted-2); font-size: 12px; font-weight: 800; }
@@ -2345,7 +2361,7 @@
         <button type="button" class="ad-tab" data-atab-btn="reports" role="tab">Reports</button>
         <button type="button" class="ad-tab" data-atab-btn="settings" role="tab">Settings</button>
       </div>
-      <div class="hv-nav" data-atab="dash exams">
+      <div class="hv-nav" id="adminDateNav" data-atab="dash exams">
         <button type="button" class="hv-arrow" id="adminDatePrev" aria-label="Previous day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="adminDateLabelText">Today</span></button></div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
@@ -2439,11 +2455,14 @@
             <button type="button" class="back-btn" id="xwBack" aria-label="Close"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
             <div class="xw-title"><div class="xw-t1" id="adminExamFormTitle">New Exam</div><div class="xw-t2" id="xwSub">Step 1 of 4 · Exam</div></div>
             <button type="button" class="xw-prev" id="xwPreview" aria-label="Preview the duty sheet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Preview</span></button>
+            <button type="button" class="xw-trash" id="xwTrash" aria-label="Discard or delete this exam"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
           </div>
           <div class="xw-steps" id="xwSteps"></div>
           <div class="xw-pane" data-xw="1">
             <div class="xw-card">
               <div class="xw-ch">The exam</div>
+              <div class="sv-tlbl">Date</div>
+              <button type="button" class="xw-date" id="xwDate"><span class="ico i-cal" aria-hidden="true"></span><span id="xwDateTxt"></span><span class="xd-chev">›</span></button>
               <div class="sv-tlbl">Test type</div>
               <div class="chips inv-scope" id="adminExamType"></div>
               <div class="sv-tlbl">Subject <span class="xt-note">optional</span></div>
@@ -2940,7 +2959,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 11.8 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 11.9 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8572,40 +8591,27 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (parts.length) head.push({ k: 'exam', txt: `(${parts.join(' · ')})` });
       examTimeLines(e).forEach((x) => head.push({ k: 'time', txt: x }));
     });
-    // rooms: one block per room (across the day's exams); app teachers with the same time share a row,
-    // people not in the app get their own row; each person's break sits in the Break column
-    const rooms = {}; const order = []; const byT = {};
-    const room = (k) => { if (!rooms[k]) { rooms[k] = { rows: [], staff: 0 }; order.push(k); } return rooms[k]; };
+    // rooms: one block per room (across the day's exams); every person once, with all of his duty times one under the other
+    const rooms = {}; const order = [];
+    const room = (k) => { if (!rooms[k]) { rooms[k] = { people: {}, porder: [], staff: 0 }; order.push(k); } return rooms[k]; };
+    const addTime = (R, key, name, a, b) => { if (!R.people[key]) { R.people[key] = { name, times: [] }; R.porder.push(key); } if (!R.people[key].times.some((q) => q.a === a && q.b === b)) R.people[key].times.push({ a, b }); };
+    const invigSet = new Set();
     list.forEach((e) => planOf(e).forEach((r) => {
       const k = String(r.room || '—');
-      (r.slots || []).forEach((sl) => {
-        if (!(sl.teachers || []).length || !sl.start || !sl.end) return; const R = room(k);
-        let row = R.rows.find((q) => !q.other && q.start === sl.start && q.end === sl.end);
-        if (!row) { row = { start: sl.start, end: sl.end, people: [] }; R.rows.push(row); }
-        sl.teachers.forEach((u) => {
-          if (row.people.some((q) => q.u === u)) return; const b = (sl.breaks || {})[u]; const brk = b && b.start && b.end ? span(b.start, b.end) : '';
-          row.people.push({ u, name: nm(u), brk });
-          (byT['u:' + u] = byT['u:' + u] || { name: nm(u), sort: ttName(u), d: [] }).d.push({ room: k, start: sl.start, end: sl.end, brk });
-        });
-      });
-      (r.others || []).forEach((o) => {
-        const name = (o.name || '').trim(); if (!name || !o.start || !o.end) return; const R = room(k);
-        const brk = o.bStart && o.bEnd ? span(o.bStart, o.bEnd) : '';
-        R.rows.push({ start: o.start, end: o.end, other: true, people: [{ name, brk }] });
-        const key = 'o:' + name.toLowerCase(); (byT[key] = byT[key] || { name, sort: name, d: [] }).d.push({ room: k, start: o.start, end: o.end, brk });
-      });
+      (r.slots || []).forEach((sl) => { if (!(sl.teachers || []).length || !sl.start || !sl.end) return; const R = room(k); sl.teachers.forEach((u) => { invigSet.add(u); addTime(R, 'u:' + u, nm(u), sl.start, sl.end); }); });
+      (r.others || []).forEach((o) => { const name = (o.name || '').trim(); if (!name || !o.start || !o.end) return; addTime(room(k), 'o:' + name.toLowerCase(), name, o.start, o.end); });
       if (r.staff) { const R = room(k); R.staff = Math.max(R.staff, r.staff); }
     }));
-    const blocks = order.map((k) => ({ room: k, staff: rooms[k].staff, rows: rooms[k].rows.sort((a, b) => (hhmmToMin(a.start) - hhmmToMin(b.start)) || (hhmmToMin(a.end) - hhmmToMin(b.end))) }));
-    const tRows = Object.keys(byT).map((k) => byT[k]).sort((a, b) => a.sort.localeCompare(b.sort)).map((q) => ({ name: q.name, text: q.d.sort((a, b) => hhmmToMin(a.start) - hhmmToMin(b.start)).map((d) => `${d.room} · ${span(d.start, d.end)}${d.brk ? ` (break ${d.brk})` : ''}`).join('   |   ') }));
-    const invig = Object.keys(byT).filter((k) => k.indexOf('u:') === 0).map((k) => k.slice(2));
-    // the Break column is drawn only when somebody has a break
-    const anyBreak = blocks.some((b) => b.rows.some((r) => r.people.some((q) => q.brk)));
-    const W = 1100, pad = 40, lh = 32, headH = 70, nameCol = 300, cT = W * (anyBreak ? 0.56 : 0.72), cB = anyBreak ? W * 0.78 : W - pad;
+    const blocks = order.map((k) => {
+      const R = rooms[k];
+      const rows = R.porder.map((key) => { const pp = R.people[key]; const times = pp.times.sort((x1, x2) => hhmmToMin(x1.a) - hhmmToMin(x2.a)); return { name: pp.name, times: times.map((q) => span(q.a, q.b)), first: hhmmToMin(times[0].a) }; }).sort((x1, x2) => x1.first - x2.first);
+      return { room: k, staff: R.staff, rows };
+    });
+    const invig = Array.from(invigSet);
+    const W = 1100, pad = 40, lh = 32, headH = 70, cT = W * 0.62;
     const cv = document.createElement('canvas'); const x = cv.getContext('2d');
     const font = (size, bold, fam) => `${bold ? '700 ' : ''}${size}px ${fam || 'Calibri, Arial, sans-serif'}`;
-    const wrap = (txt, size, maxW) => { x.font = font(size, false); const words = txt.split(' '); const L = []; let cur = ''; words.forEach((w) => { const tst = cur ? cur + ' ' + w : w; if (x.measureText(tst).width > maxW && cur) { L.push(cur); cur = w; } else cur = tst; }); if (cur) L.push(cur); return L; };
-    const rowH = (r) => Math.max(1, r.people.length) * lh + 10;
+    const rowH = (r) => Math.max(1, r.times.length) * lh + 10;
     let H = 40 + headH - 14 + head.length * 31 + 20;
     blocks.forEach((b) => { H += 52 + b.rows.reduce((a, r) => a + rowH(r), 0) + (b.staff ? lh + 10 : 0) + 10 + 30; });
     H += 0;
@@ -8622,17 +8628,17 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     y += 20;
     blocks.forEach((b) => {
       const top = y; let yy = y + 52;
-      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', (cT + cB) / 2, y + 26, 24, true, 'center'); if (anyBreak) t('Break', (cB + W - pad) / 2, y + 26, 24, true, 'center');
+      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', (cT + W - pad) / 2, y + 26, 24, true, 'center');
       ln(pad, y + 52, W - pad, y + 52, '#000', 2);
       b.rows.forEach((r, i) => {
         const h = rowH(r);
-        r.people.forEach((q, k) => { const ly = yy + 5 + k * lh + lh / 2; t(q.name, pad + 14, ly, 22, true); if (q.brk) t(q.brk, (cB + W - pad) / 2, ly, 22, false, 'center'); });
-        t(span(r.start, r.end), (cT + cB) / 2, yy + h / 2, 22, false, 'center');
-        ln(cT, yy, cT, yy + h, '#CCC'); if (anyBreak) ln(cB, yy, cB, yy + h, '#CCC');
+        t(r.name, pad + 14, yy + h / 2, 22, true);
+        r.times.forEach((tm, k) => t(tm, (cT + W - pad) / 2, yy + 5 + k * lh + lh / 2, 22, false, 'center'));
+        ln(cT, yy, cT, yy + h, '#CCC');
         if (i < b.rows.length - 1 || b.staff) ln(pad, yy + h, W - pad, yy + h, '#DDD');
         yy += h;
       });
-      if (b.staff) { const h = lh + 10; t(`${b.staff} Staff`, pad + 14, yy + h / 2, 22, true); ln(cT, yy, cT, yy + h, '#CCC'); if (anyBreak) ln(cB, yy, cB, yy + h, '#CCC'); yy += h; }
+      if (b.staff) { const h = lh + 10; t(`${b.staff} Staff`, pad + 14, yy + h / 2, 22, true); ln(cT, yy, cT, yy + h, '#CCC'); yy += h; }
       const bh = yy - top + 10; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(pad, top, W - 2 * pad, bh);
       y = top + bh + 30;
     });
@@ -9162,6 +9168,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     f.step = f.step || 1;
     box.querySelectorAll('.xw-pane').forEach((pn) => { pn.hidden = Number(pn.getAttribute('data-xw')) !== f.step; });
     document.getElementById('xwSub').textContent = `Step ${f.step} of 4 · ${XW_LABELS[f.step - 1]}`;
+    { const dd = dateObj(state.adminDate); const lbl = `${WD[dd.getDay()]}, ${dd.getDate()} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`;
+      document.getElementById('adminExamFormTitle').textContent = `${f.id ? 'Edit Exam' : 'New Exam'} · ${lbl}`;
+      document.getElementById('xwDateTxt').textContent = dayHeading(state.adminDate) + ' ' + dd.getFullYear();
+      document.getElementById('xwTrash').setAttribute('aria-label', f.id ? 'Delete this exam' : 'Discard this new exam'); }
     const st = document.getElementById('xwSteps');
     st.innerHTML = XW_LABELS.map((l, i) => `<button type="button" class="xw-st${f.step === i + 1 ? ' on' : ''}${f.step > i + 1 ? ' done' : ''}" data-xw-go="${i + 1}"><span class="xw-dot">${f.step > i + 1 ? '✓' : i + 1}</span><span class="xw-sl">${l}</span></button>`).join('<span class="xw-line"></span>');
     st.querySelectorAll('[data-xw-go]').forEach((b) => b.addEventListener('click', () => xwGo(Number(b.getAttribute('data-xw-go')))));
@@ -9176,6 +9186,24 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     syncNavH();
   }
   document.getElementById('xwBack').addEventListener('click', xwClose);
+  // the exam's own date: while the form is open the date bar above is hidden, the date changes only here
+  function xwSetDate(d) {
+    state.adminDate = d; state.adminExpandedTeacher = null;
+    document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(d);
+    subscribeAdminDate(d); renderAdmin();
+  }
+  document.getElementById('xwDate').addEventListener('click', () => openCalendar(state.adminDate, (d) => { xwSetDate(d); renderExamPlanSection(); }));
+  document.getElementById('xwTrash').addEventListener('click', async () => {
+    const f = state.adminExamForm; if (!f) return;
+    if (f.id) {
+      const ok = await showConfirm(`${examTitle(f)} · ${scopeLabel(f.scope)}\n\nRemoved everywhere: Exams tab, rooms, invigilation duties and the timetable grid (the classes there come back).`, 'Delete this exam?', 'Delete');
+      if (!ok) return;
+      try { await deleteExamsEverywhere([f.id]); closeHvSheet(); state.adminExamForm = null; state.exOpen = null; renderAdmin(); showToast('Exam deleted'); } catch (err) { flashOffline(err); }
+    } else {
+      if (f._snap !== xwSnap(f)) { const ok = await showConfirm('Nothing of this new exam will be kept.', 'Discard this exam?', 'Discard'); if (!ok) return; }
+      closeHvSheet(); state.adminExamForm = null; renderAdmin();
+    }
+  });
   document.getElementById('xwPreview').addEventListener('click', xwPreview);
 
   // ---------- step 2: rooms ----------
@@ -9188,7 +9216,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       ${f.rooms.length ? `<div class="xw-card"><div class="xw-ch">Support staff</div><div class="xw-cs">How many staff each room needs</div>${f.rooms.map((r, ri) => `<div class="xw-staff"><span class="xw-rn">${escapeHtml(r.room)}</span><span class="xp-step"><button type="button" data-xr-staff="${ri}" data-d="-1" aria-label="One less">−</button><b>${r.staff || 0}</b><button type="button" data-xr-staff="${ri}" data-d="1" aria-label="One more">+</button></span></div>`).join('')}</div>` : ''}`;
     box.querySelectorAll('[data-xr-room]').forEach((b) => b.addEventListener('click', async () => {
       const n = b.getAttribute('data-xr-room'); const i = f.rooms.findIndex((r) => r.room === n);
-      if (i === -1) f.rooms.push({ room: n, staff: 0, others: [], slots: [{ start: '', end: '', teachers: [] }] });
+      if (i === -1) f.rooms.push({ room: n, staff: 0, others: [], slots: [] });
       else { if (xwRoomUsed(f.rooms[i])) { const ok = await showConfirm(`${n} has duty set. Remove the room and its duty?`, 'Remove room?', 'Remove'); if (!ok) return; } f.rooms.splice(i, 1); }
       renderExamPlanSection();
     }));
@@ -9218,38 +9246,71 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     (r.others || []).forEach((o) => { if ((o.name || '').trim()) add(hhmmToMin(o.start), hhmmToMin(o.end), xwTint(o.name)[0]); });
     return `<div class="xd-axis"><span>${escapeHtml(formatTimeStr(svMinToHHMM(win[0])))}</span><span>${escapeHtml(formatTimeStr(svMinToHHMM(win[1])))}</span></div><div class="xd-bar">${segs.join('')}</div>`;
   }
+  // a room's teachers, each with all of his slots (older plans may hold several teachers in one slot)
+  const xwByStart = (a, b) => (hhmmToMin(a.start) || 0) - (hhmmToMin(b.start) || 0);
+  function xwPeopleOf(r) {
+    const map = {}; const order = [];
+    (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { if (!map[u]) { map[u] = []; order.push(u); } map[u].push({ start: sl.start, end: sl.end }); }));
+    return order.map((u) => ({ u, slots: map[u].sort(xwByStart) })).sort((a, b) => xwByStart(a.slots[0] || {}, b.slots[0] || {}));
+  }
+  function xwOthersOf(r) {
+    const map = {}; const order = [];
+    (r.others || []).forEach((o) => { const nm = (o.name || '').trim(); const k = nm.toLowerCase(); if (!nm) return; if (!map[k]) { map[k] = { name: nm, slots: [] }; order.push(k); } map[k].slots.push({ start: o.start, end: o.end }); });
+    return order.map((k) => ({ name: map[k].name, slots: map[k].slots.sort(xwByStart) }));
+  }
+  function xwSetTeacherSlots(r, u, slots) {
+    (r.slots || []).forEach((sl) => { const k = (sl.teachers || []).indexOf(u); if (k !== -1) { sl.teachers.splice(k, 1); if (sl.breaks) delete sl.breaks[u]; } });
+    r.slots = (r.slots || []).filter((sl) => (sl.teachers || []).length);
+    slots.forEach((x) => r.slots.push({ start: x.start, end: x.end, teachers: [u], breaks: {} }));
+    r.slots.sort(xwByStart);
+  }
+  function xwSetOtherSlots(r, oldName, name, slots) {
+    const k = (oldName || '').trim().toLowerCase();
+    r.others = (r.others || []).filter((o) => !k || (o.name || '').trim().toLowerCase() !== k);
+    slots.forEach((x) => r.others.push({ name: name.trim(), start: x.start, end: x.end, bStart: '', bEnd: '' }));
+  }
+  // the teacher's duties in other rooms of this exam and in the day's other exams
+  function xwElsewhere(f, u, ri) {
+    const out = [];
+    f.rooms.forEach((r, rj) => { if (rj !== ri) (r.slots || []).forEach((sl) => { if ((sl.teachers || []).indexOf(u) !== -1) out.push({ room: r.room, start: sl.start, end: sl.end }); }); });
+    (state.adminExams || []).filter((e) => e.date === state.adminDate && e.id !== f.id).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => { if ((sl.teachers || []).indexOf(u) !== -1) out.push({ room: r.room || 'a room', start: sl.start, end: sl.end, other: examTitle(e) }); })));
+    return out;
+  }
+  // what is wrong with one slot of a teacher ('' if fine)
+  function xwSlotWarn(f, ri, u, s) {
+    const a = hhmmToMin(s.start), b = hhmmToMin(s.end);
+    if (a == null || b == null) return '';
+    if (b <= a) return 'the end must be after the start';
+    const w = [];
+    const busy = dutyBusy(u, s, state.adminDate); if (busy) w.push(busy);
+    xwElsewhere(f, u, ri).filter((d) => xwClash(s, d)).forEach((d) => w.push(`duty ${xwDutyTxt(d)}${d.other ? ' (' + d.other + ')' : ''}`));
+    return w.join(' · ');
+  }
+  const xwRange = (s) => (s.start && s.end ? `${formatTimeStr(s.start)} – ${formatTimeStr(s.end)}` : 'Set the time');
   function renderXwDuty() {
     const f = state.adminExamForm; const box = document.getElementById('xwDuty'); if (!f || !box) return;
     if (!f.rooms.length) {
-      box.innerHTML = `<div class="xw-empty">Choose the rooms first, then plan who is on duty.<button type="button" class="xw-b main" style="width:auto; padding:0 24px; height:46px;" data-xw-go2="2">Choose rooms</button></div>`;
+      box.innerHTML = `<div class="xw-empty">Choose the rooms first, then add who is on duty.<button type="button" class="xw-b main" style="width:auto; padding:0 24px; height:46px;" data-xw-go2="2">Choose rooms</button></div>`;
       box.querySelector('[data-xw-go2]').addEventListener('click', () => xwGo(2)); return;
     }
     const win = xwWindow(f);
-    const tools = `<div class="xw-tools">${f.rooms.length > 1 ? '<button type="button" class="xw-tool" data-xd-copyrooms><span class="ico i-swap" aria-hidden="true"></span>Copy to other rooms</button>' : ''}<button type="button" class="xw-tool" data-xd-copyexam><span class="ico i-clock" aria-hidden="true"></span>Copy from an earlier exam</button></div>`;
+    const tools = `<div class="xw-tools"><button type="button" class="xw-tool" data-xd-copyexam><span class="ico i-clock" aria-hidden="true"></span>Copy from an earlier exam</button></div>`;
     box.innerHTML = tools + f.rooms.map((r, ri) => {
-      const people = new Set(); r.slots.forEach((sl) => (sl.teachers || []).forEach((u) => people.add(u))); (r.others || []).forEach((o) => { if ((o.name || '').trim()) people.add('o:' + o.name); });
-      const meta = [`${people.size} ${people.size === 1 ? 'person' : 'people'}`, r.staff ? `${r.staff} Staff` : ''].filter(Boolean).join(' · ');
-      const rows = r.slots.map((sl, si) => {
-        const tt = sl.teachers || []; const nm = tt.map(planNameOf);
-        const av = tt.slice(0, 3).map((u) => xwAvatar(u, planNameOf(u))).join('') + (tt.length > 3 ? `<span class="xw-av plain">+${tt.length - 3}</span>` : '');
-        const time = sl.start && sl.end ? `${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}` : 'Set the time';
-        const brk = tt.filter((u) => (sl.breaks || {})[u] && sl.breaks[u].start && sl.breaks[u].end).map((u) => `${escapeHtml(planNameOf(u).replace(/^(Mr\.?|Ms\.?|Mrs\.?|Dr\.?)\s+/i, '').split(' ')[0])} ${escapeHtml(formatTimeStr(sl.breaks[u].start))} – ${escapeHtml(formatTimeStr(sl.breaks[u].end))}`);
-        const bad = tt.filter((u) => dutyBusy(u, sl, state.adminDate) || xwOtherDuties(f, u, ri, si).some((d) => xwClash(sl, d))).length;
-        const empty = !tt.length;
-        return `<button type="button" class="xd-row${empty ? ' xd-none' : ''}" data-xd-slot="${ri}:${si}"><span class="xd-avs">${empty ? '<span class="xw-av plain">＋</span>' : av}</span>
-          <span class="xd-txt"><b>${empty ? 'Choose invigilators' : escapeHtml(nm.join(', '))}</b><span class="xd-time">${time}</span>${brk.length ? `<span class="xd-brk">Break · ${brk.join(' · ')}</span>` : ''}${bad ? `<span class="xd-warn">⚠ ${bad} to check</span>` : ''}</span><span class="xd-chev">›</span></button>`;
+      const people = xwPeopleOf(r), others = xwOthersOf(r);
+      const meta = [`${people.length + others.length} ${people.length + others.length === 1 ? 'person' : 'people'}`, r.staff ? `${r.staff} Staff` : ''].filter(Boolean).join(' · ');
+      const rows = people.map((pp) => {
+        const bad = pp.slots.some((x) => xwSlotWarn(f, ri, pp.u, x));
+        return `<button type="button" class="xd-row" data-xd-t="${ri}|${escapeHtml(pp.u)}">${xwAvatar(pp.u, planNameOf(pp.u))}<span class="xd-txt"><b>${escapeHtml(planNameOf(pp.u))}</b>${pp.slots.map((x) => `<span class="xd-time">${escapeHtml(xwRange(x))}</span>`).join('')}${bad ? '<span class="xd-warn">⚠ check the time</span>' : ''}</span><span class="xd-chev">›</span></button>`;
       }).join('');
-      const oth = (r.others || []).map((o, oi) => `<button type="button" class="xd-row" data-xd-other="${ri}:${oi}"><span class="xd-avs">${xwPlain((o.name || '').trim() || '?')}</span>
-          <span class="xd-txt"><b>${(o.name || '').trim() ? escapeHtml(o.name) : 'Add the name'}<span class="xd-tag">Not in the app</span></b><span class="xd-time">${o.start && o.end ? `${escapeHtml(formatTimeStr(o.start))} – ${escapeHtml(formatTimeStr(o.end))}` : 'Set the time'}</span>${o.bStart && o.bEnd ? `<span class="xd-brk">Break · ${escapeHtml(formatTimeStr(o.bStart))} – ${escapeHtml(formatTimeStr(o.bEnd))}</span>` : ''}</span><span class="xd-chev">›</span></button>`).join('');
+      const oth = others.map((o) => `<button type="button" class="xd-row" data-xd-o="${ri}|${escapeHtml(o.name)}">${xwPlain(o.name)}<span class="xd-txt"><b>${escapeHtml(o.name)}<span class="xd-tag">Not in the app</span></b>${o.slots.map((x) => `<span class="xd-time">${escapeHtml(xwRange(x))}</span>`).join('')}</span><span class="xd-chev">›</span></button>`).join('');
       return `<div class="xd-room"><div class="xd-rh"><div class="xd-rname">${escapeHtml(r.room)}</div><div class="xd-meta">${escapeHtml(meta)}</div></div>${xwBarHtml(r, win)}
-        <div class="xd-rows">${rows}${oth}</div>
-        <div class="xd-add"><button type="button" data-xd-addslot="${ri}">+ Add slot</button><button type="button" data-xd-addother="${ri}">+ Person not in the app</button></div></div>`;
+        <div class="xd-rows">${rows}${oth}${!rows && !oth ? '<div class="xd-nobody">No one yet · tap “+ Add invigilator”</div>' : ''}</div>
+        <div class="xd-add"><button type="button" data-xd-addt="${ri}">+ Add invigilator</button><button type="button" data-xd-addo="${ri}">+ Person not in the app</button></div></div>`;
     }).join('');
-    box.querySelectorAll('[data-xd-slot]').forEach((b) => b.addEventListener('click', () => { const [ri, si] = b.getAttribute('data-xd-slot').split(':').map(Number); openXs({ kind: 'slot', ri, si, q: '' }); }));
-    box.querySelectorAll('[data-xd-other]').forEach((b) => b.addEventListener('click', () => { const [ri, oi] = b.getAttribute('data-xd-other').split(':').map(Number); openXs({ kind: 'other', ri, oi }); }));
-    box.querySelectorAll('[data-xd-addslot]').forEach((b) => b.addEventListener('click', () => { const ri = Number(b.getAttribute('data-xd-addslot')); f.rooms[ri].slots.push({ start: '', end: '', teachers: [] }); renderExamPlanSection(); openXs({ kind: 'slot', ri, si: f.rooms[ri].slots.length - 1, q: '' }); }));
-    box.querySelectorAll('[data-xd-addother]').forEach((b) => b.addEventListener('click', () => { const ri = Number(b.getAttribute('data-xd-addother')); const r = f.rooms[ri]; r.others = r.others || []; r.others.push({ name: '', start: '', end: '' }); renderExamPlanSection(); openXs({ kind: 'other', ri, oi: r.others.length - 1 }); }));
-    const cr = box.querySelector('[data-xd-copyrooms]'); if (cr) cr.addEventListener('click', () => openXs({ kind: 'copyRooms', from: Math.max(0, f.rooms.findIndex((r) => r.slots.some((sl) => sl.start && sl.end))), to: null, names: false }));
+    box.querySelectorAll('[data-xd-t]').forEach((b) => b.addEventListener('click', () => { const [ri, u] = b.getAttribute('data-xd-t').split('|'); const pp = xwPeopleOf(f.rooms[Number(ri)]).find((x) => x.u === u); openXs({ kind: 'tslots', ri: Number(ri), u, slots: (pp ? pp.slots : []).map((x) => ({ start: x.start, end: x.end })), existing: true }); }));
+    box.querySelectorAll('[data-xd-o]').forEach((b) => b.addEventListener('click', () => { const i = b.getAttribute('data-xd-o').indexOf('|'); const ri = Number(b.getAttribute('data-xd-o').slice(0, i)); const nm = b.getAttribute('data-xd-o').slice(i + 1); const o = xwOthersOf(f.rooms[ri]).find((x) => x.name === nm); openXs({ kind: 'oslots', ri, name: nm, oldName: nm, slots: (o ? o.slots : []).map((x) => ({ start: x.start, end: x.end })), existing: true }); }));
+    box.querySelectorAll('[data-xd-addt]').forEach((b) => b.addEventListener('click', () => openXs({ kind: 'pick', ri: Number(b.getAttribute('data-xd-addt')), q: '' })));
+    box.querySelectorAll('[data-xd-addo]').forEach((b) => b.addEventListener('click', () => openXs({ kind: 'oslots', ri: Number(b.getAttribute('data-xd-addo')), name: '', oldName: '', slots: [{ start: '', end: '' }], existing: false })));
     const ce = box.querySelector('[data-xd-copyexam]'); if (ce) ce.addEventListener('click', () => { openXs({ kind: 'copyExam', list: null, pick: null }); xsLoadExams(); });
   }
 
@@ -9261,14 +9322,70 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const x = state.xs; const f = state.adminExamForm; const body = document.getElementById('hvSheetBody'); if (!x || !f || !body) return;
     const sheet = document.querySelector('#hvSheet .hv-sheet'); const top = sheet ? sheet.scrollTop : 0;
     const act = document.activeElement; const keep = act && act.hasAttribute && act.hasAttribute('data-xs-q') ? [act.selectionStart, act.selectionEnd] : null;
-    if (x.kind === 'slot') { body.innerHTML = xsSlotHtml(f, x.ri, x.si); bindXsSlot(body, f, x); }
-    else if (x.kind === 'other') { body.innerHTML = xsOtherHtml(f, x.ri, x.oi); bindXsOther(body, f, x); }
-    else if (x.kind === 'copyRooms') { body.innerHTML = xsCopyRoomsHtml(f, x); bindXsCopyRooms(body, f, x); }
+    if (x.kind === 'pick') { body.innerHTML = xsPickHtml(f, x); bindXsPick(body, f, x); }
+    else if (x.kind === 'tslots' || x.kind === 'oslots') { body.innerHTML = xsSlotsHtml(f, x); bindXsSlots(body, f, x); }
     else if (x.kind === 'copyExam') { body.innerHTML = xsCopyExamHtml(f, x); bindXsCopyExam(body, f, x); }
     if (sheet) sheet.scrollTop = top;
     if (keep) { const q = body.querySelector('[data-xs-q]'); if (q) { q.focus(); try { q.setSelectionRange(keep[0], keep[1]); } catch (e) { /* ignore */ } } }
   }
   const xsRefresh = () => { xsRender(); renderXwDuty(); renderXwCheck(); renderExamWizard(); };
+  function xsPickHtml(f, x) {
+    const r = f.rooms[x.ri]; const q = (x.q || '').trim().toLowerCase(); const t = examFormTimes(); const win = { start: t.start, end: t.end };
+    const here = xwPeopleOf(r).map((pp) => pp.u);
+    const rows = invigIds().filter((u) => !q || planNameOf(u).toLowerCase().indexOf(q) !== -1).map((u) => {
+      const why = []; const busy = dutyBusy(u, win, state.adminDate); if (busy) why.push(busy);
+      xwElsewhere(f, u, x.ri).forEach((d) => why.push('duty ' + xwDutyTxt(d)));
+      const isHere = here.indexOf(u) !== -1;
+      return { u, busy: !!why.length, html: `<button type="button" class="xs-p${isHere ? ' dim' : ''}" data-xs-pick="${escapeHtml(u)}"${isHere ? ' disabled' : ''}>${xwAvatar(u, planNameOf(u))}<span class="xs-pn"><b>${escapeHtml(planNameOf(u))}</b>${isHere ? `<small>Already in ${escapeHtml(r.room)}</small>` : (why.length ? `<small class="why">⚠ ${escapeHtml(why.join(' · '))}</small>` : '')}</span><span class="xd-chev">›</span></button>` };
+    });
+    const free = rows.filter((z) => !z.busy), busy = rows.filter((z) => z.busy);
+    return `<div class="hv-d-title">Add invigilator · ${escapeHtml(r.room)}</div><div class="hv-d-wing">Tap a name, then fill in the duty time</div>
+      <div class="xs-search">${XS_SEARCH}<input type="search" data-xs-q placeholder="Search a name" value="${escapeHtml(x.q || '')}" autocomplete="off"></div>
+      ${free.length ? `<div class="xs-grp">Free</div>${free.map((z) => z.html).join('')}` : ''}
+      ${busy.length ? `<div class="xs-grp">Busy at some time today</div>${busy.map((z) => z.html).join('')}` : ''}
+      ${!rows.length ? '<div class="xw-empty" style="margin-top:12px;">No name matches</div>' : ''}`;
+  }
+  function bindXsPick(body, f, x) {
+    const q = body.querySelector('[data-xs-q]'); if (q) q.addEventListener('input', () => { x.q = q.value; xsRender(); });
+    body.querySelectorAll('[data-xs-pick]').forEach((b) => b.addEventListener('click', () => { state.xs = { kind: 'tslots', ri: x.ri, u: b.getAttribute('data-xs-pick'), slots: [{ start: '', end: '' }], existing: false }; xsRender(); }));
+  }
+  function xsSlotsHtml(f, x) {
+    const r = f.rooms[x.ri]; const isT = x.kind === 'tslots';
+    const nm = isT ? planNameOf(x.u) : (x.name || '');
+    const head = isT
+      ? `<div class="xs-who">${xwAvatar(x.u, nm)}<div><div class="hv-d-title">${escapeHtml(nm)}</div><div class="hv-d-wing">Duty in ${escapeHtml(r.room)}</div></div></div>`
+      : `<div class="hv-d-title">Person not in the app</div><div class="hv-d-wing">${escapeHtml(r.room)} · non-teaching staff or a guest</div>
+         <div class="xs-lbl">Name</div><input class="xs-name" type="text" maxlength="40" placeholder="e.g. C.B. Mishra Ji" data-xs-on value="${escapeHtml(x.name || '')}">`;
+    const rows = x.slots.map((sl, i) => { const warn = isT ? xwSlotWarn(f, x.ri, x.u, sl) : (sl.start && sl.end && hhmmToMin(sl.end) <= hhmmToMin(sl.start) ? 'the end must be after the start' : '');
+      return `<div class="xs-sl"><div class="xs-slh"><span>Slot ${i + 1}</span>${x.slots.length > 1 ? `<button type="button" class="xs-link" data-xs-rms="${i}">Remove</button>` : ''}</div><div class="xs-two">${xsTin(`data-xs-ss="${i}"`, sl.start)}${xsTin(`data-xs-se="${i}"`, sl.end)}</div>${warn ? `<div class="xs-warn">⚠ ${escapeHtml(warn)}</div>` : ''}</div>`; }).join('');
+    return `${head}${rows}<button type="button" class="xs-addsl" id="xsAddSl">+ Add slot ${x.slots.length + 1}</button>
+      <div class="xs-err" id="xsErr"></div>
+      <div class="xs-foot"><button type="button" class="xw-b main" id="xsSave">Save</button>${x.existing ? `<button type="button" class="xs-link" id="xsRmP">Remove from ${escapeHtml(r.room)}</button>` : ''}</div>`;
+  }
+  function bindXsSlots(body, f, x) {
+    const r = f.rooms[x.ri]; const isT = x.kind === 'tslots';
+    const nm = body.querySelector('[data-xs-on]'); if (nm) nm.addEventListener('input', () => { x.name = nm.value; });
+    body.querySelectorAll('[data-xs-ss]').forEach((el) => el.addEventListener('change', () => { x.slots[Number(el.getAttribute('data-xs-ss'))].start = el.value; xsRender(); }));
+    body.querySelectorAll('[data-xs-se]').forEach((el) => el.addEventListener('change', () => { x.slots[Number(el.getAttribute('data-xs-se'))].end = el.value; xsRender(); }));
+    body.querySelectorAll('[data-xs-rms]').forEach((el) => el.addEventListener('click', () => { x.slots.splice(Number(el.getAttribute('data-xs-rms')), 1); xsRender(); }));
+    const add = body.querySelector('#xsAddSl'); if (add) add.addEventListener('click', () => { x.slots.push({ start: '', end: '' }); xsRender(); });
+    const rm = body.querySelector('#xsRmP'); if (rm) rm.addEventListener('click', () => { if (isT) xwSetTeacherSlots(r, x.u, []); else xwSetOtherSlots(r, x.oldName, '', []); closeHvSheet(); renderExamPlanSection(); });
+    const sv = body.querySelector('#xsSave'); if (sv) sv.addEventListener('click', async () => {
+      const err = body.querySelector('#xsErr'); const say = (m) => { err.textContent = m; };
+      const name = isT ? '' : (x.name || '').trim();
+      if (!isT && !name) { say('Write the name first'); return; }
+      const slots = x.slots.filter((sl) => sl.start || sl.end);
+      for (let i = 0; i < slots.length; i++) { const a = hhmmToMin(slots[i].start), b = hhmmToMin(slots[i].end); if (a == null || b == null) { say(`Fill both times of slot ${i + 1}`); return; } if (b <= a) { say(`Slot ${i + 1}: the end must be after the start`); return; } }
+      const srt = slots.slice().sort(xwByStart); for (let i = 1; i < srt.length; i++) if (hhmmToMin(srt[i].start) < hhmmToMin(srt[i - 1].end)) { say('Two of the slots overlap'); return; }
+      if (!slots.length) { say('Fill in at least one slot'); return; }
+      if (isT) {
+        const hits = slots.map((sl) => xwElsewhere(f, x.u, x.ri).filter((d) => xwClash(sl, d))).reduce((a, b) => a.concat(b), []);
+        if (hits.length) { const ok = await showConfirm(`${planNameOf(x.u)} already has duty in ${hits.map(xwDutyTxt).join(', ')}${hits[0].other ? ` (${hits[0].other})` : ''} at the same time.\n\nSave this duty as well?`, 'Already on duty', 'Save'); if (!ok) return; }
+        xwSetTeacherSlots(r, x.u, srt);
+      } else xwSetOtherSlots(r, x.oldName, name, srt);
+      closeHvSheet(); renderExamPlanSection();
+    });
+  }
   function xsSlotHtml(f, ri, si) {
     const r = f.rooms[ri]; const sl = r && r.slots[si]; if (!sl) return '';
     const date = state.adminDate; const q = (state.xs.q || '').trim().toLowerCase(); const ids = invigIds(); const sel = (sl.teachers || []).slice();
@@ -9370,7 +9487,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const head = '<div class="hv-d-title">Copy from an earlier exam</div><div class="hv-d-wing">Bring its rooms and duty times, then change what differs</div>';
     if (x.list == null) return head + '<div class="xw-empty" style="margin-top:14px;">Loading…</div>';
     if (!x.list.length) return head + `<div class="xw-empty" style="margin-top:14px;">${x.err ? 'Could not load earlier exams. Check the internet.' : 'No earlier exam with a duty plan yet.'}</div>`;
-    return head + `<div style="margin-top:14px;">${x.list.map((e, i) => `<div><button type="button" class="xs-ex" data-xe="${i}"><b>${escapeHtml(examTitle(e))}</b><small>${escapeHtml(dayHeading(e.date))} · ${planOf(e).length} room${planOf(e).length === 1 ? '' : 's'}</small></button>${x.pick === i ? `<div class="xs-exb"><button type="button" class="xw-b ghost" data-xe-go="0">Rooms &amp; times</button><button type="button" class="xw-b main" data-xe-go="1">With names</button></div>` : ''}</div>`).join('')}</div>`;
+    return head + `<div style="margin-top:14px;">${x.list.map((e, i) => `<div><button type="button" class="xs-ex" data-xe="${i}"><b>${escapeHtml(examTitle(e))}</b><small>${escapeHtml(dayHeading(e.date))} · ${planOf(e).length} room${planOf(e).length === 1 ? '' : 's'}</small></button>${x.pick === i ? `<div class="xs-exb"><button type="button" class="xw-b ghost" data-xe-go="0">Rooms only</button><button type="button" class="xw-b main" data-xe-go="1">Rooms and duty</button></div>` : ''}</div>`).join('')}</div>`;
   }
   function bindXsCopyExam(body, f, x) {
     body.querySelectorAll('[data-xe]').forEach((b) => b.addEventListener('click', () => { const i = Number(b.getAttribute('data-xe')); x.pick = x.pick === i ? null : i; xsRender(); }));
@@ -9378,8 +9495,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const names = b.getAttribute('data-xe-go') === '1'; const e = x.list[x.pick]; if (!e) return;
       if (f.rooms.some(xwRoomUsed)) { const ok = await showConfirm('The rooms and duty in this exam will be replaced.', 'Replace duty?', 'Replace'); if (!ok) return; }
       f.rooms = planOf(e).map((r) => ({ room: r.room, staff: r.staff || 0, others: names ? (r.others || []).map((o) => Object.assign({}, o)) : [],
-        slots: (r.slots || []).length ? r.slots.map((sl) => ({ start: sl.start, end: sl.end, teachers: names ? (sl.teachers || []).slice() : [], breaks: names ? xwClone(sl.breaks) : {} })) : [{ start: '', end: '', teachers: [] }] }));
-      closeHvSheet(); renderExamPlanSection(); showToast(names ? 'Copied with names' : 'Copied rooms and times');
+        slots: names ? (r.slots || []).filter((sl) => (sl.teachers || []).length).map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers.slice(), breaks: {} })) : [] }));
+      closeHvSheet(); renderExamPlanSection(); showToast(names ? 'Copied the rooms and the duty' : 'Copied the rooms');
     }));
   }
 
@@ -9389,7 +9506,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (f.step !== 4) { box.innerHTML = ''; return; }
     const t = examFormTimes();
     const rooms = f.rooms.map((r) => ({ room: r.room, scope: ['x'], slots: r.slots.filter((sl) => sl.start || sl.end || (sl.teachers || []).length).map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers })) }));
-    const warns = planWarnings({ date: state.adminDate, start: t.start, end: t.end }, rooms).filter((x) => !/choose the class|no invigilator/.test(x)).concat(planExtraWarnings(f));
+    const warns = planWarnings({ date: state.adminDate, start: t.start, end: t.end }, rooms).filter((x) => !/choose the class|no invigilator|duty slots overlap/.test(x)).concat(planExtraWarnings(f));
     f.rooms.forEach((r) => { if (r.slots.some((sl) => (sl.teachers || []).length && (!sl.start || !sl.end))) warns.push(`${r.room}: set the duty time`); });
     const nobody = f.rooms.filter((r) => !r.slots.some((sl) => (sl.teachers || []).length) && !(r.others || []).some((o) => (o.name || '').trim())).map((r) => r.room);
     const hints = []; f.rooms.forEach((r) => roomGaps(r, t).forEach((g) => hints.push(`${r.room} ${formatTimeStr(g[0])} – ${formatTimeStr(g[1])}: nobody listed (fine if someone not in the app covers it)`)));
@@ -9407,13 +9524,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         ${nobody.length ? `<div class="xw-ck in"><span>ⓘ</span><span>${escapeHtml(nobody.join(', '))}: nobody chosen yet (you can add this later)</span></div>` : ''}
         ${hints.map((x) => `<div class="xw-ck in"><span>ⓘ</span><span>${escapeHtml(x)}</span></div>`).join('')}</div>
       <div class="xw-card"><div class="xw-ch">Duty sheet picture</div>${pic || '<div class="xw-empty" style="padding:16px;">Fill at least one duty to see the picture</div>'}</div>
-      ${f.id ? '<button type="button" class="xw-del" id="xwDelete">Delete this exam</button>' : ''}`;
+      `;
     const pc = box.querySelector('#xwPic'); if (pc) pc.addEventListener('click', xwPreview);
-    const dl = box.querySelector('#xwDelete'); if (dl) dl.addEventListener('click', async () => {
-      const ok = await showConfirm(`${examTitle(f)} · ${scopeLabel(f.scope)}\n\nRemoved everywhere: Exams tab, rooms, invigilation duties and the timetable grid (the classes there come back).`, 'Delete this exam?', 'Delete');
-      if (!ok) return;
-      try { await deleteExamsEverywhere([f.id]); state.adminExamForm = null; state.exOpen = null; renderAdmin(); showToast('Exam deleted'); } catch (err) { flashOffline(err); }
-    });
   }
   function renderExamPlanSection() { renderXwRooms(); renderXwDuty(); renderXwCheck(); renderExamWizard(); }
   // breaks inside the duty, a name for everyone typed in by hand, sensible times
@@ -9550,7 +9662,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         if (!ok) return;
       }
     } catch (e) { /* timetable not available offline */ }
-    const pw = rooms.length ? planWarnings({ date: state.adminDate, start, end }, rooms).filter((x) => !/no invigilator|choose the class/.test(x)) : [];
+    const pw = rooms.length ? planWarnings({ date: state.adminDate, start, end }, rooms).filter((x) => !/no invigilator|choose the class|duty slots overlap/.test(x)) : [];
     if (pw.length) {
       const ok = await showConfirm(`${pw.slice(0, 5).join('\n')}${pw.length > 5 ? `\n+${pw.length - 5} more` : ''}\n\nSave anyway?`, '⚠️ Please check', 'Save');
       if (!ok) return;
