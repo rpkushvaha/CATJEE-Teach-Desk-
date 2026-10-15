@@ -1042,6 +1042,10 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  #adminAiPanel[hidden] { display: none !important; }
+  .ai-stat { font-size: 13px; color: var(--muted-2); min-height: 18px; }
+  .ai-stat.ok { color: #15803D; font-weight: 600; }
+  .ai-stat.bad { color: #C81E32; font-weight: 600; }
   .team-head { display: flex; align-items: center; gap: 10px; cursor: pointer; }
   .team-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
   .team-head .team-id { font-size: 13px; color: var(--muted-2); }
@@ -2619,6 +2623,15 @@
         <div class="list-add"><input class="text-input" id="newTestTypeInput" type="text" placeholder="e.g. Half-Yearly"><button class="btn-secondary" id="addTestTypeBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
+      <div class="panel set-acc" id="adminAiPanel" data-atab="settings" hidden>
+        <div class="panel-title"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>AI (beta)</div>
+        <div class="admin-sub" style="margin:0;">Only you see this. Paste the address of your AI helper (the Cloudflare Worker) and test it. Teachers see nothing of AI until a feature is switched on.</div>
+        <div class="sv-tlbl">AI helper address</div>
+        <input class="text-input" id="aiUrlInput" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://catjee-ai.yourname.workers.dev">
+        <div class="sv-form-btns"><button type="button" class="btn-secondary" id="aiTestBtn" style="border-color: var(--line);">Test</button><button type="button" class="save-btn" id="aiSaveBtn">Save</button></div>
+        <div class="ai-stat" id="aiStatus"></div>
+      </div>
+
       <div class="panel set-acc" id="adminSubjectsPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Subjects</div>
         <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
@@ -3025,7 +3038,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 12.7 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 12.8 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7911,7 +7924,52 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     });
   }
 
+  // ===== AI helper (beta, Admin only) =====
+  // The app never holds the Gemini key: it sends the request with the person's sign-in to a Cloudflare Worker,
+  // which checks the sign-in and the allowed list, then asks Gemini. Nothing else in the app depends on it.
+  const AI_URL_KEY = 'ctd_ai_url';
+  const aiUrl = () => { try { return (localStorage.getItem(AI_URL_KEY) || '').trim(); } catch (e) { return ''; } };
+  async function aiCall(body, timeoutMs) {
+    const url = aiUrl(); if (!url) throw new Error('AI is not set up yet (Admin → Settings → AI)');
+    const cu = firebase.auth().currentUser; if (!cu) throw new Error('Please sign in again');
+    const tok = await cu.getIdToken();
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), timeoutMs || 45000);
+    try {
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok }, body: JSON.stringify(body), signal: ctl.signal });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) throw new Error(d.error || ('AI helper error ' + r.status));
+      return d;
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('The AI took too long · try again');
+      if (e instanceof TypeError) throw new Error('Could not reach the AI helper · check the address and the internet');
+      throw e;
+    } finally { clearTimeout(tm); }
+  }
+  function renderAiPanel() {
+    const pnl = document.getElementById('adminAiPanel'); if (!pnl) return;
+    pnl.hidden = !state.canAdmin;
+    const inp = document.getElementById('aiUrlInput'); if (inp && document.activeElement !== inp) inp.value = aiUrl();
+  }
+  (function bindAiPanel() {
+    const inp = document.getElementById('aiUrlInput'), st = document.getElementById('aiStatus');
+    const say = (txt, cls) => { st.textContent = txt; st.className = 'ai-stat' + (cls ? ' ' + cls : ''); };
+    const clean = () => (inp.value || '').trim().replace(/\/+$/, '');
+    document.getElementById('aiSaveBtn').addEventListener('click', () => {
+      const v = clean();
+      if (v && !/^https:\/\/[^\s/]+\.[^\s]+$/i.test(v)) { say('The address should start with https://', 'bad'); return; }
+      try { if (v) localStorage.setItem(AI_URL_KEY, v); else localStorage.removeItem(AI_URL_KEY); } catch (e) { /* ignore */ }
+      say(v ? 'Saved · tap Test to check it' : 'Removed', '');
+    });
+    document.getElementById('aiTestBtn').addEventListener('click', async () => {
+      const v = clean(); if (!v) { say('Paste the address first', 'bad'); return; }
+      try { localStorage.setItem(AI_URL_KEY, v); } catch (e) { /* ignore */ }
+      say('Checking…', '');
+      try { const d = await aiCall({ task: 'ping' }, 20000); say(`✓ Connected · ${d.model || 'Gemini'}`, 'ok'); }
+      catch (e) { say('✕ ' + e.message, 'bad'); }
+    });
+  })();
   function renderAdmin() {
+    renderAiPanel();
     applyRoleUI();
     applyAdminTab();
     renderSettingsAccordion();
