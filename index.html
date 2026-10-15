@@ -3025,7 +3025,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 12.4 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 12.5 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3507,6 +3507,12 @@
   // that isn't started by a direct user gesture — timer-fired beeps need
   // the context already running by the time they happen.
   document.addEventListener('pointerdown', unlockAudio, { once: true });
+  // While someone is typing, the app's sound system rests, so the keyboard's 🎤 (voice typing) gets the microphone.
+  // It wakes again when the typing box is left; a reminder that fires meanwhile still wakes it to play.
+  const isTypingBox = (t) => !!t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|email|tel|number|password|url)$/i.test(t.type || 'text')));
+  document.addEventListener('focusin', (e) => { if (isTypingBox(e.target) && audioCtx && audioCtx.state === 'running') { try { audioCtx.suspend(); } catch (err) { /* ignore */ } } }, true);
+  document.addEventListener('focusout', (e) => { if (isTypingBox(e.target) && audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch (err) { /* ignore */ } } }, true);
+  window.__ctdAudioState = () => (audioCtx ? audioCtx.state : 'none');
 
   function showReminderAlert(message) {
     document.getElementById('reminderAlertText').textContent = message;
