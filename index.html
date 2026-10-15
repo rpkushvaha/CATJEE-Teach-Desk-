@@ -1042,6 +1042,15 @@
   .sum-tile:has(#adLeave)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-7-4.5-7-10a4%204%200%200%201%207-2.6A4%204%200%200%201%2019%2011c0%205.5-7%2010-7%2010z%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
+  .team-head { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .team-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .team-head .team-id { font-size: 13px; color: var(--muted-2); }
+  .team-head .team-id b { font-weight: 600; color: var(--ink); letter-spacing: .02em; }
+  .team-meta { font-size: 12px; color: var(--muted); text-align: right; max-width: 42%; }
+  .team-chev { color: var(--muted); font-size: 20px; line-height: 1; transition: transform .18s ease; flex: none; }
+  .team-row.open .team-chev { transform: rotate(90deg); }
+  .team-body { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+  .rep-datenav { margin-top: 2px; }
   /* ---------- exam planner (4 steps) ---------- */
   body.xw-open #adminExamList, body.xw-open #adminTestsHeldSec { display: none !important; }
   .xw { gap: 14px !important; padding: 14px !important; border-radius: 22px !important; border: 1px solid var(--line) !important; background: var(--paper) !important; box-shadow: 0 12px 34px rgba(16,24,40,.08); display: flex; flex-direction: column; }
@@ -2548,8 +2557,8 @@
           <button class="chip active" data-report-range="day">Day</button>
           <button class="chip" data-report-range="week">Week</button>
           <button class="chip" data-report-range="month">Month</button>
-        </div><button type="button" class="hv-icon cal-btn" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
-        <div class="trep-nav"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div id="repLabel"></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+        </div></div>
+        <div class="hv-nav rep-datenav"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
         <div class="rep-opts" id="repTeacherWrap">
           <label class="rep-lbl" for="adminRepTeacher">Teacher</label>
           <select class="text-input" id="adminRepTeacher"><option value="">All teachers</option></select>
@@ -3004,7 +3013,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 12.1 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 12.2 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5049,9 +5058,15 @@
       const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed';
       const coord = isCoordUid(uid);
       const w = teamWings(uid);
-      return `<div class="team-row">
-        <div class="team-name">${escapeHtml(name)}${uid === state.teacherId ? ' <span class="team-you">(you)</span>' : ''}</div>
-        <div class="team-id">${(state.team[uid] && state.team[uid].staffId) ? `ID: <b>${escapeHtml(state.team[uid].staffId)}</b>` : `<button type="button" class="hv-back" data-team-mkid="${uid}" style="padding:0;">Create Staff ID</button>`}</div>
+      const open = state.teamOpen === uid;
+      const sid = state.team[uid] && state.team[uid].staffId;
+      return `<div class="team-row${open ? ' open' : ''}">
+        <div class="team-head" data-team-open="${uid}" role="button" tabindex="0" aria-expanded="${open}">
+          <div class="team-txt"><div class="team-name">${escapeHtml(name)}${uid === state.teacherId ? ' <span class="team-you">(you)</span>' : ''}</div>
+          <div class="team-id">${sid ? `Staff ID · <b>${escapeHtml(sid)}</b>` : `<button type="button" class="hv-back" data-team-mkid="${uid}" style="padding:0;">Generate Staff ID</button>`}</div></div>
+          <span class="team-chev" aria-hidden="true">›</span>
+        </div>
+        ${open ? `<div class="team-body">
         <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}"></div>
         <div class="chips team-chips">
           <button type="button" class="chip${coord ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
@@ -5063,11 +5078,17 @@
           <button type="button" class="chip${w.indexOf('Foundation') !== -1 ? ' active' : ''}" data-team-wing="Foundation" data-uid="${uid}">Foundation</button>
         </div>
         ${uid !== state.teacherId ? `<button type="button" class="team-remove" data-team-remove="${uid}">Remove access</button>` : ''}
+        </div>` : ''}
       </div>`;
     }).join('') + (removed.length ? `<div class="team-removed"><div class="team-lbl" style="margin:6px 0 4px;">Removed (${removed.length})</div>${removed.map((uid) => `<div class="team-rm-row"><span>${escapeHtml((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed')}</span><button type="button" class="hv-back" data-team-restore="${uid}" style="padding:0;">Restore</button></div>`).join('')}</div>` : '');
     const save = async (uid, patch, msg) => {
       try { await state.db.doc('team/' + uid).set(patch, { merge: true }); showToast(msg); } catch (err) { flashOffline(err); }
     };
+    // one person open at a time; tapping the row opens or closes it
+    el.querySelectorAll('[data-team-open]').forEach((h) => {
+      const tog = (e) => { if (e.target.closest('[data-team-mkid]')) return; const u = h.getAttribute('data-team-open'); state.teamOpen = state.teamOpen === u ? null : u; renderTeamPanel(); };
+      h.addEventListener('click', tog); h.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tog(e); } });
+    });
     el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-uid'); const role = b.getAttribute('data-team-role');
       if ((role === 'coordinator') === isCoordUid(uid)) return;
@@ -12360,7 +12381,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((c) => { const r = c.getAttribute('data-report-range'); c.classList.toggle('active', r === range); c.disabled = kind === 'count' && r === 'day'; });
     document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
     const { label } = adminReportRangeDates();
-    const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = range === 'day' ? `Day: ${label}` : (range === 'week' ? `Week: ${label}` : `Month: ${label}`);
+    const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label;
     const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
     document.getElementById('repStd').hidden = kind === 'count';
