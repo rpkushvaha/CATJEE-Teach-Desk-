@@ -1676,12 +1676,23 @@
     box-shadow: 12px 0 32px rgba(0,0,0,.18); border-radius: 0 22px 22px 0;
   }
   .drawer-root.open .drawer { transform: translateX(0); }
+  .drawer.full { width: 100vw; border-radius: 0; box-shadow: none; }
+  .drawer { transition: transform .32s cubic-bezier(.22,.8,.26,1), width .28s cubic-bezier(.22,.8,.26,1), border-radius .28s ease; }
+  .drawer.full .dscroll { padding-left: 14px; padding-right: 14px; }
+  /* gallery on a full page: bigger pictures, the whole description, three across on wide screens */
+  .drawer.full .gal-grid { gap: 12px; }
+  @media (min-width: 560px) { .drawer.full .gal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 900px) { .drawer.full .gal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .gal-t { overflow-wrap: anywhere; white-space: normal; }
+  .gal-s { overflow-wrap: anywhere; }
+  .gal-auto { font-size: 12px; color: var(--muted); }
   .dpanel {
     position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--paper);
     transition: transform .3s cubic-bezier(.22,.8,.26,1), filter .3s ease;
   }
-  .dsub { transform: translateX(100%); box-shadow: -8px 0 24px rgba(0,0,0,.08); }
-  .dsub.active { transform: translateX(0); }
+  .dsub { transform: translateX(100%); box-shadow: none; }
+  .dsub.active { transform: translateX(0); box-shadow: -8px 0 24px rgba(0,0,0,.08); }
+  .drawer.full .dsub.active { box-shadow: none; }
   .dpanel-main.pushed { transform: translateX(-30%); filter: brightness(.9); }
   .dscroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
   .dbody { display: flex; flex-direction: column; gap: 12px; }
@@ -2942,6 +2953,7 @@
         <div class="day-card-hint" id="scheduleNoticeHint" style="display:none;">Tap to expand</div>
         <div id="scheduleNoticeBody" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
           <div class="admin-sub" style="margin-top:0;">Timetable pictures published for you, and your own saved photos (only you can see those). Tap a picture to see it full screen.</div>
+          <div class="gal-auto">Timetable and duty pictures are removed by themselves two weeks after their week. Your own photos stay until you delete them.</div>
           <div id="scheduleNoticeGallery"></div>
           <input type="file" id="scheduleNoticeFileInput" accept="image/*" style="display:none;">
           <button class="btn-secondary" id="scheduleNoticeUploadBtn" style="border-color: var(--line);"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Add Photo</button>
@@ -3013,7 +3025,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 12.3 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 12.4 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10222,6 +10234,20 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
 
   let pruningSchedule = false;
   // Only tidies up slots from more than 6 weeks ago; recent slots stay so the week can show Completed / Missed.
+  // once a day, an Admin or Coordinator's app removes timetable and duty pictures whose week ended more than two weeks ago
+  async function pruneOldTimetableImages() {
+    if (!state.db || !(state.canAdmin || state.isCoordinator)) return;
+    const key = 'ctd_img_prune_day'; let last = ''; try { last = localStorage.getItem(key) || ''; } catch (e) { /* ignore */ }
+    if (last === todayStr()) return;
+    try { localStorage.setItem(key, todayStr()); } catch (e) { /* ignore */ }
+    const cutoffWs = shiftDateStr(todayStr(), -20); // the week (Mon–Sun) ended before today − 14 days
+    try {
+      const snap = await state.db.collection('timetableImages').where('weekStart', '<', cutoffWs).get();
+      let n = 0;
+      for (const d of snap.docs) { const x = d.data() || {}; const end = x.day || shiftDateStr(x.weekStart || cutoffWs, 6); if (end < shiftDateStr(todayStr(), -14)) { try { await d.ref.delete(); n++; } catch (e) { /* not allowed for this one */ } } }
+      if (n) { state.ttImgs = {}; state.myTtImages = (state.myTtImages || []).filter((x) => (x.weekStart || '') >= cutoffWs); }
+    } catch (e) { try { localStorage.removeItem(key); } catch (e2) { /* ignore */ } }
+  }
   async function pruneExpiredScheduleSlots() {
     if (!state.db || !state.teacherId || pruningSchedule) return;
     migrateUndatedSlots();
@@ -11201,6 +11227,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     drawerEl.setAttribute('aria-hidden', s ? 'false' : 'true');
     document.querySelectorAll('.dsub').forEach((p) => p.classList.toggle('active', p.id === 'dpanel-' + panel));
     document.getElementById('dpanel-main').classList.toggle('pushed', !!panel);
+    // a section of the menu (Gallery, Settings, Profile …) uses the whole screen
+    drawerEl.querySelector('.drawer').classList.toggle('full', !!panel);
     document.body.style.overflow = s ? 'hidden' : '';
   }
   window.addEventListener('popstate', renderDrawerFromHistory);
@@ -14504,7 +14532,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       state.scheduleSlots = snap.docs.map((d) => normDoc(d));
       if (state.tab === 'schedule') renderScheduleList();
       renderTodayList();
-      pruneExpiredScheduleSlots();
+      pruneExpiredScheduleSlots(); setTimeout(pruneOldTimetableImages, 8000);
     }, (err) => flashOffline(err)));
 
     if (state.canAdmin || state.isCoordinator) {
