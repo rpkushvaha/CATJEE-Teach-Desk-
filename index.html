@@ -1067,6 +1067,7 @@
   .xw-date .ico { color: var(--gold); }
   .xw-date span:nth-child(2) { flex: 1; }
   .xd-nobody { font-size: 13px; color: var(--muted); padding: 10px 4px; }
+  .xd-tag.xd-sug { background: var(--gold-soft); color: var(--gold); }
   .xs-p.dim { opacity: .55; cursor: default; }
   .xs-who { display: flex; align-items: center; gap: 12px; padding-right: 40px; }
   .xs-who .xw-av { width: 44px; height: 44px; font-size: 14px; }
@@ -3025,7 +3026,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 12.5 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 12.6 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3507,12 +3508,6 @@
   // that isn't started by a direct user gesture — timer-fired beeps need
   // the context already running by the time they happen.
   document.addEventListener('pointerdown', unlockAudio, { once: true });
-  // While someone is typing, the app's sound system rests, so the keyboard's 🎤 (voice typing) gets the microphone.
-  // It wakes again when the typing box is left; a reminder that fires meanwhile still wakes it to play.
-  const isTypingBox = (t) => !!t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|email|tel|number|password|url)$/i.test(t.type || 'text')));
-  document.addEventListener('focusin', (e) => { if (isTypingBox(e.target) && audioCtx && audioCtx.state === 'running') { try { audioCtx.suspend(); } catch (err) { /* ignore */ } } }, true);
-  document.addEventListener('focusout', (e) => { if (isTypingBox(e.target) && audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch (err) { /* ignore */ } } }, true);
-  window.__ctdAudioState = () => (audioCtx ? audioCtx.state : 'none');
 
   function showReminderAlert(message) {
     document.getElementById('reminderAlertText').textContent = message;
@@ -9404,13 +9399,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       box.querySelector('[data-xw-go2]').addEventListener('click', () => xwGo(2)); return;
     }
     const win = xwWindow(f);
-    const tools = `<div class="xw-tools"><button type="button" class="xw-tool" data-xd-copyexam><span class="ico i-clock" aria-hidden="true"></span>Copy from an earlier exam</button></div>`;
+    const tools = `<div class="xw-tools"><button type="button" class="xw-tool" data-xd-copyexam><span class="ico i-clock" aria-hidden="true"></span>Copy from an earlier exam</button><button type="button" class="xw-tool" data-xd-suggest><span class="ico i-usersck" aria-hidden="true"></span>Suggest duties</button></div>`;
     box.innerHTML = tools + f.rooms.map((r, ri) => {
       const people = xwPeopleOf(r), others = xwOthersOf(r);
       const meta = [`${people.length + others.length} ${people.length + others.length === 1 ? 'person' : 'people'}`, r.staff ? `${r.staff} Staff` : ''].filter(Boolean).join(' · ');
       const rows = people.map((pp) => {
         const bad = pp.slots.some((x) => xwSlotWarn(f, ri, pp.u, x));
-        return `<button type="button" class="xd-row" data-xd-t="${ri}|${escapeHtml(pp.u)}">${xwAvatar(pp.u, planNameOf(pp.u))}<span class="xd-txt"><b>${escapeHtml(planNameOf(pp.u))}</b>${pp.slots.map((x) => `<span class="xd-time">${escapeHtml(xwRange(x))}</span>`).join('')}${bad ? '<span class="xd-warn">⚠ check the time</span>' : ''}</span><span class="xd-chev">›</span></button>`;
+        const sug = f._sug && f._sug.has(ri + '|' + pp.u);
+        return `<button type="button" class="xd-row" data-xd-t="${ri}|${escapeHtml(pp.u)}">${xwAvatar(pp.u, planNameOf(pp.u))}<span class="xd-txt"><b>${escapeHtml(planNameOf(pp.u))}${sug ? '<span class="xd-tag xd-sug">Suggested</span>' : ''}</b>${pp.slots.map((x) => `<span class="xd-time">${escapeHtml(xwRange(x))}</span>`).join('')}${bad ? '<span class="xd-warn">⚠ check the time</span>' : ''}</span><span class="xd-chev">›</span></button>`;
       }).join('');
       const oth = others.map((o) => `<button type="button" class="xd-row" data-xd-o="${ri}|${escapeHtml(o.name)}">${xwPlain(o.name)}<span class="xd-txt"><b>${escapeHtml(o.name)}<span class="xd-tag">Not in the app</span></b>${o.slots.map((x) => `<span class="xd-time">${escapeHtml(xwRange(x))}</span>`).join('')}</span><span class="xd-chev">›</span></button>`).join('');
       return `<div class="xd-room"><div class="xd-rh"><div class="xd-rname">${escapeHtml(r.room)}</div><div class="xd-meta">${escapeHtml(meta)}</div></div>${xwBarHtml(r, win)}
@@ -9422,6 +9418,116 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     box.querySelectorAll('[data-xd-addt]').forEach((b) => b.addEventListener('click', () => openXs({ kind: 'pick', ri: Number(b.getAttribute('data-xd-addt')), q: '' })));
     box.querySelectorAll('[data-xd-addo]').forEach((b) => b.addEventListener('click', () => openXs({ kind: 'oslots', ri: Number(b.getAttribute('data-xd-addo')), name: '', oldName: '', slots: [{ start: '', end: '' }], existing: false })));
     const ce = box.querySelector('[data-xd-copyexam]'); if (ce) ce.addEventListener('click', () => { openXs({ kind: 'copyExam', list: null, pick: null }); xsLoadExams(); });
+    const sg = box.querySelector('[data-xd-suggest]'); if (sg) sg.addEventListener('click', () => openXs({ kind: 'suggest', per: 2, coords: false, keep: true, seed: 1 }));
+  }
+
+  // ---------- Suggest duties: who is free, when, and the work shared out evenly ----------
+  function xwBusyOf(u, date) {
+    const day = (state.adminClasses || []).filter((c) => c.date === date && c.teacherId === u);
+    if (day.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) return { leave: true, list: [] };
+    const out = [];
+    ((state.adminSlotsDate === date && state.adminSlots && state.adminSlots[u]) || []).filter((sl) => !sl.cancelled).forEach((sl) => { const a = hhmmToMin(sl.time); if (a != null) out.push([a, a + slotDuration(sl), `class ${formatTimeStr(sl.time)}`]); });
+    day.filter((c) => c.entryType !== 'activity').forEach((c) => { const a = hhmmToMin(c.startTimeStr), b = hhmmToMin(c.endTimeStr); if (a != null && b != null && !out.some((x) => x[0] === a)) out.push([a, b, `class ${formatTimeStr(c.startTimeStr)}`]); });
+    return { leave: false, list: out };
+  }
+  function xwSuggest(f, opt) {
+    const t = examFormTimes(); const S = hhmmToMin(t.start), E = hhmmToMin(t.end);
+    if (S == null || E == null || E <= S) return { err: 'times' };
+    const date = state.adminDate; const MINLEN = 30;
+    let rs = (opt.seed || 1) * 7919; const rand = () => { rs = (rs * 16807) % 2147483647; return rs / 2147483647; };
+    const hm = (m) => formatTimeStr(svMinToHHMM(m)).replace(/\s?(AM|PM)$/i, '');
+    const cands = invigIds().filter((u) => opt.coords || !isCoordUid(u));
+    const info = {};
+    cands.forEach((u) => { const b = xwBusyOf(u, date); info[u] = { leave: b.leave, busy: b.list.slice(), load: 0, r: rand() }; });
+    (state.adminExams || []).filter((e) => e.date === date && e.id !== f.id).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => {
+      const a = hhmmToMin(sl.start), b = hhmmToMin(sl.end); if (info[u] && a != null && b != null) { info[u].busy.push([a, b, `duty ${r.room} ${hm(a)}–${hm(b)}`]); info[u].load += b - a; }
+    }))));
+    const plan = f.rooms.map((r, ri) => ({ ri, room: r.room, cov: new Array(E - S).fill(0), add: {}, gaps: [] }));
+    const cover = (p, a, b) => { for (let m = Math.max(a, S); m < Math.min(b, E); m++) p.cov[m - S]++; };
+    f.rooms.forEach((r, ri) => {
+      (r.others || []).forEach((o) => { if ((o.name || '').trim()) cover(plan[ri], hhmmToMin(o.start), hhmmToMin(o.end)); });
+      if (opt.keep) (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { const a = hhmmToMin(sl.start), b = hhmmToMin(sl.end); if (a == null || b == null) return; cover(plan[ri], a, b); if (info[u]) { info[u].busy.push([a, b, `duty ${r.room} ${hm(a)}–${hm(b)}`]); info[u].load += b - a; } }));
+    });
+    const freeAt = (u, m) => !info[u].leave && !info[u].busy.some((x) => x[0] <= m && m < x[1]);
+    const runTo = (u, m, lim) => { let x = m; while (x < lim && freeAt(u, x)) x++; return x; };
+    const better = (a, b) => { for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return a[i] > b[i]; } return false; };
+    for (let k = 1; k <= opt.per; k++) {
+      plan.forEach((p) => {
+        let m = S;
+        while (m < E) {
+          if (p.cov[m - S] >= k) { m++; continue; }
+          let lim = m; while (lim < E && p.cov[lim - S] < k) lim++;
+          let best = null;
+          cands.forEach((u) => {
+            if (!freeAt(u, m)) return;
+            const end = runTo(u, m, lim); const len = end - m; if (len < Math.min(MINLEN, lim - m)) return;
+            const all = end >= lim ? 1 : 0;
+            const sc = all ? [1, -info[u].load, info[u].r, 0] : [0, len, -info[u].load, info[u].r];
+            if (!best || better(sc, best.sc)) best = { u, end, sc };
+          });
+          if (!best) {
+            const g = p.gaps[p.gaps.length - 1];
+            if (g && g.k === k && g.b === m) g.b = m + 1; else p.gaps.push({ k, a: m, b: m + 1 });
+            m++; continue;
+          }
+          (p.add[best.u] = p.add[best.u] || []).push({ start: svMinToHHMM(m), end: svMinToHHMM(best.end) });
+          info[best.u].busy.push([m, best.end, `duty ${p.room} ${hm(m)}–${hm(best.end)}`]); info[best.u].load += best.end - m;
+          cover(p, m, best.end); m = best.end;
+        }
+      });
+    }
+    // why each person was given that time
+    plan.forEach((p) => {
+      p.people = Object.keys(p.add).map((u) => {
+        const sl = p.add[u].sort(xwByStart); const full = sl.length === 1 && hhmmToMin(sl[0].start) <= S && hhmmToMin(sl[0].end) >= E;
+        const b = xwBusyOf(u, date).list.filter((x) => x[0] < E && S < x[1]).map((x) => x[2]);
+        (state.adminExams || []).filter((e) => e.date === date && e.id !== f.id).forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((s2) => { if ((s2.teachers || []).indexOf(u) !== -1) b.push(`duty ${r.room} ${hm(hhmmToMin(s2.start))}–${hm(hhmmToMin(s2.end))}`); })));
+        return { u, slots: sl, why: full ? 'free for the whole exam' : (b.length ? b.join(' · ') : 'shares the room with others') };
+      }).sort((a, b) => xwByStart(a.slots[0], b.slots[0]));
+      p.gapTxt = p.gaps.filter((g) => g.b - g.a >= 5).map((g) => `${p.room} ${formatTimeStr(svMinToHHMM(g.a))} – ${formatTimeStr(svMinToHHMM(g.b))}: ${g.k === 1 ? 'nobody is free' : `only ${g.k - 1} free`}`);
+    });
+    return { plan };
+  }
+  function xsSuggestHtml(f, x) {
+    const t = examFormTimes(); const names = f.rooms.map((r) => r.room).join(', ');
+    const head = `<div class="hv-d-title">Suggest duties</div><div class="hv-d-wing">${escapeHtml(names)}${t.start && t.end ? ` · ${escapeHtml(formatTimeStr(t.start))} – ${escapeHtml(formatTimeStr(t.end))}` : ''}</div>`;
+    if (!(t.start && t.end)) return head + `<div class="xw-empty" style="margin-top:14px;">Fill in the paper times in step 1 first.<button type="button" class="xw-b main" style="width:auto; padding:0 22px; height:44px;" id="xgTimes">Go to step 1</button></div>`;
+    const hasPeople = f.rooms.some((r) => (r.slots || []).some((sl) => (sl.teachers || []).length));
+    if (x.res) {
+      const p = x.res.plan;
+      const rows = p.map((q) => `<div class="xs-grp">${escapeHtml(q.room)}</div>${q.people.length ? q.people.map((pp) => `<div class="xs-p" style="cursor:default;">${xwAvatar(pp.u, planNameOf(pp.u))}<span class="xs-pn"><b>${escapeHtml(planNameOf(pp.u))}</b>${pp.slots.map((sl) => `<span class="xd-time">${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}</span>`).join('')}<small>${escapeHtml(pp.why)}</small></span></div>`).join('') : `<div class="xd-nobody">${x.keep && hasPeople ? 'Nothing more needed here' : 'Nobody could be added'}</div>`}
+        ${q.gapTxt.map((g) => `<div class="xw-ck wn" style="margin-top:6px;"><span>⚠</span><span>${escapeHtml(g)}</span></div>`).join('')}`).join('');
+      return `<div class="hv-d-title">Suggested duties</div><div class="hv-d-wing">Check them, then use them or try again</div>${rows}
+        <div class="xs-exb" style="margin-top:16px;"><button type="button" class="xw-b ghost" id="xgAgain">Try again</button><button type="button" class="xw-b main" id="xgUse">Use these</button></div>
+        <div class="xs-foot" style="margin-top:6px;"><button type="button" class="xs-link xw-keep" id="xgBack">Change the choices</button></div>`;
+    }
+    return head + `<div class="xs-lbl">Invigilators in each room</div><span class="xp-step"><button type="button" id="xgMinus" aria-label="One less">−</button><b>${x.per}</b><button type="button" id="xgPlus" aria-label="One more">+</button></span>
+      <div class="xs-lbl">Who can be on duty</div><div class="chips"><span class="chip active">Teachers</span><button type="button" class="chip${x.coords ? ' active' : ''}" id="xgCoord">Coordinators too</button></div>
+      ${hasPeople ? `<div class="xs-lbl">People already added</div><div class="chips"><button type="button" class="chip${x.keep ? ' active' : ''}" data-xg-keep="1">Keep them</button><button type="button" class="chip${x.keep ? '' : ' active'}" data-xg-keep="0">Start fresh</button></div>` : ''}
+      <div class="xw-ck in" style="margin-top:14px;"><span>ⓘ</span><span>Only people who are free at that time are used: their classes, leave and other duties are checked first, and the work is shared out evenly.</span></div>
+      <div class="xs-foot"><button type="button" class="xw-b main" id="xgGo">Suggest</button></div>`;
+  }
+  function bindXsSuggest(body, f, x) {
+    const on = (id, fn) => { const el = body.querySelector('#' + id); if (el) el.addEventListener('click', fn); };
+    on('xgTimes', () => { closeHvSheet(); xwGo(1); });
+    on('xgMinus', () => { x.per = Math.max(1, x.per - 1); xsRender(); });
+    on('xgPlus', () => { x.per = Math.min(4, x.per + 1); xsRender(); });
+    on('xgCoord', () => { x.coords = !x.coords; xsRender(); });
+    body.querySelectorAll('[data-xg-keep]').forEach((b) => b.addEventListener('click', () => { x.keep = b.getAttribute('data-xg-keep') === '1'; xsRender(); }));
+    on('xgGo', () => { x.res = xwSuggest(f, x); xsRender(); });
+    on('xgAgain', () => { x.seed = (x.seed || 1) + 1; x.res = xwSuggest(f, x); xsRender(); });
+    on('xgBack', () => { x.res = null; xsRender(); });
+    on('xgUse', () => {
+      const res = x.res; if (!res || !res.plan) return;
+      f._sug = f._sug || new Set();
+      res.plan.forEach((p) => {
+        const r = f.rooms[p.ri];
+        if (!x.keep) { r.slots = []; Array.from(f._sug).forEach((k) => { if (k.indexOf(p.ri + '|') === 0) f._sug.delete(k); }); }
+        p.people.forEach((pp) => { pp.slots.forEach((sl) => r.slots.push({ start: sl.start, end: sl.end, teachers: [pp.u], breaks: {} })); f._sug.add(p.ri + '|' + pp.u); });
+        r.slots.sort(xwByStart);
+      });
+      closeHvSheet(); renderExamPlanSection(); showToast('Duties filled in · check and save');
+    });
   }
 
   // ---------- the picker sheet (slot · person not in the app · copy) ----------
@@ -9435,6 +9541,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (x.kind === 'pick') { body.innerHTML = xsPickHtml(f, x); bindXsPick(body, f, x); }
     else if (x.kind === 'tslots' || x.kind === 'oslots') { body.innerHTML = xsSlotsHtml(f, x); bindXsSlots(body, f, x); }
     else if (x.kind === 'copyExam') { body.innerHTML = xsCopyExamHtml(f, x); bindXsCopyExam(body, f, x); }
+    else if (x.kind === 'suggest') { body.innerHTML = xsSuggestHtml(f, x); bindXsSuggest(body, f, x); }
     if (sheet) sheet.scrollTop = top;
     if (keep) { const q = body.querySelector('[data-xs-q]'); if (q) { q.focus(); try { q.setSelectionRange(keep[0], keep[1]); } catch (e) { /* ignore */ } } }
   }
@@ -9491,7 +9598,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (isT) {
         const hits = slots.map((sl) => xwElsewhere(f, x.u, x.ri).filter((d) => xwClash(sl, d))).reduce((a, b) => a.concat(b), []);
         if (hits.length) { const ok = await showConfirm(`${planNameOf(x.u)} already has duty in ${hits.map(xwDutyTxt).join(', ')}${hits[0].other ? ` (${hits[0].other})` : ''} at the same time.\n\nSave this duty as well?`, 'Already on duty', 'Save'); if (!ok) return; }
-        xwSetTeacherSlots(r, x.u, srt);
+        xwSetTeacherSlots(r, x.u, srt); if (f._sug) f._sug.delete(x.ri + '|' + x.u);
       } else xwSetOtherSlots(r, x.oldName, name, srt);
       closeHvSheet(); renderExamPlanSection();
     });
