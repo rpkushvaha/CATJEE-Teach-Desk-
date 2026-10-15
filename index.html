@@ -517,9 +517,10 @@
   /* ---------- Add Class: faster logging, lighter look ---------- */
   #view-add { gap: 16px; }
   #view-add .form-title { font-size: 19px; font-weight: 600; }
-  #view-add .chip { font-weight: 600; }
+  #view-add .chip { font-weight: 500; }
+  #view-add .chip.active { font-weight: 600; }
   #classFields > .field:not(:last-child):not(.nested-box), #activityFields > .field:not(:last-child) { padding-bottom: 0; border-bottom: none; }
-  #view-add .field label { font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  #view-add .field label { font-size: 13px; font-weight: 500; color: var(--muted-2); }
   #recentChips .chip { padding: 9px 14px; }
   #view-add .batch-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   #view-add .batch-grid .chip { width: auto; padding: 9px 14px; white-space: nowrap; }
@@ -1096,6 +1097,12 @@
   .xs-addsl, .xs-link, .xs-bt button, .xs-badd { font-weight: 600; }
   .xw-discard { color: #C81E32 !important; }
   .xw-keep { color: var(--muted-2) !important; }
+  .xw-ib { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; padding: 0; }
+  #xwPreview.xw-ib .ic { color: var(--gold); }
+  .xw-trash.xw-ib { border-color: rgba(230,57,70,.4); color: #C81E32; }
+  .xw-head .hv-sheet-x { flex: none; }
+  .xw-t1 { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.2; }
+  .xw-t2[hidden] { display: none; }
   .xw-steps { display: flex; align-items: center; gap: 6px; }
   .xw-st { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-size: 12.5px; font-weight: 700; cursor: pointer; flex: none; transition: background .18s ease, border-color .18s ease, color .18s ease; }
   .xw-dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--neutral-soft); color: var(--muted-2); font-size: 12px; font-weight: 800; }
@@ -1854,6 +1861,17 @@
     padding: 10px 12px; font-size: 13px; font-weight: 600; text-align: center;
   }
   .auth-forgot { background: none; border: none; color: var(--muted-2); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px; }
+  /* ===== one type rule for the whole app: semi-bold (600) only for titles, names, numbers and main buttons ===== */
+  .chip { font-weight: 500; }
+  .chip.active { font-weight: 600; }
+  .field label, .micro-label, .sv-tlbl, .team-lbl, .xw-card .sv-tlbl { font-weight: 500; }
+  .btn-secondary { font-weight: 500; }
+  .hv-back { font-weight: 500; }
+  .ad-tab { font-weight: 500; }
+  .ad-tab.active { font-weight: 600; }
+  .hv-icon-lbl { font-weight: 500; }
+  .qa-s, .tsec-meta, .hv-d-wing, .xd-time, .xs-pn small, .xd-brk { font-weight: 400; }
+  .xw-tool, .xd-add button, .xs-link, .xs-addsl, .xs-badd, .xs-bt button, .xw-stat, .xd-meta, .xd-axis { font-weight: 500; }
 </style>
 </head>
 <body>
@@ -2481,17 +2499,15 @@
         <div class="tsec-head"><div class="tsec-title">Tests &amp; Exams</div><button type="button" class="hv-back" id="adminNewExamBtn" style="padding:0;">+ New Exam</button></div>
         <div class="panel xw" id="adminExamForm" hidden>
           <div class="xw-head">
-            <button type="button" class="back-btn xw-x" id="xwBack" aria-label="Close"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            <div class="xw-title"><div class="xw-t1" id="adminExamFormTitle">New Exam</div><div class="xw-t2" id="xwSub">Step 1 of 4 · Exam</div></div>
-            <button type="button" class="xw-prev" id="xwPreview" aria-label="Preview the duty sheet"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Preview</span></button>
-            <button type="button" class="xw-trash" id="xwTrash" aria-label="Discard or delete this exam"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            <div class="xw-title"><div class="xw-t1" id="adminExamFormTitle">New Exam</div><div class="xw-t2" id="xwSub"></div></div>
+            <button type="button" class="xw-ib" id="xwPreview" aria-label="Preview the duty sheet" title="Preview"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button type="button" class="xw-ib xw-trash" id="xwTrash" aria-label="Discard or delete this exam" title="Discard / Delete"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            <button type="button" class="hv-sheet-x" id="xwBack" aria-label="Close" title="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
           <div class="xw-steps" id="xwSteps"></div>
           <div class="xw-pane" data-xw="1">
             <div class="xw-card">
               <div class="xw-ch">The exam</div>
-              <div class="sv-tlbl">Date</div>
-              <button type="button" class="xw-date" id="xwDate"><span class="ico i-cal" aria-hidden="true"></span><span id="xwDateTxt"></span><span class="xd-chev">›</span></button>
               <div class="sv-tlbl">Test type</div>
               <div class="chips inv-scope" id="adminExamType"></div>
               <div class="sv-tlbl">Subject <span class="xt-note">optional</span></div>
@@ -2988,7 +3004,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 12.0 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 12.1 · updated 15 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5136,7 +5152,7 @@
         <div class="sid-actions"><button type="button" class="btn-secondary" id="sidCopy" style="border-color: var(--line);">Copy</button><button type="button" class="save-btn" id="sidShare" style="margin:0;">Share on WhatsApp</button></div>
         <button type="button" class="hv-back" id="sidDone" style="padding:0; align-self:center;">Done</button></div>`;
     } else if (f) {
-      html += `<div class="sid-form">
+      html += `<div class="sid-form"><div class="sv-form-head"><div class="panel-title" style="margin:0;">New Staff ID</div><button type="button" class="hv-sheet-x" id="sidX" aria-label="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
         <input class="text-input" id="sidNote" type="text" placeholder="For (optional), e.g. New Physics teacher" value="${escapeHtml(f.note || '')}">
         <div class="chips team-chips"><span class="team-lbl">Role</span>
           <button type="button" class="chip${f.role === 'teacher' ? ' active' : ''}" data-sid-role="teacher">Teacher</button>
@@ -5158,6 +5174,7 @@
     const on = (id, fn) => { const b = document.getElementById(id); if (b) b.addEventListener('click', fn); };
     on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1) }; renderStaffIdsBlock(); });
     on('sidCancel', () => { state.staffForm = null; renderStaffIdsBlock(); });
+    on('sidX', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidDone', () => { state.lastStaffCode = null; renderStaffIdsBlock(); });
     on('sidCopy', async () => { try { await navigator.clipboard.writeText(state.lastStaffCode); showToast('Staff ID copied'); } catch (e) { showToast(state.lastStaffCode); } });
     on('sidShare', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(state.lastStaffCode)), '_blank'));
@@ -5378,7 +5395,7 @@
     box._built = f.key;
     const ws = state.tt.weekStart;
     const days = datesBetween(ws, shiftDateStr(ws, 6));
-    box.innerHTML = `<div class="panel-title" style="margin:0;">${f.id ? 'Edit class' : 'Add class to timetable'}</div>
+    box.innerHTML = `<div class="sv-form-head"><div class="panel-title" style="margin:0;">${f.id ? 'Edit class' : 'Add class to timetable'}</div><button type="button" class="hv-sheet-x" id="ttX" aria-label="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
       <div class="field"><label>${f.id ? 'Day' : 'Day · tap one or more'}</label><div class="sv-days">${days.map((d) => {
         const dis = d < todayStr();
         return `<button type="button" class="chip sv-daychip" data-tt-day="${d}"${dis ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`;
@@ -5406,6 +5423,7 @@
     const en = document.getElementById('ttEnd');
     en.addEventListener('change', () => { const m = hhmmToMin(en.value) - hhmmToMin(f.start); if (f.start && m > 0) f.dur = m; syncTtForm(); });
     document.getElementById('ttRoom').addEventListener('input', (e) => { f.room = e.target.value; });
+    document.getElementById('ttX').addEventListener('click', () => document.getElementById('ttCancel').click());
     document.getElementById('ttCancel').addEventListener('click', () => { state.tt.form = null; renderTimetable(); });
     document.getElementById('ttSave').addEventListener('click', () => { f.start = st.value || f.start; saveTtForm(); });
     syncTtForm();
@@ -5958,10 +5976,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (box._cpKey === cp.src + '|' + cp.pick.join(',') && box.innerHTML) return;
     box._cpKey = cp.src + '|' + cp.pick.join(',');
     const days = tgDays().filter((d) => d !== cp.src);
-    box.innerHTML = `<div class="panel" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"><div class="team-lbl">Copy ${escapeHtml(dayHeading(cp.src))} to</div>
+    box.innerHTML = `<div class="panel" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"><div class="sv-form-head"><div class="panel-title" style="margin:0;">Copy ${escapeHtml(dayHeading(cp.src))} to</div><button type="button" class="hv-sheet-x" id="cpdX" aria-label="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
       <div class="chips">${days.map((d) => `<button type="button" class="chip${cp.pick.indexOf(d) !== -1 ? ' active' : ''}" data-cpd="${d}">${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}</button>`).join('')}</div>
       <div class="sv-form-btns"><button type="button" class="btn-secondary" id="cpdCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="cpdGo" style="margin:0;">Copy</button></div></div>`;
     box.querySelectorAll('[data-cpd]').forEach((b) => b.addEventListener('click', () => { const d = b.getAttribute('data-cpd'); const k = cp.pick.indexOf(d); if (k === -1) cp.pick.push(d); else cp.pick.splice(k, 1); renderTgCopyBox(); }));
+    document.getElementById('cpdX').addEventListener('click', () => document.getElementById('cpdCancel').click());
     document.getElementById('cpdCancel').addEventListener('click', () => { state.tg.copy = null; renderTgGrid(); });
     document.getElementById('cpdGo').addEventListener('click', async () => {
       const pick = cp.pick.slice();
@@ -9222,9 +9241,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     { const dd = dateObj(state.adminDate); const lbl = `${WD[dd.getDay()]}, ${dd.getDate()} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`;
       // the date is written once: in the Date box on step 1, and small under the title on the other steps
       // the step pills already say which step this is; under the title only the date, and only where the Date box is not shown
-      const sub = document.getElementById('xwSub'); sub.textContent = f.step === 1 ? '' : lbl; sub.hidden = f.step === 1;
+      const sub = document.getElementById('xwSub'); sub.textContent = lbl; sub.hidden = false;
       document.getElementById('adminExamFormTitle').textContent = f.id ? 'Edit Exam' : 'New Exam';
-      document.getElementById('xwDateTxt').textContent = dayHeading(state.adminDate) + ' ' + dd.getFullYear();
       document.getElementById('xwTrash').setAttribute('aria-label', f.id ? 'Delete this exam' : 'Discard this new exam'); }
     const st = document.getElementById('xwSteps');
     st.innerHTML = XW_LABELS.map((l, i) => `<button type="button" class="xw-st${f.step === i + 1 ? ' on' : ''}${f.step > i + 1 ? ' done' : ''}" data-xw-go="${i + 1}"><span class="xw-dot">${f.step > i + 1 ? '✓' : i + 1}</span><span class="xw-sl">${l}</span></button>`).join('<span class="xw-line"></span>');
@@ -9246,7 +9264,6 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(d);
     subscribeAdminDate(d); renderAdmin();
   }
-  document.getElementById('xwDate').addEventListener('click', () => openCalendar(state.adminDate, (d) => { xwSetDate(d); renderExamPlanSection(); }));
   document.getElementById('xwTrash').addEventListener('click', async () => {
     const f = state.adminExamForm; if (!f) return;
     if (f.id) {
@@ -10700,6 +10717,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (state.tab !== 'today') { state.navStack = []; state.navDepth = 0; navGo({ tab: 'today' }); }
   }
   function anyOverlayOpen() {
+    const cm = document.getElementById('confirmModal');
+    if (cm && cm.classList.contains('active')) return () => { const c = document.getElementById('confirmCancelBtn'); if (c) c.click(); };
+    const zv = document.getElementById('zoomViewer');
+    if (zv && zv.classList.contains('open')) return () => { const c = document.getElementById('zvX'); if (c) c.click(); else zv.classList.remove('open'); };
     const sheet = document.getElementById('hvSheet');
     if (sheet && sheet.classList.contains('open')) return () => closeHvSheet();
     const lb = document.getElementById('photoLightboxModal');
@@ -10707,6 +10728,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const cal = document.getElementById('calendarModal');
     if (cal && cal.classList.contains('active')) return () => cal.classList.remove('active');
     if (state.adminExamForm && state.tab === 'admin') return () => { xwClose(); };
+    const panelX = ['absClose', 'ttCancel', 'cpdCancel', 'sidCancel'].map((id) => document.getElementById(id)).find((b) => b && b.offsetParent);
+    if (panelX) return () => panelX.click();
     return null;
   }
   window.addEventListener('popstate', () => {
