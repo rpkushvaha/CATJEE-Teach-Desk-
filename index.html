@@ -1043,6 +1043,16 @@
   .sum-tile:has(#adNotIn)::before { content: ""; display: block; width: 15px; height: 15px; margin: 0 auto 3px; background: #E63946; -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22/%3E%3Cline%20x1%3D%229%22%20y1%3D%229%22%20x2%3D%2215%22%20y2%3D%2215%22/%3E%3Cline%20x1%3D%2215%22%20y1%3D%229%22%20x2%3D%229%22%20y2%3D%2215%22/%3E%3C/svg%3E") center / contain no-repeat; opacity: .85; }
   .rt-tile { position: relative; }
   #adminAiPanel[hidden] { display: none !important; }
+  .qa-ai .ic { color: var(--gold); }
+  .qa-ai[hidden] { display: none !important; }
+  .sm-lang { margin: 12px 0 10px; }
+  .sm-nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .sm-tile { background: var(--neutral-soft); border-radius: 14px; padding: 10px 6px; text-align: center; display: flex; flex-direction: column; gap: 2px; }
+  .sm-tile b { font-size: 17px; font-weight: 600; color: var(--ink); }
+  .sm-tile span { font-size: 11.5px; color: var(--muted-2); }
+  .sm-text { width: 100%; min-height: 200px; line-height: 1.55; font-size: 15px; resize: none; border-radius: 14px; padding: 12px 14px; font-family: inherit; }
+  .sm-note { font-size: 12.5px; color: var(--muted-2); margin: 8px 2px 0; line-height: 1.45; min-height: 18px; }
+  .sm-note.ok { color: #15803D; } .sm-note.bad { color: #B45309; } .sm-note.wait { color: var(--muted); }
   .ai-stat { font-size: 13px; color: var(--muted-2); min-height: 18px; }
   .ai-stat.ok { color: #15803D; font-weight: 600; }
   .ai-stat.bad { color: #C81E32; font-weight: 600; }
@@ -2587,6 +2597,7 @@
             <button type="button" class="qa-btn qa-wa" id="repAttShare" hidden><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
             <button type="button" class="qa-btn" id="downloadAdminPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/></svg><span class="qa-l">PDF</span><span class="qa-s">Download</span></button>
             <button type="button" class="qa-btn qa-xl" id="downloadAdminCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button>
+            <button type="button" class="qa-btn qa-ai" id="repSumBtn" hidden style="grid-column: 1 / -1;"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span class="qa-l">Summary</span><span class="qa-s">A short message for Director sir · AI</span></button>
           </div>
         </div>
         <div id="repCount" hidden>
@@ -3038,7 +3049,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 12.8 · updated 15 Oct 2026</div>
+          <div class="dnote">Version 12.9 · updated 16 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7949,6 +7960,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const pnl = document.getElementById('adminAiPanel'); if (!pnl) return;
     pnl.hidden = !state.canAdmin;
     const inp = document.getElementById('aiUrlInput'); if (inp && document.activeElement !== inp) inp.value = aiUrl();
+    const tile = document.getElementById('repSumBtn'); if (tile) tile.hidden = !(state.canAdmin && aiUrl());
   }
   (function bindAiPanel() {
     const inp = document.getElementById('aiUrlInput'), st = document.getElementById('aiStatus');
@@ -7958,16 +7970,135 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const v = clean();
       if (v && !/^https:\/\/[^\s/]+\.[^\s]+$/i.test(v)) { say('The address should start with https://', 'bad'); return; }
       try { if (v) localStorage.setItem(AI_URL_KEY, v); else localStorage.removeItem(AI_URL_KEY); } catch (e) { /* ignore */ }
+      renderAiPanel();
       say(v ? 'Saved · tap Test to check it' : 'Removed', '');
     });
     document.getElementById('aiTestBtn').addEventListener('click', async () => {
       const v = clean(); if (!v) { say('Paste the address first', 'bad'); return; }
       try { localStorage.setItem(AI_URL_KEY, v); } catch (e) { /* ignore */ }
+      renderAiPanel();
       say('Checking…', '');
       try { const d = await aiCall({ task: 'ping' }, 20000); say(`✓ Connected · ${d.model || 'Gemini'}`, 'ok'); }
       catch (e) { say('✕ ' + e.message, 'bad'); }
     });
   })();
+  // ===== AI: a short summary for the Director (Admin only) =====
+  // The numbers are counted by the app (same counting as the institute report). The AI only writes the words;
+  // every number in its text is checked against the app's numbers, and if anything does not match, the plain summary is shown instead.
+  const SM_LANG_KEY = 'ctd_ai_sum_lang';
+  const smLang = () => { try { return localStorage.getItem(SM_LANG_KEY) === 'en' ? 'en' : 'hi'; } catch (e) { return 'hi'; } };
+  const smNum = (n) => String(Math.round(n * 10) / 10);
+  const smHm = (mins, hi) => { const h = Math.floor(mins / 60), m = Math.round(mins % 60); return hi ? `${h} घंटे${m ? ' ' + m + ' मिनट' : ''}` : `${h} h${m ? ' ' + m + ' min' : ''}`; };
+  async function smCollect() {
+    const { dates, label } = adminReportRangeDates(); const range = state.adminReportRange || 'day';
+    const results = await Promise.all(dates.map((dt) => fetchAdminDayData(dt)));
+    const tidSet = {};
+    results.forEach(({ classes, campus }) => { filterByAdminWing(classes).forEach((c) => { if (c.teacherId) tidSet[c.teacherId] = 1; }); Object.keys(campus || {}).forEach((tid) => { tidSet[tid] = 1; }); });
+    const allF = reportFilter(false); const per = {};
+    Object.keys(tidSet).forEach((tid) => {
+      const pr = results.map(({ classes, campus }) => ({ classes: filterByAdminWing(classes).filter((c) => c.teacherId === tid), campus: (campus || {})[tid] || null }));
+      const t = reportTotals(dates, pr, allF); if (t.classes || t.campusSec > 0 || t.other || t.leave || t.invig) per[tid] = t;
+    });
+    const ids = Object.keys(per); if (!ids.length) return null;
+    try { await resolveAdminNames(ids); } catch (e) { /* best effort */ }
+    const nm = (tid) => (state.adminNames[tid] && state.adminNames[tid].name) || 'Teacher';
+    let classes = 0, mins = 0, tests = 0, invig = 0, other = 0, leaveN = 0, campusSec = 0, checked = 0; const batches = {}; const onLeave = [];
+    ids.forEach((tid) => { const t = per[tid]; classes += t.classes; mins += t.mins; tests += t.tests; invig += t.invig; other += t.other; leaveN += t.leave; campusSec += t.campusSec; if (t.campusSec > 0) checked++;
+      Object.keys(t.batches).forEach((b) => { batches[b] = (batches[b] || 0) + t.batches[b].n; }); if (t.leave) onLeave.push({ name: nm(tid), leave_days: t.leave }); });
+    const top = Object.keys(batches).sort((a, b) => batches[b] - batches[a]).slice(0, 6).map((b) => ({ batch: b, classes: Number(fmtUnits(batches[b])) }));
+    return { period: label, period_type: range, wing: state.adminReportWing === 'all' ? 'All wings' : state.adminReportWing, days_in_period: dates.length,
+      teachers_with_activity: ids.length, teachers_who_checked_in: checked, classes_taken: Number(fmtUnits(classes)), teaching_time: smHm(mins, false), teaching_hours: Math.round(mins / 6) / 10,
+      tests_conducted: tests, invigilation_duties: invig, other_work_entries: other, leave_entries: leaveN, top_batches: top, teachers_on_leave: onLeave, _mins: mins };
+  }
+  function smPlain(f, lang) {
+    const hi = lang === 'hi';
+    const kind = { day: hi ? 'दैनिक' : 'Daily', week: hi ? 'साप्ताहिक' : 'Weekly', month: hi ? 'मासिक' : 'Monthly' }[f.period_type] || '';
+    const wing = f.wing === 'All wings' ? (hi ? 'सभी wings' : 'All wings') : f.wing;
+    const L = [`*CATJEE Teach Desk · ${kind} ${hi ? 'सार' : 'summary'}*`, `${f.period} · ${wing}`, ''];
+    L.push(hi ? `• कक्षाएँ: ${smNum(f.classes_taken)} (${smHm(f._mins, true)})` : `• Classes taken: ${smNum(f.classes_taken)} (${smHm(f._mins, false)})`);
+    if (f.tests_conducted) L.push(hi ? `• टेस्ट: ${f.tests_conducted}` : `• Tests: ${f.tests_conducted}`);
+    if (f.invigilation_duties) L.push(hi ? `• Invigilation duty: ${f.invigilation_duties}` : `• Invigilation duties: ${f.invigilation_duties}`);
+    if (f.other_work_entries) L.push(hi ? `• अन्य काम की प्रविष्टियाँ: ${f.other_work_entries}` : `• Other work entries: ${f.other_work_entries}`);
+    L.push(hi ? `• Teachers जिन्होंने काम दर्ज किया: ${f.teachers_with_activity}` : `• Teachers with activity: ${f.teachers_with_activity}`);
+    if (f.leave_entries) L.push((hi ? `• छुट्टी: ${f.leave_entries} दिन — ` : `• Leave: ${f.leave_entries} day${f.leave_entries === 1 ? '' : 's'} — `) + f.teachers_on_leave.map((x) => `${x.name} (${x.leave_days})`).join(', '));
+    if (f.top_batches.length) L.push('', (hi ? '*Batch-wise कक्षाएँ*' : '*Classes by batch*'), ...f.top_batches.map((b) => `• ${b.batch}: ${smNum(b.classes)}`));
+    return L.join('\n');
+  }
+  function smPrompt(f, lang) {
+    const lg = lang === 'hi' ? 'Hindi in Devanagari script, simple everyday words (keep English for words like Class, Test, Invigilation duty, batch names and people\'s names exactly as given)' : 'simple, polite English';
+    const system = `You write a short WhatsApp message for the Director of a coaching institute (CATJEE), summarising what the teachers did in a period.
+Rules:
+- Use ONLY the facts in the JSON. Never invent, estimate, add up or change a number. Write numbers with the digits 0-9 only. Never write percentages.
+- Say nothing that is not in the data: no students, no marks, no reasons, no advice, no praise or blame of any person, no rankings.
+- First line: a short bold title using *asterisks*, with the period. Then 4 to 7 short lines, each starting with "• ". Name the teachers on leave only if the data lists them. End with one short neutral closing line.
+- Under 150 words. Write in ${lg}. Output only the message text.`;
+    const facts = Object.assign({}, f); delete facts._mins;
+    return { system, prompt: JSON.stringify(facts) };
+  }
+  // every number in the AI's text must be one the app gave it
+  function smCheck(text, f) {
+    const asc = text.replace(/[०-९]/g, (d) => String('०१२३४५६७८९'.indexOf(d)));
+    const ok = new Set();
+    const addN = (v) => { if (typeof v === 'number' && isFinite(v)) { [String(v), String(Math.round(v)), String(Math.round(v * 10) / 10), v.toFixed(1)].forEach((x) => ok.add(x)); } };
+    const addS = (v) => { (String(v).match(/\d+/g) || []).forEach((x) => { ok.add(x); ok.add(String(Number(x))); }); };
+    const walk = (o, key) => { if (o && typeof o === 'object') Object.keys(o).forEach((k) => walk(o[k], k)); else if (typeof o === 'number') addN(o); else if (typeof o === 'string') addS(o); };
+    walk(Object.assign({}, f, { _mins: undefined }));
+    const found = (asc.match(/\d+(?:[.,]\d+)?/g) || []).map((x) => x.replace(',', '.'));
+    const bad = found.filter((x) => !ok.has(x) && !ok.has(String(Number(x))));
+    return { ok: bad.length === 0, bad: bad };
+  }
+  function smFit(t) { if (!t) return; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, Math.round(window.innerHeight * 0.45)) + 'px'; }
+  function smBody() { return document.getElementById('hvSheetBody'); }
+  async function openSummary() {
+    if (!state.canAdmin || !aiUrl()) return;
+    const sm = state.sm = { id: (state.sm ? state.sm.id : 0) + 1, lang: smLang(), facts: null, edited: false, busy: false };
+    const body = smBody(); state.xs = null;
+    body.innerHTML = `<div class="hv-d-title">Summary</div><div class="hv-d-wing">Collecting the numbers…</div><div class="skel short" style="margin-top:14px;"></div><div class="skel" style="margin-top:10px; height:120px;"></div>`;
+    const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+    let f; try { f = await smCollect(); } catch (e) { if (state.sm === sm) body.innerHTML = `<div class="hv-d-title">Summary</div><div class="xw-empty" style="margin-top:14px;">Could not collect the numbers. Check the internet and try again.</div>`; return; }
+    if (state.sm !== sm) return;
+    if (!f) { body.innerHTML = `<div class="hv-d-title">Summary</div><div class="hv-d-wing">${escapeHtml(adminReportRangeDates().label)}</div><div class="xw-empty" style="margin-top:14px;">No activity in this period yet.</div>`; return; }
+    sm.facts = f; smRender(); smWrite();
+  }
+  function smRender() {
+    const sm = state.sm; if (!sm || !sm.facts) return; const f = sm.facts; const body = smBody();
+    const tile = (n, l) => `<div class="sm-tile"><b>${escapeHtml(String(n))}</b><span>${escapeHtml(l)}</span></div>`;
+    body.innerHTML = `<div class="hv-d-title">Summary</div><div class="hv-d-wing">${escapeHtml(f.period)} · ${escapeHtml(f.wing)}</div>
+      <div class="chips sm-lang"><button type="button" class="chip${sm.lang === 'hi' ? ' active' : ''}" data-sm-lang="hi">हिंदी</button><button type="button" class="chip${sm.lang === 'en' ? ' active' : ''}" data-sm-lang="en">English</button></div>
+      <div class="sm-nums">${tile(smNum(f.classes_taken), 'Classes')}${tile(f.teaching_hours + ' h', 'Teaching')}${tile(f.tests_conducted, 'Tests')}${tile(f.invigilation_duties, 'Duties')}</div>
+      <textarea class="text-input sm-text" id="smText" rows="8" spellcheck="false"></textarea>
+      <div class="sm-note" id="smNote"></div>
+      <div class="xs-foot"><button type="button" class="xw-b main" id="smWa">Send on WhatsApp</button>
+        <div class="xs-exb" style="margin-top:0;"><button type="button" class="xw-b ghost" id="smCopy">Copy</button><button type="button" class="xw-b ghost" id="smAgain">Write again</button></div></div>`;
+    const ta = body.querySelector('#smText'); ta.value = sm.text || smPlain(f, sm.lang); smFit(ta);
+    ta.addEventListener('input', () => { sm.edited = true; smFit(ta); });
+    body.querySelectorAll('[data-sm-lang]').forEach((b) => b.addEventListener('click', () => { sm.lang = b.getAttribute('data-sm-lang'); try { localStorage.setItem(SM_LANG_KEY, sm.lang); } catch (e) { /* ignore */ } sm.text = null; sm.edited = false; smRender(); smWrite(); }));
+    body.querySelector('#smWa').addEventListener('click', () => { window.open('https://wa.me/?text=' + encodeURIComponent(ta.value), '_blank'); });
+    body.querySelector('#smCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); showToast('Copied'); } catch (e) { ta.select(); try { document.execCommand('copy'); showToast('Copied'); } catch (e2) { showToast('Could not copy', 'error'); } } });
+    body.querySelector('#smAgain').addEventListener('click', () => { sm.edited = false; smWrite(); });
+    smNote(sm.note || '');
+  }
+  function smNote(txt, kind) { const n = document.getElementById('smNote'); if (n) { n.textContent = txt; n.className = 'sm-note' + (kind ? ' ' + kind : ''); } if (state.sm) state.sm.note = txt; }
+  async function smWrite() {
+    const sm = state.sm; if (!sm || !sm.facts || sm.busy) return; const my = sm.id; sm.busy = true;
+    const ta = () => document.getElementById('smText'); const again = document.getElementById('smAgain'); if (again) again.disabled = true;
+    const plain = smPlain(sm.facts, sm.lang);
+    if (ta() && !sm.edited) { ta().value = plain; smFit(ta()); }
+    smNote('Plain summary ready · AI is writing a smoother one…', 'wait');
+    try {
+      const q = smPrompt(sm.facts, sm.lang);
+      const d = await aiCall({ system: q.system, prompt: q.prompt }, 45000);
+      if (state.sm !== sm || sm.id !== my) return;
+      const text = String(d.text || '').trim().replace(/^```[a-z]*\n?|```$/g, '').trim(); const chk = smCheck(text, sm.facts);
+      if (!text) throw new Error('The AI gave no answer');
+      if (!chk.ok) { smNote(`The AI wrote a number that is not in the app's data (${chk.bad.slice(0, 3).join(', ')}), so the plain summary is shown. Tap “Write again” to try once more.`, 'bad'); }
+      else if (sm.edited) { smNote('The AI text is ready, but you have edited this one. Tap “Write again” to replace it.', ''); }
+      else { sm.text = text; if (ta()) { ta().value = text; smFit(ta()); } smNote('✨ Written by AI · numbers checked against the app · read it once before sending', 'ok'); }
+    } catch (e) {
+      if (state.sm === sm && sm.id === my) smNote(`${e.message || 'The AI is not available'} · the plain summary is shown. Tap “Write again” to retry.`, 'bad');
+    } finally { sm.busy = false; const a2 = document.getElementById('smAgain'); if (a2) a2.disabled = false; }
+  }
+  document.getElementById('repSumBtn').addEventListener('click', openSummary);
   function renderAdmin() {
     renderAiPanel();
     applyRoleUI();
