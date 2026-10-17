@@ -2010,6 +2010,10 @@
   .tt-row .sv-time { width: 82px; }
   /* the wing is already in the menu: no second red tag */
   #adminReportWingTag { display: none !important; }
+  /* All classes list: the menu, the count bar and the buttons no longer touch each other */
+  #ttTeachers { margin: 10px 0 8px; }
+  #ttSummary { margin: 0 0 8px; }
+  #ttActions { margin: 0 0 12px; }
 </style>
 </head>
 <body>
@@ -3152,7 +3156,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.4 · updated 17 Oct 2026</div>
+          <div class="dnote">Version 13.5 · updated 17 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5475,9 +5479,9 @@
     document.getElementById('ttSummary').hidden = true;
     document.getElementById('ttCopyBtn').hidden = !ttCopyList().length;
     // teacher filter
-    document.getElementById('ttTeachers').innerHTML = '<select class="text-input tt-tsel" id="ttTSel" aria-label="Show timetable of">' + [['all', 'All teachers']].concat(ids.map((u) => [u, ttName(u)]))
+    { const tBox = document.getElementById('ttTeachers'); const tHtml = '<select class="text-input tt-tsel" id="ttTSel" aria-label="Show timetable of">' + [['all', 'All teachers']].concat(ids.map((u) => [u, ttName(u)]))
       .map(([v, l]) => `<option value="${escapeHtml(v)}"${tt.teacher === v ? ' selected' : ''}>${escapeHtml(l)}</option>`).join('') + '</select>';
-    document.getElementById('ttTSel').addEventListener('change', (e) => { tt.teacher = e.target.value; renderTimetable(); });
+      if (tBox._h !== tHtml) { tBox._h = tHtml; tBox.innerHTML = tHtml; document.getElementById('ttTSel').addEventListener('change', (e) => { tt.teacher = e.target.value; renderTimetable(); }); } }
     renderTtForm();
     const all = ttAll(ws, we);
     const clash = ttClashes(all);
@@ -5745,6 +5749,7 @@
       // never let an older copy from the server replace newer local changes
       if (snap.exists && state.tg.doc && (snap.data().updatedAt || 0) < (state.tg.doc.updatedAt || 0)) return;
       state.tg.doc = snap.exists ? Object.assign({ cells: [] }, snap.data()) : { group: g.key, wing: g.wing, session: g.session, weekStart: ws, sunday: false, cells: [], status: 'draft', published: [] };
+      { const wE = shiftDateStr(ws, 6); const keep = (state.tg.doc.cells || []).filter((c) => !c.d || (c.d >= ws && c.d <= wE)); if (keep.length !== (state.tg.doc.cells || []).length) { state.tg.doc.cells = keep; state.tg.dirty = true; try { tgSave(); } catch (e) { /* ignore */ } } }
       if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid();
     }, () => {});
     // other timetables of the same week (other wings / sessions) for teacher clash checks
@@ -8195,15 +8200,17 @@ Rules:
     tp.data.days.forEach((d) => d.rows.forEach((r) => { if (tp.rows.indexOf(r.class) === -1) tp.rows.push(r.class); r.cells.forEach((c) => { const v = String(c == null ? '' : c).trim(); if (v && tp.raws.indexOf(v) === -1) tp.raws.push(v); }); }));
     tp.map = {}; tp.rows.forEach((l) => { tp.map[l] = tpBatchGuess(l, tp.data.classes.find((c) => c.label === l), g ? g.batches : []); });
     tp.sub = {}; tp.exact = {}; tp.raws.forEach((v) => { const r = tpGuessSubject(v, subjects); tp.sub[v] = r.s; tp.exact[v] = r.exact; });
-    tp.day = tp.data.days[0].date; tp.policy = 'empty';
+    tp.day = tp.data.days[0].date; tp.policy = 'empty'; tp.shift = mondayOf(tp.data.days[0].date) !== state.tt.weekStart;
   }
   // what would be put in the grid with the current choices
+  // The picture is often last week's. Its Monday..Saturday are put on this page's Monday..Saturday, unless the person chooses the picture's own week.
+  function tpDate(tp, date) { if (!tp.shift) return date; const wd = (dateObj(date).getDay() + 6) % 7; return shiftDateStr(state.tt.weekStart, wd); }
   function tpBuild(tp) {
     const g = tgGroup(); const per = g ? periodsFor(g.key) : []; const cells = []; let unmatched = 0, badRows = 0, read = 0;
     tp.data.days.forEach((d) => d.rows.forEach((r) => {
       if (r.cells.length !== tp.data.periods.length) badRows++;
       const b = tp.map[r.class]; if (!b) return;
-      r.cells.forEach((raw, i) => { const v = String(raw == null ? '' : raw).trim(); if (!v || i >= per.length) return; read++; const sj = tp.sub[v]; if (!sj) { unmatched++; return; } cells.push({ d: d.date, p: i, b, s: sj, t: defaultTeacher(b, sj) }); });
+      r.cells.forEach((raw, i) => { const v = String(raw == null ? '' : raw).trim(); if (!v || i >= per.length) return; read++; const sj = tp.sub[v]; if (!sj) { unmatched++; return; } cells.push({ d: tpDate(tp, d.date), p: i, b, s: sj, t: defaultTeacher(b, sj) }); });
     }));
     return { cells, unmatched, badRows, read };
   }
@@ -8212,6 +8219,7 @@ Rules:
     if (!tp || !g || !doc) { showToast('The timetable page is not ready · try again', 'error'); return; }
     if (!tgEditable()) { showToast('Tap Edit first, then fill from the photo', 'error'); return; }
     const B = tpBuild(tp); if (!B.cells.length) { showToast('Nothing to put in yet', 'error'); return; }
+    const wkS = state.tt.weekStart, wkE = shiftDateStr(wkS, 6); if (B.cells.some((c) => c.d < wkS || c.d > wkE)) { showToast('These days are not in this week · choose the week first', 'error'); return; }
     const days = new Set(B.cells.map((c) => c.d)), bats = new Set(B.cells.map((c) => c.b));
     tgRemember();
     let keep = (doc.cells || []).slice();
@@ -8262,7 +8270,7 @@ Rules:
     const D = tp.data; const per = g ? periodsFor(g.key) : []; const dates = D.days.map((d) => d.date); const mon = mondayOf(dates[0]);
     const B = tpBuild(tp); const warns = [];
     const titleL = String(D.title || '').toLowerCase();
-    if (mon !== wk && !tp.wk) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>The picture is for the week of ${escapeHtml(weekLabel(mon))}, but this page is on ${escapeHtml(weekLabel(wk))}.<br><button type="button" class="hv-back" id="tpWeek" style="padding:6px 0 0;">Fill ${escapeHtml(weekLabel(mon))} instead</button></span></div>`);
+    if (mon !== wk) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>The picture is for ${escapeHtml(weekLabel(mon))}, but this page is on ${escapeHtml(weekLabel(wk))}. Where should it go?<span class="chips" style="margin-top:8px;"><button type="button" class="chip${tp.shift ? ' active' : ''}" id="tpShiftOn">Into ${escapeHtml(weekLabel(wk))} (this page)</button><button type="button" class="chip${tp.shift ? '' : ' active'}" id="tpShiftOff">Into ${escapeHtml(weekLabel(mon))}</button></span></span></div>`);
     const wingHit = leadWings().filter((w) => titleL.indexOf(String(w).toLowerCase()) !== -1).sort((a, b) => b.length - a.length)[0];
     const sesHit = ['morning', 'evening', 'special'].find((x) => titleL.indexOf(x) !== -1);
     if (g && ((wingHit && wingHit !== g.wing) || (sesHit && sesHit !== g.session))) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>The picture says “${escapeHtml(D.title)}”, but this page is ${escapeHtml(g.label)}. If that is not the same group, close this and choose the right group first.</span></div>`);
@@ -8270,7 +8278,7 @@ Rules:
     if (perBad) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>The picture has ${D.periods.length} periods but this group has ${per.length}. Set the periods in Settings → Periods &amp; Timings first.</span></div>`);
     else if (per.some((p, i) => D.periods[i].start && String(D.periods[i].start).slice(0, 5) !== String(p.start).slice(0, 5))) warns.push(`<div class="xw-ck in"><span>ⓘ</span><span>The period times in the picture are different from this group's Periods &amp; Timings. The app's times are kept.</span></div>`);
     if (B.badRows) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>${B.badRows} row${B.badRows === 1 ? '' : 's'} had a different number of boxes than periods. Check those days.</span></div>`);
-    const skipped = []; D.days.forEach((d) => d.specials.forEach((sp) => skipped.push(`${WD[dateObj(d.date).getDay()]} ${dateObj(d.date).getDate()} · ${(sp.classes || []).join(', ')} · ${sp.text || ''}`)));
+    const skipped = []; D.days.forEach((d) => d.specials.forEach((sp) => skipped.push(`${WD[dateObj(tpDate(tp, d.date)).getDay()]} ${dateObj(tpDate(tp, d.date)).getDate()} · ${(sp.classes || []).join(', ')} · ${sp.text || ''}`)));
     if (skipped.length) warns.push(`<div class="xw-ck in"><span>ⓘ</span><span>Left empty (add them in Exams, they fill the grid by themselves):<br>${skipped.map((x) => escapeHtml(x)).join('<br>')}</span></div>`);
     const used = Object.values(tp.map).filter(Boolean); const dup = used.some((b, i) => used.indexOf(b) !== i);
     if (dup) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>Two rows of the picture point to the same batch. Change one of them.</span></div>`);
@@ -8281,10 +8289,10 @@ Rules:
     const selS = (v) => `<select class="text-input tp-sel" data-tp-sub="${escapeHtml(v)}"><option value="">Leave empty</option>${subs.map((x) => `<option value="${escapeHtml(x)}"${tp.sub[v] === x ? ' selected' : ''}>${escapeHtml(x)}</option>`).join('')}</select>`;
     const subRows = askSubs.length ? askSubs.map((v) => `<div class="tp-map"><div class="tp-l"><b>${escapeHtml(v)}</b><small>${tp.sub[v] ? 'I guessed this one' : 'Not found in your subjects'}</small></div>${selS(v)}</div>`).join('') : `<div class="xw-ck ok"><span>✓</span><span>All ${tp.raws.length} subjects match your Subjects list.</span></div>`;
     const day = D.days.find((d) => d.date === tp.day) || D.days[0];
-    const dayChips = D.days.map((d) => `<button type="button" class="chip${d.date === day.date ? ' active' : ''}" data-tp-day="${d.date}">${WD[dateObj(d.date).getDay()]} ${dateObj(d.date).getDate()}</button>`).join('');
+    const dayChips = D.days.map((d) => { const t = tpDate(tp, d.date); return `<button type="button" class="chip${d.date === day.date ? ' active' : ''}" data-tp-day="${d.date}">${WD[dateObj(t).getDay()]} ${dateObj(t).getDate()}</button>`; }).join('');
     const th = D.periods.map((q, i) => `<th>${i + 1}<small>${escapeHtml(q.start ? formatTimeStr(String(q.start).slice(0, 5)).replace(/\s?[AP]M$/i, '') : '')}</small></th>`).join('');
     const body = tp.rows.map((l) => { const r = day.rows.find((x) => x.class === l); const sp = day.specials.find((x) => (x.classes || []).indexOf(l) !== -1); const b = tp.map[l];
-      let tds; if (r) tds = D.periods.map((q, i) => { const v = String(r.cells[i] == null ? '' : r.cells[i]).trim(); if (!v) return '<td class="nl">–</td>'; return tp.sub[v] ? `<td>${escapeHtml(tp.sub[v])}</td>` : `<td class="warn">${escapeHtml(v)}</td>`; }).join('');
+      let tds; if (r) tds = D.periods.map((q, i) => { const v = String(r.cells[i] == null ? '' : r.cells[i]).trim(); if (!v) return '<td class="nl">–</td>'; return tp.sub[v] ? `<td>${escapeHtml(shortSubj(tp.sub[v]))}</td>` : `<td class="warn">${escapeHtml(shortSubj(v))}</td>`; }).join('');
       else if (sp) tds = `<td class="sp" colspan="${D.periods.length}">${escapeHtml(sp.text || 'Special')}</td>`; else tds = `<td class="nl" colspan="${D.periods.length}">–</td>`;
       return `<tr><th>${escapeHtml(l)}<small>${b ? escapeHtml(gridBatchLabel(b)) : 'not filled'}</small></th>${tds}</tr>`; }).join('');
     const existing = (state.tg.doc && state.tg.doc.cells || []).some((c) => !c.ex);
@@ -8313,7 +8321,8 @@ Rules:
     body.querySelectorAll('[data-tp-sub]').forEach((el) => el.addEventListener('change', () => { tp.sub[el.getAttribute('data-tp-sub')] = el.value; tpRender(); }));
     body.querySelectorAll('[data-tp-day]').forEach((el) => el.addEventListener('click', () => { tp.day = el.getAttribute('data-tp-day'); tpRender(); }));
     body.querySelectorAll('[data-tp-pol]').forEach((el) => el.addEventListener('click', () => { tp.policy = el.getAttribute('data-tp-pol'); tpRender(); }));
-    const wk = body.querySelector('#tpWeek'); if (wk) wk.addEventListener('click', async () => { await tpGoWeek(mondayOf(tp.data.days[0].date)); tp.wk = true; tpRender(); });
+    const so = body.querySelector('#tpShiftOn'); if (so) so.addEventListener('click', () => { tp.shift = true; tpRender(); });
+    const sf = body.querySelector('#tpShiftOff'); if (sf) sf.addEventListener('click', async () => { await tpGoWeek(mondayOf(tp.data.days[0].date)); tp.shift = false; tpRender(); });
     const go = body.querySelector('#tpGo'); if (go) go.addEventListener('click', tpApply);
   }
   function renderAdmin() {
