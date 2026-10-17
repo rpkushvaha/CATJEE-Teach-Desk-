@@ -1978,6 +1978,38 @@
   /* the smallest phones: the narrow summary tiles keep the smaller caption */
   .sum-grid.stack .sum-lbl { flex: 0 0 auto; overflow: visible; }
   @media (max-width: 340px) { .sum-lbl, .sum-grid.stack .sum-lbl, .qa-btn .qa-s { font-size: 11px; } .sum-grid.stack .sum-tile { gap: 5px; padding-left: 8px; padding-right: 8px; } .sum-grid.stack .sum-num { font-size: 15px; } }
+  /* ===== fixes after the real-phone check (13.4) ===== */
+  /* date row: the date shrinks before it can run under the wing menu */
+  .ad-bar { gap: 8px; }
+  .ad-bar #adminDateNav { flex: 1 1 auto; min-width: 0; gap: 4px; }
+  .ad-bar #adminDateNav .hv-label { flex: 0 1 auto; min-width: 0; }
+  .ad-bar #adminDateNav .date-pill { min-width: 0; max-width: 100%; padding: 0 10px; gap: 6px; }
+  .ad-bar #adminDateLabelText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ad-bar .hv-arrow { width: 32px; height: 32px; flex: none; }
+  .ad-bar .date-pill .ic { display: none; }
+  .ad-wingsel { flex: 0 1 auto; min-width: 0; }
+  .ad-wingsel select { max-width: 148px; width: 100%; font-size: 14px !important; text-overflow: ellipsis; }
+  @media (max-width: 380px) { .ad-bar #adminDateNav .date-pill { font-size: 13px; padding: 0 8px; } .ad-wingsel select { max-width: 112px; font-size: 13px !important; padding-right: 26px; } .ad-bar .hv-arrow { width: 30px; height: 30px; } }
+  /* class names break at the dash, never before a lone number */
+  .tl-batch, .sv-batch { text-wrap: balance; }
+  /* timetable grid: subject names stay whole */
+  .tg-c b, .tg-c small, .tg-c i, .tg-c em { font-size: 11px; }
+  .tg-sub2.one { grid-template-columns: 1fr; }
+  /* the photo check table is dense: smaller text so subject names stay whole */
+  .tp-t td { font-size: 10.5px; }
+  .tp-t th { font-size: 11px; }
+  .tp-t th small { font-size: 10px; }
+  /* no single word left alone on the last line, where the phone supports it */
+  body { text-wrap: pretty; }
+  .tg-b { font-size: 13px; }
+  th.tg-b { overflow-wrap: normal; word-break: normal; }
+  @media (max-width: 380px) { .tg-c b, .tg-c small, .tg-c i, .tg-c em { font-size: 10px; } .tp-t td { font-size: 10px; } }
+  /* All classes list: one teacher menu, and a time block wide enough for "10:30 AM" */
+  #ttTeachers { display: block; }
+  .tt-tsel { width: 100%; }
+  .tt-row .sv-time { width: 82px; }
+  /* the wing is already in the menu: no second red tag */
+  #adminReportWingTag { display: none !important; }
 </style>
 </head>
 <body>
@@ -3120,7 +3152,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.3 · updated 17 Oct 2026</div>
+          <div class="dnote">Version 13.4 · updated 17 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3281,13 +3313,14 @@
     return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
   }
 
+  function nbLabel(t) { return escapeHtml(t).replace(/\b(Class|Batch)\s(\d+)/g, '$1&nbsp;$2'); }
   function formatStepperDateLabel(dateStr) {
     if (dateStr === todayStr()) return 'Today';
     const y1 = shiftDateStr(todayStr(), -1);
     if (dateStr === y1) return 'Yesterday';
     const [y, m, d] = dateStr.split('-').map(Number);
     const dt = new Date(y, m - 1, d);
-    return `${dt.toLocaleDateString('en-GB', { weekday: 'short' })}, ${dt.getDate()} ${dt.toLocaleDateString('en-GB', { month: 'short' })} ${dt.getFullYear()}`;
+    return `${dt.toLocaleDateString('en-GB', { weekday: 'short' })}, ${dt.getDate()} ${dt.toLocaleDateString('en-GB', { month: 'short' })}${dt.getFullYear() === new Date().getFullYear() ? '' : ' ' + dt.getFullYear()}`;
   }
 
   function formatDuration(totalSeconds) {
@@ -3908,7 +3941,7 @@
     const bits = [sl.subject, sl.room ? 'Room ' + sl.room : ''].filter(Boolean).join(' · ');
     return `<div class="next-card${live ? ' live' : ''}">
       <div class="next-top"><span class="next-lbl">${live ? 'Now' : 'Next class'}</span><span class="next-time">${escapeHtml(formatTimeStr(sl.time))}${end ? ' – ' + escapeHtml(formatTimeStr(end)) : ''}</span></div>
-      <div class="next-mid"><div><div class="next-batch">${escapeHtml(slotLabelAll(sl))}</div>
+      <div class="next-mid"><div><div class="next-batch">${nbLabel(slotLabelAll(sl))}</div>
       ${bits ? `<div class="next-sub">${escapeHtml(bits)}${sl.test ? ' · Class test' : ''}</div>` : ''}</div>
       ${live ? `<button type="button" class="next-go" data-log-slot="${escapeHtml(sl.id)}">Fill details</button>` : ''}</div>
     </div>`;
@@ -3931,7 +3964,7 @@
       const info = '';
       return `<div class="tl-item">${tlTimeHtml(it.min)}
         <div class="tl-card ${it.status}${isNext ? ' tl-next' : ''}">
-          <div class="tl-top"><div class="tl-batch">${escapeHtml(slotLabelAll(sl))}</div>${pill}</div>
+          <div class="tl-top"><div class="tl-batch">${nbLabel(slotLabelAll(sl))}</div>${pill}</div>
           <div class="chiprow">${subjChipHtml(sl.subject)}${sl.test ? '<span class="mchip">Class test</span>' : ''}${sl.room ? `<span class="mchip"><span class="ico i-door" aria-hidden="true"></span>${escapeHtml(sl.room)}</span>` : ''}${range ? `<span class="mchip"><span class="ico i-clock" aria-hidden="true"></span>${escapeHtml(range)}</span>` : ''}</div>${info}
           ${it.status === 'upcoming' ? '' : `<button class="tl-log" data-log-slot="${escapeHtml(it.slot.id)}">${btnTxt}</button>`}
         </div></div>`;
@@ -3945,7 +3978,7 @@
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-today-rec="${escapeHtml(c.id)}" role="button" tabindex="0">${tlTimeHtml(it.min)}
       <div class="tl-card ${it.status}">
-        <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${pill}</div>
+        <div class="tl-top"><div class="tl-batch">${nbLabel(entryBatchLabel(c))}</div>${pill}</div>
         ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
         ${classKindHtml(c, true)}
         ${it.status === 'upcoming' ? '<div class="tl-meta"><span class="tl-filled">✓ Details filled</span></div>' : ''}
@@ -4432,7 +4465,7 @@
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}">${tlTimeHtml(st)}
       <div class="tl-card">
-        <div class="tl-top"><div class="tl-batch">${escapeHtml(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : pillHtml('upcoming', 'Upcoming')}</div>
+        <div class="tl-top"><div class="tl-batch">${nbLabel(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : pillHtml('upcoming', 'Upcoming')}</div>
         ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
         ${classKindHtml(c, true)}
         ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
@@ -5442,9 +5475,9 @@
     document.getElementById('ttSummary').hidden = true;
     document.getElementById('ttCopyBtn').hidden = !ttCopyList().length;
     // teacher filter
-    document.getElementById('ttTeachers').innerHTML = '<span class="team-lbl" style="flex-shrink:0;">Show</span>' + [['all', 'All teachers']].concat(ids.map((u) => [u, ttName(u)]))
-      .map(([v, l]) => `<button type="button" class="chip${tt.teacher === v ? ' active' : ''}" data-tt-t="${escapeHtml(v)}">${escapeHtml(l)}</button>`).join('');
-    document.querySelectorAll('#ttTeachers [data-tt-t]').forEach((b) => b.addEventListener('click', () => { tt.teacher = b.getAttribute('data-tt-t'); renderTimetable(); }));
+    document.getElementById('ttTeachers').innerHTML = '<select class="text-input tt-tsel" id="ttTSel" aria-label="Show timetable of">' + [['all', 'All teachers']].concat(ids.map((u) => [u, ttName(u)]))
+      .map(([v, l]) => `<option value="${escapeHtml(v)}"${tt.teacher === v ? ' selected' : ''}>${escapeHtml(l)}</option>`).join('') + '</select>';
+    document.getElementById('ttTSel').addEventListener('change', (e) => { tt.teacher = e.target.value; renderTimetable(); });
     renderTtForm();
     const all = ttAll(ws, we);
     const clash = ttClashes(all);
@@ -5932,7 +5965,7 @@
     const moreBtn = `<button type="button" class="btn-secondary tg-morebtn" id="tgMore" aria-expanded="${moreOpen}" style="border-color: var(--line);"><span class="ico i-dotsc" aria-hidden="true"></span> More</button>`;
     html += `<div class="tg-pubrow tg-col">${pdList.length
         ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : 'Publish whole week'}<small>${pdList.length === 1 ? `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')}` : `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')} · ${escapeHtml(shortDays(pdList))}`}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--line);">Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:12px; font-weight:500;">${pdMap[d]} ${everPub ? 'change' : 'class'}${pdMap[d] === 1 ? '' : (everPub ? 's' : 'es')}</small></button>` : ''}<div class="tg-sub2"><button type="button" class="btn-secondary tg-prevbtn" id="tgPreview" style="border-color: var(--line);"><span class="ico i-eye" aria-hidden="true"></span> Preview</button>${moreBtn}</div>`
-        : `${(everPub ? 's' : 'es')}<div class="tg-sub2">${moreBtn}</div>`}</div>
+        : `<div class="tg-sub2 one">${moreBtn}</div>`}</div>
     <div class="tg-more" id="tgMoreList"${moreOpen ? '' : ' hidden'}>${moreItems.join('')}</div>
     ${editable ? '<div id="tgCopyDayBox"></div>' : ''}
     ${editable ? '<button type="button" class="hv-back tg-help-link" data-tour-open="timetable"><span class="ico i-help" aria-hidden="true"></span> How to use the grid</button>' : ''}`;
@@ -5948,7 +5981,7 @@
     const m = String(b).match(/class\s*(\d+)\s*[-–]?\s*(.*)$/i);
     if (!m) return b;
     const rest = m[2].replace(/batch\s*/i, 'B').replace(/evening/i, 'Eve').trim();
-    return rest ? `${m[1]} · ${rest}` : m[1];
+    return rest ? `${m[1]}${rest.length <= 3 ? '\u00a0·\u00a0' : ' · '}${rest}` : m[1];
   }
   // Short subject names for the narrow grid cells only (full names everywhere else).
   const SUBJ_SHORT = { mathematics: 'Maths', maths: 'Maths', physics: 'Phy', chemistry: 'Chem', biology: 'Bio', english: 'Eng', hindi: 'Hindi', computer: 'Comp', 'social science': 'SSt', science: 'Sci', reasoning: 'Reas', 'geo/eco': 'Geo/Eco', 'his/pol.sc.': 'His/Pol', 'his/pol.sc': 'His/Pol', 'his/pol. sc.': 'His/Pol', 'his/pol. sc': 'His/Pol', 'his/pol': 'His/Pol', 'history': 'Hist', 'geography': 'Geo', 'political science': 'Pol Sc', sanskrit: 'Skt' };
@@ -8249,7 +8282,7 @@ Rules:
     const subRows = askSubs.length ? askSubs.map((v) => `<div class="tp-map"><div class="tp-l"><b>${escapeHtml(v)}</b><small>${tp.sub[v] ? 'I guessed this one' : 'Not found in your subjects'}</small></div>${selS(v)}</div>`).join('') : `<div class="xw-ck ok"><span>✓</span><span>All ${tp.raws.length} subjects match your Subjects list.</span></div>`;
     const day = D.days.find((d) => d.date === tp.day) || D.days[0];
     const dayChips = D.days.map((d) => `<button type="button" class="chip${d.date === day.date ? ' active' : ''}" data-tp-day="${d.date}">${WD[dateObj(d.date).getDay()]} ${dateObj(d.date).getDate()}</button>`).join('');
-    const th = D.periods.map((q, i) => `<th>${i + 1}<small>${escapeHtml(q.start ? formatTimeStr(String(q.start).slice(0, 5)) : '')}</small></th>`).join('');
+    const th = D.periods.map((q, i) => `<th>${i + 1}<small>${escapeHtml(q.start ? formatTimeStr(String(q.start).slice(0, 5)).replace(/\s?[AP]M$/i, '') : '')}</small></th>`).join('');
     const body = tp.rows.map((l) => { const r = day.rows.find((x) => x.class === l); const sp = day.specials.find((x) => (x.classes || []).indexOf(l) !== -1); const b = tp.map[l];
       let tds; if (r) tds = D.periods.map((q, i) => { const v = String(r.cells[i] == null ? '' : r.cells[i]).trim(); if (!v) return '<td class="nl">–</td>'; return tp.sub[v] ? `<td>${escapeHtml(tp.sub[v])}</td>` : `<td class="warn">${escapeHtml(v)}</td>`; }).join('');
       else if (sp) tds = `<td class="sp" colspan="${D.periods.length}">${escapeHtml(sp.text || 'Special')}</td>`; else tds = `<td class="nl" colspan="${D.periods.length}">–</td>`;
@@ -8457,7 +8490,7 @@ Rules:
       : !sched.length ? `<div class="empty-state"><span class="ico i-cal" aria-hidden="true"></span>${state.adminDate < todayStr() ? 'No classes were scheduled for this day' : 'No classes are scheduled for this day'}</div>`
       : `<div class="sv-rows">${rows.map((x) => { const st = x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status); const t = formatTimeStr(x.slot.time); const tm = t.match(/^(.*?)\s?(AM|PM)$/i); const ses = batchSession(x.slot.label || '') || 'morning'; return `<div class="sv-row ${st} ses-${ses}">
           <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : escapeHtml(t)}</span>
-          <span class="sv-main"><span class="sv-top"><span class="sv-batch">${escapeHtml(slotLabelAll(x.slot))}</span>${pillHtml(st, ADMIN_PILL[x.status])}</span>
+          <span class="sv-main"><span class="sv-top"><span class="sv-batch">${nbLabel(slotLabelAll(x.slot))}</span>${pillHtml(st, ADMIN_PILL[x.status])}</span>
             <span class="chiprow"><span class="mchip"><span class="ico i-user" aria-hidden="true"></span>${escapeHtml(nameOf(x.tid))}</span>${x.slot.subject ? subjChipHtml(x.slot.subject) : ''}<span class="mchip"><span class="ico i-clock" aria-hidden="true"></span>${escapeHtml(svDur(slotDuration(x.slot)))}</span></span></span></div>`; }).join('')}</div>
           ${sched.length > 8 ? `<button type="button" class="hv-back" id="adminSchedToggle" style="align-self:center;">${showAll ? 'Show less' : `Show all ${sched.length}`}</button>` : ''}`;
     const tg = document.getElementById('adminSchedToggle');
@@ -10732,7 +10765,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const topic = m.cls && m.cls.topic ? `<span class="sv-topic">${escapeHtml(m.cls.topic)}</span>` : '';
     return `<div class="sv-row ${m.status} ses-${ses}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : (t ? escapeHtml(t) : '—')}</span>
-      <span class="sv-main"><span class="sv-top"><span class="sv-batch">${escapeHtml(slotLabelAll(s))}</span>${pillHtml(m.status, SV_PILL[m.status])}</span>
+      <span class="sv-main"><span class="sv-top"><span class="sv-batch">${nbLabel(slotLabelAll(s))}</span>${pillHtml(m.status, SV_PILL[m.status])}</span>
         <span class="chiprow">${chips}${src}</span>${topic ? `<span class="srcline">${topic}</span>` : ''}${from ? `<span class="srcline">${I_CAL}${from}</span>` : ''}${ampm}</span>
     </div>`;
   }
