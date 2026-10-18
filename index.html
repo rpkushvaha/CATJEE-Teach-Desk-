@@ -2026,6 +2026,23 @@
   .mic-wrap.listening .mic-hint { display: block; }
   .mic-wrap.listening .mic-lang { display: none; }
   @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,.35); } 50% { box-shadow: 0 0 0 8px rgba(230,57,70,0); } }
+  /* batch name stacked in the grid's first column; long texts from a picture stay short in the check screen */
+  .tg-bsub { display: block; font-size: 11px; font-weight: 500; line-height: 1.15; color: var(--muted-2); }
+  .tp-l small.tp-det { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .tp-t td.ts { box-shadow: inset 0 0 0 2px var(--gold-soft); }
+  /* photo check screen: period times, exams, notes, classes together */
+  .tp-tm { display: grid; gap: 4px; }
+  .tp-tm > div { display: grid; grid-template-columns: 34px 1fr; column-gap: 8px; font-size: 12px; }
+  .tp-tm .df b { color: var(--green); }
+  .tp-tm small { grid-column: 2; color: var(--muted); font-size: 11px; }
+  .tp-exr { border: 1px solid var(--line); border-radius: 12px; padding: 10px; margin-bottom: 8px; background: var(--card); }
+  .tp-exr.off { opacity: .55; }
+  .tp-exh { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .tp-exh b { font-size: 13px; font-weight: 600; }
+  .tp-exh small { display: block; font-size: 12px; color: var(--muted-2); overflow-wrap: anywhere; }
+  .tp-exs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .tp-t td.tog { background: var(--gold-soft); color: var(--green); font-weight: 600; }
+  .tp-t td.tog small { display: block; font-size: 9px; font-weight: 400; }
 </style>
 </head>
 <body>
@@ -2118,7 +2135,7 @@
   <button class="intro-skip" id="introSkip">Skip</button>
   <div class="intro-track">
     <div class="intro-slide active">
-      <div class="intro-art"><svg class="ic" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l-5-5 5-5"/><path d="M15 12H3"/></svg></div>
+      <div class="intro-art"><svg class="ic" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg></div>
       <div class="intro-title">Check in when you reach campus</div>
       <p class="intro-text">One tap on <strong>Check In</strong> when you arrive and <strong>Check Out</strong> when you leave. Your campus time is counted for you.</p>
     </div>
@@ -3168,7 +3185,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.10 · updated 18 Oct 2026</div>
+          <div class="dnote">Version 13.13 · updated 19 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3730,7 +3747,7 @@
   }
 
   function svgLogin() {
-    return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l-5-5 5-5"></path><path d="M15 12H3"></path></svg>';
+    return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>';
   }
   function svgLogout() {
     return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>';
@@ -5936,7 +5953,7 @@
     g.batches.forEach((b, bi) => {
       const rOn = batchRoomOn(b, d); const rMoved = rOn && rOn !== batchRoom(b);
       const rDup = rOn && g.batches.some((o) => o !== b && batchRoomOn(o, d) === rOn);
-      html += `<tr><th class="tg-b" data-tg-room="${escapeHtml(b)}" role="button">${escapeHtml(gridBatchLabel(b))}${rOn ? `<span class="${rMoved ? 'tg-moved' : ''}${rDup ? ' tg-roomdup' : ''}">${escapeHtml(rOn)}${rDup ? ' ⚠️' : ''}</span>` : '<span class="tg-noroom">+ room</span>'}</th>`;
+      html += `<tr><th class="tg-b" data-tg-room="${escapeHtml(b)}" role="button">${gridBatchHtml(b)}${rOn ? `<span class="${rMoved ? 'tg-moved' : ''}${rDup ? ' tg-roomdup' : ''}">${escapeHtml(rOn)}${rDup ? ' ⚠️' : ''}</span>` : '<span class="tg-noroom">+ room</span>'}</th>`;
       let skipTo = -1;
       perD.forEach((pp, i) => {
         if (i <= skipTo || pp.off) return;
@@ -5994,6 +6011,11 @@
     renderTgCopyBox();
   }
   // "Class 9 - Batch 1" → "9 · B1", "Class 10 - Evening" → "10 · Eve", others unchanged
+  // for the narrow first column of a grid: a short name stays on one line ("9 · B1"); a long one is stacked ("10" over "Remedial")
+  function gridBatchHtml(b) {
+    const t = gridBatchLabel(b); const m = String(t).match(/^(\d+)[\s\u00a0]·[\s\u00a0](.+)$/);
+    return m && m[2].length > 3 ? `${escapeHtml(m[1])}<span class="tg-bsub">${escapeHtml(m[2])}</span>` : escapeHtml(t);
+  }
   function gridBatchLabel(b) {
     const m = String(b).match(/class\s*(\d+)\s*[-–]?\s*(.*)$/i);
     if (!m) return b;
@@ -8198,9 +8220,12 @@ Rules:
 - "periods" lists only the teaching periods, left to right, and skips BREAK columns. Times are 24-hour "HH:MM".
 - Dates are ISO "YYYY-MM-DD" (the sheet may print DD.MM.YYYY). Also give the printed weekday name.
 - Every row's "cells" has exactly one entry per period, left to right.
-- If a class has one merged block for the whole day (an exam, a test or a holiday) instead of separate periods, do not put that class in "rows"; list it in "specials" with the printed text.
+- If a box is merged across several periods of one row, repeat its exact text in every period it covers.
+- If a class has one merged block for the whole day (an exam, a test, a holiday, a doubt-clearing day) instead of separate periods, do not put that class in "rows"; list it in "specials" with the exact printed text and the classes it covers.
+- If one box is merged across several class rows (one lesson for those classes together), do not repeat it in "rows"; list it in the day's "together" with the classes, the period numbers (the first period is 0) and the exact printed text.
+- Keep any time printed inside a box (for example "(7:00pm – 8:15pm)") as part of the text.
 - "classes" lists the class labels as they appear in the rows. If the sheet has a key such as "Class 9th Batch-1 : E3 Room", fill "name" and "room" from it, otherwise use null.`;
-  const TP_PROMPT = `Read the timetable in this picture and return JSON in exactly this shape:\n{"title":"","periods":[{"label":"1ST PERIOD","start":"09:00","end":"09:40"}],"classes":[{"label":"I-8TH","name":"Class 8th Batch-1","room":"A1"}],"days":[{"date":"2026-01-05","weekday":"Monday","rows":[{"class":"I-8TH","cells":["Subject","Subject"]}],"specials":[{"classes":["II-8TH"],"text":"Half Yearly Exam"}]}]}`;
+  const TP_PROMPT = `Read the timetable in this picture and return JSON in exactly this shape:\n{"title":"","periods":[{"label":"1ST PERIOD","start":"09:00","end":"09:40"}],"classes":[{"label":"I-8TH","name":"Class 8th Batch-1","room":"A1"}],"days":[{"date":"2026-01-05","weekday":"Monday","rows":[{"class":"I-8TH","cells":["Subject","Subject"]}],"specials":[{"classes":["II-8TH"],"text":"Half Yearly Exam"}],"together":[{"classes":["I-8TH","II-8TH"],"periods":[2],"text":"Subject"}]}]}`;
   function tpFile(file) {
     return new Promise((resolve, reject) => {
       if (/pdf/i.test(file.type)) {
@@ -8231,7 +8256,8 @@ Rules:
   function tpBatchGuess(label, info, batches) {
     const nm = String((info && info.name) || ''); const lab = String(label || '');
     const roman = (t) => { const m = String(t).trim().match(/^(iii|ii|iv|i|v)\b/i); return m ? { i: 1, ii: 2, iii: 3, iv: 4, v: 5 }[m[1].toLowerCase()] : null; };
-    const numM = (nm || lab).match(/(\d{1,2})/); const num = numM ? Number(numM[1]) : null;
+    const numM = (nm || lab).match(/(\d{1,2})/); const ROM = { v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10, xi: 11, xii: 12 }; const romM = (nm || lab).match(/\b(xii|xi|x|ix|viii|vii|vi|v)\b/i);
+    const num = numM ? Number(numM[1]) : (romM ? ROM[romM[1].toLowerCase()] : null);
     const ordM = nm.match(/batch\s*[-:]?\s*(\d+)/i); const ord = ordM ? Number(ordM[1]) : roman(lab);
     if (num != null) {
       const same = batches.filter((b) => { const m = String(b).match(/class\s*(\d+)/i); return m && Number(m[1]) === num; });
@@ -8252,45 +8278,188 @@ Rules:
     o.days = o.days.map((d) => {
       let date = String((d && d.date) || '');
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { const wd = NAMES.indexOf(String((d && d.weekday) || '').slice(0, 3).toLowerCase()); date = wd === -1 ? '' : shiftDateStr(wk, (wd + 6) % 7); }
-      return { date, rows: (Array.isArray(d && d.rows) ? d.rows : []).filter((r) => r && r.class && Array.isArray(r.cells)), specials: Array.isArray(d && d.specials) ? d.specials.filter(Boolean) : [] };
+      return { date, rows: (Array.isArray(d && d.rows) ? d.rows : []).filter((r) => r && r.class && Array.isArray(r.cells)), specials: Array.isArray(d && d.specials) ? d.specials.filter(Boolean) : [], together: (Array.isArray(d && d.together) ? d.together : []).filter((x) => x && Array.isArray(x.classes) && String(x.text || '').trim()).map((x) => ({ classes: x.classes, periods: (Array.isArray(x.periods) ? x.periods : []).map(Number).filter((n) => Number.isFinite(n)), text: String(x.text).trim() })) };
     }).filter((d) => d.date);
     if (!o.days.length) return { err: 'The dates could not be read from this picture. Try a clearer one.' };
     return { data: o };
   }
+  // "BIOLOGY (WEEKLY TEST) Syllabus: Ch-6 …" → subject "BIOLOGY", marked as a test, the rest is only shown, not saved
+  const tpCap = (t) => { const x = String(t || '').toLowerCase(); return x.charAt(0).toUpperCase() + x.slice(1); };
+  const tpNormT = (t) => String(t || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).map((w) => ({ i: '1', ii: '2', iii: '3', iv: '4' }[w] || w)).join('');
+  // the test type of a text: the longest of YOUR Test Types found in it (Unit Test-I, Weekly Test, Half-Yearly Exam, CCPT-1…)
+  function tpTestType(text) { const n = tpNormT(text); let best = ''; testTypesList().forEach((tt) => { const k = tpNormT(tt); if (k && n.indexOf(k) !== -1 && k.length > tpNormT(best).length) best = tt; }); return best; }
+  function tpClock(str) {
+    const m = String(str || '').trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?$/i); if (!m) return '';
+    let h = Number(m[1]); const mi = m[2] ? Number(m[2]) : 0; const ap = m[3] ? m[3].toLowerCase() : '';
+    if (ap === 'p' && h < 12) h += 12; if (ap === 'a' && h === 12) h = 0; if (h > 23 || mi > 59) return '';
+    return String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0');
+  }
+  // "(7:00pm – 8:15pm)" → { start: '19:00', end: '20:15' }
+  function tpTimeIn(text) {
+    const m = String(text).match(/(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*[–—-]\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)/i); if (!m) return null;
+    const a = tpClock(m[1].replace(/\./g, '')), z = tpClock(m[2].replace(/\./g, '')); return a && z ? { start: a, end: z } : null;
+  }
+  // "BIOLOGY (WEEKLY TEST) Syllabus: Ch-6 …" → subject "BIOLOGY"; the type comes from your Test Types; the rest is only shown
+  function tpSplit(raw) {
+    const t = String(raw).replace(/\s+/g, ' ').trim(); const cut = t.search(/\s*[(:\[]|\s+[-–—]\s|\s+syllabus\b/i);
+    const type = tpTestType(t); const kwM = t.match(/\b((?:weekly|unit|periodic|monthly|half[\s-]*yearly|annual|term|mock|pre[\s-]*board)\s*(?:test|exam)|class\s*test|exam|test)\b/i); const kw = kwM ? kwM[1].replace(/\s+/g, ' ').trim() : '';
+    const isClass = type ? tpNormT(type) === 'classtest' : /^class test$/i.test(kw);
+    return { head: (cut > 0 ? t.slice(0, cut) : t).trim(), detail: cut > 0 ? t.slice(cut).replace(/^[\s\-–—:(]+/, '').replace(/^([^()]{1,40})\)\s*/, '$1 · ').replace(/[\s)]+$/, '').trim() : '', kw, type, kind: (!type && !kw) ? '' : (isClass ? 'class' : 'exam'), time: tpTimeIn(t) };
+  }
+  function tpSubjectIn(text, subjects) {
+    const sp = tpSplit(text); const r = tpGuessSubject(sp.head, subjects); if (r.s) return r.s;
+    const groups = String(text).match(/\(([^()]*)\)/g) || [];
+    for (let i = 0; i < groups.length; i++) { const inner = groups[i].slice(1, -1).trim(); if (/test|exam|mode|marks|syllabus/i.test(inner)) continue; const r2 = tpGuessSubject(inner, subjects); if (r2.s) return r2.s; }
+    return '';
+  }
   function tpInit(tp) {
     const g = tgGroup(); const subjects = ttSubjectsList(); tp.rows = []; tp.raws = [];
-    tp.data.days.forEach((d) => d.rows.forEach((r) => { if (tp.rows.indexOf(r.class) === -1) tp.rows.push(r.class); r.cells.forEach((c) => { const v = String(c == null ? '' : c).trim(); if (v && tp.raws.indexOf(v) === -1) tp.raws.push(v); }); }));
+    const addRaw = (c) => { const v = String(c == null ? '' : c).trim(); if (v && tp.raws.indexOf(v) === -1) tp.raws.push(v); };
+    tp.data.days.forEach((d) => {
+      d.rows.forEach((r) => { if (tp.rows.indexOf(r.class) === -1) tp.rows.push(r.class); r.cells.forEach(addRaw); });
+      (d.together || []).forEach((t) => { addRaw(t.text); (t.classes || []).forEach((l) => { if (tp.rows.indexOf(l) === -1) tp.rows.push(l); }); });
+    });
     tp.map = {}; tp.rows.forEach((l) => { tp.map[l] = tpBatchGuess(l, tp.data.classes.find((c) => c.label === l), g ? g.batches : []); });
-    tp.sub = {}; tp.exact = {}; tp.raws.forEach((v) => { const r = tpGuessSubject(v, subjects); tp.sub[v] = r.s; tp.exact[v] = r.exact; });
-    tp.day = tp.data.days[0].date; tp.policy = 'empty'; tp.shift = mondayOf(tp.data.days[0].date) !== state.tt.weekStart;
+    tp.sub = {}; tp.exact = {}; tp.kind = {}; tp.kw = {}; tp.type = {}; tp.time = {}; tp.guess = {}; tp.head = {}; tp.det = {};
+    tp.raws.forEach((v) => {
+      let r = tpGuessSubject(v, subjects); const sp = tpSplit(v); tp.head[v] = sp.head || v; tp.det[v] = sp.detail; tp.kind[v] = sp.kind; tp.kw[v] = sp.type || sp.kw; tp.type[v] = sp.type; tp.time[v] = sp.time;
+      if (!r.s && sp.head && sp.head !== v) { const r2 = tpGuessSubject(sp.head, subjects); if (r2.s) r = { s: r2.s, exact: false }; }
+      tp.guess[v] = r.s || (sp.kind ? tpSubjectIn(v, subjects) : '');
+      // a weekly / unit / half-yearly test or an exam is made as an Exam (it takes the box); a "class test" is a class that has a test
+      tp.sub[v] = sp.kind === 'exam' ? '' : r.s; tp.exact[v] = !sp.kind && (r.exact || (!!r.s && !!sp.time && tpKey(sp.head) === tpKey(r.s)));
+    });
+    tp.day = tp.data.days[0].date; tp.policy = 'empty'; tp.shift = mondayOf(tp.data.days[0].date) !== state.tt.weekStart; tp.useTimes = true; tp.exEdit = {}; tp.noteOff = {};
   }
   // what would be put in the grid with the current choices
   // The picture is often last week's. Its Monday..Saturday are put on this page's Monday..Saturday, unless the person chooses the picture's own week.
   function tpDate(tp, date) { if (!tp.shift) return date; const wd = (dateObj(date).getDay() + 6) % 7; return shiftDateStr(state.tt.weekStart, wd); }
-  function tpBuild(tp) {
-    const g = tgGroup(); const per = g ? periodsFor(g.key) : []; const cells = []; let unmatched = 0, badRows = 0, read = 0;
-    tp.data.days.forEach((d) => d.rows.forEach((r) => {
-      if (r.cells.length !== tp.data.periods.length) badRows++;
-      const b = tp.map[r.class]; if (!b) return;
-      r.cells.forEach((raw, i) => { const v = String(raw == null ? '' : raw).trim(); if (!v || i >= per.length) return; read++; const sj = tp.sub[v]; if (!sj) { unmatched++; return; } cells.push({ d: tpDate(tp, d.date), p: i, b, s: sj, t: defaultTeacher(b, sj) }); });
-    }));
-    return { cells, unmatched, badRows, read };
+  // consecutive boxes with the same text that prints its own time ("Reasoning (5:35pm - 6:50pm)") are one long lesson; used only when every class of that day has the same shape
+  function tpMerges(tp, d) {
+    const rows = d.rows.filter((r) => tp.map[r.class]); if (!rows.length) return [];
+    const sigs = rows.map((r) => {
+      const out = []; const c = r.cells; let i = 0;
+      while (i < c.length) { const v = String(c[i] == null ? '' : c[i]).trim(); let j = i; while (v && j + 1 < c.length && String(c[j + 1] == null ? '' : c[j + 1]).trim() === v) j++; const tm = v ? tpTimeIn(v) : null; if (j > i && tm) out.push({ from: i, to: j, start: tm.start, end: tm.end }); i = j + 1; }
+      return out;
+    });
+    const first = JSON.stringify(sigs[0]); if (!sigs[0].length || sigs.some((x) => JSON.stringify(x) !== first)) return [];
+    return sigs[0];
   }
-  function tpApply() {
+  // everything the picture would put in the draft, with the choices made so far
+  function tpBuild(tp) {
+    const g = tgGroup(); const per = g ? periodsFor(g.key) : []; const D = tp.data; const subjects = ttSubjectsList();
+    const cells = [], exams = [], notes = [], times = {}; let unmatched = 0, badRows = 0, read = 0, cbN = 0;
+    const hm = (x) => String(x || '').slice(0, 5);
+    const appT = (i) => (per[i] ? { start: hm(per[i].start), end: hm(per[i].end) } : null);
+    const picT = (i) => (D.periods[i] ? { start: tpClock(D.periods[i].start), end: tpClock(D.periods[i].end) } : null);
+    const nCols = tp.useTimes ? D.periods.length : Math.min(D.periods.length, per.length);
+    D.days.forEach((d) => {
+      const date = tpDate(tp, d.date); const T = {}; const hasRows = d.rows.length > 0;
+      if (tp.useTimes && hasRows) {
+        for (let i = 0; i < D.periods.length; i++) { const a = picT(i), b = appT(i); if (a && a.start && a.end && (!b || b.start !== a.start || b.end !== a.end)) T[i] = { start: a.start, end: a.end }; }
+        for (let i = D.periods.length; i < per.length; i++) T[i] = { off: true };
+      }
+      const blocks = tp.useTimes ? tpMerges(tp, d) : [];
+      blocks.forEach((k) => { T[k.from] = { start: k.start, end: k.end }; for (let q = k.from + 1; q <= k.to; q++) T[q] = { off: true }; });
+      const tail = (i) => blocks.some((k) => i > k.from && i <= k.to);
+      const timeOf = (i) => { const o = T[i]; if (o && o.off) return null; if (o) return o; return (tp.useTimes ? picT(i) : null) || appT(i); };
+      const exTimes = {};
+      d.rows.forEach((r) => {
+        if (r.cells.length !== D.periods.length) badRows++;
+        const b = tp.map[r.class]; if (!b) return;
+        r.cells.forEach((raw, i) => {
+          const v = String(raw == null ? '' : raw).trim(); if (!v || i >= nCols || tail(i)) return; read++;
+          const sj = tp.sub[v];
+          if (!sj) {
+            if (tp.kind[v] === 'exam') {
+              const tm = tp.time[v]; const pt = timeOf(i) || {};
+              exams.push({ key: 'c|' + date + '|' + r.class + '|' + i, d: date, classes: [r.class], batches: [b], periods: [i], type: tp.type[v] || '', kw: tp.kw[v] || '', subject: tp.guess[v] || '', start: tm ? tm.start : (pt.start || ''), end: tm ? tm.end : (pt.end || ''), src: v });
+              (exTimes[i] = exTimes[i] || []).push(tm);
+            } else unmatched++;
+            return;
+          }
+          (exTimes[i] = exTimes[i] || []).push(null);
+          cells.push(Object.assign({ d: date, p: i, b, s: sj, t: defaultTeacher(b, sj) }, tp.kind[v] === 'class' ? { test: true } : {}));
+        });
+      });
+      // an exam printed with its own time: the day's period takes that time when every class has an exam there at the same time
+      if (tp.useTimes) Object.keys(exTimes).forEach((k) => { const L = exTimes[k]; const f = L[0]; if (f && L.every((x) => x && x.start === f.start && x.end === f.end)) T[k] = { start: f.start, end: f.end }; });
+      // classes sharing one lesson
+      (d.together || []).forEach((tg) => {
+        const labs = tg.classes.filter((l) => tp.map[l]); const bs = labs.map((l) => tp.map[l]); const v = String(tg.text || '').trim(); if (!v || !bs.length) return;
+        const ps = (tg.periods || []).filter((i) => i >= 0 && i < nCols); if (!ps.length) return;
+        if (tp.kind[v] === 'exam' && !tp.sub[v]) { const tm = tp.time[v]; const pt = timeOf(ps[0]) || {}; exams.push({ key: 't|' + date + '|' + tg.classes.join(',') + '|' + ps.join(','), d: date, classes: labs, batches: bs, periods: ps, type: tp.type[v] || '', kw: tp.kw[v] || '', subject: tp.guess[v] || '', start: tm ? tm.start : (pt.start || ''), end: tm ? tm.end : ((timeOf(ps[ps.length - 1]) || {}).end || ''), src: v }); return; }
+        const sj = tp.sub[v]; if (!sj) { unmatched++; return; }
+        ps.forEach((i) => {
+          read++; const t = defaultTeacher(bs[0], sj) || ''; const id = 'cb' + Date.now().toString(36) + (cbN++);
+          if (bs.length < 2) cells.push({ d: date, p: i, b: bs[0], s: sj, t }); else bs.forEach((b) => cells.push(Object.assign({ d: date, p: i, b, s: sj, t, cb: id }, tp.kind[v] === 'class' ? { test: true } : {})));
+        });
+      });
+      // a box over the whole day: an exam (made as an Exam) or a note for the day (Doubt Clearing Day, Holiday, PTM…)
+      (d.specials || []).forEach((sp, si) => {
+        const text = String(sp.text || '').replace(/\s+/g, ' ').trim(); if (!text) return;
+        const labs = (sp.classes || []).filter((l) => tp.rows.indexOf(l) !== -1); const bs = labs.map((l) => tp.map[l]).filter(Boolean); const spl = tpSplit(text);
+        if (spl.kind) {
+          if (!bs.length) return; const tm = spl.time; const ps = [];
+          for (let i = 0; i < nCols; i++) { const pt = timeOf(i); if (!pt) continue; if (!tm || (hhmmToMin(pt.start) < hhmmToMin(tm.end) && hhmmToMin(tm.start) < hhmmToMin(pt.end))) ps.push(i); }
+          exams.push({ key: 's|' + date + '|' + si, d: date, classes: labs, batches: bs, periods: ps, type: spl.type || '', kw: spl.type || spl.kw || '', subject: tpSubjectIn(text, subjects) || '', start: tm ? tm.start : (ps.length ? timeOf(ps[0]).start : ''), end: tm ? tm.end : (ps.length ? timeOf(ps[ps.length - 1]).end : ''), src: text, special: true });
+        } else {
+          const all = tp.rows.every((l) => labs.indexOf(l) !== -1 || !tp.map[l]);
+          notes.push({ key: 'n|' + date + '|' + si, d: date, text: (all || !labs.length ? text : text + ' · ' + labs.map((l) => (tp.map[l] ? gridBatchLabel(tp.map[l]) : l)).join(', ')).slice(0, 60) });
+        }
+      });
+      if (Object.keys(T).length && hasRows) times[date] = T;
+    });
+    exams.forEach((x) => { const e = tp.exEdit[x.key] || {}; x.on = e.on !== false; if (e.type !== undefined) x.type = e.type; if (e.subject !== undefined) x.subject = e.subject; });
+    notes.forEach((n) => { n.on = !tp.noteOff[n.key]; });
+    return { cells, exams, notes, times, unmatched, badRows, read };
+  }
+  async function tpApply() {
     const tp = state.tp; const g = tgGroup(); const doc = state.tg.doc;
     if (!tp || !g || !doc) { showToast('The timetable page is not ready · try again', 'error'); return; }
     if (!tgEditable()) { showToast('Tap Edit first, then fill from the photo', 'error'); return; }
-    const B = tpBuild(tp); if (!B.cells.length) { showToast('Nothing to put in yet', 'error'); return; }
-    const wkS = state.tt.weekStart, wkE = shiftDateStr(wkS, 6); if (B.cells.some((c) => c.d < wkS || c.d > wkE)) { showToast('These days are not in this week · choose the week first', 'error'); return; }
-    const days = new Set(B.cells.map((c) => c.d)), bats = new Set(B.cells.map((c) => c.b));
-    tgRemember();
-    let keep = (doc.cells || []).slice();
-    if (tp.policy === 'all') keep = keep.filter((c) => c.ex || !(days.has(c.d) && bats.has(c.b)));
-    const taken = new Set(keep.map((c) => cellKey(c))); let put = 0;
-    B.cells.forEach((c) => { if (!taken.has(cellKey(c))) { keep.push(c); taken.add(cellKey(c)); put++; } });
-    doc.cells = keep; if (B.cells.some((c) => dateObj(c.d).getDay() === 0)) doc.sunday = true;
-    tgSave(); closeHvSheet(); state.tp = null; renderTgGrid();
-    showToast(`${put} class${put === 1 ? '' : 'es'} put in the draft · nothing is published yet`);
+    const B = tpBuild(tp); const exOn = B.exams.filter((x) => x.on && x.batches.length), noteOn = B.notes.filter((n) => n.on);
+    if (!B.cells.length && !exOn.length && !noteOn.length) { showToast('Nothing to put in yet', 'error'); return; }
+    const wkS = state.tt.weekStart, wkE = shiftDateStr(wkS, 6);
+    const allDates = B.cells.map((c) => c.d).concat(exOn.map((x) => x.d), noteOn.map((n) => n.d), Object.keys(B.times));
+    if (allDates.some((x) => x < wkS || x > wkE)) { showToast('These days are not in this week · choose the week first', 'error'); return; }
+    const go = document.getElementById('tpGo'); if (go) { go.disabled = true; go.textContent = 'Putting it in…'; }
+    try {
+      // 1) the exams: the same record the grid's Exam tool makes (rooms and invigilators are added later in Exams)
+      const groups = {};
+      exOn.forEach((x) => {
+        const have = (doc.cells || []).some((c) => c.ex && c.d === x.d && x.batches.indexOf(c.b) !== -1 && x.periods.indexOf(c.p) !== -1); if (have) return;
+        const k = [x.d, x.type, x.subject, x.start, x.end].join('|'); const gr = groups[k] = groups[k] || { d: x.d, type: x.type, name: x.type ? '' : tpCap(x.kw || 'Test'), subject: x.subject, start: x.start, end: x.end, scope: [], pairs: [] };
+        x.batches.forEach((b) => { if (gr.scope.indexOf(b) === -1) gr.scope.push(b); x.periods.forEach((p) => gr.pairs.push([b, p])); });
+      });
+      const made = [];
+      for (const k of Object.keys(groups)) {
+        const gr = groups[k]; const ref = state.db.collection('exams').doc();
+        await waitForWrite(ref.set({ type: gr.type || gr.name || 'Test', subject: gr.subject || '', name: gr.name || '', date: gr.d, start: gr.start, end: gr.end, room: '', scope: gr.scope.slice(), invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
+        made.push({ gr, id: ref.id });
+      }
+      // 2) classes, times, notes and exam boxes in the draft
+      tgRemember();
+      const days = new Set(B.cells.map((c) => c.d)), bats = new Set(B.cells.map((c) => c.b));
+      let keep = (doc.cells || []).slice();
+      if (tp.policy === 'all') keep = keep.filter((c) => c.ex || !(days.has(c.d) && bats.has(c.b)));
+      const taken = new Set(keep.map((c) => cellKey(c))); let put = 0;
+      B.cells.forEach((c) => { if (!taken.has(cellKey(c))) { keep.push(c); taken.add(cellKey(c)); put++; } });
+      made.forEach(({ gr, id }) => {
+        const label = gr.name || `${gr.type}${gr.subject ? ' · ' + gr.subject : ''}`;
+        gr.pairs.forEach(([b, p]) => {
+          const old = keep.find((c) => c.d === gr.d && c.p === p && c.b === b && !c.ex); keep = keep.filter((c) => !(c.d === gr.d && c.p === p && c.b === b));
+          const nc = { d: gr.d, p, b, ex: id, s: label, et: `${gr.start}-${gr.end}` }; if (old && old.s) nc.was = { s: old.s, t: old.t || '', test: !!old.test }; keep.push(nc);
+        });
+      });
+      doc.cells = keep;
+      doc.dayTimes = Object.assign({}, doc.dayTimes || {});
+      Object.keys(B.times).forEach((date) => { const day = Object.assign({}, doc.dayTimes[date] || {}); Object.keys(B.times[date]).forEach((i) => { if (tp.policy === 'all' || day[i] === undefined) day[i] = B.times[date][i]; }); doc.dayTimes[date] = day; });
+      noteOn.forEach((n) => { const day = Object.assign({}, doc.dayTimes[n.d] || {}); if (tp.policy === 'all' || !day.note) day.note = n.text; doc.dayTimes[n.d] = day; });
+      if (allDates.some((x) => dateObj(x).getDay() === 0)) doc.sunday = true;
+      tgSave(); closeHvSheet(); state.tp = null; renderTgGrid();
+      const bits = [`${put} class${put === 1 ? '' : 'es'}`]; if (made.length) bits.push(`${made.length} exam${made.length === 1 ? '' : 's'}`); if (noteOn.length) bits.push(`${noteOn.length} day note${noteOn.length === 1 ? '' : 's'}`);
+      showToast(`${bits.join(' · ')} put in the draft · nothing is published yet`);
+    } catch (err) { if (go) { go.disabled = false; go.textContent = 'Put in draft'; } flashOffline(err); }
   }
   function tpOpenSheet() { const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
   function openTtPhoto() {
@@ -8336,34 +8505,58 @@ Rules:
     const wingHit = leadWings().filter((w) => titleL.indexOf(String(w).toLowerCase()) !== -1).sort((a, b) => b.length - a.length)[0];
     const sesHit = ['morning', 'evening', 'special'].find((x) => titleL.indexOf(x) !== -1);
     if (g && ((wingHit && wingHit !== g.wing) || (sesHit && sesHit !== g.session))) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>The picture says “${escapeHtml(D.title)}”, but this page is ${escapeHtml(g.label)}. If that is not the same group, close this and choose the right group first.</span></div>`);
-    const perBad = per.length !== D.periods.length;
-    if (perBad) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>The picture has ${D.periods.length} periods but this group has ${per.length}. Set the periods in Settings → Periods &amp; Timings first.</span></div>`);
-    else if (per.some((p, i) => D.periods[i].start && String(D.periods[i].start).slice(0, 5) !== String(p.start).slice(0, 5))) warns.push(`<div class="xw-ck in"><span>ⓘ</span><span>The period times in the picture are different from this group's Periods &amp; Timings. The app's times are kept.</span></div>`);
+    let timesHtml = '';
+    {
+      const nPic = D.periods.length, nApp = per.length; const rowsT = []; let diff = nPic !== nApp;
+      for (let i = 0; i < Math.max(nPic, nApp); i++) {
+        const a = D.periods[i] ? { s: tpClock(D.periods[i].start), e: tpClock(D.periods[i].end) } : null; const b = per[i] ? { s: String(per[i].start).slice(0, 5), e: String(per[i].end).slice(0, 5) } : null;
+        const same = !!(a && b && a.s === b.s && a.e === b.e); if (!same) diff = true; rowsT.push({ i, a, b, same });
+      }
+      const ft = (x) => (x && x.s && x.e ? `${formatTimeStr(x.s)} – ${formatTimeStr(x.e)}` : 'none');
+      if (diff) timesHtml = `<div class="xs-grp">Period times</div><div class="chips" style="margin-bottom:8px;"><button type="button" class="chip${tp.useTimes ? ' active' : ''}" data-tp-times="1">Use the picture's times</button><button type="button" class="chip${tp.useTimes ? '' : ' active'}" data-tp-times="0">Keep the app's times</button></div>
+        <div class="tp-tm">${rowsT.map((r) => `<div class="${r.same ? '' : 'df'}"><b>P${r.i + 1}</b><span>${escapeHtml(ft(r.a))}</span><small>app: ${escapeHtml(ft(r.b))}</small></div>`).join('')}</div>
+        <div class="hv-note" style="text-align:left; margin-top:6px;">${tp.useTimes ? 'These days get the times printed in the picture' + (nPic < nApp ? ', and the periods the picture does not have are switched off for them.' : '.') : 'The app\'s times stay' + (nPic > nApp ? ', and the picture\'s extra periods are left out.' : '.')} Your Periods &amp; Timings setting is not changed.</div>`;
+    }
     if (B.badRows) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>${B.badRows} row${B.badRows === 1 ? '' : 's'} had a different number of boxes than periods. Check those days.</span></div>`);
-    const skipped = []; D.days.forEach((d) => d.specials.forEach((sp) => skipped.push(`${WD[dateObj(tpDate(tp, d.date)).getDay()]} ${dateObj(tpDate(tp, d.date)).getDate()} · ${(sp.classes || []).join(', ')} · ${sp.text || ''}`)));
-    if (skipped.length) warns.push(`<div class="xw-ck in"><span>ⓘ</span><span>Left empty (add them in Exams, they fill the grid by themselves):<br>${skipped.map((x) => escapeHtml(x)).join('<br>')}</span></div>`);
+    const dayTxt = (dd) => `${WD[dateObj(dd).getDay()]} ${dateObj(dd).getDate()}`;
+    const ftm = (x) => (x.start && x.end ? `${formatTimeStr(x.start)} – ${formatTimeStr(x.end)}` : 'time not found');
+    const exHtml = B.exams.length ? `<div class="xs-grp">Tests and exams · made in Exams</div>${B.exams.map((x) => `<div class="tp-exr${x.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(x.d))} · ${escapeHtml(x.classes.join(', '))}</b><small>${escapeHtml(ftm(x))}</small></div><button type="button" class="chip${x.on ? ' active' : ''}" data-tp-ex-on="${escapeHtml(x.key)}">${x.on ? '✓ Make it' : 'Skip'}</button></div>
+        <div class="tp-exs"><select class="text-input tp-sel" data-tp-ex-type="${escapeHtml(x.key)}"><option value="">${x.type ? 'Other' : 'Choose type'}</option>${testTypesList().map((t) => `<option value="${escapeHtml(t)}"${x.type === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select><select class="text-input tp-sel" data-tp-ex-sub="${escapeHtml(x.key)}"><option value="">No subject</option>${ttSubjectsList().map((t) => `<option value="${escapeHtml(t)}"${x.subject === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div></div>`).join('')}<div class="hv-note" style="text-align:left;">Each one takes its box in the grid and appears in the Exams tab; add the rooms and invigilators there. The syllabus and marks are not saved.</div>` : '';
+    const noteHtml = B.notes.length ? `<div class="xs-grp">Notes for the whole day</div>${B.notes.map((n) => `<div class="tp-exr${n.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(n.d))}</b><small>${escapeHtml(n.text)}</small></div><button type="button" class="chip${n.on ? ' active' : ''}" data-tp-note="${escapeHtml(n.key)}">${n.on ? '✓ Add' : 'Skip'}</button></div></div>`).join('')}` : '';
     const used = Object.values(tp.map).filter(Boolean); const dup = used.some((b, i) => used.indexOf(b) !== i);
     if (dup) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>Two rows of the picture point to the same batch. Change one of them.</span></div>`);
     const bats = g ? g.batches : [];
     const selB = (l) => `<select class="text-input tp-sel" data-tp-cls="${escapeHtml(l)}"><option value="">Do not fill</option>${bats.map((b) => `<option value="${escapeHtml(b)}"${tp.map[l] === b ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('')}</select>`;
     const clsRows = tp.rows.map((l) => { const info = D.classes.find((c) => c.label === l) || {}; return `<div class="tp-map"><div class="tp-l"><b>${escapeHtml(l)}</b>${info.name ? `<small>${escapeHtml(info.name)}${info.room ? ' · ' + escapeHtml(info.room) : ''}</small>` : ''}</div>${selB(l)}</div>`; }).join('');
     const subs = ttSubjectsList(); const askSubs = tp.raws.filter((v) => !tp.exact[v]);
-    const selS = (v) => `<select class="text-input tp-sel" data-tp-sub="${escapeHtml(v)}"><option value="">Leave empty</option>${subs.map((x) => `<option value="${escapeHtml(x)}"${tp.sub[v] === x ? ' selected' : ''}>${escapeHtml(x)}</option>`).join('')}</select>`;
-    const subRows = askSubs.length ? askSubs.map((v) => `<div class="tp-map"><div class="tp-l"><b>${escapeHtml(v)}</b><small>${tp.sub[v] ? 'I guessed this one' : 'Not found in your subjects'}</small></div>${selS(v)}</div>`).join('') : `<div class="xw-ck ok"><span>✓</span><span>All ${tp.raws.length} subjects match your Subjects list.</span></div>`;
+    const selS = (v) => `<select class="text-input tp-sel" data-tp-sub="${escapeHtml(v)}"><option value="">${tp.kind[v] === 'exam' ? 'Make it an exam' : 'Leave empty'}</option>${subs.map((x) => `<option value="${escapeHtml(x)}"${tp.sub[v] === x ? ' selected' : ''}>${escapeHtml(x)}</option>`).join('')}</select>`;
+    const subRows = askSubs.length ? askSubs.map((v) => `<div class="tp-map"><div class="tp-l"><b>${escapeHtml(tp.head[v] || v)}</b><small>${tp.kind[v] === 'exam' ? (tp.sub[v] ? tpCap(tp.kw[v]) + ' · put in as a normal class' : tpCap(tp.kw[v]) + ' · will be made as an exam') : (tp.sub[v] ? (tp.kind[v] === 'class' ? 'Class test · marked as a class test' : 'I guessed this one') : 'Not found in your subjects')}</small>${tp.det[v] ? `<small class="tp-det">${escapeHtml(tp.det[v])}</small>` : ''}</div>${selS(v)}</div>`).join('') : `<div class="xw-ck ok"><span>✓</span><span>All ${tp.raws.length} subjects match your Subjects list.</span></div>`;
     const day = D.days.find((d) => d.date === tp.day) || D.days[0];
     const dayChips = D.days.map((d) => { const t = tpDate(tp, d.date); return `<button type="button" class="chip${d.date === day.date ? ' active' : ''}" data-tp-day="${d.date}">${WD[dateObj(t).getDay()]} ${dateObj(t).getDate()}</button>`; }).join('');
     const th = D.periods.map((q, i) => `<th>${i + 1}<small>${escapeHtml(q.start ? formatTimeStr(String(q.start).slice(0, 5)).replace(/\s?[AP]M$/i, '') : '')}</small></th>`).join('');
-    const body = tp.rows.map((l) => { const r = day.rows.find((x) => x.class === l); const sp = day.specials.find((x) => (x.classes || []).indexOf(l) !== -1); const b = tp.map[l];
-      let tds; if (r) tds = D.periods.map((q, i) => { const v = String(r.cells[i] == null ? '' : r.cells[i]).trim(); if (!v) return '<td class="nl">–</td>'; return tp.sub[v] ? `<td>${escapeHtml(shortSubj(tp.sub[v]))}</td>` : `<td class="warn">${escapeHtml(shortSubj(v))}</td>`; }).join('');
-      else if (sp) tds = `<td class="sp" colspan="${D.periods.length}">${escapeHtml(sp.text || 'Special')}</td>`; else tds = `<td class="nl" colspan="${D.periods.length}">–</td>`;
-      return `<tr><th>${escapeHtml(l)}<small>${b ? escapeHtml(gridBatchLabel(b)) : 'not filled'}</small></th>${tds}</tr>`; }).join('');
+    const blocksD = tp.useTimes ? tpMerges(tp, day) : [];
+    const body = tp.rows.map((l) => {
+      const r = day.rows.find((x) => x.class === l); const sp = day.specials.find((x) => (x.classes || []).indexOf(l) !== -1); const b = tp.map[l]; let tds = '';
+      if (r) {
+        for (let i = 0; i < D.periods.length; i++) {
+          if (blocksD.some((k) => i > k.from && i <= k.to)) continue;
+          const blk = blocksD.find((k) => k.from === i); const cs = blk ? ` colspan="${blk.to - blk.from + 1}"` : '';
+          const tg = (day.together || []).find((t) => (t.classes || []).indexOf(l) !== -1 && (t.periods || []).indexOf(i) !== -1); const v = String(r.cells[i] == null ? '' : r.cells[i]).trim();
+          if (!v && tg) { const sj = tp.sub[String(tg.text).trim()]; tds += `<td class="tog">${escapeHtml(shortSubj(sj || tg.text))}<small>together</small></td>`; continue; }
+          if (!v) { tds += `<td class="nl"${cs}>–</td>`; continue; }
+          tds += tp.sub[v] ? `<td${cs}${tp.kind[v] === 'class' ? ' class="ts"' : ''}>${escapeHtml(shortSubj(tp.sub[v]))}</td>` : (tp.kind[v] === 'exam' ? `<td${cs} class="sp">${escapeHtml(shortSubj(tp.guess[v] || tp.head[v]))} test</td>` : `<td${cs} class="warn">${escapeHtml(shortSubj(tp.head[v] || v))}</td>`);
+        }
+      } else if (sp) tds = `<td class="sp" colspan="${D.periods.length}">${escapeHtml(sp.text || 'Special')}</td>`; else tds = `<td class="nl" colspan="${D.periods.length}">–</td>`;
+      return `<tr><th>${escapeHtml(l)}<small>${b ? gridBatchHtml(b) : 'not filled'}</small></th>${tds}</tr>`;
+    }).join('');
     const existing = (state.tg.doc && state.tg.doc.cells || []).some((c) => !c.ex);
-    const canPut = !perBad && !dup && B.cells.length > 0;
+    const canPut = !dup && (B.cells.length > 0 || B.exams.some((x) => x.on) || B.notes.some((n) => n.on));
     return `<div id="tpRoot" data-tp="${tp.id}">${head(target)}
-      <div class="tp-sum"><b>${B.cells.length}</b> classes ready${B.unmatched ? ` · <span class="tp-amb">${B.unmatched} need a subject</span>` : ''}<small>read in ${tp.secs || 0} s · ${dates.length} days · ${D.periods.length} periods · ${tp.rows.length} classes</small></div>
+      <div class="tp-sum"><b>${B.cells.length}</b> classes ready${B.cells.filter((c) => c.test).length ? ` · ${B.cells.filter((c) => c.test).length} as class test` : ''}${B.exams.filter((x) => x.on).length ? ` · ${B.exams.filter((x) => x.on).length} exam${B.exams.filter((x) => x.on).length === 1 ? '' : 's'}` : ''}${B.notes.filter((n) => n.on).length ? ` · ${B.notes.filter((n) => n.on).length} day note${B.notes.filter((n) => n.on).length === 1 ? '' : 's'}` : ''}${B.unmatched ? ` · <span class="tp-amb">${B.unmatched} need a subject</span>` : ''}<small>read in ${tp.secs || 0} s · ${dates.length} days · ${D.periods.length} periods · ${tp.rows.length} classes</small></div>
       ${warns.join('')}
       <div class="xs-grp">Classes → your batches</div>${clsRows}
       <div class="xs-grp">Subjects</div>${subRows}
+      ${timesHtml}${exHtml}${noteHtml}
       <div class="xs-grp">What it will look like</div><div class="chips" style="margin-bottom:8px;">${dayChips}</div>
       <div class="tp-wrap"><table class="tp-t"><thead><tr><th></th>${th}</tr></thead><tbody>${body}</tbody></table></div>
       ${existing ? `<div class="xs-grp">This week already has classes</div><div class="chips"><button type="button" class="chip${tp.policy === 'empty' ? ' active' : ''}" data-tp-pol="empty">Keep them, fill only empty boxes</button><button type="button" class="chip${tp.policy === 'all' ? ' active' : ''}" data-tp-pol="all">Replace these days</button></div>` : ''}
@@ -8385,6 +8578,11 @@ Rules:
     body.querySelectorAll('[data-tp-pol]').forEach((el) => el.addEventListener('click', () => { tp.policy = el.getAttribute('data-tp-pol'); tpRender(); }));
     const so = body.querySelector('#tpShiftOn'); if (so) so.addEventListener('click', () => { tp.shift = true; tpRender(); });
     const sf = body.querySelector('#tpShiftOff'); if (sf) sf.addEventListener('click', async () => { await tpGoWeek(mondayOf(tp.data.days[0].date)); tp.shift = false; tpRender(); });
+    body.querySelectorAll('[data-tp-ex-on]').forEach((el) => el.addEventListener('click', () => { const k = el.getAttribute('data-tp-ex-on'); const e = tp.exEdit[k] = tp.exEdit[k] || {}; e.on = e.on === false; tpRender(); }));
+    body.querySelectorAll('[data-tp-ex-type]').forEach((el) => el.addEventListener('change', () => { const k = el.getAttribute('data-tp-ex-type'); (tp.exEdit[k] = tp.exEdit[k] || {}).type = el.value; tpRender(); }));
+    body.querySelectorAll('[data-tp-ex-sub]').forEach((el) => el.addEventListener('change', () => { const k = el.getAttribute('data-tp-ex-sub'); (tp.exEdit[k] = tp.exEdit[k] || {}).subject = el.value; tpRender(); }));
+    body.querySelectorAll('[data-tp-note]').forEach((el) => el.addEventListener('click', () => { const k = el.getAttribute('data-tp-note'); tp.noteOff[k] = !tp.noteOff[k]; tpRender(); }));
+    body.querySelectorAll('[data-tp-times]').forEach((el) => el.addEventListener('click', () => { tp.useTimes = el.getAttribute('data-tp-times') === '1'; tpRender(); }));
     const go = body.querySelector('#tpGo'); if (go) go.addEventListener('click', tpApply);
   }
   function renderAdmin() {
