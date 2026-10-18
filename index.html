@@ -1510,6 +1510,7 @@
   .i-sun { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%224%22/%3E%3Cpath%20d%3D%22M12%202v2M12%2020v2M4.9%204.9l1.4%201.4M17.7%2017.7l1.4%201.4M2%2012h2M20%2012h2M4.9%2019.1l1.4-1.4M17.7%206.3l1.4-1.4%22/%3E%3C/svg%3E"); }
   .i-moon { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%2012.79A9%209%200%201%201%2011.21%203%207%207%200%200%200%2021%2012.79z%22/%3E%3C/svg%3E"); }
   .i-phone { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%226%22%20y%3D%222%22%20width%3D%2212%22%20height%3D%2220%22%20rx%3D%222%22/%3E%3Cline%20x1%3D%2211%22%20y1%3D%2218%22%20x2%3D%2213%22%20y2%3D%2218%22/%3E%3C/svg%3E"); }
+  .i-mic { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%229%22%20y%3D%222%22%20width%3D%226%22%20height%3D%2211%22%20rx%3D%223%22/%3E%3Cpath%20d%3D%22M5%2010a7%207%200%200%200%2014%200M12%2017v4M8%2021h8%22/%3E%3C/svg%3E"); }
   .i-spark { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203l1.9%205.6L19.5%2010l-5.6%201.9L12%2017.5l-1.9-5.6L4.5%2010l5.6-1.4z%22/%3E%3C/svg%3E"); }
   .i-eye { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M1%2012s4-8%2011-8%2011%208%2011%208-4%208-11%208-11-8-11-8z%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22/%3E%3C/svg%3E"); }
   .i-share { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2012v8a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2v-8%22/%3E%3Cpolyline%20points%3D%2216%206%2012%202%208%206%22/%3E%3Cline%20x1%3D%2212%22%20y1%3D%222%22%20x2%3D%2212%22%20y2%3D%2215%22/%3E%3C/svg%3E"); }
@@ -2014,6 +2015,17 @@
   #ttTeachers { margin: 10px 0 8px; }
   #ttSummary { margin: 0 0 8px; }
   #ttActions { margin: 0 0 12px; }
+  /* voice typing: a quiet mic at the bottom right inside a text box */
+  .mic-wrap { position: relative; }
+  .mic-wrap > textarea { padding-right: 58px; padding-bottom: 46px; box-sizing: border-box; width: 100%; }
+  .mic-btn { position: absolute; right: 8px; bottom: 8px; width: 38px; height: 38px; padding: 0; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted-2); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .mic-btn .ico { width: 20px; height: 20px; }
+  .mic-lang { position: absolute; right: 52px; bottom: 12px; height: 30px; padding: 0 10px; border-radius: 999px; border: 0; background: var(--neutral-soft); color: var(--muted-2); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .mic-hint { position: absolute; left: 14px; bottom: 15px; font-size: 12px; color: var(--green); display: none; pointer-events: none; }
+  .mic-wrap.listening .mic-btn { background: var(--gold); border-color: var(--gold); color: #fff; animation: micPulse 1.2s ease-in-out infinite; }
+  .mic-wrap.listening .mic-hint { display: block; }
+  .mic-wrap.listening .mic-lang { display: none; }
+  @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,.35); } 50% { box-shadow: 0 0 0 8px rgba(230,57,70,0); } }
 </style>
 </head>
 <body>
@@ -3156,7 +3168,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.5 · updated 17 Oct 2026</div>
+          <div class="dnote">Version 13.6 · updated 18 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7598,6 +7610,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const pickable = () => noticeRecipients('all').filter((u) => u !== state.teacherId && (!teamWings(u).length || teamWings(u).some((w) => lw.indexOf(w) !== -1)));
     const targets = () => (aud === 'pick' ? pick.filter((u) => pickable().indexOf(u) !== -1) : noticeRecipients(aud));
     const draw = () => {
+      micStop();
       const n = targets().length;
       const msg = aud === 'pick' && !n ? 'Choose at least one teacher.' : (n ? `${n} teacher${n === 1 ? '' : 's'} will get it.` : 'No teachers to send to yet.');
       body.innerHTML = `<div class="hv-d-title">New notice</div><div class="hv-d-wing">Shows on the teachers' Today page and in their notifications</div>
@@ -7611,7 +7624,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           <div class="nn-pick-acts"><button type="button" class="hv-back" id="nnAll">Select all</button><button type="button" class="hv-back" id="nnNone">Clear</button></div>` : ''}
         <div class="hv-note" id="nnErr" style="text-align:left; min-height:18px; color: var(--accent);">${msg}</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="nnCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="nnPost" style="margin:0;">Send notice</button></div>`;
-      const ta = document.getElementById('nnText'); ta.addEventListener('input', () => { txt = ta.value; });
+      const ta = document.getElementById('nnText'); ta.addEventListener('input', () => { txt = ta.value; }); micAttach(ta);
       const pb = document.getElementById('nnPol'); if (pb) pb.addEventListener('click', async () => {
         txt = ta.value.trim(); if (!txt) { pol = { err: 'Write the notice first, then polish it.' }; draw(); return; }
         const mine = txt; pol = { busy: true }; draw();
@@ -8108,6 +8121,41 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       catch (e) { say('✕ ' + e.message, 'bad'); }
     });
   })();
+  // ===== Voice typing: a mic inside a text box, using the phone's own speech recognition =====
+  const MicSR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let micCur = null;
+  function micStop() { if (micCur) { try { micCur.rec.stop(); } catch (e) { /* already stopped */ } } }
+  function micLang() { try { return localStorage.getItem('ctd_mic_lang') || 'hi-IN'; } catch (e) { return 'hi-IN'; } }
+  function micAttach(ta) {
+    if (!MicSR || !ta || ta.dataset.mic) return; ta.dataset.mic = '1';
+    const wrap = document.createElement('div'); wrap.className = 'mic-wrap'; wrap.style.marginTop = ta.style.marginTop; ta.style.marginTop = '';
+    ta.parentNode.insertBefore(wrap, ta); wrap.appendChild(ta);
+    const hint = document.createElement('span'); hint.className = 'mic-hint'; hint.textContent = '● Listening… tap the mic to stop';
+    const lang = document.createElement('button'); lang.type = 'button'; lang.className = 'mic-lang'; lang.setAttribute('aria-label', 'Speaking language');
+    const showLang = () => { lang.textContent = micLang() === 'hi-IN' ? 'हिं' : 'EN'; }; showLang();
+    lang.addEventListener('click', () => { try { localStorage.setItem('ctd_mic_lang', micLang() === 'hi-IN' ? 'en-IN' : 'hi-IN'); } catch (e) { /* ignore */ } showLang(); });
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'mic-btn'; btn.setAttribute('aria-label', 'Speak'); btn.innerHTML = '<span class="ico i-mic" aria-hidden="true"></span>';
+    wrap.appendChild(hint); wrap.appendChild(lang); wrap.appendChild(btn);
+    btn.addEventListener('click', () => {
+      if (micCur && micCur.ta === ta) { micStop(); return; }
+      micStop();
+      let rec; try { rec = new MicSR(); } catch (e) { showToast('Voice typing is not available here', 'error'); return; }
+      rec.lang = micLang(); rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;
+      const base = ta.value; const sep = base && !/\s$/.test(base) ? ' ' : ''; const maxLen = ta.maxLength > 0 ? ta.maxLength : 100000; let err = '', heard = false;
+      rec.onresult = (e) => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; heard = true; ta.value = (base + sep + t.trim()).slice(0, maxLen); ta.dispatchEvent(new Event('input', { bubbles: true })); };
+      rec.onerror = (e) => { err = (e && e.error) || 'error'; };
+      const watch = setInterval(() => { if (!document.body.contains(ta)) micStop(); }, 800);
+      rec.onend = () => {
+        clearInterval(watch); wrap.classList.remove('listening'); if (micCur && micCur.rec === rec) micCur = null;
+        if (err === 'not-allowed' || err === 'service-not-allowed') showToast('Microphone is blocked · allow it for this site in the browser settings', 'error');
+        else if (err === 'audio-capture') showToast('No microphone found', 'error');
+        else if (err === 'network') showToast('Voice typing needs the internet', 'error');
+        else if (err === 'no-speech' && !heard) showToast('I did not hear anything · try again', 'error');
+      };
+      try { rec.start(); micCur = { ta, rec }; wrap.classList.add('listening'); } catch (e) { clearInterval(watch); showToast('Could not start the microphone', 'error'); }
+    });
+  }
+  setTimeout(() => micAttach(document.getElementById('activityNoteInput')), 0);
   // A notice the Admin has written is made clearer and more polite, in the same language. Nothing is sent by the AI:
   // the Admin sees the suggestion and chooses. Every date, time and number must come through exactly, or the suggestion is thrown away.
   const nnDigits = (t) => (String(t).replace(/[०-९]/g, (d) => String('०१२३४५६७८९'.indexOf(d))).match(/\d+(?:[.,:]\d+)*/g) || []).map((x) => x.replace(',', '.'));
