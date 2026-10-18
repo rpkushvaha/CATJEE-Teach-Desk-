@@ -2017,19 +2017,14 @@
   #ttActions { margin: 0 0 12px; }
   /* voice typing: a quiet mic at the bottom right inside a text box */
   .mic-wrap { position: relative; }
-  .mic-wrap:not(.mic-off) > textarea { padding-right: 58px; padding-bottom: 46px; box-sizing: border-box; width: 100%; }
+  .mic-wrap > textarea { padding-right: 58px; padding-bottom: 46px; box-sizing: border-box; width: 100%; }
   .mic-btn { position: absolute; right: 8px; bottom: 8px; width: 38px; height: 38px; padding: 0; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted-2); display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .mic-btn .ico { width: 20px; height: 20px; }
   .mic-lang { position: absolute; right: 52px; bottom: 12px; height: 30px; padding: 0 10px; border-radius: 999px; border: 0; background: var(--neutral-soft); color: var(--muted-2); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
   .mic-hint { position: absolute; left: 14px; bottom: 15px; font-size: 12px; color: var(--green); display: none; pointer-events: none; }
   .mic-wrap.listening .mic-btn { background: var(--gold); border-color: var(--gold); color: #fff; animation: micPulse 1.2s ease-in-out infinite; }
-  .mic-wrap.listening .mic-hint, .mic-wrap.working .mic-hint { display: block; }
-  .mic-wrap.working .mic-btn { opacity: .55; pointer-events: none; }
-  .mic-wrap.working .mic-lang, .mic-wrap.failed .mic-lang { display: none; }
-  .mic-retry { position: absolute; left: 10px; bottom: 11px; display: none; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--green); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .mic-wrap.failed:not(.working):not(.listening) .mic-retry { display: inline-flex; align-items: center; }
+  .mic-wrap.listening .mic-hint { display: block; }
   .mic-wrap.listening .mic-lang { display: none; }
-  .mic-wrap.mic-off .mic-btn, .mic-wrap.mic-off .mic-lang, .mic-wrap.mic-off .mic-hint, .mic-wrap.mic-off .mic-retry { display: none; }
   @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,.35); } 50% { box-shadow: 0 0 0 8px rgba(230,57,70,0); } }
 </style>
 </head>
@@ -3173,7 +3168,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.9 · updated 18 Oct 2026</div>
+          <div class="dnote">Version 13.10 · updated 18 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8126,113 +8121,52 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       catch (e) { say('✕ ' + e.message, 'bad'); }
     });
   })();
-  // ===== Voice typing: a mic inside a text box =====
-  // Admin (AI switched on): the voice is recorded and Gemini writes it down, like a voice note: no tick sounds, up to 90 seconds at a time.
-  // Everyone else (or no AI): the phone's own speech recognition.
+  // ===== Voice typing: a mic inside a text box, using the phone's own speech recognition =====
   const MicSR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const micRecCan = () => !!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
   let micCur = null;
-  function micStop() { if (micCur) { micCur.stopping = true; try { micCur.stop(); } catch (e) { /* already stopped */ } } }
+  function micStop() { if (micCur) { micCur.stopping = true; try { micCur.rec.stop(); } catch (e) { /* already stopped */ } } }
   function micLang() { try { return localStorage.getItem('ctd_mic_lang') || 'hi-IN'; } catch (e) { return 'hi-IN'; } }
-  function micSystem() {
-    const dev = micLang() === 'hi-IN';
-    return 'You write down speech from a recording exactly as it was said. The speaker may mix Hindi and English. ' + (dev ? 'Write Hindi words in Devanagari script and English words in English letters.' : 'Write everything in English letters (Roman script); write Hindi words with Hinglish spelling, for example "sab teachers kal meeting me aaye".') + ' Do not translate, summarise, answer or correct anything, and do not add anything. Add normal punctuation. Output only the written words. If nobody speaks, output nothing.';
-  }
-  function micB64(buf) { let t = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 0x8000) t += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(t); }
-  // the recording is turned into a small mono 16 kHz WAV, a format Gemini always accepts
-  async function micToWav(blob) {
-    const AC = window.AudioContext || window.webkitAudioContext; const ac = new AC();
-    let audio; try { audio = await ac.decodeAudioData(await blob.arrayBuffer()); } finally { try { ac.close(); } catch (e) { /* ignore */ } }
-    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext; const off = new OAC(1, Math.max(1, Math.ceil(audio.duration * 16000)), 16000);
-    const src = off.createBufferSource(); src.buffer = audio; src.connect(off.destination); src.start(0);
-    const pcm = (await off.startRendering()).getChannelData(0); const n = pcm.length;
-    const buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf); const w = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
-    w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 16000, true); v.setUint32(28, 32000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
-    for (let i = 0; i < n; i++) { const x = Math.max(-1, Math.min(1, pcm[i])); v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
-    return micB64(buf);
-  }
   function micAttach(ta) {
-    if (!ta || ta.dataset.mic || (!MicSR && !micRecCan())) return; ta.dataset.mic = '1';
+    if (!MicSR || !ta || ta.dataset.mic) return; ta.dataset.mic = '1';
     const wrap = document.createElement('div'); wrap.className = 'mic-wrap'; wrap.style.marginTop = ta.style.marginTop; ta.style.marginTop = '';
     ta.parentNode.insertBefore(wrap, ta); wrap.appendChild(ta);
-    const hint = document.createElement('span'); hint.className = 'mic-hint';
-    const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'mic-retry'; retry.textContent = '↻ Could not write it down · Retry';
+    const hint = document.createElement('span'); hint.className = 'mic-hint'; hint.textContent = '● Listening… tap the mic to stop';
     const lang = document.createElement('button'); lang.type = 'button'; lang.className = 'mic-lang'; lang.setAttribute('aria-label', 'Speaking language');
-    const showLang = () => { lang.textContent = micLang() === 'hi-IN' ? 'हिं' : 'ABC'; }; showLang();
+    const showLang = () => { lang.textContent = micLang() === 'hi-IN' ? 'हिं' : 'EN'; }; showLang();
     lang.addEventListener('click', () => { try { localStorage.setItem('ctd_mic_lang', micLang() === 'hi-IN' ? 'en-IN' : 'hi-IN'); } catch (e) { /* ignore */ } showLang(); });
     const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'mic-btn'; btn.setAttribute('aria-label', 'Speak'); btn.innerHTML = '<span class="ico i-mic" aria-hidden="true"></span>';
-    wrap.appendChild(hint); wrap.appendChild(retry); wrap.appendChild(lang); wrap.appendChild(btn);
-    // the mic is shown only where it can work: the phone's speech engine, or recording with the AI helper switched on
-    const refresh = () => wrap.classList.toggle('mic-off', !(MicSR || (micRecCan() && aiReady()))); refresh();
-    ta.addEventListener('focus', refresh); wrap.addEventListener('pointerenter', refresh);
-    const maxLen = () => (ta.maxLength > 0 ? ta.maxLength : 100000);
-    const put = (text) => { const cur = ta.value; const sep = cur && !/\s$/.test(cur) ? ' ' : ''; ta.value = (cur + sep + text).slice(0, maxLen()); ta.dispatchEvent(new Event('input', { bubbles: true })); };
-    let saved = null;
-    // --- record, then write it down
-    const write = async (blob) => {
-      saved = blob; wrap.classList.remove('failed'); wrap.classList.add('working'); hint.textContent = 'Writing it down…';
-      try {
-        const wav = await micToWav(blob);
-        const d = await aiCall({ system: micSystem(), prompt: 'Write down exactly what is said in this recording.', image: { data: wav, mime: 'audio/wav' } }, 90000);
-        const text = String(d.text || '').trim().replace(/^["“]|["”]$/g, '').trim();
-        if (!text) { showToast('I did not hear anything · try again', 'error'); saved = null; }
-        else { saved = null; put(text); }
-      } catch (e) { wrap.classList.add('failed'); showToast((e && e.message) || 'Could not write it down', 'error'); }
-      finally { wrap.classList.remove('working'); }
-    };
-    retry.addEventListener('click', () => { if (saved) write(saved); });
-    const record = async () => {
-      let stream; try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-      catch (e) { showToast(e && (e.name === 'NotAllowedError' || e.name === 'SecurityError') ? 'Microphone is blocked · allow it for this site in the browser settings' : 'No microphone found', 'error'); return; }
-      let mr; try { mr = new MediaRecorder(stream, { audioBitsPerSecond: 32000 }); } catch (e) { try { mr = new MediaRecorder(stream); } catch (e2) { stream.getTracks().forEach((t) => t.stop()); showToast('Could not start the microphone', 'error'); return; } }
-      const chunks = []; const t0 = Date.now(); wrap.classList.remove('failed'); saved = null;
-      const cur = micCur = { ta, stopping: false, discard: false, stop: () => { if (mr.state !== 'inactive') mr.stop(); } };
-      const clock = () => { const sec = Math.floor((Date.now() - t0) / 1000); hint.textContent = '● Recording ' + Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0') + ' · tap the mic when done'; };
-      clock(); const tick = setInterval(() => { clock(); if (!document.body.contains(ta)) { cur.discard = true; micStop(); } }, 500);
-      const cap = setTimeout(() => micStop(), 90000);
-      mr.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
-      mr.onstop = () => {
-        clearInterval(tick); clearTimeout(cap); stream.getTracks().forEach((t) => t.stop()); wrap.classList.remove('listening'); if (micCur === cur) micCur = null;
-        if (cur.discard || !document.body.contains(ta)) return;
-        if (Date.now() - t0 < 800 || !chunks.length) { showToast('Too short · tap the mic, speak, then tap it again', 'error'); return; }
-        write(new Blob(chunks, { type: mr.mimeType || 'audio/webm' }));
-      };
-      try { mr.start(); wrap.classList.add('listening'); } catch (e) { clearInterval(tick); clearTimeout(cap); stream.getTracks().forEach((t) => t.stop()); micCur = null; showToast('Could not start the microphone', 'error'); }
-    };
-    // --- the phone's own speech recognition (when AI is not switched on)
-    const listen = () => {
-      const mx = maxLen(); let sessions = 0;
-      // One short listening round at a time (more reliable than "continuous" on many Android phones, which repeat every word).
+    wrap.appendChild(hint); wrap.appendChild(lang); wrap.appendChild(btn);
+    btn.addEventListener('click', () => {
+      if (micCur && micCur.ta === ta) { micStop(); return; }
+      micStop();
+      const maxLen = ta.maxLength > 0 ? ta.maxLength : 100000; let sessions = 0;
+      // One short listening round at a time (it is more reliable than "continuous" on many Android phones, which repeat every word).
+      // While the person keeps speaking, the next round starts by itself; a quiet round, a tap, or an error ends it.
       const round = () => {
         let rec; try { rec = new MicSR(); } catch (e) { showToast('Voice typing is not available here', 'error'); wrap.classList.remove('listening'); micCur = null; return; }
         rec.lang = micLang(); rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
         const base = ta.value; const sep = base && !/\s$/.test(base) ? ' ' : ''; let err = '', heard = false;
-        const cur = micCur = { ta, stopping: false, stop: () => rec.stop() };
+        const cur = micCur = { ta, rec, stopping: false };
         rec.onresult = (e) => {
+          // the newest item is the whole sentence so far; some phones also send the older, shorter ones again
           let t = ''; for (let i = e.results.length - 1; i >= 0; i--) { const x = String((e.results[i][0] && e.results[i][0].transcript) || '').trim(); if (x) { t = x; break; } }
-          if (!t) return; heard = true; ta.value = (base + sep + t).slice(0, mx); ta.dispatchEvent(new Event('input', { bubbles: true }));
+          if (!t) return; heard = true; ta.value = (base + sep + t).slice(0, maxLen); ta.dispatchEvent(new Event('input', { bubbles: true }));
         };
         rec.onerror = (e) => { err = (e && e.error) || 'error'; };
         rec.onend = () => {
           if (micCur === cur) micCur = null;
-          const again = !cur.stopping && heard && !err && sessions < 40 && document.body.contains(ta) && ta.value.length < mx;
+          const again = !cur.stopping && heard && !err && sessions < 40 && document.body.contains(ta) && ta.value.length < maxLen;
           if (again) { sessions++; setTimeout(round, 120); return; }
-          clearInterval(watch); wrap.classList.remove('listening');
+          clearInterval(micWatch); wrap.classList.remove('listening');
           if (err === 'not-allowed' || err === 'service-not-allowed') showToast('Microphone is blocked · allow it for this site in the browser settings', 'error');
           else if (err === 'audio-capture') showToast('No microphone found', 'error');
           else if (err === 'network') showToast('Voice typing needs the internet', 'error');
           else if (err === 'no-speech' && sessions === 0 && !heard) showToast('I did not hear anything · try again', 'error');
         };
-        try { rec.start(); wrap.classList.add('listening'); hint.textContent = '● Listening… tap the mic to stop'; } catch (e) { micCur = null; clearInterval(watch); wrap.classList.remove('listening'); showToast('Could not start the microphone', 'error'); }
+        try { rec.start(); wrap.classList.add('listening'); } catch (e) { micCur = null; clearInterval(micWatch); wrap.classList.remove('listening'); showToast('Could not start the microphone', 'error'); }
       };
-      const watch = setInterval(() => { if (!document.body.contains(ta)) micStop(); }, 800);
+      const micWatch = setInterval(() => { if (!document.body.contains(ta)) micStop(); }, 800);
       round();
-    };
-    btn.addEventListener('click', () => {
-      if (wrap.classList.contains('working')) return;
-      if (micCur && micCur.ta === ta) { micStop(); return; }
-      micStop();
-      if (aiReady() && micRecCan()) record(); else if (MicSR) listen(); else showToast('Voice typing is not available on this phone', 'error');
     });
   }
   setTimeout(() => micAttach(document.getElementById('activityNoteInput')), 0);
