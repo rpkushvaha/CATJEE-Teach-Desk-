@@ -1928,17 +1928,12 @@
   .field label, .micro-label, .sv-tlbl, .team-lbl, .xw-card .sv-tlbl { font-weight: 500; }
   .btn-secondary { font-weight: 500; }
   .hv-back { font-weight: 500; }
-  .ad-tab { font-weight: 500; }
-  .ad-tab.active { font-weight: 600; }
   .hv-icon-lbl { font-weight: 500; }
   .qa-s, .tsec-meta, .hv-d-wing, .xd-time, .xs-pn small, .xd-brk { font-weight: 400; }
   .xw-tool, .xd-add button, .xs-link, .xs-addsl, .xs-badd, .xs-bt button, .xw-stat, .xd-meta, .xd-axis { font-weight: 500; }
 
   /* ===== design cleanup (13.3): red only for the main action; quiet icons; calm controls ===== */
   :root { --muted: #666666; --neutral-text: #6B6B6B; }
-  .stat-box-icon, .dtile, .dhero-icon { background: var(--neutral-soft); color: var(--muted-2); }
-  .checklist-icon, .qa-btn .ic, .set-acc > .panel-title > .ic, .sched-hint .ic, .xw-tool .ic, .help-item .ico, .pv-row .ico, .ck-lines > div > .ico, .date-pill .ic, .xw-prev .ic, #xwPreview.xw-ib .ic, .subject-btn .edit-icon { color: var(--muted-2); }
-  .sum-tile::before { background: var(--muted-2) !important; }
   .sum-num.warn { color: var(--green); }
   /* chips: filters are quiet fills, the chosen one a soft red */
   .chip { border-color: transparent; background: var(--neutral-soft); box-shadow: none; font-weight: 500; }
@@ -1946,16 +1941,12 @@
   /* "pick one of these" is a segmented control, not a row of pills */
   #modeChips, #adminReportRangeChips, .tg-mode, .chips:has(> [data-hrange]) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 3px; background: var(--neutral-soft); border-radius: 12px; width: 100%; }
   #modeChips .chip, #adminReportRangeChips .chip, .tg-mode .chip, .chips:has(> [data-hrange]) .chip { background: transparent; border-radius: 12px; padding: 9px 6px; color: var(--muted-2); text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; }
-  #modeChips .chip.active, #adminReportRangeChips .chip.active, .tg-mode .chip.active, .chips:has(> [data-hrange]) .chip.active { background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(23,23,23,.06); font-weight: 600; }
+  #modeChips .chip.active, #adminReportRangeChips .chip.active, .tg-mode .chip.active, .chips:has(> [data-hrange]) .chip.active { background: var(--card); color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 1px 2px rgba(23,23,23,.06); font-weight: 600; }
   /* date arrows and date pill: quiet filled shapes everywhere */
   .hv-arrow { width: 34px; height: 34px; border: 0; background: var(--neutral-soft); }
   .date-pill { height: 38px; border-color: transparent; background: var(--neutral-soft); padding: 0 14px; }
   /* Admin: tabs are plain text with a line, the title row goes, date and wing share one bar */
   body:not(.coord-mode) #view-admin > .hv-head { display: none; }
-  .ad-tabs { display: flex; justify-content: space-between; gap: 12px; padding: 0; background: none; border-radius: 0; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-  .ad-tabs::-webkit-scrollbar { display: none; }
-  .ad-tab { flex: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 11px 2px; margin-bottom: -1px; font-weight: 500; }
-  .ad-tab.active { background: none; box-shadow: none; border-color: transparent; border-bottom-color: var(--gold); color: var(--gold); font-weight: 600; }
   .ad-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .ad-bar #adminDateNav { flex: 0 1 auto; gap: 6px; }
   .ad-bar #adminDateNav .hv-label { flex: none; }
@@ -1974,7 +1965,7 @@
   .tg-more[hidden] { display: none; }
   .tg-more .btn-secondary { width: 100%; border: 0; border-bottom: 1px solid var(--neutral-soft); border-radius: 0; justify-content: flex-start; padding: 13px 14px; gap: 12px; font-size: 15px; font-weight: 500; color: var(--ink) !important; opacity: 1; background: transparent; }
   .tg-more .btn-secondary:last-child { border-bottom: 0; }
-  .tg-more .btn-secondary .ico { width: 18px; height: 18px; color: var(--muted-2); }
+  .tg-more .btn-secondary .ico { width: 18px; height: 18px; }
   .tg-more .btn-secondary.hv-del, .tg-more .btn-secondary.hv-del .ico { color: var(--green) !important; }
   /* the smallest phones: the narrow summary tiles keep the smaller caption */
   .sum-grid.stack .sum-lbl { flex: 0 0 auto; overflow: visible; }
@@ -3185,7 +3176,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.13 · updated 19 Oct 2026</div>
+          <div class="dnote">Version 13.14 · updated 19 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
