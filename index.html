@@ -3168,7 +3168,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.6 · updated 18 Oct 2026</div>
+          <div class="dnote">Version 13.7 · updated 18 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8142,7 +8142,16 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       let rec; try { rec = new MicSR(); } catch (e) { showToast('Voice typing is not available here', 'error'); return; }
       rec.lang = micLang(); rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;
       const base = ta.value; const sep = base && !/\s$/.test(base) ? ' ' : ''; const maxLen = ta.maxLength > 0 ? ta.maxLength : 100000; let err = '', heard = false;
-      rec.onresult = (e) => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; heard = true; ta.value = (base + sep + t.trim()).slice(0, maxLen); ta.dispatchEvent(new Event('input', { bubbles: true })); };
+      rec.onresult = (e) => {
+        // Some phones send every growing phrase as a new item ("hello", "hello teachers", "hello teachers please"…): only the longest of such a run is kept
+        const parts = [];
+        for (let i = 0; i < e.results.length; i++) {
+          const r = e.results[i]; const t = String((r[0] && r[0].transcript) || '').trim(); if (!t) continue;
+          const last = parts[parts.length - 1];
+          if (last && !last.fin && t.toLowerCase().indexOf(last.t.toLowerCase()) === 0) { last.t = t; last.fin = !!r.isFinal; } else parts.push({ t, fin: !!r.isFinal });
+        }
+        heard = true; ta.value = (base + sep + parts.map((x) => x.t).join(' ')).slice(0, maxLen); ta.dispatchEvent(new Event('input', { bubbles: true }));
+      };
       rec.onerror = (e) => { err = (e && e.error) || 'error'; };
       const watch = setInterval(() => { if (!document.body.contains(ta)) micStop(); }, 800);
       rec.onend = () => {
