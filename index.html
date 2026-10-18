@@ -3168,7 +3168,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.7 · updated 18 Oct 2026</div>
+          <div class="dnote">Version 13.8 · updated 18 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8124,7 +8124,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   // ===== Voice typing: a mic inside a text box, using the phone's own speech recognition =====
   const MicSR = window.SpeechRecognition || window.webkitSpeechRecognition;
   let micCur = null;
-  function micStop() { if (micCur) { try { micCur.rec.stop(); } catch (e) { /* already stopped */ } } }
+  function micStop() { if (micCur) { micCur.stopping = true; try { micCur.rec.stop(); } catch (e) { /* already stopped */ } } }
   function micLang() { try { return localStorage.getItem('ctd_mic_lang') || 'hi-IN'; } catch (e) { return 'hi-IN'; } }
   function micAttach(ta) {
     if (!MicSR || !ta || ta.dataset.mic) return; ta.dataset.mic = '1';
@@ -8139,29 +8139,34 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     btn.addEventListener('click', () => {
       if (micCur && micCur.ta === ta) { micStop(); return; }
       micStop();
-      let rec; try { rec = new MicSR(); } catch (e) { showToast('Voice typing is not available here', 'error'); return; }
-      rec.lang = micLang(); rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;
-      const base = ta.value; const sep = base && !/\s$/.test(base) ? ' ' : ''; const maxLen = ta.maxLength > 0 ? ta.maxLength : 100000; let err = '', heard = false;
-      rec.onresult = (e) => {
-        // Some phones send every growing phrase as a new item ("hello", "hello teachers", "hello teachers please"…): only the longest of such a run is kept
-        const parts = [];
-        for (let i = 0; i < e.results.length; i++) {
-          const r = e.results[i]; const t = String((r[0] && r[0].transcript) || '').trim(); if (!t) continue;
-          const last = parts[parts.length - 1];
-          if (last && !last.fin && t.toLowerCase().indexOf(last.t.toLowerCase()) === 0) { last.t = t; last.fin = !!r.isFinal; } else parts.push({ t, fin: !!r.isFinal });
-        }
-        heard = true; ta.value = (base + sep + parts.map((x) => x.t).join(' ')).slice(0, maxLen); ta.dispatchEvent(new Event('input', { bubbles: true }));
+      const maxLen = ta.maxLength > 0 ? ta.maxLength : 100000; let sessions = 0;
+      // One short listening round at a time (it is more reliable than "continuous" on many Android phones, which repeat every word).
+      // While the person keeps speaking, the next round starts by itself; a quiet round, a tap, or an error ends it.
+      const round = () => {
+        let rec; try { rec = new MicSR(); } catch (e) { showToast('Voice typing is not available here', 'error'); wrap.classList.remove('listening'); micCur = null; return; }
+        rec.lang = micLang(); rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+        const base = ta.value; const sep = base && !/\s$/.test(base) ? ' ' : ''; let err = '', heard = false;
+        const cur = micCur = { ta, rec, stopping: false };
+        rec.onresult = (e) => {
+          // the newest item is the whole sentence so far; some phones also send the older, shorter ones again
+          let t = ''; for (let i = e.results.length - 1; i >= 0; i--) { const x = String((e.results[i][0] && e.results[i][0].transcript) || '').trim(); if (x) { t = x; break; } }
+          if (!t) return; heard = true; ta.value = (base + sep + t).slice(0, maxLen); ta.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+        rec.onerror = (e) => { err = (e && e.error) || 'error'; };
+        rec.onend = () => {
+          if (micCur === cur) micCur = null;
+          const again = !cur.stopping && heard && !err && sessions < 40 && document.body.contains(ta) && ta.value.length < maxLen;
+          if (again) { sessions++; setTimeout(round, 120); return; }
+          clearInterval(micWatch); wrap.classList.remove('listening');
+          if (err === 'not-allowed' || err === 'service-not-allowed') showToast('Microphone is blocked · allow it for this site in the browser settings', 'error');
+          else if (err === 'audio-capture') showToast('No microphone found', 'error');
+          else if (err === 'network') showToast('Voice typing needs the internet', 'error');
+          else if (err === 'no-speech' && sessions === 0 && !heard) showToast('I did not hear anything · try again', 'error');
+        };
+        try { rec.start(); wrap.classList.add('listening'); } catch (e) { micCur = null; clearInterval(micWatch); wrap.classList.remove('listening'); showToast('Could not start the microphone', 'error'); }
       };
-      rec.onerror = (e) => { err = (e && e.error) || 'error'; };
-      const watch = setInterval(() => { if (!document.body.contains(ta)) micStop(); }, 800);
-      rec.onend = () => {
-        clearInterval(watch); wrap.classList.remove('listening'); if (micCur && micCur.rec === rec) micCur = null;
-        if (err === 'not-allowed' || err === 'service-not-allowed') showToast('Microphone is blocked · allow it for this site in the browser settings', 'error');
-        else if (err === 'audio-capture') showToast('No microphone found', 'error');
-        else if (err === 'network') showToast('Voice typing needs the internet', 'error');
-        else if (err === 'no-speech' && !heard) showToast('I did not hear anything · try again', 'error');
-      };
-      try { rec.start(); micCur = { ta, rec }; wrap.classList.add('listening'); } catch (e) { clearInterval(watch); showToast('Could not start the microphone', 'error'); }
+      const micWatch = setInterval(() => { if (!document.body.contains(ta)) micStop(); }, 800);
+      round();
     });
   }
   setTimeout(() => micAttach(document.getElementById('activityNoteInput')), 0);
