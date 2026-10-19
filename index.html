@@ -3254,7 +3254,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.16 · updated 20 Oct 2026</div>
+          <div class="dnote">Version 13.17 · updated 20 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14154,8 +14154,11 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
   function selectRow(el, items, active, onPick, noneLabel) {
     const list = (active && items.indexOf(active) === -1) ? [active].concat(items) : items;
-    el.innerHTML = `<select class="text-input xw-sel">${noneLabel !== undefined ? `<option value="">${escapeHtml(noneLabel)}</option>` : (active ? '' : '<option value="" disabled selected>Choose…</option>')}${list.map((t) => `<option value="${escapeHtml(t)}"${t === active ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select>`;
-    el.querySelector('select').addEventListener('change', (e) => onPick(e.target.value));
+    const html = `<select class="text-input xw-sel">${noneLabel !== undefined ? `<option value="">${escapeHtml(noneLabel)}</option>` : (active ? '' : '<option value="" disabled selected>Choose…</option>')}${list.map((t) => `<option value="${escapeHtml(t)}"${t === active ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select>`;
+    // the menu is rebuilt only when something really changed, so a background update can never close it while it is open
+    el._onPick = onPick;
+    if (!el._bound) { el._bound = true; el.addEventListener('change', (e) => { if (e.target && e.target.tagName === 'SELECT' && el._onPick) el._onPick(e.target.value); }); }
+    if (el._h !== html) { el._h = html; el.innerHTML = html; }
   }
   function chipRow(el, items, active, attr, onPick) {
     el.innerHTML = items.map((t) => `<button type="button" class="chip${t === active ? ' active' : ''}" ${attr}="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
