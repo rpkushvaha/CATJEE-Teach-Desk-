@@ -2034,6 +2034,26 @@
   .tp-exs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
   .tp-t td.tog { background: var(--gold-soft); color: var(--green); font-weight: 600; }
   .tp-t td.tog small { display: block; font-size: 9px; font-weight: 400; }
+  /* ===== Admin → Timetable, compact (13.15) ===== */
+  #view-admin[data-atab-cur="tt"] .ad-bar { display: none; }
+  .tt-weekrow { gap: 8px; margin-bottom: 8px; }
+  .tt-weekrow > div:nth-child(2) { flex: 1; min-width: 0; }
+  .tt-wingbox { flex: 0 0 auto; }
+  .tt-wingbox select { max-width: 132px; }
+  .tt-groupbox { margin-bottom: 8px; }
+  .tt-groupbox[hidden] { display: none; }
+  .tt-groupbox select { width: 100%; }
+  .tg-status { gap: 6px 10px; }
+  .tg-status .tg-sun { margin: 0; }
+  .tg-pgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  @media (max-width: 340px) { .tg-pgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .tg-pgrid .chip { display: flex; align-items: center; justify-content: center; height: 34px; padding: 0 3px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+  .tg-pgrid .tg-pedit { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); color: var(--gold); font-weight: 600; gap: 4px; }
+  .tg-dayacts { margin-top: 8px; }
+  .tg-more .btn-secondary .ico, .tg-dayacts .ico, .tg-morebtn .ico, .tg-prevbtn .ico, .tg-pgrid .tg-pedit .ico { color: var(--gold); }
+  .tg-more .btn-secondary.hv-del .ico { color: var(--green); }
+  .ai-coord-row { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .ai-coord-row span { color: var(--muted-2); font-size: 13px; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
@@ -2637,12 +2657,14 @@
       </section>
 
       <section class="tsec" id="ttSec" data-atab="tt">
-        <div class="hv-nav">
+        <div class="hv-nav tt-weekrow">
           <button type="button" class="hv-arrow" id="ttPrev" aria-label="Previous week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
           <div style="text-align:center;"><div class="hv-label" id="ttLabel"></div><div class="sv-sub" id="ttWhich" style="text-align:center;"></div></div>
           <button type="button" class="hv-arrow" id="ttNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
-        </div>
-        <div class="tg-mode"><button type="button" class="chip active" data-tt-mode="grid">Weekly grid</button><button type="button" class="chip" data-tt-mode="list">All classes</button></div>
+        <div class="ad-wingsel tt-wingbox" id="ttWingBox"><select id="ttWingSel" aria-label="Wing"></select></div>
+    </div>
+    <div class="tt-groupbox" id="ttGroupBox" hidden></div>
+    <div class="tg-mode"><button type="button" class="chip active" data-tt-mode="grid">Weekly grid</button><button type="button" class="chip" data-tt-mode="list">All classes</button></div>
         <div class="panel abs-box" id="absBox" hidden></div>
         <div id="tgWrap" class="tg-wrap"></div>
         <div id="ttListWrap" hidden>
@@ -2768,6 +2790,10 @@
         <input class="text-input" id="aiUrlInput" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://catjee-ai.yourname.workers.dev">
         <div class="sv-form-btns"><button type="button" class="btn-secondary" id="aiTestBtn" style="border-color: var(--line);">Test</button><button type="button" class="save-btn" id="aiSaveBtn">Save</button></div>
         <div class="ai-stat" id="aiStatus"></div>
+      <div class="sv-tlbl" style="margin-top:14px;">Coordinators and AI</div>
+      <div class="admin-sub" style="margin:0;">A Coordinator can use “Fill from a photo” once their login email is added in Cloudflare → your Worker → Settings → Variables → ADMIN_EMAILS (keep yours, put a comma, then theirs).</div>
+      <div id="aiCoordList"></div>
+      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="aiCoordShow" style="border-color: var(--line);">Show Coordinators’ emails</button><button type="button" class="save-btn" id="aiCoordCopy" hidden>Copy emails</button></div>
       </div>
 
       <div class="panel set-acc" id="adminSubjectsPanel" data-atab="settings">
@@ -3176,7 +3202,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.14 · updated 19 Oct 2026</div>
+          <div class="dnote">Version 13.15 · updated 19 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5467,10 +5493,27 @@
     }
     return res;
   }
+    // one menu for the groups (Pre-Foundation · Morning…): in Weekly grid it picks the timetable, in All classes it filters the list
+  function renderTtGroupSel() {
+    const box = document.getElementById('ttGroupBox'); if (!box) return;
+    const gridMode = state.tg.mode !== 'list'; const groups = ttGroupsShown(); const tt = state.tt;
+    if (tt.group && tt.group !== 'all' && !groups.some((x) => x.key === tt.group)) tt.group = 'all';
+    const g = gridMode ? tgGroup() : null; const cur = gridMode ? (g ? g.key : '') : (tt.group || 'all');
+    const opts = (gridMode ? [] : [['all', 'All groups']]).concat(groups.map((x) => [x.key, x.label]));
+    box.hidden = groups.length < 2;
+    const html = `<select class="text-input tt-tsel" id="ttGroupSel" aria-label="Group">${opts.map(([v, l]) => `<option value="${escapeHtml(v)}"${v === cur ? ' selected' : ''}>${escapeHtml(l)}</option>`).join('')}</select>`;
+    if (box._h !== html) {
+      box._h = html; box.innerHTML = html;
+      document.getElementById('ttGroupSel').addEventListener('change', (e) => {
+        if (state.tg.mode !== 'list') { state.tg.group = e.target.value; state.tg.docKey = ''; state.tg.dirty = false; state.tg.sel = null; state.tg.swap = null; if (state.abs) { state.abs = null; renderAbsent(); } renderTgGrid(); }
+        else { state.tt.group = e.target.value; renderTimetable(); }
+      });
+    }
+  }
   function renderTimetable() {
     const el = document.getElementById('ttBody');
     if (!el) return;
-    const gridMode = state.tg.mode !== 'list';
+        const gridMode = state.tg.mode !== 'list'; renderTtGroupSel();
     document.querySelectorAll('[data-tt-mode]').forEach((b) => b.classList.toggle('active', (b.getAttribute('data-tt-mode') === 'grid') === gridMode));
     document.getElementById('tgWrap').hidden = !gridMode;
     document.getElementById('ttListWrap').hidden = gridMode;
@@ -5505,7 +5548,9 @@
     renderTtForm();
     const all = ttAll(ws, we);
     const clash = ttClashes(all);
-    const shown = all.filter((x) => tt.teacher === 'all' || x.tid === tt.teacher);
+        const grp = (tt.group && tt.group !== 'all') ? ttGroupsShown().find((x) => x.key === tt.group) : null;
+    const inGrp = (sl) => !grp || grp.batches.indexOf(sl.label) !== -1 || (Array.isArray(sl.batches) && sl.batches.some((bb) => grp.batches.indexOf(bb) !== -1));
+    const shown = all.filter((x) => (tt.teacher === 'all' || x.tid === tt.teacher) && inGrp(x.s));
     const nClash = Object.keys(clash).filter((id) => shown.some((x) => x.s.id === id)).length;
     const nTeach = shown.map((x) => x.tid).filter((v, i, a) => a.indexOf(v) === i).length;
     document.getElementById('ttSummary').innerHTML = shown.length
@@ -5890,7 +5935,7 @@
     const clash = tgClashes();
     const subjects = ttSubjectsList();
     const st = doc ? (doc.status === 'published' && !state.tg.dirty ? 'Published' : (tgEverPub(doc) ? 'Changes not published' : 'Draft')) : '';
-    let html = `<div class="chips tt-teachers">${groups.map((x) => `<button type="button" class="chip${g && x.key === g.key ? ' active' : ''}" data-tg-group="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>`;
+    let html = '';
     if (!g) { box.innerHTML = html + '<div class="hv-note" style="text-align:left;">No batches yet. Add them in Settings → Class / Batch List.</div>'; return; }
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
     const wImgs = weekTtImages(state.tt.weekStart);
@@ -5908,16 +5953,16 @@
     const pend = tgPendingCount(); const chg = tgChanges();
     const st2 = tgEverPub(doc) ? (pend ? `${pend} change${pend === 1 ? '' : 's'} not published` : 'Published') : 'Draft';
     const canUndo = editable && state.tg.undo.some((x) => x.key === state.tg.docKey);
-    html += `<div class="tg-status"><span class="tg-st ${st2 === 'Published' ? 'ok' : 'draft'}">${st2}</span>
+    html += `<div class="tg-status"><span class="tg-st ${st2 === 'Published' ? 'ok' : 'draft'}">${st2}</span>${editable ? `<label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday this week</label>` : ''}
       <span class="tg-st-acts">${canUndo ? '<button type="button" class="tg-mini" id="tgUndo">↶ Undo</button>' : ''}
       ${editable && pend && doc.pubSnap && tgEverPub(doc) ? '<button type="button" class="tg-mini" id="tgDiscard">✕ Discard changes</button>' : ''}
       ${tgEverPub(doc) ? (editable ? '<button type="button" class="tg-mini" id="tgEditDone">✓ Done</button>' : '<button type="button" class="tg-mini tg-mini-gold" id="tgEdit"><span class="ico i-edit" aria-hidden="true"></span> Edit timetable</button>') : ''}</span></div>
-      ${editable ? `<label class="tg-sun"><input type="checkbox" id="tgSunday"${doc.sunday ? ' checked' : ''}> Sunday this week</label>` : '<div class="hv-note tg-lock"><span class="ico i-lock" aria-hidden="true"></span> Published timetable · tap “Edit timetable” to make changes</div>'}`;
+    ${editable ? '' : '<div class="hv-note tg-lock"><span class="ico i-lock" aria-hidden="true"></span> Published timetable · tap “Edit timetable” to make changes</div>'}`;
     html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; const pn = tgPendDays()[d] || 0; const isPub = (doc.pubDays || []).indexOf(d) !== -1 || (!doc.pubDays && (doc.published || []).length && n); return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}${pn ? ' chg' : ''}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small>${pn ? `<i class="tg-dn">${pn}</i>` : (isPub ? '<i class="tg-dok">✓</i>' : '')}</button>`; }).join('')}</div>`;
     // paint bar
     if (!editable) state.tg.paint = null;
     if (state.tg.paint) html += `<div class="tg-paintbar"><span><span class="ico i-brush" aria-hidden="true"></span> Paint <b>${escapeHtml(state.tg.paint)}</b> is on · tap cells to fill</span><button type="button" class="tg-mini" data-tg-paint="">Turn off</button></div>`;
-    if (!state.tg.sel && editable) html += `<div class="tg-paint"><span class="team-lbl tg-paint-h"><span><span class="ico i-brush" aria-hidden="true"></span> Paint</span><button type="button" class="hv-back" id="tgEditSubj" style="padding:0;"><span class="ico i-edit" aria-hidden="true"></span> Edit list</button></span><div class="chips tt-teachers">${['', ...subjects].map((s) => `<button type="button" class="chip${(state.tg.paint || '') === s ? ' active' : ''}" data-tg-paint="${escapeHtml(s)}">${s ? escapeHtml(s) : 'Off'}</button>`).join('')}</div></div>`;
+    if (!state.tg.sel && editable) html += `<div class="tg-paint"><span class="team-lbl tg-paint-h"><span><span class="ico i-brush" aria-hidden="true"></span> Paint</span></span><div class="tg-pgrid">${['', ...subjects].map((sj) => `<button type="button" class="chip${(state.tg.paint || '') === sj ? ' active' : ''}" data-tg-paint="${escapeHtml(sj)}">${sj ? escapeHtml(sj) : 'Off'}</button>`).join('')}<button type="button" class="chip tg-pedit" id="tgEditSubj"><span class="ico i-edit" aria-hidden="true"></span> Edit</button></div></div>`;
     const d = state.tg.day;
     const perD = periodsForDay(g.key, d);
     const sel = state.tg.sel;
@@ -5936,9 +5981,8 @@
         <button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
     } else if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
     const dNote = dayNoteOf(doc, d);
-    if (editable && !sel) html += `<div class="tg-dayacts"><button type="button" class="tg-mini" id="tgAddBatch">＋ Batch</button><button type="button" class="tg-mini" id="tgAddPer">＋ Period</button><button type="button" class="tg-mini" id="tgDayNote"><span class="ico i-note" aria-hidden="true"></span> ${dNote ? 'Edit day note' : 'Day note'}</button></div>`;
     if (dNote) html += `<div class="tg-daynote"><span class="ico i-pin" aria-hidden="true"></span> ${escapeHtml(dNote)}${(doc.cells || []).some((c) => c.d === d) ? '' : ' · whole day'}</div>`;
-    html += '<!--tgalert-->';
+    
     html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th>${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => pp.off ? '' : `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${tgDispNo(perD, i)}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
     const rowSkip = {};
     g.batches.forEach((b, bi) => {
@@ -5967,13 +6011,14 @@
       html += '</tr>';
     });
     html += '</tbody></table></div>';
+    if (editable && !sel) html += `<div class="tg-dayacts"><button type="button" class="tg-mini" id="tgAddBatch">＋ Batch</button><button type="button" class="tg-mini" id="tgAddPer">＋ Period</button><button type="button" class="tg-mini" id="tgDayNote"><span class="ico i-note" aria-hidden="true"></span> ${dNote ? 'Edit day note' : 'Day note'}</button></div>`;
     if (chg && Object.keys(chg.keys).some((k) => k.startsWith(d + '|'))) html += '<div class="hv-note" style="text-align:left; margin-top:4px;"><span style="color: var(--gold);">●</span> = not sent to teachers yet · Publish to send</div>';
     const nClash = Object.keys(clash).length; const noT = (doc.cells || []).filter((c) => !c.t && !c.ex).length;
     loadTtLeaves();
     const lvCls = ttLeaveClasses(doc); const lvKeys = Object.keys(lvCls);
     if (lvKeys.length) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Teacher on leave</div>${lvKeys.map((k) => { const [u, dd] = k.split('|'); const n = lvCls[k].length; return `<div class="ad-alert-l">${escapeHtml(ttName(u))} is on leave on ${escapeHtml(dayHeading(dd))} · ${n} class${n === 1 ? '' : 'es'} <button type="button" class="hv-back" data-lv-give="${escapeHtml(dd)}" style="padding:0; margin-left:4px;">Give to someone</button></div>`; }).join('')}</div>`;
-    if (nClash || noT) { const al = `<div class="ad-alert tg-alertbar">${nClash ? `<div class="ad-alert-row"><span>${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places · tap the ⚠️ cells</span></div>` : ''}${noT ? `<div class="ad-alert-row"><span>${noT} class${noT === 1 ? ' has' : 'es have'} no teacher</span><button type="button" class="hv-back" id="tgFixTeachers">Fix ›</button></div>` : ''}</div>`; html = html.replace('<!--tgalert-->', () => al); }
-    html = html.replace('<!--tgalert-->', '');
+    if (nClash || noT) { const al = `<div class="ad-alert tg-alertbar">${nClash ? `<div class="ad-alert-row"><span>${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places · tap the ⚠️ cells</span></div>` : ''}${noT ? `<div class="ad-alert-row"><span>${noT} class${noT === 1 ? ' has' : 'es have'} no teacher</span><button type="button" class="hv-back" id="tgFixTeachers">Fix ›</button></div>` : ''}</div>`; html += al; }
+    
     const pdMap = tgPendDays(); const pdList = Object.keys(pdMap).sort(); const pdTotal = pdList.reduce((n, x) => n + pdMap[x], 0);
     const everPub = tgEverPub(doc);
     const dayPend = pdMap[d] && pdList.length > 1;
@@ -8029,8 +8074,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   // ---------- Admin tabs: Dashboard / Exams / Reports / Settings ----------
   state.adminTab = (() => { try { return localStorage.getItem('ctd_admin_tab') || 'dash'; } catch (e) { return 'dash'; } })();
   state.adminSetOpen = null;
-  function applyAdminTab() {
-    const t = state.adminTab;
+  function applyAdminTab() { const t = state.adminTab; const av = document.getElementById('view-admin'); if (av) av.setAttribute('data-atab-cur', t);
     document.querySelectorAll('#adminTabs [data-atab-btn]').forEach((b) => {
       const on = b.getAttribute('data-atab-btn') === t;
       b.classList.toggle('active', on);
@@ -8094,7 +8138,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   // The app never holds the Gemini key: it sends the request with the person's sign-in to a Cloudflare Worker,
   // which checks the sign-in and the allowed list, then asks Gemini. Nothing else in the app depends on it.
   const AI_URL_KEY = 'ctd_ai_url';
-  const aiUrl = () => { try { return (localStorage.getItem(AI_URL_KEY) || '').trim(); } catch (e) { return ''; } };
+  const aiUrl = () => { let v = ''; try { v = (localStorage.getItem(AI_URL_KEY) || '').trim(); } catch (e) { v = ''; } return v || (state && state.aiShared) || ''; };
   async function aiCall(body, timeoutMs) {
     const url = aiUrl(); if (!url) throw new Error('AI is not set up yet (Admin → Settings → AI)');
     const cu = firebase.auth().currentUser; if (!cu) throw new Error('Please sign in again');
@@ -8103,7 +8147,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     try {
       const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok }, body: JSON.stringify(body), signal: ctl.signal });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok || !d.ok) throw new Error(d.error || ('AI helper error ' + r.status));
+      if (!r.ok || !d.ok) throw new Error(r.status === 403 && /not switched on/i.test(d.error || '') ? 'AI is not switched on for your login yet · ask the Admin' : (d.error || ('AI helper error ' + r.status)));
       return d;
     } catch (e) {
       if (e.name === 'AbortError') throw new Error('The AI took too long · try again');
@@ -8116,6 +8160,26 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     pnl.hidden = !state.canAdmin;
     const inp = document.getElementById('aiUrlInput'); if (inp && document.activeElement !== inp) inp.value = aiUrl();
   }
+  (function bindAiCoord() {
+    const show = document.getElementById('aiCoordShow'), cp = document.getElementById('aiCoordCopy'), box = document.getElementById('aiCoordList'); if (!show || !cp || !box) return; let emails = [];
+    show.addEventListener('click', async () => {
+      const ids = Object.keys(state.team || {}).filter((u) => (state.team[u] || {}).role === 'coordinator' && (state.team[u] || {}).status !== 'removed');
+      if (!ids.length) { box.innerHTML = '<div class="hv-note" style="text-align:left;">No Coordinator in the Team yet.</div>'; cp.hidden = true; return; }
+      box.innerHTML = '<div class="skel short"></div>'; emails = [];
+      const rows = await Promise.all(ids.map(async (u) => { let em = ''; try { const sn = await state.db.doc('profile/' + u).get(); em = String((sn.data() || {}).email || '').trim(); } catch (e) { /* ignore */ } if (em) emails.push(em); return `<div class="ai-coord-row"><b>${escapeHtml(ttName(u))}</b><span>${em ? escapeHtml(em) : 'email not saved yet · ask them to open the app once'}</span></div>`; }));
+      box.innerHTML = rows.join(''); cp.hidden = !emails.length;
+    });
+    cp.addEventListener('click', async () => {
+      const txt = emails.join(', '); const done = () => showToast('Emails copied · paste them in ADMIN_EMAILS after yours');
+      try { await navigator.clipboard.writeText(txt); done(); } catch (e) { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e2) { showToast(txt, 'error'); } ta.remove(); }
+    });
+  })();
+  // the address is also kept in the shared settings so a Coordinator's phone can use it without typing anything
+  async function shareAiUrl(v, say) {
+    if (!state.db || !state.canAdmin) return;
+    try { await state.db.doc('settings/ai').set({ url: v || '', updatedAt: Date.now(), updatedBy: state.teacherId }, { merge: true }); state.aiShared = v || ''; say(v ? 'Saved and shared with Coordinators · tap Test to check it' : 'Removed', ''); }
+    catch (e) { say('Saved on this phone only · the database did not let me share it with Coordinators', 'bad'); }
+  }
   (function bindAiPanel() {
     const inp = document.getElementById('aiUrlInput'), st = document.getElementById('aiStatus');
     const say = (txt, cls) => { st.textContent = txt; st.className = 'ai-stat' + (cls ? ' ' + cls : ''); };
@@ -8124,8 +8188,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const v = clean();
       if (v && !/^https:\/\/[^\s/]+\.[^\s]+$/i.test(v)) { say('The address should start with https://', 'bad'); return; }
       try { if (v) localStorage.setItem(AI_URL_KEY, v); else localStorage.removeItem(AI_URL_KEY); } catch (e) { /* ignore */ }
-      say(v ? 'Saved · tap Test to check it' : 'Removed', '');
-    });
+      say(v ? 'Saved · tap Test to check it' : 'Removed', ''); shareAiUrl(v, say); });
     document.getElementById('aiTestBtn').addEventListener('click', async () => {
       const v = clean(); if (!v) { say('Paste the address first', 'bad'); return; }
       try { localStorage.setItem(AI_URL_KEY, v); } catch (e) { /* ignore */ }
@@ -8203,7 +8266,7 @@ Keep it short (not more than about 1.3 times the original, and under 380 charact
   // ===== AI: fill the timetable grid from a picture (Admin only) =====
   // The AI only READS the picture. What it read is shown first; the app matches classes and subjects to its own lists,
   // asks about anything it is not sure of, and puts the result in the DRAFT only after "Put in draft". Nothing is published.
-  function aiReady() { try { return !!(state.canAdmin && aiUrl()); } catch (e) { return false; } }
+  function aiReady() { try { return !!((state.canAdmin || state.isCoordinator) && aiUrl()); } catch (e) { return false; } }
   const TP_SYSTEM = `You read a school timetable from a picture and answer with JSON only.
 Rules:
 - Copy every subject exactly as printed (for example "His/Pol.Sc." or "Geo/Eco"); never translate, expand or correct it.
@@ -14547,9 +14610,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const chips = Array.from(document.querySelectorAll('#adminWingChips [data-admin-wing]')).filter((b) => b.style.display !== 'none');
     const sig = chips.map((b) => b.getAttribute('data-admin-wing')).join('|');
     if (sel._sig !== sig) { sel._sig = sig; sel.innerHTML = chips.map((b) => { const v = b.getAttribute('data-admin-wing'); return `<option value="${escapeHtml(v)}">${v === 'all' ? 'All wings' : escapeHtml(v)}</option>`; }).join(''); }
-    sel.value = state.adminReportWing || 'all';
-    if (sel.parentElement) sel.parentElement.style.display = chips.length < 2 ? 'none' : '';
+    sel.value = state.adminReportWing || 'all'; if (sel.parentElement) sel.parentElement.style.display = chips.length < 2 ? 'none' : '';
+    const t2 = document.getElementById('ttWingSel'); if (t2) { if (t2._sig !== sig) { t2._sig = sig; t2.innerHTML = sel.innerHTML; } t2.value = sel.value; if (t2.parentElement) t2.parentElement.style.display = chips.length < 2 ? 'none' : ''; }
   }
+  { const sel2 = document.getElementById('ttWingSel'); if (sel2) sel2.addEventListener('change', () => { const b = Array.from(document.querySelectorAll('#adminWingChips [data-admin-wing]')).find((x) => x.getAttribute('data-admin-wing') === sel2.value); if (b) b.click(); }); }
   { const sel = document.getElementById('adminWingSel'); if (sel) sel.addEventListener('change', () => { const b = Array.from(document.querySelectorAll('#adminWingChips [data-admin-wing]')).find((x) => x.getAttribute('data-admin-wing') === sel.value); if (b) b.click(); }); }
   document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -15140,11 +15204,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       renderWeeklyOffChips();
       if (state.tab === 'admin') renderAdmin();
     }, () => {}));
-    unsubscribers.push(db.doc('settings/testTypes').onSnapshot((snap) => {
-      state.testTypes = (snap.exists && snap.data().list) || null;
-      renderListManagers();
-      if (state.tab === 'add') renderInvig();
-    }, () => {}));
+    unsubscribers.push(db.doc('settings/testTypes').onSnapshot((snap) => { state.testTypes = (snap.exists && snap.data().list) || null; renderListManagers(); if (state.tab === 'add') renderInvig(); }, () => {}));
+    unsubscribers.push(db.doc('settings/ai').onSnapshot((snap) => { state.aiShared = String((snap.exists && snap.data().url) || ''); if (state.tab === 'admin') renderAdmin(); }, () => {}));
     unsubscribers.push(db.doc('settings/periods').onSnapshot((snap) => {
       state.periodSets = (snap.exists && snap.data().groups) || {};
       if (state.tab === 'admin') renderAdmin();
