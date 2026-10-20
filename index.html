@@ -2113,6 +2113,9 @@
   .xw-sw input { width: 20px; height: 20px; accent-color: var(--gold); flex: none; }
   .xw-prow { display: grid; grid-template-columns: minmax(70px, 38%) 1fr; gap: 8px; align-items: center; margin-top: 8px; font-size: 13px; font-weight: 600; }
   .tg-tight .tg-b .tg-bsub { font-size: 10.5px; letter-spacing: -0.2px; }
+  /* the "fill from a photo" button in an opened exam card */
+  .ex-photo-btn { margin-top: 8px; background: none; border: 1px solid var(--gold); color: var(--gold); }
+  .ex-photo-btn .ico { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -3259,7 +3262,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.20 · updated 21 Oct 2026</div>
+          <div class="dnote">Version 13.21 · updated 22 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8649,6 +8652,179 @@ Rules:
     } catch (err) { if (go) { go.disabled = false; go.textContent = 'Put in draft'; } flashOffline(err); }
   }
   function tpOpenSheet() { const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
+  // ---------- Exams: fill the rooms and invigilators of an exam from a photo of the duty sheet ----------
+  const DS_SYSTEM = 'You read a coaching institute\u2019s invigilation duty sheet from a picture. Reply with JSON only. Never invent a name, room or time: if something is not printed, leave it empty. Copy every person\u2019s name exactly as printed, including Mr., Ms. and Ji.';
+  const DS_PROMPT = 'Read this invigilation duty sheet and return JSON in exactly this shape:\n{"dateText":"","date":"","times":{"reporting":"","answerSheet":"","questionPaper":"","readFrom":"","readTo":"","writeFrom":"","writeTo":""},"rooms":[{"room":"D-1","staff":0,"duties":[{"name":"Mr. Rohan Dixit","start":"09:00","end":"10:15","breakStart":"","breakEnd":""}]}]}\nRules:\n- dateText is the day and date as printed (for example "Monday (5th, Oct.)"). date is YYYY-MM-DD only if the year is printed, otherwise "".\n- reporting = "Reporting Time"; answerSheet = "Paper Distribution" or "Answer sheet distribution"; questionPaper = "Question Paper Distribution"; readFrom and readTo = "Reading Time" from and to; writeFrom and writeTo = "Writing Time" from and to. Leave empty what is not printed.\n- One entry in rooms for each room box. room is the name without the word ROOM (D-1 ROOM becomes D-1).\n- One entry in duties for each person row, with that person\u2019s Duty Timing as start and end. Use 24-hour HH:MM when am/pm is printed. If no am/pm is printed, copy the time as written (for example 10:15 or 12:45).\n- The Break column belongs to the person on the same row: put it in breakStart and breakEnd.\n- "1 Staff" or "2 Staff" is the number of staff for that room (a number only).\n- Keep the order of the sheet.';
+  function dsNorm(t) { return String(t || '').toLowerCase().replace(/\b(mr|ms|mrs|miss|dr|prof|sir|madam|ji)\b\.?/g, ' ').replace(/ma'?am/g, ' ').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function dsTokens(t) { return dsNorm(t).split(' ').filter(Boolean); }
+  function dsTeacherScore(sheet, name) {
+    const a = dsTokens(sheet), b = dsTokens(name); if (!a.length || !b.length) return 0;
+    const ja = a.join(''), jb = b.join(''); if (ja === jb) return 100;
+    let hit = 0; a.forEach((x) => { if (b.some((y) => y === x || (x.length === 1 && y.charAt(0) === x) || (x.length >= 3 && y.length >= 3 && (y.indexOf(x) === 0 || x.indexOf(y) === 0)))) hit++; });
+    let sc = Math.round(60 * hit / a.length);
+    if (hit === a.length) sc = 85 + Math.min(10, 3 * hit);
+    if (ja.length >= 6 && jb.length >= 6 && (jb.indexOf(ja) !== -1 || ja.indexOf(jb) !== -1)) sc = Math.max(sc, 88);
+    return sc;
+  }
+  function dsTeacherIds() { return (state.adminTeacherIds && state.adminTeacherIds.length) ? state.adminTeacherIds.slice() : Object.keys(state.adminNames || {}); }
+  function dsMatch(sheetName) {
+    const L = dsTeacherIds().map((u) => ({ u, sc: dsTeacherScore(sheetName, planNameOf(u)) })).filter((x) => x.sc >= 60).sort((a, b) => b.sc - a.sc);
+    return { best: (L[0] && L[0].sc >= 80 && (!L[1] || L[0].sc - L[1].sc >= 8)) ? L[0].u : '', cands: L.slice(0, 3).map((x) => x.u) };
+  }
+  function dsKeyRoom(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+  function dsClock(v) { const m = String(v || '').trim().match(/^(\d{1,2})[:.](\d{2})\s*([ap])?\.?m?\.?$/i); return m ? tpClockCtx(Number(m[1]), Number(m[2]), m[3] ? m[3].toLowerCase() : '') : ''; }
+  function dsSheetDM(d) {
+    if (d.date && /^\d{4}-\d{2}-\d{2}$/.test(d.date)) return { day: Number(d.date.slice(8, 10)), mon: Number(d.date.slice(5, 7)) - 1 };
+    const m = String(d.dateText || '').match(/(\d{1,2})(?:st|nd|rd|th)?[\s,.]*([A-Za-z]{3,9})/); if (!m) return null;
+    const mi = MON3.findIndex((x) => x.toLowerCase() === m[2].slice(0, 3).toLowerCase()); return mi < 0 ? null : { day: Number(m[1]), mon: mi };
+  }
+  function dsParse(text) {
+    const t = String(text || '').trim().replace(/^```[a-z]*\n?|```$/g, '').trim(); let o;
+    try { o = JSON.parse(t); } catch (e) { const m = t.match(/\{[\s\S]*\}/); try { o = JSON.parse(m && m[0]); } catch (e2) { return { err: 'The AI answer could not be understood. Try again with a clearer picture.' }; } }
+    if (!o || !Array.isArray(o.rooms) || !o.rooms.length) return { err: 'This does not look like a duty sheet. Use a clear picture of the whole sheet.' };
+    o.times = o.times || {}; o.dateText = String(o.dateText || ''); o.date = String(o.date || '');
+    o.rooms = o.rooms.filter((r) => r && String(r.room || '').trim()).map((r) => ({ room: String(r.room).replace(/\s*room\s*$/i, '').trim(), staff: Math.max(0, Math.min(9, parseInt(r.staff, 10) || 0)), duties: (Array.isArray(r.duties) ? r.duties : []).filter((d) => d && String(d.name || '').trim()).map((d) => ({ name: String(d.name).replace(/\s+/g, ' ').trim(), start: String(d.start || ''), end: String(d.end || ''), breakStart: String(d.breakStart || ''), breakEnd: String(d.breakEnd || '') })) }));
+    if (!o.rooms.length) return { err: 'No rooms were found in the picture.' };
+    return { data: o };
+  }
+  function dsInit(ds) {
+    const e = ds.exam; const d = ds.data; const t = d.times || {};
+    const a = hhmmToMin(e.start), z = hhmmToMin(e.end);
+    TP_CTX = (a != null && z != null) ? (a + z) / 2 : null;
+    ds.st = { reporting: dsClock(t.reporting), answerSheet: dsClock(t.answerSheet), questionPaper: dsClock(t.questionPaper), readFrom: dsClock(t.readFrom), readTo: dsClock(t.readTo), writeFrom: dsClock(t.writeFrom), writeTo: dsClock(t.writeTo) };
+    if (TP_CTX == null && ds.st.writeFrom && ds.st.writeTo) TP_CTX = (hhmmToMin(ds.st.writeFrom) + hhmmToMin(ds.st.writeTo)) / 2;
+    d.rooms.forEach((r) => r.duties.forEach((x) => { x.start = dsClock(x.start); x.end = dsClock(x.end); x.breakStart = dsClock(x.breakStart); x.breakEnd = dsClock(x.breakEnd); }));
+    ds.who = {}; ds.roomMap = {}; const rl = roomsList();
+    d.rooms.forEach((r, ri) => { const m = rl.find((x) => dsKeyRoom(x) === dsKeyRoom(r.room)); ds.roomMap[ri] = m || r.room; r.duties.forEach((x, di) => { ds.who[ri + '|' + di] = dsMatch(x.name).best || 'other'; }); });
+    const dm = dsSheetDM(d); const ed = dateObj(e.date); ds.dateDiff = !!(dm && (dm.day !== ed.getDate() || dm.mon !== ed.getMonth())); ds.dateOk = false;
+    ds.notify = true; ds.tmMode = 'exam'; ds.also = [];
+  }
+  function dsAllowKeys(e) { const pt = e.ptype === 'mcq' ? 'mcq' : 'sub'; const allow = {}; PT_FIELDS[pt].forEach(([k, , range]) => (range ? [k + 'From', k + 'To'] : [k]).forEach((x) => { allow[x] = 1; })); return allow; }
+  function dsSheetTimes(st) { return { report: st.reporting, sheet: st.answerSheet, qp: st.questionPaper, readFrom: st.readFrom, readTo: st.readTo, writeFrom: st.writeFrom, writeTo: st.writeTo }; }
+  function dsTimesDiffer(e, st) {
+    const allow = dsAllowKeys(e); const sh = dsSheetTimes(st); const cur = e.times || {};
+    return Object.keys(sh).some((k) => allow[k] && sh[k] && cur[k] && cur[k] !== sh[k]) || !!(st.reporting && e.start && st.reporting !== e.start) || !!(st.writeTo && e.end && st.writeTo !== e.end);
+  }
+  function dsMergeTimes(e, st, mode) {
+    const allow = dsAllowKeys(e); const sh = dsSheetTimes(st); const cur = Object.assign({}, e.times || {}); const out = Object.assign({}, cur);
+    Object.keys(sh).forEach((k) => { if (!allow[k] || !sh[k]) return; if (mode === 'sheet' || !cur[k]) out[k] = sh[k]; });
+    let start = e.start, end = e.end;
+    if (mode === 'sheet') { if (st.reporting) start = st.reporting; if (st.writeTo) end = st.writeTo; } else { if (!start && st.reporting) start = st.reporting; if (!end && st.writeTo) end = st.writeTo; }
+    return { times: out, start, end };
+  }
+  function dsGood(x) { return !!(x.start && x.end && hhmmToMin(x.end) > hhmmToMin(x.start)); }
+  function dsBuild(ds, e) {
+    return ds.data.rooms.map((r, ri) => {
+      const slots = [], others = [];
+      r.duties.forEach((x, di) => {
+        const w = ds.who[ri + '|' + di]; if (!w || !dsGood(x)) return;
+        if (w === 'other') { others.push({ name: x.name, start: x.start, end: x.end, bStart: x.breakStart || '', bEnd: x.breakEnd || '' }); return; }
+        const sl = { start: x.start, end: x.end, teachers: [w], breaks: {} }; if (x.breakStart && x.breakEnd) sl.breaks[w] = { start: x.breakStart, end: x.breakEnd }; slots.push(sl);
+      });
+      return { room: ds.roomMap[ri] || r.room, scope: (e.scope || []).slice(), staff: r.staff || 0, others, slots };
+    });
+  }
+  function dsOpen(examId) {
+    if (!aiReady()) return;
+    const exam = (state.adminExams || []).find((x) => x.id === examId); if (!exam) return;
+    state.ds = { id: (state.ds ? state.ds.id : 0) + 1, step: 'pick', exam }; state.tp = null; state.xs = null;
+    dsRender(); tpOpenSheet();
+  }
+  async function dsRead(file) {
+    const ds = state.ds; if (!ds) return; ds.step = 'busy'; ds.t0 = Date.now(); dsRender();
+    const timer = setInterval(() => { const el = document.getElementById('dsSecs'); if (el) el.textContent = String(Math.round((Date.now() - ds.t0) / 1000)); }, 500);
+    try {
+      const f = await tpFile(file);
+      const r = await aiCall({ system: DS_SYSTEM, prompt: DS_PROMPT, image: { data: f.data, mime: f.mime }, json: true }, 110000);
+      const q = dsParse(r.text); if (q.err) throw new Error(q.err);
+      ds.data = q.data; dsInit(ds); ds.step = 'review';
+    } catch (e) { ds.step = 'error'; ds.err = e.message || 'Could not read the picture'; }
+    clearInterval(timer);
+    if (state.ds === ds) dsRender();
+  }
+  function dsHtml() {
+    const ds = state.ds; const e = ds.exam;
+    const head = (sub) => `<div class="hv-d-title">Duty sheet from a photo</div><div class="hv-d-wing">${escapeHtml(sub)}</div>`;
+    const sub = `${examTitle(e)} · ${slotWhen(e.date)}`;
+    if (ds.step === 'pick') return `<div id="dsRoot" data-ds="${ds.id}">${head(sub)}
+      <div class="tp-how"><span><b>1</b>Choose a clear picture</span><span><b>2</b>Check what was read</span><span><b>3</b>Save the duty</span></div>
+      <button type="button" class="xw-b main" id="dsPick" style="width:100%;">Choose a picture of the duty sheet</button><input type="file" id="dsFile" accept="image/*,application/pdf" hidden>
+      <div class="xw-ck in" style="margin-top:12px;"><span>ⓘ</span><span>The AI reads the rooms, the names, the duty times, the breaks and the staff counts. You check everything before it is saved. The picture goes to Google's Gemini to be read.</span></div></div>`;
+    if (ds.step === 'busy') return `<div id="dsRoot" data-ds="${ds.id}">${head(sub)}<div class="tp-busy"><div class="tp-spin"></div><div>Reading the duty sheet… <b id="dsSecs">0</b> s</div></div></div>`;
+    if (ds.step === 'error') return `<div id="dsRoot" data-ds="${ds.id}">${head(sub)}<div class="xw-ck wn"><span>⚠</span><span>${escapeHtml(ds.err || 'Could not read the picture')}</span></div><button type="button" class="xw-b main" id="dsAgain" style="width:100%; margin-top:12px;">Try another picture</button><input type="file" id="dsFile" accept="image/*,application/pdf" hidden></div>`;
+    const d = ds.data; const st = ds.st; const nR = d.rooms.length, nD = d.rooms.reduce((n, r) => n + r.duties.length, 0), nS = d.rooms.filter((r) => r.staff).length, nB = d.rooms.reduce((n, r) => n + r.duties.filter((x) => x.breakStart && x.breakEnd).length, 0);
+    const ids = dsTeacherIds().sort((a, b) => planNameOf(a).localeCompare(planNameOf(b)));
+    const rl = roomsList();
+    const dateBox = ds.dateDiff ? `<div class="xw-ck wn" style="margin-top:10px;"><span>⚠</span><span><b>Date check.</b> The sheet says ${escapeHtml(d.dateText || 'another date')}. This exam is on ${escapeHtml(slotWhen(e.date))}.<label style="display:flex; gap:8px; align-items:center; margin-top:6px;"><input type="checkbox" id="dsDateOk"${ds.dateOk ? ' checked' : ''}> Use the sheet anyway (the exam's date does not change)</label></span></div>` : '';
+    const ft = (a, z) => (a && z ? `${formatTimeStr(a)} – ${formatTimeStr(z)}` : '');
+    const hasT = Object.keys(st).some((k) => st[k]);
+    const tmBox = hasT ? `<div class="xs-grp">Paper times</div><div class="tp-exr">${dsTimesDiffer(e, st) ? `<div class="hv-note" style="text-align:left;">The exam has ${escapeHtml(ft(e.start, e.end) || 'no times yet')}. The sheet says: ${escapeHtml([st.reporting && 'reporting ' + formatTimeStr(st.reporting), st.answerSheet && 'answer sheet distribution ' + formatTimeStr(st.answerSheet), st.questionPaper && 'question paper distribution ' + formatTimeStr(st.questionPaper), st.readFrom && st.readTo && 'reading ' + ft(st.readFrom, st.readTo), st.writeFrom && st.writeTo && 'writing ' + ft(st.writeFrom, st.writeTo)].filter(Boolean).join(' · '))}.</div><div class="chips" style="margin-top:8px;"><button type="button" class="chip${ds.tmMode === 'exam' ? ' active' : ''}" data-ds-tm="exam">Keep the exam's times</button><button type="button" class="chip${ds.tmMode === 'sheet' ? ' active' : ''}" data-ds-tm="sheet">Use the sheet's times</button></div>` : '<div class="hv-note" style="text-align:left;">The paper times in the sheet match the exam. Empty ones are filled from the sheet.</div>'}</div>` : '';
+    const rooms = d.rooms.map((r, ri) => {
+      const roomOpts = (rl.indexOf(ds.roomMap[ri]) === -1 ? [ds.roomMap[ri]] : []).concat(rl).map((x) => `<option value="${escapeHtml(x)}"${x === ds.roomMap[ri] ? ' selected' : ''}>${escapeHtml(x)}${rl.indexOf(x) === -1 ? ' (as written)' : ''}</option>`).join('');
+      const cards = r.duties.map((x, di) => {
+        const key = ri + '|' + di; const cur = ds.who[key]; const m = dsMatch(x.name); const first = m.cands.filter((u, i2, a) => a.indexOf(u) === i2);
+        const opt = (u) => `<option value="${escapeHtml(u)}"${cur === u ? ' selected' : ''}>${escapeHtml(planNameOf(u))}</option>`;
+        const ok = cur && cur !== 'other'; const bad = !dsGood(x);
+        return `<div class="tp-exr${cur === '' ? ' off' : ''}"><div class="tp-exh"><div><b>${escapeHtml(x.name)}</b><small>${bad ? 'time not read' : escapeHtml(ft(x.start, x.end))}${x.breakStart && x.breakEnd ? ` · break ${escapeHtml(ft(x.breakStart, x.breakEnd))}` : ''}</small></div><span class="${ok ? 'ok' : ''}" style="font-weight:600; color:${ok ? 'var(--green)' : '#B45309'};">${ok ? '✓ matched' : (cur === '' ? 'skipped' : 'name only')}</span></div>
+          <div style="margin-top:8px;"><select class="text-input tp-sel" data-ds-who="${escapeHtml(key)}">${first.length ? `<optgroup label="Best matches">${first.map(opt).join('')}</optgroup>` : ''}<optgroup label="All teachers">${ids.map(opt).join('')}</optgroup><option value="other"${cur === 'other' ? ' selected' : ''}>Add as a name only (not in the app)</option><option value=""${cur === '' ? ' selected' : ''}>Skip this duty</option></select></div></div>`;
+      }).join('');
+      return `<div class="xs-grp">Room ${escapeHtml(r.room)} → <select class="text-input tp-sel" data-ds-room="${ri}" style="display:inline-block; width:auto; margin-left:4px;">${roomOpts}</select></div>${cards}${r.staff ? `<div class="hv-note" style="text-align:left;">${r.staff} Staff</div>` : ''}`;
+    }).join('');
+    const built = dsBuild(ds, e); const warns = [];
+    d.rooms.forEach((r) => { const L = r.duties.filter(dsGood).sort((a, b) => hhmmToMin(a.start) - hhmmToMin(b.start)); for (let i = 1; i < L.length; i++) if (hhmmToMin(L[i].start) > hhmmToMin(L[i - 1].end)) warns.push(`${r.room}: nobody on duty ${ft(L[i - 1].end, L[i].start)} (this is in the sheet itself)`); const bad = r.duties.filter((x) => !dsGood(x)).length; if (bad) warns.push(`${r.room}: ${bad} duty without a readable time is left out`); });
+    try { planWarnings(e, built).filter((x) => !/no invigilator|choose the class/.test(x)).forEach((x) => warns.push(x)); } catch (er) { /* ignore */ }
+    const others = Object.keys(ds.who).filter((k) => ds.who[k] === 'other').length; if (others) warns.push(`${others} name${others === 1 ? ' is' : 's are'} not matched to your Team, so ${others === 1 ? 'it is' : 'they are'} written as a name only and not notified`);
+    const told = {}; built.forEach((r) => r.slots.forEach((sl) => sl.teachers.forEach((u) => { told[u] = 1; }))); const nTold = Object.keys(told).length;
+    const sameDay = (state.adminExams || []).filter((x) => x.date === e.date && x.id !== e.id);
+    const alsoBox = sameDay.length ? `<div class="xs-grp">Same rooms for other exams today</div>${sameDay.map((x) => `<label class="tp-exr" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" data-ds-also="${escapeHtml(x.id)}"${ds.also.indexOf(x.id) !== -1 ? ' checked' : ''}> <span>${escapeHtml(examTitle(x))}</span></label>`).join('')}` : '';
+    return `<div id="dsRoot" data-ds="${ds.id}">${head(sub)}
+      <div class="tp-sum"><b>${nD}</b><span>duties ready · ${nR} room${nR === 1 ? '' : 's'}${nS ? ` · ${nS} staff count${nS === 1 ? '' : 's'}` : ''}${nB ? ` · ${nB} break${nB === 1 ? '' : 's'}` : ''}</span></div>
+      ${dateBox}${tmBox}${rooms}
+      ${warns.length ? `<div class="xs-grp">Please look at</div>${warns.map((x) => `<div class="xw-ck wn"><span>⚠</span><span>${escapeHtml(x)}</span></div>`).join('')}` : ''}
+      ${alsoBox}
+      <label class="xw-sw" style="margin-top:12px;"><span><b>Tell the teachers now</b><small>${nTold} teacher${nTold === 1 ? '' : 's'} get${nTold === 1 ? 's' : ''} a notification about their duty</small></span><input type="checkbox" id="dsNotify"${ds.notify ? ' checked' : ''}></label>
+      <button type="button" class="save-btn" id="dsSave" style="margin-top:12px;"${ds.saving ? ' disabled' : ''}>${ds.saving ? 'Saving…' : 'Check and save'}</button>
+      <button type="button" class="hv-back" id="dsAgain" style="margin:8px auto 0;">Choose another picture</button><input type="file" id="dsFile" accept="image/*,application/pdf" hidden></div>`;
+  }
+  function dsRender() {
+    const ds = state.ds; const body = document.getElementById('hvSheetBody'); if (!ds || !body) return;
+    const cur = body.querySelector('#dsRoot'); if (body.firstElementChild && !cur && ds.rendered) return;
+    const sheet = document.querySelector('#hvSheet .hv-sheet'); const top = sheet && cur ? sheet.scrollTop : 0;
+    body.innerHTML = dsHtml(); ds.rendered = true; if (sheet) sheet.scrollTop = top;
+    const fi = body.querySelector('#dsFile'); const pick = body.querySelector('#dsPick'), again = body.querySelector('#dsAgain');
+    if (pick && fi) pick.addEventListener('click', () => fi.click()); if (again && fi) again.addEventListener('click', () => fi.click());
+    if (fi) fi.addEventListener('change', () => { const f = fi.files && fi.files[0]; if (f) dsRead(f); });
+    body.querySelectorAll('[data-ds-who]').forEach((el) => el.addEventListener('change', () => { ds.who[el.getAttribute('data-ds-who')] = el.value; dsRender(); }));
+    body.querySelectorAll('[data-ds-room]').forEach((el) => el.addEventListener('change', () => { ds.roomMap[el.getAttribute('data-ds-room')] = el.value; dsRender(); }));
+    body.querySelectorAll('[data-ds-tm]').forEach((el) => el.addEventListener('click', () => { ds.tmMode = el.getAttribute('data-ds-tm'); dsRender(); }));
+    body.querySelectorAll('[data-ds-also]').forEach((el) => el.addEventListener('change', () => { const id = el.getAttribute('data-ds-also'); const i = ds.also.indexOf(id); if (el.checked && i === -1) ds.also.push(id); if (!el.checked && i !== -1) ds.also.splice(i, 1); dsRender(); }));
+    const dok = body.querySelector('#dsDateOk'); if (dok) dok.addEventListener('change', () => { ds.dateOk = dok.checked; });
+    const nt = body.querySelector('#dsNotify'); if (nt) nt.addEventListener('change', () => { ds.notify = nt.checked; });
+    const sv = body.querySelector('#dsSave'); if (sv) sv.addEventListener('click', dsSave);
+  }
+  async function dsSave() {
+    const ds = state.ds; if (!ds || ds.saving || !state.db) return; const exam = ds.exam;
+    if (ds.dateDiff && !ds.dateOk) { showToast('The sheet is for another date: tick "Use the sheet anyway"', 'error'); return; }
+    const targets = [exam].concat(ds.also.map((id) => (state.adminExams || []).find((x) => x.id === id)).filter(Boolean));
+    const plans = targets.map((e) => ({ e, rooms: dsBuild(ds, e) }));
+    const main = plans[0].rooms; const nDuty = main.reduce((n, r) => n + r.slots.length + r.others.length, 0);
+    if (!nDuty) { showToast('There is no duty to save', 'error'); return; }
+    const told = {}; plans.forEach((pl) => pl.rooms.forEach((r) => r.slots.forEach((sl) => sl.teachers.forEach((u) => { told[u] = 1; })))); const nTold = ds.notify ? Object.keys(told).length : 0;
+    const had = planOf(exam).length > 0;
+    const ok = await showConfirm(`${main.length} room${main.length === 1 ? '' : 's'} · ${nDuty} dut${nDuty === 1 ? 'y' : 'ies'} for ${examTitle(exam)}${plans.length > 1 ? ` and ${plans.length - 1} more exam${plans.length > 2 ? 's' : ''}` : ''}.${had ? '\nThis exam already has rooms: they will be replaced.' : ''}\n${ds.notify ? `${nTold} teacher${nTold === 1 ? '' : 's'} will be told about their duty.` : 'Nobody will be told yet.'}`, 'Save the duty plan?', 'Save');
+    if (!ok) return;
+    ds.saving = true; dsRender();
+    try {
+      for (const pl of plans) {
+        const e = pl.e; const tm = dsMergeTimes(e, ds.st, ds.tmMode);
+        const data = { room: pl.rooms.map((r) => r.room).join(', '), invigilators: planTeachers(pl.rooms), plan: { rooms: pl.rooms }, times: tm.times }; if (tm.start) data.start = tm.start; if (tm.end) data.end = tm.end;
+        await state.db.collection('exams').doc(e.id).set(data, { merge: true });
+        if (ds.notify) { const upd = planOf(e).length > 0; pl.rooms.forEach((r) => r.slots.forEach((sl) => sl.teachers.forEach((u) => notify(u, { type: 'duty', title: `${upd ? 'Exam duty updated' : 'Exam duty'}: ${examTitle(e)} · ${r.room}`, body: slotWhen(e.date, sl.start) + ` – ${formatTimeStr(sl.end)}`, link: { tab: 'today' } })))); }
+      }
+      closeHvSheet(); state.ds = null; state.exOpen = exam.id; showToast(`Duty saved${ds.notify ? ` · ${nTold} teacher${nTold === 1 ? '' : 's'} told` : ' · nobody told yet'}`); renderAdmin();
+    } catch (err) { ds.saving = false; flashOffline(err); dsRender(); }
+  }
+  
   function openTtPhoto() {
     if (!aiReady()) return;
     const tp = state.tp = { id: (state.tp ? state.tp.id : 0) + 1, step: 'pick' }; state.xs = null; tpRender(); tpOpenSheet(); return tp;
@@ -9471,7 +9647,7 @@ Rules:
           duty += '</div>';
         });
         if (pr.length) duty += `<div class="ex-get">Get it as</div><div class="qa-row hv-tiles ex-tiles"><button type="button" class="qa-btn" data-ex-pdf="${escapeHtml(e.id)}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF</span><span class="qa-s">Duty chart</span></button><button type="button" class="qa-btn qa-wa" data-ex-wa="${escapeHtml(e.id)}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share duty</span></button></div>`;
-        duty += `<button type="button" class="ex-edit-main" data-ex-edit="${escapeHtml(e.id)}"><span class="ico i-edit" aria-hidden="true"></span>Edit exam</button></div>`;
+        duty += `<button type="button" class="ex-edit-main" data-ex-edit="${escapeHtml(e.id)}"><span class="ico i-edit" aria-hidden="true"></span>Edit exam</button>${(aiReady() && (state.canAdmin || state.isCoordinator)) ? `<button type="button" class="ex-edit-main ex-photo-btn" data-ex-photo="${escapeHtml(e.id)}"><span class="ico i-spark" aria-hidden="true"></span>Fill rooms and invigilators from a photo</button>` : ''}</div>`;
       }
       return `<div class="ad-exam${isSel ? ' ex-sel' : ''}${open ? ' ex-open' : ''}" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${state.exSel ? `<span class="ex-tick">${isSel ? '✓' : ''}</span>` : ''}${escapeHtml(examTitle(e))}</div>
@@ -9578,7 +9754,7 @@ Rules:
     y += 20;
     blocks.forEach((b) => {
       const top = y; let yy = y + 52;
-      t(`${String(b.room).toUpperCase()} ROOM${b.who ? ' · ' + b.who : ''}`, pad + 14, y + 26, b.who ? 22 : 26, true); t('Duty Timing', (cT + W - pad) / 2, y + 26, 24, true, 'center');
+      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', (cT + W - pad) / 2, y + 26, 24, true, 'center');
       ln(pad, y + 52, W - pad, y + 52, '#000', 2);
       b.rows.forEach((r, i) => {
         const h = rowH(r);
@@ -9670,6 +9846,7 @@ Rules:
       });
     });
     listEl.querySelectorAll('[data-ex-edit]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-edit')); if (e) { state.exOpen = null; openAdminExamForm(e, b.hasAttribute('data-ex-step') ? Number(b.getAttribute('data-ex-step')) : 1); } }));
+    listEl.querySelectorAll('[data-ex-photo]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); dsOpen(b.getAttribute('data-ex-photo')); }));
     listEl.querySelectorAll('[data-ex-pdf]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-pdf')); if (e) dutyChartPdf(e); }));
     listEl.querySelectorAll('[data-ex-wa]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-wa')); if (e) window.open('https://wa.me/?text=' + encodeURIComponent(dutyChartText(e)), '_blank'); }));
     listEl.querySelectorAll('[data-ex-more]').forEach((b) => b.addEventListener('click', () => openExamSheet(b.getAttribute('data-ex-more'), nameOf)));
