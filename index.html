@@ -2127,6 +2127,10 @@
   .ex-cancel-btn .ico { color: var(--green); }
   .undo-bar { position: fixed; left: 12px; right: 12px; bottom: 86px; z-index: 2000; background: #171717; color: #fff; border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
   .undo-bar button { background: none; border: 0; color: #ffb3b9; font-weight: 700; font-size: 14px; padding: 4px 8px; cursor: pointer; }
+  /* Back to today / this week / this month: Timetable and Reports, like Home and Exams */
+  #repBackBtn[hidden], #ttBackToday[hidden] { display: none; }
+  #repBackBtn { font-size: 12px; line-height: 1.2; padding: 0; margin: 0; align-self: center; white-space: nowrap; }
+  #ttBackToday { font-size: 12px; line-height: 1.2; padding: 0; margin: 2px auto 0; display: inline-flex; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -2669,7 +2673,7 @@
         <div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="adminDateLabelText">Today</span></button><button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button></div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <div class="hv-nav rep-datenav" data-atab="reports"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+      <div class="hv-nav rep-datenav" data-atab="reports"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button><button type="button" class="hv-back" id="repBackBtn" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span id="repBackText">Back to today</span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
       <div class="chips" id="adminWingChips" data-atab="dash tt reports">
         <button class="chip active" data-admin-wing="all">All</button>
         <button class="chip" data-admin-wing="Pre-Foundation">Pre-Foundation</button>
@@ -2733,7 +2737,7 @@
       <section class="tsec" id="ttSec" data-atab="tt">
         <div class="hv-nav tt-weekrow">
           <button type="button" class="hv-arrow" id="ttPrev" aria-label="Previous week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
-          <div style="text-align:center;"><div class="hv-label" id="ttLabel"></div><div class="sv-sub" id="ttWhich" style="text-align:center;"></div></div>
+          <div style="text-align:center;"><div class="hv-label" id="ttLabel"></div><div class="sv-sub" id="ttWhich" style="text-align:center;"></div><button type="button" class="hv-back" id="ttBackToday" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button></div>
           <button type="button" class="hv-arrow" id="ttNext" aria-label="Next week"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
         <div class="ad-wingsel tt-wingbox" id="ttWingBox"><select id="ttWingSel" aria-label="Wing"></select></div>
     </div>
@@ -3273,7 +3277,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.23 · updated 24 Oct 2026</div>
+          <div class="dnote">Version 13.24 · updated 25 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5585,7 +5589,7 @@
     if (gridMode) {
       const ws0 = state.tt.weekStart, cur0 = mondayOf(todayStr());
       document.getElementById('ttLabel').textContent = weekLabel(ws0);
-      document.getElementById('ttWhich').textContent = svWeekLabel(ws0);
+      document.getElementById('ttWhich').textContent = svWeekLabel(ws0); document.getElementById('ttBackToday').hidden = ws0 === cur0;
       document.getElementById('ttPrev').disabled = ws0 <= shiftDateStr(cur0, -28);
       document.getElementById('ttNext').disabled = ws0 >= shiftDateStr(cur0, 28);
       renderTgGrid();
@@ -5598,7 +5602,7 @@
     loadTtWeek(false);
     document.getElementById('ttLabel').textContent = `${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })}`;
     const cur = mondayOf(todayStr());
-    document.getElementById('ttWhich').textContent = svWeekLabel(ws);
+    document.getElementById('ttWhich').textContent = svWeekLabel(ws); document.getElementById('ttBackToday').hidden = ws === cur;
     document.getElementById('ttPrev').disabled = ws <= shiftDateStr(cur, -28);
     document.getElementById('ttNext').disabled = ws >= shiftDateStr(cur, 28);
     const past = we < todayStr();
@@ -5817,6 +5821,7 @@
     renderTimetable();
   }
   document.getElementById('ttPrev').addEventListener('click', () => ttWeekMove(-7));
+  document.getElementById('ttBackToday').addEventListener('click', () => { const diff = Math.round((dateObj(mondayOf(todayStr())) - dateObj(state.tt.weekStart)) / 86400000); if (diff) ttWeekMove(diff); });
   document.getElementById('ttNext').addEventListener('click', () => ttWeekMove(7));
   document.getElementById('ttAddBtn').addEventListener('click', () => openTtForm(null));
   document.querySelectorAll('[data-tt-mode]').forEach((b) => b.addEventListener('click', () => { state.tg.mode = b.getAttribute('data-tt-mode'); state.tt.key = ''; renderTimetable(); }));
@@ -9059,7 +9064,7 @@ Rules:
     const isToday = date === todayStr();
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(date);
     document.getElementById('adminDateSub').textContent = `${isToday ? 'Today' : (date < todayStr() ? 'Past day' : 'Upcoming day')} — ${dayHeading(date)}`;
-    document.getElementById('adminDateClearBtn').hidden = isToday;
+    document.getElementById('adminDateClearBtn').hidden = isToday; syncRepBack();
     document.getElementById('adminDateNext').disabled = date >= shiftDateStr(todayStr(), 14);
     document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((btn) => btn.classList.toggle('active', btn.getAttribute('data-admin-wing') === wing));
     syncWingSel();
@@ -12022,6 +12027,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   document.getElementById('repAttShare').addEventListener('click', () => attendanceReport(document.getElementById('adminRepTeacher').value || null, 'share-img', document.getElementById('adminReportMsg')));
   document.getElementById('adminRepTeacher').addEventListener('change', () => { document.getElementById('adminReportMsg').textContent = ''; if ((state.adminRepKind || 'full') === 'att') renderRepControls(); });
   document.getElementById('repNext').addEventListener('click', () => shiftRepPeriod(1));
+  document.getElementById('repBackBtn').addEventListener('click', () => { state.adminDate = todayStr(); state.adminExpandedTeacher = null; const t = document.getElementById('adminDateLabelText'); if (t) t.textContent = formatStepperDateLabel(state.adminDate); subscribeAdminDate(state.adminDate); document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); });
   document.getElementById('adminRepTeacher').addEventListener('focus', fillAdminRepTeachers);
   document.getElementById('adminRepTeacher').addEventListener('pointerdown', fillAdminRepTeachers);
   document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((chip) => {
@@ -13569,7 +13575,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((c) => { const r = c.getAttribute('data-report-range'); c.classList.toggle('active', r === range); c.disabled = kind === 'count' && r === 'day'; });
     document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
     const { label } = adminReportRangeDates();
-    const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label;
+    const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label; syncRepBack();
     const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
     document.getElementById('repStd').hidden = kind === 'count';
@@ -13581,6 +13587,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (kind === 'count' && typeof trepEnsure === 'function') trepEnsure();
   }
   // move the report period back or forward (the date above the page moves with it)
+  function syncRepBack() {
+    const b = document.getElementById('repBackBtn'); if (!b) return;
+    const range = state.adminReportRange || 'day'; const t = todayStr(); const d = state.adminDate || t;
+    const away = range === 'day' ? d !== t : (range === 'week' ? mondayOf(d) !== mondayOf(t) : monthKeyOf(d) !== monthKeyOf(t));
+    b.hidden = !away; const tx = document.getElementById('repBackText'); if (tx) tx.textContent = range === 'day' ? 'Back to today' : (range === 'week' ? 'Back to this week' : 'Back to this month');
+  }
   function shiftRepPeriod(dir) {
     const range = state.adminReportRange || 'day'; let d = state.adminDate;
     if (range === 'day') d = shiftDateStr(d, dir);
