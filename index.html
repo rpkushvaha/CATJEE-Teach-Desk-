@@ -2122,6 +2122,11 @@
   .ds-trow { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
   .ds-trow b { font-weight: 600; text-align: right; }
   .ds-diff { display: block; color: #B45309; font-size: 12px; padding: 2px 0 4px; }
+  /* cancel only the invigilation duty; the Undo bar */
+  .ex-cancel-btn { margin-top: 8px; background: none; border: 1px solid var(--green); color: var(--green); }
+  .ex-cancel-btn .ico { color: var(--green); }
+  .undo-bar { position: fixed; left: 12px; right: 12px; bottom: 86px; z-index: 2000; background: #171717; color: #fff; border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  .undo-bar button { background: none; border: 0; color: #ffb3b9; font-weight: 700; font-size: 14px; padding: 4px 8px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -3268,7 +3273,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.22 · updated 23 Oct 2026</div>
+          <div class="dnote">Version 13.23 · updated 24 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8677,6 +8682,51 @@ Rules:
     } catch (err) { if (go) { go.disabled = false; go.textContent = 'Put in draft'; } flashOffline(err); }
   }
   function tpOpenSheet() { const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
+  // ---------- Exams: cancel only the invigilation duty (the exam stays), tell the teachers, and an Undo ----------
+  function dutyNoticeMap(rooms) { const m = {}; (rooms || []).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { const k = u + '|' + r.room; (m[k] = m[k] || { u, room: r.room, t: [] }).t.push(`${formatTimeStr(sl.start)} – ${formatTimeStr(sl.end)}`); }))); return Object.keys(m).map((k) => m[k]); }
+  function sendDutyNotices(e, rooms, kind) { dutyNoticeMap(rooms).forEach((x) => notify(x.u, { type: 'duty', title: `${kind}: ${examTitle(e)} · ${x.room}`, body: `${slotWhen(e.date)} · ${x.t.join(', ')}`, link: { tab: 'today' } })); }
+  // teachers who were on duty in a room before and are not any more are told
+  function dutyRemovedNotices(oldE, newE) {
+    const now = {}; planOf(newE).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { now[u + '|' + r.room] = 1; })));
+    const gone = []; const had = {}; planOf(oldE).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { const k = u + '|' + r.room; if (!now[k]) { (had[k] = had[k] || { u, room: r.room, t: [] }).t.push(`${formatTimeStr(sl.start)} – ${formatTimeStr(sl.end)}`); } })));
+    Object.keys(had).forEach((k) => gone.push(had[k]));
+    gone.forEach((x) => notify(x.u, { type: 'duty', title: `Exam duty removed: ${examTitle(oldE)} · ${x.room}`, body: `${slotWhen(oldE.date)} · ${x.t.join(', ')}`, link: { tab: 'today' } }));
+  }
+  function showUndoBar(msg, onUndo, ms) {
+    const old = document.getElementById('undoBar'); if (old) old.remove();
+    const el = document.createElement('div'); el.id = 'undoBar'; el.className = 'undo-bar'; el.innerHTML = `<span>${escapeHtml(msg)}</span><button type="button" id="undoBtn">Undo</button>`;
+    document.body.appendChild(el); const t = setTimeout(() => { el.remove(); }, ms || 12000);
+    el.querySelector('#undoBtn').addEventListener('click', async () => { clearTimeout(t); el.remove(); try { await onUndo(); } catch (err) { flashOffline(err); } });
+  }
+  function openExCancelDuty(examId) {
+    const e = (state.adminExams || []).find((x) => x.id === examId); if (!e) return;
+    const rooms = planOf(e); if (!rooms.length) { showToast('This exam has no invigilation duty', 'error'); return; }
+    const duties = rooms.reduce((n, r) => n + (r.slots || []).reduce((a, sl) => a + (sl.teachers || []).length, 0) + (r.others || []).length, 0);
+    const people = planTeachers(rooms); state.tp = null; state.ds = null; let notifyOn = true;
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div id="excRoot"><div class="hv-d-title">Cancel invigilation duty?</div><div class="hv-d-wing">${escapeHtml(examTitle(e))} · ${escapeHtml(slotWhen(e.date))}</div>
+      <div class="hv-d-rows" style="margin-top:10px;"><div class="hv-d-row"><span>Rooms</span><span>${escapeHtml(rooms.map((r) => r.room).join(', '))}</span></div><div class="hv-d-row"><span>Duties</span><span>${duties}</span></div><div class="hv-d-row"><span>Teachers</span><span>${people.length}</span></div></div>
+      <div class="xw-ck in" style="margin-top:12px;"><span>ⓘ</span><span>The exam stays: its date, time, classes, paper times and its box in the timetable. Only the rooms and invigilators are removed. Duties teachers have already logged stay in their History.</span></div>
+      <label class="xw-sw" style="margin-top:12px;"><span><b>Tell the teachers</b><small>${people.length} teacher${people.length === 1 ? '' : 's'} get "Exam duty removed"</small></span><input type="checkbox" id="excNotify" checked></label>
+      <button type="button" class="dbtn-primary dbtn-block" id="excGo" style="margin-top:14px;">Cancel the duty</button>
+      <button type="button" class="btn-secondary dbtn-block" id="excKeep" style="border-color: var(--line); margin-top:8px;">Keep it</button></div>`;
+    tpOpenSheet();
+    body.querySelector('#excNotify').addEventListener('change', (ev) => { notifyOn = ev.target.checked; });
+    body.querySelector('#excKeep').addEventListener('click', closeHvSheet);
+    body.querySelector('#excGo').addEventListener('click', async () => {
+      const go = body.querySelector('#excGo'); go.disabled = true; go.textContent = 'Cancelling…';
+      const oldPlan = JSON.parse(JSON.stringify(e.plan || { rooms: [] })); const oldInv = (e.invigilators || []).slice(); const oldRoom = e.room || '';
+      try {
+        await state.db.collection('exams').doc(e.id).set({ plan: { rooms: [] }, invigilators: [], room: '' }, { merge: true });
+        if (notifyOn) sendDutyNotices(e, oldPlan.rooms, 'Exam duty removed');
+        closeHvSheet(); state.exOpen = e.id;
+        showUndoBar('Invigilation duty cancelled · the exam stays', async () => {
+          await state.db.collection('exams').doc(e.id).set({ plan: oldPlan, invigilators: oldInv, room: oldRoom }, { merge: true });
+          if (notifyOn) sendDutyNotices(e, oldPlan.rooms, 'Exam duty'); showToast('Duty restored');
+        }, 12000);
+      } catch (err) { go.disabled = false; go.textContent = 'Cancel the duty'; flashOffline(err); }
+    });
+  }
   // ---------- Exams: fill the rooms and invigilators of an exam from a photo of the duty sheet ----------
   const DS_SYSTEM = 'You read a coaching institute\u2019s invigilation duty sheet from a picture. Reply with JSON only. Never invent a name, room or time: if something is not printed, leave it empty. Copy every person\u2019s name exactly as printed, including Mr., Ms. and Ji.';
   const DS_PROMPT = 'Read this invigilation duty sheet and return JSON in exactly this shape:\n{"dateText":"","date":"","times":{"reporting":"","answerSheet":"","questionPaper":"","readFrom":"","readTo":"","writeFrom":"","writeTo":""},"rooms":[{"room":"D-1","staff":0,"duties":[{"name":"Mr. Rohan Dixit","start":"09:00","end":"10:15","breakStart":"","breakEnd":""}]}]}\nRules:\n- dateText is the day and date as printed (for example "Monday (5th, Oct.)"). date is YYYY-MM-DD only if the year is printed, otherwise "".\n- reporting = "Reporting Time"; answerSheet = "Paper Distribution" or "Answer sheet distribution"; questionPaper = "Question Paper Distribution"; readFrom and readTo = "Reading Time" from and to; writeFrom and writeTo = "Writing Time" from and to. Leave empty what is not printed.\n- One entry in rooms for each room box. room is the name without the word ROOM (D-1 ROOM becomes D-1).\n- One entry in duties for each person row, with that person\u2019s Duty Timing as start and end. Use 24-hour HH:MM when am/pm is printed. If no am/pm is printed, copy the time as written (for example 10:15 or 12:45).\n- The Break column belongs to the person on the same row: put it in breakStart and breakEnd.\n- "1 Staff" or "2 Staff" is the number of staff for that room (a number only).\n- Keep the order of the sheet.';
@@ -8852,6 +8902,7 @@ Rules:
         const e = pl.e; const tm = dsMergeTimes(e, ds.st, ds.tmMode);
         const data = { room: pl.rooms.map((r) => r.room).join(', '), invigilators: planTeachers(pl.rooms), plan: { rooms: pl.rooms }, times: tm.times }; if (tm.start) data.start = tm.start; if (tm.end) data.end = tm.end;
         await state.db.collection('exams').doc(e.id).set(data, { merge: true });
+        if (ds.notify) dutyRemovedNotices(e, data);
         if (ds.notify) { const upd = planOf(e).length > 0; pl.rooms.forEach((r) => r.slots.forEach((sl) => sl.teachers.forEach((u) => notify(u, { type: 'duty', title: `${upd ? 'Exam duty updated' : 'Exam duty'}: ${examTitle(e)} · ${r.room}`, body: slotWhen(e.date, sl.start) + ` – ${formatTimeStr(sl.end)}`, link: { tab: 'today' } })))); }
       }
       closeHvSheet(); state.ds = null; state.exOpen = exam.id; showToast(`Duty saved${ds.notify ? ` · ${nTold} teacher${nTold === 1 ? '' : 's'} told` : ' · nobody told yet'}`); renderAdmin();
@@ -9680,7 +9731,7 @@ Rules:
           duty += '</div>';
         });
         if (pr.length) duty += `<div class="ex-get">Get it as</div><div class="qa-row hv-tiles ex-tiles"><button type="button" class="qa-btn" data-ex-pdf="${escapeHtml(e.id)}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg><span class="qa-l">PDF</span><span class="qa-s">Duty chart</span></button><button type="button" class="qa-btn qa-wa" data-ex-wa="${escapeHtml(e.id)}"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share duty</span></button></div>`;
-        duty += `<button type="button" class="ex-edit-main" data-ex-edit="${escapeHtml(e.id)}"><span class="ico i-edit" aria-hidden="true"></span>Edit exam</button>${(aiReady() && (state.canAdmin || state.isCoordinator)) ? `<button type="button" class="ex-edit-main ex-photo-btn" data-ex-photo="${escapeHtml(e.id)}"><span class="ico i-spark" aria-hidden="true"></span>Fill rooms and invigilators from a photo</button>` : ''}</div>`;
+        duty += `<button type="button" class="ex-edit-main" data-ex-edit="${escapeHtml(e.id)}"><span class="ico i-edit" aria-hidden="true"></span>Edit exam</button>${(aiReady() && (state.canAdmin || state.isCoordinator)) ? `<button type="button" class="ex-edit-main ex-photo-btn" data-ex-photo="${escapeHtml(e.id)}"><span class="ico i-spark" aria-hidden="true"></span>Fill rooms and invigilators from a photo</button>` : ''}${(pr.length && (state.canAdmin || state.isCoordinator)) ? `<button type="button" class="ex-edit-main ex-cancel-btn" data-ex-cancelduty="${escapeHtml(e.id)}"><span class="ico i-trash" aria-hidden="true"></span>Cancel invigilation duty</button>` : ''}</div>`;
       }
       return `<div class="ad-exam${isSel ? ' ex-sel' : ''}${open ? ' ex-open' : ''}" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${state.exSel ? `<span class="ex-tick">${isSel ? '✓' : ''}</span>` : ''}${escapeHtml(examTitle(e))}</div>
@@ -9880,6 +9931,7 @@ Rules:
     });
     listEl.querySelectorAll('[data-ex-edit]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-edit')); if (e) { state.exOpen = null; openAdminExamForm(e, b.hasAttribute('data-ex-step') ? Number(b.getAttribute('data-ex-step')) : 1); } }));
     listEl.querySelectorAll('[data-ex-photo]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); dsOpen(b.getAttribute('data-ex-photo')); }));
+    listEl.querySelectorAll('[data-ex-cancelduty]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); openExCancelDuty(b.getAttribute('data-ex-cancelduty')); }));
     listEl.querySelectorAll('[data-ex-pdf]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-pdf')); if (e) dutyChartPdf(e); }));
     listEl.querySelectorAll('[data-ex-wa]').forEach((b) => b.addEventListener('click', () => { const e = exams.find((x) => x.id === b.getAttribute('data-ex-wa')); if (e) window.open('https://wa.me/?text=' + encodeURIComponent(dutyChartText(e)), '_blank'); }));
     listEl.querySelectorAll('[data-ex-more]').forEach((b) => b.addEventListener('click', () => openExamSheet(b.getAttribute('data-ex-more'), nameOf)));
@@ -10858,7 +10910,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     rooms.forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => notify(u, { type: 'duty', title: `${f.id ? 'Exam duty updated' : 'Exam duty'}: ${examTitle(data)} · ${r.room}`, body: slotWhen(state.adminDate, sl.start) + ` – ${formatTimeStr(sl.end)}`, link: { tab: 'today' } }))));
     try {
       let savedId = f.id; const wantPub = !!f._publish;
-      if (f.id) await state.db.collection('exams').doc(f.id).set(data, { merge: true });
+      if (f.id) { const oldE = (state.adminExams || []).find((x) => x.id === f.id); await state.db.collection('exams').doc(f.id).set(data, { merge: true }); if (oldE) dutyRemovedNotices(oldE, data); }
       else { const ref = await state.db.collection('exams').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId }, data)); savedId = ref && ref.id; }
       closeHvSheet(); state.adminExamForm = null;
       showToast(f.id ? 'Exam updated' : 'Exam added');
@@ -11640,7 +11692,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const dur = slotDuration(slot);
     const body = document.getElementById('hvSheetBody');
     const canLog = !m.cls && !slot.cancelled && d <= todayStr() && m.status !== 'leave' && m.status !== 'covered';
-    const canCancel = !m.cls;
+    const canCancel = !m.cls && !slot.setBy;
     const bySet = !!slot.setBy;
     body.innerHTML = `<div class="hv-d-title">${escapeHtml(slotLabelAll(slot))}</div>
       <div class="hv-d-wing">${escapeHtml(wingForBatch(slot.label) || '')}${state.teacherSubject ? ' · ' + escapeHtml(state.teacherSubject) : ''}</div>
@@ -11650,12 +11702,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         <div class="hv-d-row"><span>Duration</span><span>${svDur(dur)}</span></div>
         <div class="hv-d-row"><span>Status</span><span>${SV_PILL[m.status]}</span></div>
         ${slot.room ? `<div class="hv-d-row"><span>Room</span><span>${escapeHtml(slot.room)}</span></div>` : ''}
-        ${bySet ? `<div class="hv-d-row"><span>Set by</span><span>${escapeHtml(slot.setByName || 'Coordinator')}</span></div>` : ''}
+        ${bySet ? `<div class="hv-d-row"><span>Set by</span><span>Coordinator</span></div>` : ''}
         ${m.cls && m.cls.topic ? `<div class="hv-d-row"><span>Topic</span><span>${escapeHtml(m.cls.topic)}</span></div>` : ''}
       </div>
       ${m.cls ? '<button type="button" class="dbtn-primary dbtn-block" id="svViewClass" style="margin-top:14px;">View logged class</button>' : ''}
       ${canLog ? '<button type="button" class="dbtn-primary dbtn-block" id="svLogClass" style="margin-top:14px;">Log this class</button>' : ''}
-      ${bySet ? '<div class="hv-note" style="text-align:left; margin-top:12px;">This class is in your timetable from the coordinator. You can log it or mark it cancelled.</div>' : `<div class="hv-d-btns sv-3btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary" id="svDupSlot" style="border-color: var(--line);">Duplicate</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Delete</button></div>`}
+      ${bySet ? '' : `<div class="hv-d-btns sv-3btns"><button type="button" class="btn-secondary" id="svEditSlot" style="border-color: var(--line);">Edit</button><button type="button" class="btn-secondary" id="svDupSlot" style="border-color: var(--line);">Duplicate</button><button type="button" class="btn-secondary hv-del" id="svDelSlot" style="border-color: var(--line);">Delete</button></div>`}
       ${canCancel ? `<button type="button" class="btn-secondary dbtn-block" id="svCancelSlot" style="border-color: var(--line); margin-top:8px;">${slot.cancelled ? 'Restore class' : 'Cancel class'}</button>` : ''}`;
     const root = document.getElementById('hvSheet');
     root.classList.add('open');
