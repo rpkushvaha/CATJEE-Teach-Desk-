@@ -941,7 +941,7 @@
   .tg-mini-gold { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
   .tg-lock { text-align: left !important; margin: -2px 0 0 !important; }
   .tg-paintbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 8px 10px; font-size: 13px; color: var(--ink); }
-  .tg-paintbar b { color: var(--gold); }
+  .tg-paintbar b { color: var(--gold); white-space: nowrap; }
   .tg-chgd { position: relative; }
   .tg-chgd::after { content: ''; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
   .tg-day.chg { border-color: var(--gold); }
@@ -2106,6 +2106,13 @@
   .xw-pane[data-xw="1"] .text-input, .xw-pane[data-xw="1"] input[type="time"] { min-height: 42px; height: 42px; }
   .xw-pane[data-xw="1"] .xt-box { grid-template-columns: 1fr; gap: 2px; }
   .xw-pane[data-xw="1"] .xt-f .sv-tlbl { margin: 4px 0 3px; }
+  /* different subject for each class (New Exam) */
+  .xw-sw { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+  .xw-sw b { display: block; font-size: 13px; font-weight: 600; }
+  .xw-sw small { display: block; font-size: 12px; color: var(--muted-2); }
+  .xw-sw input { width: 20px; height: 20px; accent-color: var(--gold); flex: none; }
+  .xw-prow { display: grid; grid-template-columns: minmax(70px, 38%) 1fr; gap: 8px; align-items: center; margin-top: 8px; font-size: 13px; font-weight: 600; }
+  .tg-tight .tg-b .tg-bsub { font-size: 10.5px; letter-spacing: -0.2px; }
 </style>
 </head>
 <body>
@@ -2749,9 +2756,7 @@
               <div id="adminExamType"></div>
               <div class="sv-tlbl">Subject <span class="xt-note">optional</span></div>
               <div id="adminExamSubject"></div>
-              <div class="sv-tlbl">Classes</div>
-              <div id="adminExamScope"></div>
-            </div>
+              <div class="sv-tlbl">Classes</div> <div id="adminExamScope"></div> <div id="adminExamPapers"></div> </div>
             <div class="xw-card">
               <div class="xw-ch">Paper &amp; timings</div>
               <div class="sv-tlbl">Paper type</div>
@@ -3254,7 +3259,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.17 · updated 20 Oct 2026</div>
+          <div class="dnote">Version 13.18 · updated 20 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6029,7 +6034,7 @@
     const dNote = dayNoteOf(doc, d);
     if (dNote) html += `<div class="tg-daynote"><span class="ico i-pin" aria-hidden="true"></span> ${escapeHtml(dNote)}${(doc.cells || []).some((c) => c.d === d) ? '' : ' · whole day'}</div>`;
     
-    html += `<div class="tg-scroll"><table class="tg-table"><thead><tr><th style="width:${tgLblW(g.batches)}px">${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => pp.off ? '' : `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${tgDispNo(perD, i)}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
+    html += `<div class="tg-scroll"><table class="tg-table${tgLblW(g.batches, perD.length).tight ? ' tg-tight' : ''}"><thead><tr><th style="width:${tgLblW(g.batches, perD.length).w}px">${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => pp.off ? '' : `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${tgDispNo(perD, i)}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
     const rowSkip = {};
     g.batches.forEach((b, bi) => {
       const rOn = batchRoomOn(b, d); const rMoved = rOn && rOn !== batchRoom(b);
@@ -6094,12 +6099,39 @@
   }
   // "Class 9 - Batch 1" → "9 · B1", "Class 10 - Evening" → "10 · Eve", others unchanged
   // for the narrow first column of a grid: a short name stays on one line ("9 · B1"); a long one is stacked ("10" over "Remedial")
+  // one exam, several papers: a different subject for each class that sits together (papers is optional; subject keeps the joined text, e.g. "Physics / Chemistry")
+  function examPapers(e) { return (e && Array.isArray(e.papers) && e.papers.length) ? e.papers : [{ scope: (e && e.scope) || [], subject: (e && e.subject) || '' }]; }
+  function paperSubjects(papers) { const out = []; (papers || []).forEach((p) => { const t = String((p && p.subject) || '').trim(); if (t && out.indexOf(t) === -1) out.push(t); }); return out; }
+  function examHasPapers(e) { const P = examPapers(e); return P.length > 1 && paperSubjects(P).length > 1; }
+  function examSubjectFor(e, batch) { const P = examPapers(e); for (let i = 0; i < P.length; i++) { const sc = P[i].scope || []; if (sc.indexOf(batch) !== -1 || expandScope(sc).indexOf(batch) !== -1) return P[i].subject || ''; } return (e && e.subject) || ''; }
+  // "9 · Eve (Physics) | 10 · Eve (Chemistry)" when the classes write different subjects; otherwise just the classes
+  function scopeWithSubjects(e, short) {
+    if (!examHasPapers(e)) return short ? scopeShort(e.scope) : scopeLabel(e.scope);
+    return examPapers(e).map((p) => `${short ? scopeShort(p.scope) : scopeLabel(p.scope)}${p.subject ? ' (' + p.subject + ')' : ''}`).join(short ? ' | ' : ', ');
+  }
+  // the classes that sit in one room, with their subjects (only the papers that belong to that room)
+  function roomScopeText(e, r, short) {
+    const rs = (r && r.scope) || []; if (!examHasPapers(e) || !rs.length) return scopeLabel(rs);
+    const mine = expandScope(rs); const P = examPapers(e).filter((p) => expandScope(p.scope || []).some((b) => mine.indexOf(b) !== -1) || (p.scope || []).some((b) => rs.indexOf(b) !== -1));
+    return (P.length ? P : examPapers(e)).map((p) => `${short ? scopeShort(p.scope) : scopeLabel(p.scope)}${p.subject ? ' (' + p.subject + ')' : ''}`).join(short ? ' | ' : ', ');
+  }
+  function examFormPapers(f) {
+    const sc = f.scope || []; if (!f.diff || sc.length < 2) return [];
+    const by = {}; const order = []; sc.forEach((en) => { const k = String((f.paperSub || {})[en] || '').trim(); if (!by[k]) { by[k] = []; order.push(k); } by[k].push(en); });
+    if (order.filter(Boolean).length < 2) return [];
+    return order.map((k) => ({ scope: by[k], subject: k }));
+  }
   function scopeShort(scope) {
     const full = String(scopeLabel(scope) || ''); const parts = full.split(/,\s*/).filter(Boolean); const by = {}; const order = []; const raw = [];
     parts.forEach((x) => { if (!/^Class\s*\d+\s*[-–]\s*\S/i.test(x)) { raw.push(x); return; } const t = gridBatchLabel(x); const m = String(t).match(/^(\d+)[\s\u00a0]·[\s\u00a0](.+)$/); if (!m) { raw.push(x); return; } if (!by[m[1]]) { by[m[1]] = []; order.push(m[1]); } by[m[1]].push(m[2]); });
     const out = order.map((n) => `${n} · ${by[n].join(', ')}`).concat(raw); return out.length ? out.join(' | ') : full;
   }
-  function tgLblW(bats) { let w = 52; (bats || []).forEach((b) => { const m = String(gridBatchLabel(b)).match(/^(\d+)[\s\u00a0]·[\s\u00a0](.+)$/); if (m && m[2].length > 3) w = Math.max(w, Math.min(104, Math.round(m[2].length * 7.2 + 14))); }); return w; }
+  function tgLblW(bats, nPer) {
+    let need = 52; (bats || []).forEach((b) => { const m = String(gridBatchLabel(b)).match(/^(\d+)[\s\u00a0]·[\s\u00a0](.+)$/); if (m && m[2].length > 3) need = Math.max(need, Math.min(104, Math.round(m[2].length * 7.2 + 14))); });
+    // never squeeze the period columns below ~47px: on a narrow screen with many periods the name gets a smaller font instead
+    const avail = Math.min(window.innerWidth || 393, 560) - 40; const maxW = Math.max(52, avail - (nPer || 5) * 47);
+    return { w: Math.min(need, maxW), tight: need > maxW };
+  }
   function gridBatchHtml(b) {
     const t = gridBatchLabel(b); const m = String(t).match(/^(\d+)[\s\u00a0]·[\s\u00a0](.+)$/);
     return m && m[2].length > 3 ? `${escapeHtml(m[1])}<span class="tg-bsub">${escapeHtml(m[2])}</span>` : escapeHtml(t);
@@ -8450,7 +8482,7 @@ Rules:
       // a weekly / unit / half-yearly test or an exam is made as an Exam (it takes the box); a "class test" is a class that has a test
       tp.sub[v] = sp.kind === 'exam' ? '' : r.s; tp.exact[v] = !sp.kind && (r.exact || (!!r.s && !!sp.time && tpKey(sp.head) === tpKey(r.s)));
     });
-    tp.day = tp.data.days[0].date; tp.policy = 'empty'; tp.shift = mondayOf(tp.data.days[0].date) !== state.tt.weekStart; tp.useTimes = true; tp.exEdit = {}; tp.noteOff = {};
+    tp.day = tp.data.days[0].date; tp.policy = 'empty'; tp.shift = mondayOf(tp.data.days[0].date) !== state.tt.weekStart; tp.useTimes = true; tp.exEdit = {}; tp.noteOff = {}; tp.together = false;
   }
   // what would be put in the grid with the current choices
   // The picture is often last week's. Its Monday..Saturday are put on this page's Monday..Saturday, unless the person chooses the picture's own week.
@@ -8550,13 +8582,14 @@ Rules:
       const groups = {};
       exOn.forEach((x) => {
         const have = (doc.cells || []).some((c) => c.ex && c.d === x.d && x.batches.indexOf(c.b) !== -1 && x.periods.indexOf(c.p) !== -1); if (have) return;
-        const k = [x.d, x.type, x.subject, x.start, x.end].join('|'); const gr = groups[k] = groups[k] || { d: x.d, type: x.type, name: x.type ? '' : tpCap(x.kw || 'Test'), subject: x.subject, start: x.start, end: x.end, scope: [], pairs: [] };
-        x.batches.forEach((b) => { if (gr.scope.indexOf(b) === -1) gr.scope.push(b); x.periods.forEach((p) => gr.pairs.push([b, p])); });
+        const k = (tp.together ? [x.d, x.type, x.start, x.end] : [x.d, x.type, x.subject, x.start, x.end]).join('|'); const gr = groups[k] = groups[k] || { d: x.d, type: x.type, name: x.type ? '' : tpCap(x.kw || 'Test'), subject: x.subject, start: x.start, end: x.end, scope: [], pairs: [], papers: [] };
+ x.batches.forEach((b) => { if (gr.scope.indexOf(b) === -1) gr.scope.push(b); x.periods.forEach((p) => gr.pairs.push([b, p, x.subject || ''])); });
+ if (tp.together) { const pp = gr.papers.find((q) => q.subject === (x.subject || '')); if (pp) x.batches.forEach((b) => { if (pp.scope.indexOf(b) === -1) pp.scope.push(b); }); else gr.papers.push({ scope: x.batches.slice(), subject: x.subject || '' }); }
       });
       const made = [];
       for (const k of Object.keys(groups)) {
-        const gr = groups[k]; const ref = state.db.collection('exams').doc();
-        await waitForWrite(ref.set({ type: gr.type || gr.name || 'Test', subject: gr.subject || '', name: gr.name || '', date: gr.d, start: gr.start, end: gr.end, room: '', scope: gr.scope.slice(), invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
+        const gr = groups[k]; { const subs = paperSubjects(gr.papers); if (subs.length > 1) gr.subject = subs.join(' / '); else gr.papers = []; } const ref = state.db.collection('exams').doc();
+        await waitForWrite(ref.set({ type: gr.type || gr.name || 'Test', subject: gr.subject || '', papers: gr.papers || [], name: gr.name || '', date: gr.d, start: gr.start, end: gr.end, room: '', scope: gr.scope.slice(), invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
         made.push({ gr, id: ref.id });
       }
       // 2) classes, times, notes and exam boxes in the draft
@@ -8567,8 +8600,8 @@ Rules:
       const taken = new Set(keep.map((c) => cellKey(c))); let put = 0;
       B.cells.forEach((c) => { if (!taken.has(cellKey(c))) { keep.push(c); taken.add(cellKey(c)); put++; } });
       made.forEach(({ gr, id }) => {
-        const label = gr.name || `${gr.type}${gr.subject ? ' · ' + gr.subject : ''}`;
-        gr.pairs.forEach(([b, p]) => {
+        gr.pairs.forEach(([b, p, sj]) => {
+ const sub = (gr.papers && gr.papers.length) ? (sj || '') : (gr.subject || ''); const label = gr.name || `${gr.type}${sub ? ' · ' + sub : ''}`;
           const old = keep.find((c) => c.d === gr.d && c.p === p && c.b === b && !c.ex); keep = keep.filter((c) => !(c.d === gr.d && c.p === p && c.b === b));
           const nc = { d: gr.d, p, b, ex: id, s: label, et: `${gr.start}-${gr.end}` }; if (old && old.s) nc.was = { s: old.s, t: old.t || '', test: !!old.test }; keep.push(nc);
         });
@@ -8642,7 +8675,10 @@ Rules:
     if (B.badRows) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>${B.badRows} row${B.badRows === 1 ? '' : 's'} had a different number of boxes than periods. Check those days.</span></div>`);
     const dayTxt = (dd) => `${WD[dateObj(dd).getDay()]} ${dateObj(dd).getDate()}`;
     const ftm = (x) => (x.start && x.end ? `${formatTimeStr(x.start)} – ${formatTimeStr(x.end)}` : 'time not found');
-    const exHtml = B.exams.length ? `<div class="xs-grp">Tests and exams · made in Exams</div>${B.exams.map((x) => `<div class="tp-exr${x.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(x.d))} · ${escapeHtml(x.classes.join(', '))}</b><small>${escapeHtml(ftm(x))}</small></div><button type="button" class="chip${x.on ? ' active' : ''}" data-tp-ex-on="${escapeHtml(x.key)}">${x.on ? '✓ Make it' : 'Skip'}</button></div>
+    const togK = {}; B.exams.filter((x) => x.on).forEach((x) => { const k = [x.d, x.type, x.start, x.end].join('|'); (togK[k] = togK[k] || []).push(x); });
+    const canTog = Object.keys(togK).some((k) => togK[k].length >= 2 && new Set(togK[k].map((x) => x.batches.join(','))).size >= 2);
+    const tgHtml = canTog ? `<div class="tp-exr"><div class="tp-exh"><div><b>Sit together</b><small>Same room and invigilators: make ONE exam with a subject for each class</small></div><button type="button" class="chip${tp.together ? ' active' : ''}" data-tp-together="1">${tp.together ? '✓ One exam' : 'Separate exams'}</button></div></div>` : '';
+    const exHtml = B.exams.length ? `<div class="xs-grp">Tests and exams · made in Exams</div>${tgHtml}${B.exams.map((x) => `<div class="tp-exr${x.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(x.d))} · ${escapeHtml(x.classes.join(', '))}</b><small>${escapeHtml(ftm(x))}</small></div><button type="button" class="chip${x.on ? ' active' : ''}" data-tp-ex-on="${escapeHtml(x.key)}">${x.on ? '✓ Make it' : 'Skip'}</button></div>
         <div class="tp-exs"><select class="text-input tp-sel" data-tp-ex-type="${escapeHtml(x.key)}"><option value="">${x.type ? 'Other' : 'Choose type'}</option>${testTypesList().map((t) => `<option value="${escapeHtml(t)}"${x.type === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select><select class="text-input tp-sel" data-tp-ex-sub="${escapeHtml(x.key)}"><option value="">No subject</option>${ttSubjectsList().map((t) => `<option value="${escapeHtml(t)}"${x.subject === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div></div>`).join('')}<div class="hv-note" style="text-align:left;">Each one takes its box in the grid and appears in the Exams tab; add the rooms and invigilators there. The syllabus and marks are not saved.</div>` : '';
     const noteHtml = B.notes.length ? `<div class="xs-grp">Notes for the whole day</div>${B.notes.map((n) => `<div class="tp-exr${n.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(n.d))}</b><small>${escapeHtml(n.text)}</small></div><button type="button" class="chip${n.on ? ' active' : ''}" data-tp-note="${escapeHtml(n.key)}">${n.on ? '✓ Add' : 'Skip'}</button></div></div>`).join('')}` : '';
     const used = Object.values(tp.map).filter(Boolean); const dup = used.some((b, i) => used.indexOf(b) !== i);
@@ -8705,6 +8741,7 @@ Rules:
     body.querySelectorAll('[data-tp-ex-sub]').forEach((el) => el.addEventListener('change', () => { const k = el.getAttribute('data-tp-ex-sub'); (tp.exEdit[k] = tp.exEdit[k] || {}).subject = el.value; tpRender(); }));
     body.querySelectorAll('[data-tp-note]').forEach((el) => el.addEventListener('click', () => { const k = el.getAttribute('data-tp-note'); tp.noteOff[k] = !tp.noteOff[k]; tpRender(); }));
     body.querySelectorAll('[data-tp-times]').forEach((el) => el.addEventListener('click', () => { tp.useTimes = el.getAttribute('data-tp-times') === '1'; tpRender(); }));
+    body.querySelectorAll('[data-tp-together]').forEach((el) => el.addEventListener('click', () => { tp.together = !tp.together; tpRender(); }));
     const go = body.querySelector('#tpGo'); if (go) go.addEventListener('click', tpApply);
   }
   function renderAdmin() {
@@ -9266,7 +9303,7 @@ Rules:
     examTimeLines(exam).forEach((x) => L.push('⏩ ' + x));
     planOf(exam).forEach((r) => {
       L.push('──────────');
-      L.push(`*${r.room}*${(r.scope || []).length ? ' — ' + scopeLabel(r.scope) : ''}`);
+      L.push(`*${r.room}*${(r.scope || []).length ? ' — ' + roomScopeText(exam, r) : ''}`);
       (r.slots || []).forEach((sl) => L.push(`🕙 ${formatTimeStr(sl.start)} – ${formatTimeStr(sl.end)}: ${slotNames(sl) || '—'}`));
       (r.others || []).forEach((o) => L.push(`🕙 ${formatTimeStr(o.start)} – ${formatTimeStr(o.end)}: ${o.name}${o.bStart && o.bEnd ? ` (break ${formatTimeStr(o.bStart)} – ${formatTimeStr(o.bEnd)})` : ''}`));
       if (r.staff) L.push(`👥 ${r.staff} Staff`);
@@ -9283,7 +9320,7 @@ Rules:
     w.addSpace(4); w.rule();
     planOf(exam).forEach((r) => {
       w.addSpace(4);
-      w.bodyLine(`${r.room}${(r.scope || []).length ? '   (' + scopeLabel(r.scope) + ')' : ''}`, { bold: true, size: 12 });
+      w.bodyLine(`${r.room}${(r.scope || []).length ? ' (' + roomScopeText(exam, r) + ')' : ''}`, { bold: true, size: 12 });
       (r.slots || []).forEach((sl) => w.bodyLine(`${formatTimeStr(sl.start)} - ${formatTimeStr(sl.end)}:   ${slotNames(sl) || '-'}`, { indent: 14 }));
       (r.others || []).forEach((o) => w.bodyLine(`${formatTimeStr(o.start)} - ${formatTimeStr(o.end)}:   ${o.name}${o.bStart && o.bEnd ? ` (break ${formatTimeStr(o.bStart)} - ${formatTimeStr(o.bEnd)})` : ''}`, { indent: 14 }));
       if (r.staff) w.bodyLine(`${r.staff} Staff`, { indent: 14, bold: true });
@@ -9406,7 +9443,7 @@ Rules:
       }
       return `<div class="ad-exam${isSel ? ' ex-sel' : ''}${open ? ' ex-open' : ''}" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${state.exSel ? `<span class="ex-tick">${isSel ? '✓' : ''}</span>` : ''}${escapeHtml(examTitle(e))}</div>
-        <div class="ad-tsub">${escapeHtml([scopeShort(e.scope), `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
+        <div class="ad-tsub">${escapeHtml([scopeWithSubjects(e, true), `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
  ${steps}${dutyLine}${duty}
         ${open && extra.length ? `<div class="ad-tsub">Done, not in plan: ${escapeHtml(extra.map((u) => `${nameOf(u)} (${svDur(loggedBy[u])})`).join(', '))}</div>` : ''}
         ${!pr.length && inv.length ? `<div class="ad-tsub">Invigilation filled in: ${escapeHtml(inv.join(', '))}</div>` : ''}
@@ -9455,7 +9492,7 @@ Rules:
   function dutyNameKey(list) { const ids = []; list.forEach((e) => planOf(e).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { if (ids.indexOf(u) === -1) ids.push(u); })))); return ids.map((u) => (state.adminNames[u] && state.adminNames[u].name) || '?').join(','); }
   const stableJson = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v).sort().reduce((a, x) => { a[x] = v[x]; return a; }, {}) : v));
   // the same exam gives the same signature whether it comes from the form or from the database
-  function dutySig(list) { return stableJson(list.map((e) => [examTitle(e), scopeLabel(e.scope), e.start, e.end, e.ptype || 'sub', e.times || {}, planOf(e)])); }
+  function dutySig(list) { return stableJson(list.map((e) => [examTitle(e), scopeWithSubjects(e, false), e.start, e.end, e.ptype || 'sub', e.times || {}, planOf(e)])); }
   function dutyImgId(date) { return 'duty~' + date + '~' + leadWings().map((w) => String(w).replace(/[^A-Za-z0-9]+/g, '')).join('_'); }
   function buildDutyCanvas(list) {
     const date = list[0].date; const dd = dateObj(date);
@@ -9467,17 +9504,18 @@ Rules:
     // header: each exam, then its paper times (Reporting time, distributions, reading / writing time)
     const head = [];
     list.forEach((e) => {
-      const parts = [examTitle(e), scopeLabel(e.scope), e.start && e.end ? `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}` : ''].filter((x) => x && String(x).trim());
+      const parts = [examTitle(e), scopeWithSubjects(e, true), e.start && e.end ? `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}` : ''].filter((x) => x && String(x).trim());
       if (parts.length) head.push({ k: 'exam', txt: `(${parts.join(' · ')})` });
       examTimeLines(e).forEach((x) => head.push({ k: 'time', txt: x }));
     });
     // rooms: one block per room (across the day's exams); every person once, with all of his duty times one under the other
     const rooms = {}; const order = [];
-    const room = (k) => { if (!rooms[k]) { rooms[k] = { people: {}, porder: [], staff: 0 }; order.push(k); } return rooms[k]; };
+    const room = (k) => { if (!rooms[k]) { rooms[k] = { people: {}, porder: [], staff: 0, who: [] }; order.push(k); } return rooms[k]; };
     const addTime = (R, key, name, a, b) => { if (!R.people[key]) { R.people[key] = { name, times: [] }; R.porder.push(key); } if (!R.people[key].times.some((q) => q.a === a && q.b === b)) R.people[key].times.push({ a, b }); };
     const invigSet = new Set();
     list.forEach((e) => planOf(e).forEach((r) => {
-      const k = String(r.room || '—');
+ const k = String(r.room || '—');
+ if (r.room && examHasPapers(e)) { const R0 = room(k); const w0 = roomScopeText(e, r, true); if (w0 && R0.who.indexOf(w0) === -1) R0.who.push(w0); }
       (r.slots || []).forEach((sl) => { if (!(sl.teachers || []).length || !sl.start || !sl.end) return; const R = room(k); sl.teachers.forEach((u) => { invigSet.add(u); addTime(R, 'u:' + u, nm(u), sl.start, sl.end); }); });
       (r.others || []).forEach((o) => { const name = (o.name || '').trim(); if (!name || !o.start || !o.end) return; addTime(room(k), 'o:' + name.toLowerCase(), name, o.start, o.end); });
       if (r.staff) { const R = room(k); R.staff = Math.max(R.staff, r.staff); }
@@ -9485,7 +9523,7 @@ Rules:
     const blocks = order.map((k) => {
       const R = rooms[k];
       const rows = R.porder.map((key) => { const pp = R.people[key]; const times = pp.times.sort((x1, x2) => hhmmToMin(x1.a) - hhmmToMin(x2.a)); return { name: pp.name, times: times.map((q) => span(q.a, q.b)), first: hhmmToMin(times[0].a) }; }).sort((x1, x2) => x1.first - x2.first);
-      return { room: k, staff: R.staff, rows };
+      return { room: k, staff: R.staff, rows, who: (R.who || []).join(', ') };
     });
     const invig = Array.from(invigSet);
     const W = 1100, pad = 40, lh = 32, headH = 70, cT = W * 0.62;
@@ -9508,7 +9546,7 @@ Rules:
     y += 20;
     blocks.forEach((b) => {
       const top = y; let yy = y + 52;
-      t(`${String(b.room).toUpperCase()} ROOM`, pad + 14, y + 26, 26, true); t('Duty Timing', (cT + W - pad) / 2, y + 26, 24, true, 'center');
+      t(`${String(b.room).toUpperCase()} ROOM${b.who ? ' · ' + b.who : ''}`, pad + 14, y + 26, b.who ? 22 : 26, true); t('Duty Timing', (cT + W - pad) / 2, y + 26, 24, true, 'center');
       ln(pad, y + 52, W - pad, y + 52, '#000', 2);
       b.rows.forEach((r, i) => {
         const h = rowH(r);
@@ -10006,7 +10044,7 @@ Rules:
   const xwPlain = (name) => `<span class="xw-av plain" aria-hidden="true">${escapeHtml(xwInitials(name))}</span>`;
   const xwFmt = (v) => (v ? formatTimeStr(v) : '');
   const xwClone = (o) => JSON.parse(JSON.stringify(o || {}));
-  const xwSnap = (f) => JSON.stringify({ type: f.type, subject: f.subject, name: f.name, scope: f.scope, ptype: f.ptype, times: Object.assign({}, f.times, { _auto: undefined }), rooms: f.rooms });
+  const xwSnap = (f) => JSON.stringify({ type: f.type, subject: f.subject, diff: !!f.diff, paperSub: f.diff ? f.paperSub : null, name: f.name, scope: f.scope, ptype: f.ptype, times: Object.assign({}, f.times, { _auto: undefined }), rooms: f.rooms });
   const xwRoomUsed = (r) => !!((r.staff || 0) || (r.others || []).length || (r.slots || []).some((sl) => sl.start || sl.end || (sl.teachers || []).length));
   function syncNavH() { const n = document.querySelector('.bottom-nav'); if (n) document.documentElement.style.setProperty('--nav-h', n.offsetHeight + 'px'); }
   window.addEventListener('resize', syncNavH); syncNavH();
@@ -10052,7 +10090,7 @@ Rules:
       others: (r.others || []).filter((o) => (o.name || '').trim() && o.start && o.end).map((o) => ({ name: o.name.trim(), start: o.start, end: o.end, bStart: o.bStart || '', bEnd: o.bEnd || '' })),
       slots: r.slots.filter((sl) => sl.start && sl.end && (sl.teachers || []).length).map((sl) => ({ start: sl.start, end: sl.end, teachers: sl.teachers.slice(), breaks: xwClone(sl.breaks) })) }))
       .filter((r) => r.slots.length || r.others.length || r.staff);
-    return { id: f.id || 'draft', type: f.type || '', subject: f.subject || '', name: f.name || '', date: state.adminDate, start: t.start, end: t.end, ptype: f.ptype === 'mcq' ? 'mcq' : 'sub', times: cleanExamTimes(f), scope: f.scope.slice(), plan: { rooms } };
+    return { id: f.id || 'draft', type: f.type || '', subject: f.subject || '', papers: examFormPapers(f), name: f.name || '', date: state.adminDate, start: t.start, end: t.end, ptype: f.ptype === 'mcq' ? 'mcq' : 'sub', times: cleanExamTimes(f), scope: f.scope.slice(), plan: { rooms } };
   }
   function xwDutyList() {
     const f = state.adminExamForm; if (!f) return [];
@@ -10475,6 +10513,7 @@ Rules:
     document.getElementById('adminExamFormTitle').textContent = f.id ? 'Edit Exam' : 'New Exam';
     selectRow(document.getElementById('adminExamType'), testTypesList(), f.type, (v) => { f.type = v; renderAdminExamForm(ids, nameOf); });
     selectRow(document.getElementById('adminExamSubject'), subjectsList(), f.subject, (v) => { f.subject = v; renderAdminExamForm(ids, nameOf); }, 'No subject');
+    renderExamPapers(f, () => renderAdminExamForm(ids, nameOf));
     const sc = document.getElementById('adminExamScope');
     renderScopePicker(sc, f, () => renderAdminExamForm(ids, nameOf));
     if (false) sc.innerHTML = scopeChipsHtml(f.scope, 'data-exscope');
@@ -10494,7 +10533,7 @@ Rules:
   }
   function openAdminExamForm(exam, step) {
     state.adminExamForm = exam
-      ? { id: exam.id, type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
+      ? { id: exam.id, papers: (exam.papers || []), type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
           ptype: exam.ptype === 'mcq' ? 'mcq' : 'sub', times: Object.assign({}, exam.times || {}, (exam.times && exam.times.report) ? {} : { report: exam.start || '', writeTo: exam.end || '' }),
           rooms: planOf(exam).length ? planOf(exam).map((r) => ({ room: r.room || '', staff: r.staff || 0, others: (r.others || []).map((o) => Object.assign({}, o)), slots: (r.slots || []).map((sl) => ({ start: sl.start, end: sl.end, teachers: (sl.teachers || []).slice(), breaks: JSON.parse(JSON.stringify(sl.breaks || {})) })) }))
             : (exam.room ? [{ room: exam.room, slots: [{ start: exam.start, end: exam.end, teachers: (exam.invigilators || []).slice() }] }] : []) }
@@ -10514,7 +10553,7 @@ Rules:
         <div class="hv-d-row"><span>Date</span><span>${escapeHtml(dayHeading(e.date))}</span></div>
         <div class="hv-d-row"><span>Time</span><span>${escapeHtml(formatTimeStr(e.start))} – ${escapeHtml(formatTimeStr(e.end))}</span></div>
         ${planOf(e).length ? '' : `<div class="hv-d-row"><span>Room / Hall</span><span>${escapeHtml(e.room || '—')}</span></div>`}
-        <div class="hv-d-row"><span>Classes</span><span>${escapeHtml(scopeLabel(e.scope) || '—')}</span></div>
+        <div class="hv-d-row"><span>Classes</span><span>${escapeHtml(scopeWithSubjects(e, false) || '—')}</span></div>
         ${planOf(e).length ? '' : `<div class="hv-d-row"><span>Invigilators</span><span>${escapeHtml((e.invigilators || []).map(nameOf).join(', ') || '—')}</span></div>`}
       </div>
       ${planOf(e).length ? `<div class="plan-sum">${planOf(e).map((r) => `<div class="plan-sum-r"><b>${escapeHtml(r.room)}</b>${(r.scope || []).length ? ' · ' + escapeHtml(scopeLabel(r.scope)) : ''}${(r.slots || []).map((sl) => `<div class="ad-tsub">${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}: ${escapeHtml(slotNames(sl, nameOf) || '—')}</div>`).join('')}${(r.others || []).map((o) => `<div class="ad-tsub">${escapeHtml(formatTimeStr(o.start))} – ${escapeHtml(formatTimeStr(o.end))}: ${escapeHtml(o.name)}${o.bStart && o.bEnd ? ` (break ${escapeHtml(formatTimeStr(o.bStart))} – ${escapeHtml(formatTimeStr(o.bEnd))})` : ''}</div>`).join('')}${r.staff ? `<div class="ad-tsub">${r.staff} Staff</div>` : ''}</div>`).join('')}</div>` : ''}
@@ -10544,8 +10583,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!f || !state.db) return;
     const fail = (msg, st) => { showToast(msg, 'error'); if (state.adminExamForm) { state.adminExamForm.step = st; renderExamPlanSection(); } };
     if (!f.type && !f.name) { fail('Choose the test type', 1); return; }
-    const name = f.type ? `${f.type}${f.subject ? ' · ' + f.subject : ''}` : f.name;
-    const start = document.getElementById('adminExamStart').value;
+    if (f.diff) f.subject = paperSubjects((f.scope || []).map((en) => ({ subject: (f.paperSub || {})[en] }))).join(' / ');
+ const name = f.type ? `${f.type}${f.subject ? ' · ' + f.subject : ''}` : f.name;
+ const start = document.getElementById('adminExamStart').value;
     const end = document.getElementById('adminExamEnd').value;
     if (!start || !end || hhmmToMin(end) <= hhmmToMin(start)) { fail('Check the Reporting time and when Writing time ends', 1); return; }
     { const tt = cleanExamTimes(f); const bad = [['read', 'Reading time'], ['write', 'Writing time']].find(([k]) => tt[k + 'From'] && tt[k + 'To'] && hhmmToMin(tt[k + 'To']) <= hhmmToMin(tt[k + 'From'])); if (bad) { fail(`Check the ${bad[1]}`, 1); return; } }
@@ -10571,7 +10611,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const ok = await showConfirm(`${pw.slice(0, 5).join('\n')}${pw.length > 5 ? `\n+${pw.length - 5} more` : ''}\n\nSave anyway?`, '⚠️ Please check', 'Save');
       if (!ok) return;
     }
-    const data = { name, type: f.type || '', subject: f.subject || '', date: state.adminDate, start, end, ptype: f.ptype === 'mcq' ? 'mcq' : 'sub', times: cleanExamTimes(f), room: rooms.map((r) => r.room).join(', '), scope: f.scope.slice(), invigilators: planTeachers(rooms), plan: { rooms } };
+    const data = { name, type: f.type || '', subject: f.subject || '', papers: examFormPapers(f), date: state.adminDate, start, end, ptype: f.ptype === 'mcq' ? 'mcq' : 'sub', times: cleanExamTimes(f), room: rooms.map((r) => r.room).join(', '), scope: f.scope.slice(), invigilators: planTeachers(rooms), plan: { rooms } };
     // each invigilator is told about their duty
     rooms.forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => notify(u, { type: 'duty', title: `${f.id ? 'Exam duty updated' : 'Exam duty'}: ${examTitle(data)} · ${r.room}`, body: slotWhen(state.adminDate, sl.start) + ` – ${formatTimeStr(sl.end)}`, link: { tab: 'today' } }))));
     try {
@@ -14151,6 +14191,25 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (/^Class \d+$/.test(v)) return list.filter((x) => x === v || classOfBatch(x) !== v || /^Class \d+$/.test(x));
     if (list.indexOf(classOfBatch(v)) !== -1) return list.filter((x) => x !== classOfBatch(v));
     return list;
+  }
+  function renderExamPapers(f, redraw) {
+    const box = document.getElementById('adminExamPapers'); if (!box) return;
+    if (!f._pinit) { f._pinit = true; f.paperSub = {}; (f.papers || []).forEach((p) => (p.scope || []).forEach((en) => { f.paperSub[en] = p.subject || ''; })); f.diff = paperSubjects(f.papers || []).length > 1; }
+    const sc = f.scope || []; const show = sc.length >= 2; const on = show && !!f.diff;
+    const single = document.getElementById('adminExamSubject'); if (single) { single.hidden = on; if (single.previousElementSibling) single.previousElementSibling.hidden = on; }
+    if (on) f.subject = paperSubjects(sc.map((en) => ({ subject: f.paperSub[en] }))).join(' / ');
+    const subs = subjectsList();
+    const html = !show ? '' : `<label class="xw-sw"><span><b>Different subject for each class</b><small>One exam, one duty plan</small></span><input type="checkbox" id="exDiff"${on ? ' checked' : ''}></label>${on ? sc.map((en) => `<div class="xw-prow"><span>${escapeHtml(en)}</span><select class="text-input" data-psub="${escapeHtml(en)}"><option value="">No subject</option>${subs.map((t) => `<option value="${escapeHtml(t)}"${(f.paperSub[en] || '') === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div>`).join('') : ''}`;
+    box._f = f; box._redraw = redraw;
+    if (!box._bound) {
+      box._bound = true;
+      box.addEventListener('change', (e) => {
+        const ff = box._f; if (!ff) return; const t = e.target;
+        if (t && t.id === 'exDiff') { ff.diff = t.checked; if (t.checked) (ff.scope || []).forEach((en) => { if (ff.paperSub[en] === undefined) ff.paperSub[en] = ff.subject || ''; }); else if (ff.subject && ff.subject.indexOf(' / ') !== -1) ff.subject = ''; box._redraw(); }
+        else if (t && t.hasAttribute && t.hasAttribute('data-psub')) { ff.paperSub[t.getAttribute('data-psub')] = t.value; box._redraw(); }
+      });
+    }
+    if (box._h !== html) { box._h = html; box.innerHTML = html; }
   }
   function selectRow(el, items, active, onPick, noneLabel) {
     const list = (active && items.indexOf(active) === -1) ? [active].concat(items) : items;
