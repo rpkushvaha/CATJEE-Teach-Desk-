@@ -3259,7 +3259,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.19 · updated 21 Oct 2026</div>
+          <div class="dnote">Version 13.20 · updated 21 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6074,6 +6074,9 @@
     const everPub = tgEverPub(doc);
     const dayPend = pdMap[d] && pdList.length > 1;
     const dN = `${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}`;
+ const cellCnt = (x) => (doc.cells || []).filter((c) => c.d === x).length;
+ const pendLbl = (n, x) => ((!everPub && !cellCnt(x)) ? 'day note' : `${n} ${everPub ? 'change' : 'class'}${n === 1 ? '' : (everPub ? 's' : 'es')}`);
+ const pendTot = () => { if (everPub) return `${pdTotal} change${pdTotal === 1 ? '' : 's'}`; const nn = pdList.filter((x) => !cellCnt(x)).length; const cn = pdList.reduce((a, x) => a + cellCnt(x), 0); return [cn ? `${cn} class${cn === 1 ? '' : 'es'}` : '', nn ? `${nn} day note${nn === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ') || '0'; };
     
     const rowBtn = (id, ico, label, extra) => `<button type="button" class="btn-secondary${extra || ''}" id="${id}" style="border-color: var(--line);"><span class="ico ${ico}" aria-hidden="true"></span> ${label}</button>`;
     const moreItems = [];
@@ -6085,7 +6088,7 @@
     if (editable) moreItems.push(rowBtn('tgDelWeek', 'i-trash', 'Delete week', ' hv-del'));
     
     html += `<div class="tg-pubrow tg-col">${pdList.length
-        ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : 'Publish whole week'}<small>${pdList.length === 1 ? `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')}` : `${pdTotal} ${everPub ? 'change' : 'class'}${pdTotal === 1 ? '' : (everPub ? 's' : 'es')} · ${escapeHtml(shortDays(pdList))}`}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--line);">Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:12px; font-weight:500;">${pdMap[d]} ${everPub ? 'change' : 'class'}${pdMap[d] === 1 ? '' : (everPub ? 's' : 'es')}</small></button>` : ''}<div class="tg-sub2 one"><button type="button" class="btn-secondary tg-prevbtn" id="tgPreview" style="border-color: var(--line);"><span class="ico i-eye" aria-hidden="true"></span> Preview</button></div>`
+        ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : 'Publish whole week'}<small>${pdList.length === 1 ? `${pendTot()}` : `${pendTot()} · ${escapeHtml(shortDays(pdList))}`}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--line);">Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:12px; font-weight:500;">${pendLbl(pdMap[d], d)}</small></button>` : ''}<div class="tg-sub2 one"><button type="button" class="btn-secondary tg-prevbtn" id="tgPreview" style="border-color: var(--line);"><span class="ico i-eye" aria-hidden="true"></span> Preview</button></div>`
  : ''}</div>
     <div class="tg-more" id="tgMoreList">${moreItems.join('')}</div>
     ${editable ? '<div id="tgCopyDayBox"></div>' : ''}
@@ -6497,7 +6500,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const pX = (p) => colX.find((o) => !o.c.br && o.c.p === p);
     const fmtS = (t) => formatTimeStr(t).replace(/\s/g, '').toLowerCase();
     let y = headH + topX;
-    days.forEach((d, di) => {
+    // days in a row that carry the same note and have no classes are drawn as one box
+ const noteOnlyOf = (dd) => { const nt = dayNoteOf(doc, dd); return nt && !(doc.cells || []).some((c) => c.d === dd) ? nt : ''; };
+ const runOf = {}, runY = {}, runShade = {};
+ for (let q = 0; q < days.length;) { const nt = noteOnlyOf(days[q]); if (!nt) { q++; continue; } let r = 1; while (q + r < days.length && noteOnlyOf(days[q + r]) === nt) r++; if (r > 1) for (let t = 0; t < r; t++) runOf[days[q + t]] = { first: days[q], last: days[q + r - 1] }; q += r; }
+ days.forEach((d, di) => {
       const dh = bats.length * rowH;
       const perD = periodsForDay(g.key, d);
       box(20, y, colDate, dh, '#E2EFDA');
@@ -6603,7 +6610,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (note) {
         const hasCls = (doc.cells || []).some((c) => c.d === d);
         const pc = colX.filter((o) => !o.c.br);
-        if (!hasCls && pc.length) { const xa = colX[0].x, xz = colX[colX.length - 1].x + colX[colX.length - 1].w; box(xa, y, xz - xa, dh, shade); fitLines(x, [[note, '#000', 20]], xa + (xz - xa) / 2, y, xz - xa, dh); }
+        if (!hasCls && pc.length) { const xa = colX[0].x, xz = colX[colX.length - 1].x + colX[colX.length - 1].w; const ro = runOf[d]; if (!ro) { box(xa, y, xz - xa, dh, shade); fitLines(x, [[note, '#000', 20]], xa + (xz - xa) / 2, y, xz - xa, dh); } else { if (d === ro.first) { runY[ro.first] = y; runShade[ro.first] = shade; } if (d === ro.last) { const y0 = runY[ro.first], hh = y + dh - y0; box(xa, y0, xz - xa, hh, runShade[ro.first]); fitLines(x, [[note, '#000', 20]], xa + (xz - xa) / 2, y0, xz - xa, hh); } } }
         else txt(note, 20 + colDate / 2, y + dh - 14, 11, true, '#C00000', colDate - 8);
       }
       y += dh;
