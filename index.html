@@ -2116,6 +2116,12 @@
   /* the "fill from a photo" button in an opened exam card */
   .ex-photo-btn { margin-top: 8px; background: none; border: 1px solid var(--gold); color: var(--gold); }
   .ex-photo-btn .ico { color: var(--gold); }
+  /* Schedule: the exam name on an Invigilation row wraps; the paper times on the duty-sheet check screen */
+  .sv-row.ses-duty .chiprow { flex-wrap: wrap; }
+  .sv-row.ses-duty .schip { white-space: normal; overflow: visible; text-overflow: clip; height: auto; line-height: 1.25; max-width: 100%; }
+  .ds-trow { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .ds-trow b { font-weight: 600; text-align: right; }
+  .ds-diff { display: block; color: #B45309; font-size: 12px; padding: 2px 0 4px; }
 </style>
 </head>
 <body>
@@ -3262,7 +3268,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.21 · updated 22 Oct 2026</div>
+          <div class="dnote">Version 13.22 · updated 23 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8411,10 +8417,12 @@ Rules:
   }
   const tpKey = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
   const tpTok = (v) => String(v || '').toLowerCase().split(/[^a-z]+/).filter(Boolean);
+  const TP_EQ = [['maths', 'math', 'mathematics', 'mathematic']];
   const TP_ALIAS = { math: 'maths', mathematics: 'maths', phy: 'physics', phys: 'physics', chem: 'chemistry', bio: 'biology', eng: 'english', hin: 'hindi', comp: 'computer', computers: 'computer', sst: 'socialscience' };
   function tpGuessSubject(raw, subjects) {
     const k = tpKey(raw); if (!k) return { s: '', exact: false };
     let m = subjects.find((x) => tpKey(x) === k); if (m) return { s: m, exact: true };
+    { const g = TP_EQ.find((grp) => grp.indexOf(k) !== -1); if (g) { m = subjects.find((x) => g.indexOf(tpKey(x)) !== -1); if (m) return { s: m, exact: true }; } }
     if (TP_ALIAS[k]) { m = subjects.find((x) => tpKey(x) === TP_ALIAS[k]); if (m) return { s: m, exact: false }; }
     const rt = tpTok(raw);
     m = subjects.find((x) => { const at = tpTok(x); return at.length > 0 && at.length === rt.length && at.every((t, i) => t.startsWith(rt[i]) || rt[i].startsWith(t)); });
@@ -8483,6 +8491,18 @@ Rules:
     const type = tpTestType(t); const kwM = t.match(/\b((?:weekly|unit|periodic|monthly|half[\s-]*yearly|annual|term|mock|pre[\s-]*board)\s*(?:test|exam)|class\s*test|exam|test)\b/i); const kw = kwM ? kwM[1].replace(/\s+/g, ' ').trim() : '';
     const isClass = type ? tpNormT(type) === 'classtest' : /^class test$/i.test(kw);
     return { head: (cut > 0 ? t.slice(0, cut) : t).trim(), detail: cut > 0 ? t.slice(cut).replace(/^[\s\-–—:(]+/, '').replace(/^([^()]{1,40})\)\s*/, '$1 · ').replace(/[\s)]+$/, '').trim() : '', kw, type, kind: (!type && !kw) ? '' : (isClass ? 'class' : 'exam'), time: tpTimeIn(t) };
+  }
+  // "HALF YEARLY EXAM PREPARATION LEAVE": a test name followed by words that are not a subject, a time or exam details is a note, not an exam
+  function tpIsNoteText(text) {
+    const spl = tpSplit(text); if (!spl.kind) return false;
+    let t = String(text);
+    if (/\b(leave|holiday|vacation|off|closed|preparation|prep)\b/i.test(t)) return true;
+    t = t.replace(/\([^)]*\)/g, ' ').replace(/syllabus.*$/i, ' ');
+    const esc = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const nm = String(spl.type || spl.kw || '').trim(); if (nm) t = t.replace(new RegExp(nm.split(/[\s-]+/).map(esc).join('[\\s-]*'), 'ig'), ' ');
+    ttSubjectsList().concat(['maths', 'math', 'mathematics', 'phy', 'chem', 'bio', 'eng']).forEach((sj) => { const w = String(sj).trim(); if (w) t = t.replace(new RegExp('\\b' + esc(w) + '\\b', 'ig'), ' '); });
+    const words = t.toLowerCase().replace(/[^a-z ]+/g, ' ').split(/\s+/).filter((w) => w.length >= 3 && ['exam', 'test', 'paper', 'the', 'and', 'for', 'with', 'mode', 'marks', 'subjective', 'objective', 'syllabus', 'from', 'till'].indexOf(w) === -1);
+    return words.length > 0;
   }
   function tpSubjectIn(text, subjects) {
     const sp = tpSplit(text); const r = tpGuessSubject(sp.head, subjects); if (r.s) return r.s;
@@ -8586,14 +8606,15 @@ Rules:
       // a box over the whole day: an exam (made as an Exam) or a note for the day (Doubt Clearing Day, Holiday, PTM…)
       (d.specials || []).forEach((sp, si) => {
         const text = String(sp.text || '').replace(/\s+/g, ' ').trim(); if (!text) return;
-        const labs = (sp.classes || []).filter((l) => tp.rows.indexOf(l) !== -1); const bs = labs.map((l) => tp.map[l]).filter(Boolean); const spl = tpSplit(text);
-        if (spl.kind) {
+        const labs = (sp.classes || []).filter((l) => tp.rows.indexOf(l) !== -1); const bs = labs.map((l) => tp.map[l]).filter(Boolean); const spl0 = tpSplit(text); const spl = (spl0.kind && tpIsNoteText(text)) ? Object.assign({}, spl0, { kind: '' }) : spl0;
+ if (spl.kind) {
           if (!bs.length) return; const tm = spl.time; const ps = [];
           for (let i = 0; i < nCols; i++) { const pt = timeOf(i); if (!pt) continue; if (!tm || (hhmmToMin(pt.start) < hhmmToMin(tm.end) && hhmmToMin(tm.start) < hhmmToMin(pt.end))) ps.push(i); }
           exams.push({ key: 's|' + date + '|' + si, d: date, classes: labs, batches: bs, periods: ps, type: spl.type || '', kw: spl.type || spl.kw || '', subject: tpSubjectIn(text, subjects) || '', start: tm ? tm.start : (ps.length ? timeOf(ps[0]).start : ''), end: tm ? tm.end : (ps.length ? timeOf(ps[ps.length - 1]).end : ''), src: text, special: true });
         } else {
           const all = tp.rows.every((l) => labs.indexOf(l) !== -1 || !tp.map[l]);
-          notes.push({ key: 'n|' + date + '|' + si, d: date, text: (all || !labs.length ? text : text + ' · ' + labs.map((l) => (tp.map[l] ? gridBatchLabel(tp.map[l]) : l)).join(', ')).slice(0, 60) });
+          if (all || !labs.length || !bs.length) notes.push({ key: 'n|' + date + '|' + si, d: date, text: text.slice(0, 60) });
+          else { const ps2 = []; for (let i = 0; i < nCols; i++) if (timeOf(i)) ps2.push(i); notes.push({ key: 'n|' + date + '|' + si, d: date, text: text.slice(0, 60), blocks: bs, labs: labs.map((l) => (tp.map[l] ? gridBatchLabel(tp.map[l]) : l)), ps: ps2 }); }
         }
       });
       if (Object.keys(T).length && hasRows) times[date] = T;
@@ -8641,10 +8662,14 @@ Rules:
           const nc = { d: gr.d, p, b, ex: id, s: label, et: `${gr.start}-${gr.end}` }; if (old && old.s) nc.was = { s: old.s, t: old.t || '', test: !!old.test }; keep.push(nc);
         });
       });
+      noteOn.filter((n) => n.blocks && n.blocks.length).forEach((n, ni) => {
+        const id = 'note:' + Date.now().toString(36) + ni;
+        n.blocks.forEach((b) => (n.ps || []).forEach((pp) => { const old = keep.find((c) => c.d === n.d && c.p === pp && c.b === b && !c.ex); keep = keep.filter((c) => !(c.d === n.d && c.p === pp && c.b === b)); const nc = { d: n.d, p: pp, b, s: n.text, ex: id }; if (old && old.s) nc.was = { s: old.s, t: old.t || '' }; keep.push(nc); }));
+      });
       doc.cells = keep;
       doc.dayTimes = Object.assign({}, doc.dayTimes || {});
       Object.keys(B.times).forEach((date) => { const day = Object.assign({}, doc.dayTimes[date] || {}); Object.keys(B.times[date]).forEach((i) => { if (tp.policy === 'all' || day[i] === undefined) day[i] = B.times[date][i]; }); doc.dayTimes[date] = day; });
-      noteOn.forEach((n) => { const day = Object.assign({}, doc.dayTimes[n.d] || {}); if (tp.policy === 'all' || !day.note) day.note = n.text; doc.dayTimes[n.d] = day; });
+      noteOn.forEach((n) => { if (n.blocks && n.blocks.length) return; const day = Object.assign({}, doc.dayTimes[n.d] || {}); if (tp.policy === 'all' || !day.note) day.note = n.text; doc.dayTimes[n.d] = day; });
       if (allDates.some((x) => dateObj(x).getDay() === 0)) doc.sunday = true;
       tgSave(); closeHvSheet(); state.tp = null; renderTgGrid();
       const bits = [`${put} class${put === 1 ? '' : 'es'}`]; if (made.length) bits.push(`${made.length} exam${made.length === 1 ? '' : 's'}`); if (noteOn.length) bits.push(`${noteOn.length} day note${noteOn.length === 1 ? '' : 's'}`);
@@ -8663,7 +8688,7 @@ Rules:
     let hit = 0; a.forEach((x) => { if (b.some((y) => y === x || (x.length === 1 && y.charAt(0) === x) || (x.length >= 3 && y.length >= 3 && (y.indexOf(x) === 0 || x.indexOf(y) === 0)))) hit++; });
     let sc = Math.round(60 * hit / a.length);
     if (hit === a.length) sc = 85 + Math.min(10, 3 * hit);
-    if (ja.length >= 6 && jb.length >= 6 && (jb.indexOf(ja) !== -1 || ja.indexOf(jb) !== -1)) sc = Math.max(sc, 88);
+    if (ja.length >= 6 && jb.indexOf(ja) !== -1) sc = Math.max(sc, 97); else if (ja.length >= 6 && jb.length >= 6 && ja.indexOf(jb) !== -1) sc = Math.max(sc, 88);
     return sc;
   }
   function dsTeacherIds() { return (state.adminTeacherIds && state.adminTeacherIds.length) ? state.adminTeacherIds.slice() : Object.keys(state.adminNames || {}); }
@@ -8712,14 +8737,20 @@ Rules:
     if (mode === 'sheet') { if (st.reporting) start = st.reporting; if (st.writeTo) end = st.writeTo; } else { if (!start && st.reporting) start = st.reporting; if (!end && st.writeTo) end = st.writeTo; }
     return { times: out, start, end };
   }
+  // 9:00–10:15 with a break 9:45–10:00 becomes two slots: 9:00–9:45 and 10:00–10:15
+  function dsParts(x) {
+    const a = hhmmToMin(x.start), z = hhmmToMin(x.end), b0 = hhmmToMin(x.breakStart), b1 = hhmmToMin(x.breakEnd);
+    if (!(x.breakStart && x.breakEnd) || b0 == null || b1 == null || b1 <= b0 || a == null || z == null) return [{ start: x.start, end: x.end }];
+    const out = []; if (b0 > a) out.push({ start: x.start, end: x.breakStart }); if (b1 < z) out.push({ start: x.breakEnd, end: x.end });
+    return out.length ? out : [{ start: x.start, end: x.end }];
+  }
   function dsGood(x) { return !!(x.start && x.end && hhmmToMin(x.end) > hhmmToMin(x.start)); }
   function dsBuild(ds, e) {
     return ds.data.rooms.map((r, ri) => {
       const slots = [], others = [];
       r.duties.forEach((x, di) => {
         const w = ds.who[ri + '|' + di]; if (!w || !dsGood(x)) return;
-        if (w === 'other') { others.push({ name: x.name, start: x.start, end: x.end, bStart: x.breakStart || '', bEnd: x.breakEnd || '' }); return; }
-        const sl = { start: x.start, end: x.end, teachers: [w], breaks: {} }; if (x.breakStart && x.breakEnd) sl.breaks[w] = { start: x.breakStart, end: x.breakEnd }; slots.push(sl);
+        dsParts(x).forEach((pt) => { if (w === 'other') others.push({ name: x.name, start: pt.start, end: pt.end, bStart: '', bEnd: '' }); else slots.push({ start: pt.start, end: pt.end, teachers: [w], breaks: {} }); });
       });
       return { room: ds.roomMap[ri] || r.room, scope: (e.scope || []).slice(), staff: r.staff || 0, others, slots };
     });
@@ -8758,14 +8789,16 @@ Rules:
     const dateBox = ds.dateDiff ? `<div class="xw-ck wn" style="margin-top:10px;"><span>⚠</span><span><b>Date check.</b> The sheet says ${escapeHtml(d.dateText || 'another date')}. This exam is on ${escapeHtml(slotWhen(e.date))}.<label style="display:flex; gap:8px; align-items:center; margin-top:6px;"><input type="checkbox" id="dsDateOk"${ds.dateOk ? ' checked' : ''}> Use the sheet anyway (the exam's date does not change)</label></span></div>` : '';
     const ft = (a, z) => (a && z ? `${formatTimeStr(a)} – ${formatTimeStr(z)}` : '');
     const hasT = Object.keys(st).some((k) => st[k]);
-    const tmBox = hasT ? `<div class="xs-grp">Paper times</div><div class="tp-exr">${dsTimesDiffer(e, st) ? `<div class="hv-note" style="text-align:left;">The exam has ${escapeHtml(ft(e.start, e.end) || 'no times yet')}. The sheet says: ${escapeHtml([st.reporting && 'reporting ' + formatTimeStr(st.reporting), st.answerSheet && 'answer sheet distribution ' + formatTimeStr(st.answerSheet), st.questionPaper && 'question paper distribution ' + formatTimeStr(st.questionPaper), st.readFrom && st.readTo && 'reading ' + ft(st.readFrom, st.readTo), st.writeFrom && st.writeTo && 'writing ' + ft(st.writeFrom, st.writeTo)].filter(Boolean).join(' · '))}.</div><div class="chips" style="margin-top:8px;"><button type="button" class="chip${ds.tmMode === 'exam' ? ' active' : ''}" data-ds-tm="exam">Keep the exam's times</button><button type="button" class="chip${ds.tmMode === 'sheet' ? ' active' : ''}" data-ds-tm="sheet">Use the sheet's times</button></div>` : '<div class="hv-note" style="text-align:left;">The paper times in the sheet match the exam. Empty ones are filled from the sheet.</div>'}</div>` : '';
+    const ct = e.times || {}; const tdiff = dsTimesDiffer(e, st); const f1 = (v) => (v ? formatTimeStr(v) : '');
+    const rowsT = [['Reporting time', f1(st.reporting), f1(e.start)], ['Answer sheet distribution', f1(st.answerSheet), f1(ct.sheet)], ['Question paper distribution', f1(st.questionPaper), f1(ct.qp)], ['Reading time', ft(st.readFrom, st.readTo), ft(ct.readFrom, ct.readTo)], ['Writing time', ft(st.writeFrom, st.writeTo), ft(ct.writeFrom, ct.writeTo)]];
+    const tmBox = hasT ? `<div class="xs-grp">Paper times · from the sheet</div><div class="tp-exr">${rowsT.map((r) => `<div class="ds-trow"><span>${r[0]}</span><b>${escapeHtml(r[1] || '—')}</b></div>${(r[2] && r[1] && r[2] !== r[1]) ? `<small class="ds-diff">the exam has ${escapeHtml(r[2])}</small>` : ''}`).join('')}${(e.end && st.writeTo && e.end !== st.writeTo) ? `<small class="ds-diff">the exam ends at ${escapeHtml(formatTimeStr(e.end))}; the sheet says writing ends at ${escapeHtml(formatTimeStr(st.writeTo))}</small>` : ''}${tdiff ? `<div class="chips" style="margin-top:10px;"><button type="button" class="chip${ds.tmMode === 'exam' ? ' active' : ''}" data-ds-tm="exam">Keep the exam's times</button><button type="button" class="chip${ds.tmMode === 'sheet' ? ' active' : ''}" data-ds-tm="sheet">Use the sheet's times</button></div><div class="hv-note" style="text-align:left;">Keep: only the empty ones are filled from the sheet. Use: the sheet's times replace the exam's.</div>` : '<div class="hv-note" style="text-align:left;">These match the exam. Empty ones are filled from the sheet.</div>'}</div>` : '';
     const rooms = d.rooms.map((r, ri) => {
       const roomOpts = (rl.indexOf(ds.roomMap[ri]) === -1 ? [ds.roomMap[ri]] : []).concat(rl).map((x) => `<option value="${escapeHtml(x)}"${x === ds.roomMap[ri] ? ' selected' : ''}>${escapeHtml(x)}${rl.indexOf(x) === -1 ? ' (as written)' : ''}</option>`).join('');
       const cards = r.duties.map((x, di) => {
         const key = ri + '|' + di; const cur = ds.who[key]; const m = dsMatch(x.name); const first = m.cands.filter((u, i2, a) => a.indexOf(u) === i2);
         const opt = (u) => `<option value="${escapeHtml(u)}"${cur === u ? ' selected' : ''}>${escapeHtml(planNameOf(u))}</option>`;
         const ok = cur && cur !== 'other'; const bad = !dsGood(x);
-        return `<div class="tp-exr${cur === '' ? ' off' : ''}"><div class="tp-exh"><div><b>${escapeHtml(x.name)}</b><small>${bad ? 'time not read' : escapeHtml(ft(x.start, x.end))}${x.breakStart && x.breakEnd ? ` · break ${escapeHtml(ft(x.breakStart, x.breakEnd))}` : ''}</small></div><span class="${ok ? 'ok' : ''}" style="font-weight:600; color:${ok ? 'var(--green)' : '#B45309'};">${ok ? '✓ matched' : (cur === '' ? 'skipped' : 'name only')}</span></div>
+        return `<div class="tp-exr${cur === '' ? ' off' : ''}"><div class="tp-exh"><div><b>${escapeHtml(x.name)}</b><small>${bad ? 'time not read' : escapeHtml(dsParts(x).map((pt) => ft(pt.start, pt.end)).join('  +  '))}${(!bad && dsParts(x).length > 1) ? ` (break ${escapeHtml(ft(x.breakStart, x.breakEnd))} is left out)` : ''}</small></div><span class="${ok ? 'ok' : ''}" style="font-weight:600; color:${ok ? 'var(--green)' : '#B45309'};">${ok ? '✓ matched' : (cur === '' ? 'skipped' : 'name only')}</span></div>
           <div style="margin-top:8px;"><select class="text-input tp-sel" data-ds-who="${escapeHtml(key)}">${first.length ? `<optgroup label="Best matches">${first.map(opt).join('')}</optgroup>` : ''}<optgroup label="All teachers">${ids.map(opt).join('')}</optgroup><option value="other"${cur === 'other' ? ' selected' : ''}>Add as a name only (not in the app)</option><option value=""${cur === '' ? ' selected' : ''}>Skip this duty</option></select></div></div>`;
       }).join('');
       return `<div class="xs-grp">Room ${escapeHtml(r.room)} → <select class="text-input tp-sel" data-ds-room="${ri}" style="display:inline-block; width:auto; margin-left:4px;">${roomOpts}</select></div>${cards}${r.staff ? `<div class="hv-note" style="text-align:left;">${r.staff} Staff</div>` : ''}`;
@@ -8888,7 +8921,7 @@ Rules:
     const tgHtml = canTog ? `<div class="tp-exr"><div class="tp-exh"><div><b>Sit together</b><small>Only if both classes sit in the SAME room: ONE exam, a subject for each class. Different rooms? Keep separate exams.</small></div><button type="button" class="chip${tp.together ? ' active' : ''}" data-tp-together="1">${tp.together ? '✓ One exam' : 'Separate exams'}</button></div></div>` : '';
     const exHtml = B.exams.length ? `<div class="xs-grp">Tests and exams · made in Exams</div>${tgHtml}${B.exams.map((x) => `<div class="tp-exr${x.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(x.d))} · ${escapeHtml(x.classes.join(', '))}</b><small>${escapeHtml(ftm(x))}</small></div><button type="button" class="chip${x.on ? ' active' : ''}" data-tp-ex-on="${escapeHtml(x.key)}">${x.on ? '✓ Make it' : 'Skip'}</button></div>
         <div class="tp-exs"><select class="text-input tp-sel" data-tp-ex-type="${escapeHtml(x.key)}"><option value="">${x.type ? 'Other' : 'Choose type'}</option>${testTypesList().map((t) => `<option value="${escapeHtml(t)}"${x.type === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select><select class="text-input tp-sel" data-tp-ex-sub="${escapeHtml(x.key)}"><option value="">No subject</option>${ttSubjectsList().map((t) => `<option value="${escapeHtml(t)}"${x.subject === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div></div>`).join('')}<div class="hv-note" style="text-align:left;">Each one takes its box in the grid and appears in the Exams tab; add the rooms and invigilators there. The syllabus and marks are not saved.</div>` : '';
-    const noteHtml = B.notes.length ? `<div class="xs-grp">Notes for the whole day</div>${B.notes.map((n) => `<div class="tp-exr${n.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(n.d))}</b><small>${escapeHtml(n.text)}</small></div><button type="button" class="chip${n.on ? ' active' : ''}" data-tp-note="${escapeHtml(n.key)}">${n.on ? '✓ Add' : 'Skip'}</button></div></div>`).join('')}` : '';
+    const noteHtml = B.notes.length ? `<div class="xs-grp">Notes</div>${B.notes.map((n) => `<div class="tp-exr${n.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(n.d))}</b><small>${escapeHtml(n.text)}${n.blocks ? ' · ' + escapeHtml(n.labs.join(', ')) + ' (all periods)' : ' · whole day'}</small></div><button type="button" class="chip${n.on ? ' active' : ''}" data-tp-note="${escapeHtml(n.key)}">${n.on ? '✓ Add' : 'Skip'}</button></div></div>`).join('')}` : '';
     const used = Object.values(tp.map).filter(Boolean); const dup = used.some((b, i) => used.indexOf(b) !== i);
     if (dup) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>Two rows of the picture point to the same batch. Change one of them.</span></div>`);
     const bats = g ? g.batches : [];
@@ -11434,7 +11467,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const st = logged ? 'done' : dutyStatus([{ start: x.start, end: x.end }], x.date);
       const t = formatTimeStr(x.start); const tm = t.match(/^(.*?)\s?(AM|PM)$/i);
       const dur = Math.max(0, (hhmmToMin(x.end) || 0) - (hhmmToMin(x.start) || 0));
-      return `<div class="sv-row ${st} ses-duty">
+      return `<div class="sv-row ${st} ses-duty" data-sv-duty="${escapeHtml(x.examId || '')}|${escapeHtml(x.date)}|${escapeHtml(x.start)}" role="button" tabindex="0" style="cursor:pointer;">
       <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : escapeHtml(t)}</span>
       <span class="sv-main"><span class="sv-top"><span class="sv-batch">Invigilation · ${escapeHtml(x.room)}</span>${pillHtml(st, SV_PILL[st])}</span>
         <span class="chiprow"><span class="schip"><span class="ico i-cbpen" aria-hidden="true"></span>${escapeHtml(x.title)}</span><span class="mchip">${I_DOOR}${escapeHtml(x.room)}</span><span class="mchip">${I_CLOCK}${escapeHtml(svDur(dur))} · till ${escapeHtml(formatTimeStr(x.end).replace(/\s?(AM|PM)$/i, ''))}</span>${x.brk && x.brk.start ? `<span class="mchip">Break ${escapeHtml(formatTimeStr(x.brk.start).replace(/\s?(AM|PM)$/i, ''))} – ${escapeHtml(formatTimeStr(x.brk.end).replace(/\s?(AM|PM)$/i, ''))}</span>` : ''}</span></span>
@@ -11442,7 +11475,34 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     }).join('');
   }
   document.querySelectorAll('[data-sv-view]').forEach((b) => b.addEventListener('click', () => { svState().view = b.getAttribute('data-sv-view'); renderScheduleList(); }));
+  document.getElementById('scheduleList').addEventListener('click', (e) => { const r = e.target.closest('[data-sv-duty]'); if (r) openSvDuty(r.getAttribute('data-sv-duty')); });
   document.getElementById('scheduleList').addEventListener('click', (e) => { const b = e.target.closest('[data-sv-past]'); if (!b) return; svState().showPast = b.getAttribute('data-sv-past') === '1'; renderScheduleList(); });
+  function openSvDuty(key) {
+    const [examId, date, start] = String(key).split('|');
+    const list = state.weekDuties.list || [];
+    const x = list.find((r) => (r.examId || '') === examId && r.date === date && r.start === start); if (!x) return;
+    const exam = (state.examsFor[date] || []).find((e) => e.id === examId) || null;
+    const dayCls = hvDay(date).classes || [];
+    const logged = dayCls.some((c) => c.entryType === 'activity' && c.activityType === 'Invigilation' && (!x.examId || !c.examId || c.examId === x.examId));
+    const st = logged ? 'done' : dutyStatus([{ start: x.start, end: x.end }], date);
+    const dur = Math.max(0, (hhmmToMin(x.end) || 0) - (hhmmToMin(x.start) || 0));
+    const mine = list.filter((r) => (r.examId || '') === examId && r.date === date && r.room === x.room).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+    const lines = exam ? examTimeLines(exam) : [];
+    const room = exam ? planOf(exam).find((r) => r.room === x.room) : null;
+    const nm = (u) => (state.adminNames[u] && state.adminNames[u].name) || '';
+    const also = room ? (room.slots || []).map((sl) => ({ sl, who: (sl.teachers || []).filter((u) => u !== state.teacherId).map(nm).filter(Boolean) })).filter((z) => z.who.length) : [];
+    const row = (a, b) => `<div class="hv-d-row"><span>${escapeHtml(a)}</span><span>${escapeHtml(b)}</span></div>`;
+    const body = document.getElementById('hvSheetBody');
+    body.innerHTML = `<div class="hv-d-title">Invigilation · ${escapeHtml(x.room)}</div><div class="hv-d-wing">${escapeHtml(exam ? examTitle(exam) : (x.title || ''))}</div>
+      <div class="hv-d-rows" style="margin-top:10px;">${row('Date', dayHeading(date))}${row('Time', formatTimeStr(x.start))}${row('Duration', svDur(dur))}<div class="hv-d-row"><span>Status</span><span>${SV_PILL[st]}</span></div>${row('Room', x.room)}${exam && (exam.scope || []).length ? row('Classes', scopeWithSubjects(exam, true)) : ''}${row('Set by', 'Coordinator')}</div>
+      ${mine.length > 1 ? `<div class="xs-grp">Your duty in this room</div><div class="hv-d-rows">${mine.map((m) => row(`${formatTimeStr(m.start)} – ${formatTimeStr(m.end)}`, svDur(Math.max(0, (hhmmToMin(m.end) || 0) - (hhmmToMin(m.start) || 0))))).join('')}</div>` : ''}
+      ${lines.length ? `<div class="xs-grp">Paper times</div><div class="hv-d-rows">${lines.map((t) => { const i = t.indexOf(' - '); return row(i === -1 ? t : t.slice(0, i), i === -1 ? '' : t.slice(i + 3)); }).join('')}</div>` : ''}
+      ${also.length ? `<div class="xs-grp">Also in this room</div><div class="hv-d-rows">${also.map((z) => row(`${formatTimeStr(z.sl.start)} – ${formatTimeStr(z.sl.end)}`, z.who.join(', '))).join('')}</div>` : ''}`;
+    tpOpenSheet();
+    // the other invigilators' names, when the app is allowed to read them (tried once)
+    { const ids = room ? [].concat(...(room.slots || []).map((sl) => sl.teachers || [])).filter((u, i, arr) => u !== state.teacherId && arr.indexOf(u) === i) : []; const miss = ids.filter((u) => !nm(u)); state.svDutyTried = state.svDutyTried || {};
+      if (miss.length && !state.svDutyTried[key]) { state.svDutyTried[key] = 1; resolveAdminNames(miss).then(() => { if (document.getElementById('hvSheet').classList.contains('open') && /Invigilation ·/.test((document.querySelector('#hvSheetBody .hv-d-title') || {}).textContent || '')) openSvDuty(key); }).catch(() => {}); } }
+  }
   function renderScheduleList() {
     const el = document.getElementById('scheduleList');
     if (!el) return;
