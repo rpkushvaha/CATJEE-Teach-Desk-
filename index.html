@@ -3259,7 +3259,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.18 · updated 20 Oct 2026</div>
+          <div class="dnote">Version 13.19 · updated 21 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6525,8 +6525,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       // exams: one merged box when the cells form a rectangle
       const exIds = (doc.cells || []).filter((c) => c.d === d && c.ex).map((c) => c.ex).filter((v, i, arr) => arr.indexOf(v) === i);
       exIds.forEach((id) => {
-        const cs = (doc.cells || []).filter((c) => c.d === d && c.ex === id && bats.indexOf(c.b) !== -1);
-        if (!cs.length) return;
+ const all = (doc.cells || []).filter((c) => c.d === d && c.ex === id && bats.indexOf(c.b) !== -1);
+ if (!all.length) return;
+ const sameTxt = all.every((c) => c.s === all[0].s); const parts = sameTxt ? [all] : bats.map((bb) => all.filter((c) => c.b === bb)).filter((a) => a.length);
+ parts.forEach((cs) => {
         const bi = cs.map((c) => bats.indexOf(c.b)), pi = cs.map((c) => c.p);
         const b0 = Math.min(...bi), b1 = Math.max(...bi), p0 = Math.min(...pi), p1 = Math.max(...pi);
         const rect = cs.length === (b1 - b0 + 1) * (p1 - p0 + 1);
@@ -6541,8 +6543,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           const xa = colsOf(p0)[0].x, xz = colsOf(p1)[1].x + colsOf(p1)[1].w;
           drawEx(xa, y + b0 * rowH, xz - xa, (b1 - b0 + 1) * rowH);
           cs.forEach((c) => { drawn[`${c.p}|${c.b}`] = 1; });
-        }
-      });
+ }
+ });
+ });
       const drawCell = (o, p, ci, b, bi, ry, join) => {
           const cell = tgCell(d, p, b);
           // joined periods (this period runs over the next ones, which are off this day): one wide box
@@ -8448,10 +8451,21 @@ Rules:
     if (ap === 'p' && h < 12) h += 12; if (ap === 'a' && h === 12) h = 0; if (h > 23 || mi > 59) return '';
     return String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0');
   }
-  // "(7:00pm – 8:15pm)" → { start: '19:00', end: '20:15' }
+  // a time written without am/pm is read as the one nearest to the middle of the day's periods (5:35 in an evening timetable is 5:35 PM)
+  let TP_CTX = null;
+  function tpClockCtx(h, mi, ap) {
+    if (mi > 59 || h > 23) return ''; let H = h;
+    if (ap === 'p' && H < 12) H += 12; else if (ap === 'a' && H === 12) H = 0;
+    else if (!ap && H >= 1 && H <= 12 && TP_CTX != null) { const c1 = (H % 12) * 60 + mi, c2 = (H % 12 + 12) * 60 + mi; H = Math.abs(c1 - TP_CTX) <= Math.abs(c2 - TP_CTX) ? (H % 12) : (H % 12) + 12; }
+    return String(H).padStart(2, '0') + ':' + String(mi).padStart(2, '0');
+  }
+  // "(7:00pm – 8:15pm)" or "(5:35 – 6:50)" → { start: '19:00', end: '20:15' }
   function tpTimeIn(text) {
-    const m = String(text).match(/(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*[–—-]\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)/i); if (!m) return null;
-    const a = tpClock(m[1].replace(/\./g, '')), z = tpClock(m[2].replace(/\./g, '')); return a && z ? { start: a, end: z } : null;
+    const m = String(text).match(/(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?(?![\d:])/i); if (!m) return null;
+    const a1 = m[3] ? m[3].toLowerCase() : '', a2 = m[6] ? m[6].toLowerCase() : '';
+    if (!a1 && !a2 && !(m[2] && m[5])) return null; // "19 - 24" is not a time range
+    const a = tpClockCtx(Number(m[1]), m[2] ? Number(m[2]) : 0, a1 || a2), z = tpClockCtx(Number(m[4]), m[5] ? Number(m[5]) : 0, a2 || a1);
+    return a && z && hhmmToMin(z) > hhmmToMin(a) ? { start: a, end: z } : null;
   }
   // "BIOLOGY (WEEKLY TEST) Syllabus: Ch-6 …" → subject "BIOLOGY"; the type comes from your Test Types; the rest is only shown
   function tpSplit(raw) {
@@ -8467,7 +8481,8 @@ Rules:
     return '';
   }
   function tpInit(tp) {
-    const g = tgGroup(); const subjects = ttSubjectsList(); tp.rows = []; tp.raws = [];
+    const g = tgGroup(); const subjects = ttSubjectsList();
+    { const per0 = g ? periodsFor(g.key) : []; TP_CTX = per0.length ? (hhmmToMin(String(per0[0].start).slice(0, 5)) + hhmmToMin(String(per0[per0.length - 1].end).slice(0, 5))) / 2 : null; } tp.rows = []; tp.raws = [];
     const addRaw = (c) => { const v = String(c == null ? '' : c).trim(); if (v && tp.raws.indexOf(v) === -1) tp.raws.push(v); };
     tp.data.days.forEach((d) => {
       d.rows.forEach((r) => { if (tp.rows.indexOf(r.class) === -1) tp.rows.push(r.class); r.cells.forEach(addRaw); });
@@ -8488,6 +8503,16 @@ Rules:
   // The picture is often last week's. Its Monday..Saturday are put on this page's Monday..Saturday, unless the person chooses the picture's own week.
   function tpDate(tp, date) { if (!tp.shift) return date; const wd = (dateObj(date).getDay() + 6) % 7; return shiftDateStr(state.tt.weekStart, wd); }
   // consecutive boxes with the same text that prints its own time ("Reasoning (5:35pm - 6:50pm)") are one long lesson; used only when every class of that day has the same shape
+  function tpDayBlocks(tp, d, nCols) {
+    const out = tpMerges(tp, d).slice();
+    (d.together || []).forEach((tg) => {
+      const tm = tpTimeIn(String(tg.text || '')); const ps = (tg.periods || []).filter((i) => i >= 0 && i < nCols).sort((a, b) => a - b);
+      if (!tm || ps.length < 2) return; for (let q = 1; q < ps.length; q++) if (ps[q] !== ps[q - 1] + 1) return;
+      if (d.rows.some((r) => ps.some((i) => String(r.cells[i] == null ? '' : r.cells[i]).trim()))) return;
+      out.push({ from: ps[0], to: ps[ps.length - 1], start: tm.start, end: tm.end, tg });
+    });
+    return out;
+  }
   function tpMerges(tp, d) {
     const rows = d.rows.filter((r) => tp.map[r.class]); if (!rows.length) return [];
     const sigs = rows.map((r) => {
@@ -8504,7 +8529,7 @@ Rules:
     const cells = [], exams = [], notes = [], times = {}; let unmatched = 0, badRows = 0, read = 0, cbN = 0;
     const hm = (x) => String(x || '').slice(0, 5);
     const appT = (i) => (per[i] ? { start: hm(per[i].start), end: hm(per[i].end) } : null);
-    const picT = (i) => (D.periods[i] ? { start: tpClock(D.periods[i].start), end: tpClock(D.periods[i].end) } : null);
+    const picT = (i) => { if (!D.periods[i]) return null; const a = { start: tpClock(D.periods[i].start), end: tpClock(D.periods[i].end) }; const b = appT(i); if (b && a.start && b.start && Math.abs(hhmmToMin(a.start) - hhmmToMin(b.start)) === 720) return { start: b.start, end: b.end }; return a; };
     const nCols = tp.useTimes ? D.periods.length : Math.min(D.periods.length, per.length);
     D.days.forEach((d) => {
       const date = tpDate(tp, d.date); const T = {}; const hasRows = d.rows.length > 0;
@@ -8512,8 +8537,8 @@ Rules:
         for (let i = 0; i < D.periods.length; i++) { const a = picT(i), b = appT(i); if (a && a.start && a.end && (!b || b.start !== a.start || b.end !== a.end)) T[i] = { start: a.start, end: a.end }; }
         for (let i = D.periods.length; i < per.length; i++) T[i] = { off: true };
       }
-      const blocks = tp.useTimes ? tpMerges(tp, d) : [];
-      blocks.forEach((k) => { T[k.from] = { start: k.start, end: k.end }; for (let q = k.from + 1; q <= k.to; q++) T[q] = { off: true }; });
+      const blocks = tp.useTimes ? tpDayBlocks(tp, d, nCols) : [];
+ blocks.forEach((k) => { T[k.from] = { start: k.start, end: k.end }; for (let q = k.from + 1; q <= k.to; q++) T[q] = { off: true }; });
       const tail = (i) => blocks.some((k) => i > k.from && i <= k.to);
       const timeOf = (i) => { const o = T[i]; if (o && o.off) return null; if (o) return o; return (tp.useTimes ? picT(i) : null) || appT(i); };
       const exTimes = {};
@@ -8540,8 +8565,8 @@ Rules:
       // classes sharing one lesson
       (d.together || []).forEach((tg) => {
         const labs = tg.classes.filter((l) => tp.map[l]); const bs = labs.map((l) => tp.map[l]); const v = String(tg.text || '').trim(); if (!v || !bs.length) return;
-        const ps = (tg.periods || []).filter((i) => i >= 0 && i < nCols); if (!ps.length) return;
-        if (tp.kind[v] === 'exam' && !tp.sub[v]) { const tm = tp.time[v]; const pt = timeOf(ps[0]) || {}; exams.push({ key: 't|' + date + '|' + tg.classes.join(',') + '|' + ps.join(','), d: date, classes: labs, batches: bs, periods: ps, type: tp.type[v] || '', kw: tp.kw[v] || '', subject: tp.guess[v] || '', start: tm ? tm.start : (pt.start || ''), end: tm ? tm.end : ((timeOf(ps[ps.length - 1]) || {}).end || ''), src: v }); return; }
+        const ps0 = (tg.periods || []).filter((i) => i >= 0 && i < nCols); if (!ps0.length) return; const blk = blocks.find((k) => k.tg === tg); const ps = blk ? [blk.from] : ps0;
+ if (tp.kind[v] === 'exam' && !tp.sub[v]) { const tm = tp.time[v]; const pt = timeOf(ps[0]) || {}; exams.push({ key: 't|' + date + '|' + tg.classes.join(',') + '|' + ps.join(','), d: date, classes: labs, batches: bs, periods: ps, type: tp.type[v] || '', kw: tp.kw[v] || '', subject: tp.guess[v] || '', start: tm ? tm.start : (pt.start || ''), end: tm ? tm.end : ((timeOf(ps[ps.length - 1]) || {}).end || ''), src: v }); return; }
         const sj = tp.sub[v]; if (!sj) { unmatched++; return; }
         ps.forEach((i) => {
           read++; const t = defaultTeacher(bs[0], sj) || ''; const id = 'cb' + Date.now().toString(36) + (cbN++);
@@ -8662,14 +8687,14 @@ Rules:
     if (g && ((wingHit && wingHit !== g.wing) || (sesHit && sesHit !== g.session))) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>The picture says “${escapeHtml(D.title)}”, but this page is ${escapeHtml(g.label)}. If that is not the same group, close this and choose the right group first.</span></div>`);
     let timesHtml = '';
     {
-      const nPic = D.periods.length, nApp = per.length; const rowsT = []; let diff = nPic !== nApp;
+      const nPic = D.periods.length, nApp = per.length; const rowsT = []; let diff = nPic !== nApp; let anyFlip = false;
       for (let i = 0; i < Math.max(nPic, nApp); i++) {
         const a = D.periods[i] ? { s: tpClock(D.periods[i].start), e: tpClock(D.periods[i].end) } : null; const b = per[i] ? { s: String(per[i].start).slice(0, 5), e: String(per[i].end).slice(0, 5) } : null;
-        const same = !!(a && b && a.s === b.s && a.e === b.e); if (!same) diff = true; rowsT.push({ i, a, b, same });
+        const flip = !!(a && b && a.s && b.s && Math.abs(hhmmToMin(a.s) - hhmmToMin(b.s)) === 720); const same = flip || !!(a && b && a.s === b.s && a.e === b.e); if (!same) diff = true; if (flip) anyFlip = true; rowsT.push({ i, a, b, same, flip });
       }
       const ft = (x) => (x && x.s && x.e ? `${formatTimeStr(x.s)} – ${formatTimeStr(x.e)}` : 'none');
       if (diff) timesHtml = `<div class="xs-grp">Period times</div><div class="chips" style="margin-bottom:8px;"><button type="button" class="chip${tp.useTimes ? ' active' : ''}" data-tp-times="1">Use the picture's times</button><button type="button" class="chip${tp.useTimes ? '' : ' active'}" data-tp-times="0">Keep the app's times</button></div>
-        <div class="tp-tm">${rowsT.map((r) => `<div class="${r.same ? '' : 'df'}"><b>P${r.i + 1}</b><span>${escapeHtml(ft(r.a))}</span><small>app: ${escapeHtml(ft(r.b))}</small></div>`).join('')}</div>
+        <div class="tp-tm">${rowsT.map((r) => `<div class="${r.same ? '' : 'df'}"><b>P${r.i + 1}</b><span>${escapeHtml(ft(r.a))}</span><small>app: ${escapeHtml(ft(r.b))}${r.flip ? ' · the picture time looks like an AM/PM slip, so the app time is used' : ''}</small></div>`).join('')}</div>
         <div class="hv-note" style="text-align:left; margin-top:6px;">${tp.useTimes ? 'These days get the times printed in the picture' + (nPic < nApp ? ', and the periods the picture does not have are switched off for them.' : '.') : 'The app\'s times stay' + (nPic > nApp ? ', and the picture\'s extra periods are left out.' : '.')} Your Periods &amp; Timings setting is not changed.</div>`;
     }
     if (B.badRows) warns.push(`<div class="xw-ck wn"><span>⚠</span><span>${B.badRows} row${B.badRows === 1 ? '' : 's'} had a different number of boxes than periods. Check those days.</span></div>`);
@@ -8677,7 +8702,7 @@ Rules:
     const ftm = (x) => (x.start && x.end ? `${formatTimeStr(x.start)} – ${formatTimeStr(x.end)}` : 'time not found');
     const togK = {}; B.exams.filter((x) => x.on).forEach((x) => { const k = [x.d, x.type, x.start, x.end].join('|'); (togK[k] = togK[k] || []).push(x); });
     const canTog = Object.keys(togK).some((k) => togK[k].length >= 2 && new Set(togK[k].map((x) => x.batches.join(','))).size >= 2);
-    const tgHtml = canTog ? `<div class="tp-exr"><div class="tp-exh"><div><b>Sit together</b><small>Same room and invigilators: make ONE exam with a subject for each class</small></div><button type="button" class="chip${tp.together ? ' active' : ''}" data-tp-together="1">${tp.together ? '✓ One exam' : 'Separate exams'}</button></div></div>` : '';
+    const tgHtml = canTog ? `<div class="tp-exr"><div class="tp-exh"><div><b>Sit together</b><small>Only if both classes sit in the SAME room: ONE exam, a subject for each class. Different rooms? Keep separate exams.</small></div><button type="button" class="chip${tp.together ? ' active' : ''}" data-tp-together="1">${tp.together ? '✓ One exam' : 'Separate exams'}</button></div></div>` : '';
     const exHtml = B.exams.length ? `<div class="xs-grp">Tests and exams · made in Exams</div>${tgHtml}${B.exams.map((x) => `<div class="tp-exr${x.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(x.d))} · ${escapeHtml(x.classes.join(', '))}</b><small>${escapeHtml(ftm(x))}</small></div><button type="button" class="chip${x.on ? ' active' : ''}" data-tp-ex-on="${escapeHtml(x.key)}">${x.on ? '✓ Make it' : 'Skip'}</button></div>
         <div class="tp-exs"><select class="text-input tp-sel" data-tp-ex-type="${escapeHtml(x.key)}"><option value="">${x.type ? 'Other' : 'Choose type'}</option>${testTypesList().map((t) => `<option value="${escapeHtml(t)}"${x.type === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select><select class="text-input tp-sel" data-tp-ex-sub="${escapeHtml(x.key)}"><option value="">No subject</option>${ttSubjectsList().map((t) => `<option value="${escapeHtml(t)}"${x.subject === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div></div>`).join('')}<div class="hv-note" style="text-align:left;">Each one takes its box in the grid and appears in the Exams tab; add the rooms and invigilators there. The syllabus and marks are not saved.</div>` : '';
     const noteHtml = B.notes.length ? `<div class="xs-grp">Notes for the whole day</div>${B.notes.map((n) => `<div class="tp-exr${n.on ? '' : ' off'}"><div class="tp-exh"><div><b>${escapeHtml(dayTxt(n.d))}</b><small>${escapeHtml(n.text)}</small></div><button type="button" class="chip${n.on ? ' active' : ''}" data-tp-note="${escapeHtml(n.key)}">${n.on ? '✓ Add' : 'Skip'}</button></div></div>`).join('')}` : '';
@@ -8692,7 +8717,7 @@ Rules:
     const day = D.days.find((d) => d.date === tp.day) || D.days[0];
     const dayChips = D.days.map((d) => { const t = tpDate(tp, d.date); return `<button type="button" class="chip${d.date === day.date ? ' active' : ''}" data-tp-day="${d.date}">${WD[dateObj(t).getDay()]} ${dateObj(t).getDate()}</button>`; }).join('');
     const th = D.periods.map((q, i) => `<th>${i + 1}<small>${escapeHtml(q.start ? formatTimeStr(String(q.start).slice(0, 5)).replace(/\s?[AP]M$/i, '') : '')}</small></th>`).join('');
-    const blocksD = tp.useTimes ? tpMerges(tp, day) : [];
+    const blocksD = tp.useTimes ? tpDayBlocks(tp, day, D.periods.length) : [];
     const body = tp.rows.map((l) => {
       const r = day.rows.find((x) => x.class === l); const sp = day.specials.find((x) => (x.classes || []).indexOf(l) !== -1); const b = tp.map[l]; let tds = '';
       if (r) {
