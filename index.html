@@ -2173,6 +2173,9 @@
 @media (min-width: 1100px) and (min-height: 560px) {
   .tg-pgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
+  /* Today: the exam name on the Invigilation card wraps instead of running out of the card */
+  .tl-card.tl-duty .chiprow { flex-wrap: wrap; }
+  .tl-card.tl-duty .schip { white-space: normal; overflow: visible; text-overflow: clip; height: auto; line-height: 1.25; max-width: 100%; }
 </style>
 </head>
 <body>
@@ -2644,7 +2647,7 @@
       </div>
       <button type="button" class="hv-back" id="svThisWeek" hidden style="align-self:center; margin-top:-6px;"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to this week</button>
       <div class="sv-summary" id="svSummary"></div>
-      <div class="tg-mode"><button type="button" class="chip active" data-sv-view="list">List</button><button type="button" class="chip" data-sv-view="grid">Weekly timetable</button></div>
+      <div class="tg-mode"><button type="button" class="chip" data-sv-view="grid">Weekly timetable</button><button type="button" class="chip active" data-sv-view="list">List</button></div>
       <div id="svGrid" hidden></div>
       <div class="sv-actions">
         <button type="button" class="save-btn" id="svAddBtn">+ Add Slot</button>
@@ -3319,7 +3322,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.26 · updated 27 Oct 2026</div>
+          <div class="dnote">Version 13.27 · updated 28 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4307,10 +4310,15 @@
   const DUTY_PILL = { upcoming: 'Upcoming', live: 'In Progress', missed: 'Not logged' };
   function dutyRowHtml(d) {
     const st = dutyStatus(d.slots, todayStr());
-    return `<div class="tl-item hv-rec" data-today-duty="${escapeHtml(d.exam.id)}" role="button" tabindex="0"><div class="tl-time"></div>
-      <div class="hv-act-card duty-planned ${st}">
-        <div class="hv-act-top"><span class="hv-act-title">Invigilation · ${escapeHtml(examTitle(d.exam))}</span><span class="tl-pill ${st}">${DUTY_PILL[st]}</span></div>
-        ${d.slots.map((s) => `<div class="hv-act-note">${escapeHtml(s.room)} · ${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))}${s.brk && s.brk.start ? ` · break ${escapeHtml(formatTimeStr(s.brk.start))} – ${escapeHtml(formatTimeStr(s.brk.end))}` : ''}</div>`).join('')}
+    const first = d.slots.reduce((mn, sl) => Math.min(mn, hhmmToMin(sl.start)), 24 * 60);
+    const rooms = d.slots.map((sl) => sl.room).filter((r, i, a) => r && a.indexOf(r) === i);
+    let prev = null;
+    const chips = d.slots.map((sl) => { const room = (sl.room && sl.room !== prev) ? `<span class="mchip">${I_DOOR}${escapeHtml(sl.room)}</span>` : ''; prev = sl.room;
+      return `${room}<span class="mchip">${I_CLOCK}${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}${sl.brk && sl.brk.start ? ` · break ${escapeHtml(formatTimeStr(sl.brk.start))} – ${escapeHtml(formatTimeStr(sl.brk.end))}` : ''}</span>`; }).join('');
+    return `<div class="tl-item hv-rec" data-today-duty="${escapeHtml(d.exam.id)}" role="button" tabindex="0">${tlTimeHtml(first)}
+      <div class="tl-card ${st} tl-duty">
+        <div class="tl-top"><div class="tl-batch">Invigilation${rooms.length ? ' · ' + escapeHtml(rooms.join(', ')) : ''}</div><span class="tl-pill ${st}">${DUTY_PILL[st]}</span></div>
+        <div class="chiprow"><span class="schip"><span class="ico i-cbpen" aria-hidden="true"></span>${escapeHtml(examTitle(d.exam))}</span>${chips}</div>
         ${st === 'upcoming' ? '' : `<button type="button" class="tl-log" data-duty-log="${escapeHtml(d.exam.id)}">${st === 'live' ? 'Log this duty' : 'Log it now'}</button>`}
       </div></div>`;
   }
@@ -4324,16 +4332,26 @@
     const d = myDuties(todayStr()).find((x) => x.exam.id === examId);
     if (!d) return;
     const slots = d.slots.map((s) => Object.assign({}, s));
+    const st0 = dutyStatus(d.slots, todayStr());
+    const rowD = (a, b) => `<div class="hv-d-row"><span>${escapeHtml(a)}</span><span>${b}</span></div>`;
+    const preRows = rowD('Date', escapeHtml(dayHeading(todayStr()))) + rowD('Status', `<span class="tl-pill ${st0}">${DUTY_PILL[st0]}</span>`) + ((d.exam.scope || []).length ? rowD('Classes', escapeHtml(scopeWithSubjects(d.exam, true))) : '') + rowD('Set by', 'Coordinator');
+    const nmOf = (u) => (state.adminNames[u] && state.adminNames[u].name) || '';
+    const roomPlan = planOf(d.exam).find((r) => r.room === (d.slots[0] || {}).room);
+    const post = () => {
+      const lines = examTimeLines(d.exam); const also = roomPlan ? (roomPlan.slots || []).map((sl) => ({ sl, who: (sl.teachers || []).filter((u) => u !== state.teacherId).map(nmOf).filter(Boolean) })).filter((z) => z.who.length) : [];
+      return (lines.length ? `<div class="xs-grp">Paper times</div><div class="hv-d-rows">${lines.map((t) => { const i = t.indexOf(' - '); return rowD(i === -1 ? t : t.slice(0, i), escapeHtml(i === -1 ? '' : t.slice(i + 3))); }).join('')}</div>` : '')
+        + (also.length ? `<div class="xs-grp">Also in this room</div><div class="hv-d-rows">${also.map((z) => rowD(`${formatTimeStr(z.sl.start)} – ${formatTimeStr(z.sl.end)}`, escapeHtml(z.who.join(', ')))).join('')}</div>` : '');
+    };
     const body = document.getElementById('hvSheetBody');
     const draw = (editing) => {
       body.innerHTML = `<div class="hv-d-title">Invigilation</div>
         <div class="hv-d-wing">${escapeHtml(examTitle(d.exam))}${(d.exam.scope || []).length ? ' · ' + escapeHtml(scopeLabel(d.exam.scope)) : ''}</div>
-        <div class="hv-d-rows" style="margin-top:10px;">${slots.map((s, i) => editing
+        <div class="hv-d-rows" style="margin-top:10px;">${editing ? '' : preRows}${slots.map((s, i) => editing
           ? `<div class="plan-slot" style="margin-bottom:8px;"><div class="team-lbl">${escapeHtml(s.room)}</div><div class="sv-times">
               <div><div class="sv-tlbl">From</div><input class="text-input" type="time" data-dt-s="${i}" value="${escapeHtml(s.start)}"></div>
               <div><div class="sv-tlbl">To</div><input class="text-input" type="time" data-dt-e="${i}" value="${escapeHtml(s.end)}"></div></div></div>`
-          : `<div class="hv-d-row"><span>${escapeHtml(s.room)}</span><span>${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))}</span></div>`).join('')}</div>
-        <div class="hv-note" style="text-align:left; margin-top:10px;">${editing ? 'Change the times if you came late or left early, then save.' : 'Planned by the coordinator. Confirm once your duty is done.'}</div>
+          : `<div class="hv-d-row"><span>${escapeHtml(s.room)}</span><span>${escapeHtml(formatTimeStr(s.start))} – ${escapeHtml(formatTimeStr(s.end))}</span></div>`).join('')}</div>${editing ? '' : post()}
+ <div class="hv-note" style="text-align:left; margin-top:10px;">${editing ? 'Change the times if you came late or left early, then save.' : 'Planned by the coordinator. Confirm once your duty is done.'}</div>
         <div class="hv-d-btns">${editing
           ? '<button type="button" class="btn-secondary" id="dtBack" style="border-color: var(--line);">Back</button><button type="button" class="save-btn" id="dtSave" style="margin:0;">Save duty</button>'
           : '<button type="button" class="btn-secondary" id="dtEdit" style="border-color: var(--line);">Edit time</button><button type="button" class="save-btn" id="dtDone" style="margin:0;">✓ Duty done</button>'}</div>`;
@@ -4353,6 +4371,8 @@
       }
     };
     draw(false);
+    { const ids = roomPlan ? [].concat(...(roomPlan.slots || []).map((sl) => sl.teachers || [])).filter((u, i, a) => u !== state.teacherId && a.indexOf(u) === i && !nmOf(u)) : [];
+      if (ids.length) resolveAdminNames(ids).then(() => { if (document.getElementById('dtEdit')) draw(false); }).catch(() => {}); }
     const root = document.getElementById('hvSheet');
     root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
