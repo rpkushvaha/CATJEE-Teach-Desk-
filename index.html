@@ -2219,6 +2219,13 @@
   .cal-s { background: #EFE6FA !important; color: #6B3FA0 !important; font-weight: 700; }
   .cal-dot.cal-s { background: #EFE6FA !important; }
   .hol-s { background: #EFE6FA; color: #6B3FA0; }
+  /* CATJEE Calendar as a page */
+  .cal-cols { display: block; } .cal-right { margin-top: 4px; }
+  #calHost { padding-bottom: 24px; }
+@media (min-width: 900px) and (min-height: 560px) {
+  .cal-cols { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .cal-d { height: 54px; font-size: 16px; }
+}
 </style>
 </head>
 <body>
@@ -2617,7 +2624,14 @@
       <button class="save-btn" id="saveClassBtn">Save Class</button>
     </div>
 
-    <!-- HISTORY -->
+    <!-- CALENDAR -->
+  <div class="tab-view" id="view-calendar">
+    <div class="hv-head">
+      <div class="pg-title-row"><button type="button" class="back-btn" id="calBackBtn" aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title">CATJEE Calendar</div></div>
+    </div>
+    <div id="calHost"></div>
+  </div>
+  <!-- HISTORY -->
     <div class="tab-view" id="view-history">
       <div class="hv-head">
         <div class="pg-title-row"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title">History</div></div>
@@ -3379,7 +3393,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.32 · updated 2 Nov 2026</div>
+          <div class="dnote">Version 13.33 · updated 3 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8854,15 +8868,16 @@ Rules:
     const c = state.cal; const admin = !!(state.canAdmin || state.isCoordinator); const m = c.m; const ms = m + '-01'; const me = m + '-31';
     const inMonth = (state.holidays || []).filter((h) => h.from <= me && holEnd(h) >= ms).sort((a, b) => a.from.localeCompare(b.from));
     const det = c.sel ? (holOn(c.sel).length ? holOn(c.sel).map((h) => calEntryHtml(h, admin)).join('') : `<div class="cal-det"><div class="cal-dh"><b>${escapeHtml(slotWhen(c.sel))}</b></div><div class="cal-ln">${isWeeklyOff(c.sel) ? 'Weekly off' : 'No holiday'}</div></div>`) : '';
-    return `<div id="calRoot"><div class="hv-d-title">CATJEE Calendar</div><div class="hv-d-wing">Holidays, working Sundays and special days</div>
+    return `<div id="calRoot"><div class="cal-cols"><div class="cal-left">
       <div class="cal-nav"><button type="button" class="chip" id="calPrev" aria-label="Previous month">‹</button><b>${escapeHtml(calMonthLabel(m))}</b><button type="button" class="chip" id="calNext" aria-label="Next month">›</button></div>
       ${calGridHtml(m)}
       <div class="cal-legend"><span><i class="cal-dot cal-h"></i>Holiday</span><span><i class="cal-dot cal-w"></i>Sunday working</span><span><i class="cal-dot cal-s"></i>Special day</span><span><i class="cal-dot cal-f"></i>Half day</span><span><i class="cal-dot cal-v"></i>Students' vacation</span><span><i class="cal-dot cal-o"></i>Weekly off</span><span><i class="cal-dot cal-t"></i>Date may change</span></div>
+            </div><div class="cal-right">
       ${det}
       <div class="xs-grp">In ${escapeHtml(calMonthLabel(m))}</div>
       ${inMonth.length ? inMonth.map((h) => `<button type="button" class="cal-row" data-cal-d="${h.from > ms ? h.from : ms}"><span class="cal-rd">${escapeHtml(holEnd(h) !== h.from ? slotWhen(h.from).split(' · ')[0].replace(/^\w+ /, '') + ' – ' + slotWhen(holEnd(h)).replace(/^\w+ /, '') : slotWhen(h.from).replace(/^\w+ /, ''))}</span><span><b>${escapeHtml(h.name)}</b><br><span class="cal-pill ${HOL_CLS[h.type]}">${HOL_TYPES[h.type]}</span></span></button>`).join('') : '<div class="hv-note" style="text-align:left;">Nothing this month.</div>'}
       ${admin ? `<div class="sv-form-btns" style="margin-top:12px;"><button type="button" class="save-btn" id="calAdd">+ Add holiday</button>${aiReady() ? '<button type="button" class="btn-secondary" id="calPhoto" style="border-color: var(--line);">Fill from a photo</button>' : ''}</div><input type="file" id="calFile" accept="image/*,application/pdf" hidden>` : ''}
-    </div>`;
+    </div></div></div>`;
   }
   function calFormHtml() {
     const f = state.cal.form;
@@ -8920,8 +8935,8 @@ Rules:
     list.sort((a, b) => a.from.localeCompare(b.from) || a.type.localeCompare(b.type));
     try { await state.db.doc('settings/institute').set({ holidays: list }, { merge: true }); state.holidays = list; renderHolidayUi(); return true; } catch (err) { if (err && err.code === 'permission-denied') showToast('The database did not allow this. Ask the admin to let Coordinators change the calendar.', 'error'); else flashOffline(err); return false; } }
   function calOpen(date) {
-    state.tp = null; state.ds = null; hvSheetId = null;
-    state.cal = { m: (date || todayStr()).slice(0, 7), sel: date || null, mode: 'cal' }; calRender(); tpOpenSheet();
+    state.cal = { m: (date || todayStr()).slice(0, 7), sel: date || null, mode: 'cal', lastMode: '' };
+    if (state.tab !== 'calendar') switchTab('calendar'); calRender();
   }
   async function calAiRun(file) {
     const c = state.cal; c.ai = { step: 'busy' }; calRender();
@@ -8930,10 +8945,9 @@ Rules:
     if (state.cal === c) calRender();
   }
   function calRender() {
-    const c = state.cal; const body = document.getElementById('hvSheetBody'); if (!c || !body) return;
-    if (!body.querySelector('#calRoot') && body.firstElementChild && c.rendered) return;
-    const sheet = document.querySelector('#hvSheet .hv-sheet'); const top = sheet && body.querySelector('#calRoot') ? sheet.scrollTop : 0;
-    body.innerHTML = c.mode === 'form' ? calFormHtml() : (c.mode === 'ai' ? calAiHtml() : calHtml()); c.rendered = true; if (sheet) sheet.scrollTop = top;
+    const c = state.cal; const body = document.getElementById('calHost'); if (!c || !body) return;
+    const y = c.lastMode === c.mode ? window.scrollY : 0;
+    body.innerHTML = c.mode === 'form' ? calFormHtml() : (c.mode === 'ai' ? calAiHtml() : calHtml()); c.lastMode = c.mode; window.scrollTo(0, y);
     const q = (sel) => body.querySelector(sel); const qa = (sel) => body.querySelectorAll(sel);
     if (c.mode === 'cal') {
       q('#calPrev').addEventListener('click', () => { c.m = calShift(c.m, -1); c.sel = null; calRender(); });
@@ -8974,6 +8988,7 @@ Rules:
   (function bindCal() {
     const row = document.getElementById('calDrawRow'), card = document.getElementById('holidayCard');
     if (row) row.addEventListener('click', () => { closeMenu(); setTimeout(() => calOpen(), 300); });
+    const bk = document.getElementById('calBackBtn'); if (bk) bk.addEventListener('click', () => { const c = state.cal; if (c && c.mode !== 'cal') { c.mode = 'cal'; c.ai = null; calRender(); } else goBack(); });
     if (card) card.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); });
   })();
   // ---------- Phone notifications (Web Push): they arrive even when the app is closed ----------
@@ -12319,8 +12334,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   function renderTabs() {
-    ['today', 'add', 'history', 'schedule', 'admin'].forEach((t) => {
-      const view = document.getElementById(`view-${t}`);
+    ['today', 'add', 'history', 'schedule', 'admin', 'calendar'].forEach((t) => { const view = document.getElementById(`view-${t}`);
       if (view) view.classList.toggle('active', state.tab === t);
       const nav = document.getElementById(`nav${t.charAt(0).toUpperCase() + t.slice(1)}`);
       if (nav) nav.classList.toggle('active', state.tab === t);
