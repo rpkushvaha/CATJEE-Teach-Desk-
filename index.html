@@ -2131,6 +2131,48 @@
   #repBackBtn[hidden], #ttBackToday[hidden] { display: none; }
   #repBackBtn { font-size: 12px; line-height: 1.2; padding: 0; margin: 0; align-self: center; white-space: nowrap; }
   #ttBackToday { font-size: 12px; line-height: 1.2; padding: 0; margin: 2px auto 0; display: inline-flex; white-space: nowrap; }
+/* ===== 13.26: tablet and laptop layout. Phones are untouched: every rule below sits inside these two media queries. ===== */
+@media (min-width: 700px) and (min-height: 560px) {
+  #shell { max-width: 1000px; }
+  .topbar { padding-left: 28px; padding-right: 28px; }
+  .content { padding: 22px 28px 0 28px; gap: 20px; }
+  .bottom-nav { padding-left: 24px; padding-right: 24px; }
+  /* bottom sheets become dialogs in the middle of the screen */
+  .hv-sheet { left: 50%; right: auto; bottom: auto; top: 50%; width: min(580px, 92vw); max-height: 88vh; border-radius: 16px; padding: 18px 24px 24px; transform: translate(-50%, -46%); opacity: 0; transition: transform .2s ease, opacity .2s ease; }
+  .hv-sheet-root.open .hv-sheet { transform: translate(-50%, -50%); opacity: 1; }
+  /* Admin: Home and Settings in two columns */
+  #view-admin[data-atab-cur="dash"], #view-admin[data-atab-cur="settings"] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; align-items: start; }
+  #view-admin[data-atab-cur="dash"] > .ad-tabs, #view-admin[data-atab-cur="dash"] > .ad-bar, #view-admin[data-atab-cur="dash"] > .hv-head,
+  #view-admin[data-atab-cur="settings"] > .ad-tabs, #view-admin[data-atab-cur="settings"] > .ad-bar, #view-admin[data-atab-cur="settings"] > .hv-head, #view-admin[data-atab-cur="settings"] > .tsec-head { grid-column: 1 / -1; }
+  #view-admin[data-atab-cur="dash"] > section:has(#adminTeacherList) { grid-column: 2; grid-row: 3 / span 6; }
+  #view-admin[data-atab-cur="dash"] > section:has(#adminSchedList) { grid-column: 1 / -1; }
+  /* Today in two columns */
+  #view-today.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; align-items: start; }
+  #view-today > .today-hello, #view-today > #todayNotices, #view-today > #statusCard, #view-today > #installCard { grid-column: 1 / -1; }
+}
+@media (min-width: 1100px) and (min-height: 560px) {
+  #shell { max-width: none; margin: 0; padding-left: 232px; }
+  .topbar, .content { width: 100%; max-width: 1240px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+  .bottom-nav { position: fixed; left: 0; top: 0; bottom: 0; width: 232px; height: auto; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 6px; padding: 28px 14px 20px; border-top: 0; border-right: 1px solid var(--line); z-index: 20; box-sizing: border-box; }
+  .nav-item { flex-direction: row; justify-content: flex-start; gap: 14px; padding: 12px 16px; border-radius: 12px; }
+  .nav-item span { font-size: 16px; }
+  .nav-item.active { background: var(--neutral-soft); }
+}
+@media (min-width: 700px) and (min-height: 560px) {
+  .hv-sheet .hv-grab { display: none; }
+  .dsp-card { max-width: 560px; }
+  #view-add.tab-view.active { max-width: 780px; width: 100%; margin-left: auto; margin-right: auto; }
+}
+@media (min-width: 900px) and (min-height: 560px) {
+  /* Exams: the list on the left, the duty sheet picture on the right */
+  #adminExamList { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); gap: 12px 24px; align-items: start; }
+  #adminExamList > .ex-hint { grid-column: 1 / -1; }
+  #adminExamList > .dsp-card { grid-column: 2; grid-row: 2 / span 12; max-width: none; position: sticky; top: 12px; }
+  #adminExamList > .ad-exam { grid-column: 1; }
+}
+@media (min-width: 1100px) and (min-height: 560px) {
+  .tg-pgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
 </style>
 </head>
 <body>
@@ -3277,7 +3319,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.25 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.26 · updated 27 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
