@@ -2226,6 +2226,16 @@
   .cal-cols { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: start; }
   .cal-d { height: 54px; font-size: 16px; }
 }
+  /* calendar days in the Timetable and the Schedule */
+  .tg-day.tg-hol { background: #FDE8EA; color: #C81E32; border-color: #F4B9BF; }
+  .tg-day.tg-wrk { background: #E3F4E8; color: #1E7A3C; border-color: #BFE3C9; }
+  .tg-day.tg-spc { background: #EFE6FA; color: #6B3FA0; border-color: #D9C8F0; }
+  .tg-day.tg-hol.active, .tg-day.tg-wrk.active, .tg-day.tg-spc.active { box-shadow: inset 0 0 0 2px #E63946; }
+  .tg-holcard { border-radius: 12px; padding: 10px 12px; margin-top: 10px; font-size: 13px; }
+  .tg-holcard > b { display: block; margin-bottom: 4px; } .tg-hol-ln { margin-top: 2px; }
+  .tg-hol-ok { color: #1E7A3C; font-weight: 600; } .tg-hol-w { color: #B45309; }
+  .tg-holcard .tg-mini { margin-top: 8px; }
+  .sv-holchip { border: 0; border-radius: 99px; padding: 2px 9px; font: inherit; font-size: 12px; font-weight: 600; margin-left: 8px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -3393,7 +3403,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.33 · updated 3 Nov 2026</div>
+          <div class="dnote">Version 13.34 · updated 4 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6161,7 +6171,8 @@
       ${editable && pend && doc.pubSnap && tgEverPub(doc) ? '<button type="button" class="tg-mini" id="tgDiscard">✕ Discard changes</button>' : ''}
       ${tgEverPub(doc) ? (editable ? '<button type="button" class="tg-mini" id="tgEditDone">✓ Done</button>' : '<button type="button" class="tg-mini tg-mini-gold" id="tgEdit"><span class="ico i-edit" aria-hidden="true"></span> Edit timetable</button>') : ''}</span></div>
     ${editable ? '' : '<div class="hv-note tg-lock"><span class="ico i-lock" aria-hidden="true"></span> Published timetable · tap “Edit timetable” to make changes</div>'}`;
-    html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; const pn = tgPendDays()[d] || 0; const isPub = (doc.pubDays || []).indexOf(d) !== -1 || (!doc.pubDays && (doc.published || []).length && n); return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}${pn ? ' chg' : ''}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small>${pn ? `<i class="tg-dn">${pn}</i>` : (isPub ? '<i class="tg-dok">✓</i>' : '')}</button>`; }).join('')}</div>`;
+    html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; const pn = tgPendDays()[d] || 0; const isPub = (doc.pubDays || []).indexOf(d) !== -1 || (!doc.pubDays && (doc.published || []).length && n); return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}${pn ? ' chg' : ''}${tgDayCls(d)}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small>${pn ? `<i class="tg-dn">${pn}</i>` : (isPub ? '<i class="tg-dok">✓</i>' : '')}</button>`; }).join('')}</div>`;
+    html += tgHolidayCards(doc, days, editable);
     // paint bar
     if (!editable) state.tg.paint = null;
     if (state.tg.paint) html += `<div class="tg-paintbar"><span><span class="ico i-brush" aria-hidden="true"></span> Paint <b>${escapeHtml(state.tg.paint)}</b> is on · tap cells to fill</span><button type="button" class="tg-mini" data-tg-paint="">Turn off</button></div>`;
@@ -6302,7 +6313,7 @@
   function shortSubj(x) { const k = String(x || '').trim().toLowerCase(); if (SUBJ_SHORT[k]) return SUBJ_SHORT[k]; return x.length > 7 ? x.slice(0, 5) + '.' : x; }
   function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase(); }
   function classOfBatchNum(b) { const m = String(b).match(/class\s*(\d+)/i); return m ? m[1] : ''; }
-  function bindTg(box) {
+  function bindTg(box) { tgHolBind(box);
     box.querySelectorAll('[data-tg-group]').forEach((b) => b.addEventListener('click', () => { state.tg.group = b.getAttribute('data-tg-group'); state.tg.docKey = ''; state.tg.dirty = false; state.tg.sel = null; state.tg.swap = null; if (state.abs) { state.abs = null; renderAbsent(); } renderTgGrid(); }));
     box.querySelectorAll('[data-tg-day]').forEach((b) => b.addEventListener('click', () => { state.tg.day = b.getAttribute('data-tg-day'); state.tg.copy = null; state.tg.sel = null; state.tg.swap = null; renderTgGrid(); }));
     box.querySelectorAll('[data-tg-paint]').forEach((b) => b.addEventListener('click', () => { state.tg.paint = b.getAttribute('data-tg-paint') || null; renderTgGrid(); }));
@@ -8990,7 +9001,49 @@ Rules:
     if (row) row.addEventListener('click', () => { closeMenu(); setTimeout(() => calOpen(), 300); });
     const bk = document.getElementById('calBackBtn'); if (bk) bk.addEventListener('click', () => { const c = state.cal; if (c && c.mode !== 'cal') { c.mode = 'cal'; c.ai = null; calRender(); } else goBack(); });
     if (card) card.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); });
+    const svl = document.getElementById('scheduleList'); if (svl) svl.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); });
   })();
+  // ---------- Holidays from the calendar, in the Timetable and in the teacher's Schedule ----------
+  const holNoteText = (h) => (h.type === 'holiday' ? `Holiday (${h.name})` : `Evening classes off (${h.name})`);
+  function tgHolInfo(days, session) {
+    const hol = [], eve = [], work = []; const ws = state.tt.weekStart; const week7 = datesBetween(ws, shiftDateStr(ws, 6));
+    days.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'holiday') hol.push({ d, h }); else if ((h.type === 'special' || h.type === 'half') && h.evening === 'off' && session === 'evening') eve.push({ d, h }); }));
+    week7.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'working') work.push({ d, h }); }));
+    return { hol, eve, work };
+  }
+  const tgDayCls = (d) => { const h = holDay(d); return h ? ({ holiday: ' tg-hol', working: ' tg-wrk', special: ' tg-spc', half: ' tg-spc' }[h.type] || '') : ''; };
+  function tgHolidayCards(doc, days, editable) {
+    if (!(state.holidays || []).length) return '';
+    const g = tgGroup(); const info = tgHolInfo(days, g ? g.session : '');
+    const off = info.hol.concat(info.eve).sort((a, b) => a.d.localeCompare(b.d)); let out = '';
+    if (off.length) {
+      const dt = doc.dayTimes || {}; const pending = off.filter((x) => !(dt[x.d] || {}).note);
+      const lines = off.map((x) => { const nCls = (doc.cells || []).filter((c) => c.d === x.d).length; const has = (dt[x.d] || {}).note; return `<div class="tg-hol-ln"><b style="display:inline;">${escapeHtml(slotWhen(x.d))}</b> ${escapeHtml(x.h.type === 'holiday' ? x.h.name : x.h.name + ' · Evening classes off')}${has ? ' · <span class="tg-hol-ok">box added</span>' : ''}${nCls && !has ? ` · <span class="tg-hol-w">${nCls} class${nCls === 1 ? '' : 'es'} filled here</span>` : ''}</div>`; }).join('');
+      out += `<div class="tg-holcard hol-h"><b>${off.length} day${off.length === 1 ? '' : 's'} off this week · from CATJEE Calendar</b>${lines}${(editable && pending.length) ? '<button type="button" class="tg-mini tg-mini-gold" data-tg-holfill>Add holiday boxes</button>' : ''}</div>`;
+    }
+    info.work.forEach((x) => {
+      const isSun = WD[dateObj(x.d).getDay()] === 'Sun'; const on = isSun && doc.sunday;
+      out += `<div class="tg-holcard hol-w"><b>${escapeHtml(slotWhen(x.d))} is a working day</b><div class="tg-hol-ln">${escapeHtml(holPair(x.h) || x.h.name)}</div>${isSun ? (on ? '<div class="tg-hol-ln"><span class="tg-hol-ok">Sunday is on in this timetable</span></div>' : (editable ? '<button type="button" class="tg-mini tg-mini-gold" data-tg-holsun>Turn on Sunday</button>' : '')) : ''}</div>`;
+    });
+    return out;
+  }
+  function tgHolFill() {
+    const doc = state.tg.doc; if (!doc) return; const g = tgGroup(); const info = tgHolInfo(tgDays(), g ? g.session : '');
+    const dt = Object.assign({}, doc.dayTimes || {}); const todo = info.hol.concat(info.eve).filter((x) => !(dt[x.d] || {}).note);
+    if (!todo.length) { showToast('Nothing to add'); return; }
+    tgRemember(); todo.forEach((x) => { dt[x.d] = Object.assign({}, dt[x.d] || {}, { note: holNoteText(x.h) }); }); doc.dayTimes = dt;
+    tgSave(); renderTgGrid(); showToast(`${todo.length} holiday box${todo.length === 1 ? '' : 'es'} added · Undo is above the grid`);
+  }
+  function tgHolBind(box) {
+    box.querySelectorAll('[data-tg-holfill]').forEach((b) => b.addEventListener('click', tgHolFill));
+    box.querySelectorAll('[data-tg-holsun]').forEach((b) => b.addEventListener('click', () => { if (!state.tg.doc) return; state.tg.doc.sunday = true; tgSave(); renderTgGrid(); showToast('Sunday is on for this week'); }));
+  }
+  function svHolChip(d) {
+    const h = holDay(d); if (!h || h.type === 'vac') return '';
+    const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f' }[h.type];
+    const txt = h.type === 'holiday' ? `Holiday · ${h.name}` : (h.type === 'working' ? `Sunday working · ${holPair(h) || h.name}` : `${HOL_TYPES[h.type]} · ${h.name}${h.evening === 'off' ? ' · Evening off' : ''}`);
+    return `<button type="button" class="sv-holchip ${cls}" data-cal-open="${d}">${escapeHtml(txt)}</button>`;
+  }
   // ---------- Phone notifications (Web Push): they arrive even when the app is closed ----------
   let pushKey = null; // null = not asked yet, '' = the Worker is not set up for it
   const pushUrl = (path) => AI_DEFAULT_URL.replace(/\/+$/, '') + path;
@@ -12025,7 +12078,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const daySlots = slots.filter((s) => slotDate(s) === d);
       const dutyHtml = weekDutyRowsHtml(d);
       const isSun = i === 6;
-      if (isSun && !daySlots.length && !dutyHtml && d !== todayStr()) return;
+      if (isSun && !daySlots.length && !dutyHtml && d !== todayStr() && !(holDay(d) && holDay(d).type !== 'vac')) return;
       const dayEntries = hvDay(d).classes;
       const matched = matchDaySlots(daySlots, dayEntries);
       // On a leave day, unlogged classes show "On leave" (or "Test held" if someone conducted a test in it).
@@ -12047,7 +12100,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const today = d === todayStr();
       const live = daySlots.filter((x) => !x.cancelled).length;
       const lvHere = (state.historyClasses || []).find((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday' && c.teacherId === state.teacherId && c.date === d);
-      html += `<div class="sv-day${today ? ' today' : ''}${!daySlots.length && !dutyHtml && !lvHere ? ' sv-noclass' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}${lvHere ? (d > todayStr() ? `<button type="button" class="sv-lv" data-cancel-leave="${escapeHtml(lvHere.id)}" title="Tap to cancel this leave">On leave ✕</button>` : '<span class="sv-lv">On leave</span>') : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : (dutyHtml ? '' : ' · No classes')}${dutyHtml ? ` · ${(state.weekDuties.list || []).filter((x) => x.date === d).length} duty${(state.weekDuties.list || []).filter((x) => x.date === d).length === 1 ? '' : ' slots'}` : ''}</span></div>`;
+      html += `<div class="sv-day${today ? ' today' : ''}${!daySlots.length && !dutyHtml && !lvHere ? ' sv-noclass' : ''}"><span class="hv-day-date">${escapeHtml(dayHeading(d))}</span>${today ? '<span class="sv-today">Today</span>' : ''}${svHolChip(d)}${lvHere ? (d > todayStr() ? `<button type="button" class="sv-lv" data-cancel-leave="${escapeHtml(lvHere.id)}" title="Tap to cancel this leave">On leave ✕</button>` : '<span class="sv-lv">On leave</span>') : ''}<span class="hv-day-meta">${daySlots.length ? ` · ${live} class${live === 1 ? '' : 'es'}` : (dutyHtml ? '' : ' · No classes')}${dutyHtml ? ` · ${(state.weekDuties.list || []).filter((x) => x.date === d).length} duty${(state.weekDuties.list || []).filter((x) => x.date === d).length === 1 ? '' : ' slots'}` : ''}</span></div>`;
       if (daySlots.length || dutyHtml) html += `<div class="sv-rows">${dutyHtml}${matched.map(svSlotHtml).join('')}</div>`;
     });
     if (sv.weekStart === mondayOf(todayStr()) && pastAny) {
@@ -12062,7 +12115,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!weekHasSlots && !(state.weekDuties.list || []).some((x) => days.indexOf(x.date) !== -1)) {
       const canCopy = !pastWeek && svCopyCandidates().length;
       html = `<div class="tl-empty compact sv-empty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><div class="tl-empty-title">${pastWeek ? 'No classes were scheduled this week.' : 'No classes planned for this week yet.'}</div>${pastWeek ? '' : `<div class="tl-empty-sub">${canCopy ? 'Tap + Add Slot, or Copy last week to start from last week\'s plan.' : 'Tap + Add Slot to plan your classes.'}</div>`}</div></div>`;
-      const wkLv = upcomingLeaves().filter((c) => days.indexOf(c.date) !== -1);
+      const wkHol = days.filter((d) => holDay(d) && holDay(d).type !== 'vac');
+    if (wkHol.length) html += `<div class="uplv" style="margin-top:10px;">${wkHol.map((d) => `<div class="uplv-row"><span><b>${escapeHtml(dayHeading(d))}</b></span>${svHolChip(d)}</div>`).join('')}</div>`;
+    const wkLv = upcomingLeaves().filter((c) => days.indexOf(c.date) !== -1);
       if (wkLv.length) html += `<div class="uplv" style="margin-top:10px;">${wkLv.map((c) => `<div class="uplv-row"><span><b>${escapeHtml(dayHeading(c.date))}</b> · On leave</span><button type="button" class="btn-secondary uplv-x" data-cancel-leave="${escapeHtml(c.id)}">Cancel</button></div>`).join('')}</div>`;
     }
     const parts = [`${fmtTeaching(counts.mins)} teaching`];
