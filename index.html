@@ -3322,7 +3322,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.27 · updated 28 Oct 2026</div>
+          <div class="dnote">Version 13.28 · updated 29 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4097,7 +4097,9 @@
       const cm = hhmmToMin(c.startTimeStr);
       items.push({ kind: 'class', min: cm != null ? cm : 24 * 60, cls: c, status: classStatus(c) });
     });
-    items.sort((x, y) => x.min - y.min);
+    const nextSlot = items.filter((x) => x.kind === 'slot' && x.status === 'upcoming').sort((x, y) => x.min - y.min)[0] || null;
+    const rank = (it) => (it.status === 'live' ? 0 : (it === nextSlot ? 1 : (it.status === 'missed' ? 2 : (it.status === 'done' ? 4 : 3))));
+    items.sort((x, y) => (rank(x) - rank(y)) || (x.min - y.min));
     return { items, classes, activities };
   }
   const TL_LABEL = { done: 'Completed', live: 'In Progress', upcoming: 'Upcoming', missed: 'Not logged' };
@@ -4201,8 +4203,7 @@
         : `<div class="tl-empty compact">${emptyIcon}<div><div class="tl-empty-title">No classes scheduled for today</div><div class="tl-empty-sub">Classes you schedule or log today will show here.</div></div></div>`;
     } else {
       // the class on now (or the next one) is marked in the list itself — no second copy of it
-      const nx = items.find((x) => x.kind === 'slot' && x.status === 'live') || items.find((x) => x.kind === 'slot' && x.status === 'upcoming');
-      tlNextId = nx ? nx.slot.id : '';
+      const nx = items.find((x) => x.kind === 'slot' && x.status === 'upcoming'); tlNextId = nx ? nx.slot.id : '';
       html = items.map(tlItemHtml).join('');
     }
     let duties = [];
@@ -8329,7 +8330,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   // The app never holds the Gemini key: it sends the request with the person's sign-in to a Cloudflare Worker,
   // which checks the sign-in and the allowed list, then asks Gemini. Nothing else in the app depends on it.
   const AI_URL_KEY = 'ctd_ai_url';
-  const aiUrl = () => { let v = ''; try { v = (localStorage.getItem(AI_URL_KEY) || '').trim(); } catch (e) { v = ''; } return v || (state && state.aiShared) || ''; };
+  // a Coordinator's phone has no saved address, so it uses this one (the Worker itself only lets the emails in ADMIN_EMAILS through)
+  const AI_DEFAULT_URL = 'https://catjee-ai.rpkushvaha.workers.dev';
+  const aiUrl = () => { let v = ''; try { v = (localStorage.getItem(AI_URL_KEY) || '').trim(); } catch (e) { v = ''; } return v || (state && state.aiShared) || ((state && state.isCoordinator && !state.canAdmin) ? AI_DEFAULT_URL : ''); };
   async function aiCall(body, timeoutMs) {
     const url = aiUrl(); if (!url) throw new Error('AI is not set up yet (Admin → Settings → AI)');
     const cu = firebase.auth().currentUser; if (!cu) throw new Error('Please sign in again');
@@ -15736,7 +15739,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (state.tab === 'admin') renderAdmin();
     }, () => {}));
     unsubscribers.push(db.doc('settings/testTypes').onSnapshot((snap) => { state.testTypes = (snap.exists && snap.data().list) || null; renderListManagers(); if (state.tab === 'add') renderInvig(); }, () => {}));
-    unsubscribers.push(db.doc('settings/ai').onSnapshot((snap) => { state.aiShared = String((snap.exists && snap.data().url) || ''); if (state.tab === 'admin') renderAdmin(); }, () => {}));
+    unsubscribers.push(db.doc('settings/ai').onSnapshot((snap) => { state.aiShared = String((snap.exists && snap.data().url) || ''); if (state.canAdmin && !state.aiShared && !state.aiShareTried) { let lv = ''; try { lv = (localStorage.getItem(AI_URL_KEY) || '').trim(); } catch (e) { lv = ''; } if (lv) { state.aiShareTried = 1; shareAiUrl(lv, () => {}); } } if (state.tab === 'admin') renderAdmin(); }, () => {}));
     unsubscribers.push(db.doc('settings/periods').onSnapshot((snap) => {
       state.periodSets = (snap.exists && snap.data().groups) || {};
       if (state.tab === 'admin') renderAdmin();
