@@ -2176,6 +2176,49 @@
   /* Today: the exam name on the Invigilation card wraps instead of running out of the card */
   .tl-card.tl-duty .chiprow { flex-wrap: wrap; }
   .tl-card.tl-duty .schip { white-space: normal; overflow: visible; text-overflow: clip; height: auto; line-height: 1.25; max-width: 100%; }
+  /* Phone notifications */
+  #adminPushPanel[hidden] { display: none !important; }
+  #pushCard[hidden], #pushDrawRow[hidden] { display: none !important; }
+  .push-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .push-row:last-child { border-bottom: 0; }
+  .push-on { color: #15803D; font-weight: 600; }
+  .push-off { color: #B45309; font-weight: 600; }
+  /* CATJEE Calendar */
+  #calDrawRow[hidden], #holidayCard[hidden] { display: none !important; }
+  .hol-card { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; border: 0; border-radius: 14px; padding: 12px 14px; font: inherit; cursor: pointer; }
+  .hol-card b { font-size: 14px; } .hol-card span { font-size: 13px; }
+  .hol-h { background: #FDE8EA; color: #C81E32; } .hol-w { background: #E3F4E8; color: #1E7A3C; } .hol-f { background: #FBEBD0; color: #8a5a00; }
+  .hol-n { background: var(--neutral-soft); color: var(--ink); border: 1px solid var(--line); }
+  .cal-nav { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 6px; font-size: 15px; }
+  .cal-head { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: var(--muted-2); margin-bottom: 4px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-d { border: 0; border-radius: 10px; height: 38px; background: #FAFAFA; color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; }
+  .cal-d.cal-o { background: #F0F0F0; color: #999; }
+  .cal-h { background: #FDE8EA !important; color: #C81E32 !important; font-weight: 700; }
+  .cal-w { background: #E3F4E8 !important; color: #1E7A3C !important; font-weight: 700; }
+  .cal-f { background: #FBEBD0 !important; color: #8a5a00 !important; font-weight: 700; }
+  .cal-v { background: #EAF0FA !important; color: #3B5B8C !important; }
+  .cal-d.cal-t { outline: 1.5px dashed #C81E32; outline-offset: -2px; }
+  .cal-d.cal-today { box-shadow: inset 0 0 0 2px var(--ink); }
+  .cal-d.cal-sel { box-shadow: inset 0 0 0 2px #E63946; }
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 12px; color: var(--muted-2); }
+  .cal-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; background: #F0F0F0; }
+  .cal-dot.cal-h { background: #FDE8EA !important; } .cal-dot.cal-w { background: #E3F4E8 !important; } .cal-dot.cal-f { background: #FBEBD0 !important; } .cal-dot.cal-v { background: #EAF0FA !important; }
+  .cal-dot.cal-t { background: #fff; outline: 1.5px dashed #C81E32; outline-offset: -1px; }
+  .cal-det { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-top: 10px; }
+  .cal-dh { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .cal-ln { font-size: 13px; color: var(--muted-2); margin-top: 3px; }
+  .cal-pill { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 99px; padding: 2px 8px; background: #F0F0F0; }
+  .cal-pill.cal-h, .cal-pill.cal-w, .cal-pill.cal-f, .cal-pill.cal-v { font-weight: 600; }
+  .cal-row { display: flex; gap: 12px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 9px 0; font: inherit; font-size: 14px; cursor: pointer; align-items: flex-start; }
+  .cal-rd { min-width: 78px; font-weight: 600; color: var(--muted-2); font-size: 13px; }
+  .cal-edit { margin-top: 8px; }
+  .cal-ai { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; margin-top: 8px; } .cal-ai.off { opacity: .55; }
+  .cal-ai-h { display: flex; gap: 8px; align-items: center; } .cal-ai-h .text-input { flex: 1; min-width: 0; }
+  .cal-ai-b { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; } .cal-ai-b .text-input { min-width: 0; padding: 8px; font-size: 13px; } .cal-ai-b select { grid-column: 1 / -1; }
+  .cal-ai-n { font-size: 12px; color: var(--muted-2); margin-top: 6px; } .cal-ai-w { font-size: 12px; color: #B45309; margin-top: 4px; }
+  .cal-s { background: #EFE6FA !important; color: #6B3FA0 !important; font-weight: 700; }
+  .cal-dot.cal-s { background: #EFE6FA !important; }
+  .hol-s { background: #EFE6FA; color: #6B3FA0; }
 </style>
 </head>
 <body>
@@ -2318,7 +2361,11 @@
     <div class="install-tx"><b>Install Teach Desk</b><span>Open it from your home screen like any app — full screen and faster.</span></div>
     <div class="install-btns"><button type="button" class="save-btn" id="installGo" style="margin:0;">Install</button><button type="button" class="btn-secondary" id="installLater" style="border-color: var(--line);">Not now</button></div>
   </div>
-      <div class="today-hello hello-row">
+      <div class="panel install-card" id="pushCard" hidden>
+    <div class="install-tx"><b id="pushCardTitle">Get duty and notice alerts on your phone</b><span id="pushCardSub">They arrive even when the app is closed.</span></div>
+    <div class="install-btns"><button type="button" class="save-btn" id="pushGo" style="margin:0;">Turn on</button><button type="button" class="btn-secondary" id="pushLater" style="border-color: var(--line);">Not now</button></div>
+  </div>
+  <div class="today-hello hello-row">
         <div style="min-width:0;">
           <div class="hello-title" id="helloTitle">Welcome</div>
           <div class="hello-date" id="helloDate"></div>
@@ -2326,6 +2373,7 @@
         <button type="button" class="bell-btn" id="bellBtn" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-count" id="bellCount" hidden>0</span></button>
       </div>
       <div id="todayNotices"></div>
+  <div id="holidayCard" hidden></div>
 
       <div class="status-card" id="statusCard">
         <div class="status-row">
@@ -2903,6 +2951,13 @@
         <div class="list-add"><input class="text-input" id="newTestTypeInput" type="text" placeholder="e.g. Half-Yearly"><button class="btn-secondary" id="addTestTypeBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
 
+      <div class="panel set-acc" id="adminPushPanel" data-atab="settings" hidden>
+        <div class="panel-title"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Phone notifications</div>
+        <div class="admin-sub" style="margin:0;">Alerts that reach a teacher's phone even when the app is closed. Each teacher turns them on once, on the Today page.</div>
+        <div class="ai-stat" id="pushStatus"></div>
+        <div id="pushTeachers"></div>
+        <div class="sv-form-btns"><button type="button" class="btn-secondary" id="pushRefresh" style="border-color: var(--line);">Refresh</button><button type="button" class="save-btn" id="pushTest">Send a test to me</button></div>
+      </div>
       <div class="panel set-acc" id="adminAiPanel" data-atab="settings" hidden>
         <div class="panel-title"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>AI (beta)</div>
         <div class="admin-sub" style="margin:0;">Only you see this. Paste the address of your AI helper (the Cloudflare Worker) and test it. Teachers see nothing of AI until a feature is switched on.</div>
@@ -3071,6 +3126,8 @@
             <span class="dlabel">Profile<small>Name and subject</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
+        <button class="drow" id="calDrawRow" style="--i:1" hidden><span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span><span class="dlabel">CATJEE Calendar<small>Holidays and working Sundays</small></span></button>
+        <button class="drow" id="pushDrawRow" style="--i:1" hidden><span class="dtile"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span><span class="dlabel">Phone notifications<small id="pushDrawState">Checking…</small></span></button>
           <button class="drow" data-open="photos" style="--i:2">
             <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>
             <span class="dlabel">Gallery<small>Timetables, notes, anything</small></span>
@@ -3322,7 +3379,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.28 · updated 29 Oct 2026</div>
+          <div class="dnote">Version 13.32 · updated 2 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4049,8 +4106,7 @@
     const t = document.getElementById('helloTitle');
     const d = document.getElementById('helloDate');
     if (t && t.textContent !== title) t.textContent = title;
-    if (d && d.textContent !== dateTxt) d.textContent = dateTxt;
-  }
+    if (d && d.textContent !== dateTxt) d.textContent = dateTxt; try { renderHolidayCard(); } catch (e) { /* ignore */ } }
   function todayScheduleSlots() {
     const t = todayStr();
     return (state.scheduleSlots || [])
@@ -7683,8 +7739,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (!state.db || !uid) return;
     const data = Object.assign({ at: Date.now(), read: false }, n);
     if (n.key) state.db.doc('notices/' + uid + '/items/' + String(n.key).replace(/[^A-Za-z0-9_-]+/g, '-')).set(data).catch(() => {});
-    else state.db.collection('notices/' + uid + '/items').add(data).catch(() => {});
-  }
+    else state.db.collection('notices/' + uid + '/items').add(data).catch(() => {}); try { pushRelay(uid, n); } catch (e) { /* ignore */ } }
   function slotWhen(d, t) { return `${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()} ${dateObj(d).toLocaleDateString('en-GB', { month: 'short' })}${t ? ' · ' + formatTimeStr(t) : ''}`; }
   state.notices = state.notices || [];
   function leadNotices() {
@@ -8752,6 +8807,304 @@ Rules:
     } catch (err) { if (go) { go.disabled = false; go.textContent = 'Put in draft'; } flashOffline(err); }
   }
   function tpOpenSheet() { const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
+  // ---------- CATJEE Calendar: holidays, Sunday working, half days ----------
+  state.holidays = state.holidays || []; state.cal = null;
+  const HOL_TYPES = { holiday: 'Holiday', working: 'Sunday working', special: 'Special day', half: 'Half day', vac: "Students' vacation" };
+  const HOL_CLS = { holiday: 'cal-h', working: 'cal-w', special: 'cal-s', half: 'cal-f', vac: 'cal-v' };
+  const HOL_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const holEnd = (h) => (h.to && h.to >= h.from ? h.to : h.from);
+  const holOn = (date) => (state.holidays || []).filter((h) => h.from <= date && date <= holEnd(h));
+  function holDay(date) { const L = holOn(date); const pick = (t) => L.find((h) => h.type === t); return pick('holiday') || pick('working') || pick('special') || pick('half') || pick('vac') || null; }
+  const holRange = (h) => (holEnd(h) !== h.from ? `${slotWhen(h.from)} – ${slotWhen(holEnd(h))}` : slotWhen(h.from));
+  const holPair = (h) => (!h.pair ? '' : (h.type === 'working' ? `In lieu of ${slotWhen(h.pair)}` : (h.type === 'holiday' ? `Made up by working on ${slotWhen(h.pair)}` : '')));
+  const calId = () => 'h' + Math.random().toString(36).slice(2, 8);
+  function holCardHtml() {
+    const t = todayStr(); const d = holDay(t);
+    if (d && d.type !== 'vac') {
+      const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f' }[d.type]; const head = { holiday: 'Holiday today', working: 'Sunday working today', special: 'Special day today', half: 'Half day today' }[d.type];
+      const extra = [(d.type === 'half' || d.type === 'special') && d.evening === 'off' ? 'Evening classes off' : '', d.type === 'special' && d.evening === 'off' ? 'Morning classes run' : '', d.type === 'special' ? 'Special working hours for teachers' : '', d.type === 'working' ? holPair(d) : '', d.tentative ? 'Date may change' : ''].filter(Boolean).join(' · ');
+      return `<button type="button" class="hol-card ${cls}" data-cal-open="${t}"><b>${head}</b><span>${escapeHtml(d.name)}${extra ? ' · ' + escapeHtml(extra) : ''}</span></button>`;
+    }
+    const next = (state.holidays || []).filter((h) => (h.type === 'holiday' || h.type === 'special' || h.type === 'half') && h.from > t).sort((a, b) => a.from.localeCompare(b.from))[0];
+    if (!next) return '';
+    const days = Math.round((dateObj(next.from) - dateObj(t)) / 86400000); if (days > 30) return '';
+    return `<button type="button" class="hol-card hol-n" data-cal-open="${next.from}"><b>${next.type === 'holiday' ? 'Next holiday' : 'Next ' + HOL_TYPES[next.type].toLowerCase()}</b><span>${escapeHtml(next.name)} · ${escapeHtml(slotWhen(next.from))} · ${days === 1 ? 'tomorrow' : 'in ' + days + ' days'}</span></button>`;
+  }
+  function renderHolidayCard() { const el = document.getElementById('holidayCard'); if (!el) return; const h = holCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
+  function renderHolidayUi() { renderHolidayCard(); const r = document.getElementById('calDrawRow'); if (r) r.hidden = !((state.holidays || []).length || state.canAdmin || state.isCoordinator); }
+  const calMonthLabel = (m) => { const [y, mo] = m.split('-').map(Number); return new Date(y, mo - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); };
+  const calShift = (m, d) => { const [y, mo] = m.split('-').map(Number); const dt = new Date(y, mo - 1 + d, 1); return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'); };
+  function calCls(date) {
+    const h = holDay(date); let c = 'cal-d';
+    if (h) c += ' ' + HOL_CLS[h.type] + (h.tentative ? ' cal-t' : ''); else if (isWeeklyOff(date)) c += ' cal-o';
+    if (date === todayStr()) c += ' cal-today'; if (state.cal && state.cal.sel === date) c += ' cal-sel'; return c;
+  }
+  function calGridHtml(m) {
+    const [y, mo] = m.split('-').map(Number); const first = (new Date(y, mo - 1, 1).getDay() + 6) % 7; const n = new Date(y, mo, 0).getDate();
+    let h = '<div class="cal-head">' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((x) => `<span>${x}</span>`).join('') + '</div><div class="cal-grid">';
+    for (let i = 0; i < first; i++) h += '<span></span>';
+    for (let k = 1; k <= n; k++) { const ds = `${m}-${String(k).padStart(2, '0')}`; h += `<button type="button" class="${calCls(ds)}" data-cal-d="${ds}">${k}</button>`; }
+    return h + '</div>';
+  }
+  function calEntryHtml(h, admin) {
+    const lines = [holRange(h), holPair(h), (h.type === 'half' || h.type === 'special') && h.evening === 'off' ? 'Evening classes off, morning classes run' : '', h.type === 'special' ? 'Teachers have special working hours' : '', h.tentative ? 'This date may change' : '', h.note || ''].filter(Boolean);
+    return `<div class="cal-det"><div class="cal-dh"><span class="cal-pill ${HOL_CLS[h.type]}">${HOL_TYPES[h.type]}</span><b>${escapeHtml(h.name)}</b></div>${lines.map((l) => `<div class="cal-ln">${escapeHtml(l)}</div>`).join('')}${admin ? `<button type="button" class="btn-secondary cal-edit" data-cal-edit="${escapeHtml(h.id)}" style="border-color: var(--line);">Edit</button>` : ''}</div>`;
+  }
+  function calHtml() {
+    const c = state.cal; const admin = !!(state.canAdmin || state.isCoordinator); const m = c.m; const ms = m + '-01'; const me = m + '-31';
+    const inMonth = (state.holidays || []).filter((h) => h.from <= me && holEnd(h) >= ms).sort((a, b) => a.from.localeCompare(b.from));
+    const det = c.sel ? (holOn(c.sel).length ? holOn(c.sel).map((h) => calEntryHtml(h, admin)).join('') : `<div class="cal-det"><div class="cal-dh"><b>${escapeHtml(slotWhen(c.sel))}</b></div><div class="cal-ln">${isWeeklyOff(c.sel) ? 'Weekly off' : 'No holiday'}</div></div>`) : '';
+    return `<div id="calRoot"><div class="hv-d-title">CATJEE Calendar</div><div class="hv-d-wing">Holidays, working Sundays and special days</div>
+      <div class="cal-nav"><button type="button" class="chip" id="calPrev" aria-label="Previous month">‹</button><b>${escapeHtml(calMonthLabel(m))}</b><button type="button" class="chip" id="calNext" aria-label="Next month">›</button></div>
+      ${calGridHtml(m)}
+      <div class="cal-legend"><span><i class="cal-dot cal-h"></i>Holiday</span><span><i class="cal-dot cal-w"></i>Sunday working</span><span><i class="cal-dot cal-s"></i>Special day</span><span><i class="cal-dot cal-f"></i>Half day</span><span><i class="cal-dot cal-v"></i>Students' vacation</span><span><i class="cal-dot cal-o"></i>Weekly off</span><span><i class="cal-dot cal-t"></i>Date may change</span></div>
+      ${det}
+      <div class="xs-grp">In ${escapeHtml(calMonthLabel(m))}</div>
+      ${inMonth.length ? inMonth.map((h) => `<button type="button" class="cal-row" data-cal-d="${h.from > ms ? h.from : ms}"><span class="cal-rd">${escapeHtml(holEnd(h) !== h.from ? slotWhen(h.from).split(' · ')[0].replace(/^\w+ /, '') + ' – ' + slotWhen(holEnd(h)).replace(/^\w+ /, '') : slotWhen(h.from).replace(/^\w+ /, ''))}</span><span><b>${escapeHtml(h.name)}</b><br><span class="cal-pill ${HOL_CLS[h.type]}">${HOL_TYPES[h.type]}</span></span></button>`).join('') : '<div class="hv-note" style="text-align:left;">Nothing this month.</div>'}
+      ${admin ? `<div class="sv-form-btns" style="margin-top:12px;"><button type="button" class="save-btn" id="calAdd">+ Add holiday</button>${aiReady() ? '<button type="button" class="btn-secondary" id="calPhoto" style="border-color: var(--line);">Fill from a photo</button>' : ''}</div><input type="file" id="calFile" accept="image/*,application/pdf" hidden>` : ''}
+    </div>`;
+  }
+  function calFormHtml() {
+    const f = state.cal.form;
+    return `<div id="calRoot"><div class="hv-d-title">${f.id ? 'Change' : 'Add'} holiday</div>
+      <div class="chips" style="margin-top:10px;">${Object.keys(HOL_TYPES).map((k) => `<button type="button" class="chip${f.type === k ? ' active' : ''}" data-cf-type="${k}">${HOL_TYPES[k]}</button>`).join('')}</div>
+      <div class="sv-tlbl">Name</div><input class="text-input" id="cfName" type="text" value="${escapeHtml(f.name)}" placeholder="e.g. Diwali">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"><div><div class="sv-tlbl">From</div><input class="text-input" id="cfFrom" type="date" value="${escapeHtml(f.from)}"></div><div><div class="sv-tlbl">To (optional)</div><input class="text-input" id="cfTo" type="date" value="${escapeHtml(f.to)}"></div></div>
+      <div class="sv-tlbl">Note (optional)</div><input class="text-input" id="cfNote" type="text" value="${escapeHtml(f.note)}">
+      <div class="sv-tlbl">Linked day (optional)</div><input class="text-input" id="cfPair" type="date" value="${escapeHtml(f.pair)}"><div class="hv-note" style="text-align:left;">A holiday: the Sunday worked instead. A working Sunday: the holiday it is in lieu of.</div>
+      <label class="xw-sw" style="margin-top:8px;"><span><b>This date may change</b><small>For dates that depend on the moon</small></span><input type="checkbox" id="cfTent"${f.tentative ? ' checked' : ''}></label>
+      ${(f.type === 'half' || f.type === 'special') ? `<label class="xw-sw" style="margin-top:8px;"><span><b>Evening classes off</b><small>Morning classes run as usual</small></span><input type="checkbox" id="cfEve"${f.evening === 'off' ? ' checked' : ''}></label>` : ''}
+      <button type="button" class="save-btn" id="cfSave" style="margin-top:12px;">Save</button>
+      <button type="button" class="btn-secondary" id="cfCancel" style="border-color: var(--line); margin-top:8px; width:100%;">Cancel</button>
+      ${f.id ? '<button type="button" class="btn-secondary" id="cfDelete" style="border-color: var(--line); margin-top:8px; width:100%; color:#B42318;">Delete</button>' : ''}</div>`;
+  }
+  const CAL_SYSTEM = 'You read a coaching institute\u2019s holiday list from a picture or a PDF. Reply with JSON only. Never invent an entry, a date or a name. Dates are ISO YYYY-MM-DD. If a row has no year, use the year in the title of the list.';
+  const CAL_PROMPT = 'Read this holiday list and return JSON in this shape:\n{"year":2026,"entries":[{"type":"holiday","name":"Holi","from":"2026-03-03","to":"2026-03-05","weekday":"Tuesday to Thursday","note":"","tentative":false,"linked":"","evening":""}]}\nRules:\n- type is one of: holiday (a day off for the staff), working (a Sunday or other off day that is a working day in exchange for a holiday), special (a working day with special rules, for example the morning batches run, the evening batches are off and the staff have special working hours), half (only when the day itself is called a half day), vac (a vacation only for students or some classes, the staff still work).\n- One entry for each row. A range such as "3rd Mar to 5th Mar" is ONE entry with from and to. A single day has the same from and to.\n- name is the occasion as printed, without the bracket notes. note keeps useful bracket text (for example "Subject to visibility of moon", or the working hours rules).\n- tentative is true when the text says the date is subject to the moon or may change.\n- weekday is the day name printed in the Day column (for checking).\n- working entries: take them from the table "Sundays that are working days" if there is one (the date in its first column). Set linked to the date of the holiday given in lieu of it (for "In lieu of the holiday given on Monday, 2nd March 2026" linked is "2026-03-02"). If there is no such table, make them from notes such as "(8th March Sunday is a working day)" in the holiday rows. Never make the same working day twice.\n- For a holiday row whose note names a Sunday that is a working day, put that Sunday\u2019s date in linked.\n- For special and half: evening is "off" when the evening batches are off, otherwise "". A column such as "No. of days" with 0.5 does not decide the type: "Regular working day for Morning Batches; Evening Batches off" with special working hours is special, not half. Keep the working-hours text in note.\n- If a half day row says that this year it is a total off (for example because it falls on a Sunday), use type holiday and keep that text in note.\n- Skip rows that are only headings.';
+  function calWdMismatch(e) {
+    const w = (e.weekday.match(/[A-Za-z]+/g) || []).map((x) => x.toLowerCase().slice(0, 3)).filter((x) => ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].indexOf(x) !== -1); if (!w.length) return '';
+    const a = WD[dateObj(e.from).getDay()].toLowerCase(), z = WD[dateObj(e.to).getDay()].toLowerCase();
+    if (w[0] !== a) return `The list says ${e.weekday}, but ${slotWhen(e.from)} is a ${HOL_FULL[dateObj(e.from).getDay()]}`;
+    if (w.length > 1 && w[w.length - 1] !== z) return `The list says ${e.weekday}, but ${slotWhen(e.to)} is a ${HOL_FULL[dateObj(e.to).getDay()]}`;
+    return '';
+  }
+  function calParse(text) {
+    const t = String(text || '').trim().replace(/^```[a-z]*\n?|```$/g, '').trim(); let o;
+    try { o = JSON.parse(t); } catch (e) { const m = t.match(/\{[\s\S]*\}/); try { o = JSON.parse(m && m[0]); } catch (e2) { return { err: 'The AI answer could not be understood. Try again with a clearer picture.' }; } }
+    const L = Array.isArray(o) ? o : (o && Array.isArray(o.entries) ? o.entries : []); const iso = (x) => (/^\d{4}-\d{2}-\d{2}$/.test(String(x || '')) ? String(x) : '');
+    let rows = L.map((e) => ({ type: HOL_TYPES[e && e.type] ? e.type : 'holiday', name: String((e && e.name) || '').replace(/\s+/g, ' ').trim().slice(0, 80), from: iso(e && e.from), to: iso(e && e.to), weekday: String((e && e.weekday) || ''), note: String((e && e.note) || '').replace(/\s+/g, ' ').trim().slice(0, 600), tentative: !!(e && e.tentative), pair: iso(e && e.linked), evening: (e && e.evening) === 'off' ? 'off' : '' })).filter((e) => e.from && e.name);
+    rows.forEach((e) => { if (!e.to || e.to < e.from) e.to = e.from; });
+    const seen = {}; rows = rows.filter((e) => { const k = e.type + '|' + e.from; if (seen[k]) { if (!seen[k].pair && e.pair) seen[k].pair = e.pair; return false; } seen[k] = e; return true; });
+    rows.filter((e) => e.type === 'working' && e.pair).forEach((w) => { const h = rows.find((x) => x.type === 'holiday' && x.from <= w.pair && w.pair <= x.to); if (h && !h.pair) h.pair = w.from; });
+    rows.filter((e) => e.type === 'holiday' && e.pair && !rows.some((x) => x.type === 'working' && x.from === e.pair)).forEach((h) => rows.push({ type: 'working', name: 'Sunday working', from: h.pair, to: h.pair, weekday: '', note: '', tentative: false, pair: h.from, evening: '' }));
+    if (!rows.length) return { err: 'No holidays were found in this file. Use a clear picture of the whole list.' };
+    rows.sort((a, b) => a.from.localeCompare(b.from) || a.type.localeCompare(b.type));
+    rows.forEach((e) => { e.bad = calWdMismatch(e); e.dup = (state.holidays || []).some((x) => x.type === e.type && x.from === e.from); e.on = !e.dup; });
+    return { rows };
+  }
+  function calAiHtml() {
+    const a = state.cal.ai || { step: 'pick' };
+    const head = '<div class="hv-d-title">Holidays from a photo</div><div class="hv-d-wing">CATJEE Calendar</div>';
+    if (a.step === 'pick') return `<div id="calRoot">${head}<button type="button" class="xw-b main" id="calPick" style="width:100%; margin-top:12px;">Choose a photo or PDF of the holiday list</button><input type="file" id="calFile" accept="image/*,application/pdf" hidden><button type="button" class="btn-secondary" id="calBack" style="border-color: var(--line); margin-top:8px; width:100%;">Back</button></div>`;
+    if (a.step === 'busy') return `<div id="calRoot">${head}<div class="tp-busy"><div class="tp-spin"></div><div>Reading the holiday list…</div></div></div>`;
+    if (a.step === 'error') return `<div id="calRoot">${head}<div class="xw-ck wn"><span>⚠</span><span>${escapeHtml(a.err || 'Could not read the file')}</span></div><button type="button" class="xw-b main" id="calPick" style="width:100%; margin-top:12px;">Try another file</button><input type="file" id="calFile" accept="image/*,application/pdf" hidden><button type="button" class="btn-secondary" id="calBack" style="border-color: var(--line); margin-top:8px; width:100%;">Back</button></div>`;
+    const n = a.rows.filter((r) => r.on).length; const cnt = (t) => a.rows.filter((r) => r.type === t).length;
+    return `<div id="calRoot">${head}<div class="tp-sum"><b>${a.rows.length}</b><span>found · ${cnt('holiday')} holidays · ${cnt('working')} Sunday working · ${cnt('special')} special day · ${cnt('half')} half day · ${cnt('vac')} vacation</span></div>
+      ${a.rows.map((r, i) => `<div class="cal-ai${r.on ? '' : ' off'}"><label class="cal-ai-h"><input type="checkbox" data-ca-on="${i}"${r.on ? ' checked' : ''}><input class="text-input" type="text" data-ca-name="${i}" value="${escapeHtml(r.name)}"></label>
+        <div class="cal-ai-b"><select class="text-input" data-ca-type="${i}">${Object.keys(HOL_TYPES).map((k) => `<option value="${k}"${r.type === k ? ' selected' : ''}>${HOL_TYPES[k]}</option>`).join('')}</select><input class="text-input" type="date" data-ca-from="${i}" value="${escapeHtml(r.from)}"><input class="text-input" type="date" data-ca-to="${i}" value="${escapeHtml(r.to)}"></div>
+        <div class="cal-ai-n"><span class="cal-pill ${HOL_CLS[r.type]}">${HOL_TYPES[r.type]}</span> ${escapeHtml(holRange(r))}${r.pair ? ' · ' + escapeHtml(holPair(r)) : ''}${r.evening === 'off' ? ' · Evening classes off' : ''}${r.tentative ? ' · Date may change' : ''}</div>
+        ${r.bad ? `<div class="cal-ai-w">⚠ ${escapeHtml(r.bad)}</div>` : ''}${r.dup ? '<div class="cal-ai-w">Already in the calendar, so it is not ticked</div>' : ''}</div>`).join('')}
+      <button type="button" class="save-btn" id="calAiSave" style="margin-top:12px;"${n ? '' : ' disabled'}>Add ${n} to the calendar</button>
+      <button type="button" class="btn-secondary" id="calBack" style="border-color: var(--line); margin-top:8px; width:100%;">Cancel</button></div>`;
+  }
+  async function calSave(list) {
+    list.sort((a, b) => a.from.localeCompare(b.from) || a.type.localeCompare(b.type));
+    try { await state.db.doc('settings/institute').set({ holidays: list }, { merge: true }); state.holidays = list; renderHolidayUi(); return true; } catch (err) { if (err && err.code === 'permission-denied') showToast('The database did not allow this. Ask the admin to let Coordinators change the calendar.', 'error'); else flashOffline(err); return false; } }
+  function calOpen(date) {
+    state.tp = null; state.ds = null; hvSheetId = null;
+    state.cal = { m: (date || todayStr()).slice(0, 7), sel: date || null, mode: 'cal' }; calRender(); tpOpenSheet();
+  }
+  async function calAiRun(file) {
+    const c = state.cal; c.ai = { step: 'busy' }; calRender();
+    try { const f = await tpFile(file); const r = await aiCall({ system: CAL_SYSTEM, prompt: CAL_PROMPT, image: { data: f.data, mime: f.mime }, json: true }, 110000); const q = calParse(r.text); if (q.err) throw new Error(q.err); c.ai = { step: 'review', rows: q.rows }; }
+    catch (e) { c.ai = { step: 'error', err: e.message || 'Could not read the file' }; }
+    if (state.cal === c) calRender();
+  }
+  function calRender() {
+    const c = state.cal; const body = document.getElementById('hvSheetBody'); if (!c || !body) return;
+    if (!body.querySelector('#calRoot') && body.firstElementChild && c.rendered) return;
+    const sheet = document.querySelector('#hvSheet .hv-sheet'); const top = sheet && body.querySelector('#calRoot') ? sheet.scrollTop : 0;
+    body.innerHTML = c.mode === 'form' ? calFormHtml() : (c.mode === 'ai' ? calAiHtml() : calHtml()); c.rendered = true; if (sheet) sheet.scrollTop = top;
+    const q = (sel) => body.querySelector(sel); const qa = (sel) => body.querySelectorAll(sel);
+    if (c.mode === 'cal') {
+      q('#calPrev').addEventListener('click', () => { c.m = calShift(c.m, -1); c.sel = null; calRender(); });
+      q('#calNext').addEventListener('click', () => { c.m = calShift(c.m, 1); c.sel = null; calRender(); });
+      qa('[data-cal-d]').forEach((b) => b.addEventListener('click', () => { c.sel = b.getAttribute('data-cal-d'); calRender(); }));
+      qa('[data-cal-edit]').forEach((b) => b.addEventListener('click', () => { const h = (state.holidays || []).find((x) => x.id === b.getAttribute('data-cal-edit')); if (!h) return; c.form = { id: h.id, type: h.type, name: h.name, from: h.from, to: h.to && h.to !== h.from ? h.to : '', note: h.note || '', pair: h.pair || '', tentative: !!h.tentative, evening: h.evening || '' }; c.mode = 'form'; calRender(); }));
+      const add = q('#calAdd'); if (add) add.addEventListener('click', () => { c.form = { id: '', type: 'holiday', name: '', from: c.sel || c.m + '-01', to: '', note: '', pair: '', tentative: false, evening: '' }; c.mode = 'form'; calRender(); });
+      const ph = q('#calPhoto'), fi = q('#calFile'); if (ph) ph.addEventListener('click', () => { c.mode = 'ai'; c.ai = { step: 'pick' }; calRender(); });
+    } else if (c.mode === 'form') {
+      const f = c.form;
+      qa('[data-cf-type]').forEach((b) => b.addEventListener('click', () => { f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; f.type = b.getAttribute('data-cf-type'); calRender(); }));
+      q('#cfCancel').addEventListener('click', () => { c.mode = 'cal'; calRender(); });
+      q('#cfSave').addEventListener('click', async () => {
+        const name = q('#cfName').value.trim() || (f.type === 'working' ? 'Sunday working' : ''); const from = q('#cfFrom').value, to = q('#cfTo').value;
+        if (!name) { showToast('Write the name of the holiday', 'error'); return; } if (!from) { showToast('Choose the date', 'error'); return; } if (to && to < from) { showToast('The last date is before the first date', 'error'); return; }
+        const rec = { id: f.id || calId(), type: f.type, name: name.slice(0, 80), from, to: to && to !== from ? to : '', note: q('#cfNote').value.trim().slice(0, 600), pair: q('#cfPair').value, tentative: q('#cfTent').checked, evening: ((f.type === 'half' || f.type === 'special') && q('#cfEve') && q('#cfEve').checked) ? 'off' : '' };
+        const list = (state.holidays || []).filter((x) => x.id !== rec.id).concat(rec);
+        if (await calSave(list)) { showToast(f.id ? 'Holiday updated' : 'Holiday added'); c.mode = 'cal'; c.m = from.slice(0, 7); c.sel = from; calRender(); }
+      });
+      const del = q('#cfDelete'); if (del) del.addEventListener('click', async () => { if (!(await showConfirm(`Delete "${f.name}" from the calendar?`, 'Delete holiday?', 'Delete'))) return; if (await calSave((state.holidays || []).filter((x) => x.id !== f.id))) { showToast('Holiday deleted'); c.mode = 'cal'; calRender(); } });
+    } else {
+      const fi = q('#calFile'), pk = q('#calPick'); if (pk && fi) pk.addEventListener('click', () => fi.click()); if (fi) fi.addEventListener('change', () => { const file = fi.files && fi.files[0]; if (file) calAiRun(file); });
+      const bk = q('#calBack'); if (bk) bk.addEventListener('click', () => { c.mode = 'cal'; c.ai = null; calRender(); });
+      const a = c.ai; if (a && a.step === 'review') {
+        qa('[data-ca-on]').forEach((el) => el.addEventListener('change', () => { a.rows[Number(el.getAttribute('data-ca-on'))].on = el.checked; calRender(); }));
+        qa('[data-ca-name]').forEach((el) => el.addEventListener('input', () => { a.rows[Number(el.getAttribute('data-ca-name'))].name = el.value; }));
+        qa('[data-ca-type]').forEach((el) => el.addEventListener('change', () => { const r = a.rows[Number(el.getAttribute('data-ca-type'))]; r.type = el.value; calRender(); }));
+        qa('[data-ca-from]').forEach((el) => el.addEventListener('change', () => { const r = a.rows[Number(el.getAttribute('data-ca-from'))]; r.from = el.value; if (!r.to || r.to < r.from) r.to = r.from; r.bad = calWdMismatch(r); calRender(); }));
+        qa('[data-ca-to]').forEach((el) => el.addEventListener('change', () => { const r = a.rows[Number(el.getAttribute('data-ca-to'))]; r.to = el.value >= r.from ? el.value : r.from; calRender(); }));
+        const sv = q('#calAiSave'); if (sv) sv.addEventListener('click', async () => {
+          const rows = a.rows.filter((r) => r.on && r.from && r.name.trim()); if (!rows.length) { showToast('Nothing is ticked', 'error'); return; }
+          const list = (state.holidays || []).concat(rows.map((r) => ({ id: calId(), type: r.type, name: r.name.trim(), from: r.from, to: r.to > r.from ? r.to : '', note: r.note, pair: r.pair, tentative: r.tentative, evening: r.evening })));
+          if (await calSave(list)) { showToast(`${rows.length} added to the calendar`); c.mode = 'cal'; c.ai = null; c.m = rows[0].from.slice(0, 7); c.sel = null; calRender(); }
+        });
+      }
+    }
+  }
+  (function bindCal() {
+    const row = document.getElementById('calDrawRow'), card = document.getElementById('holidayCard');
+    if (row) row.addEventListener('click', () => { closeMenu(); setTimeout(() => calOpen(), 300); });
+    if (card) card.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); });
+  })();
+  // ---------- Phone notifications (Web Push): they arrive even when the app is closed ----------
+  let pushKey = null; // null = not asked yet, '' = the Worker is not set up for it
+  const pushUrl = (path) => AI_DEFAULT_URL.replace(/\/+$/, '') + path;
+  async function pushWorker(path, body, withToken) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (withToken) { const cu = firebase.auth().currentUser; if (!cu) throw new Error('Please sign in again'); headers.Authorization = 'Bearer ' + await cu.getIdToken(); }
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 15000);
+    try { const r = await fetch(pushUrl(path), { method: 'POST', headers, body: JSON.stringify(body || {}), signal: ctl.signal }); let j = {}; try { j = await r.json(); } catch (e) { j = {}; } return { status: r.status, data: j }; }
+    finally { clearTimeout(tm); }
+  }
+  const pushIsIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const pushSupported = () => !!(window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window);
+  function pushState() {
+    if (pushIsIOS() && !isStandalone()) return 'ios-install';
+    if (!pushSupported()) return 'unsupported';
+    if (Notification.permission === 'denied') return 'denied';
+    let mark = ''; try { mark = localStorage.getItem('ctd_push') || ''; } catch (e) { mark = ''; }
+    if (Notification.permission === 'granted') return mark === 'off' ? 'off' : 'on';
+    return 'ask';
+  }
+  async function pushKeyGet() {
+    if (pushKey !== null) return pushKey;
+    try { const r = await pushWorker('/push/key', {}, false); pushKey = (r.status === 200 && r.data && r.data.key) ? String(r.data.key) : ''; } catch (e) { pushKey = ''; }
+    return pushKey;
+  }
+  function pushKeyBytes(k) { k = String(k).replace(/-/g, '+').replace(/_/g, '/'); while (k.length % 4) k += '='; const bin = atob(k); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+  async function pushRegister() {
+    const key = await pushKeyGet(); if (!key) throw new Error('Phone notifications are not set up yet · ask the admin');
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (sub && sub.options && sub.options.applicationServerKey) { const have = new Uint8Array(sub.options.applicationServerKey); const want = pushKeyBytes(key); if (have.length !== want.length || have.some((b, i) => b !== want[i])) { await sub.unsubscribe(); sub = null; } }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushKeyBytes(key) });
+    const j = sub.toJSON();
+    const r = await pushWorker('/push/register', { sub: { endpoint: j.endpoint, keys: j.keys } }, true);
+    if (r.status !== 200) throw new Error((r.data && r.data.error) || 'Could not save this phone');
+    try { localStorage.setItem('ctd_push', 'on'); localStorage.setItem('ctd_push_at', String(Date.now())); } catch (e) { /* ignore */ }
+  }
+  async function pushEnable() {
+    const st = pushState();
+    if (st === 'ios-install') throw new Error('On iPhone, first tap Share, then Add to Home Screen, and open Teach Desk from there');
+    if (st === 'unsupported') throw new Error('This phone or browser cannot show phone notifications');
+    if (st === 'denied') throw new Error('Notifications are blocked · allow them for Teach Desk in the phone settings');
+    const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    if (perm !== 'granted') { try { localStorage.setItem('ctd_push', 'off'); } catch (e) { /* ignore */ } return false; }
+    await pushRegister(); return true;
+  }
+  async function pushDisable() {
+    try { const reg = await navigator.serviceWorker.ready; const sub = await reg.pushManager.getSubscription(); if (sub) { try { await pushWorker('/push/unregister', { endpoint: sub.endpoint }, true); } catch (e) { /* ignore */ } await sub.unsubscribe(); } } catch (e) { /* ignore */ }
+    try { localStorage.setItem('ctd_push', 'off'); } catch (e) { /* ignore */ }
+  }
+  async function renderPushUi() {
+    const card = document.getElementById('pushCard'); const stt = pushState();
+    const key = stt === 'unsupported' ? '' : await pushKeyGet();
+    const row = document.getElementById('pushDrawState');
+    const rowBtn = document.getElementById('pushDrawRow'); if (rowBtn) rowBtn.hidden = !key || stt === 'unsupported'; // nothing shows in the menu until it can really work
+    if (row) row.textContent = !key ? (stt === 'unsupported' ? 'Not supported on this phone' : 'Not set up yet') : ({ on: 'On', off: 'Off', ask: 'Tap to turn on', denied: 'Blocked in phone settings', 'ios-install': 'Add to Home Screen first' }[stt] || '');
+    if (!card) return;
+    let later = 0; try { later = Number(localStorage.getItem('ctd_push_later') || 0); } catch (e) { later = 0; }
+    const show = !!key && Date.now() - later > 7 * 86400e3 && (stt === 'ask' || stt === 'ios-install');
+    card.hidden = !show;
+    if (show) {
+      const ios = stt === 'ios-install';
+      document.getElementById('pushCardTitle').textContent = ios ? 'Alerts on your iPhone' : 'Get duty and notice alerts on your phone';
+      document.getElementById('pushCardSub').textContent = ios ? 'Tap Share, then Add to Home Screen, and open Teach Desk from there. Then turn alerts on here.' : 'They arrive even when the app is closed.';
+      document.getElementById('pushGo').textContent = ios ? 'OK' : 'Turn on';
+    }
+  }
+  function pushInit() {
+    renderPushUi();
+    if (pushState() === 'on') { let at = 0; try { at = Number(localStorage.getItem('ctd_push_at') || 0); } catch (e) { at = 0; } if (Date.now() - at > 12 * 3600e3) pushRegister().catch(() => {}); }
+  }
+  (function bindPush() {
+    const go = document.getElementById('pushGo'), later = document.getElementById('pushLater'), row = document.getElementById('pushDrawRow');
+    const postpone = () => { try { localStorage.setItem('ctd_push_later', String(Date.now())); } catch (e) { /* ignore */ } renderPushUi(); };
+    if (later) later.addEventListener('click', postpone);
+    if (go) go.addEventListener('click', async () => {
+      if (pushState() === 'ios-install') { postpone(); return; }
+      go.disabled = true;
+      try { const on = await pushEnable(); showToast(on ? '✓ Phone notifications are on' : 'Notifications were not allowed', on ? '' : 'error'); } catch (e) { showToast(e.message || 'Could not turn on', 'error'); }
+      go.disabled = false; renderPushUi();
+    });
+    if (row) row.addEventListener('click', async () => {
+      const stt = pushState(); const key = await pushKeyGet();
+      if (!key) { showToast('Phone notifications are not set up yet · ask the admin', 'error'); return; }
+      try { if (stt === 'on') { await pushDisable(); showToast('Phone notifications are off'); } else { const on = await pushEnable(); showToast(on ? '✓ Phone notifications are on' : 'Notifications were not allowed', on ? '' : 'error'); } } catch (e) { showToast(e.message || 'Could not change this', 'error'); }
+      renderPushUi();
+    });
+  })();
+  // the sender side: whatever goes to the bell also goes to the phone
+  let pushQ = [], pushT = 0;
+  function pushRelay(uid, n) {
+    if (!(state.canAdmin || state.isCoordinator) || !uid || !n || !n.title) return;
+    pushQ.push({ uid, title: String(n.title).slice(0, 120), body: String(n.body || '').slice(0, 300), tag: String(n.type || '') });
+    if (!pushT) pushT = setTimeout(pushFlush, 700);
+  }
+  async function pushFlush() {
+    pushT = 0; const items = pushQ.splice(0, 100); if (!items.length) return;
+    try { if (await pushKeyGet()) await pushWorker('/push/send', { items }, true); } catch (e) { /* the bell inside the app still has it */ }
+    if (pushQ.length) pushT = setTimeout(pushFlush, 700);
+  }
+  // Settings → Phone notifications (admin)
+  let pushPanelAt = 0;
+  function renderPushPanel() { const p = document.getElementById('adminPushPanel'); if (p) p.hidden = !state.canAdmin; }
+  async function pushPanelLoad(force) {
+    const st = document.getElementById('pushStatus'), box = document.getElementById('pushTeachers'); if (!st || !box || !state.canAdmin) return;
+    if (!force && Date.now() - pushPanelAt < 15000) return; pushPanelAt = Date.now();
+    st.className = 'ai-stat'; st.textContent = 'Checking…'; let uids = null;
+    try { const r = await pushWorker('/push/status', {}, true); if (r.status === 200) uids = r.data.uids || []; else { st.className = 'ai-stat bad'; st.textContent = r.status === 503 ? 'Not set up in the Worker yet · see the setup steps' : ((r.data && r.data.error) || 'Could not check'); } } catch (e) { st.className = 'ai-stat bad'; st.textContent = 'Could not reach the Worker · check the internet'; }
+    if (!uids) { box.innerHTML = ''; return; }
+    const people = Object.keys(state.team || {}).filter((u) => (state.team[u] || {}).status !== 'removed').sort((a, b) => planNameOf(a).localeCompare(planNameOf(b)));
+    const on = people.filter((u) => uids.indexOf(u) !== -1).length;
+    st.textContent = `Sending part works ✓ · ${on} of ${people.length} have turned it on`;
+    box.innerHTML = people.map((u) => `<div class="push-row"><span>${escapeHtml(planNameOf(u))}</span><span class="${uids.indexOf(u) !== -1 ? 'push-on' : 'push-off'}">${uids.indexOf(u) !== -1 ? 'On' : 'Not yet'}</span></div>`).join('');
+  }
+  (function bindPushPanel() {
+    const rf = document.getElementById('pushRefresh'), ts = document.getElementById('pushTest'), head = document.querySelector('#adminPushPanel .panel-title');
+    if (head) head.addEventListener('click', () => setTimeout(() => { if (state.adminSetOpen === 'adminPushPanel') pushPanelLoad(false); }, 60));
+    if (rf) rf.addEventListener('click', () => pushPanelLoad(true));
+    if (ts) ts.addEventListener('click', async () => {
+      const st = document.getElementById('pushStatus'); if (!st) return; st.className = 'ai-stat'; st.textContent = 'Sending the test…';
+      try {
+        const r = await pushWorker('/push/send', { items: [{ uid: state.teacherId, title: 'CATJEE Teach Desk', body: 'Test: phone notifications work on this phone.', tag: 'test' }] }, true);
+        if (r.status !== 200) { st.className = 'ai-stat bad'; st.textContent = r.status === 503 ? 'Not set up in the Worker yet · see the setup steps' : ((r.data && r.data.error) || 'Could not send'); }
+        else if (r.data.sent) st.textContent = 'Sent · it should reach this phone in a few seconds';
+        else if (r.data.noSub) { st.className = 'ai-stat bad'; st.textContent = 'No phone of yours is registered yet · turn notifications on here first (menu → Phone notifications)'; }
+        else { st.className = 'ai-stat bad'; st.textContent = 'The phone did not take it · try again'; }
+      } catch (e) { st.className = 'ai-stat bad'; st.textContent = 'Could not reach the Worker · check the internet'; }
+    });
+  })();
   // ---------- Exams: cancel only the invigilation duty (the exam stays), tell the teachers, and an Undo ----------
   function dutyNoticeMap(rooms) { const m = {}; (rooms || []).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => { const k = u + '|' + r.room; (m[k] = m[k] || { u, room: r.room, t: [] }).t.push(`${formatTimeStr(sl.start)} – ${formatTimeStr(sl.end)}`); }))); return Object.keys(m).map((k) => m[k]); }
   function sendDutyNotices(e, rooms, kind) { dutyNoticeMap(rooms).forEach((x) => notify(x.u, { type: 'duty', title: `${kind}: ${examTitle(e)} · ${x.room}`, body: `${slotWhen(e.date)} · ${x.t.join(', ')}`, link: { tab: 'today' } })); }
@@ -9107,7 +9460,7 @@ Rules:
     const go = body.querySelector('#tpGo'); if (go) go.addEventListener('click', tpApply);
   }
   function renderAdmin() {
-    renderAiPanel();
+    renderAiPanel(); renderPushPanel();
     applyRoleUI();
     applyAdminTab();
     renderSettingsAccordion();
@@ -15655,9 +16008,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         return;
       }
     } catch (err) { state.isCoordinator = false; state.coordWings = []; }
-    applyRoleUI();
-    if (state.isCoordinator && !state.canAdmin) switchTab('admin');
-    renderScheduleNotice();
+    applyRoleUI(); if (state.isCoordinator && !state.canAdmin) switchTab('admin'); renderScheduleNotice(); try { pushInit(); } catch (e) { /* ignore */ } try { renderHolidayUi(); } catch (e) { /* ignore */ }
 
     const today = todayStr();
     const tid = state.teacherId;
@@ -15734,7 +16085,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
 
     unsubscribers.push(db.doc('settings/institute').onSnapshot((snap) => {
       const data = snap.data() || {};
-      state.weeklyOff = Array.isArray(data.weeklyOff) ? data.weeklyOff : ['Sun'];
+      state.weeklyOff = Array.isArray(data.weeklyOff) ? data.weeklyOff : ['Sun']; state.holidays = Array.isArray(data.holidays) ? data.holidays : []; try { renderHolidayUi(); if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ }
       renderWeeklyOffChips();
       if (state.tab === 'admin') renderAdmin();
     }, () => {}));
