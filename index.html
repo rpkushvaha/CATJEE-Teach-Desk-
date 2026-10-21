@@ -2236,6 +2236,18 @@
   .tg-hol-ok { color: #1E7A3C; font-weight: 600; } .tg-hol-w { color: #B45309; }
   .tg-holcard .tg-mini { margin-top: 8px; }
   .sv-holchip { border: 0; border-radius: 99px; padding: 2px 9px; font: inherit; font-size: 12px; font-weight: 600; margin-left: 8px; cursor: pointer; }
+  /* birthdays, notes and quick buttons in the calendar */
+  #bdayCard[hidden] { display: none !important; }
+  .cal-d { position: relative; }
+  .cal-cake { position: absolute; right: 2px; top: 0; font-size: 11px; line-height: 1; }
+  .cal-n { background: #EAF0F6 !important; color: #3B4A5E !important; } .cal-dot.cal-n { background: #EAF0F6 !important; }
+  .cal-pill.cal-b { background: #FFE9EE; color: #B4234A; }
+  .cal-quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .cal-seldate { font-weight: 600; font-size: 14px; margin-top: 12px; }
+  .hol-n2 { background: #EAF0F6; color: #3B4A5E; }
+  .bday-card { display: flex; flex-direction: column; gap: 4px; background: linear-gradient(135deg, #FFF1F3, #FFF8E6); border: 1px solid #F7C9D0; border-radius: 16px; padding: 14px 16px; }
+  .bday-card b { font-size: 16px; color: #8A1F3D; } .bday-card span { font-size: 14px; color: #5B4A50; line-height: 1.4; } .bday-em { font-size: 26px; line-height: 1.1; }
+  .bday-small { display: block; width: 100%; text-align: left; background: #FFF4F6; color: #8A1F3D; border: 1px solid #F7C9D0; border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 14px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -2390,6 +2402,7 @@
         <button type="button" class="bell-btn" id="bellBtn" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-count" id="bellCount" hidden>0</span></button>
       </div>
       <div id="todayNotices"></div>
+  <div id="bdayCard" hidden></div>
   <div id="holidayCard" hidden></div>
 
       <div class="status-card" id="statusCard">
@@ -3403,7 +3416,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.34 · updated 4 Nov 2026</div>
+          <div class="dnote">Version 13.35 · updated 5 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8834,20 +8847,20 @@ Rules:
   function tpOpenSheet() { const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
   // ---------- CATJEE Calendar: holidays, Sunday working, half days ----------
   state.holidays = state.holidays || []; state.cal = null;
-  const HOL_TYPES = { holiday: 'Holiday', working: 'Sunday working', special: 'Special day', half: 'Half day', vac: "Students' vacation" };
-  const HOL_CLS = { holiday: 'cal-h', working: 'cal-w', special: 'cal-s', half: 'cal-f', vac: 'cal-v' };
+  const HOL_TYPES = { holiday: 'Holiday', working: 'Sunday working', special: 'Special day', half: 'Half day', vac: "Students' vacation", note: 'Note' };
+  const HOL_CLS = { holiday: 'cal-h', working: 'cal-w', special: 'cal-s', half: 'cal-f', vac: 'cal-v', note: 'cal-n' };
   const HOL_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const holEnd = (h) => (h.to && h.to >= h.from ? h.to : h.from);
   const holOn = (date) => (state.holidays || []).filter((h) => h.from <= date && date <= holEnd(h));
-  function holDay(date) { const L = holOn(date); const pick = (t) => L.find((h) => h.type === t); return pick('holiday') || pick('working') || pick('special') || pick('half') || pick('vac') || null; }
+  function holDay(date) { const L = holOn(date); const pick = (t) => L.find((h) => h.type === t); return pick('holiday') || pick('working') || pick('special') || pick('half') || pick('vac') || pick('note') || null; }
   const holRange = (h) => (holEnd(h) !== h.from ? `${slotWhen(h.from)} – ${slotWhen(holEnd(h))}` : slotWhen(h.from));
   const holPair = (h) => (!h.pair ? '' : (h.type === 'working' ? `In lieu of ${slotWhen(h.pair)}` : (h.type === 'holiday' ? `Made up by working on ${slotWhen(h.pair)}` : '')));
   const calId = () => 'h' + Math.random().toString(36).slice(2, 8);
   function holCardHtml() {
     const t = todayStr(); const d = holDay(t);
     if (d && d.type !== 'vac') {
-      const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f' }[d.type]; const head = { holiday: 'Holiday today', working: 'Sunday working today', special: 'Special day today', half: 'Half day today' }[d.type];
-      const extra = [(d.type === 'half' || d.type === 'special') && d.evening === 'off' ? 'Evening classes off' : '', d.type === 'special' && d.evening === 'off' ? 'Morning classes run' : '', d.type === 'special' ? 'Special working hours for teachers' : '', d.type === 'working' ? holPair(d) : '', d.tentative ? 'Date may change' : ''].filter(Boolean).join(' · ');
+      const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f', note: 'hol-n2' }[d.type]; const head = { holiday: 'Holiday today', working: 'Sunday working today', special: 'Special day today', half: 'Half day today', note: 'Note for today' }[d.type];
+      const extra = [(d.type === 'half' || d.type === 'special') && d.evening === 'off' ? 'Evening classes off' : '', d.type === 'special' && d.evening === 'off' ? 'Morning classes run' : '', d.type === 'special' ? 'Special working hours for teachers' : '', d.type === 'working' ? holPair(d) : '', d.type === 'note' && d.note ? d.note : '', d.tentative ? 'Date may change' : ''].filter(Boolean).join(' · ');
       return `<button type="button" class="hol-card ${cls}" data-cal-open="${t}"><b>${head}</b><span>${escapeHtml(d.name)}${extra ? ' · ' + escapeHtml(extra) : ''}</span></button>`;
     }
     const next = (state.holidays || []).filter((h) => (h.type === 'holiday' || h.type === 'special' || h.type === 'half') && h.from > t).sort((a, b) => a.from.localeCompare(b.from))[0];
@@ -8855,8 +8868,8 @@ Rules:
     const days = Math.round((dateObj(next.from) - dateObj(t)) / 86400000); if (days > 30) return '';
     return `<button type="button" class="hol-card hol-n" data-cal-open="${next.from}"><b>${next.type === 'holiday' ? 'Next holiday' : 'Next ' + HOL_TYPES[next.type].toLowerCase()}</b><span>${escapeHtml(next.name)} · ${escapeHtml(slotWhen(next.from))} · ${days === 1 ? 'tomorrow' : 'in ' + days + ' days'}</span></button>`;
   }
-  function renderHolidayCard() { const el = document.getElementById('holidayCard'); if (!el) return; const h = holCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
-  function renderHolidayUi() { renderHolidayCard(); const r = document.getElementById('calDrawRow'); if (r) r.hidden = !((state.holidays || []).length || state.canAdmin || state.isCoordinator); }
+  function renderHolidayCard() { try { renderBdayCard(); } catch (e) { /* ignore */ } const el = document.getElementById('holidayCard'); if (!el) return; const h = holCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
+  function renderHolidayUi() { renderHolidayCard(); const r = document.getElementById('calDrawRow'); if (r) r.hidden = !((state.holidays || []).length || (state.birthdays || []).length || state.canAdmin || state.isCoordinator); }
   const calMonthLabel = (m) => { const [y, mo] = m.split('-').map(Number); return new Date(y, mo - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); };
   const calShift = (m, d) => { const [y, mo] = m.split('-').map(Number); const dt = new Date(y, mo - 1 + d, 1); return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'); };
   function calCls(date) {
@@ -8868,7 +8881,7 @@ Rules:
     const [y, mo] = m.split('-').map(Number); const first = (new Date(y, mo - 1, 1).getDay() + 6) % 7; const n = new Date(y, mo, 0).getDate();
     let h = '<div class="cal-head">' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((x) => `<span>${x}</span>`).join('') + '</div><div class="cal-grid">';
     for (let i = 0; i < first; i++) h += '<span></span>';
-    for (let k = 1; k <= n; k++) { const ds = `${m}-${String(k).padStart(2, '0')}`; h += `<button type="button" class="${calCls(ds)}" data-cal-d="${ds}">${k}</button>`; }
+    for (let k = 1; k <= n; k++) { const ds = `${m}-${String(k).padStart(2, '0')}`; h += `<button type="button" class="${calCls(ds)}" data-cal-d="${ds}">${k}${calHasBd(ds) ? '<span class="cal-cake">🎂</span>' : ''}</button>`; }
     return h + '</div>';
   }
   function calEntryHtml(h, admin) {
@@ -8876,24 +8889,35 @@ Rules:
     return `<div class="cal-det"><div class="cal-dh"><span class="cal-pill ${HOL_CLS[h.type]}">${HOL_TYPES[h.type]}</span><b>${escapeHtml(h.name)}</b></div>${lines.map((l) => `<div class="cal-ln">${escapeHtml(l)}</div>`).join('')}${admin ? `<button type="button" class="btn-secondary cal-edit" data-cal-edit="${escapeHtml(h.id)}" style="border-color: var(--line);">Edit</button>` : ''}</div>`;
   }
   function calHtml() {
-    const c = state.cal; const admin = !!(state.canAdmin || state.isCoordinator); const m = c.m; const ms = m + '-01'; const me = m + '-31';
+    const c = state.cal; const editor = calEditor(); const m = c.m; const ms = m + '-01'; const me = m + '-31'; const sel = c.sel;
     const inMonth = (state.holidays || []).filter((h) => h.from <= me && holEnd(h) >= ms).sort((a, b) => a.from.localeCompare(b.from));
-    const det = c.sel ? (holOn(c.sel).length ? holOn(c.sel).map((h) => calEntryHtml(h, admin)).join('') : `<div class="cal-det"><div class="cal-dh"><b>${escapeHtml(slotWhen(c.sel))}</b></div><div class="cal-ln">${isWeeklyOff(c.sel) ? 'Weekly off' : 'No holiday'}</div></div>`) : '';
+    const [yy, mm] = m.split('-').map(Number); const monShort = new Date(yy, mm - 1, 1).toLocaleDateString('en-GB', { month: 'short' });
+    const bdMonth = (state.birthdays || []).filter((b) => b.md.slice(0, 2) === m.slice(5, 7)).sort((a, b) => a.md.localeCompare(b.md));
+    let det = '';
+    if (sel) {
+      const bds = bdHits(sel).map((b) => `<div class="cal-det"><div class="cal-dh"><span class="cal-pill cal-b">Birthday 🎂</span><b>${escapeHtml(bdName(b))}</b></div>${editor ? `<button type="button" class="btn-secondary cal-edit" data-cal-bedit="${escapeHtml(b.id)}" style="border-color: var(--line);">Edit</button>` : ''}</div>`).join('');
+      const hs = holOn(sel).map((h) => calEntryHtml(h, editor)).join('');
+      const none = (!bds && !hs) ? `<div class="cal-det"><div class="cal-ln">${isWeeklyOff(sel) ? 'Weekly off' : 'Nothing added'}</div></div>` : '';
+      const quick = editor ? `<div class="cal-quick"><button type="button" class="chip" data-cal-quick="holiday">Make holiday</button>${isWeeklyOff(sel) ? '<button type="button" class="chip" data-cal-quick="working">Make working day</button>' : ''}<button type="button" class="chip" data-cal-quick="birthday">Add birthday 🎂</button><button type="button" class="chip" data-cal-quick="note">Add note</button></div>` : '';
+      det = `<div class="cal-seldate">${escapeHtml(slotWhen(sel))}</div>${bds}${hs}${none}${quick}`;
+    }
     return `<div id="calRoot"><div class="cal-cols"><div class="cal-left">
       <div class="cal-nav"><button type="button" class="chip" id="calPrev" aria-label="Previous month">‹</button><b>${escapeHtml(calMonthLabel(m))}</b><button type="button" class="chip" id="calNext" aria-label="Next month">›</button></div>
       ${calGridHtml(m)}
-      <div class="cal-legend"><span><i class="cal-dot cal-h"></i>Holiday</span><span><i class="cal-dot cal-w"></i>Sunday working</span><span><i class="cal-dot cal-s"></i>Special day</span><span><i class="cal-dot cal-f"></i>Half day</span><span><i class="cal-dot cal-v"></i>Students' vacation</span><span><i class="cal-dot cal-o"></i>Weekly off</span><span><i class="cal-dot cal-t"></i>Date may change</span></div>
-            </div><div class="cal-right">
+      <div class="cal-legend"><span><i class="cal-dot cal-h"></i>Holiday</span><span><i class="cal-dot cal-w"></i>Sunday working</span><span><i class="cal-dot cal-s"></i>Special day</span><span><i class="cal-dot cal-f"></i>Half day</span><span><i class="cal-dot cal-v"></i>Students' vacation</span><span><i class="cal-dot cal-n"></i>Note</span><span><i class="cal-dot cal-o"></i>Weekly off</span><span><i class="cal-dot cal-t"></i>Date may change</span><span>🎂 Birthday</span></div>
+      ${editor ? '<div class="hv-note" style="text-align:left;">Tap a date to add a holiday, working day, birthday or note.</div>' : ''}
+      </div><div class="cal-right">
       ${det}
       <div class="xs-grp">In ${escapeHtml(calMonthLabel(m))}</div>
       ${inMonth.length ? inMonth.map((h) => `<button type="button" class="cal-row" data-cal-d="${h.from > ms ? h.from : ms}"><span class="cal-rd">${escapeHtml(holEnd(h) !== h.from ? slotWhen(h.from).split(' · ')[0].replace(/^\w+ /, '') + ' – ' + slotWhen(holEnd(h)).replace(/^\w+ /, '') : slotWhen(h.from).replace(/^\w+ /, ''))}</span><span><b>${escapeHtml(h.name)}</b><br><span class="cal-pill ${HOL_CLS[h.type]}">${HOL_TYPES[h.type]}</span></span></button>`).join('') : '<div class="hv-note" style="text-align:left;">Nothing this month.</div>'}
-      ${admin ? `<div class="sv-form-btns" style="margin-top:12px;"><button type="button" class="save-btn" id="calAdd">+ Add holiday</button>${aiReady() ? '<button type="button" class="btn-secondary" id="calPhoto" style="border-color: var(--line);">Fill from a photo</button>' : ''}</div><input type="file" id="calFile" accept="image/*,application/pdf" hidden>` : ''}
+      ${bdMonth.length ? `<div class="xs-grp">Birthdays in ${escapeHtml(new Date(yy, mm - 1, 1).toLocaleDateString('en-GB', { month: 'long' }))}</div>${bdMonth.map((b) => `<button type="button" class="cal-row" data-cal-d="${calBdDateIn(m, b)}"><span class="cal-rd">🎂 ${Number(b.md.slice(3))} ${escapeHtml(monShort)}</span><span><b>${escapeHtml(bdName(b))}</b></span></button>`).join('')}` : ''}
+      ${editor && aiReady() ? '<div class="sv-form-btns" style="margin-top:12px;"><button type="button" class="btn-secondary" id="calPhoto" style="border-color: var(--line);">Fill the holiday list from a photo</button></div><input type="file" id="calFile" accept="image/*,application/pdf" hidden>' : ''}
     </div></div></div>`;
   }
   function calFormHtml() {
     const f = state.cal.form;
     return `<div id="calRoot"><div class="hv-d-title">${f.id ? 'Change' : 'Add'} holiday</div>
-      <div class="chips" style="margin-top:10px;">${Object.keys(HOL_TYPES).map((k) => `<button type="button" class="chip${f.type === k ? ' active' : ''}" data-cf-type="${k}">${HOL_TYPES[k]}</button>`).join('')}</div>
+      <div class="chips" style="margin-top:10px;">${Object.keys(HOL_TYPES).map((k) => `<button type="button" class="chip${f.type === k ? ' active' : ''}" data-cf-type="${k}">${HOL_TYPES[k]}</button>`).join('')}<button type="button" class="chip" data-cf-type="birthday">Birthday 🎂</button></div>
       <div class="sv-tlbl">Name</div><input class="text-input" id="cfName" type="text" value="${escapeHtml(f.name)}" placeholder="e.g. Diwali">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"><div><div class="sv-tlbl">From</div><input class="text-input" id="cfFrom" type="date" value="${escapeHtml(f.from)}"></div><div><div class="sv-tlbl">To (optional)</div><input class="text-input" id="cfTo" type="date" value="${escapeHtml(f.to)}"></div></div>
       <div class="sv-tlbl">Note (optional)</div><input class="text-input" id="cfNote" type="text" value="${escapeHtml(f.note)}">
@@ -8958,18 +8982,20 @@ Rules:
   function calRender() {
     const c = state.cal; const body = document.getElementById('calHost'); if (!c || !body) return;
     const y = c.lastMode === c.mode ? window.scrollY : 0;
-    body.innerHTML = c.mode === 'form' ? calFormHtml() : (c.mode === 'ai' ? calAiHtml() : calHtml()); c.lastMode = c.mode; window.scrollTo(0, y);
+    body.innerHTML = c.mode === 'form' ? calFormHtml() : (c.mode === 'bform' ? calBformHtml() : (c.mode === 'ai' ? calAiHtml() : calHtml())); c.lastMode = c.mode; window.scrollTo(0, y);
     const q = (sel) => body.querySelector(sel); const qa = (sel) => body.querySelectorAll(sel);
     if (c.mode === 'cal') {
       q('#calPrev').addEventListener('click', () => { c.m = calShift(c.m, -1); c.sel = null; calRender(); });
       q('#calNext').addEventListener('click', () => { c.m = calShift(c.m, 1); c.sel = null; calRender(); });
       qa('[data-cal-d]').forEach((b) => b.addEventListener('click', () => { c.sel = b.getAttribute('data-cal-d'); calRender(); }));
       qa('[data-cal-edit]').forEach((b) => b.addEventListener('click', () => { const h = (state.holidays || []).find((x) => x.id === b.getAttribute('data-cal-edit')); if (!h) return; c.form = { id: h.id, type: h.type, name: h.name, from: h.from, to: h.to && h.to !== h.from ? h.to : '', note: h.note || '', pair: h.pair || '', tentative: !!h.tentative, evening: h.evening || '' }; c.mode = 'form'; calRender(); }));
-      const add = q('#calAdd'); if (add) add.addEventListener('click', () => { c.form = { id: '', type: 'holiday', name: '', from: c.sel || c.m + '-01', to: '', note: '', pair: '', tentative: false, evening: '' }; c.mode = 'form'; calRender(); });
+      qa('[data-cal-quick]').forEach((b) => b.addEventListener('click', () => calQuick(b.getAttribute('data-cal-quick'), c.sel)));
+      qa('[data-cal-bedit]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-bedit')); if (!x) return; c.bform = { id: x.id, uid: x.uid || '', name: x.name, sal: x.sal || '', date: (c.sel || todayStr()).slice(0, 4) + '-' + x.md, other: !x.uid }; c.mode = 'bform'; calRender(); }));
       const ph = q('#calPhoto'), fi = q('#calFile'); if (ph) ph.addEventListener('click', () => { c.mode = 'ai'; c.ai = { step: 'pick' }; calRender(); });
+    } else if (c.mode === 'bform') { calBindBform(body, c);
     } else if (c.mode === 'form') {
       const f = c.form;
-      qa('[data-cf-type]').forEach((b) => b.addEventListener('click', () => { f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; f.type = b.getAttribute('data-cf-type'); calRender(); }));
+      qa('[data-cf-type]').forEach((b) => b.addEventListener('click', () => { f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; const nt = b.getAttribute('data-cf-type'); if (nt === 'birthday') { c.bform = calNewBd(from0(f.from)); c.mode = 'bform'; calRender(); return; } f.type = nt; calRender(); }));
       q('#cfCancel').addEventListener('click', () => { c.mode = 'cal'; calRender(); });
       q('#cfSave').addEventListener('click', async () => {
         const name = q('#cfName').value.trim() || (f.type === 'working' ? 'Sunday working' : ''); const from = q('#cfFrom').value, to = q('#cfTo').value;
@@ -9003,6 +9029,63 @@ Rules:
     if (card) card.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); });
     const svl = document.getElementById('scheduleList'); if (svl) svl.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); });
   })();
+  // ---------- Birthdays, quick buttons on a tapped date, and the birthday wish ----------
+  state.birthdays = state.birthdays || [];
+  const calEditor = () => !!(state.canAdmin || state.isCoordinator);
+  const from0 = (v) => v || todayStr();
+  // a 29 Feb birthday is kept on 28 Feb in a year that has no 29 Feb
+  const bdHits = (date) => { const md = String(date).slice(5); const y = Number(String(date).slice(0, 4)); const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; return (state.birthdays || []).filter((b) => b.md === md || (b.md === '02-29' && md === '02-28' && !leap)); };
+  const calHasBd = (date) => bdHits(date).length > 0;
+  const bdName = (b) => salutedName(b.name, b.sal) || b.name || 'a teacher';
+  function calBdDateIn(m, b) { const y = Number(m.slice(0, 4)); const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; return b.md === '02-29' && !leap ? `${m}-28` : `${m}-${b.md.slice(3)}`; }
+  const calNewBd = (date) => ({ id: '', uid: '', name: '', sal: '', date: date || todayStr(), other: false });
+  function calBformHtml() {
+    const f = state.cal.bform; const ids = dsTeacherIds().sort((a, b) => planNameOf(a).localeCompare(planNameOf(b)));
+    return `<div id="calRoot"><div class="hv-d-title">${f.id ? 'Change' : 'Add'} birthday 🎂</div>
+      <div class="chips" style="margin-top:10px;">${Object.keys(HOL_TYPES).map((k) => `<button type="button" class="chip" data-bf-type="${k}">${HOL_TYPES[k]}</button>`).join('')}<button type="button" class="chip active">Birthday 🎂</button></div>
+      <div class="sv-tlbl">Teacher</div><select class="text-input" id="bfWho"><option value="">Choose…</option>${ids.map((u) => `<option value="${escapeHtml(u)}"${f.uid === u && !f.other ? ' selected' : ''}>${escapeHtml(planNameOf(u))}</option>`).join('')}<option value="__other"${f.other ? ' selected' : ''}>Someone else (type the name)</option></select>
+      ${f.other ? `<div class="sv-tlbl">Name</div><input class="text-input" id="bfName" type="text" value="${escapeHtml(f.name)}" placeholder="e.g. Anil Sir">` : ''}
+      <div class="sv-tlbl">Day and month</div><input class="text-input" id="bfDate" type="date" value="${escapeHtml(f.date)}"><div class="hv-note" style="text-align:left;">Only the day and the month are kept. It comes back every year, and the wish shows on the teacher's Today page.</div>
+      <button type="button" class="save-btn" id="bfSave" style="margin-top:12px;">Save</button>
+      <button type="button" class="btn-secondary" id="bfCancel" style="border-color: var(--line); margin-top:8px; width:100%;">Cancel</button>
+      ${f.id ? '<button type="button" class="btn-secondary" id="bfDelete" style="border-color: var(--line); margin-top:8px; width:100%; color:#B42318;">Delete</button>' : ''}</div>`;
+  }
+  async function calSaveBd(list) {
+    try { await state.db.doc('settings/institute').set({ birthdays: list }, { merge: true }); state.birthdays = list; renderHolidayUi(); return true; }
+    catch (err) { if (err && err.code === 'permission-denied') showToast('The database did not allow this. Ask the admin to let Coordinators change the calendar.', 'error'); else flashOffline(err); return false; }
+  }
+  // the list of teachers is loaded on the Admin screen; when the calendar is opened straight from the menu, load it here
+  async function calEnsureTeachers() { if ((state.adminTeacherIds || []).length) return; try { await loadAdminTeachers(true); } catch (e) { /* ignore */ } if (state.cal && state.cal.mode === 'bform' && (state.adminTeacherIds || []).length) calRender(); }
+  function calBindBform(body, c) {
+    calEnsureTeachers();
+    const q = (sel) => body.querySelector(sel); const f = c.bform;
+    const keep = () => { if (q('#bfDate') && q('#bfDate').value) f.date = q('#bfDate').value; if (q('#bfName')) f.name = q('#bfName').value; };
+    body.querySelectorAll('[data-bf-type]').forEach((b) => b.addEventListener('click', () => { keep(); c.form = { id: '', type: b.getAttribute('data-bf-type'), name: '', from: f.date, to: '', note: '', pair: '', tentative: false, evening: '' }; c.mode = 'form'; calRender(); }));
+    q('#bfWho').addEventListener('change', (e) => { keep(); const v = e.target.value; if (v === '__other') { f.other = true; f.uid = ''; f.name = ''; f.sal = ''; } else { f.other = false; f.uid = v; const a = state.adminNames[v] || {}; f.name = a.name || planNameOf(v); f.sal = a.sal || ''; } calRender(); });
+    q('#bfCancel').addEventListener('click', () => { c.mode = 'cal'; calRender(); });
+    q('#bfSave').addEventListener('click', async () => {
+      keep(); if (!String(f.name || '').trim()) { showToast('Choose the teacher', 'error'); return; } if (!f.date) { showToast('Choose the day and month', 'error'); return; }
+      const rec = { id: f.id || calId(), uid: f.other ? '' : f.uid, name: String(f.name).trim().slice(0, 60), sal: f.other ? '' : (f.sal || ''), md: f.date.slice(5) };
+      if (await calSaveBd((state.birthdays || []).filter((x) => x.id !== rec.id).concat(rec))) { showToast(f.id ? 'Birthday updated' : 'Birthday added'); c.mode = 'cal'; c.m = f.date.slice(0, 7); c.sel = f.date; calRender(); }
+    });
+    const del = q('#bfDelete'); if (del) del.addEventListener('click', async () => { if (!(await showConfirm(`Delete the birthday of ${bdName(f)}?`, 'Delete birthday?', 'Delete'))) return; if (await calSaveBd((state.birthdays || []).filter((x) => x.id !== f.id))) { showToast('Birthday deleted'); c.mode = 'cal'; calRender(); } });
+  }
+  function calQuick(kind, date) {
+    const c = state.cal; const d = date || c.m + '-01';
+    if (kind === 'birthday') { c.bform = calNewBd(d); c.mode = 'bform'; calRender(); return; }
+    c.form = { id: '', type: kind, name: kind === 'working' ? 'Sunday working' : '', from: d, to: '', note: '', pair: '', tentative: false, evening: '' }; c.mode = 'form'; calRender();
+  }
+  const BDAY_MSG = ['Wishing you a wonderful year ahead, full of joy and good health. ✨ From all of us at CATJEE.', 'May this year bring you success, smiles and everything you wish for. 🌟 With warm wishes from your CATJEE family.', 'Thank you for everything you do for our students. Have a lovely day! 💐 Team CATJEE', 'Another year of inspiring young minds! Enjoy your special day. 🥳 Team CATJEE'];
+  function bdayCardHtml() {
+    const t = todayStr(); const L = bdHits(t); if (!L.length) return '';
+    const mine = L.filter((b) => b.uid && b.uid === state.teacherId); const others = L.filter((b) => !(b.uid && b.uid === state.teacherId));
+    const d = dateObj(t); const doy = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000); let out = '';
+    if (mine.length) out += `<div class="bday-card"><div class="bday-em">🎂🎉🎈</div><b>Happy Birthday, ${escapeHtml(bdName(mine[0]))}!</b><span>${escapeHtml(BDAY_MSG[(d.getFullYear() + doy) % BDAY_MSG.length])}</span></div>`;
+    if (others.length) { const names = others.map((b) => escapeHtml(bdName(b))); out += `<button type="button" class="bday-small" data-cal-open="${t}">🎂 ${names.length === 1 ? `Today is ${names[0]}'s birthday` : `Today is the birthday of ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`}</button>`; }
+    return out;
+  }
+  function renderBdayCard() { const el = document.getElementById('bdayCard'); if (!el) return; const h = bdayCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
+  (function bindBday() { const el = document.getElementById('bdayCard'); if (el) el.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); }); })();
   // ---------- Holidays from the calendar, in the Timetable and in the teacher's Schedule ----------
   const holNoteText = (h) => (h.type === 'holiday' ? `Holiday (${h.name})` : `Evening classes off (${h.name})`);
   function tgHolInfo(days, session) {
@@ -9040,7 +9123,7 @@ Rules:
   }
   function svHolChip(d) {
     const h = holDay(d); if (!h || h.type === 'vac') return '';
-    const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f' }[h.type];
+    const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f', note: 'hol-n2' }[h.type];
     const txt = h.type === 'holiday' ? `Holiday · ${h.name}` : (h.type === 'working' ? `Sunday working · ${holPair(h) || h.name}` : `${HOL_TYPES[h.type]} · ${h.name}${h.evening === 'off' ? ' · Evening off' : ''}`);
     return `<button type="button" class="sv-holchip ${cls}" data-cal-open="${d}">${escapeHtml(txt)}</button>`;
   }
@@ -16154,7 +16237,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
 
     unsubscribers.push(db.doc('settings/institute').onSnapshot((snap) => {
       const data = snap.data() || {};
-      state.weeklyOff = Array.isArray(data.weeklyOff) ? data.weeklyOff : ['Sun']; state.holidays = Array.isArray(data.holidays) ? data.holidays : []; try { renderHolidayUi(); if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ }
+      state.weeklyOff = Array.isArray(data.weeklyOff) ? data.weeklyOff : ['Sun']; state.holidays = Array.isArray(data.holidays) ? data.holidays : []; state.birthdays = Array.isArray(data.birthdays) ? data.birthdays : []; try { renderHolidayUi(); if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ }
       renderWeeklyOffChips();
       if (state.tab === 'admin') renderAdmin();
     }, () => {}));
