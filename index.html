@@ -3448,7 +3448,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.39 · updated 9 Nov 2026</div>
+          <div class="dnote">Version 13.40 · updated 10 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8023,6 +8023,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         const ok = await Promise.all(to.map((u) => state.db.doc('notices/' + u + '/items/' + nkey).set({ at, read: false, type: 'notice', title: 'Notice', body: txt, by: state.teacherId, byName: by, aud }).then(() => 1).catch(() => 0)));
         const sent = ok.reduce((a, b) => a + b, 0);
         if (!sent) { btn.disabled = false; err.textContent = 'Could not send. Check the internet and try again.'; return; }
+    to.forEach((u, i) => { if (ok[i] && u !== state.teacherId) { try { pushRelay(u, { type: 'notice', title: 'Notice from ' + by, body: txt }); } catch (e) { /* the bell inside the app still has it */ } } });
         try { await state.db.doc('notices/' + state.teacherId + '/items/sent_' + id).set({ at, read: true, type: 'sent', title: 'Notice sent', body: txt, nkey, aud, to: to.filter((u, i) => ok[i]) }); } catch (e) { /* the notice itself was sent */ }
         closeHvSheet(); showToast(sent === to.length ? `Notice sent to ${sent} teacher${sent === 1 ? '' : 's'}` : `Sent to ${sent} of ${to.length} teachers`);
       });
