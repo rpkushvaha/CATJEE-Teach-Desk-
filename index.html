@@ -2260,6 +2260,8 @@
   .team-phone { display: flex; align-items: center; gap: 8px; } .team-phone .text-input { flex: 1; min-width: 0; }
   .tg-day.tg-hlf { background: #FFF6C9; color: #7A6200; border-color: #EFE0A0; }
   .tg-day.tg-hlf.active { box-shadow: inset 0 0 0 2px #E63946; }
+  /* a Save button with nothing to save yet */
+  .is-clean { background: #ECECEC !important; color: #8A8A8A !important; box-shadow: none !important; cursor: default; }
 </style>
 </head>
 <body>
@@ -2363,7 +2365,7 @@
       <p class="intro-text">One tap on <strong>Check In</strong> when you arrive and <strong>Check Out</strong> when you leave. Your campus time is counted for you.</p>
     </div>
     <div class="intro-slide">
-      <div class="intro-art"><svg class="ic" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div>
+      <div class="intro-art"><svg class="ic" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/><polyline points="7 12 10 9 13 11 17 7"/></svg></div>
       <div class="intro-title">Log each class in seconds</div>
       <p class="intro-text">Tap <strong>+ Class</strong>, pick the batch and write the topic. If the class is in your Schedule, the batch and time fill in by themselves.</p>
     </div>
@@ -2501,7 +2503,7 @@
       </div>
 
       <div class="chips" id="modeChips">
-        <button class="chip" data-mode="class"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:5px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>Class</button>
+        <button class="chip" data-mode="class"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:5px;"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/><polyline points="7 12 10 9 13 11 17 7"/></svg>Class</button>
         <button class="chip" data-mode="activity"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:5px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Activity</button>
       </div>
 
@@ -3446,7 +3448,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.37 · updated 7 Nov 2026</div>
+          <div class="dnote">Version 13.38 · updated 8 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4527,10 +4529,7 @@
     state.addTargetDate = d && d !== todayStr() ? d : null;
     state.entryMode = 'class';
     resetClassForm();
-    fillClassFromSlot(slot, hhmmToMin(slot.time));
-    renderForm();
-    switchTab('add');
-  }
+    fillClassFromSlot(slot, hhmmToMin(slot.time)); renderForm(); switchTab('add'); sdReady('saveClassBtn'); }
 
   function mondayOf(dateStr) {
     const [y, m, d] = dateStr.split('-').map(Number);
@@ -8898,7 +8897,7 @@ Rules:
     }
     const next = (state.holidays || []).filter((h) => (h.type === 'holiday' || h.type === 'special' || h.type === 'half') && h.from > t).sort((a, b) => a.from.localeCompare(b.from))[0];
     if (!next) return '';
-    const days = Math.round((dateObj(next.from) - dateObj(t)) / 86400000); if (days > 30) return '';
+    const days = Math.round((dateObj(next.from) - dateObj(t)) / 86400000); if (days > 7) return '';
     return `<button type="button" class="hol-card hol-n" data-cal-open="${next.from}"><b>${next.type === 'holiday' ? 'Next holiday' : 'Next ' + HOL_TYPES[next.type].toLowerCase()}</b><span>${escapeHtml(next.name)} · ${escapeHtml(slotWhen(next.from))} · ${days === 1 ? 'tomorrow' : 'in ' + days + ' days'}</span></button>`;
   }
   function renderHolidayCard() { try { renderBdayCard(); } catch (e) { /* ignore */ } try { renderContactCard(); } catch (e) { /* ignore */ } const el = document.getElementById('holidayCard'); if (!el) return; const h = holCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
@@ -9015,7 +9014,7 @@ Rules:
   function calRender() {
     const c = state.cal; const body = document.getElementById('calHost'); if (!c || !body) return;
     const y = c.lastMode === c.mode ? window.scrollY : 0;
-    body.innerHTML = c.mode === 'form' ? calFormHtml() : (c.mode === 'bform' ? calBformHtml() : (c.mode === 'ai' ? calAiHtml() : calHtml())); c.lastMode = c.mode; window.scrollTo(0, y);
+    body.innerHTML = c.mode === 'form' ? calFormHtml() : (c.mode === 'bform' ? calBformHtml() : (c.mode === 'ai' ? calAiHtml() : calHtml())); c.lastMode = c.mode; if (c.mode !== 'form') c.preForm = false; if (c.mode === 'form' && c.preForm) sdReady('cfSave'); window.scrollTo(0, y);
     const q = (sel) => body.querySelector(sel); const qa = (sel) => body.querySelectorAll(sel);
     if (c.mode === 'cal') {
       q('#calPrev').addEventListener('click', () => { c.m = calShift(c.m, -1); c.sel = null; calRender(); });
@@ -9108,7 +9107,7 @@ Rules:
   function calQuick(kind, date) {
     const c = state.cal; const d = date || c.m + '-01';
     if (kind === 'birthday') { c.bform = calNewBd(d); c.mode = 'bform'; calRender(); return; }
-    c.form = { id: '', type: kind, name: kind === 'working' ? 'Sunday working' : '', from: d, to: '', note: '', pair: '', tentative: false, evening: '' }; c.mode = 'form'; calRender();
+    c.form = { id: '', type: kind, name: kind === 'working' ? 'Sunday working' : '', from: d, to: '', note: '', pair: '', tentative: false, evening: '' }; c.preForm = kind === 'working'; c.mode = 'form'; calRender();
   }
   const BDAY_MSG = ['Wishing you a wonderful year ahead, full of joy and good health. ✨ From all of us at CATJEE.', 'May this year bring you success, smiles and everything you wish for. 🌟 With warm wishes from your CATJEE family.', 'Thank you for everything you do for our students. Have a lovely day! 💐 Team CATJEE', 'Another year of inspiring young minds! Enjoy your special day. 🥳 Team CATJEE'];
   function bdayCardHtml() {
@@ -9121,6 +9120,68 @@ Rules:
   }
   function renderBdayCard() { const el = document.getElementById('bdayCard'); if (!el) return; const h = bdayCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
   (function bindBday() { const el = document.getElementById('bdayCard'); if (el) el.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); }); })();
+  // ---------- Save buttons are grey until something is edited, red once it is ----------
+  const SD_IDS = ['saveClassBtn', 'menuNameSaveBtn', 'subjectSaveBtn', 'profileContactSave', 'dnSave', 'pdSave', 'peSave', 'nbSave', 'ntOk', 'exOk', 'asSave', 'apsSave', 'dtSave', 'plSave', 'cfSave', 'bfSave'];
+  const SD_SEL = SD_IDS.map((i) => '#' + i).join(',');
+  const SD_NOEDIT = '.hv-d-btns, .sv-form-btns, .back-btn, .hv-back, .btn-secondary, [data-sd-skip]';
+  const sd = { base: new WeakMap(), dirty: new WeakMap(), last: null, clicked: null, clickedAt: 0 };
+  function sdScope(btn) {
+    let el = btn.parentElement;
+    while (el && el !== document.body) { if (el.matches('.hv-sheet, .dcard, [role="dialog"], #view-add, .modal, .tab-view') || el.querySelector('input, select, textarea')) return el; el = el.parentElement; }
+    return btn.parentElement || document.body;
+  }
+  function sdSnap(sc) {
+    const parts = []; let n = 0;
+    sc.querySelectorAll('input, select, textarea').forEach((el) => { if (el.type === 'file' || el.type === 'button' || el.type === 'submit') return; n++; parts.push(el.type === 'checkbox' || el.type === 'radio' ? (el.checked ? '1' : '0') : el.value); });
+    sc.querySelectorAll('button, label, .chip, [role="switch"], [role="button"], [aria-pressed]').forEach((el) => parts.push(/\b(active|on|sel|selected|checked)\b/.test(String(el.className)) || el.getAttribute('aria-pressed') === 'true' ? '1' : '0'));
+    if (!n) parts.push(String(sc.innerText || '').replace(/\s+/g, ' ').slice(0, 600));
+    return parts.join('\u0001');
+  }
+  function sdSet(btn, isDirty) { sd.dirty.set(btn, !!isDirty); btn.classList.toggle('is-clean', !isDirty); btn.setAttribute('aria-disabled', isDirty ? 'false' : 'true'); }
+  function sdReady(id) { const b = document.getElementById(id); if (!b) return; b.dataset.sdReady = '1'; sdSet(b, true); }
+  function sdEval(btn) { if (btn.dataset.sdReady) return; const sc = sdScope(btn); if (!sd.base.has(sc)) return; sdSet(btn, sdSnap(sc) !== sd.base.get(sc)); }
+  function sdResetAll() { sd.base = new WeakMap(); document.querySelectorAll(SD_SEL).forEach((b) => { delete b.dataset.sdReady; sdSet(b, false); }); }
+  ['pointerdown', 'keydown', 'focusin'].forEach((ev) => document.addEventListener(ev, (e) => {
+    const t = e.target; if (!t || !t.closest) return;
+    document.querySelectorAll(SD_SEL).forEach((btn) => { const sc = sdScope(btn); if (sc.contains(t) && !sd.base.has(sc)) sd.base.set(sc, sdSnap(sc)); });
+  }, true));
+  document.addEventListener('click', (e) => {
+    const b = e.target && e.target.closest && e.target.closest(SD_SEL); if (!b) return;
+    if (b.classList.contains('is-clean')) { e.preventDefault(); e.stopPropagation(); showToast('Nothing to save yet'); return; }
+    sd.clicked = b; sd.clickedAt = Date.now();
+  }, true);
+  ['input', 'change', 'click'].forEach((ev) => document.addEventListener('click' === ev ? ev : ev, (e) => {
+    const t = e.target; if (!t || !t.closest) return;
+    const isEdit = ev !== 'click' || (!t.closest(SD_NOEDIT) && !t.closest(SD_SEL));
+    document.querySelectorAll(SD_SEL).forEach((btn) => {
+      const sc = sdScope(btn); if (!sc.contains(t)) return; if (isEdit) sd.last = { t: Date.now(), sc }; if (isEdit && !sd.base.has(sc) && !btn.dataset.sdReady) sdSet(btn, true);
+      [0, 150, 400, 900].forEach((ms) => setTimeout(() => { if (!document.contains(btn) || btn.dataset.sdReady) return; if (!sd.base.has(sc)) { if (isEdit) sdSet(btn, true); return; } sdEval(btn); }, ms));
+    });
+  }));
+  // a form that is drawn again after each tap keeps its state: the new Save button inherits the old one's
+  new MutationObserver((muts) => {
+    const gone = new Map(); const fresh = [];
+    muts.forEach((m) => {
+      m.removedNodes.forEach((n) => { if (n.nodeType === 1) (n.matches(SD_SEL) ? [n] : Array.from(n.querySelectorAll(SD_SEL))).forEach((b) => gone.set(b.id, b)); });
+      m.addedNodes.forEach((n) => { if (n.nodeType === 1) (n.matches(SD_SEL) ? [n] : Array.from(n.querySelectorAll(SD_SEL))).forEach((b) => fresh.push(b)); });
+    });
+    fresh.forEach((b) => {
+      if (b.dataset.sdReady) { sdSet(b, true); return; }
+      const old = gone.get(b.id); const was = old ? !!sd.dirty.get(old) : false; const recent = !!(old && sd.last && Date.now() - sd.last.t < 700);
+      sdSet(b, was || recent);
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+  // a successful save (a normal toast right after the tap) makes the form clean again; a refused one (a red toast) does not
+  const sdShowToast = showToast;
+  showToast = function (message, variant, action) {
+    const r = sdShowToast.apply(this, arguments);
+    try { const b = sd.clicked; if (variant !== 'error' && b && Date.now() - sd.clickedAt < 2500 && document.contains(b)) { sd.clicked = null; setTimeout(() => { if (!document.contains(b)) return; const sc = sdScope(b); sd.base.set(sc, sdSnap(sc)); delete b.dataset.sdReady; sdSet(b, false); }, 0); } } catch (e) { /* ignore */ }
+    return r;
+  };
+  const sdSwitchTab = switchTab;
+  switchTab = function (tab) { sdResetAll(); return sdSwitchTab.apply(this, arguments); };
+  setInterval(() => document.querySelectorAll(SD_SEL).forEach((b) => { try { sdEval(b); } catch (e) { /* ignore */ } }), 800);
+  sdResetAll();
   // ---------- Holidays from the calendar, in the Timetable and in the teacher's Schedule ----------
   const holNoteText = (h) => (h.type === 'holiday' ? `Holiday (${h.name})` : `Evening classes off (${h.name})`);
   function tgHolInfo(days, session) {
