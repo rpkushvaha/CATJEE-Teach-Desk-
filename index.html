@@ -2997,7 +2997,25 @@
       </section>
 
       <div class="tsec-head" data-atab="settings"><div class="tsec-title">Settings</div></div>
-      <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
+      <div class="panel set-acc admin-only" id="adminTeamPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team</div>
+        <div class="admin-sub" style="margin:0;">Choose who is a coordinator and which wing each person belongs to. A coordinator manages their wing (dashboard, exams, reports, batch lists) and can force a check-out, but does not teach.</div>
+        <div id="staffIdsBlock" class="sid-block"></div>
+        <div id="teamRows" style="display:flex; flex-direction:column; margin-top:6px;"></div>
+      </div>
+  <div class="panel set-acc" id="adminPushPanel" data-atab="settings" hidden>
+        <div class="panel-title"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Phone notifications</div>
+        <div class="admin-sub" style="margin:0;">Alerts that reach a teacher's phone even when the app is closed. Each teacher turns them on once, on the Today page.</div>
+        <div class="ai-stat" id="pushStatus"></div>
+        <div id="pushTeachers"></div>
+        <div class="sv-form-btns"><button type="button" class="btn-secondary" id="pushRefresh" style="border-color: var(--line);">Refresh</button><button type="button" class="save-btn" id="pushTest">Send a test to me</button></div>
+      </div>
+  <div class="panel set-acc" id="adminMappingPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8l3 3-3 3"/></svg>Teacher Mapping</div>
+        <div class="admin-sub" style="margin:0;">The usual teacher for each subject (and batch). The timetable fills the teacher in automatically.</div>
+        <div id="mappingBody" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+      </div>
+  <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
         <div class="chips" id="adminBatchWingChips">
@@ -3011,22 +3029,35 @@
           <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button>
         </div>
       </div>
-
-      <div class="panel set-acc" id="adminTestTypesPanel" data-atab="settings">
+  <div class="panel set-acc" id="adminPeriodsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Periods &amp; Timings</div>
+        <div class="admin-sub" style="margin:0;">Period times for each timetable (Pre-Foundation Morning, Evening…).</div>
+        <div id="periodsBody" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"></div>
+      </div>
+  <div class="panel set-acc" id="adminSubjectsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Subjects</div>
+        <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
+        <div class="activity-rows" id="subjectsRows"></div>
+        <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
+      </div>
+  <div class="panel set-acc" id="adminRoomsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><circle cx="14.5" cy="12.5" r="1"/></svg>Rooms</div>
+        <div class="admin-sub" style="margin:0;">Rooms and halls used for exams and the duty plan.</div>
+        <div class="activity-rows" id="roomsRows"></div>
+        <div class="list-add"><input class="text-input" id="newRoomInput" type="text" placeholder="e.g. Hall A or Room 4"><button class="btn-secondary" id="addRoomBtn" style="border-color: var(--line);">+ Add</button></div>
+      </div>
+  <div class="panel set-acc" id="adminTestTypesPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Test Types</div>
         <div class="admin-sub" style="margin:0;">Shown when teachers log invigilation and when you add an exam.</div>
         <div class="activity-rows" id="testTypesRows"></div>
         <div class="list-add"><input class="text-input" id="newTestTypeInput" type="text" placeholder="e.g. Half-Yearly"><button class="btn-secondary" id="addTestTypeBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
-
-      <div class="panel set-acc" id="adminPushPanel" data-atab="settings" hidden>
-        <div class="panel-title"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Phone notifications</div>
-        <div class="admin-sub" style="margin:0;">Alerts that reach a teacher's phone even when the app is closed. Each teacher turns them on once, on the Today page.</div>
-        <div class="ai-stat" id="pushStatus"></div>
-        <div id="pushTeachers"></div>
-        <div class="sv-form-btns"><button type="button" class="btn-secondary" id="pushRefresh" style="border-color: var(--line);">Refresh</button><button type="button" class="save-btn" id="pushTest">Send a test to me</button></div>
+  <div class="panel set-acc admin-only" id="adminWeeklyOffPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Weekly Off</div>
+        <div class="admin-sub" style="margin:0;">On these days a teacher with no activity shows as "Weekly off" (not Absent), and their report says WEEKLY OFF.</div>
+        <div class="chips" id="weeklyOffChips" style="margin-top:10px;"></div>
       </div>
-      <div class="panel set-acc" id="adminAiPanel" data-atab="settings" hidden>
+  <div class="panel set-acc" id="adminAiPanel" data-atab="settings" hidden>
         <div class="panel-title"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>AI (beta)</div>
         <div class="admin-sub" style="margin:0;">Only you see this. Paste the address of your AI helper (the Cloudflare Worker) and test it. Teachers see nothing of AI until a feature is switched on.</div>
         <div class="sv-tlbl">AI helper address</div>
@@ -3038,57 +3069,7 @@
       <div id="aiCoordList"></div>
       <div class="sv-form-btns"><button type="button" class="btn-secondary" id="aiCoordShow" style="border-color: var(--line);">Show Coordinators’ emails</button><button type="button" class="save-btn" id="aiCoordCopy" hidden>Copy emails</button></div>
       </div>
-
-      <div class="panel set-acc" id="adminSubjectsPanel" data-atab="settings">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Subjects</div>
-        <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
-        <div class="activity-rows" id="subjectsRows"></div>
-        <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
-      </div>
-
-      <div class="panel set-acc" id="adminPeriodsPanel" data-atab="settings">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Periods &amp; Timings</div>
-        <div class="admin-sub" style="margin:0;">Period times for each timetable (Pre-Foundation Morning, Evening…).</div>
-        <div id="periodsBody" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;"></div>
-      </div>
-
-      <div class="panel set-acc" id="adminMappingPanel" data-atab="settings">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8l3 3-3 3"/></svg>Teacher Mapping</div>
-        <div class="admin-sub" style="margin:0;">The usual teacher for each subject (and batch). The timetable fills the teacher in automatically.</div>
-        <div id="mappingBody" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
-      </div>
-
-      <div class="panel set-acc" id="adminRoomsPanel" data-atab="settings">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><circle cx="14.5" cy="12.5" r="1"/></svg>Rooms</div>
-        <div class="admin-sub" style="margin:0;">Rooms and halls used for exams and the duty plan.</div>
-        <div class="activity-rows" id="roomsRows"></div>
-        <div class="list-add"><input class="text-input" id="newRoomInput" type="text" placeholder="e.g. Hall A or Room 4"><button class="btn-secondary" id="addRoomBtn" style="border-color: var(--line);">+ Add</button></div>
-      </div>
-
-      <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
-        <button type="button" class="pv-row" id="pvToggle" aria-expanded="false"><span class="ico i-eye2" aria-hidden="true"></span><b>Preview as Coordinator</b><span class="chev"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span></button>
-        <div class="pv-body"><div class="admin-sub" style="margin:0 0 10px;">See the coordinator's screens. Changes made here are real.</div>
-        <div class="chips">
-          <button type="button" class="chip" data-preview-wing="Pre-Foundation">Pre-Foundation</button>
-          <button type="button" class="chip" data-preview-wing="Foundation">Foundation</button>
-          <button type="button" class="chip" data-preview-wing="both">Both wings</button>
-        </div></div>
-      </div>
-
-      <div class="panel set-acc admin-only" id="adminTeamPanel" data-atab="settings">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team</div>
-        <div class="admin-sub" style="margin:0;">Choose who is a coordinator and which wing each person belongs to. A coordinator manages their wing (dashboard, exams, reports, batch lists) and can force a check-out, but does not teach.</div>
-        <div id="staffIdsBlock" class="sid-block"></div>
-        <div id="teamRows" style="display:flex; flex-direction:column; margin-top:6px;"></div>
-      </div>
-
-      <div class="panel set-acc admin-only" id="adminWeeklyOffPanel" data-atab="settings">
-        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Weekly Off</div>
-        <div class="admin-sub" style="margin:0;">On these days a teacher with no activity shows as "Weekly off" (not Absent), and their report says WEEKLY OFF.</div>
-        <div class="chips" id="weeklyOffChips" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="panel set-acc admin-only" id="adminCampusPanel" data-atab="settings">
+  <div class="panel set-acc admin-only" id="adminCampusPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Campus Location</div>
         <div class="admin-sub" style="margin:0 0 4px;">Used to check that teachers are on campus when they check in.</div>
         <div class="admin-sub" id="campusLocText">Not set yet.</div>
@@ -3103,8 +3084,7 @@
           <button class="btn-secondary" id="saveManualLocBtn" style="border-color: var(--line);">Save Coordinates</button>
         </div>
       </div>
-
-      <div class="panel set-acc admin-only" id="adminContactPanel" data-atab="settings">
+  <div class="panel set-acc admin-only" id="adminContactPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"/></svg>Director Contact</div>
         <div class="admin-sub">Teachers can reach out from their Menu → Contact Director. Leave blank to hide a field.</div>
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
@@ -3112,6 +3092,15 @@
           <input class="text-input" id="directorEmailInput" type="email" placeholder="Email address">
           <button class="btn-secondary" id="saveDirectorContactBtn" style="border-color: var(--line);">Save</button>
         </div>
+      </div>
+  <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
+        <button type="button" class="pv-row" id="pvToggle" aria-expanded="false"><span class="ico i-eye2" aria-hidden="true"></span><b>Preview as Coordinator</b><span class="chev"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span></button>
+        <div class="pv-body"><div class="admin-sub" style="margin:0 0 10px;">See the coordinator's screens. Changes made here are real.</div>
+        <div class="chips">
+          <button type="button" class="chip" data-preview-wing="Pre-Foundation">Pre-Foundation</button>
+          <button type="button" class="chip" data-preview-wing="Foundation">Foundation</button>
+          <button type="button" class="chip" data-preview-wing="both">Both wings</button>
+        </div></div>
       </div>
     </div>
 
@@ -3188,71 +3177,68 @@
 
       <div class="dscroll">
         <div class="dgroup-lbl">You</div>
-        <div class="dgroup">
-          <button class="drow" data-open="profile" style="--i:0">
+      <div class="dgroup">
+        <button class="drow" data-open="profile" style="--i:0">
             <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></span>
             <span class="dlabel">Profile<small>Name and subject</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-        <button class="drow" id="noticeDrawRow" style="--i:1" hidden><span class="dtile"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg></span><span class="dlabel">Send a notice<small>To your teachers</small></span><svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
-          <button class="drow" id="calDrawRow" style="--i:1" hidden><span class="dtile"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg></span><span class="dlabel">CATJEE Calendar<small>Holidays and working Sundays</small></span></button>
         <button class="drow" id="pushDrawRow" data-open="push" style="--i:1" hidden><span class="dtile"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span><span class="dlabel">Phone notifications<small id="pushDrawState">Checking…</small></span><svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
-          <button class="drow" data-open="photos" style="--i:2">
-            <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>
-            <span class="dlabel">Gallery<small>Timetables, notes, anything</small></span>
-            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
-          </button>
-          <button class="drow" data-open="settings" style="--i:1">
+        <button class="drow" data-open="settings" style="--i:2">
             <span class="dtile"><svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="17" x2="20" y2="17"></line><circle cx="9" cy="7" r="2.2"></circle><circle cx="15" cy="17" r="2.2"></circle></svg></span>
             <span class="dlabel">Settings<small>Reminders, display, text size, update</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-          <button class="drow" data-open="password" style="--i:2">
+        <button class="drow" data-open="password" style="--i:3">
             <span class="dtile"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
             <span class="dlabel">Change password<small>Get a reset link by email</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-        </div>
-
-        <div class="dgroup-lbl">Help</div>
-        <div class="dgroup">
-          <button class="drow" id="menuHelpRow" type="button" style="--i:1">
-            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
-            <span class="dlabel">Help &amp; guided tours<small>Tours and the written guide</small></span>
+      </div>
+      <div class="dgroup-lbl">Everyday</div>
+      <div class="dgroup">
+        <button class="drow" id="noticeDrawRow" style="--i:4" hidden><span class="dtile"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg></span><span class="dlabel">Send a notice<small>To your teachers</small></span><svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
+        <button class="drow" id="calDrawRow" style="--i:5" hidden><span class="dtile"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg></span><span class="dlabel">CATJEE Calendar<small>Holidays and working Sundays</small></span><svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg></button>
+        <button class="drow" data-open="photos" style="--i:6">
+            <span class="dtile"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>
+            <span class="dlabel">Gallery<small>Timetables, notes, anything</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-          <button class="drow" id="menuReportRow" type="button" style="--i:4">
-            <span class="dtile"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
-            <span class="dlabel">Report a problem<small>Send it to the admin on WhatsApp</small></span>
-            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
-          </button>
-          <button class="drow" data-open="contact" style="--i:3">
+      </div>
+      <div class="dgroup-lbl">Help &amp; more</div>
+      <div class="dgroup">
+        <button class="drow" data-open="contact" style="--i:7">
             <span class="dtile"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"></path></svg></span>
             <span class="dlabel">Contact director<small>WhatsApp or email</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-        </div>
-
-        <div class="dgroup-lbl">More</div>
-        <div class="dgroup">
-          <button class="drow" data-open="share" id="menuShareAppBtn" style="--i:4">
+        <button class="drow" id="menuHelpRow" type="button" style="--i:8">
+            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <span class="dlabel">Help &amp; guided tours<small>Tours and the written guide</small></span>
+            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
+        <button class="drow" id="menuReportRow" type="button" style="--i:9">
+            <span class="dtile"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <span class="dlabel">Report a problem<small>Send it to the admin on WhatsApp</small></span>
+            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
+        <button class="drow" data-open="share" id="menuShareAppBtn" style="--i:10">
             <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line></svg></span>
             <span class="dlabel">Share app<small>Link for a new colleague</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-          <button class="drow" id="menuInstallRow" type="button" style="--i:1" hidden>
+        <button class="drow" id="menuInstallRow" type="button" style="--i:11" hidden>
             <span class="dtile"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M12 7v8"></path><polyline points="9 12 12 15 15 12"></polyline></svg></span>
             <span class="dlabel">Install app<small>Put Teach Desk on your home screen</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-          <button class="drow" data-open="about" style="--i:6">
+        <button class="drow" data-open="about" style="--i:12">
             <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="16" x2="12" y2="11"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
             <span class="dlabel">About<small>Version and privacy</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-        </div>
-
-        <button class="drow drow-danger" id="menuSignOutBtn" style="--i:7">
+      </div>
+      <button class="drow drow-danger" id="menuSignOutBtn" style="--i:13">
           <span class="dtile"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span>
           <span class="dlabel">Sign out</span>
         </button>
@@ -3475,7 +3461,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.43 · updated 13 Nov 2026</div>
+          <div class="dnote">Version 13.45 · updated 15 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
