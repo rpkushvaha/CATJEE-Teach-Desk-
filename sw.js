@@ -44,7 +44,10 @@ self.addEventListener('push', (e) => {
   // the phone buzzes with the alert: a long pattern for a class reminder, a short double buzz for everything else
   const opts = { body: d.body || '', icon: 'icon-192.png', data: { url: d.url || './' }, vibrate: String(d.tag || '').indexOf('cls-') === 0 ? [300, 150, 300, 150, 600] : [200, 100, 200] };
   if (d.tag) { opts.tag = d.tag; opts.renotify = true; }
-  e.waitUntil(self.registration.showNotification(d.title || 'CATJEE Teach Desk', opts).then(() => badgeGet()).then((n) => badgeSet(n + 1)));
+  const show = () => self.registration.showNotification(d.title || 'CATJEE Teach Desk', opts).then(() => badgeGet()).then((n) => badgeSet(n + 1));
+  // a class reminder while the app is open on the screen: the app plays its own reminder, so no phone notification (and no number) for it
+  const isClass = String(d.tag || '').indexOf('cls-') === 0;
+  e.waitUntil(isClass ? self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => (list.some((c) => c.visibilityState === 'visible') ? null : show())).catch(() => show()) : show());
 });
 
 self.addEventListener('notificationclick', (e) => {
