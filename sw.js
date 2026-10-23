@@ -1,4 +1,4 @@
-/* CATJEE Teach Desk — service worker (v5: also shows phone notifications, and the number on the app icon).
+/* CATJEE Teach Desk — service worker (v5: also shows phone notifications, the number on the app icon, and buzzes the phone).
    Everything from our own site (the page, manifest.json, icons) is fetched fresh when online,
    so a new upload shows up at once; the saved copy is used only when there is no internet.
    Firebase and other servers are never touched here. */
@@ -41,7 +41,8 @@ self.addEventListener('message', (e) => { const d = e.data; if (d && d.type === 
 self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data ? e.data.text() : '' }; }
-  const opts = { body: d.body || '', icon: 'icon-192.png', data: { url: d.url || './' } };
+  // the phone buzzes with the alert: a long pattern for a class reminder, a short double buzz for everything else
+  const opts = { body: d.body || '', icon: 'icon-192.png', data: { url: d.url || './' }, vibrate: String(d.tag || '').indexOf('cls-') === 0 ? [300, 150, 300, 150, 600] : [200, 100, 200] };
   if (d.tag) { opts.tag = d.tag; opts.renotify = true; }
   e.waitUntil(self.registration.showNotification(d.title || 'CATJEE Teach Desk', opts).then(() => badgeGet()).then((n) => badgeSet(n + 1)));
 });
