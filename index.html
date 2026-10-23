@@ -3326,7 +3326,8 @@
           <div class="sal-preview" id="pushPageNote"></div>
         </div>
         <div class="dcard" id="pushOptCard">
-          <div class="dfield-row"><div style="min-width:0;"><div class="dfield-label">Class reminder</div><div class="dfield-value" style="font-size:13px; font-weight:400; white-space:normal; overflow:visible; text-overflow:clip;">5 minutes before each class in your Schedule</div></div><button type="button" class="psw" id="pushOptCls" role="switch" aria-checked="true" aria-label="Class reminder"><i></i></button></div>
+          <div class="dfield-row"><div style="min-width:0;"><div class="dfield-label">Class reminder</div><div class="dfield-value" id="pushClsState" style="font-size:13px; font-weight:500; white-space:normal; overflow:visible; text-overflow:clip;"></div></div><button type="button" class="btn-secondary" id="pushClsGo" style="border-color: var(--line); width:auto; padding:6px 14px; min-height:36px; flex:none;">Settings</button></div>
+        <div class="sal-preview">It follows Settings → Class reminders (the switch and the minutes you choose there). While the app is open you hear the app's own reminder, so no phone notification comes at that time.</div>
           <div class="sal-preview">Birthday wish: a message at 7:30 AM on your birthday (add your birthday in Profile).</div>
         </div>
         <div class="dcard" id="pushTestCard">
@@ -3474,7 +3475,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.42 · updated 12 Nov 2026</div>
+          <div class="dnote">Version 13.43 · updated 13 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9215,7 +9216,7 @@ Rules:
     st.textContent = !key ? 'Not set up yet' : (on ? 'On' : 'Off'); st.className = 'dfield-value ' + (!key ? '' : (on ? 'dstate-on' : 'dstate-off'));
     if (sw) { sw.setAttribute('aria-checked', on ? 'true' : 'false'); sw.disabled = !key && stt !== 'unsupported' ? true : false; }
     if (note) note.textContent = !key ? (stt === 'unsupported' ? 'This phone or browser cannot show phone notifications.' : 'The admin has not set this up yet.') : ({ on: 'You will get duty, notice and reminder alerts, even when the app is closed.', off: 'Switch it on to get alerts on this phone.', ask: 'Switch it on to get alerts on this phone.', denied: 'Blocked in the phone settings. Allow notifications for Teach Desk there, then switch it on here.', 'ios-install': 'iPhone: tap Share, then Add to Home Screen, and open Teach Desk from there. Then switch it on here.' }[stt] || '');
-    const oc = document.getElementById('pushOptCls'); if (oc) oc.setAttribute('aria-checked', pushOptOn('ctd_push_cls') ? 'true' : 'false');
+    let clsOn = false; try { clsOn = localStorage.getItem(REMINDER_PREF_KEY) === '1'; } catch (e) { clsOn = false; } const cs = document.getElementById('pushClsState'); if (cs) { cs.textContent = clsOn ? `On · ${reminderLead()} minutes before each class` : 'Off · turn it on in Settings'; cs.className = 'dfield-value ' + (clsOn ? 'dstate-on' : 'dstate-off'); }
     const card = document.getElementById('pushOptCard'); if (card) card.hidden = !on; const tb = document.getElementById('pushPageTest'); if (tb) tb.hidden = !on; const tcd = document.getElementById('pushTestCard'); if (tcd) tcd.hidden = !on;
   }
   // the number on the app icon = the unread alerts in the bell (iPhone shows the number; many Android phones show a dot)
@@ -9229,13 +9230,13 @@ Rules:
   // timed alerts: the app hands the Worker the next week's reminders; the Worker's timer sends them even when the app is closed
   function pushPlanBuild() {
     const out = []; const now = Date.now();
-    if (pushOptOn('ctd_push_cls')) {
+    let clsOn = false; try { clsOn = localStorage.getItem(REMINDER_PREF_KEY) === '1'; } catch (e) { clsOn = false; } if (clsOn) { const lead = reminderLead();
       const leave = new Set((state.historyClasses ? upcomingLeaves() : []).map((c) => c.date));
       (state.scheduleSlots || []).forEach((sl) => {
         if (!sl || sl.cancelled || !sl.time) return; const d = slotDate(sl); if (!d || leave.has(d)) return; const hd = holDay(d); if (hd && hd.type === 'holiday') return;
         const [y, mo, da] = d.split('-').map(Number); const [hh, mm] = String(sl.time).split(':').map(Number); if ([y, mo, da, hh, mm].some((x) => !Number.isFinite(x))) return;
-        const at = new Date(y, mo - 1, da, hh, mm, 0, 0).getTime() - 5 * 60000; if (at < now - 60000 || at > now + 7 * 86400e3) return;
-        out.push({ at, title: 'Class in 5 minutes', body: [slotLabelAll(sl), sl.subject, formatTimeStr(sl.time) + (sl.room ? ' · Room ' + sl.room : '')].filter(Boolean).join(' · '), tag: 'cls-' + String(sl.id || at).slice(0, 30) });
+        const at = new Date(y, mo - 1, da, hh, mm, 0, 0).getTime() - lead * 60000; if (at < now - 60000 || at > now + 7 * 86400e3) return;
+        out.push({ at, title: 'Class in ' + lead + ' minutes', body: [slotLabelAll(sl), sl.subject, formatTimeStr(sl.time) + (sl.room ? ' · Room ' + sl.room : '')].filter(Boolean).join(' · '), tag: 'cls-' + String(sl.id || at).slice(0, 30) });
       });
     }
     return out.sort((a, b) => a.at - b.at).slice(0, 80);
@@ -9382,6 +9383,24 @@ Rules:
     if (!lines.length) { showToast('No numbers yet', 'error'); return; }
     try { await navigator.clipboard.writeText(lines.join('\n')); showToast(`${lines.length} number${lines.length === 1 ? '' : 's'} copied`); } catch (e) { showToast('Could not copy. Allow the clipboard for this app.', 'error'); }
   }
+  // the role is watched live: when the Admin changes it, this app follows at once (before, it was read only at sign-in)
+  function roleFollow(msg) {
+    applyRoleUI(); try { renderHolidayUi(); } catch (e) { /* ignore */ }
+    if (!(state.canAdmin || state.isCoordinator)) { state.adminTeacherIds = []; if (state.tab === 'admin') switchTab('today'); }
+    else { try { loadAdminTeachers(true); } catch (e) { /* ignore */ } if (state.isCoordinator && !state.canAdmin) switchTab('admin'); }
+    if (msg) showToast(msg);
+  }
+  function watchRole(db, uid) {
+    unsubscribers.push(db.doc('team/' + uid).onSnapshot((snap) => {
+      const td = snap.data() || {}; const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
+      if (td.status === 'removed' && !state.canAdmin) { if (!state.accessRemoved) { state.accessRemoved = true; try { firebase.auth().signOut(); } catch (e) { /* ignore */ } showAuthScreen(); showAuthError('Your access to CATJEE Teach Desk has been removed by the admin. Please contact the director if this is a mistake.'); } return; }
+      const was = state.isCoordinator; if (co === was && JSON.stringify(wings) === JSON.stringify(state.coordWings || [])) return;
+      state.isCoordinator = co; state.coordWings = wings; roleFollow(co !== was ? (co ? 'You are now a Coordinator' : 'Your role is now Teacher') : '');
+    }, () => { /* if it cannot be watched, the role is read again at the next sign-in */ }));
+    unsubscribers.push(db.doc('admins/' + uid).onSnapshot((snap) => {
+      const ad = snap.exists; if (ad === state.canAdmin) return; state.canAdmin = ad; roleFollow(ad ? 'You are now an Admin' : 'You are no longer an Admin');
+    }, () => { /* the role is read again at the next sign-in */ }));
+  }
   // ---------- Phone notifications (Web Push): they arrive even when the app is closed ----------
   let pushKey = null; // null = not asked yet, '' = the Worker is not set up for it
   const pushUrl = (path) => AI_DEFAULT_URL.replace(/\/+$/, '') + path;
@@ -9470,8 +9489,7 @@ Rules:
       try { if (stt === 'on') { await pushDisable(); showToast('Phone notifications are off'); } else { const on = await pushEnable(); showToast(on ? '✓ Phone notifications are on' : 'Notifications were not allowed', on ? '' : 'error'); } } catch (e) { showToast(e.message || 'Could not change this', 'error'); }
       sw.disabled = false; renderPushUi();
     });
-    const oc = document.getElementById('pushOptCls');
-    if (oc) oc.addEventListener('click', () => { let on = true; try { on = localStorage.getItem('ctd_push_cls') !== '0'; localStorage.setItem('ctd_push_cls', on ? '0' : '1'); } catch (e) { /* ignore */ } renderPushUi(); pushPlanSoon(true); });
+    const cg = document.getElementById('pushClsGo'); if (cg) cg.addEventListener('click', () => openMenuPanel('settings'));
     const tb = document.getElementById('pushPageTest');
     if (tb) tb.addEventListener('click', async () => {
       if (pushState() !== 'on') { showToast('Switch the phone notifications on first', 'error'); return; }
@@ -12606,9 +12624,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
   document.querySelectorAll('#reminderLeadChips [data-lead]').forEach((b) => b.addEventListener('click', () => {
     try { localStorage.setItem(LEAD_KEY, b.getAttribute('data-lead')); } catch (err) { /* ignore */ }
-    state.firedScheduleReminders = {};
-    renderReminderLead();
-    showToast(`Reminder: ${b.getAttribute('data-lead')} min before class`);
+    state.firedScheduleReminders = {}; renderReminderLead(); try { pushPlanSoon(true); renderPushUi(); } catch (e) { /* ignore */ } showToast(`Reminder: ${b.getAttribute('data-lead')} min before class`);
   }));
   renderReminderLead();
 
@@ -13148,8 +13164,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
 
   document.getElementById('menuReminderToggleRow').addEventListener('click', () => {
     const enabling = localStorage.getItem(REMINDER_PREF_KEY) !== '1';
-    localStorage.setItem(REMINDER_PREF_KEY, enabling ? '1' : '0');
-    renderReminderToggle();
+    localStorage.setItem(REMINDER_PREF_KEY, enabling ? '1' : '0'); renderReminderToggle(); try { pushPlanSoon(true); renderPushUi(); } catch (e) { /* ignore */ }
     if (enabling) {
       unlockAudio();
       playBeep();
@@ -16426,7 +16441,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         return;
       }
     } catch (err) { state.isCoordinator = false; state.coordWings = []; }
-    applyRoleUI(); if (state.isCoordinator && !state.canAdmin) switchTab('admin'); renderScheduleNotice(); try { pushInit(); } catch (e) { /* ignore */ } try { renderHolidayUi(); } catch (e) { /* ignore */ } if (state.canAdmin || state.isCoordinator) setTimeout(() => { try { loadAdminTeachers(false); } catch (e) { /* ignore */ } }, 2500); const today = todayStr(); const tid = state.teacherId;
+    applyRoleUI(); if (state.isCoordinator && !state.canAdmin) switchTab('admin'); renderScheduleNotice(); try { pushInit(); } catch (e) { /* ignore */ } try { renderHolidayUi(); } catch (e) { /* ignore */ } if (state.canAdmin || state.isCoordinator) setTimeout(() => { try { loadAdminTeachers(false); } catch (e) { /* ignore */ } }, 2500); const today = todayStr(); const tid = state.teacherId; try { watchRole(db, firebaseUser.uid); } catch (e) { /* ignore */ }
 
     unsubscribers.push(db.doc('profile/' + tid).onSnapshot((snap) => {
       const data = snap.data();
