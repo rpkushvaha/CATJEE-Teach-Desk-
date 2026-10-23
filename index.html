@@ -2269,6 +2269,8 @@
   .psw:disabled { opacity: .5; cursor: default; }
   .dstate-on { color: #15803D !important; font-weight: 600; } .dstate-off { color: #C81E32 !important; font-weight: 600; }
   #pushOptCard[hidden], #pushTestCard[hidden], #pushPageTest[hidden] { display: none !important; }
+  /* whatever is marked hidden is really gone (a menu row with display:flex used to stay on the screen, e.g. "Send a notice" for teachers) */
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -3461,7 +3463,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.45 · updated 15 Nov 2026</div>
+          <div class="dnote">Version 13.46 · updated 16 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
