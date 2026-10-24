@@ -2278,6 +2278,17 @@
   .bs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; }
   .bs-row + .bs-row { border-top: 1px solid #F7C9D0; }
   .bs-wa { display: inline-flex; align-items: center; gap: 5px; border: 0; border-radius: 99px; background: #1E8E4E; color: #fff; font: inherit; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer; flex: none; }
+  /* birthday surprise */
+  .bds { position: fixed; inset: 0; z-index: 4000; background: var(--paper, #fff); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; cursor: pointer; padding: 24px; transition: opacity .35s; }
+  .bds.bye { opacity: 0; pointer-events: none; }
+  .bds-g { font-size: 72px; animation: bdBob 1.2s ease-in-out infinite; }
+  @keyframes bdBob { 50% { transform: translateY(-10px); } }
+  .bds b { font-size: 18px; color: #8A1F3D; } .bds small { color: var(--muted-2, #777); font-size: 14px; }
+  
+  #bdayCard.pop .bday-card { animation: bdPop .7s ease; }
+  @keyframes bdPop { 0% { transform: scale(.92); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  .bd-re { border: 1px solid #F0B3BD; background: #fff; color: #8A1F3D; border-radius: 99px; padding: 5px 11px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) { .bds-g, #bdayCard.pop .bday-card { animation: none; } }
 </style>
 </head>
 <body>
@@ -3470,7 +3481,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.48 · updated 18 Nov 2026</div>
+          <div class="dnote">Version 13.49 · updated 19 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9135,7 +9146,7 @@ Rules:
     const t = todayStr(); const L = bdHits(t); const selfMd = state.user && state.user.birthMd; if (selfMd && mdOn(selfMd, t) && !L.some((b) => b.uid && b.uid === state.teacherId)) L.push({ uid: state.teacherId, name: state.user.name, sal: state.user.salutation || '', md: selfMd }); if (!L.length) return '';
     const mine = L.filter((b) => b.uid && b.uid === state.teacherId); const others = L.filter((b) => !(b.uid && b.uid === state.teacherId));
     const d = dateObj(t); const doy = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000); let out = '';
-    if (mine.length) out += `<div class="bday-card"><div class="bday-em">🎂🎉🎈</div><b>Happy Birthday, ${escapeHtml(bdName(mine[0]))}!</b><span>${escapeHtml(BDAY_MSG[(d.getFullYear() + doy) % BDAY_MSG.length])}</span></div>`;
+    if (mine.length) out += `<div class="bday-card"><div class="bday-em">🎂🎉🎈</div><b>Happy Birthday, ${escapeHtml(bdName(mine[0]))}!</b><span>${escapeHtml(BDAY_MSG[(d.getFullYear() + doy) % BDAY_MSG.length])}</span><div class="bs-r"><button type="button" class="bd-re" data-bd-replay>🎉 Replay</button></div></div>`;
     if (others.length) {
       const pill = (b) => `<button type="button" class="bs-wa" data-bd-wish="${escapeHtml(b.id || '')}" data-bd-name="${escapeHtml(bdName(b))}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Wish</button>`;
       out += others.length === 1
@@ -9144,14 +9155,14 @@ Rules:
     }
     return out;
   }
-  function renderBdayCard() { const el = document.getElementById('bdayCard'); if (!el) return; const h = bdayCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
+  function renderBdayCard() { const el = document.getElementById('bdayCard'); if (!el) return; const h = bdayCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; try { bdSurpriseMaybe(); } catch (e) { /* ignore */ } }
   function bdWish(id, name) {
     const b = (state.birthdays || []).find((x) => x.id === id); const num = b ? calWa(b) : '';
     const me = String((state.user && state.user.name) || '').trim().split(/\s+/)[0];
     const msg = `Happy Birthday, ${name}! 🎂🎉 Wishing you a wonderful year ahead.${me ? ' — ' + me : ' Team CATJEE'}`;
     window.open('https://wa.me/' + (num || '') + '?text=' + encodeURIComponent(msg), '_blank');
   }
-  (function bindBday() { const el = document.getElementById('bdayCard'); if (el) el.addEventListener('click', (e) => { const w = e.target.closest('[data-bd-wish]'); if (w) { e.stopPropagation(); bdWish(w.getAttribute('data-bd-wish'), w.getAttribute('data-bd-name')); return; } const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); }); })();
+  (function bindBday() { const el = document.getElementById('bdayCard'); if (el) el.addEventListener('click', (e) => { if (e.target.closest('[data-bd-replay]')) { e.stopPropagation(); bdPlay(); return; } const w = e.target.closest('[data-bd-wish]'); if (w) { e.stopPropagation(); bdWish(w.getAttribute('data-bd-wish'), w.getAttribute('data-bd-name')); return; } const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); }); })();
   // ---------- Save buttons are grey until something is edited, red once it is ----------
   const SD_IDS = ['saveClassBtn', 'menuNameSaveBtn', 'subjectSaveBtn', 'profileContactSave', 'dnSave', 'pdSave', 'peSave', 'nbSave', 'ntOk', 'exOk', 'asSave', 'apsSave', 'dtSave', 'plSave', 'cfSave', 'bfSave'];
   const SD_SEL = SD_IDS.map((i) => '#' + i).join(',');
@@ -9211,7 +9222,7 @@ Rules:
     return r;
   };
   const sdSwitchTab = switchTab;
-  switchTab = function (tab) { sdResetAll(); return sdSwitchTab.apply(this, arguments); };
+  switchTab = function (tab) { sdResetAll(); const r = sdSwitchTab.apply(this, arguments); if (tab === 'today') setTimeout(() => { try { bdSurpriseMaybe(); } catch (e) { /* ignore */ } }, 500); return r; };
   setInterval(() => document.querySelectorAll(SD_SEL).forEach((b) => { try { sdEval(b); } catch (e) { /* ignore */ } }), 800);
   sdResetAll();
   // ---------- the Phone notifications page, the number on the app icon, timed alerts ----------
@@ -9268,6 +9279,60 @@ Rules:
     try { if (!(await pushKeyGet())) return; const r = await pushWorker('/push/birthdays', { list }, true); if (r.status === 200 || r.status === 403) { try { localStorage.setItem('ctd_bday_hash', h); } catch (e) { /* ignore */ } } } catch (e) { /* tried again the next time */ }
   }
   (function bindNoticeRow() { const r = document.getElementById('noticeDrawRow'); if (r) r.addEventListener('click', () => { closeMenu(); setTimeout(() => openNewNotice(), 320); }); })();
+  // ---------- Birthday surprise: the birthday person, the first time he opens the app that day ----------
+  // a screen to tap (a phone only allows sound after a tap), then paper confetti and balloons, and the Happy Birthday tune (about 12 seconds, made by the phone itself)
+  const BD_SONG = [['G4', 0.75], ['G4', 0.25], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2], ['G4', 0.75], ['G4', 0.25], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2], ['G4', 0.75], ['G4', 0.25], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 2], ['F5', 0.75], ['F5', 0.25], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 2]];
+  const BD_HZ = { G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784 };
+  let bdOsc = [];
+  function bdSing() {
+    try {
+      unlockAudio(); const ac = audioCtx; if (!ac) return;
+      bdOsc.forEach((o) => { try { o.stop(); } catch (e) { /* already done */ } }); bdOsc = [];
+      let t = ac.currentTime + 0.05; const beat = 0.46;
+      BD_SONG.forEach(([n, b]) => {
+        const o = ac.createOscillator(); const g = ac.createGain(); o.type = 'triangle'; o.frequency.value = BD_HZ[n]; o.connect(g); g.connect(ac.destination);
+        const d = b * beat; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.18, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0008, t + d * 0.95); o.start(t); o.stop(t + d); bdOsc.push(o); t += d;
+      });
+    } catch (e) { /* the phone cannot play it: the picture still shows */ }
+  }
+  function bdShow() {
+    let reduce = false; try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+    if (reduce) return;
+    const old = document.getElementById('bdCv'); if (old) old.remove();
+    const cv = document.createElement('canvas'); cv.id = 'bdCv'; const dpr = Math.min(window.devicePixelRatio || 1, 2); const W = window.innerWidth; const H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4100;';
+    document.body.appendChild(cv); const x = cv.getContext('2d'); if (!x) { cv.remove(); return; } x.scale(dpr, dpr);
+    const COL = ['#E63946', '#F4A261', '#2A9D8F', '#457B9D', '#F6C453', '#9B5DE5', '#EF476F', '#06D6A0'];
+    const conf = Array.from({ length: 110 }, (_, i) => ({ x: Math.random() * W, y: -10 - Math.random() * H * 0.5, vx: (Math.random() - 0.5) * 2.2, vy: 1.8 + Math.random() * 3.2, w: 5 + Math.random() * 5, h: 8 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.35, c: COL[i % COL.length] }));
+    const bal = Array.from({ length: 9 }, (_, i) => ({ x: W * (0.08 + 0.84 * Math.random()), y: H + 40 + Math.random() * H * 0.35, vy: 1.3 + Math.random() * 1.2, ph: Math.random() * 6, rad: 20 + Math.random() * 10, c: COL[(i * 3 + 1) % COL.length] }));
+    const t0 = performance.now();
+    (function frame() {
+      const e = (performance.now() - t0) / 1000; x.clearRect(0, 0, W, H);
+      conf.forEach((p) => { p.x += p.vx + Math.sin(e * 3 + p.r) * 0.4; p.y += p.vy; p.r += p.vr; x.save(); x.globalAlpha = Math.max(0, Math.min(1, (5.6 - e) / 1.2)); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); });
+      bal.forEach((b) => {
+        b.y -= b.vy; const sx = b.x + Math.sin(e * 1.6 + b.ph) * 14; x.save(); x.globalAlpha = Math.max(0, Math.min(1, (7.4 - e) / 1.2));
+        x.strokeStyle = '#8a8a8a'; x.lineWidth = 1; x.beginPath(); x.moveTo(sx, b.y + b.rad * 1.25); x.quadraticCurveTo(sx - 6, b.y + b.rad * 2.2, sx, b.y + b.rad * 3.2); x.stroke();
+        x.fillStyle = b.c; x.beginPath(); x.ellipse(sx, b.y, b.rad * 0.82, b.rad, 0, 0, Math.PI * 2); x.fill();
+        x.fillStyle = 'rgba(255,255,255,.35)'; x.beginPath(); x.ellipse(sx - b.rad * 0.3, b.y - b.rad * 0.35, b.rad * 0.18, b.rad * 0.3, 0, 0, Math.PI * 2); x.fill(); x.restore();
+      });
+      if (e < 7.8) requestAnimationFrame(frame); else cv.remove();
+    })();
+  }
+  function bdPlay() {
+    bdSing(); bdShow();
+    const c = document.getElementById('bdayCard'); if (c) { c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+  }
+  function bdSurpriseMaybe() {
+    const el = document.getElementById('bdayCard'); if (!el || el.hidden || !el.querySelector('.bday-card')) return;
+    if (state.tab !== 'today' || document.hidden || document.getElementById('bdSurprise')) return;
+    let seen = ''; try { seen = localStorage.getItem('ctd_bday_surprise') || ''; } catch (e) { seen = ''; }
+    if (seen === todayStr()) return;
+    const nm = (el.querySelector('.bday-card b') || {}).textContent || 'Happy Birthday!';
+    const ov = document.createElement('div'); ov.id = 'bdSurprise'; ov.className = 'bds'; ov.setAttribute('role', 'button'); ov.setAttribute('aria-label', 'Tap to open your birthday surprise');
+    ov.innerHTML = `<div class="bds-g">🎁</div><b>Tap to open your birthday surprise</b><small>${escapeHtml(nm)}</small>`;
+    ov.addEventListener('click', () => { try { localStorage.setItem('ctd_bday_surprise', todayStr()); } catch (e) { /* ignore */ } ov.classList.add('bye'); setTimeout(() => ov.remove(), 350); bdPlay(); });
+    document.body.appendChild(ov);
+  }
   // ---------- Holidays from the calendar, in the Timetable and in the teacher's Schedule ----------
   const holNoteText = (h) => (h.type === 'holiday' ? `Holiday (${h.name})` : `Evening classes off (${h.name})`);
   function tgHolInfo(days, session) {
