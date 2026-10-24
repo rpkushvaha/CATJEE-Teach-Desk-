@@ -3463,7 +3463,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.46 · updated 16 Nov 2026</div>
+          <div class="dnote">Version 13.47 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10671,7 +10671,7 @@ Rules:
     blocks.forEach((b) => { H += 52 + b.rows.reduce((a, r) => a + rowH(r), 0) + (b.staff ? lh + 10 : 0) + 10 + 30; });
     H += 0;
     const sc = 2; cv.width = W * sc; cv.height = H * sc; x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const t = (str, tx, ty, size, bold, align, fam) => { x.font = font(size, bold, fam); x.fillStyle = '#000'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; x.fillText(str, tx, ty, W - 2 * pad - 20); x.strokeStyle = '#000'; x.lineJoin = 'round'; x.lineWidth = Math.min(bold ? 0.95 : 0.65, size * 0.04); x.strokeText(str, tx, ty, W - 2 * pad - 20); };
+    const t = (str, tx, ty, size, bold, align, fam) => { x.font = font(size, bold, fam); x.fillStyle = '#000'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; x.fillText(str, tx, ty, W - 2 * pad - 20); };
     const ln = (x1, y1, x2, y2, col, lw) => { x.strokeStyle = col; x.lineWidth = lw || 1; x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2, y2); x.stroke(); };
     const ff = (cx, cy) => { x.fillStyle = '#000'; [0, 9].forEach((dx) => { x.beginPath(); x.moveTo(cx + dx, cy - 7); x.lineTo(cx + dx + 9, cy); x.lineTo(cx + dx, cy + 7); x.closePath(); x.fill(); }); };
     let y = 40; t(title, W / 2, y + 20, 36, true, 'center'); y += headH - 14;
