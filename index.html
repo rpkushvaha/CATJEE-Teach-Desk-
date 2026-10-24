@@ -2289,6 +2289,17 @@
   @keyframes bdPop { 0% { transform: scale(.92); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
   .bd-re { border: 1px solid #F0B3BD; background: #fff; color: #8A1F3D; border-radius: 99px; padding: 5px 11px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
   @media (prefers-reduced-motion: reduce) { .bds-g, #bdayCard.pop .bday-card { animation: none; } }
+  /* substitute reports: the red SUB column, the view chips and the daily report */
+  .trep-subh { color: #C1121F !important; }
+  .trep-subc { color: #C1121F; font-weight: 700; }
+  .sd-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card, #fff); }
+  .sd-h { font-weight: 800; font-size: 15px; } .sd-sub { color: var(--muted-2, #777); font-size: 12px; margin: 2px 0 8px; }
+  .sd-none { padding: 12px 0; color: var(--muted-2, #777); font-size: 13px; }
+  .sd-t { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sd-t th { text-align: left; font-size: 11px; color: var(--muted-2, #777); padding: 4px 4px; border-bottom: 1px solid var(--line); }
+  .sd-t td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+  .sd-t td span { color: var(--muted-2, #777); font-size: 12px; }
+  .sd-t th:nth-child(2), .sd-t td:nth-child(2), .sd-t th:nth-child(3), .sd-t td:nth-child(3) { white-space: nowrap; padding-left: 8px; }
 </style>
 </head>
 <body>
@@ -2994,7 +3005,7 @@
           <label class="rep-lbl" for="adminRepTeacher">Teacher</label>
           <select class="text-input" id="adminRepTeacher"><option value="">All teachers</option></select>
         </div>
-        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(3, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button></div>
+        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Day · Week · Month</span></button></div>
         <div class="hv-note" id="repKindNote" style="text-align:left;"></div>
         <div id="repStd">
           <div id="repAttPrev" class="att-prev" hidden></div>
@@ -3006,14 +3017,24 @@
           </div>
         </div>
         <div id="repCount" hidden>
-          <div id="trepBox"><div class="skel short"></div></div>
+      <div class="chips" id="trepSubMode" style="margin-bottom:8px;"><button type="button" class="chip active" data-trep-sub="all">All classes + Sub</button><button type="button" class="chip" data-trep-sub="only">Only substitute</button></div>
+      <div id="trepBox"><div class="skel short"></div></div>
           <div class="rep-lbl">Get it as</div>
           <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
             <button type="button" class="qa-btn qa-wa" id="trepImg"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
             <button type="button" class="qa-btn qa-xl" id="trepCsv"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button>
           </div>
         </div>
-        <div class="admin-sub" id="adminReportMsg" style="text-align:center;"></div>
+        <div id="repSubDay" hidden>
+      <div class="chips" id="subDaySes" style="margin-bottom:8px;"><button type="button" class="chip active" data-sd-ses="morning">Morning batches</button><button type="button" class="chip" data-sd-ses="evening">Evening batches</button></div>
+      <div id="subDayBox"><div class="skel short"></div></div>
+      <div class="rep-lbl">Get it as</div>
+      <div class="qa-row" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <button type="button" class="qa-btn qa-wa" id="subDayImg"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
+        <button type="button" class="qa-btn" id="subDayWa"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Send as text</span><span class="qa-s">WhatsApp</span></button>
+      </div>
+    </div>
+    <div class="admin-sub" id="adminReportMsg" style="text-align:center;"></div>
       </section>
 
       <div class="tsec-head" data-atab="settings"><div class="tsec-title">Settings</div></div>
@@ -3481,7 +3502,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.50 · updated 20 Nov 2026</div>
+          <div class="dnote">Version 13.52 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6424,9 +6445,7 @@
       if (state.tg.sel) { tgToggleSel(d, pi, b); return; }
       if (state.tg.swap) { tgSwapPick(d, pi, b); return; }
       const cx = tgCell(d, pi, b);
-      if (cx && cx.ex) { openExamBlockSheet(cx); return; }
-      if (!tgEditable()) { locked(); return; }
-      if (state.tg.paint) {
+      if (cx && cx.ex) { openExamBlockSheet(cx); return; } if (!tgEditable()) { if (cx && tgCellIsLive(cx)) { openPubCellSheet(cx); return; } locked(); return; } if (state.tg.paint) {
         const c = tgCell(d, pi, b);
         if (c && c.s === state.tg.paint) { tgSetCell(d, pi, b, null); renderTgGrid(); return; }
         const pp = periodsForDay(tgGroup().key, d)[pi]; const ex = examAt(b, d, pp.start, pp.end);
@@ -10903,6 +10922,7 @@ Rules:
   // Units: up to 1 h 10 min = 1 class, up to 1 h 45 min = 1.5, then +0.5 for every further 30 min.
   // =====================================================================
   state.trep = state.trep || { mode: 'week', anchor: '', key: '', data: null, busy: false };
+  state.trep.sub = state.trep.sub || 'all'; // 'all' = all classes + a red SUB column · 'only' = only the substitute classes
   function trepUnits(min) { if (!(min > 0)) return 1; if (min <= 70) return 1; if (min <= 105) return 1.5; return 1.5 + Math.ceil((min - 105) / 30) * 0.5; }
   function trepRange() {
     const t = state.trep; t.mode = state.adminReportRange === 'month' ? 'month' : 'week'; const a = state.adminDate || todayStr();
@@ -10946,7 +10966,7 @@ Rules:
           if ((doc.published || []).indexOf(T + '/' + slotIdFor(doc._id, c)) === -1) return;
           const tm = cellTimes(doc, c); if (!tm) return;
           if (c.cb) { const ms = tgComboOf(doc.cells, c); const g0 = ttGroups().find((x) => x.key === doc.group); if (ms.length > 1 && g0) { const lead = ms.slice().sort((a, b) => g0.batches.indexOf(a.b) - g0.batches.indexOf(b.b))[0]; if (lead.b !== c.b) return; } }
-          tt.push({ t: T, d: c.d, b: c.b, a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p });
+          tt.push({ t: T, d: c.d, b: c.b, a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p, sub: c.sub ? 1 : 0, f: c.sub ? (c.sub.for || c.t || '') : '' });
         }));
       }
       // classes the teachers filled in
@@ -10956,16 +10976,17 @@ Rules:
       const seen = {};
       const logs = [].concat(...parts).filter((c) => (seen[c.id] ? false : (seen[c.id] = true))).filter((c) => c.entryType !== 'activity' && c.date >= r.from && c.date <= r.to && !c.cancelled)
         .map((c) => ({ c, t: c.teacherId, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
-      const used = new Set(); const missing = []; const upcoming = [];
+      const used = new Set(); const missing = []; const upcoming = []; const subHits = [];
       tt.forEach((x) => {
         const hit = logs.find((l) => l.t === x.t && l.d === x.d && l.bs.indexOf(x.b) !== -1 && (l.a == null || l.z == null || (l.a < x.z && x.a < l.z)));
-        if (hit) { used.add(hit); return; }
+        if (hit) { if (x.sub && !used.has(hit)) subHits.push({ t: x.t, f: x.f, d: x.d, bs: hit.bs, a: hit.a != null ? hit.a : x.a, z: hit.z != null ? hit.z : x.z }); used.add(hit); return; }
         // a class still to come is not "missing" yet
         const endTs = dateObj(x.d).getTime() + (x.z || 0) * 60000;
         if (endTs > Date.now()) { upcoming.push(x); return; }
         missing.push(x);
       });
-      t.data = { logs, missing, upcoming, from: r.from, to: r.to, ttCount: tt.length };
+      const subs = subHits;
+      t.data = { logs, missing, upcoming, subs, from: r.from, to: r.to, ttCount: tt.length };
     } catch (err) { t.data = { error: true }; }
     t.busy = false; trepRender();
   }
@@ -10976,7 +10997,10 @@ Rules:
     const rows = {}; const other = {};
     const add = (u, i, v) => { rows[u] = rows[u] || {}; rows[u][i] = (rows[u][i] || 0) + v; };
     const spans = {}; // combined classes spanning neighbour columns: u -> [{a,z,v}]
-    D.logs.forEach((l) => {
+    const only = state.trep.sub === 'only';
+    const subU = {}; (D.subs || []).forEach((x) => { subU[x.t] = (subU[x.t] || 0) + trepUnits(x.z - x.a); });
+    const srcLogs = only ? (D.subs || []).map((x) => ({ t: x.t, d: x.d, bs: x.bs, a: x.a, z: x.z })) : D.logs;
+    srcLogs.forEach((l) => {
       const v = trepUnits(l.a != null && l.z != null ? l.z - l.a : 0);
       const idx = l.bs.map(colOf).filter((i) => i !== -1).filter((i, k, a) => a.indexOf(i) === k).sort((p, q) => p - q);
       if (!idx.length) { other[l.t] = (other[l.t] || 0) + v; return; }
@@ -10986,16 +11010,16 @@ Rules:
       add(l.t, idx[0], v);
     });
     const ids = ttTeacherIds().slice();
-    Object.keys(rows).concat(Object.keys(spans), Object.keys(other)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u)) ids.push(u); });
+    Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u)) ids.push(u); });
     ids.sort((a, b) => ttName(a).localeCompare(ttName(b)));
     const hasOther = Object.keys(other).length > 0;
     const list = ids.map((u) => {
       const cells = cols.map((c, i) => (rows[u] && rows[u][i]) || 0);
       const sp = spans[u] || [];
       const total = cells.reduce((a, b) => a + b, 0) + sp.reduce((a, x) => a + x.v, 0) + (other[u] || 0);
-      return { u, name: trepName(u), cells, spans: sp, other: other[u] || 0, total };
+      return { u, name: trepName(u), cells, spans: sp, other: other[u] || 0, total, sub: subU[u] || 0 };
     });
-    return { cols, heads, list, hasOther, grand: list.reduce((a, x) => a + x.total, 0) };
+    return { cols, heads, list, hasOther, only, subOn: !only, grand: list.reduce((a, x) => a + x.total, 0), grandSub: list.reduce((a, x) => a + x.sub, 0) };
   }
   const trepFmt = (v) => (v ? String(Math.round(v * 10) / 10) : '');
   // Mr. / Ms. before the name: from "Address me as" (Sir → Mr., Ma'am → Ms.); a title tapped in the report wins
@@ -11022,33 +11046,34 @@ Rules:
   }
   function trepRender() {
     const box = document.getElementById('trepBox'); if (!box) return;
-    const t = state.trep;
-    const tl = document.getElementById('trepLabel'); if (tl) tl.textContent = trepTitle();
+    const t = state.trep; document.querySelectorAll('#trepSubMode [data-trep-sub]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-sub') === (t.sub || 'all'))); const tl = document.getElementById('trepLabel'); if (tl) tl.textContent = trepTitle();
     if (t.busy || !t.data) { box.innerHTML = '<div class="skel short"></div>'; return; }
     if (t.data.error) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the report. Check the internet and try again.</div>'; return; }
     const T = trepTable();
-    const ttl = state.trep.mode === 'month' ? 'Monthly Teaching Report' : 'Weekly Teaching Report';
+    const ttl = trepTitleText();
     const per = state.trep.mode === 'month' ? 'Month' : 'Week';
-    const nCols = T.cols.length + (T.hasOther ? 1 : 0);
+    const nCols = T.cols.length + (T.hasOther ? 1 : 0); const ex = T.subOn ? 1 : 0;
     let h = `<div class="trep-scroll"><table class="trep-t"><thead>
-      <tr class="trep-h0"><th colspan="${nCols + 3}"><span class="trep-stick">${escapeHtml(ttl)}</span></th></tr>
-      <tr class="trep-h1"><th colspan="${nCols + 3}"><span class="trep-stick">${per}: ${escapeHtml(trepTitle())}</span></th></tr>
-      <tr><th rowspan="2">S.N</th><th rowspan="2">NAME OF FACULTY</th>${T.heads.map((x) => `<th colspan="${x.end - x.start + 1}">${escapeHtml(x.head)}</th>`).join('')}${T.hasOther ? '<th>OTHER</th>' : ''}<th rowspan="2">TOTAL</th></tr>
+      <tr class="trep-h0"><th colspan="${nCols + 3 + ex}"><span class="trep-stick">${escapeHtml(ttl)}</span></th></tr>
+      <tr class="trep-h1"><th colspan="${nCols + 3 + ex}"><span class="trep-stick">${per}: ${escapeHtml(trepTitle())}</span></th></tr>
+      <tr><th rowspan="2">S.N</th><th rowspan="2">NAME OF FACULTY</th>${T.heads.map((x) => `<th colspan="${x.end - x.start + 1}">${escapeHtml(x.head)}</th>`).join('')}${T.hasOther ? '<th>OTHER</th>' : ''}<th rowspan="2">TOTAL</th>${T.subOn ? '<th rowspan="2" class="trep-subh">SUB</th>' : ''}</tr>
       <tr>${T.cols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('')}${T.hasOther ? '<th>Batches</th>' : ''}</tr></thead><tbody>`;
     T.list.forEach((row, i) => {
-      h += `<tr><td>${i + 1}</td><td class="trep-n" data-trep-u="${escapeHtml(row.u)}" role="button">${escapeHtml(row.name)}${trepTitleOf(row.u) ? '' : ' <span class="trep-tset">+ Mr./Ms.</span>'}</td>${trepRowCells(row, T.cols).map((c) => `<td${c.span > 1 ? ` colspan="${c.span}"` : ''}>${trepFmt(c.v)}</td>`).join('')}${T.hasOther ? `<td>${trepFmt(row.other)}</td>` : ''}<td><b>${trepFmt(row.total) || ''}</b></td></tr>`;
+      h += `<tr><td>${i + 1}</td><td class="trep-n" data-trep-u="${escapeHtml(row.u)}" role="button">${escapeHtml(row.name)}${trepTitleOf(row.u) ? '' : ' <span class="trep-tset">+ Mr./Ms.</span>'}</td>${trepRowCells(row, T.cols).map((c) => `<td${c.span > 1 ? ` colspan="${c.span}"` : ''}>${trepFmt(c.v)}</td>`).join('')}${T.hasOther ? `<td>${trepFmt(row.other)}</td>` : ''}<td><b>${trepFmt(row.total) || ''}</b></td>${T.subOn ? `<td class="trep-subc">${trepFmt(row.sub)}</td>` : ''}</tr>`;
     });
-    h += `</tbody><tfoot><tr><td colspan="${nCols + 2}" style="text-align:right;">Total:</td><td>${trepFmt(T.grand) || '0'}</td></tr></tfoot></table></div>`;
-    const miss = t.data.missing || [];
+    h += `</tbody><tfoot><tr><td colspan="${nCols + 2}" style="text-align:right;">Total:</td><td>${trepFmt(T.grand) || '0'}</td>${T.subOn ? `<td class="trep-subc">${trepFmt(T.grandSub) || '0'}</td>` : ''}</tr></tfoot></table></div>`;
+    const miss = (t.data.missing || []).filter((x) => !T.only || x.sub);
     if (miss.length) {
       const by = {}; miss.forEach((x) => { (by[x.t] = by[x.t] || []).push(x); });
       h += `<div class="trep-miss"><div class="trep-miss-h"><span class="ico i-alert" aria-hidden="true"></span> Not filled in (${miss.length}) · not counted</div>
         <div class="trep-miss-l">${Object.keys(by).sort((a, b) => ttName(a).localeCompare(ttName(b))).map((u) => `<button type="button" class="trep-mchip" data-trep-miss="${escapeHtml(u)}">${escapeHtml(trepName(u))} <b>${by[u].length}</b></button>`).join('')}</div>
         <div class="hv-note" style="text-align:left; margin-top:4px;">Classes whose time is over but the teacher hasn't filled them in. Tap a name to see which.</div></div>`;
-    } else if ((t.data.ttCount || 0) > 0) h += '<div class="trep-ok"><span class="ico i-check" aria-hidden="true"></span> Every class that has happened is filled in</div>';
-    const upc = (t.data.upcoming || []).length;
+    } else if (!T.only && (t.data.ttCount || 0) > 0) h += '<div class="trep-ok"><span class="ico i-check" aria-hidden="true"></span> Every class that has happened is filled in</div>';
+    const upc = (t.data.upcoming || []).filter((x) => !T.only || x.sub).length;
     if (upc) h += `<div class="hv-note" style="text-align:left;">Still to come in this ${state.trep.mode === 'month' ? 'month' : 'week'}: ${upc} class${upc === 1 ? '' : 'es'} (counted once they are taken and filled in)</div>`;
     if (T.list.some((row) => !trepTitleOf(row.u))) h += '<div class="hv-note" style="text-align:left;">Mr. / Ms. comes from Sir / Ma\'am chosen by the teacher. For a name without it, tap the name to set Mr. or Ms.</div>';
+    if (T.subOn) h += '<div class="hv-note" style="text-align:left;"><b style="color:#C1121F;">SUB</b> = the substitute classes the teacher filled in. They are part of TOTAL too. The length is the time filled in.</div>';
+    if (T.only) h += '<div class="hv-note" style="text-align:left;">Only the substitute classes the teacher filled in, with the time filled in. A substitute class that is not filled in yet is listed below.</div>';
     h += '<div class="hv-note" style="text-align:left;">1 class = up to 1 h 10 min · 1.5 = up to 1 h 45 min (e.g. 1 h 15 min) · a class taken with two batches together counts once.</div>';
     // a picture of the report that fits the screen; tap to open it big (zoom with two fingers)
     let img = '';
@@ -11115,14 +11140,14 @@ Rules:
   function trepCanvas() {
     const T = trepTable(); if (!T) return null;
     const nC = T.cols.length + (T.hasOther ? 1 : 0);
-    const wSN = 50, wName = 220, wC = 92, wTot = 80; const W = wSN + wName + wC * nC + wTot + 2;
+    const wSN = 50, wName = 220, wC = 92, wTot = 80; const wSub = T.subOn ? 80 : 0; const W = wSN + wName + wC * nC + wTot + wSub + 2;
     const hT = 36, hH = 28, hR = 26; const H = hT * 2 + hH * 2 + hR * (T.list.length + 1) + 2;
     const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
     const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
     const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#7F7F7F'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw, bh); };
-    const tx = (s, cx, cy, size, bold, align, maxW) => { x.fillStyle = '#000'; x.font = `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; let f = size; while (maxW && x.measureText(s).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(s, cx, cy); };
+    const tx = (s, cx, cy, size, bold, align, maxW, col) => { x.fillStyle = col || '#000'; x.font = `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; let f = size; while (maxW && x.measureText(s).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(s, cx, cy); };
     let y = 1;
-    box(1, y, W - 2, hT, '#FFC000'); tx(state.trep.mode === 'month' ? 'Monthly Teaching Report' : 'Weekly Teaching Report', W / 2, y + hT / 2, 20, true); y += hT;
+    box(1, y, W - 2, hT, '#FFC000'); tx(trepTitleText(), W / 2, y + hT / 2, 20, true); y += hT;
     box(1, y, W - 2, hT, '#E26B0A'); tx(`${state.trep.mode === 'month' ? 'Month' : 'Week'}: ${trepTitle()}`, W / 2, y + hT / 2, 18, true); y += hT;
     const x0 = 1 + wSN + wName; const cx = (i) => x0 + wC * i;
     box(1, y, wSN, hH * 2, '#FFFF00'); tx('S.N', 1 + wSN / 2, y + hH, 13, true);
@@ -11132,6 +11157,7 @@ Rules:
     T.cols.forEach((c, i) => { box(cx(i), y + hH, wC, hH, '#FFFF00'); tx(c.label, cx(i) + wC / 2, y + hH * 1.5, 13, true, 'center', wC - 6); });
     if (T.hasOther) { box(cx(T.cols.length), y + hH, wC, hH, '#FFFF00'); tx('Batches', cx(T.cols.length) + wC / 2, y + hH * 1.5, 12, true); }
     box(cx(nC), y, wTot, hH * 2, '#FFFF00'); tx('TOTAL', cx(nC) + wTot / 2, y + hH, 13, true);
+    if (T.subOn) { box(cx(nC) + wTot, y, wSub, hH * 2, '#FFFF00'); tx('SUB', cx(nC) + wTot + wSub / 2, y + hH, 13, true, 'center', 0, '#C1121F'); }
     y += hH * 2;
     T.list.forEach((row, ri) => {
       box(1, y, wSN, hR, '#fff'); tx(String(ri + 1), 1 + wSN / 2, y + hR / 2, 13);
@@ -11139,12 +11165,16 @@ Rules:
       let i = 0; trepRowCells(row, T.cols).forEach((c) => { box(cx(i), y, wC * c.span, hR, '#fff'); tx(trepFmt(c.v), cx(i) + wC * c.span / 2, y + hR / 2, 13); i += c.span; });
       if (T.hasOther) { box(cx(T.cols.length), y, wC, hR, '#fff'); tx(trepFmt(row.other), cx(T.cols.length) + wC / 2, y + hR / 2, 13); }
       box(cx(nC), y, wTot, hR, '#fff'); tx(trepFmt(row.total), cx(nC) + wTot / 2, y + hR / 2, 13, true);
+      if (T.subOn) { box(cx(nC) + wTot, y, wSub, hR, '#fff'); tx(trepFmt(row.sub), cx(nC) + wTot + wSub / 2, y + hR / 2, 13, true, 'center', 0, '#C1121F'); }
       y += hR;
     });
     box(1, y, cx(nC) - 1, hR, '#fff'); tx('Total:', cx(nC) - 8, y + hR / 2, 13, true, 'right');
     box(cx(nC), y, wTot, hR, '#fff'); tx(trepFmt(T.grand) || '0', cx(nC) + wTot / 2, y + hR / 2, 13, true);
+    if (T.subOn) { box(cx(nC) + wTot, y, wSub, hR, '#fff'); tx(trepFmt(T.grandSub) || '0', cx(nC) + wTot + wSub / 2, y + hR / 2, 13, true, 'center', 0, '#C1121F'); }
     return cv;
   }
+  function trepTitleText() { const mo = state.trep.mode === 'month'; return state.trep.sub === 'only' ? (mo ? 'Monthly Substitute Report' : 'Weekly Substitute Report') : (mo ? 'Monthly Teaching Report' : 'Weekly Teaching Report'); }
+  function trepFilePrefix() { return state.trep.sub === 'only' ? 'Substitute-Report' : 'Teaching-Report'; }
   function trepFileTag() { const r = trepRange(); return state.trep.mode === 'month' ? r.from.slice(0, 7) : r.from; }
   (function bindTeachingReport() {
     const on = (id, f) => { const el = document.getElementById(id); if (el) el.addEventListener('click', f); };
@@ -11160,24 +11190,114 @@ Rules:
       if (state.trep.busy || !state.trep.data || state.trep.data.error) { showToast('The report is still loading', 'error'); return; }
       const cv = trepCanvas(); if (!cv) return;
       cv.toBlob((blob) => {
-        const name = `Teaching-Report-${trepFileTag()}.png`;
+        const name = `${trepFilePrefix()}-${trepFileTag()}.png`;
         const file = new File([blob], name, { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'Teaching Report' }).catch(() => saveFile(name, blob));
+        if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: trepTitleText() }).catch(() => saveFile(name, blob));
         else saveFile(name, blob);
       }, 'image/png');
     });
     on('trepCsv', () => {
       const T = trepTable(); if (!T || state.trep.busy) { showToast('The report is still loading', 'error'); return; }
       const q = (v) => `"${String(v).replace(/"/g, '""')}"`;
-      const L = [[state.trep.mode === 'month' ? 'Monthly Teaching Report' : 'Weekly Teaching Report'], [`${state.trep.mode === 'month' ? 'Month' : 'Week'}: ${trepTitle()}`],
-        ['S.N', 'NAME OF FACULTY', ...T.cols.map((c) => `${c.head} ${c.label}`), ...(T.hasOther ? ['OTHER'] : []), 'TOTAL']];
+      const L = [[trepTitleText()], [`${state.trep.mode === 'month' ? 'Month' : 'Week'}: ${trepTitle()}`],
+        ['S.N', 'NAME OF FACULTY', ...T.cols.map((c) => `${c.head} ${c.label}`), ...(T.hasOther ? ['OTHER'] : []), 'TOTAL', ...(T.subOn ? ['SUB'] : [])]];
       T.list.forEach((row, i) => {
         const cells = row.cells.slice(); row.spans.forEach((x) => { cells[x.a] = (cells[x.a] || 0) + x.v; });
-        L.push([i + 1, row.name, ...cells.map(trepFmt), ...(T.hasOther ? [trepFmt(row.other)] : []), trepFmt(row.total)]);
+        L.push([i + 1, row.name, ...cells.map(trepFmt), ...(T.hasOther ? [trepFmt(row.other)] : []), trepFmt(row.total), ...(T.subOn ? [trepFmt(row.sub)] : [])]);
       });
-      L.push(['', 'Total', ...T.cols.map(() => ''), ...(T.hasOther ? [''] : []), trepFmt(T.grand) || '0']);
-      saveFile(`Teaching-Report-${trepFileTag()}.csv`, '\ufeff' + L.map((r) => r.map(q).join(',')).join('\n'), 'text/csv');
+      L.push(['', 'Total', ...T.cols.map(() => ''), ...(T.hasOther ? [''] : []), trepFmt(T.grand) || '0', ...(T.subOn ? [trepFmt(T.grandSub) || '0'] : [])]);
+      saveFile(`${trepFilePrefix()}-${trepFileTag()}.csv`, '\ufeff' + L.map((r) => r.map(q).join(',')).join('\n'), 'text/csv');
     });
+  })();
+  // ---------- Substitute classes: for the daily report and for the Teaching Report (SUB column / only substitute) ----------
+  // Read from the weekly timetables: every class that has a substitute (c.sub). The class length is the length of the period
+  // the class sits in now (after a swap the class sits in its new period). Swaps and shifts are never reported, only substitutes.
+  function subBatchLabel(b) { const n = classOfBatchNum(b); const m = String(b).match(/batch\s*(\d+)/i); return n ? `${n}th${m ? ' B-' + m[1] : ''}` : String(b); }
+  async function subCollect(from, to, force) {
+    const out = []; const wings = leadWings();
+    for (let ws = mondayOf(from); ws <= to; ws = shiftDateStr(ws, 7)) {
+      const docs = await loadWeekTimetables(ws, !!force);
+      docs.forEach((doc) => (doc.cells || []).forEach((c) => {
+        if (doc.weekStart && doc.weekStart !== ws) return; // a week's papers are read once for that week only
+        if (c.ex || !c.sub || !c.sub.t || c.d < from || c.d > to) return;
+        if (wings.indexOf(wingOfBatch(c.b)) === -1) return;
+        const tm = cellTimes(doc, c); if (!tm) return;
+        let bs = [c.b];
+        if (c.cb) { const ms = tgComboOf(doc.cells, c); const g0 = ttGroups().find((x) => x.key === doc.group); if (ms.length > 1 && g0) { const srt = ms.slice().sort((a, b) => g0.batches.indexOf(a.b) - g0.batches.indexOf(b.b)); if (srt[0].b !== c.b) return; bs = srt.map((x) => x.b); } }
+        out.push({ t: c.sub.t, f: c.sub.for || c.t || '', d: c.d, b: c.b, bs, p: c.p, a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), ts: tm.start, te: tm.end, ses: batchSession(c.b) });
+      }));
+    }
+    out.sort((x, y) => (x.d + x.ts).localeCompare(y.d + y.ts));
+    return out;
+  }
+  // ----- the daily report: one for the Morning batches, one for the Evening batches -----
+  state.subDay = state.subDay || { ses: 'morning', data: null, key: '', busy: false };
+  const SUB_SES = { morning: 'Morning', evening: 'Evening' };
+  function subName(u) { const t = trepTitleOf(u); const n = ttName(u); return t === 'Mr.' ? `${n} Sir` : t === 'Ms.' ? `${n} Ma'am` : n; }
+  const subTm = (v) => formatTimeStr(v).replace(/\s?AM$/i, ' am').replace(/\s?PM$/i, ' pm');
+  function subDayDateText(d) { const o = dateObj(d); const n = o.getDate(); const sf = (n % 10 === 1 && n !== 11) ? 'st' : (n % 10 === 2 && n !== 12) ? 'nd' : (n % 10 === 3 && n !== 13) ? 'rd' : 'th'; return `${o.toLocaleDateString('en-GB', { weekday: 'long' })}, ${n}${sf} ${o.toLocaleDateString('en-GB', { month: 'long' })} ${o.getFullYear()}`; }
+  function subDayRows(ses) { const D = state.subDay.data; if (!D || D.error) return []; return D.rows.filter((x) => (ses === 'evening' ? x.ses === 'evening' : x.ses !== 'evening')); }
+  function subDayText(ses) {
+    const rows = subDayRows(ses); const d = state.adminDate || todayStr();
+    let t = `*${SUB_SES[ses]} Batches · Substitute Report*\n${subDayDateText(d)}\n`;
+    if (!rows.length) return t + '\nNo substitute classes.';
+    rows.forEach((x, i) => { t += `\n${i + 1}. ${subName(x.t)}${x.f ? `\n    in place of ${subName(x.f)}` : ''}\n    ${x.bs.map(subBatchLabel).join(' + ')} · ${subTm(x.ts)} – ${subTm(x.te)}\n`; });
+    return t.trimEnd();
+  }
+  function subDayCanvas(ses) {
+    const rows = subDayRows(ses); const d = state.adminDate || todayStr();
+    const W = 1000; const hT = 118; const hH = 52; const hR = 84; const H = hT + hH + hR * Math.max(rows.length, 1) + 2;
+    const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
+    const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#000'; x.lineWidth = 1.5; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
+    const tx = (s, cx, cy, size, bold, align, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(s).width > maxW && f > 10) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(s, cx, cy); };
+    const w1 = 560; const w2 = 190; const w3 = W - w1 - w2;
+    box(0, 0, W, hT, '#fff'); tx(`${SUB_SES[ses]} Batches · Substitute Report`, W / 2, 40, 34, true); tx(subDayDateText(d), W / 2, 84, 28, true);
+    let y = hT; box(0, y, w1, hH, '#F2F2F2'); tx('Faculty Name', w1 / 2, y + hH / 2, 24, true); box(w1, y, w2, hH, '#F2F2F2'); tx('Class', w1 + w2 / 2, y + hH / 2, 24, true); box(w1 + w2, y, w3, hH, '#F2F2F2'); tx('Class Time', w1 + w2 + w3 / 2, y + hH / 2, 24, true); y += hH;
+    if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No substitute classes', W / 2, y + hR / 2, 26, false); return cv; }
+    rows.forEach((r) => {
+      box(0, y, w1, hR, '#fff'); tx(subName(r.t), w1 / 2, y + (r.f ? 28 : hR / 2), 27, true, 'center', w1 - 24); if (r.f) tx(`In place of ${subName(r.f)}`, w1 / 2, y + 58, 23, false, 'center', w1 - 24);
+      box(w1, y, w2, hR, '#fff'); tx(r.bs.map(subBatchLabel).join(' + '), w1 + w2 / 2, y + hR / 2, 26, true, 'center', w2 - 16);
+      box(w1 + w2, y, w3, hR, '#fff'); tx(`${subTm(r.ts)} – ${subTm(r.te)}`, w1 + w2 + w3 / 2, y + hR / 2, 25, false, 'center', w3 - 16);
+      y += hR;
+    });
+    return cv;
+  }
+  function subDayRender() {
+    const box = document.getElementById('subDayBox'); if (!box) return;
+    const sd = state.subDay; const d = state.adminDate || todayStr();
+    document.querySelectorAll('#subDaySes [data-sd-ses]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-sd-ses') === sd.ses));
+    if (sd.busy || !sd.data) { box.innerHTML = '<div class="skel short"></div>'; return; }
+    if (sd.data.error) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the report. Check the internet and try again.</div>'; return; }
+    const rows = subDayRows(sd.ses);
+    let h = `<div class="sd-card"><div class="sd-h">${SUB_SES[sd.ses]} Batches · Substitute Report</div><div class="sd-sub">${escapeHtml(subDayDateText(d))} · ${rows.length} substitute class${rows.length === 1 ? '' : 'es'}</div>`;
+    if (!rows.length) h += `<div class="sd-none">No substitute classes in the ${sd.ses} batches on this day.</div>`;
+    else h += `<table class="sd-t"><thead><tr><th>Faculty Name</th><th>Class</th><th>Class Time</th></tr></thead><tbody>${rows.map((r) => `<tr><td><b>${escapeHtml(subName(r.t))}</b>${r.f ? `<br><span>in place of ${escapeHtml(subName(r.f))}</span>` : ''}</td><td>${escapeHtml(r.bs.map(subBatchLabel).join(' + '))}</td><td>${escapeHtml(subTm(r.ts))}<br>${escapeHtml(subTm(r.te))}</td></tr>`).join('')}</tbody></table>`;
+    h += '<div class="hv-note" style="text-align:left;">Only substitutes. The time is the time of the period the class was taken in.</div></div>';
+    box.innerHTML = h;
+    const none = !rows.length; ['subDayImg', 'subDayWa'].forEach((id) => { const b = document.getElementById(id); if (b) b.disabled = none; });
+  }
+  async function subDayEnsure() {
+    const sd = state.subDay; const d = state.adminDate || todayStr();
+    if (sd.busy) return; if (sd.key === d && sd.data && !sd.data.error) { subDayRender(); return; }
+    sd.busy = true; sd.key = d; subDayRender();
+    try { sd.data = { rows: await subCollect(d, d, true) }; } catch (err) { sd.data = { error: true }; }
+    sd.busy = false; subDayRender();
+  }
+  (function bindSubReports() {
+    const on = (id, f) => { const el = document.getElementById(id); if (el) el.addEventListener('click', f); };
+    document.querySelectorAll('#subDaySes [data-sd-ses]').forEach((b) => b.addEventListener('click', () => { state.subDay.ses = b.getAttribute('data-sd-ses'); subDayRender(); }));
+    document.querySelectorAll('#trepSubMode [data-trep-sub]').forEach((b) => b.addEventListener('click', () => { state.trep.sub = b.getAttribute('data-trep-sub'); trepRender(); }));
+    on('subDayImg', () => {
+      const sd = state.subDay; if (sd.busy || !sd.data || sd.data.error) { showToast('The report is still loading', 'error'); return; }
+      const cv = subDayCanvas(sd.ses);
+      cv.toBlob((blob) => {
+        const name = `Substitute-Report-${sd.ses}-${state.adminDate || todayStr()}.png`; const file = new File([blob], name, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: `${SUB_SES[sd.ses]} Batches · Substitute Report` }).catch(() => saveFile(name, blob));
+        else saveFile(name, blob);
+      }, 'image/png');
+    });
+    on('subDayWa', () => { const sd = state.subDay; if (sd.busy || !sd.data || sd.data.error) { showToast('The report is still loading', 'error'); return; } window.open('https://wa.me/?text=' + encodeURIComponent(subDayText(sd.ses)), '_blank'); });
   })();
   // ---------- Duty Plan inside the New / Edit Exam form ----------
   // Rooms only (the exam's classes are chosen once above). Built when the form opens and rebuilt only on taps,
@@ -12943,6 +13063,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((b) => b.addEventListener('click', () => {
     state.adminRepKind = b.getAttribute('data-rep-kind');
     if (state.adminRepKind === 'count' && (state.adminReportRange || 'day') === 'day') state.adminReportRange = 'week';
+    if (state.adminRepKind === 'count') state.trep.sub = 'all'; if (state.adminRepKind === 'sub') state.trep.sub = 'only';
     renderRepControls();
   }));
   document.getElementById('repPrev').addEventListener('click', () => shiftRepPeriod(-1));
@@ -14486,24 +14607,26 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   // ---------- Reports page: one period, one teacher, one report type ----------
-  const REP_NOTE = { full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a week or a month.' };
+  const REP_NOTE = { full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a week or a month. A red SUB column shows the substitute classes.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.' };
   function renderRepControls() {
     try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
     const kind = state.adminRepKind || 'full'; let range = state.adminReportRange || 'day';
     if (kind === 'count' && range === 'day') { range = 'week'; state.adminReportRange = 'week'; }
+  const subDay = kind === 'sub' && range === 'day'; const showCount = kind === 'count' || (kind === 'sub' && range !== 'day');
     document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((c) => { const r = c.getAttribute('data-report-range'); c.classList.toggle('active', r === range); c.disabled = kind === 'count' && r === 'day'; });
     document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
     const { label } = adminReportRangeDates();
     const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label; syncRepBack();
-    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count';
+    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
-    document.getElementById('repStd').hidden = kind === 'count';
+    document.getElementById('repStd').hidden = showCount || subDay;
     const shareT = document.getElementById('repAttShare'); if (shareT) shareT.hidden = kind !== 'att';
     const tiles = document.getElementById('repStdTiles'); if (tiles) tiles.style.gridTemplateColumns = kind === 'att' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
     const ap = document.getElementById('repAttPrev');
     if (ap) { if (kind === 'att') { const sp = adminRepSpec(); showAttPreview('repAttPrev', document.getElementById('adminRepTeacher').value || null, null, null); void sp; } else { ap.hidden = true; ap.innerHTML = ''; } }
-    document.getElementById('repCount').hidden = kind !== 'count';
-    if (kind === 'count' && typeof trepEnsure === 'function') trepEnsure();
+    document.getElementById('repCount').hidden = !showCount; const sdv = document.getElementById('repSubDay'); if (sdv) sdv.hidden = !subDay;
+    if (showCount && typeof trepEnsure === 'function') trepEnsure();
+    if (subDay) subDayEnsure();
   }
   // move the report period back or forward (the date above the page moves with it)
   function syncRepBack() {
