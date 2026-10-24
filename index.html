@@ -3481,7 +3481,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.49 · updated 19 Nov 2026</div>
+          <div class="dnote">Version 13.50 · updated 20 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9155,7 +9155,7 @@ Rules:
     }
     return out;
   }
-  function renderBdayCard() { const el = document.getElementById('bdayCard'); if (!el) return; const h = bdayCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; try { bdSurpriseMaybe(); } catch (e) { /* ignore */ } }
+  function renderBdayCard() { const el = document.getElementById('bdayCard'); if (!el) return; const h = bdayCardHtml(); if (el._bdH !== h) { el.innerHTML = h; el._bdH = h; } el.hidden = !h; try { bdSurpriseMaybe(); } catch (e) { /* ignore */ } }
   function bdWish(id, name) {
     const b = (state.birthdays || []).find((x) => x.id === id); const num = b ? calWa(b) : '';
     const me = String((state.user && state.user.name) || '').trim().split(/\s+/)[0];
@@ -9283,7 +9283,7 @@ Rules:
   // a screen to tap (a phone only allows sound after a tap), then paper confetti and balloons, and the Happy Birthday tune (about 12 seconds, made by the phone itself)
   const BD_SONG = [['G4', 0.75], ['G4', 0.25], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2], ['G4', 0.75], ['G4', 0.25], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2], ['G4', 0.75], ['G4', 0.25], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 2], ['F5', 0.75], ['F5', 0.25], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 2]];
   const BD_HZ = { G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784 };
-  let bdOsc = [];
+  let bdOsc = []; let bdPopT = 0;
   function bdSing() {
     try {
       unlockAudio(); const ac = audioCtx; if (!ac) return;
@@ -9320,7 +9320,7 @@ Rules:
   }
   function bdPlay() {
     bdSing(); bdShow();
-    const c = document.getElementById('bdayCard'); if (c) { c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+    const c = document.getElementById('bdayCard'); if (c) { c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); clearTimeout(bdPopT); bdPopT = setTimeout(() => c.classList.remove('pop'), 900); }
   }
   function bdSurpriseMaybe() {
     const el = document.getElementById('bdayCard'); if (!el || el.hidden || !el.querySelector('.bday-card')) return;
