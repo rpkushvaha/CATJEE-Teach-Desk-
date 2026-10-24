@@ -2271,6 +2271,13 @@
   #pushOptCard[hidden], #pushTestCard[hidden], #pushPageTest[hidden] { display: none !important; }
   /* whatever is marked hidden is really gone (a menu row with display:flex used to stay on the screen, e.g. "Send a notice" for teachers) */
   [hidden] { display: none !important; }
+  /* birthday today: the small card with a small green Wish button in its bottom right corner */
+  .bday-small { cursor: default; }
+  .bday-small .bs-t { cursor: pointer; }
+  .bs-r { display: flex; justify-content: flex-end; margin-top: 6px; }
+  .bs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; }
+  .bs-row + .bs-row { border-top: 1px solid #F7C9D0; }
+  .bs-wa { display: inline-flex; align-items: center; gap: 5px; border: 0; border-radius: 99px; background: #1E8E4E; color: #fff; font: inherit; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer; flex: none; }
 </style>
 </head>
 <body>
@@ -3463,7 +3470,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.47 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 13.48 · updated 18 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9129,11 +9136,22 @@ Rules:
     const mine = L.filter((b) => b.uid && b.uid === state.teacherId); const others = L.filter((b) => !(b.uid && b.uid === state.teacherId));
     const d = dateObj(t); const doy = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000); let out = '';
     if (mine.length) out += `<div class="bday-card"><div class="bday-em">🎂🎉🎈</div><b>Happy Birthday, ${escapeHtml(bdName(mine[0]))}!</b><span>${escapeHtml(BDAY_MSG[(d.getFullYear() + doy) % BDAY_MSG.length])}</span></div>`;
-    if (others.length) { const names = others.map((b) => escapeHtml(bdName(b))); out += `<button type="button" class="bday-small" data-cal-open="${t}">🎂 ${names.length === 1 ? `Today is ${names[0]}'s birthday` : `Today is the birthday of ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`}</button>`; }
+    if (others.length) {
+      const pill = (b) => `<button type="button" class="bs-wa" data-bd-wish="${escapeHtml(b.id || '')}" data-bd-name="${escapeHtml(bdName(b))}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Wish</button>`;
+      out += others.length === 1
+        ? `<div class="bday-small"><div class="bs-t" data-cal-open="${t}">🎂 Today is ${escapeHtml(bdName(others[0]))}'s birthday</div><div class="bs-r">${pill(others[0])}</div></div>`
+        : `<div class="bday-small"><div class="bs-t" data-cal-open="${t}">🎂 Birthdays today</div>${others.map((b) => `<div class="bs-row"><span>${escapeHtml(bdName(b))}</span>${pill(b)}</div>`).join('')}</div>`;
+    }
     return out;
   }
   function renderBdayCard() { const el = document.getElementById('bdayCard'); if (!el) return; const h = bdayCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
-  (function bindBday() { const el = document.getElementById('bdayCard'); if (el) el.addEventListener('click', (e) => { const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); }); })();
+  function bdWish(id, name) {
+    const b = (state.birthdays || []).find((x) => x.id === id); const num = b ? calWa(b) : '';
+    const me = String((state.user && state.user.name) || '').trim().split(/\s+/)[0];
+    const msg = `Happy Birthday, ${name}! 🎂🎉 Wishing you a wonderful year ahead.${me ? ' — ' + me : ' Team CATJEE'}`;
+    window.open('https://wa.me/' + (num || '') + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+  (function bindBday() { const el = document.getElementById('bdayCard'); if (el) el.addEventListener('click', (e) => { const w = e.target.closest('[data-bd-wish]'); if (w) { e.stopPropagation(); bdWish(w.getAttribute('data-bd-wish'), w.getAttribute('data-bd-name')); return; } const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); }); })();
   // ---------- Save buttons are grey until something is edited, red once it is ----------
   const SD_IDS = ['saveClassBtn', 'menuNameSaveBtn', 'subjectSaveBtn', 'profileContactSave', 'dnSave', 'pdSave', 'peSave', 'nbSave', 'ntOk', 'exOk', 'asSave', 'apsSave', 'dtSave', 'plSave', 'cfSave', 'bfSave'];
   const SD_SEL = SD_IDS.map((i) => '#' + i).join(',');
