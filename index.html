@@ -3510,7 +3510,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.56 · updated 26 Nov 2026</div>
+          <div class="dnote">Version 13.57 · updated 27 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11012,7 +11012,9 @@ Rules:
   // columns: SCHOOL (morning, one per batch), REMEDIAL (special, one), COACHING (evening, one per batch), FOUNDATION (one per session)
   function trepColumns() {
     const cols = []; const heads = [];
-    ttGroups().forEach((g) => {
+    // school batches, then the remedial class (it is a school class too), then coaching, then foundation
+    const rank = (g) => (/foundation/i.test(g.wing) && !/pre/i.test(g.wing) ? 3 : g.session === 'morning' ? 0 : g.session === 'special' ? 1 : 2);
+    ttGroups().map((g, i) => ({ g, i })).sort((x, y) => rank(x.g) - rank(y.g) || x.i - y.i).map((x) => x.g).forEach((g) => {
       const fnd = /foundation/i.test(g.wing) && !/pre/i.test(g.wing);
       const head = fnd ? 'FOUNDATION' : (g.session === 'morning' ? 'SCHOOL' : g.session === 'evening' ? 'COACHING' : 'SCHOOL');
       const nth = (b) => { const n = classOfBatchNum(b); return n ? n + 'th' : ''; };
