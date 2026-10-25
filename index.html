@@ -2308,6 +2308,11 @@
   .sd-t td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: top; }
   .sd-t td span { color: var(--muted-2, #777); font-size: 12px; }
   .trep-totc { white-space: nowrap; }
+  /* the class chosen for a swap stays yellow until the swap is done or cancelled */
+  .tg-c.tg-swapsrc { background: #FFE45C !important; box-shadow: inset 0 0 0 2px #C9A400; }
+  .tg-c.tg-swapsrc b, .tg-c.tg-swapsrc small, .tg-c.tg-swapsrc i { color: #3A2F00; }
+  [data-theme="dark"] .tg-c.tg-swapsrc { background: #E8C93A !important; }
+  .hol-duty { display: block; margin: 4px 2px 0; padding: 6px 2px; border: 0; background: transparent; color: var(--accent); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; }
 </style>
 </head>
 <body>
@@ -3508,7 +3513,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.59 · updated 29 Nov 2026</div>
+          <div class="dnote">Version 13.61 · updated 1 Dec 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3553,7 +3558,7 @@
     'Foundation': []
   };
   const DEFAULT_BATCHES = DEFAULT_BATCHES_BY_WING['Pre-Foundation'];
-  const ACTIVITY_TYPES = ['Other Activity', 'Invigilation', 'Leave / Holiday', 'Coordination'];
+  const ACTIVITY_TYPES = ['Other Activity', 'Invigilation', 'Leave / Holiday', 'Coordination', 'Extra Work / Holiday Duty'];
   const COORD_TAGS = ['Timetable', 'Arrangement', 'Teacher follow-up', 'Parent calls', 'Exam / duty', 'Meeting', 'Other'];
   const isLeadNow = () => !!(state.canAdmin || state.isCoordinator);
   const ACT_ICONS = {"Other Activity": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/></svg>", "Invigilation": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2\"/><rect x=\"9\" y=\"3\" width=\"6\" height=\"4\" rx=\"1\"/><polyline points=\"9 14 11 16 15 12\"/></svg>", "Leave / Holiday": "<svg class=\"ic\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"/><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"/><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"/><line x1=\"9\" y1=\"14\" x2=\"15\" y2=\"18\"/><line x1=\"15\" y1=\"14\" x2=\"9\" y2=\"18\"/></svg>"};
@@ -3561,7 +3566,7 @@
   const DEFAULT_TEST_TYPES = ['Class Test', 'Unit Test', 'Half-Yearly', 'Pre-Board 1', 'Pre-Board 2', 'Annual Exam'];
   const DEFAULT_SUBJECTS = ['Maths', 'Physics', 'Chemistry', 'Biology', 'Science', 'English', 'Hindi', 'Social Science', 'Computer', 'Reasoning'];
   // Saved value stays 'Other Activity' (older records use it); it is shown as 'Other Work'.
-  function activityLabel(t) { return t === 'Other Activity' ? 'Other Work' : (t === 'Coordination' ? 'Coordination Work' : (t || 'Activity')); }
+  function activityLabel(t) { return t === 'Extra Work / Holiday Duty' ? 'Holiday Duty' : t === 'Other Activity' ? 'Other Work' : (t === 'Coordination' ? 'Coordination Work' : (t || 'Activity')); }
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const REMINDER_PREF_KEY = 'catjee_reminders_enabled';
 
@@ -5284,6 +5289,26 @@
     }
     return t;
   }
+  function selfSubCanvas(D, r) {
+    const rows = D.subList; const W = 760; const hT = 34; const hR = 30; const SC = 2; const H = hT * 2 + 30 + Math.max(rows.length, 1) * hR + 44;
+    const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC; const x = cv.getContext('2d'); x.scale(SC, SC); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#B5B5B5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); };
+    const tx = (t, ax, ay, size, bold, color, align, maxW) => { x.fillStyle = color || '#111'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; while (maxW && x.measureText(t).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(t, ax, ay); };
+    let y = 1;
+    box(1, y, W - 2, hT, '#FFC000'); tx('My Substitute Classes', W / 2, y + hT / 2, 19, true, '#000', 'center'); y += hT;
+    box(1, y, W - 2, hT, '#E26B0A'); tx(`${(state.user && state.user.name) || ''}   ${r.mode === 'day' ? subDayDateText(r.from) : `${r.from} to ${r.to}`}`, W / 2, y + hT / 2, 16, true, '#000', 'center'); y += hT;
+    const X = [1, 120, 240, 420, 640]; const Wc = [119, 120, 180, 220, W - 2 - 640];
+    ['Date', 'Class', 'Time', 'In place of', 'Counted'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); }); y += 30;
+    if (!rows.length) { box(1, y, W - 2, hR, '#fff'); tx('No substitute classes in this period', W / 2, y + hR / 2, 14, false, '#666', 'center'); y += hR; }
+    rows.forEach((q, i) => {
+      const fill = i % 2 ? '#F4F7FB' : '#FFFFFF'; X.forEach((xx, k) => box(xx, y, Wc[k], hR, fill));
+      tx(selfDay(q.d), X[0] + Wc[0] / 2, y + hR / 2, 13, true, '#111', 'center'); tx(q.bs.map(subBatchLabel).join(' + '), X[1] + Wc[1] / 2, y + hR / 2, 13, true, '#111', 'center', Wc[1] - 8);
+      tx(`${subTm(m2t(q.a))} - ${subTm(m2t(q.z))}`, X[2] + Wc[2] / 2, y + hR / 2, 13, false, '#111', 'center', Wc[2] - 8); tx(q.fn || '-', X[3] + 8, y + hR / 2, 13, false, '#111', 'left', Wc[3] - 14);
+      tx(q.status === 'filled' ? trepFmt(q.units) : q.status === 'upcoming' ? 'to come' : 'not filled in', X[4] + Wc[4] / 2, y + hR / 2, 13, q.status === 'filled', q.status === 'filled' ? '#111' : q.status === 'upcoming' ? '#B26A00' : '#C1121F', 'center', Wc[4] - 6); y += hR;
+    });
+    box(1, y, W - 2, 32, '#EEF2F7'); tx(`Counted (filled in): ${trepFmt(selfSubCounted(D)) || '0'}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
+    const out = document.createElement('canvas'); out.width = W * SC; out.height = Math.ceil((y + 2) * SC); out.getContext('2d').drawImage(cv, 0, 0); return out;
+  }
   async function hvSelfEnsure() {
     const box = document.getElementById('hvCntPrev'); if (!box) return;
     const r = hvSelfRange(); const sf = state.hvSelf; box.hidden = false;
@@ -5299,11 +5324,13 @@
     if (state.hvRepKind === 'cnt') {
       selfTrepSet(); let img = ''; try { const cv = trepCanvas(); img = cv ? cv.toDataURL('image/png') : ''; } catch (e) { img = ''; }
       const T = trepTable(); const miss = D.missing.length;
-      box.innerHTML = (img ? `<img class="trep-img" alt="${escapeHtml(trepTitleText())}" src="${img}" style="width:100%;border-radius:8px;">` : '') + `<div class="hv-note" style="text-align:left;">Only your own classes. In a cell and in the total: regular <b style="color:#C1121F;">+ substitute</b> (red); a substitute class counts when you have filled it in.${miss ? ` <b>${miss}</b> class${miss === 1 ? '' : 'es'} not filled in (not counted).` : ''}</div>`;
+      box.innerHTML = (img ? `<button type=\"button\" class=\"att-pic\" aria-label=\"Open the report big\"><img src=\"${img}\" alt=\"${escapeHtml(trepTitleText())}\"><span>Tap to open big</span></button>` : '') + `<div class="hv-note" style="text-align:left;">Only your own classes. In a cell and in the total: regular <b style="color:#C1121F;">+ substitute</b> (red); a substitute class counts when you have filled it in.${miss ? ` <b>${miss}</b> class${miss === 1 ? '' : 'es'} not filled in (not counted).` : ''}</div>`;
+      const ap = box.querySelector('.att-pic'); if (ap) ap.addEventListener('click', () => openZoomViewer(img, { turn: false }));
       return;
     }
-    const rows = D.subList; const c = selfSubCounted(D);
-    box.innerHTML = `<div class="sd-card"><div class="sd-h">My substitute classes</div><div class="sd-sub">${r.mode === 'day' ? escapeHtml(subDayDateText(r.from)) : `${escapeHtml(r.from)} to ${escapeHtml(r.to)}`} · counted ${trepFmt(c) || '0'}</div>${rows.length ? `<table class="sd-t"><thead><tr><th>Date</th><th>Class</th><th>Time</th></tr></thead><tbody>${rows.map((x) => `<tr><td>${escapeHtml(selfDay(x.d))}</td><td><b>${escapeHtml(x.bs.map(subBatchLabel).join(' + '))}</b><br><span>in place of ${escapeHtml(x.fn || '-')}</span></td><td>${escapeHtml(subTm(m2t(x.a)))}<br>${escapeHtml(subTm(m2t(x.z)))}<br><b style="${x.status === 'filled' ? '' : x.status === 'missing' ? 'color:#C1121F;' : 'color:#B26A00;'}">${x.status === 'filled' ? trepFmt(x.units) : x.status === 'upcoming' ? 'to come' : 'not filled'}</b></td></tr>`).join('')}</tbody></table>` : '<div class="sd-none">No substitute classes in this period.</div>'}<div class="hv-note" style="text-align:left;">A substitute class counts when you have filled it in, with the time you filled in.</div></div>`;
+    let img = ''; try { img = selfSubCanvas(D, r).toDataURL('image/png'); } catch (e) { img = ''; }
+    box.innerHTML = (img ? `<button type="button" class="att-pic" aria-label="Open the report big"><img src="${img}" alt="My substitute classes"><span>Tap to open big</span></button>` : '') + `<div class="hv-note" style="text-align:left;">A substitute class counts when you have filled it in, with the time you filled in.${D.subList.some((x) => x.status === 'missing') ? ' Classes marked "not filled in" are not counted.' : ''}</div>`;
+    const ap = box.querySelector('.att-pic'); if (ap) ap.addEventListener('click', () => openZoomViewer(img, { turn: false }));
   }
   function hvSelfOn() { return state.hvRepKind === 'cnt' || state.hvRepKind === 'sub'; }
   async function hvSelfOut(how) {
@@ -6389,16 +6416,16 @@
     const sel = state.tg.sel;
     const sw = state.tg.swap;
     if (sw) html += `<div class="tg-selbar"><span>⇄ Tap the period to swap with (${escapeHtml(gridBatchLabel(sw.k.split('|').slice(2).join('|')))})</span><span><button type="button" class="btn-secondary" id="tgSwapCancel" style="border-color: var(--line);">Cancel</button></span></div>`;
-    if (sel && sel.multi) {
-      const selCells = sel.cells.map((k) => { const [dd, pp, ...rest] = k.split('|'); return tgCell(dd, Number(pp), rest.join('|')); });
+    if (state.tg.swapPick) html += '<div class="tg-selbar"><span>⇄ Tap the class you want to swap</span><span><button type="button" class="btn-secondary" id="tgSwapPickCancel" style="border-color: var(--line);">Cancel</button></span></div>';
+    if (sel && sel.multi) { const selCells = sel.cells.map((k) => { const [dd, pp, ...rest] = k.split('|'); return tgCell(dd, Number(pp), rest.join('|')); });
       const nEx = selCells.filter((c) => c && c.ex).length; const cls = selCells.filter((c) => c && !c.ex && c.s);
-      const allTest = cls.length && cls.every((c) => c.test);
-      html += `<div class="tg-selbar tg-msel"><span>${sel.cells.length ? `<b>${sel.cells.length}</b> selected · tap more cells` : 'Tap the cells of the exam or class test'}</span>
-        <span class="tg-msel-btns">${(sel.cells.length === 1 && cls.length === 1) ? '<button type="button" class="btn-secondary" id="tgMSwap" style="border-color: var(--line);">⇄ Swap with</button>' : ''}${cls.length ?  `<button type="button" class="btn-secondary" id="tgMTest" style="border-color: var(--line);">${allTest ? 'Remove test' : 'Class test'}</button>` : ''}
-        ${tgCanCombine(selCells) ? '<button type="button" class="btn-secondary" id="tgMCombine" style="border-color: var(--line);"><span class="ico i-link" aria-hidden="true"></span> Combine</button>' : ''}
-        ${selCells.some((c) => c && c.cb) ? '<button type="button" class="btn-secondary" id="tgMSplit" style="border-color: var(--line);">Separate</button>' : ''}
-        ${nEx ? `<button type="button" class="btn-secondary" id="tgMExDel" style="border-color: var(--line);">${selCells.every((c) => !c || !c.ex || isNoteId(c.ex)) ? 'Remove note' : 'Remove exam'}</button>` : (sel.cells.length ? '<button type="button" class="btn-secondary" id="tgMExam" style="border-color: var(--line);">Exam / Test</button><button type="button" class="btn-secondary" id="tgMNote" style="border-color: var(--line);">Note</button>' : '')}
-        ${sel.cells.length ? '<button type="button" class="btn-secondary hv-del" id="tgMClear" style="border-color: var(--line);">Clear</button>' : ''}
+      const allTest = cls.length && cls.every((c) => c.test); const noteOnly = sel.intent === 'note';
+      html += `<div class="tg-selbar tg-msel"><span>${sel.cells.length ? `<b>${sel.cells.length}</b> selected · tap more cells` : (noteOnly ? 'Tap the cells for the note' : 'Tap the cells of the exam or class test')}</span>
+        <span class="tg-msel-btns">${(!noteOnly && sel.cells.length === 1 && cls.length === 1) ? '<button type="button" class="btn-secondary" id="tgMSwap" style="border-color: var(--line);">⇄ Swap with</button>' : ''}${!noteOnly && cls.length ? `<button type="button" class="btn-secondary" id="tgMTest" style="border-color: var(--line);">${allTest ? 'Remove test' : 'Class test'}</button>` : ''}
+        ${!noteOnly && tgCanCombine(selCells) ? '<button type="button" class="btn-secondary" id="tgMCombine" style="border-color: var(--line);"><span class="ico i-link" aria-hidden="true"></span> Combine</button>' : ''}
+        ${!noteOnly && selCells.some((c) => c && c.cb) ? '<button type="button" class="btn-secondary" id="tgMSplit" style="border-color: var(--line);">Separate</button>' : ''}
+        ${nEx ? `<button type="button" class="btn-secondary" id="tgMExDel" style="border-color: var(--line);">${selCells.every((c) => !c || !c.ex || isNoteId(c.ex)) ? 'Remove note' : 'Remove exam'}</button>` : (sel.cells.length ? (noteOnly ? '' : '<button type="button" class="btn-secondary" id="tgMExam" style="border-color: var(--line);">Exam / Test</button>') + '<button type="button" class="btn-secondary" id="tgMNote" style="border-color: var(--line);">Note</button>' : '')}
+        ${!noteOnly && sel.cells.length ? '<button type="button" class="btn-secondary hv-del" id="tgMClear" style="border-color: var(--line);">Clear</button>' : ''}
         <button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
     } else if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
     const dNote = dayNoteOf(doc, d);
@@ -6418,7 +6445,7 @@
         const k = `${d}|${i}|${b}`;
         let rspan = 1;
         if (c && c.cb && !c.ex) { for (let j = bi + 1; j < g.batches.length; j++) { const n2 = tgCell(d, i, g.batches[j]); if (n2 && n2.cb === c.cb) { rspan++; rowSkip[i + '|' + g.batches[j]] = 1; } else break; } }
-        const isSel = sel && sel.cells.indexOf(k) !== -1;
+        const isSel = sel && sel.cells.indexOf(k) !== -1; const isSw = !!(state.tg.swap && state.tg.swap.k === k);
         if (c && c.ex) {
           let span = 1; while (i + span < perD.length && !perD[i + span].off) { const n2 = tgCell(d, i + span, b); if (n2 && n2.ex === c.ex) span++; else break; }
           skipTo = i + span - 1;
@@ -6427,7 +6454,7 @@
         const exHere = examAt(b, d, pp.start, pp.end);
         if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small><span class="ico i-note" aria-hidden="true"></span> ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
         const cl = c ? ((clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) + (c.subWait ? ' tg-wait' : '')) : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small${effT(c) ? '' : ' class="tg-nt"'}>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '–'}</small>${c.sub ? '<i>Sub</i>' : ''}${c.subWait ? '<i class="tg-waitlbl">Substitute</i>' : ''}${ttLeaveOf(effT(c), d) ? '<i class="tg-lvtag">⚠ On leave</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${isSw ? ' tg-swapsrc' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small${effT(c) ? '' : ' class="tg-nt"'}>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '–'}</small>${c.sub ? '<i>Sub</i>' : ''}${c.subWait ? '<i class="tg-waitlbl">Substitute</i>' : ''}${ttLeaveOf(effT(c), d) ? '<i class="tg-lvtag">⚠ On leave</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
@@ -6452,7 +6479,7 @@
     const moreItems = [];
     if (editable && aiReady()) moreItems.push(rowBtn('tgPhoto', 'i-spark', 'Fill from a photo'));
     if (editable) { moreItems.push(rowBtn('tgCopyWeek', 'i-file', 'Copy last week')); moreItems.push(rowBtn('tgCopyDay', 'i-cal', 'Copy this day to…')); }
-        if (editable) moreItems.push(rowBtn('tgExam', 'i-note', 'Exam / Class test'));
+        if (editable) { moreItems.push(rowBtn('tgSwapStart', 'i-swap', 'Swap with')); moreItems.push(rowBtn('tgNoteStart', 'i-note', 'Note')); moreItems.push(rowBtn('tgExam', 'i-note', 'Exam / Class test')); }
     if (weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey)) moreItems.push(rowBtn('tgImage', 'i-share', 'Share image'));
     if (editable) moreItems.push(rowBtn('tgDelWeek', 'i-trash', 'Delete week', ' hv-del'));
     
@@ -6550,6 +6577,7 @@
       if (td._lpFired) { td._lpFired = false; return; }
       const [d, p, ...rest] = td.getAttribute('data-tg-cell').split('|'); const b = rest.join('|'); const pi = Number(p);
       if (state.tg.sel) { tgToggleSel(d, pi, b); return; }
+      if (state.tg.swapPick) { const c0 = tgCell(d, pi, b); if (!c0 || c0.ex || !c0.s) { showToast('Tap a class to swap', 'error'); return; } state.tg.swapPick = false; state.tg.swap = { k: `${d}|${pi}|${b}` }; renderTgGrid(); return; }
       if (state.tg.swap) { tgSwapPick(d, pi, b); return; }
       const cx = tgCell(d, pi, b);
       if (cx && cx.ex) { openExamBlockSheet(cx); return; }
@@ -6579,7 +6607,7 @@
     on('tgUndo', tgUndo);
     on('tgDiscard', tgDiscard);
     on('tgBatchPics', tgBatchPictures);
-    on('tgExam', tgStartExamSelect);
+    on('tgExam', tgStartExamSelect); on('tgSwapStart', tgStartSwapPick); on('tgNoteStart', tgStartNoteSelect); on('tgSwapPickCancel', () => { state.tg.swapPick = false; renderTgGrid(); });
       document.querySelectorAll('[data-lv-give]').forEach((b) => b.addEventListener('click', () => { state.tg.day = b.getAttribute('data-lv-give'); renderTgGrid(); const t0 = document.getElementById('tgWrap'); if (t0) t0.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   on('tgPreview', tgPreview);
     on('tgDelWeek', tgDeleteWeek);
@@ -7282,7 +7310,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     tgIdleWarn(0);
     if (!(state.tg.editKey && state.tg.editKey === state.tg.docKey)) return;
     try { if (tgSaveTimer) tgFlush(); } catch (e) { /* ignore */ }
-    state.tg.editKey = null; state.tg.paint = null; state.tg.sel = null; state.tg.swap = null;
+    state.tg.editKey = null; state.tg.paint = null; state.tg.sel = null; state.tg.swap = null; state.tg.swapPick = false;
     if (msg && document.getElementById('tgWrap')) { renderTgGrid(); showToast(msg); }
   }
   setInterval(() => {
@@ -7366,6 +7394,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     return true;
   }
   function tgStartExamSelect() { state.tg.sel = { cells: [], multi: true }; state.tg.paint = null; state.tg.copy = null; renderTgGrid(); setTimeout(() => { const b = document.querySelector('.tg-msel'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60); }
+  // "Swap with" from the list: first tap the class you want to swap, then the period to swap it with (same batch, same day)
+  function tgStartSwapPick() { state.tg.sel = null; state.tg.paint = null; state.tg.copy = null; state.tg.swap = null; state.tg.swapPick = true; renderTgGrid(); setTimeout(() => { const b = document.querySelector('.tg-selbar'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60); }
+  // "Note" from the list: tap the cells for the note, then the Note button
+  function tgStartNoteSelect() { state.tg.sel = { cells: [], multi: true, intent: 'note' }; state.tg.paint = null; state.tg.copy = null; state.tg.swap = null; state.tg.swapPick = false; renderTgGrid(); setTimeout(() => { const b = document.querySelector('.tg-msel'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60); }
   function tgToggleSel(d, p, b) {
     const sel = state.tg.sel; const k = `${d}|${p}|${b}`; const i = sel.cells.indexOf(k);
     if (i === -1) sel.cells.push(k); else sel.cells.splice(i, 1);
@@ -9118,13 +9150,20 @@ Rules:
     if (d && d.type !== 'vac') {
       const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f', note: 'hol-n2' }[d.type]; const head = { holiday: 'Holiday today', working: 'Sunday working today', special: 'Special day today', half: 'Half day today', note: 'Note for today' }[d.type];
       const extra = [(d.type === 'half' || d.type === 'special') && d.evening === 'off' ? 'Evening classes off' : '', d.type === 'special' && d.evening === 'off' ? 'Morning classes run' : '', d.type === 'special' ? 'Special working hours for teachers' : '', d.type === 'working' ? holPair(d) : '', d.type === 'note' && d.note ? d.note : '', d.tentative ? 'Date may change' : ''].filter(Boolean).join(' · ');
-      return `<button type="button" class="hol-card ${cls}" data-cal-open="${t}"><b>${head}</b><span>${escapeHtml(d.name)}${extra ? ' · ' + escapeHtml(extra) : ''}</span></button>`;
+      return `<button type="button" class="hol-card ${cls}" data-cal-open="${t}"><b>${head}</b><span>${escapeHtml(d.name)}${extra ? ' · ' + escapeHtml(extra) : ''}</span></button>${d.type === 'holiday' ? '<button type="button" class="hol-duty" data-hol-duty>Working today? Record holiday duty</button>' : ''}`;
     }
     const next = (state.holidays || []).filter((h) => (h.type === 'holiday' || h.type === 'special' || h.type === 'half') && h.from > t).sort((a, b) => a.from.localeCompare(b.from))[0];
     if (!next) return '';
     const days = Math.round((dateObj(next.from) - dateObj(t)) / 86400000); if (days > 7) return '';
     return `<button type="button" class="hol-card hol-n" data-cal-open="${next.from}"><b>${next.type === 'holiday' ? 'Next holiday' : 'Next ' + HOL_TYPES[next.type].toLowerCase()}</b><span>${escapeHtml(next.name)} · ${escapeHtml(slotWhen(next.from))} · ${days === 1 ? 'tomorrow' : 'in ' + days + ' days'}</span></button>`;
   }
+  // on a holiday: a teacher who works records it as Other Work (type: Extra Work / Holiday Duty, with a note)
+  function openHolidayDuty() {
+    state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast();
+    state.activityForm = Object.assign({}, state.activityForm, { activityType: 'Extra Work / Holiday Duty', note: '' });
+    switchTab('add'); try { renderForm(); const ni = document.getElementById('activityNoteInput'); if (ni) ni.value = ''; } catch (e) { /* ignore */ }
+  }
+  (function bindHolidayDuty() { const el = document.getElementById('holidayCard'); if (el) el.addEventListener('click', (e) => { if (e.target.closest('[data-hol-duty]')) openHolidayDuty(); }); })();
   function renderHolidayCard() { try { renderBdayCard(); } catch (e) { /* ignore */ } try { renderContactCard(); } catch (e) { /* ignore */ } const el = document.getElementById('holidayCard'); if (!el) return; const h = holCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; el.hidden = !h; }
   function renderHolidayUi() { renderHolidayCard(); const nr = document.getElementById('noticeDrawRow'); if (nr) nr.hidden = !(state.canAdmin || state.isCoordinator); const r = document.getElementById('calDrawRow'); if (r) r.hidden = !((state.holidays || []).length || (state.birthdays || []).length || state.canAdmin || state.isCoordinator); }
   const calMonthLabel = (m) => { const [y, mo] = m.split('-').map(Number); return new Date(y, mo - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); };
@@ -14989,22 +15028,36 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     finally { reportFor = null; reportShowEdits = false; }
   }
   // one row per day: present (with sessions), leave, weekly off, absent; days still to come are left out
+  ACT_ICONS['Extra Work / Holiday Duty'] = ACT_ICONS['Other Activity'];
   function attendanceDays(dates, results) {
     const today = todayStr();
     return dates.map((dt, i) => {
       const r = results[i] || {}; const c = r.campus || {}; const ss = c.sessions || [];
-      const leave = (r.classes || []).some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday');
+      const acts = (r.classes || []).filter((x) => x.entryType === 'activity');
+      const leave = acts.some((x) => x.activityType === 'Leave / Holiday');
+      const duty = acts.filter((x) => x.activityType === 'Extra Work / Holiday Duty');
+      const hd = holDay(dt); const isHol = !!(hd && hd.type === 'holiday');
       let st = ss.length ? 'present' : (leave ? 'leave' : (isWeeklyOff(dt) ? 'off' : 'absent'));
-      if (dt > today || (dt === today && !ss.length)) st = 'future';
-      return { dt, ss, secs: ss.length ? campusSeconds(c) : 0, st, edited: !!(c && c.adminEdited) };
+      // a festival or holiday of the CATJEE Calendar is not an absence; it is "Holiday duty" only when the teacher recorded the work that day
+      if (isHol) st = duty.length ? 'duty' : 'holiday';
+      else if (duty.length && !ss.length && isWeeklyOff(dt)) st = 'duty';
+      if (dt > today || (dt === today && !ss.length && st !== 'duty')) st = 'future';
+      return { dt, ss, secs: ss.length ? campusSeconds(c) : 0, st, edited: !!(c && c.adminEdited), hol: isHol ? hd.name : '', notes: duty.map((x) => x.note).filter(Boolean) };
     }).filter((x) => x.st !== 'future');
   }
-  const ATT_TXT = { present: '', leave: 'Leave', off: 'Weekly off', absent: 'Absent' };
+  const ATT_TXT = { present: '', leave: 'Leave', off: 'Weekly off', absent: 'Absent', holiday: 'Holiday', duty: 'Holiday duty' };
+  // how many lines a day takes in the picture, and one line of words for a day that is not a plain "present"
+  function attRowLines(d) { return d.st === 'present' ? Math.max(1, d.ss.length) : d.st === 'duty' ? 1 + d.ss.length + (d.notes && d.notes.length ? 1 : 0) : (d.st === 'holiday' && d.ss.length ? 2 : 1); }
+  function attDayTxt(d, sesTxt) {
+    if (d.st === 'holiday') return `Holiday${d.hol ? ' · ' + d.hol : ''}${d.ss.length ? ` (checked in ${d.ss.map(sesTxt).join(', ')})` : ''}`;
+    if (d.st === 'duty') return `Holiday duty${d.hol ? ' · ' + d.hol : ''}${d.ss.length ? ' · ' + d.ss.map(sesTxt).join(', ') : ''}${d.notes && d.notes.length ? ' · ' + d.notes.join('; ') : ''}`;
+    return ATT_TXT[d.st];
+  }
   // Attendance as a picture (same colours as the Class count picture): one teacher day by day, or a register for all
   function attCanvas(rows, tid, period, nameOfU, forAdmin, sesTxt, hmm) {
     const one = !!tid; const r0 = rows[0] || { days: [] };
     const W = 760, hT = 34, hR = 26; const SC = 2;
-    const lines = one ? r0.days.reduce((n, d) => n + Math.max(1, d.st === 'present' ? d.ss.length : 1), 0) : rows.length;
+    const lines = one ? r0.days.reduce((n, d) => n + attRowLines(d), 0) : rows.length;
     const H = hT * 2 + (one ? 30 : 0) + 30 + lines * hR + 64 + 12;
     const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC;
     const x = cv.getContext('2d'); x.scale(SC, SC); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
@@ -15021,11 +15074,17 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       y += 30;
       r0.days.forEach((d, di) => {
         const dd = dateObj(d.dt); const dl = `${pad(dd.getDate())} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`; const dw = WD[dd.getDay()];
-        const n = d.st === 'present' ? d.ss.length : 1; const bh = n * hR;
-        const fill = d.st === 'absent' ? '#FDECEC' : d.st === 'leave' ? '#FFF4D6' : d.st === 'off' ? '#EFEFEF' : (di % 2 ? '#F4F7FB' : '#FFFFFF');
+        const n = attRowLines(d); const bh = n * hR;
+        const fill = d.st === 'absent' ? '#FDECEC' : d.st === 'leave' ? '#FFF4D6' : d.st === 'off' ? '#EFEFEF' : d.st === 'holiday' ? '#E8F0FE' : d.st === 'duty' ? '#EAF6EC' : (di % 2 ? '#F4F7FB' : '#FFFFFF');
         X.forEach((xx, i) => box(xx, y, Wc[i], bh, fill));
         tx(dl, X[0] + Wc[0] / 2, y + bh / 2, 13, true, '#111', 'center'); tx(dw, X[1] + Wc[1] / 2, y + bh / 2, 13, false, '#111', 'center');
-        if (d.st !== 'present') { tx(ATT_TXT[d.st], X[2] + Wc[2] / 2, y + bh / 2, 13, true, d.st === 'absent' ? RED : d.st === 'leave' ? AMB : GRY, 'center'); tx('–', X[3] + Wc[3] / 2, y + bh / 2, 13, false, GRY, 'center'); }
+        if (d.st === 'holiday' || d.st === 'duty') {
+          const cx2 = X[2] + Wc[2] / 2; let ly = y + hR / 2; const isD = d.st === 'duty';
+          tx(`${isD ? 'Holiday duty' : 'Holiday'}${d.hol ? ' · ' + d.hol : ''}`, cx2, ly, 13, true, isD ? '#14532D' : '#1A4DB3', 'center', Wc[2] - 8); ly += hR;
+          d.ss.forEach((ss) => { tx((isD ? '' : 'checked in ') + sesTxt(ss), cx2, ly, isD ? 13 : 11, false, isD ? '#111' : GRY, 'center', Wc[2] - 8); ly += hR; });
+          if (isD && d.notes && d.notes.length) tx(d.notes.join(' · '), cx2, ly, 12, false, '#14532D', 'center', Wc[2] - 8);
+          tx(isD && d.ss.length ? hmm(d.secs) : '–', X[3] + Wc[3] / 2, y + bh / 2, 13, isD && d.ss.length > 0, isD && d.ss.length ? '#111' : GRY, 'center');
+        } else if (d.st !== 'present') { tx(ATT_TXT[d.st], X[2] + Wc[2] / 2, y + bh / 2, 13, true, d.st === 'absent' ? RED : d.st === 'leave' ? AMB : GRY, 'center'); tx('–', X[3] + Wc[3] / 2, y + bh / 2, 13, false, GRY, 'center'); }
         else {
           d.ss.forEach((ss, i) => tx(sesTxt(ss), X[2] + Wc[2] / 2, y + hR * i + hR / 2, 13, false, '#111', 'center'));
           tx(hmm(d.secs) + (forAdmin && d.edited ? '  (edited)' : ''), X[3] + Wc[3] / 2, y + bh / 2, 13, true, '#111', 'center', Wc[3] - 8);
@@ -15033,11 +15092,11 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         y += bh;
       });
       const t = attTotals(r0.days);
-      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Present: ${t.n.present}   ·   Absent: ${t.n.absent}   ·   Leave: ${t.n.leave}   ·   Weekly off: ${t.n.off}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
+      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Present: ${t.n.present} · Absent: ${t.n.absent} · Leave: ${t.n.leave} · Weekly off: ${t.n.off}${t.n.holiday ? ' · Holiday: ' + t.n.holiday : ''}${t.n.duty ? ' · Holiday duty: ' + t.n.duty : ''}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
       box(1, y, W - 2, 32, '#EEF2F7'); tx(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `   ·   Average: ${hmm(t.avg)} a day` : ''}`, W / 2, y + 16, 14, false, '#111', 'center'); y += 32;
     } else {
-      const X = [1, 60, 330, 410, 490, 570, 640]; const Wc = [59, 270, 80, 80, 80, 70, W - 2 - 640];
-      ['S.N', 'Name of faculty', 'Present', 'Absent', 'Leave', 'Off', 'On campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
+      const X = [1, 50, 270, 340, 410, 470, 525, 580, 640]; const Wc = [49, 220, 70, 70, 60, 55, 55, 60, W - 2 - 640];
+      ['S.N', 'Name of faculty', 'Present', 'Absent', 'Leave', 'Off', 'Holiday', 'Duty', 'On campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
       y += 30; let P = 0, A = 0, Lv = 0, S = 0;
       rows.forEach((r, ri) => {
         const t = attTotals(r.days); P += t.n.present; A += t.n.absent; Lv += t.n.leave; S += t.secs;
@@ -15045,8 +15104,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         X.forEach((xx, i) => box(xx, y, Wc[i], hR, fill));
         tx(String(ri + 1), X[0] + Wc[0] / 2, y + hR / 2, 13, false, '#111', 'center');
         tx(nameOfU(r.u) + (forAdmin && r.days.some((d) => d.edited) ? ' (edited)' : ''), X[1] + 8, y + hR / 2, 13, false, '#111', 'left', Wc[1] - 12);
-        [t.n.present, t.n.absent || '–', t.n.leave || '–', t.n.off || '–'].forEach((v, i) => tx(String(v), X[2 + i] + Wc[2 + i] / 2, y + hR / 2, 13, i === 0, i === 1 && t.n.absent ? RED : '#111', 'center'));
-        tx(hmm(t.secs), X[6] + Wc[6] / 2, y + hR / 2, 13, true, '#111', 'center');
+        [t.n.present, t.n.absent || '–', t.n.leave || '–', t.n.off || '–', t.n.holiday || '–', t.n.duty || '–'].forEach((v, i) => tx(String(v), X[2 + i] + Wc[2 + i] / 2, y + hR / 2, 13, i === 0, i === 1 && t.n.absent ? RED : '#111', 'center'));
+        tx(hmm(t.secs), X[8] + Wc[8] / 2, y + hR / 2, 13, true, '#111', 'center');
         y += hR;
       });
       box(1, y, W - 2, 32, '#EEF2F7'); tx(`Teachers: ${rows.length}   ·   Present days: ${P}   ·   Absent days: ${A}   ·   Leave: ${Lv}   ·   Total on campus: ${hmm(S)}`, W / 2, y + 16, 13, true, '#111', 'center', W - 20); y += 32;
@@ -15072,8 +15131,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     box.querySelector('.att-pic').addEventListener('click', () => openZoomViewer(url, { turn: false }));
   }
   function attTotals(days) {
-    const n = { present: 0, leave: 0, off: 0, absent: 0 }; let secs = 0; days.forEach((d) => { n[d.st]++; secs += d.secs; });
-    return { n, secs, avg: n.present ? Math.round(secs / n.present) : 0 };
+    const n = { present: 0, leave: 0, off: 0, absent: 0, holiday: 0, duty: 0 }; let secs = 0; let secsP = 0; days.forEach((d) => { n[d.st]++; secs += d.secs; if (d.st === 'present') secsP += d.secs; }); return { n, secs, avg: n.present ? Math.round(secsP / n.present) : 0 };
   }
   async function attendanceFetch(tid, dates) {
     const prev = reportFor; reportFor = tid === state.teacherId ? null : repTeacherInfo(tid);
@@ -15091,7 +15149,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const perDay = await Promise.all(sp.dates.map(async (d) => {
           const [camp, cls] = await Promise.all([
             state.db.collection('campusLogs/' + d + '/teachers').limit(300).get().then((sn) => { const m = {}; sn.docs.forEach((x) => { m[x.id] = x.data(); }); return m; }).catch(() => ({})),
-            state.db.collection('classes').where('date', '==', d).limit(500).get().then((sn) => sn.docs.map(normDoc).filter((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday')).catch(() => [])
+            state.db.collection('classes').where('date', '==', d).limit(500).get().then((sn) => sn.docs.map(normDoc).filter((c) => c.entryType === 'activity' && (c.activityType === 'Leave / Holiday' || c.activityType === 'Extra Work / Holiday Duty'))).catch(() => [])
           ]);
           return { camp, cls };
         }));
@@ -15117,7 +15175,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (kind === 'csv') {
         const L = [['Teacher', 'Date', 'Day', 'Status', 'Check-in', 'Check-out', 'Time on campus (min)', 'Note']];
         rows.forEach((r) => r.days.forEach((d) => {
-          if (d.st !== 'present') { L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], ATT_TXT[d.st], '', '', '', '']); return; }
+          if (d.st === 'holiday') { L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], 'Holiday', '', '', '', [d.hol, d.ss.length ? `checked in ${d.ss.map(sesTxt).join(', ')}` : ''].filter(Boolean).join(' - ')]); return; }
+        if (d.st === 'duty') { const nt = [d.hol, d.notes.join('; ')].filter(Boolean).join(' - '); if (!d.ss.length) { L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], 'Holiday duty', '', '', '', nt]); return; } d.ss.forEach((s2, i) => L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], 'Holiday duty', formatTimeStr(toHHMM(s2.in)), s2.out != null ? formatTimeStr(toHHMM(s2.out)) : 'In progress', i === 0 ? Math.round(d.secs / 60) : '', i === 0 ? nt : ''])); return; }
+        if (d.st !== 'present') { L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], ATT_TXT[d.st], '', '', '', '']); return; }
           d.ss.forEach((s, i) => L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], 'Present', formatTimeStr(toHHMM(s.in)), s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress', i === 0 ? Math.round(d.secs / 60) : '', i === 0 && d.edited && forAdmin ? 'Edited by admin' : '']));
         }));
         saveFile(fileBase + '.csv', '\ufeff' + L.map((x) => x.map(csvEscape).join(',')).join('\n'), 'text/csv');
@@ -15127,8 +15187,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const r = rows[0]; const t = attTotals(r.days);
         const L = [`*Attendance · ${nameOfU(r.u)}*`, sp.period, ''];
         r.days.forEach((d) => { const dd = dateObj(d.dt); const lbl = `${dd.toLocaleDateString('en-GB', { weekday: 'short' })} ${dd.getDate()} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`;
-          L.push(d.st === 'present' ? `• *${lbl}:* ${d.ss.map(sesTxt).join(', ')} (${hmm(d.secs)})${d.edited ? ' _(edited)_' : ''}` : `• *${lbl}:* ${ATT_TXT[d.st]}`); });
-        L.push(''); L.push(`*Present:* ${t.n.present} · *Absent:* ${t.n.absent} · *Leave:* ${t.n.leave} · *Weekly off:* ${t.n.off}`);
+          L.push(d.st === 'present' ? `• *${lbl}:* ${d.ss.map(sesTxt).join(', ')} (${hmm(d.secs)})${d.edited ? ' _(edited)_' : ''}` : `• *${lbl}:* ${attDayTxt(d, sesTxt)}`); });
+        L.push(''); L.push(`*Present:* ${t.n.present} · *Absent:* ${t.n.absent} · *Leave:* ${t.n.leave} · *Weekly off:* ${t.n.off}${t.n.holiday ? ` · *Holiday:* ${t.n.holiday}` : ''}${t.n.duty ? ` · *Holiday duty:* ${t.n.duty}` : ''}`);
         L.push(`*Total on campus:* ${hmm(t.secs)}${t.n.present ? ` · *Average:* ${hmm(t.avg)} a day` : ''}`);
         await shareReportText(L.join('\n'), msgEl); return;
       }
@@ -15142,9 +15202,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (!tid) {
         // register: one row per teacher
         w.addSpace(8);
-        const X = [0, 200, 262, 318, 368, 420];
-        w.row(['Teacher', 'Present', 'Absent', 'Leave', 'Off', 'Time on campus'], X, { bold: true, size: 9.5, fill: HEAD });
-        rows.forEach((r, ri) => { const t = attTotals(r.days); w.row([nameOfU(r.u) + (forAdmin && r.days.some((d) => d.edited) ? ' (edited)' : ''), t.n.present, t.n.absent || '-', t.n.leave || '-', t.n.off || '-', hmm(t.secs)], X, { size: 9.5, fill: ri % 2 ? ALT : null, colors: t.n.absent ? { 2: RED } : null }); });
+        const X = [0, 168, 220, 268, 312, 350, 398, 438]; w.row(['Teacher', 'Present', 'Absent', 'Leave', 'Off', 'Holiday', 'Duty', 'Time on campus'], X, { bold: true, size: 9.5, fill: HEAD });
+        rows.forEach((r, ri) => { const t = attTotals(r.days); w.row([nameOfU(r.u) + (forAdmin && r.days.some((d) => d.edited) ? ' (edited)' : ''), t.n.present, t.n.absent || '-', t.n.leave || '-', t.n.off || '-', t.n.holiday || '-', t.n.duty || '-', hmm(t.secs)], X, { size: 9.5, fill: ri % 2 ? ALT : null, colors: t.n.absent ? { 2: RED } : null }); });
         w.addSpace(6);
       }
       rows.forEach((r) => {
@@ -15156,8 +15215,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
           const dd = dateObj(d.dt); const dl = `${pad(dd.getDate())} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`; const dw = WD[dd.getDay()];
           const band = di % 2 ? ALT : null;
           if (d.st !== 'present') {
-            const fill = d.st === 'absent' ? ABS : (d.st === 'leave' ? LEAVE : OFF); const col = d.st === 'absent' ? RED : (d.st === 'leave' ? AMBER : GRAY);
-            w.row([dl, dw, ATT_TXT[d.st], '-'], X, { size: 9.5, fill, colors: { 2: col, 3: GRAY } }); return;
+            const HOLF = [0.91, 0.94, 1]; const DUTYF = [0.92, 0.97, 0.93]; const HOLC = [0.1, 0.3, 0.7]; const DUTYC = [0.08, 0.33, 0.18];
+          const fill = d.st === 'absent' ? ABS : (d.st === 'leave' ? LEAVE : d.st === 'holiday' ? HOLF : d.st === 'duty' ? DUTYF : OFF); const col = d.st === 'absent' ? RED : (d.st === 'leave' ? AMBER : d.st === 'holiday' ? HOLC : d.st === 'duty' ? DUTYC : GRAY);
+          let txt = attDayTxt(d, sesTxt).replace(/ · /g, ' - '); if (txt.length > 62) txt = txt.slice(0, 59) + '...';
+          w.row([dl, dw, txt, d.st === 'duty' && d.ss.length ? hmm(d.secs) : '-'], X, { size: 9.5, fill, colors: { 2: col, 3: GRAY } }); return;
           }
           d.ss.forEach((ss, i) => {
             const last = i === d.ss.length - 1;
@@ -15167,7 +15228,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const t = attTotals(r.days);
         w.addSpace(8);
         w.box(40, TOT);
-        w.bodyLine(`Present: ${t.n.present} day${t.n.present === 1 ? '' : 's'}    Absent: ${t.n.absent}    Leave: ${t.n.leave}    Weekly off: ${t.n.off}`, { size: 10, bold: true });
+        w.bodyLine(`Present: ${t.n.present} day${t.n.present === 1 ? '' : 's'} Absent: ${t.n.absent} Leave: ${t.n.leave} Weekly off: ${t.n.off}${t.n.holiday ? ` Holiday: ${t.n.holiday}` : ''}${t.n.duty ? ` Holiday duty: ${t.n.duty}` : ''}`, { size: 10, bold: true });
         w.bodyLine(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `    Average: ${hmm(t.avg)} a day` : ''}`, { size: 10 });
         w.addSpace(4);
       });
