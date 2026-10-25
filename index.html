@@ -2289,6 +2289,14 @@
   @keyframes bdPop { 0% { transform: scale(.92); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
   .bd-re { border: 1px solid #F0B3BD; background: #fff; color: #8A1F3D; border-radius: 99px; padding: 5px 11px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
   @media (prefers-reduced-motion: reduce) { .bds-g, #bdayCard.pop .bday-card { animation: none; } }
+  /* Timetable: the red Substitute key, a class marked for a substitute */
+  .chip.tg-subkey { color: #C1121F; border-color: #C1121F; font-weight: 700; }
+  .chip.tg-subkey.active { background: #C1121F; color: #fff; }
+  .tg-c.tg-wait { box-shadow: inset 0 0 0 2px #C1121F; background: rgba(193,18,31,.08); }
+  .tg-waitlbl { color: #C1121F !important; font-weight: 800; font-style: normal; }
+  .tg-c i.tg-waitlbl { font-size: 9px; letter-spacing: -.3px; white-space: nowrap; }
+  /* edit mode closes soon */
+  .tg-idlewarn { position: fixed; left: 12px; right: 12px; bottom: 84px; z-index: 3000; background: #171717; color: #fff; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 14px; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
 </style>
 </head>
 <body>
@@ -3481,7 +3489,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.50 · updated 20 Nov 2026</div>
+          <div class="dnote">Version 13.54 · updated 24 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6253,8 +6261,8 @@
     html += tgHolidayCards(doc, days, editable);
     // paint bar
     if (!editable) state.tg.paint = null;
-    if (state.tg.paint) html += `<div class="tg-paintbar"><span><span class="ico i-brush" aria-hidden="true"></span> Paint <b>${escapeHtml(state.tg.paint)}</b> is on · tap cells to fill</span><button type="button" class="tg-mini" data-tg-paint="">Turn off</button></div>`;
-    if (!state.tg.sel && editable) html += `<div class="tg-paint"><span class="team-lbl tg-paint-h"><span><span class="ico i-brush" aria-hidden="true"></span> Paint</span></span><div class="tg-pgrid">${['', ...subjects].map((sj) => `<button type="button" class="chip${(state.tg.paint || '') === sj ? ' active' : ''}" data-tg-paint="${escapeHtml(sj)}">${sj ? escapeHtml(sj) : 'Off'}</button>`).join('')}<button type="button" class="chip tg-pedit" id="tgEditSubj"><span class="ico i-edit" aria-hidden="true"></span> Edit</button></div></div>`;
+    if (state.tg.paint) html += `<div class="tg-paintbar"><span><span class="ico i-brush" aria-hidden="true"></span> Paint <b${state.tg.paint === '__SUB__' ? ' style="color:#C1121F"' : ''}>${state.tg.paint === '__SUB__' ? 'Substitute' : escapeHtml(state.tg.paint)}</b> is on · ${state.tg.paint === '__SUB__' ? 'tap the class to mark' : 'tap cells to fill'}</span><button type="button" class="tg-mini" data-tg-paint="">Turn off</button></div>`;
+    if (!state.tg.sel && editable) html += `<div class="tg-paint"><span class="team-lbl tg-paint-h"><span><span class="ico i-brush" aria-hidden="true"></span> Paint</span></span><div class="tg-pgrid">${['', ...subjects].map((sj) => `<button type="button" class="chip${(state.tg.paint || '') === sj ? ' active' : ''}" data-tg-paint="${escapeHtml(sj)}">${sj ? escapeHtml(sj) : 'Off'}</button>`).join('')}<button type="button" class="chip tg-subkey${state.tg.paint === '__SUB__' ? ' active' : ''}" data-tg-paint="__SUB__">Substitute</button><button type="button" class="chip tg-pedit" id="tgEditSubj"><span class="ico i-edit" aria-hidden="true"></span> Edit</button></div></div>`;
     const d = state.tg.day;
     const perD = periodsForDay(g.key, d);
     const sel = state.tg.sel;
@@ -6265,7 +6273,7 @@
       const nEx = selCells.filter((c) => c && c.ex).length; const cls = selCells.filter((c) => c && !c.ex && c.s);
       const allTest = cls.length && cls.every((c) => c.test);
       html += `<div class="tg-selbar tg-msel"><span>${sel.cells.length ? `<b>${sel.cells.length}</b> selected · tap more cells` : 'Tap the cells of the exam or class test'}</span>
-        <span class="tg-msel-btns">${cls.length ? `<button type="button" class="btn-secondary" id="tgMTest" style="border-color: var(--line);">${allTest ? 'Remove test' : 'Class test'}</button>` : ''}
+        <span class="tg-msel-btns">${(sel.cells.length === 1 && cls.length === 1) ? '<button type="button" class="btn-secondary" id="tgMSwap" style="border-color: var(--line);">⇄ Swap with</button>' : ''}${cls.length ?  `<button type="button" class="btn-secondary" id="tgMTest" style="border-color: var(--line);">${allTest ? 'Remove test' : 'Class test'}</button>` : ''}
         ${tgCanCombine(selCells) ? '<button type="button" class="btn-secondary" id="tgMCombine" style="border-color: var(--line);"><span class="ico i-link" aria-hidden="true"></span> Combine</button>' : ''}
         ${selCells.some((c) => c && c.cb) ? '<button type="button" class="btn-secondary" id="tgMSplit" style="border-color: var(--line);">Separate</button>' : ''}
         ${nEx ? `<button type="button" class="btn-secondary" id="tgMExDel" style="border-color: var(--line);">${selCells.every((c) => !c || !c.ex || isNoteId(c.ex)) ? 'Remove note' : 'Remove exam'}</button>` : (sel.cells.length ? '<button type="button" class="btn-secondary" id="tgMExam" style="border-color: var(--line);">Exam / Test</button><button type="button" class="btn-secondary" id="tgMNote" style="border-color: var(--line);">Note</button>' : '')}
@@ -6297,8 +6305,8 @@
         }
         const exHere = examAt(b, d, pp.start, pp.end);
         if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small><span class="ico i-note" aria-hidden="true"></span> ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
-        const cl = c ? (clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) : '';
-        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small${effT(c) ? '' : ' class="tg-nt"'}>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '–'}</small>${c.sub ? '<i>Sub</i>' : ''}${ttLeaveOf(effT(c), d) ? '<i class="tg-lvtag">⚠ On leave</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
+        const cl = c ? ((clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) + (c.subWait ? ' tg-wait' : '')) : '';
+        html += `<td class="tg-c${cl}${c && c.test ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${c.test ? '<i>Test</i>' : ''}<small${effT(c) ? '' : ' class="tg-nt"'}>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '–'}</small>${c.sub ? '<i>Sub</i>' : ''}${c.subWait ? '<i class="tg-waitlbl">Substitute</i>' : ''}${ttLeaveOf(effT(c), d) ? '<i class="tg-lvtag">⚠ On leave</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
@@ -6308,7 +6316,7 @@
     const nClash = Object.keys(clash).length; const noT = (doc.cells || []).filter((c) => !c.t && !c.ex).length;
     loadTtLeaves();
     const lvCls = ttLeaveClasses(doc); const lvKeys = Object.keys(lvCls);
-    if (lvKeys.length) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Teacher on leave</div>${lvKeys.map((k) => { const [u, dd] = k.split('|'); const n = lvCls[k].length; return `<div class="ad-alert-l">${escapeHtml(ttName(u))} is on leave on ${escapeHtml(dayHeading(dd))} · ${n} class${n === 1 ? '' : 'es'} <button type="button" class="hv-back" data-lv-give="${escapeHtml(dd)}" style="padding:0; margin-left:4px;">Give to someone</button></div>`; }).join('')}</div>`;
+    if (lvKeys.length) html += `<div class="ad-alert" style="margin-top:8px;"><div class="ad-alert-t">⚠️ Teacher on leave</div>${lvKeys.map((k) => { const [u, dd] = k.split('|'); const n = lvCls[k].length; return `<div class="ad-alert-l">${escapeHtml(ttName(u))} is on leave on ${escapeHtml(dayHeading(dd))} · ${n} class${n === 1 ? '' : 'es'} <button type="button" class="hv-back" data-lv-give="${escapeHtml(dd)}" style="padding:0; margin-left:4px;">Open that day</button></div>`; }).join('')}</div>`;
     if (nClash || noT) { const al = `<div class="ad-alert tg-alertbar">${nClash ? `<div class="ad-alert-row"><span>${nClash} class${nClash === 1 ? '' : 'es'} where a teacher is in two places · tap the ⚠️ cells</span></div>` : ''}${noT ? `<div class="ad-alert-row"><span>${noT} class${noT === 1 ? ' has' : 'es have'} no teacher</span><button type="button" class="hv-back" id="tgFixTeachers">Fix ›</button></div>` : ''}</div>`; html += al; }
     
     const pdMap = tgPendDays(); const pdList = Object.keys(pdMap).sort(); const pdTotal = pdList.reduce((n, x) => n + pdMap[x], 0);
@@ -6323,8 +6331,7 @@
     const moreItems = [];
     if (editable && aiReady()) moreItems.push(rowBtn('tgPhoto', 'i-spark', 'Fill from a photo'));
     if (editable) { moreItems.push(rowBtn('tgCopyWeek', 'i-file', 'Copy last week')); moreItems.push(rowBtn('tgCopyDay', 'i-cal', 'Copy this day to…')); }
-    moreItems.push(rowBtn('tgAbsent', 'i-user', 'Teacher absent'));
-    if (editable) moreItems.push(rowBtn('tgExam', 'i-note', 'Exam / Class test'));
+        if (editable) moreItems.push(rowBtn('tgExam', 'i-note', 'Exam / Class test'));
     if (weekTtImages(state.tt.weekStart).some((x) => x.id === state.tg.docKey)) moreItems.push(rowBtn('tgImage', 'i-share', 'Share image'));
     if (editable) moreItems.push(rowBtn('tgDelWeek', 'i-trash', 'Delete week', ' hv-del'));
     
@@ -6426,9 +6433,7 @@
       const cx = tgCell(d, pi, b);
       if (cx && cx.ex) { openExamBlockSheet(cx); return; }
       if (!tgEditable()) { locked(); return; }
-      if (state.tg.paint) {
-        const c = tgCell(d, pi, b);
-        if (c && c.s === state.tg.paint) { tgSetCell(d, pi, b, null); renderTgGrid(); return; }
+      if (state.tg.paint) { if (state.tg.paint === '__SUB__') { tgMarkSub(d, pi, b); return; } { const cw = tgCell(d, pi, b); if (cw && cw.subWait && !cw.ex) { tgReplaceSub(d, pi, b, state.tg.paint); return; } } const c = tgCell(d, pi, b); if (c && c.s === state.tg.paint) { tgSetCell(d, pi, b, null); renderTgGrid(); return; }
         const pp = periodsForDay(tgGroup().key, d)[pi]; const ex = examAt(b, d, pp.start, pp.end);
         const put = () => { tgSetCell(d, pi, b, { s: state.tg.paint, t: defaultTeacher(b, state.tg.paint) }); renderTgGrid(); };
         if (ex) showConfirm(`${b} has an exam then:\n${examLine(ex)}\n\nAdd ${state.tg.paint} anyway?`, '⚠️ Exam at this time', 'Add anyway').then((ok) => { if (ok) put(); });
@@ -6454,8 +6459,7 @@
     on('tgDiscard', tgDiscard);
     on('tgBatchPics', tgBatchPictures);
     on('tgExam', tgStartExamSelect);
-    on('tgAbsent', () => openAbsent({ date: tgDays().indexOf(todayStr()) !== -1 ? todayStr() : null }));
-  document.querySelectorAll('[data-lv-give]').forEach((b) => b.addEventListener('click', () => openAbsent({ date: b.getAttribute('data-lv-give') })));
+      document.querySelectorAll('[data-lv-give]').forEach((b) => b.addEventListener('click', () => { state.tg.day = b.getAttribute('data-lv-give'); renderTgGrid(); const t0 = document.getElementById('tgWrap'); if (t0) t0.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   on('tgPreview', tgPreview);
     on('tgDelWeek', tgDeleteWeek);
     on('tgSelCancel', () => { state.tg.sel = null; renderTgGrid(); });
@@ -6464,6 +6468,7 @@
     on('tgAddPer', () => openAddPeriodSheet(state.tg.day));
     on('tgDayNote', () => openDayNoteSheet(state.tg.day));
     on('tgMTest', tgMultiTest);
+    on('tgMSwap', () => { const k0 = state.tg.sel && state.tg.sel.cells && state.tg.sel.cells[0]; if (!k0) return; state.tg.swap = { k: k0 }; state.tg.sel = null; renderTgGrid(); });
     on('tgMCombine', openCombineSheet);
     on('tgMSplit', tgMultiSplit);
     on('tgAddBatch', openAddBatchSheet);
@@ -6499,7 +6504,7 @@
       const tc = document.getElementById('csTest'); if (tc) tc.addEventListener('change', () => { st.test = tc.checked; });
       if (comboBats.length > 1) bindComboRoomChips(body, () => st.r, (v) => { st.r = v; }, draw);
       const cl = document.getElementById('csClear'); if (cl) cl.addEventListener('click', () => { tgSetCell(d, p, b, null); closeHvSheet(); renderTgGrid(); });
-      const us = document.getElementById('csUndoSub'); if (us) us.addEventListener('click', async () => { closeHvSheet(); try { await moveCell(Object.assign({ _id: state.tg.docKey }, state.tg.doc), `${d}|${p}|${b}`, null, 'undo'); showToast('Substitute removed'); } catch (err) { flashOffline(err); } renderTgGrid(); });
+      const us = document.getElementById('csUndoSub'); if (us) us.addEventListener('click', async () => { closeHvSheet(); try { tgSubEdit(d, p, b, (m) => { delete m.sub; delete m.subWait; }); showToast('Substitute removed · publish to tell the teachers'); } catch (err) { flashOffline(err); } renderTgGrid(); });
       const cc = document.getElementById('csCancel'); if (cc) cc.addEventListener('click', closeHvSheet);
       const dx = document.getElementById('csDelExam'); if (dx) dx.addEventListener('click', async () => {
         const e = examAt(b, d, per.start, per.end); if (!e) return;
@@ -6535,7 +6540,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (!ok) return;
     }
     tgRemember();
-    state.tg.doc.cells = cells.map((c) => { const n = Object.assign({}, c, { d: shiftDateStr(c.d, 7), t: c.t && !isRemovedUid(c.t) ? c.t : defaultTeacher(c.b, c.s) }); delete n.sub; return n; });
+    state.tg.doc.cells = cells.map((c) => { const n = Object.assign({}, c, { d: shiftDateStr(c.d, 7), t: c.t && !isRemovedUid(c.t) ? c.t : defaultTeacher(c.b, c.s) }); delete n.sub; delete n.subWait; return n; });
     if (cells.some((c) => dateObj(c.d).getDay() === 0)) state.tg.doc.sunday = true;
     tgSave(); renderTgGrid(); showToast(`${cells.length} classes copied`);
   }
@@ -6567,8 +6572,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     });
   }
   // Publish: write / update / remove the classes in each teacher's schedule.
-  async function tgPublish(dayOnly) {
-    const g = tgGroup(); const doc = state.tg.doc; if (!doc) return;
+  async function tgPublish(dayOnly) { const g = tgGroup(); const doc = state.tg.doc; if (!doc) return;
+    { const waiting = (doc.cells || []).filter((c) => c.subWait && !c.ex).length; if (waiting) { const okw = await showConfirm(`${waiting} class${waiting === 1 ? ' is' : 'es are'} marked Substitute, but no substitute is set yet. They stay with the teacher they had.`, '⚠️ Substitute not set', 'Publish anyway'); if (!okw) return; } }
     if (dayOnly && !doc.pubSnap) doc.pubSnap = { cells: {}, dayTimes: '{}', dayRooms: '{}' }; // first publish can be a single day
     const per = periodsFor(g.key);
     const cells = (doc.cells || []).filter((c) => { const pp = periodsForDay(g.key, c.d)[c.p]; return effT(c) && !c.ex && pp && !pp.off && pp.start && (!dayOnly || c.d === dayOnly); });
@@ -7105,6 +7110,74 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (state.tgExams) { state.tgExams.list = (state.tgExams.list || []).filter((x) => ids.indexOf(x.id) === -1); state.tgExams.at = 0; }
     tgSave();
   }
+  // ----- Substitute in paint mode: mark the class, then paint the subject that takes its place -----
+  function tgSubEdit(d, p, b, fn) {
+    const c = tgCell(d, p, b); if (!c) return;
+    tgRemember(); (c.cb ? tgCombo(c) : [c]).forEach((m) => fn(m)); tgSave();
+  }
+  function tgMarkSub(d, p, b) {
+    const c = tgCell(d, p, b);
+    if (!c || c.ex || !c.s) { showToast('Tap a class to mark it', 'error'); return; }
+    const on = !!c.subWait;
+    tgSubEdit(d, p, b, (m) => { if (on) delete m.subWait; else { m.subWait = (m.sub && m.sub.for) || m.t || '-'; delete m.sub; } });
+    renderTgGrid();
+  }
+  function tgBusyAt(u, d, p, b) {
+    const doc = state.tg.doc; const g = tgGroup(); const pp = periodsForDay(g.key, d)[p]; if (!doc || !pp || !pp.start) return false;
+    const a0 = hhmmToMin(pp.start); const z0 = hhmmToMin(pp.end); const docs = [doc].concat(wkDocs(state.tt.weekStart).filter((x) => x._id !== state.tg.docKey));
+    return docs.some((x) => (x.cells || []).some((c) => { if (c.d !== d || c.ex || (c.p === p && c.b === b && x === doc) || effT(c) !== u) return false; const tm = cellTimes(x, c); return !!tm && hhmmToMin(tm.start) < z0 && a0 < hhmmToMin(tm.end); }));
+  }
+  function tgPickSubTeacher(d, p, b, subj, absentT) {
+    return new Promise((resolve) => {
+      const map = state.teacherMap || {};
+      const list = ttTeacherIds().filter((u) => u !== absentT && !isRemovedUid(u)).map((u) => ({ u, star: Object.keys(map).some((k) => k.split('|').pop() === subj && map[k] === u), busy: tgBusyAt(u, d, p, b) }))
+        .sort((x, y) => (x.busy - y.busy) || (y.star - x.star) || ttName(x.u).localeCompare(ttName(y.u)));
+      const body = document.getElementById('hvSheetBody');
+      body.innerHTML = `<div class="hv-d-title">Who takes it?</div><div class="hv-d-wing">${escapeHtml(gridBatchLabel(b))} · ${escapeHtml(subj)} · P${p + 1}</div><div class="hv-d-btns" style="flex-direction:column; gap:8px; max-height:52vh; overflow:auto;">${list.map((x) => `<button type="button" class="btn-secondary" data-sp="${escapeHtml(x.u)}" style="border-color: var(--line); width:100%; text-align:left;">${x.star ? '★ ' : ''}${escapeHtml(ttName(x.u))} <small style="color:${x.busy ? '#B26A00' : '#1E8E4E'};">${x.busy ? '⚠️ has a class then' : 'free ✓'}</small></button>`).join('')}</div><div class="hv-note" style="text-align:left;">★ teaches this subject</div>`;
+      body.querySelectorAll('[data-sp]').forEach((bt) => bt.addEventListener('click', () => { closeHvSheet(); resolve(bt.getAttribute('data-sp')); }));
+      const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+    });
+  }
+  async function tgReplaceSub(d, p, b, subj) {
+    const c = tgCell(d, p, b); if (!c || !c.subWait || !subj) return;
+    const absentT = c.subWait === '-' ? '' : c.subWait;
+    let T = defaultTeacher(b, subj);
+    if (!T || T === absentT || tgBusyAt(T, d, p, b)) { T = await tgPickSubTeacher(d, p, b, subj, absentT); if (!T) return; }
+    const now = Date.now(); const by = state.teacherId || '';
+    tgSubEdit(d, p, b, (m) => { const w = m.subWait; delete m.subWait; m.sub = { t: T, s: subj, for: (w && w !== '-' ? w : '') || m.t || '', by, at: now }; });
+    renderTgGrid();
+  }
+  // ----- Edit mode closes by itself: after 3 minutes of nothing (a warning in the last 20 seconds), when the Timetable is left, or when the app stays away for a minute -----
+  const TG_IDLE_MS = 3 * 60 * 1000; const TG_WARN_MS = 20 * 1000;
+  state.tg.lastAct = Date.now();
+  ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { state.tg.lastAct = Date.now(); const iw = document.getElementById('tgIdleWarn'); if (iw) iw.remove(); }, true));
+  function tgIdleWarn(secs) {
+    let w = document.getElementById('tgIdleWarn');
+    if (!(secs > 0)) { if (w) w.remove(); return; }
+    if (!w) { w = document.createElement('div'); w.id = 'tgIdleWarn'; w.className = 'tg-idlewarn'; w.setAttribute('role', 'status'); w.addEventListener('click', () => { state.tg.lastAct = Date.now(); tgIdleWarn(0); }); document.body.appendChild(w); }
+    w.textContent = `Edit mode closes in ${secs} s · tap to keep editing`;
+  }
+  function tgEditLock(msg) {
+    tgIdleWarn(0);
+    if (!(state.tg.editKey && state.tg.editKey === state.tg.docKey)) return;
+    try { if (tgSaveTimer) tgFlush(); } catch (e) { /* ignore */ }
+    state.tg.editKey = null; state.tg.paint = null; state.tg.sel = null; state.tg.swap = null;
+    if (msg && document.getElementById('tgWrap')) { renderTgGrid(); showToast(msg); }
+  }
+  setInterval(() => {
+    const doc = state.tg && state.tg.doc;
+    if (!doc || !(state.tg.editKey && state.tg.editKey === state.tg.docKey) || !tgEverPub(doc)) { state.tg.awaySince = 0; tgIdleWarn(0); return; }
+    const now = Date.now(); const w = document.getElementById('tgWrap');
+    if (!w || w.offsetParent === null) { tgEditLock(''); return; }
+    if (document.hidden) { if (!state.tg.awaySince) state.tg.awaySince = now; if (now - state.tg.awaySince > 60000) { state.tg.awaySince = 0; tgEditLock('Edit mode closed · your changes are saved, not published yet'); } return; }
+    state.tg.awaySince = 0;
+    const sh = document.getElementById('hvSheet'); const cm = document.getElementById('confirmModal');
+    if ((sh && sh.classList.contains('open')) || (cm && cm.classList.contains('active'))) { state.tg.lastAct = now; tgIdleWarn(0); return; }
+    const idle = now - state.tg.lastAct;
+    if (idle >= TG_IDLE_MS) tgEditLock('Edit mode closed after 3 minutes · your changes are saved, not published yet');
+    else if (idle >= TG_IDLE_MS - TG_WARN_MS) tgIdleWarn(Math.ceil((TG_IDLE_MS - idle) / 1000));
+    else tgIdleWarn(0);
+  }, 1000);
   // ----- a published class: substitute or swap, without unlocking the grid -----
   function tgCellIsLive(c) { const doc = state.tg.doc; return !!(doc && c && !c.ex && effT(c) && (doc.published || []).indexOf(effT(c) + '/' + slotIdFor(state.tg.docKey, c)) !== -1); }
   function openPubCellSheet(c) {
@@ -7123,18 +7196,17 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     document.getElementById('pcEdit').addEventListener('click', () => { closeHvSheet(); state.tg.editKey = state.tg.docKey; renderTgGrid(); });
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
-  async function tgSwapPick(d, p, b) {
+  function tgSwapPick(d, p, b) {
     const sw = state.tg.swap; if (!sw) return;
     const [d0, p0, ...r0] = sw.k.split('|'); const b0 = r0.join('|');
     if (d0 === d && Number(p0) === p && b0 === b) { state.tg.swap = null; renderTgGrid(); return; }
     if (d0 !== d || b0 !== b) { showToast(`Choose another period of ${gridBatchLabel(b0)} on the same day`, 'error'); return; }
     const A = tgCell(d0, Number(p0), b0); const B = tgCell(d, p, b);
     if (!A || !B || A.ex || B.ex) { showToast('Only two classes can be swapped', 'error'); return; }
-    const ok = await showConfirm(`P${Number(p0) + 1}: ${effS(A)} (${ttName(effT(A))}) ⇄ P${p + 1}: ${effS(B)} (${ttName(effT(B))})\n\nBoth teachers' schedules change now and they get a message.`, 'Swap these periods?', 'Swap');
-    if (!ok) return;
-    state.tg.swap = null;
-    try { if (await tgSwapCells(Object.assign({ _id: state.tg.docKey }, state.tg.doc), sw.k, `${d}|${p}|${b}`)) showToast('Periods swapped'); } catch (err) { flashOffline(err); }
-    renderTgGrid();
+    if (A.cb || B.cb) { showToast('Separate the combined class first', 'error'); return; }
+    tgRemember();
+    ['s', 't', 'test', 'sub', 'subWait'].forEach((f) => { const va = A[f]; const vb = B[f]; if (vb === undefined) delete A[f]; else A[f] = vb; if (va === undefined) delete B[f]; else B[f] = va; });
+    state.tg.swap = null; tgSave(); renderTgGrid(); showToast('Periods swapped');
   }
   // swap two classes of one batch (subject, teacher, test, substitute) and update both teachers' schedules
   async function tgSwapCells(docIn, kA, kB) {
@@ -7626,7 +7698,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       else if (c.t && leaveIds.indexOf(c.t) !== -1 && (doc.published || []).length) needs[c.t] = (needs[c.t] || 0) + 1;
     }));
     let html = '';
-    Object.keys(needs).forEach((t) => { html += `<div class="ad-alert"><div class="ad-alert-t">⚠️ ${escapeHtml(ttName(t))} is on leave · ${needs[t]} timetable class${needs[t] === 1 ? '' : 'es'} need a substitute</div><button type="button" class="hv-back" data-arrange="${t}" style="padding:0;">Arrange substitute →</button></div>`; });
+    Object.keys(needs).forEach((t) => { html += `<div class="ad-alert"><div class="ad-alert-t">⚠️ ${escapeHtml(ttName(t))} is on leave · ${needs[t]} timetable class${needs[t] === 1 ? '' : 'es'} need a substitute</div><button type="button" class="hv-back" data-arrange="${t}" style="padding:0;">Open timetable →</button></div>`; });
     if (subs.length) {
       subs.sort((x, y) => ((x.tm && x.tm.start) || '').localeCompare((y.tm && y.tm.start) || ''));
       html += `<div class="ad-subs"><div class="ad-alert-t"><span class="ico i-swap" aria-hidden="true"></span> Substitutions · ${subs.length}</div>${subs.map((x) => `<div class="ad-alert-l">${x.tm ? escapeHtml(formatTimeStr(x.tm.start)) + ' · ' : ''}${escapeHtml(x.c.b)} · ${escapeHtml(effS(x.c))}: <b>${escapeHtml(ttName(x.c.sub.t))}</b> for ${escapeHtml(ttName(x.c.sub.for))}</div>`).join('')}<button type="button" class="ad-rem wa" data-arr-img style="margin-top:8px;">Share picture</button></div>`;
@@ -7914,7 +7986,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     body.querySelectorAll('[data-nt]').forEach((b) => b.addEventListener('click', () => {
       const n = list[+b.getAttribute('data-nt')]; markNoticeRead(n); renderBell(); closeHvSheet();
       const L = n.link || {};
-      if (L.arrange) { switchTab('admin'); openAbsent({ t: L.arrange, date: L.date }); return; }
+      if (L.arrange) { switchTab('admin'); openTimetableWeek(mondayOf(L.date || todayStr())); return; }
       if (L.tab === 'schedule') { const sv = svState(); if (L.ws) sv.weekStart = L.ws; if (L.view) sv.view = L.view; switchTab('schedule'); renderScheduleList(); return; }
       if (L.tab === 'admin') { switchTab('admin'); if (L.sub) { state.adminTab = L.sub; renderAdmin(); } return; }
       if (L.tab) switchTab(L.tab);
@@ -10123,7 +10195,7 @@ Rules:
     // substitutions of the day, and leave that needs a substitute
     try { renderTtImgCard(); } catch (e) { /* ignore */ }
     try { refreshDashTT(); const sx = dashSubsHtml(); if (sx) alertEl.innerHTML = sx + (alerts.length ? alertEl.innerHTML : ''); } catch (e) { /* ignore */ }
-    alertEl.querySelectorAll('[data-arrange]').forEach((b) => b.addEventListener('click', () => openAbsent({ t: b.getAttribute('data-arrange'), date: state.adminDate })));
+    alertEl.querySelectorAll('[data-arrange]').forEach((b) => b.addEventListener('click', () => openTimetableWeek(mondayOf(state.adminDate))));
     alertEl.querySelectorAll('[data-remind]').forEach((b) => b.addEventListener('click', () => remindTeacher(b.getAttribute('data-remind'), remindTexts[b.getAttribute('data-rkey')] || '')));
     alertEl.querySelectorAll('[data-open-ttweek]').forEach((b) => b.addEventListener('click', () => openTimetableWeek(b.getAttribute('data-open-ttweek'))));
     alertEl.querySelectorAll('[data-arr-img]').forEach((b) => b.addEventListener('click', () => shareArrangementPicture()));
