@@ -3515,7 +3515,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.63 · updated 3 Dec 2026</div>
+          <div class="dnote">Version 13.64 · updated 4 Dec 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7728,10 +7728,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (!bar) { bar = document.createElement('div'); bar.id = 'zvPreviewBar'; ov.appendChild(bar); }
     const hasChg = !!(state.tg.prevChg && Object.keys(state.tg.prevChg.keys || {}).length);
     const hint = ov.querySelector('.zv-hint'); if (hint) hint.style.display = 'none';
-    bar.innerHTML = `<div class="zvp-t">Preview · not published yet${hasChg ? '<small>Yellow = changes not sent to teachers</small>' : ''}</div><div class="zvp-b"><button type="button" class="btn-secondary" id="zvpEdit">Edit</button><button type="button" class="save-btn" id="zvpPub" style="margin:0;">Publish</button></div>`;
-    const close = () => { const x = document.getElementById('zvX'); if (x) x.click(); };
-    document.getElementById('zvpEdit').addEventListener('click', close);
-    document.getElementById('zvpPub').addEventListener('click', () => { close(); setTimeout(tgPublishAsk, 150); });
+    bar.innerHTML = `<div class="zvp-t">Preview · not published yet${hasChg ? '<small>Yellow = changes not sent to teachers</small>' : ''}</div>`;
   }
   // ---------- Teacher absent screen ----------
   state.abs = null;
@@ -11359,8 +11356,8 @@ Rules:
       document.getElementById('zvX').addEventListener('click', () => ov.classList.remove('open'));
       document.getElementById('zvRot').addEventListener('click', () => { ov._rot = !ov._rot; ov._show(); });
     }
-    ov._src = src;
-    ov._show = () => {
+    const oldBar = document.getElementById('zvPreviewBar'); if (oldBar) oldBar.remove(); const hint0 = ov.querySelector('.zv-hint'); if (hint0) hint0.style.display = '';
+  ov._src = src; ov._show = () => {
       const img = document.getElementById('zvImg');
       if (!ov._rot) { img.src = ov._src; ov._setZ(1); return; }
       const im = new Image();
