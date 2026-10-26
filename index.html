@@ -3515,7 +3515,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.64 · updated 4 Dec 2026</div>
+          <div class="dnote">Version 13.65 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5232,7 +5232,8 @@
   async function selfBuild(from, to) {
     const me = state.teacherId; const days = datesBetween(from, to);
     const parts = await Promise.all(days.map((d) => state.db.collection('classes').where('teacherId', '==', me).where('date', '==', d).get().then((sn) => sn.docs.map(normDoc)).catch(() => [])));
-    const logs = [].concat(...parts).filter((c) => c.entryType !== 'activity' && !c.cancelled).map((c) => ({ c, t: me, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
+    const logsAll = [].concat(...parts).filter((c) => c.entryType !== 'activity' && !c.cancelled).map((c) => ({ c, t: me, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
+    const cf = ctFilterLogs(logsAll, await ctExamsInRange(from, to)); const logs = cf.logs;
     let slots = []; try { const sn = await state.db.collection('schedule/' + me + '/slots').where('date', '>=', from).where('date', '<=', to).get(); slots = sn.docs.map(normDoc).filter((x) => x.date >= from && x.date <= to && x.setBy); } catch (e) { slots = []; }
     const tt = slots.map((x) => { const a = hhmmToMin(x.time); const bs = x.batches && x.batches.length ? x.batches : [x.label]; return { t: me, d: x.date, b: bs[0], bs, a, z: a + slotDuration(x), sub: x.subFor ? 1 : 0, f: x.subFor || '', fn: x.subForName || '' }; }).sort((p, q) => (p.d + m2t(p.a)).localeCompare(q.d + m2t(q.a)));
     const used = new Set(); const missing = []; const upcoming = []; const subHits = []; const subList = [];
@@ -5242,10 +5243,12 @@
         if (x.sub && !used.has(hit)) { const fa = hit.a != null ? hit.a : x.a; const fz = hit.z != null ? hit.z : x.z; subHits.push({ t: me, f: x.f, d: x.d, bs: hit.bs, a: fa, z: fz }); subList.push({ d: x.d, bs: hit.bs, a: fa, z: fz, fn: x.fn, status: 'filled', units: trepUnits(fz - fa) }); }
         used.add(hit); return;
       }
+      const drop = cf.dropped.find((l) => l.d === x.d && l.bs.some((b) => x.bs.indexOf(b) !== -1) && (l.a == null || l.z == null || (l.a < x.z && x.a < l.z))); if (drop) { missing.push(Object.assign({}, x, { ct: true })); if (x.sub) subList.push({ d: x.d, bs: x.bs, a: x.a, z: x.z, fn: x.fn, status: 'missing', units: 0 }); return; }
       const endTs = dateObj(x.d).getTime() + (x.z || 0) * 60000; const st = endTs > Date.now() ? 'upcoming' : 'missing';
       (st === 'upcoming' ? upcoming : missing).push(x);
       if (x.sub) subList.push({ d: x.d, bs: x.bs, a: x.a, z: x.z, fn: x.fn, status: st, units: 0 });
     });
+    cf.dropped.forEach((l) => { if (!missing.some((x) => x.ct && x.d === l.d && l.bs.some((y) => (x.bs || [x.b]).indexOf(y) !== -1))) missing.push({ t: l.t, d: l.d, b: l.bs[0], bs: l.bs, a: l.a, z: l.z, ct: true }); });
     subList.sort((p, q) => (p.d + m2t(p.a)).localeCompare(q.d + m2t(q.a)));
     return { logs, missing, upcoming, subs: subHits, subList, from, to, ttCount: tt.length };
   }
@@ -7149,13 +7152,59 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   // Mark exam: pick cells (periods × batches), then type, subject and time. The exam is also created in the Exams tab.
   // ----- several cells at once (press and hold a cell) -----
   function tgSelCells() { const sel = state.tg.sel; if (!sel) return []; return sel.cells.map((k) => { const [dd, pp, ...rest] = k.split('|'); return { k, d: dd, p: Number(pp), b: rest.join('|'), c: tgCell(dd, Number(pp), rest.join('|')) }; }); }
-  function tgMultiTest() {
+  // A class test can have a plan (rooms + invigilators, like an exam). It stays a class in the timetable (the cell keeps test: true and the plan's id).
+  // Rule: when a plan exists, the class counts for the class teacher only if he is on the duty list; without a plan it counts as before.
+  function ctMatch(c, e) { const a = hhmmToMin(c.startTimeStr), z = hhmmToMin(c.endTimeStr); return c.date === e.date && entryBatches(c).some((b) => expandScope(e.scope || []).indexOf(b) !== -1) && a != null && z != null && hhmmToMin(e.start) < z && a < hhmmToMin(e.end); }
+  function ctFilterLogs(logs, exams) {
+    const cts = (exams || []).filter((e) => e.ct); if (!cts.length) return { logs, dropped: [] };
+    const dropped = [];
+    const keep = logs.filter((l) => {
+      if (!l.c || !l.c.test) return true;
+      const e = cts.find((x) => ctMatch(l.c, x)); if (!e) return true;
+      if (planTeachers(planOf(e)).indexOf(l.t) !== -1) return true;
+      dropped.push(l); return false;
+    });
+    return { logs: keep, dropped };
+  }
+  async function ctExamsInRange(from, to) { try { const sn = await state.db.collection('exams').where('date', '>=', from).where('date', '<=', to).get(); return sn.docs.map(normDoc).filter((e) => e.ct); } catch (err) { return []; } }
+  async function ctDropPlans(ids) {
+    for (const id of ids) {
+      const still = (state.tg.doc && state.tg.doc.cells || []).some((c) => c.ctId === id); if (still) continue;
+      try { await state.db.collection('exams').doc(id).delete(); } catch (err) { /* already gone */ }
+      state.adminExams = (state.adminExams || []).filter((x) => x.id !== id);
+    }
+  }
+  async function ctCreatePlan(list) {
+    const d = list[0].d; const g = tgGroup(); const per = periodsForDay(g.key, d);
+    const same = list.filter((x) => x.d === d); const ps = same.map((x) => x.p);
+    const bats = same.map((x) => x.b).filter((v, i, a) => a.indexOf(v) === i);
+    const subs = same.map((x) => effS(x.c)).filter((v, i, a) => v && a.indexOf(v) === i);
+    const start = per[Math.min(...ps)].start; const end = per[Math.max(...ps)].end;
+    try {
+      const ref = state.db.collection('exams').doc();
+      const base = { type: 'Class Test', subject: subs.length === 1 ? subs[0] : '', name: '', date: d, start, end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, ct: true };
+      await waitForWrite(ref.set(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }, base)));
+      same.forEach((x) => { const cc = tgCell(x.d, x.p, x.b); if (cc) cc.ctId = ref.id; }); tgSave(); renderTgGrid();
+      const exam = Object.assign({ id: ref.id }, base);
+      state.adminExams = (state.adminExams || []).concat([exam]);
+      xwSetDate(d); goAdmin('exams')(); setTimeout(() => openAdminExamForm(exam, 2), 450);
+    } catch (err) { flashOffline(err); }
+  }
+  async function tgMultiTest() {
     const list = tgSelCells().filter((x) => x.c && !x.c.ex && x.c.s); if (!list.length) return;
     const allTest = list.every((x) => x.c.test);
     tgRemember();
-    list.forEach((x) => { if (allTest) delete x.c.test; else x.c.test = true; });
+    const oldIds = [];
+    list.forEach((x) => { if (allTest) { if (x.c.ctId && oldIds.indexOf(x.c.ctId) === -1) oldIds.push(x.c.ctId); delete x.c.test; delete x.c.ctId; } else x.c.test = true; });
     state.tg.sel = null; tgSave(); renderTgGrid();
-    showToast(allTest ? `Class test removed from ${list.length} class${list.length === 1 ? '' : 'es'}` : `${list.length} class${list.length === 1 ? '' : 'es'} marked as class test · they still count as the teacher's class`);
+    if (allTest) { showToast(`Class test removed from ${list.length} class${list.length === 1 ? '' : 'es'}`); ctDropPlans(oldIds); return; }
+    showToast(`${list.length} class${list.length === 1 ? '' : 'es'} marked as class test · they still count as the teacher's class`);
+    { const ids = list.map((x) => x.c.ctId).filter((v, i, a) => v && a.indexOf(v) === i); const alive = {};
+      for (const id of ids) { try { const sn = await state.db.collection('exams').doc(id).get(); alive[id] = !!(sn.exists && sn.data().ct); } catch (e) { alive[id] = true; } }
+      let fixed = false; list.forEach((x) => { if (x.c.ctId && alive[x.c.ctId] === false) { delete x.c.ctId; fixed = true; } }); if (fixed) tgSave(); }
+    if (list.every((x) => x.c.ctId)) { showToast('This class test already has its plan · see the Exams tab'); return; }
+    const ok = await showConfirm('Add the rooms and invigilators of this class test now? It works like an exam: rooms, who is on duty, and the duty goes to the teachers. If you skip it, the class counts as before.', 'Plan rooms and duty?', 'Plan now');
+    if (ok) ctCreatePlan(list.filter((x) => !x.c.ctId));
   }
   // combine: the selected cells are one period of one day, in different batches, with no exam
   function tgCanCombine(selCells) {
@@ -7557,7 +7606,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }
     for (const tt of Object.keys(tts)) {
       const gone = tts[tt];
-      const fix = (cells) => { const out = []; (cells || []).forEach((c) => { if (!c.ex || gone.indexOf(c.ex) === -1) { out.push(c); return; } if (c.was && c.was.s) { const r = { d: c.d, p: c.p, b: c.b, s: c.was.s, t: c.was.t || '' }; if (c.was.test) r.test = true; out.push(r); } }); return out; };
+      const fix = (cells) => { const out = []; (cells || []).forEach((c) => { if (c.ctId && gone.indexOf(c.ctId) !== -1) { const r0 = Object.assign({}, c); delete r0.ctId; out.push(r0); return; } if (!c.ex || gone.indexOf(c.ex) === -1) { out.push(c); return; } if (c.was && c.was.s) { const r = { d: c.d, p: c.p, b: c.b, s: c.was.s, t: c.was.t || '' }; if (c.was.test) r.test = true; out.push(r); } }); return out; };
       if (state.tg.docKey === tt && state.tg.doc) { state.tg.doc.cells = fix(state.tg.doc.cells); tgSave(); continue; }
       try { const ref = state.db.collection('timetables').doc(tt); const snap = await ref.get(); if (snap.exists) { const d = snap.data(); await ref.set(Object.assign({}, d, { cells: fix(d.cells), status: 'draft', updatedAt: Date.now() })); } } catch (e) { /* offline */ }
     }
@@ -8041,7 +8090,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const bats = expandScope(scope); const a = hhmmToMin(start), z = hhmmToMin(end);
     const out = [];
     docs.forEach((doc) => (doc.cells || []).forEach((c) => {
-      if (c.d !== date || c.ex || bats.indexOf(c.b) === -1) return;
+      if (c.d !== date || c.ex || (skipExamId && c.ctId === skipExamId) || bats.indexOf(c.b) === -1) return;
       const tm = cellTimes(doc, c); if (!tm) return;
       if (hhmmToMin(tm.start) < z && a < hhmmToMin(tm.end)) out.push(`${c.b} · ${c.s} · ${formatTimeStr(tm.start)}`);
     }));
@@ -10655,7 +10704,8 @@ Rules:
     const dayAll = (state.adminClasses || []).filter((c) => c.date === date);
     planTeachers(rooms).forEach((t) => {
       if (dayAll.some((c) => c.teacherId === t && c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) w.push(`${planNameOf(t)} is on leave that day`);
-      const slots = ((state.adminSlotsDate === date && state.adminSlots && state.adminSlots[t]) || []).filter((s) => !s.cancelled);
+      const f0 = state.adminExamForm; const ctSc = f0 && f0.ct ? expandScope(f0.scope || []) : null;
+ const slots = ((state.adminSlotsDate === date && state.adminSlots && state.adminSlots[t]) || []).filter((s) => !s.cancelled && !(ctSc && s.test && ctSc.indexOf(s.label) !== -1));
       duties.filter((d) => d.t === t).forEach((d) => slots.forEach((s) => {
         const sa = hhmmToMin(s.time), sb = sa + slotDuration(s);
         if (sa < d.b && d.a < sb) w.push(`${planNameOf(t)} has ${s.label} at ${formatTimeStr(s.time)} during duty in ${d.r}`);
@@ -10824,7 +10874,7 @@ Rules:
     const used = new Set();
 
     // --- Class tests: taken in a teacher's own class (Add Class); helpers who logged invigilation are attached.
-    const ct = dayAll.filter((c) => c.entryType !== 'activity' && c.test);
+    const ctAll = dayAll.filter((c) => c.entryType !== 'activity' && c.test); const ctPlans = (state.adminExams || []).filter((e) => e.ct); const ct = ctAll.filter((c) => !ctPlans.some((e) => ctMatch(c, e)));
     const classRows = ct.map((c) => {
       const a = hhmmToMin(c.startTimeStr), b = hhmmToMin(c.endTimeStr);
       const bs = entryBatches(c);
@@ -10858,13 +10908,15 @@ Rules:
       const missing = (e.invigilators || []).filter((t) => loggedBy[t] === undefined);
       if (missing.length && ended(e)) alerts.push({ t: `${examTitle(e)}: invigilation not logged`, lines: [missing.map(nameOf).join(', ')] });
       const batches = expandScope(e.scope);
-      sched.filter((x) => x.status !== 'cancelled' && batches.indexOf(x.slot.label) !== -1).forEach((x) => {
-        const a = hhmmToMin(x.slot.time), b = a + slotDuration(x.slot);
+      (e.ct ? [] : sched).filter((x) => x.status !== 'cancelled' && batches.indexOf(x.slot.label) !== -1).forEach((x) => {
+ const a = hhmmToMin(x.slot.time), b = a + slotDuration(x.slot);
         if (overlaps(a, b, hhmmToMin(e.start), hhmmToMin(e.end))) alerts.push({ t: `${x.slot.label} has a class during ${examTitle(e)}`, lines: [`${formatTimeStr(x.slot.time)} · ${nameOf(x.tid)}`] });
       });
       const inv = Object.keys(loggedBy).map((t) => `${nameOf(t)} (${svDur(loggedBy[t])})`);
       const pr = planOf(e);
-      const planLine = pr.length ? `Duty plan: ${pr.map((r) => r.room).join(', ')}${pr.some((r) => (r.slots || []).some((sl) => !(sl.teachers || []).length)) ? ' · ⚠️ a slot has no invigilator' : ''}` : 'No duty plan yet · tap → Edit to add rooms';
+ const ctLogs = e.ct ? ctAll.filter((c) => ctMatch(c, e)) : [];
+ const ctLine = e.ct ? `<div class="ad-tsub" style="font-weight:600;">${ctLogs.length ? escapeHtml(ctLogs.map((c) => `${nameOf(c.teacherId)}: ${planTeachers(pr).indexOf(c.teacherId) !== -1 ? 'on duty, the class counts' : 'not on duty, the class will not count'}`).join(' · ')) : 'Class not filled in yet · it counts for the class teacher only if he is on duty'}</div>` : '';
+ const planLine = pr.length ? `Duty plan: ${pr.map((r) => r.room).join(', ')}${pr.some((r) => (r.slots || []).some((sl) => !(sl.teachers || []).length)) ? ' · ⚠️ a slot has no invigilator' : ''}` : 'No duty plan yet · tap → Edit to add rooms';
       const slotsAll = [].concat(...pr.map((r) => r.slots || []));
       const slotsOk = slotsAll.filter((sl) => (sl.teachers || []).length).length;
       const isSel = state.exSel && state.exSel.indexOf(e.id) !== -1;
@@ -10903,7 +10955,7 @@ Rules:
       return `<div class="ad-exam${isSel ? ' ex-sel' : ''}${open ? ' ex-open' : ''}" data-exam="${escapeHtml(e.id)}" role="button" tabindex="0" data-plan-line="${escapeHtml(planLine)}">
         <div class="ad-tname">${state.exSel ? `<span class="ex-tick">${isSel ? '✓' : ''}</span>` : ''}${escapeHtml(examTitle(e))}</div>
         <div class="ad-tsub">${escapeHtml([scopeWithSubjects(e, true), `${formatTimeStr(e.start)} – ${formatTimeStr(e.end)}`].filter(Boolean).join(' · '))}</div>
- ${steps}${dutyLine}${duty}
+ ${steps}${dutyLine}${ctLine}${duty}
         ${open && extra.length ? `<div class="ad-tsub">Done, not in plan: ${escapeHtml(extra.map((u) => `${nameOf(u)} (${svDur(loggedBy[u])})`).join(', '))}</div>` : ''}
         ${!pr.length && inv.length ? `<div class="ad-tsub">Invigilation filled in: ${escapeHtml(inv.join(', '))}</div>` : ''}
       </div>`;
@@ -11207,19 +11259,22 @@ Rules:
       const dayList = datesBetween(r.from, r.to);
       const parts = await Promise.all(dayList.map((d) => state.db.collection('classes').where('date', '==', d).limit(500).get().then((sn) => sn.docs.map(normDoc))));
       const seen = {};
-      const logs = [].concat(...parts).filter((c) => (seen[c.id] ? false : (seen[c.id] = true))).filter((c) => c.entryType !== 'activity' && c.date >= r.from && c.date <= r.to && !c.cancelled)
-        .map((c) => ({ c, t: c.teacherId, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
+      const logsAll = [].concat(...parts).filter((c) => (seen[c.id] ? false : (seen[c.id] = true))).filter((c) => c.entryType !== 'activity' && c.date >= r.from && c.date <= r.to && !c.cancelled)
+ .map((c) => ({ c, t: c.teacherId, d: c.date, bs: entryBatches(c), a: hhmmToMin(c.startTimeStr), z: hhmmToMin(c.endTimeStr) }));
+ const cf = ctFilterLogs(logsAll, await ctExamsInRange(r.from, r.to)); const logs = cf.logs;
       const used = new Set(); const missing = []; const upcoming = []; const subHits = [];
       tt.forEach((x) => {
         const hit = logs.find((l) => l.t === x.t && l.d === x.d && l.bs.indexOf(x.b) !== -1 && (l.a == null || l.z == null || (l.a < x.z && x.a < l.z)));
         if (hit) { if (x.sub && !used.has(hit)) subHits.push({ t: x.t, f: x.f, d: x.d, bs: hit.bs, a: hit.a != null ? hit.a : x.a, z: hit.z != null ? hit.z : x.z }); used.add(hit); return; }
-        // a class still to come is not "missing" yet
+ const drop = cf.dropped.find((l) => l.t === x.t && l.d === x.d && l.bs.indexOf(x.b) !== -1 && (l.a == null || l.z == null || (l.a < x.z && x.a < l.z))); if (drop) { missing.push(Object.assign({}, x, { ct: true })); return; }
+ // a class still to come is not "missing" yet
         const endTs = dateObj(x.d).getTime() + (x.z || 0) * 60000;
         if (endTs > Date.now()) { upcoming.push(x); return; }
         missing.push(x);
       });
-      const subs = subHits;
-      t.data = { logs, missing, upcoming, subs, from: r.from, to: r.to, ttCount: tt.length };
+      cf.dropped.forEach((l) => { if (!missing.some((x) => x.ct && x.t === l.t && x.d === l.d && l.bs.indexOf(x.b) !== -1)) missing.push({ t: l.t, d: l.d, b: l.bs[0], a: l.a, z: l.z, s: l.c.subject || '', ct: true }); });
+ const subs = subHits;
+ t.data = { logs, missing, upcoming, subs, from: r.from, to: r.to, ttCount: tt.length };
     } catch (err) { t.data = { error: true }; }
     t.busy = false; trepRender();
   }
@@ -11312,7 +11367,7 @@ Rules:
     const miss = (t.data.missing || []).filter((x) => !T.only || x.sub);
     if (miss.length) {
       const by = {}; miss.forEach((x) => { (by[x.t] = by[x.t] || []).push(x); });
-      h += `<div class="trep-miss"><div class="trep-miss-h"><span class="ico i-alert" aria-hidden="true"></span> Not filled in (${miss.length}) · not counted</div>
+      h += `<div class="trep-miss"><div class="trep-miss-h"><span class="ico i-alert" aria-hidden="true"></span> ${miss.some((x) => x.ct) ? 'Not counted' : 'Not filled in'} (${miss.length}) · not counted${miss.some((x) => x.ct) ? ' · a class test where the class teacher is not on duty, or a class not filled in' : ''}</div>
         <div class="trep-miss-l">${Object.keys(by).sort((a, b) => ttName(a).localeCompare(ttName(b))).map((u) => `<button type="button" class="trep-mchip" data-trep-miss="${escapeHtml(u)}">${escapeHtml(trepName(u))} <b>${by[u].length}</b></button>`).join('')}</div>
         <div class="hv-note" style="text-align:left; margin-top:4px;">Classes whose time is over but the teacher hasn't filled them in. Tap a name to see which.</div></div>`;
     } else if (!T.only && (t.data.ttCount || 0) > 0) h += '<div class="trep-ok"><span class="ico i-check" aria-hidden="true"></span> Every class that has happened is filled in</div>';
@@ -11696,10 +11751,11 @@ Rules:
     const day = (state.adminClasses || []).filter((c) => c.date === date && c.teacherId === u);
     if (day.some((c) => c.entryType === 'activity' && c.activityType === 'Leave / Holiday')) return 'on leave';
     if (a == null || b == null) return '';
-    const slots = ((state.adminSlotsDate === date && state.adminSlots && state.adminSlots[u]) || []).filter((s) => !s.cancelled);
+    const f0 = state.adminExamForm; const ctSc = f0 && f0.ct ? expandScope(f0.scope || []) : null;
+    const slots = ((state.adminSlotsDate === date && state.adminSlots && state.adminSlots[u]) || []).filter((s) => !s.cancelled && !(ctSc && s.test && ctSc.indexOf(s.label) !== -1));
     const hit = slots.find((s) => { const sa = hhmmToMin(s.time), sb = sa + slotDuration(s); return sa < b && a < sb; });
     if (hit) return `class ${formatTimeStr(hit.time)}`;
-    const cls = day.find((c) => c.entryType !== 'activity' && hhmmToMin(c.startTimeStr) < b && a < hhmmToMin(c.endTimeStr));
+    const cls = day.find((c) => c.entryType !== 'activity' && !(ctSc && c.test && entryBatches(c).some((x) => ctSc.indexOf(x) !== -1)) && hhmmToMin(c.startTimeStr) < b && a < hhmmToMin(c.endTimeStr));
     return cls ? `class ${formatTimeStr(cls.startTimeStr)}` : '';
   }
   // ======================= Exam planner: 4 steps (Exam · Rooms · Duty · Check) =======================
@@ -12200,7 +12256,7 @@ Rules:
   }
   function openAdminExamForm(exam, step) {
     state.adminExamForm = exam
-      ? { id: exam.id, papers: (exam.papers || []), type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
+      ? { id: exam.id, ct: !!exam.ct, papers: (exam.papers || []), type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
           ptype: exam.ptype === 'mcq' ? 'mcq' : 'sub', times: Object.assign({}, exam.times || {}, (exam.times && exam.times.report) ? {} : { report: exam.start || '', writeTo: exam.end || '' }),
           rooms: planOf(exam).length ? planOf(exam).map((r) => ({ room: r.room || '', staff: r.staff || 0, others: (r.others || []).map((o) => Object.assign({}, o)), slots: (r.slots || []).map((sl) => ({ start: sl.start, end: sl.end, teachers: (sl.teachers || []).slice(), breaks: JSON.parse(JSON.stringify(sl.breaks || {})) })) }))
             : (exam.room ? [{ room: exam.room, slots: [{ start: exam.start, end: exam.end, teachers: (exam.invigilators || []).slice() }] }] : []) }
@@ -15787,6 +15843,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const match = findCurrentScheduleSlot();
     if (!match) { prefillClassTiming(); syncDurChips(); return; }
     fillClassFromSlot(match.slot, match.startMin);
+    try { renderForm(); } catch (e) { /* ignore */ }
   }
 
   // each subject keeps one soft colour (never green, red or yellow — those mean done, attention and pending)
@@ -15818,6 +15875,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.getElementById('startTimeInput').value = match.slot.time;
     document.getElementById('endTimeInput').value = `${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`;
     if (slot.test) state.form.test = true;
+    // a class test with a plan: the Class test switch is on and the plan's rooms are filled in
+    { const ctRoomsNow = () => { try { const exL = (state.examsFor && state.examsFor[slot.date]) || []; const pl = (Array.isArray(exL) ? exL : []).find((e) => e.ct && expandScope(e.scope || []).indexOf(batch) !== -1 && hhmmToMin(e.start) < match.startMin + duration && match.startMin < hhmmToMin(e.end)); if (!pl) return false; state.form.test = true; const inp = document.getElementById('testRoomsInput'); if (inp && !inp.value) inp.value = planOf(pl).map((r) => r.room).filter(Boolean).join(', '); return true; } catch (e) { return false; } };
+      if (slot.test && slot.date) { if (state.examsFor[slot.date] === undefined) loadExamsFor(slot.date).then(() => { if (ctRoomsNow()) { try { renderForm(); } catch (e) { /* ignore */ } } }); else ctRoomsNow(); } }
     if (Array.isArray(slot.batches) && slot.batches.length > 1) { state.form.extra = slot.batches.filter((x) => x !== batch); state.form.combineOpen = true; }
     setSchedHint(`Filled in from your Schedule: ${slotLabelAll(slot)} at ${formatTimeStr(match.slot.time)}${slot.test ? ' · class test ticked' : ''}. Change anything if needed.`);
     syncDurChips();
