@@ -3515,7 +3515,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.66 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.67 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10444,7 +10444,7 @@ Rules:
       : `<div class="sv-rows">${rows.map((x) => { const st = x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status); const t = formatTimeStr(x.slot.time); const tm = t.match(/^(.*?)\s?(AM|PM)$/i); const ses = batchSession(x.slot.label || '') || 'morning'; return `<div class="sv-row ${st} ses-${ses}">
           <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : escapeHtml(t)}</span>
           <span class="sv-main"><span class="sv-top"><span class="sv-batch">${nbLabel(slotLabelAll(x.slot))}</span>${pillHtml(st, ADMIN_PILL[x.status])}</span>
-            <span class="chiprow"><span class="mchip"><span class="ico i-user" aria-hidden="true"></span>${escapeHtml(nameOf(x.tid))}</span>${x.slot.subject ? subjChipHtml(x.slot.subject) : ''}<span class="mchip"><span class="ico i-clock" aria-hidden="true"></span>${escapeHtml(svDur(slotDuration(x.slot)))}</span></span></span></div>`; }).join('')}</div>
+            <span class="chiprow"><span class="mchip"><span class="ico i-user" aria-hidden="true"></span>${escapeHtml(nameOf(x.tid))}</span>${x.slot.subject ? subjChipHtml(x.slot.subject) : ''}${x.slot.test ? '<span class="mchip">Class test</span>' : ''}<span class="mchip"><span class="ico i-clock" aria-hidden="true"></span>${escapeHtml(svDur(slotDuration(x.slot)))}</span></span></span></div>`; }).join('')}</div>
           ${sched.length > 8 ? `<button type="button" class="hv-back" id="adminSchedToggle" style="align-self:center;">${showAll ? 'Show less' : `Show all ${sched.length}`}</button>` : ''}`;
     const tg = document.getElementById('adminSchedToggle');
     if (tg) tg.addEventListener('click', () => { state.adminSchedAll = !state.adminSchedAll; renderAdmin(); });
