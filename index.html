@@ -1223,12 +1223,12 @@
   .xs-search { position: relative; margin-top: 14px; }
   .xs-search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
   .xs-search input { width: 100%; height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); padding: 0 14px 0 40px; color: var(--ink); font-family: inherit; }
-  .xs-grp { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 16px 2px 6px; }
+  .xs-grp { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 16px 2px 6px; }
   .xs-pw { margin-bottom: 8px; }
   .xs-p { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font-family: inherit; }
   .xs-p.on { border-color: var(--gold); background: var(--gold-soft); }
   .xs-pn { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-  .xs-pn b { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+  .xs-pn b { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
   .xs-pn small { font-size: 12px; color: var(--muted); }
   .xs-pn small.why { color: #B45309; font-weight: 600; }
   .xs-ck { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 800; flex: none; }
@@ -2324,6 +2324,12 @@
   .xc-pick.open { border-color: var(--gold); color: var(--gold); }
   .xc-rm { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--muted-2); font-size: 15px; cursor: pointer; }
   .xc-open { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px 4px; margin-left: 8px; border-left: 2px solid var(--line); }
+  body[data-hsub="ov"] [data-hsub]:not([data-hsub="ov"]), body[data-hsub="tc"] [data-hsub]:not([data-hsub="tc"]), body[data-hsub="cl"] [data-hsub]:not([data-hsub="cl"]) { display: none !important; }
+  .home-seg { display: flex; gap: 4px; padding: 4px; background: var(--neutral-soft); border-radius: 14px; }
+  .home-seg button { flex: 1; padding: 9px 6px; border: 0; border-radius: 11px; background: transparent; color: var(--muted-2); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .home-seg button.active { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(16,24,40,.12); }
+  .ad-tfilters { display: flex; flex-direction: column; gap: 8px; }
+  .ad-schedchips { margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -2899,29 +2905,28 @@
       </div>
       
 
-      <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">Classes</div><div class="tsec-meta" id="adLoggedMeta" hidden></div></div>
+      <div class="home-seg" id="homeSeg" data-atab="dash"><button type="button" data-hsub-btn="ov" class="active">Overview</button><button type="button" data-hsub-btn="tc">Teachers - <span id="hsTc">0</span></button><button type="button" data-hsub-btn="cl">Classes - <span id="hsCl">0</span></button></div>
+ <section class="tsec" data-atab="dash" data-hsub="ov">
+        <div class="tsec-head"><div class="tsec-title">Today</div><div class="tsec-meta" id="adLoggedMeta" hidden></div></div>
         <div class="sum-grid">
           <div class="sum-tile"><div class="sum-num" id="adScheduled">0</div><div class="sum-lbl">Scheduled</div></div>
           <div class="sum-tile"><div class="sum-num" id="adCompleted">0</div><div class="sum-lbl">Completed</div></div>
           <div class="sum-tile"><div class="sum-num" id="adUpcoming">0</div><div class="sum-lbl">Upcoming</div></div>
           <div class="sum-tile"><div class="sum-num" id="adNotLogged">0</div><div class="sum-lbl">Not logged</div></div>
         </div>
-      </section>
-      <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">Teachers</div></div>
-        <div class="sum-grid ad-sum3">
+      <div style="height:2px"></div>
+ <div class="sum-grid ad-sum3">
           <div class="sum-tile"><div class="sum-num" id="adPresent">0</div><div class="sum-lbl">Present</div></div>
           <div class="sum-tile"><div class="sum-num" id="adLeave">0</div><div class="sum-lbl">On leave</div></div>
           <div class="sum-tile"><div class="sum-num" id="adNotIn">0</div><div class="sum-lbl">Not in</div></div>
         </div>
-      </section>
+ </section>
 
-      <section class="tsec" id="adminTTImgSec" data-atab="dash" hidden>
+      <section class="tsec" id="adminTTImgSec" data-atab="dash" data-hsub="ov" hidden>
         <div class="tsec-head"><div class="tsec-title">This Week's Timetable</div><div class="tsec-meta">tap to view</div></div>
         <div class="tti-row" id="adminTTImgs"></div>
       </section>
-      <div class="teacher-card ad-oncampus" id="onCampusNowCard" data-atab="dash" style="display:none; cursor:pointer;">
+      <div class="teacher-card ad-oncampus" id="onCampusNowCard" data-atab="dash" data-hsub="ov" style="display:none; cursor:pointer;">
         <div class="teacher-top">
           <div class="teacher-name"><span class="live-dot"></span>On Campus Right Now</div>
           <div class="teacher-time num" id="onCampusNowCount">0</div>
@@ -2930,23 +2935,24 @@
         <div id="onCampusNowNames" style="display:none; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
 
-      <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">Attention Required</div></div>
+      <section class="tsec" data-atab="dash" data-hsub="ov">
+ <div class="tsec-head"><div class="tsec-title">Needs attention</div></div>
         <div id="adminAlerts"></div>
       </section>
 
-      <section class="tsec" data-atab="dash" id="noticesSec">
+      <section class="tsec" data-atab="dash" data-hsub="ov" id="noticesSec">
         <div class="tsec-head"><div class="tsec-title">Notices</div><button type="button" class="hv-back" id="nbNewTop" hidden style="padding:0;">+ New</button></div>
         <div id="adminNotices"></div>
       </section>
 
-      <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">Teacher Activity</div><div class="tsec-meta" id="adminTeacherMeta" hidden></div></div>
-        <div id="adminTeacherList"><div class="skel short"></div><div class="skel short"></div></div>
+      <section class="tsec" data-atab="dash" data-hsub="tc">
+ <div class="tsec-head"><div class="tsec-title">Teacher Activity</div><div class="tsec-meta" id="adminTeacherMeta" hidden></div></div>
+ <div class="ad-tfilters" id="adminTFilters"><input type="search" class="text-input" id="adminTSearch" placeholder="Search a name" autocomplete="off"><div class="chips" id="adminTChips"></div></div>
+ <div id="adminTeacherList"><div class="skel short"></div><div class="skel short"></div></div>
       </section>
 
-      <section class="tsec" data-atab="dash">
-        <div class="tsec-head"><div class="tsec-title">Schedule (All Teachers)</div><div class="tsec-meta" id="adminSchedMeta"></div></div>
+      <section class="tsec" data-atab="dash" data-hsub="cl">
+ <div class="tsec-head"><div class="tsec-title">Schedule (All Teachers)</div><div class="tsec-meta" id="adminSchedMeta"></div></div>
         <div id="adminSchedList" style="display:flex; flex-direction:column; gap:8px;"></div>
       </section>
 
@@ -3520,7 +3526,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.69 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.72 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6382,6 +6388,17 @@
     }
     return res;
   }
+  // The published picture of this week, drawn from the saved timetable (nothing is stored). Used when the saved copy has been removed.
+  function tgDrawnPubImage(doc) {
+    if (!doc) return null;
+    const key = `${state.tg.docKey}|${doc.publishedAt || 0}`; const cache = state.tg._drawn;
+    if (cache && cache.key === key) return cache.image;
+    try {
+      const days = (doc.pubDays || []).slice().sort(); state.tg.imgDays = days.length ? days : null;
+      const cv = tgImage(true); state.tg.imgDays = null; if (!cv) return null;
+      const image = cv.toDataURL('image/png'); state.tg._drawn = { key, image }; return image;
+    } catch (e) { state.tg.imgDays = null; return null; }
+  }
   function renderTgGrid() {
     const box = document.getElementById('tgWrap');
     if (!box) return;
@@ -6409,7 +6426,8 @@
     if (!doc) { box.innerHTML = html + '<div class="skel short"></div>'; bindTg(box); return; }
     const wImgs = weekTtImages(state.tt.weekStart);
     const dayImg = wImgs.find((x) => x.id === state.tg.docKey + '~' + state.tg.day);
-    const pubImg = dayImg || wImgs.find((x) => x.id === state.tg.docKey);
+    let pubImg = dayImg || wImgs.find((x) => x.id === state.tg.docKey);
+    if (!pubImg && !wImgs.some((x) => x.id.indexOf(state.tg.docKey + '~') === 0) && doc.status === 'published' && (doc.pubDays || []).length && tgPendingCount() === 0 && state.ttImgs[state.tt.weekStart] && state.ttImgs[state.tt.weekStart].loaded) { const drawn = tgDrawnPubImage(doc); if (drawn) pubImg = { image: drawn }; }
     if (!pubImg && wImgs.some((x) => x.id.indexOf(state.tg.docKey + '~') === 0)) html += `<div class="hv-note" style="text-align:left;">${escapeHtml(WD[dateObj(state.tg.day).getDay()])} ${dateObj(state.tg.day).getDate()} has no published picture yet · pictures of other days are in the Gallery</div>`;
     if (pubImg) {
       const pDays = dayImg ? [state.tg.day] : ((doc && doc.pubDays) || []).slice().sort();
@@ -6620,7 +6638,7 @@
     
     on('tgCopyDay', tgCopyDayPicker);
     on('tgImage', tgImage);
-    on('tgViewImg', () => { const L = weekTtImages(state.tt.weekStart); const x = L.find((y) => y.id === state.tg.docKey + '~' + state.tg.day) || L.find((y) => y.id === state.tg.docKey); if (x) openZoomViewer(x.image, { turn: true }); });
+    on('tgViewImg', () => { const L = weekTtImages(state.tt.weekStart); const x = L.find((y) => y.id === state.tg.docKey + '~' + state.tg.day) || L.find((y) => y.id === state.tg.docKey); if (x) openZoomViewer(x.image, { turn: true }); else { const im = tgDrawnPubImage(state.tg.doc); if (im) openZoomViewer(im, { turn: true }); } });
     on('tgPublish', () => tgPublishAsk());
     on('tgEditSubj', () => { state.adminTab = 'settings'; state.adminSetOpen = 'adminSubjectsPanel'; renderAdmin(); setTimeout(() => { const p = document.getElementById('adminSubjectsPanel'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); });
     on('tgPublishDay', () => tgPublish(state.tg.day));
@@ -8068,9 +8086,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   state.ttImgs = state.ttImgs || {};
   function weekTtImages(ws) {
     if (state.ttImgs[ws] && Date.now() - state.ttImgs[ws].at < 60000) return state.ttImgs[ws].list;
-    state.ttImgs[ws] = { at: Date.now(), list: (state.ttImgs[ws] && state.ttImgs[ws].list) || [] };
+    state.ttImgs[ws] = { at: Date.now(), list: (state.ttImgs[ws] && state.ttImgs[ws].list) || [], loaded: !!(state.ttImgs[ws] && state.ttImgs[ws].loaded) };
     state.db.collection('timetableImages').where('weekStart', '==', ws).get().then((snap) => {
-      state.ttImgs[ws] = { at: Date.now(), list: snap.docs.map((d) => Object.assign({ id: d.id }, d.data())) };
+      state.ttImgs[ws] = { at: Date.now(), list: snap.docs.map((d) => Object.assign({ id: d.id }, d.data())), loaded: true };
       if (state.tab === 'admin') { renderAdmin(); renderTtImgCard(); }
     }).catch(() => {});
     return state.ttImgs[ws].list;
@@ -10287,6 +10305,42 @@ Rules:
     body.querySelectorAll('[data-tp-together]').forEach((el) => el.addEventListener('click', () => { tp.together = !tp.together; tpRender(); }));
     const go = body.querySelector('#tpGo'); if (go) go.addEventListener('click', tpApply);
   }
+  // ---------- Admin Home: Overview / Teachers / Classes ----------
+  state.homeSub = (function () { try { return localStorage.getItem('ctd_home_sub') || 'ov'; } catch (e) { return 'ov'; } })();
+  if (['ov', 'tc', 'cl'].indexOf(state.homeSub) === -1) state.homeSub = 'ov';
+  function applyHomeSub() {
+    document.body.setAttribute('data-hsub', state.homeSub);
+    document.querySelectorAll('#homeSeg [data-hsub-btn]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-hsub-btn') === state.homeSub));
+    try { localStorage.setItem('ctd_home_sub', state.homeSub); } catch (e) { /* ignore */ }
+  }
+  document.querySelectorAll('#homeSeg [data-hsub-btn]').forEach((b) => b.addEventListener('click', () => { state.homeSub = b.getAttribute('data-hsub-btn'); applyHomeSub(); }));
+  applyHomeSub();
+  // Teachers: search, filter chips (with the counts) and "Show all"; the rows themselves are drawn by renderAdmin
+  state.adminTF = 'all'; state.adminTQ = ''; state.adminTAll = false;
+  function tcGroup(k) { return (k === 'oncampus' || k === 'present') ? 'present' : (k === 'leave' ? 'leave' : (k === 'off' ? 'off' : 'notin')); }
+  function tcApplyFilter(rows) {
+    const listEl = document.getElementById('adminTeacherList'); const chipsEl = document.getElementById('adminTChips'); if (!listEl || !chipsEl) return;
+    if (rows) state._tcRows = rows; rows = state._tcRows || [];
+    const counts = { all: rows.length, present: 0, notin: 0, leave: 0 }; rows.forEach((r) => { const g = tcGroup(r.st.key); if (counts[g] !== undefined) counts[g]++; });
+    const F = state.adminTF || 'all';
+    chipsEl.innerHTML = [['all', 'All'], ['present', 'Present'], ['notin', 'Not in'], ['leave', 'On leave']].map(([k, l]) => `<button type="button" class="chip${F === k ? ' active' : ''}" data-tf="${k}">${l} - ${counts[k]}</button>`).join('');
+    chipsEl.querySelectorAll('[data-tf]').forEach((b) => b.addEventListener('click', () => { state.adminTF = b.getAttribute('data-tf'); state.adminTAll = false; tcApplyFilter(); }));
+    const q = (state.adminTQ || '').trim().toLowerCase(); const limited = F === 'all' && !q && !state.adminTAll;
+    let shown = 0; let match = 0;
+    listEl.querySelectorAll('.ad-trow').forEach((row) => {
+      const st = (row.className.match(/st-(\w+)/) || [])[1] || ''; const nm = ((row.querySelector('.ad-tname') || {}).textContent || '').toLowerCase();
+      const ok = (F === 'all' || tcGroup(st) === F) && (!q || nm.indexOf(q) !== -1); if (ok) match++;
+      const vis = ok && (!limited || shown < 6 || row.classList.contains('open')); if (vis) shown++;
+      row.hidden = !vis; const nx = row.nextElementSibling; if (nx && nx.classList.contains('ad-detail')) nx.hidden = !vis;
+    });
+    let more = document.getElementById('adminTMore');
+    if (!more) { more = document.createElement('button'); more.type = 'button'; more.id = 'adminTMore'; more.className = 'hv-back'; more.style.alignSelf = 'center'; listEl.insertAdjacentElement('afterend', more); more.addEventListener('click', () => { state.adminTAll = !state.adminTAll; tcApplyFilter(); }); }
+    more.hidden = !(F === 'all' && !q && rows.length > 6); more.textContent = state.adminTAll ? 'Show less' : `Show all ${rows.length}`;
+    let none = document.getElementById('adminTNone');
+    if (!none) { none = document.createElement('div'); none.id = 'adminTNone'; none.className = 'hv-note'; none.style.textAlign = 'left'; none.textContent = 'No teacher matches'; listEl.insertAdjacentElement('afterend', none); }
+    none.hidden = !(rows.length && !match);
+  }
+  (function () { const si = document.getElementById('adminTSearch'); if (si) si.addEventListener('input', () => { state.adminTQ = si.value; tcApplyFilter(); }); })();
   function renderAdmin() {
     renderAiPanel(); renderPushPanel();
     applyRoleUI();
@@ -10425,7 +10479,7 @@ Rules:
       }
     } catch (e) { /* ignore */ }
     const stuck = Object.keys(state.adminCampus || {}).filter((tid) => { const c = state.adminCampus[tid]; return c && c.checkedIn && c.checkInAt && Date.now() - c.checkInAt >= 24 * 3600 * 1000; });
-    stuck.forEach((tid) => alerts.push({ t: `${nameOf(tid)} is still checked in from an earlier day`, lines: ['Open the teacher below to force a check-out.'] }));
+    stuck.forEach((tid) => alerts.push({ t: `${nameOf(tid)} is still checked in from an earlier day`, lines: ['Open the Teachers tab to force a check-out.'] }));
     const clashes = [];
     ids.forEach((tid) => {
       const slots = ((slotsReady && state.adminSlots[tid]) || []).filter((s) => !s.cancelled).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
@@ -10455,15 +10509,21 @@ Rules:
     // --- today's schedule (all teachers)
     const schedEl = document.getElementById('adminSchedList');
     const showAll = !!state.adminSchedAll;
-    const rows = showAll ? sched : sched.slice(0, 8);
+    const sMap = (x) => (x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status));
+    const sf = state.adminSchedF || 'all'; const fsched = sf === 'all' ? sched : sched.filter((x) => sMap(x) === sf);
+    const sCnt = { all: sched.length, missed: sched.filter((x) => sMap(x) === 'missed').length, done: sched.filter((x) => sMap(x) === 'done').length, upcoming: sched.filter((x) => sMap(x) === 'upcoming').length };
+    const sChips = [['all', 'All'], ['missed', 'Not logged'], ['done', 'Done'], ['upcoming', 'Upcoming']].map(([k, l]) => `<button type="button" class="chip${sf === k ? ' active' : ''}" data-sf="${k}">${l} - ${sCnt[k]}</button>`).join('');
+    try { document.getElementById('hsCl').textContent = sched.length; } catch (e) { /* ignore */ }
+    const rows = showAll ? fsched : fsched.slice(0, 8);
     document.getElementById('adminSchedMeta').textContent = sched.length ? `${sched.length} class${sched.length === 1 ? '' : 'es'}` : '';
     schedEl.innerHTML = !slotsReady ? '<div class="skel short"></div>'
       : !sched.length ? `<div class="empty-state"><span class="ico i-cal" aria-hidden="true"></span>${state.adminDate < todayStr() ? 'No classes were scheduled for this day' : 'No classes are scheduled for this day'}</div>`
-      : `<div class="sv-rows">${rows.map((x) => { const st = x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status); const t = formatTimeStr(x.slot.time); const tm = t.match(/^(.*?)\s?(AM|PM)$/i); const ses = batchSession(x.slot.label || '') || 'morning'; return `<div class="sv-row ${st} ses-${ses}">
+      : `<div class="chips ad-schedchips">${sChips}</div><div class="sv-rows">${rows.map((x) => { const st = x.status === 'leave' ? 'missed' : (x.status === 'covered' ? 'done' : x.status); const t = formatTimeStr(x.slot.time); const tm = t.match(/^(.*?)\s?(AM|PM)$/i); const ses = batchSession(x.slot.label || '') || 'morning'; return `<div class="sv-row ${st} ses-${ses}">
           <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : escapeHtml(t)}</span>
           <span class="sv-main"><span class="sv-top"><span class="sv-batch">${nbLabel(slotLabelAll(x.slot))}</span>${pillHtml(st, ADMIN_PILL[x.status])}</span>
             <span class="chiprow"><span class="mchip"><span class="ico i-user" aria-hidden="true"></span>${escapeHtml(nameOf(x.tid))}</span>${x.slot.subject ? subjChipHtml(x.slot.subject) : ''}${x.slot.test ? '<span class="mchip">Class test</span>' : ''}<span class="mchip"><span class="ico i-clock" aria-hidden="true"></span>${escapeHtml(svDur(slotDuration(x.slot)))}</span></span></span></div>`; }).join('')}</div>
-          ${sched.length > 8 ? `<button type="button" class="hv-back" id="adminSchedToggle" style="align-self:center;">${showAll ? 'Show less' : `Show all ${sched.length}`}</button>` : ''}`;
+          ${fsched.length > 8 ? `<button type="button" class="hv-back" id="adminSchedToggle" style="align-self:center;">${showAll ? 'Show less' : `Show all ${fsched.length}`}</button>` : ''}`;
+    schedEl.querySelectorAll('[data-sf]').forEach((b) => b.addEventListener('click', () => { state.adminSchedF = b.getAttribute('data-sf'); state.adminSchedAll = false; renderAdmin(); }));
     const tg = document.getElementById('adminSchedToggle');
     if (tg) tg.addEventListener('click', () => { state.adminSchedAll = !state.adminSchedAll; renderAdmin(); });
 
@@ -10481,6 +10541,7 @@ Rules:
     });
     const order = { oncampus: 0, present: 1, nocheck: 2, leave: 3, notin: 4, off: 5, absent: 6 };
     teacherRows.sort((a, b) => (order[a.st.key] - order[b.st.key]) || nameOf(a.tid).localeCompare(nameOf(b.tid)));
+    try { document.getElementById('hsTc').textContent = teacherRows.length; } catch (e) { /* ignore */ }
     document.getElementById('adminTeacherMeta').textContent = teacherRows.length ? `${presentN} present · ${leaveN} on leave` : '';
     if (!teacherRows.length) {
       listEl.innerHTML = '<div class="hv-note" style="text-align:left;">No teachers found yet.</div>';
@@ -10513,7 +10574,8 @@ Rules:
           <span class="ad-pill ${r.st.key}">${r.st.label}</span>
         </div>${detail}`;
       }).join('')}</div>`;
-      listEl.querySelectorAll('[data-teacher-id]').forEach((row) => row.addEventListener('click', () => {
+      state._tcRows = teacherRows; try { tcApplyFilter(teacherRows); } catch (e) { /* ignore */ }
+    listEl.querySelectorAll('[data-teacher-id]').forEach((row) => row.addEventListener('click', () => {
         const tid = row.getAttribute('data-teacher-id');
         state.adminExpandedTeacher = state.adminExpandedTeacher === tid ? null : tid;
         renderAdmin();
