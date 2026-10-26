@@ -3515,7 +3515,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.67 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.68 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6250,6 +6250,12 @@
   function hashStr(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0; return h.toString(36); }
   function slotIdFor(docId, c) { return 'tt_' + hashStr(docId + '#' + cellKey(c)); }
   let tgUnsub = null;
+  // A refresh first shows the copy kept on this phone; the "changes / Publish" notice waits until the server has answered (or 4 s passed, e.g. offline)
+  function tgConfirmServer(id) {
+    const done = () => { if (state.tg.docKey !== id || state.tg.confirmed !== false) return; state.tg.confirmed = true; if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid(); };
+    try { state.db.collection('timetables').doc(id).get({ source: 'server' }).then(done, done); } catch (e) { done(); }
+    setTimeout(done, 4000);
+  }
   function subscribeTgDoc() {
     const g = tgGroup();
     if (!g || !state.db) return;
@@ -6259,14 +6265,16 @@
     if (tgSaveTimer) tgFlush();
     state.tg.docKey = id;
     state.tg.doc = null;
+    state.tg.confirmed = false; tgConfirmServer(id);
     if (tgUnsub) tgUnsub();
     tgUnsub = state.db.collection('timetables').doc(id).onSnapshot((snap) => {
       if (state.tg.docKey !== id) return;
+      const fromCache = !!(snap.metadata && snap.metadata.fromCache); if (!fromCache && state.tg.confirmed === false) state.tg.confirmed = true;
       if (state.tg.saving || tgSaveTimer) return; // a local change is about to be saved; keep it
       // never let an older copy from the server replace newer local changes
       if (snap.exists && state.tg.doc && (snap.data().updatedAt || 0) < (state.tg.doc.updatedAt || 0)) return;
       state.tg.doc = snap.exists ? Object.assign({ cells: [] }, snap.data()) : { group: g.key, wing: g.wing, session: g.session, weekStart: ws, sunday: false, cells: [], status: 'draft', published: [] };
-      { const wE = shiftDateStr(ws, 6); const keep = (state.tg.doc.cells || []).filter((c) => !c.d || (c.d >= ws && c.d <= wE)); if (keep.length !== (state.tg.doc.cells || []).length) { state.tg.doc.cells = keep; state.tg.dirty = true; try { tgSave(); } catch (e) { /* ignore */ } } }
+      { const wE = shiftDateStr(ws, 6); const keep = (state.tg.doc.cells || []).filter((c) => !c.d || (c.d >= ws && c.d <= wE)); if (keep.length !== (state.tg.doc.cells || []).length) { state.tg.doc.cells = keep; if (!fromCache) { state.tg.dirty = true; try { tgSave(); } catch (e) { /* ignore */ } } } }
       if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid();
     }, () => {});
     // other timetables of the same week (other wings / sessions) for teacher clash checks
@@ -6378,9 +6386,13 @@
     const days = tgDays();
     if (!state.tg.day || days.indexOf(state.tg.day) === -1) state.tg.day = days.indexOf(todayStr()) !== -1 ? todayStr() : days[0];
     const doc = state.tg.doc;
-    if (doc) {
+    if (doc && state.tg.confirmed !== false) {
       let filled = 0;
-      (doc.cells || []).forEach((c) => { if (!c.ex && !c.t && c.s) { const t = defaultTeacher(c.b, c.s); if (t) { c.t = t; filled++; } } });
+      (doc.cells || []).forEach((c) => { if (!c.ex && !c.t && c.s) { const t = defaultTeacher(c.b, c.s); if (t) {
+        const k0 = cellKey(c); const same = !!(doc.pubSnap && doc.pubSnap.cells && doc.pubSnap.cells[k0] === cellSig(c) && (doc.published || []).indexOf(`${t}/${slotIdFor(state.tg.docKey, c)}`) !== -1);
+        c.t = t; filled++;
+        if (same) { doc.pubSnap.cells[k0] = cellSig(c); if (doc.pubSnap.full) doc.pubSnap.full[k0] = JSON.stringify(c); }
+      } } });
       if (filled) { tgSave(); setTimeout(() => showToast(`${filled} class${filled === 1 ? '' : 'es'} got their teacher from Teacher Mapping`), 50); }
     }
     const per = g ? periodsFor(g.key) : [];
@@ -8487,6 +8499,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   // keys of changed cells and days with changes (null = never published with tracking)
   function tgChanges() {
+    if (state.tg.confirmed === false) return null;
     const doc = state.tg.doc; if (!doc || !doc.pubSnap) return null;
     const snap = doc.pubSnap; const keys = {}; const days = {};
     const now = {}; (doc.cells || []).forEach((c) => { now[cellKey(c)] = cellSig(c); });
