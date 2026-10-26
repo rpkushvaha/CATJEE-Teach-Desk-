@@ -3526,7 +3526,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.72 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.73 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5636,7 +5636,7 @@
         resolvedAdminNameIds.add(d.id);
       });
       state.adminTeacherIds = list;
-      state.adminNames = Object.assign({}, state.adminNames, names); try { syncTeacherData(); } catch (e) { /* ignore */ } try { if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ } if (state.tab === 'admin') renderAdmin();
+    state.adminNames = Object.assign({}, state.adminNames, names); try { mergePendingStaff(); } catch (e) { /* ignore */ } try { syncTeacherData(); } catch (e) { /* ignore */ } try { if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ } if (state.tab === 'admin') renderAdmin();
     } catch (err) { adminTeachersLoadedAt = 0; }
   }
   let adminSlotsKey = '';
@@ -5679,6 +5679,14 @@
   state.team = state.team || {};
   function isCoordUid(uid) { return !!(state.team[uid] && state.team[uid].role === 'coordinator' && state.team[uid].status !== 'removed'); }
   function isRemovedUid(uid) { return !!(state.team[uid] && state.team[uid].status === 'removed'); }
+  // A teacher added by the Admin before he has an account: team/<Staff ID> = { pending: true, name, salutation, whatsapp, birthMd, ... }. When he joins with that Staff ID he is linked (linkPendingStaff).
+  function isPendingUid(u) { const t = state.team && state.team[u]; return !!(t && t.pending === true && !t.joinedUid && t.status !== 'removed'); }
+  function mergePendingStaff() {
+    const team = state.team || {}; const names = {};
+    const ids = (state.adminTeacherIds || []).filter((u) => !(state.adminNames[u] && state.adminNames[u].pending && !isPendingUid(u)));
+    Object.keys(team).forEach((code) => { if (!isPendingUid(code)) return; const t = team[code]; names[code] = { name: t.name ? titleCaseName(t.name) : 'New teacher', sal: t.salutation || '', wa: t.whatsapp || '', bd: t.birthMd || '', pending: true }; if (ids.indexOf(code) === -1) ids.push(code); });
+    state.adminNames = Object.assign({}, state.adminNames, names); state.adminTeacherIds = ids;
+  }
   function teamWings(uid) { return (state.team[uid] && Array.isArray(state.team[uid].wings)) ? state.team[uid].wings : []; }
   // Admin "Preview as Coordinator": the admin sees exactly the coordinator's screens (permissions stay the admin's).
   state.previewCoord = null;
@@ -5692,8 +5700,9 @@
       const t = {};
       snap.docs.forEach((d) => { t[d.id] = d.data() || {}; });
       state.team = t;
-      if (state.tab === 'admin') renderAdmin();
-    }, () => {});
+    try { const k0 = Object.keys(t).filter((c) => isPendingUid(c)).join(','); mergePendingStaff(); if (k0 !== state._pendKey) { state._pendKey = k0; syncTeacherData(); } linkPendingStaff(); } catch (e) { /* ignore */ }
+    if (state.tab === 'admin') renderAdmin();
+  }, () => {});
   }
   function renderTeamPanel() {
     const el = document.getElementById('teamRows');
@@ -5704,7 +5713,7 @@
     const nDone = ids.filter(teamFilled).length; const nLack = ids.length - nDone;
     if (!all.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">People appear here after they sign in to the app once.</div>'; return; }
     el.innerHTML = `<div class="team-sum"><b>${nDone} of ${ids.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLack ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLack}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` + ids.map((uid) => {
-      const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed';
+      const name = ((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed') + (isPendingUid(uid) ? ' (not joined yet)' : '');
       const coord = isCoordUid(uid);
       const w = teamWings(uid);
       const open = state.teamOpen === uid;
@@ -5805,7 +5814,7 @@
   function subscribeStaffIds() {
     if (unsubStaffIds || !state.db || !state.canAdmin) return;
     unsubStaffIds = state.db.collection('staffIds').onSnapshot((snap) => {
-      state.staffIds = snap.docs.map((d) => Object.assign({ code: d.id }, d.data()));
+      state.staffIds = snap.docs.map((d) => Object.assign({ code: d.id }, d.data())); try { linkPendingStaff(); } catch (e) { /* ignore */ }
       if (state.tab === 'admin') renderAdmin();
     }, () => {});
   }
@@ -5826,7 +5835,14 @@
         <button type="button" class="hv-back" id="sidDone" style="padding:0; align-self:center;">Done</button></div>`;
     } else if (f) {
       html += `<div class="sid-form"><div class="sv-form-head"><div class="panel-title" style="margin:0;">New Staff ID</div><button type="button" class="hv-sheet-x" id="sidX" aria-label="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-        <input class="text-input" id="sidNote" type="text" placeholder="For (optional), e.g. New Physics teacher" value="${escapeHtml(f.note || '')}">
+        <div class="team-lbl">Teacher details (optional: fill the name to add the teacher now)</div>
+  <input class="text-input" id="sidName" type="text" placeholder="Name" value="${escapeHtml(f.name || '')}" autocomplete="off">
+  <div class="chips team-chips"><span class="team-lbl">Address</span><button type="button" class="chip${f.sal === 'sir' ? ' active' : ''}" data-sid-sal="sir">Sir</button><button type="button" class="chip${f.sal === 'maam' ? ' active' : ''}" data-sid-sal="maam">Ma'am</button><button type="button" class="chip${f.sal === 'name' ? ' active' : ''}" data-sid-sal="name">Name only</button></div>
+  <input class="text-input" id="sidWa" type="tel" inputmode="numeric" placeholder="WhatsApp number (optional)" value="${escapeHtml(f.wa || '')}">
+  <div style="display:flex; gap:8px;"><select class="text-input" id="sidBdDay" aria-label="Birthday day"></select><select class="text-input" id="sidBdMon" aria-label="Birthday month"></select></div>
+  <div class="team-lbl">Subjects (optional: fills Teacher Mapping where nobody is set yet)</div>
+  <div class="chips">${subjectsList().map((sj) => `<button type="button" class="chip${(f.subjects || []).indexOf(sj) !== -1 ? ' active' : ''}" data-sid-subj="${escapeHtml(sj)}">${escapeHtml(sj)}</button>`).join('')}</div>
+  <input class="text-input" id="sidNote" type="text" placeholder="For (optional), e.g. New Physics teacher" value="${escapeHtml(f.note || '')}">
         <div class="chips team-chips"><span class="team-lbl">Role</span>
           <button type="button" class="chip${f.role === 'teacher' ? ' active' : ''}" data-sid-role="teacher">Teacher</button>
           <button type="button" class="chip${f.role === 'coordinator' ? ' active' : ''}" data-sid-role="coordinator">Coordinator</button></div>
@@ -5844,13 +5860,19 @@
         <span style="display:flex; gap:12px;"><button type="button" class="hv-back" data-sid-reshare="${escapeHtml(x.code)}" style="padding:0;">Share</button><button type="button" class="team-remove" data-sid-revoke="${escapeHtml(x.code)}">Cancel</button></span></div>`).join('');
     }
     el.innerHTML = html;
+    if (f && !state.lastStaffCode) { fillBdSelects('sidBdDay', 'sidBdMon'); setBd('sidBdDay', 'sidBdMon', f.bd || ''); }
     const on = (id, fn) => { const b = document.getElementById(id); if (b) b.addEventListener('click', fn); };
-    on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1) }; renderStaffIdsBlock(); });
+    on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1), name: '', sal: '', wa: '', bd: '', subjects: [] }; renderStaffIdsBlock(); });
     on('sidCancel', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidX', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidDone', () => { state.lastStaffCode = null; renderStaffIdsBlock(); });
     on('sidCopy', async () => { try { await navigator.clipboard.writeText(state.lastStaffCode); showToast('Staff ID copied'); } catch (e) { showToast(state.lastStaffCode); } });
     on('sidShare', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(state.lastStaffCode)), '_blank'));
+    const bindIn = (id, key) => { const e2 = document.getElementById(id); if (e2) e2.addEventListener('input', () => { state.staffForm[key] = e2.value; }); };
+    bindIn('sidName', 'name'); bindIn('sidWa', 'wa');
+    ['sidBdDay', 'sidBdMon'].forEach((id) => { const e3 = document.getElementById(id); if (e3) e3.addEventListener('change', () => { const r0 = readBd('sidBdDay', 'sidBdMon'); state.staffForm.bd = r0.md || ''; }); });
+    el.querySelectorAll('[data-sid-sal]').forEach((b) => b.addEventListener('click', () => { state.staffForm.sal = b.getAttribute('data-sid-sal'); renderStaffIdsBlock(); }));
+    el.querySelectorAll('[data-sid-subj]').forEach((b) => b.addEventListener('click', () => { const sj = b.getAttribute('data-sid-subj'); const a2 = state.staffForm.subjects || (state.staffForm.subjects = []); const k2 = a2.indexOf(sj); if (k2 === -1) a2.push(sj); else a2.splice(k2, 1); renderStaffIdsBlock(); }));
     const noteEl = document.getElementById('sidNote');
     if (noteEl) noteEl.addEventListener('input', () => { state.staffForm.note = noteEl.value; });
     el.querySelectorAll('[data-sid-role]').forEach((b) => b.addEventListener('click', () => { state.staffForm.role = b.getAttribute('data-sid-role'); renderStaffIdsBlock(); }));
@@ -5862,9 +5884,37 @@
     on('sidGenerate', async () => {
       const ff = state.staffForm;
       if (!ff.wings.length) { showToast('Choose a wing', 'error'); return; }
+      const nm = (ff.name || '').trim(); let wa = ''; let bd = '';
+      if (nm) {
+        wa = waTen(ff.wa); if ((ff.wa || '').trim() && !wa) { showToast('Enter a 10-digit mobile number, or leave it empty', 'error'); return; }
+        const b0 = readBd('sidBdDay', 'sidBdMon'); if (b0.err) { showToast(b0.err, 'error'); return; } bd = b0.md || '';
+      }
       try {
         const code = await newStaffCode();
-        await state.db.doc('staffIds/' + code).set({ note: (ff.note || '').trim(), role: ff.role, wings: ff.wings.slice(), status: 'unused', createdAt: Date.now(), createdBy: state.teacherId });
+        const idDoc = { note: (ff.note || '').trim() || nm, role: ff.role, wings: ff.wings.slice(), status: 'unused', createdAt: Date.now(), createdBy: state.teacherId };
+        let saved = false;
+        if (nm) {
+          try {
+            const batch = state.db.batch();
+            batch.set(state.db.doc('staffIds/' + code), idDoc);
+            batch.set(state.db.doc('team/' + code), { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code, createdAt: Date.now() });
+            await batch.commit(); saved = true;
+          } catch (err0) {
+            if (err0 && err0.code === 'permission-denied') { await state.db.doc('staffIds/' + code).set(idDoc); showToast("The Staff ID is made, but the database did not allow saving the teacher's details. Ask for the rule to be changed.", 'error'); }
+            else throw err0;
+          }
+        } else await state.db.doc('staffIds/' + code).set(idDoc);
+        if (saved) {
+          state.team = Object.assign({}, state.team, { [code]: { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code } });
+          try { mergePendingStaff(); syncTeacherData(); } catch (e) { /* ignore */ }
+          // Teacher Mapping: only the subjects nobody is set for yet
+          if ((ff.subjects || []).length) {
+            const map = Object.assign({}, state.teacherMap || {}); let chg = false;
+            ff.subjects.forEach((sj) => { const k = `*|${sj}`; if (!map[k]) { map[k] = code; chg = true; } });
+            if (chg) { try { await state.db.doc('settings/teacherMap').set({ map }); state.teacherMap = map; } catch (e) { /* mapping can be set later */ } }
+          }
+          showToast(`${nm} added · share the Staff ID so ${ff.sal === 'sir' ? 'he' : 'they'} can create an account`);
+        }
         state.staffForm = null; state.lastStaffCode = code;
         renderStaffIdsBlock();
       } catch (err) { flashOffline(err); }
@@ -5902,11 +5952,11 @@
   state.tt = state.tt || { weekStart: mondayOf(todayStr()), teacher: 'all', form: null, slots: {}, key: '' };
   const TT_DURS = [40, 50, 60, 65];
   const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  function ttTeacherIds() {
+  function ttTeacherIds(withPending) {
     const lw = leadWings();
     const wing = state.adminReportWing;
-    return (state.adminTeacherIds || []).filter((u) => !isCoordUid(u) && !isRemovedUid(u))
-      .filter((u) => { const tw = teamWings(u); if (!tw.length) return true; if (wing !== 'all') return tw.indexOf(wing) !== -1; return tw.some((x) => lw.indexOf(x) !== -1); })
+    return (state.adminTeacherIds || []).filter((u) => !isCoordUid(u) && !isRemovedUid(u) && (withPending || !isPendingUid(u)))
+    .filter((u) => { const tw = teamWings(u); if (!tw.length) return true; if (wing !== 'all') return tw.indexOf(wing) !== -1; return tw.some((x) => lw.indexOf(x) !== -1); })
       .sort((a, b) => ttName(a).localeCompare(ttName(b)));
   }
   function ttName(u) { return (state.adminNames[u] && state.adminNames[u].name) || 'Teacher'; }
@@ -5918,7 +5968,7 @@
   }
   async function loadTtWeek(force) {
     const tt = state.tt;
-    const ids = ttTeacherIds();
+    const ids = ttTeacherIds(true);
     const ws = tt.weekStart, we = shiftDateStr(ws, 6);
     const prev = shiftDateStr(ws, -7);
     const key = ws + '|' + ids.join(',');
@@ -5990,7 +6040,7 @@
     }
     const tt = state.tt;
     const ws = tt.weekStart, we = shiftDateStr(ws, 6);
-    const ids = ttTeacherIds();
+    const ids = ttTeacherIds(true);
     if (tt.teacher !== 'all' && ids.indexOf(tt.teacher) === -1) tt.teacher = 'all';
     loadTtWeek(false);
     document.getElementById('ttLabel').textContent = `${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })}`;
@@ -6092,7 +6142,7 @@
         const dis = d < todayStr();
         return `<button type="button" class="chip sv-daychip" data-tt-day="${d}"${dis ? ' disabled' : ''}><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small></button>`;
       }).join('')}</div></div>
-      <div class="field"><label>Teacher</label><div class="chips" id="ttFormTeachers">${ttTeacherIds().map((u) => `<button type="button" class="chip" data-tt-ft="${u}">${escapeHtml(ttName(u))}</button>`).join('') || '<span class="hv-note">No teachers in this wing yet.</span>'}</div></div>
+      <div class="field"><label>Teacher</label><div class="chips" id="ttFormTeachers">${ttTeacherIds(true).map((u) => `<button type="button" class="chip" data-tt-ft="${u}">${escapeHtml(ttName(u))}</button>`).join('') || '<span class="hv-note">No teachers in this wing yet.</span>'}</div></div>
       <div class="field"><label>Class / Batch</label><div class="chips">${ttBatches().map((b) => `<button type="button" class="chip" data-tt-b="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
       <div class="field"><label>Timing</label>
         <div class="sv-times"><div><div class="sv-tlbl">Start</div><input class="text-input" type="time" id="ttStart" value="${escapeHtml(f.start)}"></div>
@@ -6671,7 +6721,7 @@
     const cur = tgCell(d, p, b);
     const st = { s: cur ? cur.s : '', t: cur ? cur.t : '', test: !!(cur && cur.test), change: false, r: cur && cur.cb ? (comboRoom(state.tg.doc.cells, cur, d) || '') : '' };
     const body = document.getElementById('hvSheetBody');
-    const ids = ttTeacherIds();
+    const ids = ttTeacherIds(true);
     const comboBats = cur && cur.cb ? tgCombo(cur).map((m) => m.b) : [];
     const draw = () => {
       if (!st.change && st.s) st.t = st.t && cur && cur.s === st.s ? st.t : defaultTeacher(b, st.s);
@@ -7256,7 +7306,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const ks = tgSelCells(); if (ks.length < 2) return;
     const first = (ks.find((x) => x.c && x.c.s) || {}).c || {};
     const f = { s: first.s || '', t: first.t || '', r: (ks.map((x) => x.c && x.c.cbRoom).find(Boolean)) || batchRoomOn(ks[0].b, ks[0].d) || '' };
-    const subs = subjectsList(); const ids = ttTeacherIds();
+    const subs = subjectsList(); const ids = ttTeacherIds(true);
     const body = document.getElementById('hvSheetBody');
     const draw = () => {
       body.innerHTML = `<div class="hv-d-title"><span class="ico i-link" aria-hidden="true"></span> Combined class</div><div class="hv-d-wing">${escapeHtml(dayHeading(ks[0].d))} · P${ks[0].p + 1} · ${escapeHtml(ks.map((x) => gridBatchLabel(x.b)).join(' + '))}</div>
@@ -7367,7 +7417,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function tgPickSubTeacher(d, p, b, subj, absentT) {
     return new Promise((resolve) => {
       const map = state.teacherMap || {};
-      const list = ttTeacherIds().filter((u) => u !== absentT && !isRemovedUid(u)).map((u) => ({ u, star: Object.keys(map).some((k) => k.split('|').pop() === subj && map[k] === u), busy: tgBusyAt(u, d, p, b) }))
+      const list = ttTeacherIds(true).filter((u) => u !== absentT && !isRemovedUid(u)).map((u) => ({ u, star: Object.keys(map).some((k) => k.split('|').pop() === subj && map[k] === u), busy: tgBusyAt(u, d, p, b) }))
         .sort((x, y) => (x.busy - y.busy) || (y.star - x.star) || ttName(x.u).localeCompare(ttName(y.u)));
       const body = document.getElementById('hvSheetBody');
       body.innerHTML = `<div class="hv-d-title">Who takes it?</div><div class="hv-d-wing">${escapeHtml(gridBatchLabel(b))} · ${escapeHtml(subj)} · P${p + 1}</div><div class="hv-d-btns" style="flex-direction:column; gap:8px; max-height:52vh; overflow:auto;">${list.map((x) => `<button type="button" class="btn-secondary" data-sp="${escapeHtml(x.u)}" style="border-color: var(--line); width:100%; text-align:left;">${x.star ? '★ ' : ''}${escapeHtml(ttName(x.u))} <small style="color:${x.busy ? '#B26A00' : '#1E8E4E'};">${x.busy ? '⚠️ has a class then' : 'free ✓'}</small></button>`).join('')}</div><div class="hv-note" style="text-align:left;">★ teaches this subject</div>`;
@@ -7863,7 +7913,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const ws = state.tt.weekStart;
     const hasSun = wkDocs(ws).some((d) => d.sunday || (d.cells || []).some((c) => dateObj(c.d).getDay() === 0));
     const days = datesBetween(ws, shiftDateStr(ws, hasSun ? 6 : 5));
-    const ids = ttTeacherIds();
+    const ids = ttTeacherIds(true);
     // classes per teacher (whole week) and per day (chosen teacher), from every wing's timetable
     const cnt = {}; const dayCnt = {};
     wkDocs(ws).forEach((doc) => (doc.cells || []).forEach((c) => { if (c.ex) return; const T = effT(c); if (!T) return; cnt[T] = (cnt[T] || 0) + 1; if (ab.t && (T === ab.t || c.t === ab.t)) dayCnt[c.d] = (dayCnt[c.d] || 0) + 1; }));
@@ -7970,7 +8020,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     docs.forEach((doc) => (doc.cells || []).forEach((c) => { if (c.t === uid && c.d >= todayStr()) cells.push({ doc, key: cellKey(c) }); }));
     if (!maps.length && !cells.length) return;
     const body = document.getElementById('hvSheetBody');
-    const ids = ttTeacherIds().filter((u) => u !== uid);
+    const ids = ttTeacherIds(true).filter((u) => u !== uid);
     let pick = '';
     const draw = () => {
       body.innerHTML = `<div class="hv-d-title">⚠️ Reassignment required</div>
@@ -8331,7 +8381,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     el.querySelectorAll('[data-nc]').forEach((b) => b.addEventListener('click', () => { const n = list.find((x) => x.id === b.getAttribute('data-nc')); if (n) { markNoticeRead(n); renderBell(); } }));
   }
   function noticeRecipients(aud) {
-    return (state.adminTeacherIds || []).concat(state.adminTeacherIds && state.adminTeacherIds.indexOf(state.teacherId) === -1 ? [state.teacherId] : []).filter((u) => !isRemovedUid(u)).filter((u) => { if (aud === 'all') return true; const tw = teamWings(u); return !tw.length || tw.indexOf(aud) !== -1; });
+    return (state.adminTeacherIds || []).concat(state.adminTeacherIds && state.adminTeacherIds.indexOf(state.teacherId) === -1 ? [state.teacherId] : []).filter((u) => !isRemovedUid(u) && !isPendingUid(u)).filter((u) => { if (aud === 'all') return true; const tw = teamWings(u); return !tw.length || tw.indexOf(aud) !== -1; });
   }
   function openNewNotice() {
     const lw = leadWings(); const opts = lw.map((w) => ({ k: w, l: w })).concat([{ k: 'all', l: 'All teachers' }, { k: 'pick', l: 'Choose teachers' }]);
@@ -8454,7 +8504,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const out = [];
     // everyone in this wing gets the picture (also when the week has only exams or notes)
     const wing = doc.wing || ((ttGroups().find((x) => x.key === doc.group) || {}).wing) || '';
-    (state.adminTeacherIds || []).concat(Object.keys(state.team || {})).forEach((u) => {
+    (state.adminTeacherIds || []).concat(Object.keys(state.team || {})).filter((u) => !isPendingUid(u)).forEach((u) => {
       if (!u || out.indexOf(u) !== -1 || isRemovedUid(u)) return;
       const tw = teamWings(u); if (wing && tw.length && tw.indexOf(wing) === -1) return;
       out.push(u);
@@ -8664,7 +8714,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const el = document.getElementById('mappingBody'); if (!el) return;
     const subs = subjectsList();
     if (!state.mapSubj || subs.indexOf(state.mapSubj) === -1) state.mapSubj = subs[0];
-    const s = state.mapSubj; const ids = ttTeacherIds(); const m = state.teacherMap || {};
+    const s = state.mapSubj; const ids = ttTeacherIds(true); const m = state.teacherMap || {};
     const bats = []; leadWings().forEach((w) => currentBatches(w).forEach((b) => { if (bats.indexOf(b) === -1) bats.push(b); }));
     const opt = (sel, none) => `<option value="">${none}</option>` + ids.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('');
     el.innerHTML = `<div class="chips tt-teachers">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
@@ -9757,6 +9807,50 @@ Rules:
   }
   // Admin and Coordinator: what teachers gave in their Profile fills the Team list and the calendar (the Admin's app copies it)
   let syncBusy = false;
+  // ---------- A teacher added before he had an account joins with his Staff ID: everything that was set on his Staff ID moves to his account ----------
+  let linkingStaff = false;
+  async function linkPendingStaff() {
+    if (linkingStaff || !state.db || !state.canAdmin) return;
+    const used = (state.staffIds || []).filter((x) => x.status === 'used' && x.usedBy && state.team[x.code] && state.team[x.code].pending === true && !state.team[x.code].joinedUid);
+    if (!used.length) return;
+    linkingStaff = true;
+    try { for (const x of used) await linkOneStaff(x.code, x.usedBy); } catch (e) { /* it is tried again the next time */ } finally { linkingStaff = false; }
+  }
+  async function linkOneStaff(code, uid) {
+    const pend = state.team[code] || {}; const sw = (v) => (typeof v === 'string' && v.indexOf(code) !== -1 ? v.split(code).join(uid) : v);
+    // 1) the timetables from last week on: his name replaces the Staff ID in every class
+    const ws0 = shiftDateStr(mondayOf(todayStr()), -7);
+    const snap = await state.db.collection('timetables').where('weekStart', '>=', ws0).get();
+    for (const d of snap.docs) {
+      const doc = d.data() || {}; let ch = false;
+      const cells = (doc.cells || []).map((c) => { const n = Object.assign({}, c); if (n.t === code) { n.t = uid; ch = true; } if (n.sub) { const sb = Object.assign({}, n.sub); if (sb.t === code) { sb.t = uid; ch = true; } if (sb.for === code) { sb.for = uid; ch = true; } n.sub = sb; } return n; });
+      const pubHas = (doc.published || []).some((k) => String(k).indexOf(code + '/') === 0);
+      if (!ch && !pubHas) continue;
+      const upd = Object.assign({}, doc, { cells });
+      if (doc.published) upd.published = doc.published.map((k) => sw(k));
+      if (doc.pubSnap) { const ps = JSON.parse(JSON.stringify(doc.pubSnap)); Object.keys(ps.cells || {}).forEach((k) => { ps.cells[k] = sw(ps.cells[k]); }); Object.keys(ps.full || {}).forEach((k) => { ps.full[k] = sw(ps.full[k]); }); upd.pubSnap = ps; }
+      await state.db.collection('timetables').doc(d.id).set(upd);
+    }
+    // 2) the classes already sent move to his own Schedule
+    const sl = await state.db.collection('schedule/' + code + '/slots').get();
+    let batch = state.db.batch(); let n = 0;
+    for (const d of sl.docs) { batch.set(state.db.doc('schedule/' + uid + '/slots/' + d.id), Object.assign({}, d.data())); batch.delete(d.ref); n += 2; if (n >= 400) { await batch.commit(); batch = state.db.batch(); n = 0; } }
+    if (n) await batch.commit();
+    // 3) Teacher Mapping
+    const map = Object.assign({}, state.teacherMap || {}); let mchg = false;
+    Object.keys(map).forEach((k) => { if (map[k] === code) { map[k] = uid; mchg = true; } });
+    if (mchg) { await state.db.doc('settings/teacherMap').set({ map }); state.teacherMap = map; }
+    // 4) calendar: the birthday typed by the Admin goes away; if he left his own empty, the Admin's one stays on his account. His number is kept if he left it empty.
+    const list0 = (state.birthdays || []); const list = list0.filter((b) => b.uid !== code);
+    if (pend.birthMd && !list.some((b) => b.uid === uid)) list.push({ id: calId(), uid, name: pend.name || '', sal: pend.salutation || '', md: pend.birthMd, src: 'staff' });
+    if (list.length !== list0.length || (pend.birthMd && !list0.some((b) => b.uid === uid))) await calSaveBd(list, true);
+    if (pend.whatsapp) { const t2 = state.team[uid] || {}; if (!t2.phone) await state.db.doc('team/' + uid).set({ phone: pend.whatsapp }, { merge: true }); }
+    // 5) done
+    await state.db.doc('team/' + code).set({ joinedUid: uid, pending: false, linkedAt: Date.now() }, { merge: true });
+    state.team = Object.assign({}, state.team, { [code]: Object.assign({}, pend, { joinedUid: uid, pending: false }) });
+    try { ttCacheStale(); await loadAdminTeachers(true); } catch (e) { /* ignore */ }
+    showToast(`${pend.name || 'The teacher'} has joined · the classes are on the account now`);
+  }
   async function syncTeacherData() {
     if (syncBusy || !state.db || !(state.canAdmin || state.isCoordinator)) return; syncBusy = true;
     try {
@@ -10010,7 +10104,7 @@ Rules:
     if (ja.length >= 6 && jb.indexOf(ja) !== -1) sc = Math.max(sc, 97); else if (ja.length >= 6 && jb.length >= 6 && ja.indexOf(jb) !== -1) sc = Math.max(sc, 88);
     return sc;
   }
-  function dsTeacherIds() { const all = (state.adminTeacherIds && state.adminTeacherIds.length) ? state.adminTeacherIds.slice() : Object.keys(state.adminNames || {}); return all.filter((u) => !isRemovedUid(u)); }
+  function dsTeacherIds() { const all = (state.adminTeacherIds && state.adminTeacherIds.length) ? state.adminTeacherIds.slice() : Object.keys(state.adminNames || {}); return all.filter((u) => !isRemovedUid(u) && !isPendingUid(u)); }
   function dsMatch(sheetName) {
     const L = dsTeacherIds().map((u) => ({ u, sc: dsTeacherScore(sheetName, planNameOf(u)) })).filter((x) => x.sc >= 60).sort((a, b) => b.sc - a.sc);
     return { best: (L[0] && L[0].sc >= 80 && (!L[1] || L[0].sc - L[1].sc >= 8)) ? L[0].u : '', cands: L.slice(0, 3).map((x) => x.u) };
@@ -10378,7 +10472,7 @@ Rules:
     const byTeacherAll = {};
     dayAll.forEach((c) => { const t = c.teacherId || 'unknown'; (byTeacherAll[t] = byTeacherAll[t] || []).push(c); });
     // Coordinators are staff, not teachers: they never appear in teacher lists or counts.
-    const ids = (state.adminTeacherIds || []).concat(Object.keys(state.adminCampus || {}), Object.keys(byTeacherAll))
+    const ids = (state.adminTeacherIds || []).filter((u) => !isPendingUid(u)).concat(Object.keys(state.adminCampus || {}), Object.keys(byTeacherAll))
       .filter((v, i, a) => v && v !== 'unknown' && a.indexOf(v) === i && !isCoordUid(v) && !isRemovedUid(v))
       .filter((v) => { const tw = teamWings(v); const lw = leadWings(); return !tw.length || tw.some((x) => lw.indexOf(x) !== -1); });
     loadAdminSlots(date, ids, false);
@@ -11833,7 +11927,8 @@ Rules:
   // who can invigilate: everyone in the app for these wings, coordinators included
   function invigIds() {
     const lw = leadWings(); const wing = state.adminReportWing;
-    return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u))
+    return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u))
+    
       .filter((u) => { const tw = teamWings(u); if (!tw.length) return true; if (wing !== 'all') return tw.indexOf(wing) !== -1; return tw.some((x) => lw.indexOf(x) !== -1); })
       .sort((a, b) => ttName(a).localeCompare(ttName(b)));
   }
