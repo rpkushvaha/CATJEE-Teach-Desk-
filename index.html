@@ -2315,6 +2315,15 @@
   .hol-duty { display: block; margin: 4px 2px 0; padding: 6px 2px; border: 0; background: transparent; color: var(--accent); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; }
   .i-copy { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%2213%22%20height%3D%2213%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M5%2015H4a2%202%200%200%201-2-2V4a2%202%200%200%201%202-2h9a2%202%200%200%201%202%202v1%22/%3E%3C/svg%3E"); }
   .i-sticky { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M15.5%203H5a2%202%200%200%200-2%202v14c0%201.1.9%202%202%202h14a2%202%200%200%200%202-2V8.5L15.5%203Z%22/%3E%3Cpath%20d%3D%22M15%203v6h6%22/%3E%3C/svg%3E"); }
+  .xw-yn { display: flex; gap: 10px; }
+  .xw-ynb { flex: 1; padding: 11px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+  .xw-ynb.active { background: var(--gold-soft); color: var(--gold); border-color: var(--gold); }
+  .xc-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; padding: 6px 6px 6px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); font-size: 14px; }
+  .xc-btns { display: flex; align-items: center; gap: 4px; }
+  .xc-pick { padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--neutral-soft); color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .xc-pick.open { border-color: var(--gold); color: var(--gold); }
+  .xc-rm { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--muted-2); font-size: 15px; cursor: pointer; }
+  .xc-open { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px 4px; margin-left: 8px; border-left: 2px solid var(--line); }
 </style>
 </head>
 <body>
@@ -2975,13 +2984,9 @@
           </div>
           <div class="xw-steps" id="xwSteps"></div>
           <div class="xw-pane" data-xw="1">
-            <div class="xw-card">
-              <div class="xw-ch">The exam</div>
-              <div class="sv-tlbl">Test type</div>
-              <div id="adminExamType"></div>
-              <div class="sv-tlbl">Subject <span class="xt-note">optional</span></div>
-              <div id="adminExamSubject"></div>
-              <div class="sv-tlbl">Classes</div> <div id="adminExamScope"></div> <div id="adminExamPapers"></div> </div>
+            <div class="xw-card"><div class="xw-ch">Exam</div><div class="sv-tlbl">Test type</div><div id="adminExamType"></div></div>
+ <div class="xw-card"><div class="xw-ch">Classes</div><div id="adminExamScope"></div></div>
+ <div class="xw-card"><div class="xw-ch">Subject</div><div id="adminExamPapers"></div><div class="sv-tlbl">Subject <span class="xt-note">optional</span></div><div id="adminExamSubject"></div></div>
             <div class="xw-card">
               <div class="xw-ch">Paper &amp; timings</div>
               <div class="sv-tlbl">Paper type</div>
@@ -3515,7 +3520,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.68 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.69 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -12268,7 +12273,7 @@ Rules:
     selectRow(document.getElementById('adminExamSubject'), subjectsList(), f.subject, (v) => { f.subject = v; renderAdminExamForm(ids, nameOf); }, 'No subject');
     renderExamPapers(f, () => renderAdminExamForm(ids, nameOf));
     const sc = document.getElementById('adminExamScope');
-    renderScopePicker(sc, f, () => renderAdminExamForm(ids, nameOf));
+    renderExamClasses(sc, f, () => renderAdminExamForm(ids, nameOf));
     if (false) sc.innerHTML = scopeChipsHtml(f.scope, 'data-exscope');
     sc.querySelectorAll('[data-exscope]').forEach((el) => el.addEventListener('click', () => {
       const v = el.getAttribute('data-exscope');
@@ -16027,14 +16032,19 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const single = document.getElementById('adminExamSubject'); if (single) { single.hidden = on; if (single.previousElementSibling) single.previousElementSibling.hidden = on; }
     if (on) f.subject = paperSubjects(sc.map((en) => ({ subject: f.paperSub[en] }))).join(' / ');
     const subs = subjectsList();
-    const html = !show ? '' : `<label class="xw-sw"><span><b>Different subject for each class</b><small>One exam, one duty plan</small></span><input type="checkbox" id="exDiff"${on ? ' checked' : ''}></label>${on ? sc.map((en) => `<div class="xw-prow"><span>${escapeHtml(en)}</span><select class="text-input" data-psub="${escapeHtml(en)}"><option value="">No subject</option>${subs.map((t) => `<option value="${escapeHtml(t)}"${(f.paperSub[en] || '') === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div>`).join('') : ''}`;
+    const html = !show ? '' : `<div class="sv-tlbl">Different subject for each class?</div><div class="xw-yn"><button type="button" class="xw-ynb${on ? ' active' : ''}" data-yn="1">Yes</button><button type="button" class="xw-ynb${!on ? ' active' : ''}" data-yn="0">No</button></div>${on ? sc.map((en) => `<div class="xw-prow"><span>${escapeHtml(en)}</span><select class="text-input" data-psub="${escapeHtml(en)}"><option value="">No subject</option>${subs.map((t) => `<option value="${escapeHtml(t)}"${(f.paperSub[en] || '') === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div>`).join('') : ''}`;
     box._f = f; box._redraw = redraw;
     if (!box._bound) {
       box._bound = true;
+      box.addEventListener('click', (e) => {
+        const ff = box._f; const b = e.target && e.target.closest ? e.target.closest('[data-yn]') : null; if (!ff || !b) return;
+        const want = b.getAttribute('data-yn') === '1'; if (!!ff.diff === want) return;
+        ff.diff = want; if (want) (ff.scope || []).forEach((en) => { if (ff.paperSub[en] === undefined) ff.paperSub[en] = ff.subject || ''; }); else if (ff.subject && ff.subject.indexOf(' / ') !== -1) ff.subject = '';
+        box._redraw();
+      });
       box.addEventListener('change', (e) => {
         const ff = box._f; if (!ff) return; const t = e.target;
-        if (t && t.id === 'exDiff') { ff.diff = t.checked; if (t.checked) (ff.scope || []).forEach((en) => { if (ff.paperSub[en] === undefined) ff.paperSub[en] = ff.subject || ''; }); else if (ff.subject && ff.subject.indexOf(' / ') !== -1) ff.subject = ''; box._redraw(); }
-        else if (t && t.hasAttribute && t.hasAttribute('data-psub')) { ff.paperSub[t.getAttribute('data-psub')] = t.value; box._redraw(); }
+        if (t && t.hasAttribute && t.hasAttribute('data-psub')) { ff.paperSub[t.getAttribute('data-psub')] = t.value; box._redraw(); }
       });
     }
     if (box._h !== html) { box._h = html; box.innerHTML = html; }
@@ -16080,6 +16090,37 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return t || b;
   }
   function scopeTokLabel(t) { return /^Class \d+$/.test(t) ? `${t} · all morning` : t; }
+  // the exam form's classes: chips (no tick: the colour says it), one small row per chosen class with its batches, opened with the arrow
+  function renderExamClasses(el, st, rerender) {
+    st.open = st.open || openFromScope(st.scope);
+    const groups = pickerGroups(); if (st.open.length > 1) st.open = st.open.slice(-1);
+    const tokOf = (g) => st.scope.filter((t) => t === g || batchGroupOf(t) === g);
+    const label = (g) => tokOf(g).map((t) => (t === g ? 'All morning' : shortBatch(t))).join(', ') || 'Choose batches';
+    let html = `<div class="chips">${groups.map((g) => `<button type="button" class="chip${tokOf(g).length ? ' active' : ''}" data-pk-cls="${escapeHtml(g)}">${escapeHtml(g)}</button>`).join('')}</div>`;
+    groups.filter((g) => tokOf(g).length || st.open.indexOf(g) !== -1).forEach((g) => {
+      const open = st.open.indexOf(g) !== -1;
+      html += `<div class="xc-row"><b>${escapeHtml(g)}</b><span class="xc-btns"><button type="button" class="xc-pick${open ? ' open' : ''}" data-pk-open="${escapeHtml(g)}">${escapeHtml(label(g))} <span aria-hidden="true">${open ? '▴' : '▾'}</span></button><button type="button" class="xc-rm" data-pk-rmc="${escapeHtml(g)}" aria-label="Remove ${escapeHtml(g)}">✕</button></span></div>`;
+      if (open) {
+        const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
+        const chip = (tok, lab) => `<button type="button" class="chip${st.scope.indexOf(tok) !== -1 ? ' active' : ''}" data-pk-tok="${escapeHtml(tok)}">${escapeHtml(lab)}</button>`;
+        html += '<div class="xc-open">';
+        SESSIONS.forEach(([key, lbl]) => { const list = bats.filter((b) => batchSession(b) === key); if (!list.length) return; const all = key === 'morning' && g !== 'Other' && list.length > 1 ? chip(g, 'All morning') : ''; html += `<div class="pk-sess">${lbl}</div><div class="chips">${all}${list.map((b) => chip(b, shortBatch(b))).join('')}</div>`; });
+        html += '</div>';
+      }
+    });
+    el.innerHTML = html;
+    el.querySelectorAll('[data-pk-cls]').forEach((btn) => btn.addEventListener('click', () => {
+      const g = btn.getAttribute('data-pk-cls');
+      if (tokOf(g).length) { st.open = st.open.indexOf(g) !== -1 ? [] : [g]; rerender(); return; }
+      st.open = [g];
+      const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g); const morning = bats.filter((b) => batchSession(b) === 'morning');
+      if (g !== 'Other' && morning.length > 1) st.scope.push(g); else if (morning.length === 1) st.scope.push(morning[0]);
+      rerender();
+    }));
+    el.querySelectorAll('[data-pk-open]').forEach((btn) => btn.addEventListener('click', () => { const g = btn.getAttribute('data-pk-open'); st.open = st.open.indexOf(g) !== -1 ? [] : [g]; rerender(); }));
+    el.querySelectorAll('[data-pk-tok]').forEach((btn) => btn.addEventListener('click', () => { st.scope = toggleScope(st.scope, btn.getAttribute('data-pk-tok')); rerender(); }));
+    el.querySelectorAll('[data-pk-rmc]').forEach((btn) => btn.addEventListener('click', () => { const g = btn.getAttribute('data-pk-rmc'); st.scope = st.scope.filter((t) => !(t === g || batchGroupOf(t) === g)); st.open = st.open.filter((x) => x !== g); rerender(); }));
+  }
   function renderScopePicker(el, st, rerender) {
     st.open = st.open || openFromScope(st.scope);
     const groups = pickerGroups();
