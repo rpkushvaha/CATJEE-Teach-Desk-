@@ -2735,7 +2735,7 @@
         </section>
       </div>
 
-      <div class="modal-msg" id="formMsg" style="min-height:0; color: var(--amber); font-weight:600;"></div>
+      <div class="modal-msg" id="formMsg" style="min-height:0; color: var(--gold); font-weight:600;"></div>
       <button class="save-btn" id="saveClassBtn">Save Class</button>
     </div>
 
@@ -3527,7 +3527,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.75 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.76 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6569,7 +6569,7 @@
     
     const pdMap = tgPendDays(); const pdList = Object.keys(pdMap).sort(); const pdTotal = pdList.reduce((n, x) => n + pdMap[x], 0);
     const everPub = tgEverPub(doc);
-    const dayPend = pdMap[d] && pdList.length > 1;
+    const dayPend = !!pdMap[d];
     const dN = `${WD[dateObj(d).getDay()]} ${dateObj(d).getDate()}`;
  const cellCnt = (x) => (doc.cells || []).filter((c) => c.d === x).length;
  const pendLbl = (n, x) => ((!everPub && !cellCnt(x)) ? 'day note' : `${n} ${everPub ? 'change' : 'class'}${n === 1 ? '' : (everPub ? 's' : 'es')}`);
@@ -6584,7 +6584,7 @@
     if (editable) moreItems.push(rowBtn('tgDelWeek', 'i-trash', 'Delete week', ' hv-del'));
     
     html += `<div class="tg-pubrow tg-col">${pdList.length
-        ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">${pdList.length === 1 ? `Publish ${escapeHtml(shortDays(pdList))}` : 'Publish whole week'}<small>${pdList.length === 1 ? `${pendTot()}` : `${pendTot()} · ${escapeHtml(shortDays(pdList))}`}</small></button>${dayPend ? `<button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--line);">Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:12px; font-weight:500;">${pendLbl(pdMap[d], d)}</small></button>` : ''}<div class="tg-sub2 one"><button type="button" class="btn-secondary tg-prevbtn" id="tgPreview" style="border-color: var(--line);"><span class="ico i-eye" aria-hidden="true"></span> Preview</button></div>`
+        ? `<button type="button" class="save-btn tg-pubmain" id="tgPublish" style="margin:0;">Publish whole week<small>${pendTot()} · ${escapeHtml(shortDays(pdList))}</small></button><button type="button" class="btn-secondary" id="tgPublishDay" style="border-color: var(--line);${dayPend ? '' : ' opacity:.55;'}"${dayPend ? '' : ' disabled'}>Publish only this day (${escapeHtml(dN)})<small style="display:block; font-size:12px; font-weight:500;">${dayPend ? pendLbl(pdMap[d], d) : 'No change on this day'}</small></button><div class="tg-sub2 one"><button type="button" class="btn-secondary tg-prevbtn" id="tgPreview" style="border-color: var(--line);"><span class="ico i-eye" aria-hidden="true"></span> Preview</button></div>`
  : ''}</div>
     <div class="tg-more" id="tgMoreList">${moreItems.join('')}</div>
     ${editable ? '<div id="tgCopyDayBox"></div>' : ''}
@@ -6699,9 +6699,9 @@
     on('tgCopyDay', tgCopyDayPicker);
     on('tgImage', tgImage);
     on('tgViewImg', () => { const L = weekTtImages(state.tt.weekStart); const x = L.find((y) => y.id === state.tg.docKey + '~' + state.tg.day) || L.find((y) => y.id === state.tg.docKey); if (x) openZoomViewer(x.image, { turn: true }); else { const im = tgDrawnPubImage(state.tg.doc); if (im) openZoomViewer(im, { turn: true }); } });
-    on('tgPublish', () => tgPublishAsk());
+    on('tgPublish', () => tgPublishAsk('week'));
     on('tgEditSubj', () => { state.adminTab = 'settings'; state.adminSetOpen = 'adminSubjectsPanel'; renderAdmin(); setTimeout(() => { const p = document.getElementById('adminSubjectsPanel'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); });
-    on('tgPublishDay', () => tgPublish(state.tg.day));
+    on('tgPublishDay', () => tgPublishAsk(state.tg.day));
     on('tgEdit', () => { state.tg.editKey = state.tg.docKey; renderTgGrid(); showToast('Editing on · changes are saved as a draft until you publish'); });
     on('tgEditDone', () => { state.tg.editKey = null; state.tg.paint = null; renderTgGrid(); });
     on('tgUndo', tgUndo);
@@ -7872,8 +7872,9 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const out = {}; ((doc && doc.cells) || []).forEach((c) => { if (c.ex) return; const u = effT(c); if (u && ttLeaveOf(u, c.d)) { const k = u + '|' + c.d; (out[k] = out[k] || []).push(c); } });
     return out;
   }
-  async function tgPublishAsk() {
-    const pd = Object.keys(tgPendDays()); const day = pd.length === 1 ? pd[0] : undefined;
+  async function tgPublishAsk(which) {
+    // 'week' = the whole week; a date = only that day
+    const day = which && which !== 'week' ? which : undefined;
     const lv = ttLeaveClasses(state.tg.doc); const n = Object.keys(lv).filter((k) => !day || k.endsWith('|' + day)).reduce((a, k) => a + lv[k].length, 0);
     if (n) { const ok = await showConfirm(`${n} class${n === 1 ? ' is' : 'es are'} with a teacher who is on leave that day. Use "Give to someone" to change them, or publish as it is.`, 'Teacher on leave', 'Publish anyway'); if (!ok) return; }
     tgPublish(day);
