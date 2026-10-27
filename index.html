@@ -3043,7 +3043,8 @@
           </div>
         </div>
         <div id="repCount" hidden>
-      <div class="chips" id="trepSubMode" style="margin-bottom:8px;"><button type="button" class="chip active" data-trep-sub="all">All classes + Sub</button><button type="button" class="chip" data-trep-sub="only">Only substitute</button></div>
+      <div class="chips" id="trepBasis" style="margin-bottom:8px;"><button type="button" class="chip active" data-trep-basis="logged">Filled in by teachers</button><button type="button" class="chip" data-trep-basis="tt">From the timetable</button></div>
+  <div class="chips" id="trepSubMode" style="margin-bottom:8px;"><button type="button" class="chip active" data-trep-sub="all">All classes + Sub</button><button type="button" class="chip" data-trep-sub="only">Only substitute</button></div>
       <div id="trepBox"><div class="skel short"></div></div>
           <div class="rep-lbl">Get it as</div>
           <div class="qa-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));"> <button type="button" class="qa-btn qa-wa" id="trepImg"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
@@ -3526,7 +3527,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.73 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.74 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11429,7 +11430,7 @@ Rules:
     cols.forEach((c, i) => { const prev = heads[heads.length - 1]; if (prev && prev.head === c.head && prev.end === i - 1 && cols[i - 1].key.split('#')[0] === c.key.split('#')[0]) prev.end = i; else heads.push({ head: c.head, start: i, end: i }); });
     return { cols, heads };
   }
-  async function trepBuild() { const t = state.trep; t.self = false; const r = trepRange(); const key = t.mode + '|' + r.from;
+  async function trepBuild() { const t = state.trep; t.self = false; const r = trepRange(); const key = t.mode + '|' + r.from + '|' + (t.basis || 'logged');
     if (t.busy) return; t.busy = true; t.key = key; trepRender();
     try {
       // published timetable classes of the period
@@ -11442,11 +11443,17 @@ Rules:
           if ((doc.published || []).indexOf(T + '/' + slotIdFor(doc._id, c)) === -1) return;
           const tm = cellTimes(doc, c); if (!tm) return;
           if (c.cb) { const ms = tgComboOf(doc.cells, c); const g0 = ttGroups().find((x) => x.key === doc.group); if (ms.length > 1 && g0) { const lead = ms.slice().sort((a, b) => g0.batches.indexOf(a.b) - g0.batches.indexOf(b.b))[0]; if (lead.b !== c.b) return; } }
-          tt.push({ t: T, d: c.d, b: c.b, a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p, sub: c.sub ? 1 : 0, f: c.sub ? (c.sub.for || c.t || '') : '' });
+          tt.push({ t: T, d: c.d, b: c.b, bs: c.cb ? tgComboOf(doc.cells, c).map((m0) => m0.b) : [c.b], a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p, sub: c.sub ? 1 : 0, f: c.sub ? (c.sub.for || c.t || '') : '' });
         }));
       }
-      // classes the teachers filled in
-      // one query per day (the same way the rest of the Admin pages read classes)
+      // "From the timetable": every published class counts (not the days that are a holiday in the calendar), for the teacher it is on; no need for the teacher to fill it in
+    if (t.basis === 'tt') {
+      const ttf = tt.filter((x) => { const h0 = holDay(x.d); return !(h0 && h0.type === 'holiday'); });
+      t.data = { logs: ttf.map((x) => ({ t: x.t, d: x.d, bs: x.bs, a: x.a, z: x.z })), missing: [], upcoming: [], subs: ttf.filter((x) => x.sub).map((x) => ({ t: x.t, f: x.f, d: x.d, bs: x.bs, a: x.a, z: x.z })), from: r.from, to: r.to, ttCount: tt.length, basis: 'tt' };
+      t.busy = false; trepRender(); return;
+    }
+    // classes the teachers filled in
+    // one query per day (the same way the rest of the Admin pages read classes)
       const dayList = datesBetween(r.from, r.to);
       const parts = await Promise.all(dayList.map((d) => state.db.collection('classes').where('date', '==', d).limit(500).get().then((sn) => sn.docs.map(normDoc))));
       const seen = {};
@@ -11503,7 +11510,7 @@ Rules:
       const cells = cols.map((c, i) => (rows[u] && rows[u][i]) || 0);
       const sp = spans[u] || [];
       const total = cells.reduce((a, b) => a + b, 0) + sp.reduce((a, x) => a + x.v, 0) + (other[u] || 0);
-      return { u, name: trepName(u), cells, spans: sp, other: other[u] || 0, total, sub: subU[u] || 0, subCells: cols.map((c, i) => (sRows[u] && sRows[u][i]) || 0), subSpans: sSpans[u] || [], subOther: sOther[u] || 0 };
+      return { u, name: trepName(u) + (isPendingUid(u) ? ' (not joined yet)' : ''), cells, spans: sp, other: other[u] || 0, total, sub: subU[u] || 0, subCells: cols.map((c, i) => (sRows[u] && sRows[u][i]) || 0), subSpans: sSpans[u] || [], subOther: sOther[u] || 0 };
     });
     return { cols, heads, list, hasOther, only, subOn: !only, grand: list.reduce((a, x) => a + x.total, 0), grandSub: list.reduce((a, x) => a + x.sub, 0) };
   }
@@ -11539,7 +11546,7 @@ Rules:
   function trepTotHtml(total, sub) { return sub ? `${trepFmt(trepHalf(total - sub)) || '0'} <span class="trep-subc">+ ${trepFmt(sub)}</span> <b>= ${trepFmt(total)}</b>` : `<b>${trepFmt(total) || ''}</b>`; }
   function trepRender() {
     const box = document.getElementById('trepBox'); if (!box) return;
-    const t = state.trep; document.querySelectorAll('#trepSubMode [data-trep-sub]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-sub') === (t.sub || 'all'))); const tl = document.getElementById('trepLabel'); if (tl) tl.textContent = trepTitle();
+    const t = state.trep; document.querySelectorAll('#trepSubMode [data-trep-sub]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-sub') === (t.sub || 'all'))); document.querySelectorAll('#trepBasis [data-trep-basis]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-basis') === (t.basis || 'logged'))); const tl = document.getElementById('trepLabel'); if (tl) tl.textContent = trepTitle();
     if (t.busy || !t.data) { box.innerHTML = '<div class="skel short"></div>'; return; }
     if (t.data.error) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the report. Check the internet and try again.</div>'; return; }
     const T = trepTable();
@@ -11561,13 +11568,14 @@ Rules:
       h += `<div class="trep-miss"><div class="trep-miss-h"><span class="ico i-alert" aria-hidden="true"></span> ${miss.some((x) => x.ct) ? 'Not counted' : 'Not filled in'} (${miss.length}) · not counted${miss.some((x) => x.ct) ? ' · a class test where the class teacher is not on duty, or a class not filled in' : ''}</div>
         <div class="trep-miss-l">${Object.keys(by).sort((a, b) => ttName(a).localeCompare(ttName(b))).map((u) => `<button type="button" class="trep-mchip" data-trep-miss="${escapeHtml(u)}">${escapeHtml(trepName(u))} <b>${by[u].length}</b></button>`).join('')}</div>
         <div class="hv-note" style="text-align:left; margin-top:4px;">Classes whose time is over but the teacher hasn't filled them in. Tap a name to see which.</div></div>`;
-    } else if (!T.only && (t.data.ttCount || 0) > 0) h += '<div class="trep-ok"><span class="ico i-check" aria-hidden="true"></span> Every class that has happened is filled in</div>';
+    } else if (!T.only && (t.data.ttCount || 0) > 0 && t.data.basis !== 'tt') h += '<div class="trep-ok"><span class="ico i-check" aria-hidden="true"></span> Every class that has happened is filled in</div>';
     const upc = (t.data.upcoming || []).filter((x) => !T.only || x.sub).length;
     if (upc) h += `<div class="hv-note" style="text-align:left;">Still to come in this ${state.trep.mode === 'month' ? 'month' : 'week'}: ${upc} class${upc === 1 ? '' : 'es'} (counted once they are taken and filled in)</div>`;
     if (T.list.some((row) => !trepTitleOf(row.u))) h += '<div class="hv-note" style="text-align:left;">Mr. / Ms. comes from Sir / Ma\'am chosen by the teacher. For a name without it, tap the name to set Mr. or Ms.</div>';
-    if (T.subOn) h += '<div class="hv-note" style="text-align:left;">In a cell and in TOTAL: regular <b style="color:#C1121F;">+ substitute</b> (red). The substitute classes are the ones the teacher filled in, with the time filled in.</div>';
-    if (T.only) h += '<div class="hv-note" style="text-align:left;">Only the substitute classes the teacher filled in, with the time filled in. A substitute class that is not filled in yet is listed below.</div>';
+    if (T.subOn) h += t.data.basis === 'tt' ? '<div class="hv-note" style="text-align:left;">In a cell and in TOTAL: regular <b style="color:#C1121F;">+ substitute</b> (red). Substitute classes are counted for the teacher who takes them.</div>' : '<div class="hv-note" style="text-align:left;">In a cell and in TOTAL: regular <b style="color:#C1121F;">+ substitute</b> (red). The substitute classes are the ones the teacher filled in, with the time filled in.</div>';
+    if (T.only) h += t.data.basis === 'tt' ? '<div class="hv-note" style="text-align:left;">Only the substitute classes of the published timetable, for the teacher who takes them.</div>' : '<div class="hv-note" style="text-align:left;">Only the substitute classes the teacher filled in, with the time filled in. A substitute class that is not filled in yet is listed below.</div>';
     h += '<div class="hv-note" style="text-align:left;">1 class = up to 1 h 10 min · 1.5 = up to 1 h 45 min (e.g. 1 h 15 min) · a class taken with two batches together counts once.</div>';
+    if (t.data.basis === 'tt') h += '<div class="hv-note" style="text-align:left;">Counted from the published timetable, not from what the teachers filled in. Days that are a holiday in the calendar are left out, but a class that did not happen (a teacher on leave, a cancelled class) is still counted. The numbers of "Filled in by teachers" stay the real record.</div>';
     // a picture of the report that fits the screen; tap to open it big (zoom with two fingers)
     let img = '';
     try { const cv = trepCanvas(); if (cv) img = cv.toDataURL('image/png'); } catch (e) { img = ''; }
@@ -11629,7 +11637,7 @@ Rules:
     document.getElementById('tmClose').addEventListener('click', closeHvSheet);
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
-  function trepEnsure() { state.trep.self = false; const r = trepRange(); if (state.trep.key !== state.trep.mode + '|' + r.from || !state.trep.data) trepBuild(); else trepRender(); }
+  function trepEnsure() { state.trep.self = false; const r = trepRange(); if (state.trep.key !== state.trep.mode + '|' + r.from + '|' + (state.trep.basis || 'logged') || !state.trep.data) trepBuild(); else trepRender(); }
   function trepCanvas() {
     const T = trepTable(); if (!T) return null;
     const nC = T.cols.length + (T.hasOther ? 1 : 0);
@@ -11717,8 +11725,8 @@ Rules:
     return w.finishBlob();
   }
   function trepPer() { return state.trep.mode === 'month' ? 'Month' : state.trep.mode === 'day' ? 'Day' : state.trep.mode === 'custom' ? 'Period' : 'Week'; }
-  function trepTitleText() { const mo = state.trep.mode === 'month'; const dy = state.trep.mode === 'day'; const pre = dy ? 'Daily ' : mo ? 'Monthly ' : state.trep.mode === 'custom' ? '' : 'Weekly '; return state.trep.sub === 'only' ? `${pre}Substitute Report` : `${pre}Teaching Report`; }
-  function trepFilePrefix() { return state.trep.sub === 'only' ? 'Substitute-Report' : 'Teaching-Report'; }
+  function trepTitleText() { const mo = state.trep.mode === 'month'; const dy = state.trep.mode === 'day'; const pre = dy ? 'Daily ' : mo ? 'Monthly ' : state.trep.mode === 'custom' ? '' : 'Weekly '; return (state.trep.sub === 'only' ? `${pre}Substitute Report` : `${pre}Teaching Report`) + (state.trep.basis === 'tt' ? ' (Timetable)' : ''); }
+  function trepFilePrefix() { return (state.trep.sub === 'only' ? 'Substitute-Report' : 'Teaching-Report') + (state.trep.basis === 'tt' ? '-Timetable' : ''); }
   function trepFileTag() { const r = trepRange(); return state.trep.mode === 'month' ? r.from.slice(0, 7) : state.trep.mode === 'custom' ? `${r.from}_to_${r.to}` : r.from; }
   (function bindTeachingReport() {
     const on = (id, f) => { const el = document.getElementById(id); if (el) el.addEventListener('click', f); };
@@ -11859,6 +11867,7 @@ Rules:
     const on = (id, f) => { const el = document.getElementById(id); if (el) el.addEventListener('click', f); };
     document.querySelectorAll('#subDaySes [data-sd-ses]').forEach((b) => b.addEventListener('click', () => { state.subDay.ses = b.getAttribute('data-sd-ses'); subDayRender(); }));
     document.querySelectorAll('#trepSubMode [data-trep-sub]').forEach((b) => b.addEventListener('click', () => { state.trep.sub = b.getAttribute('data-trep-sub'); trepRender(); }));
+  document.querySelectorAll('#trepBasis [data-trep-basis]').forEach((b) => b.addEventListener('click', () => { state.trep.basis = b.getAttribute('data-trep-basis'); trepEnsure(); }));
     on('subDayImg', () => {
       const sd = state.subDay; if (sd.busy || !sd.data || sd.data.error) { showToast('The report is still loading', 'error'); return; }
       const cv = subDayCanvas(sd.ses);
