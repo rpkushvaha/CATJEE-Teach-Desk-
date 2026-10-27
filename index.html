@@ -3527,7 +3527,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.74 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.75 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5960,6 +5960,15 @@
     .filter((u) => { const tw = teamWings(u); if (!tw.length) return true; if (wing !== 'all') return tw.indexOf(wing) !== -1; return tw.some((x) => lw.indexOf(x) !== -1); })
       .sort((a, b) => ttName(a).localeCompare(ttName(b)));
   }
+  // the order of the teachers in every report: S.K. Agrawal, then Deepali Pandey, then the others A to Z
+  function repPriority(u) {
+    const t = String(ttName(u) || '').toLowerCase().replace(/\b(mr|ms|mrs|dr|sir|madam|ma'?am)\b\.?/g, ' ').replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
+    const last = t[t.length - 1] || '';
+    if (/^agrawal/.test(last) && ((t.length >= 3 && t[0].charAt(0) === 's' && t[1].charAt(0) === 'k') || (t.length >= 2 && t[0] === 'sk'))) return 0;
+    if (t.length >= 2 && (t[0] === 'deepali' || t[0] === 'dipali') && /^pandey/.test(last)) return 1;
+    return 2;
+  }
+  function repCmp(a, b) { return (repPriority(a) - repPriority(b)) || ttName(a).localeCompare(ttName(b)); }
   function ttName(u) { return (state.adminNames[u] && state.adminNames[u].name) || 'Teacher'; }
   function ttBatches() {
     const lw = state.adminReportWing !== 'all' ? [state.adminReportWing] : leadWings();
@@ -8567,6 +8576,12 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   // ---------- Grid safety: view mode, change marks, undo, day-only room ----------
   // What a published timetable looked like, to show what has changed since.
   function cellSig(c) { return c ? [c.s, c.t, isCt(c) ? 1 : 0, c.ex || '', c.sub ? c.sub.t + '/' + (c.sub.s || '') : ''].join('|') + (c.cb ? '|cb' : '') : ''; }
+  // the same content gives the same text, whatever the order of the keys; an empty value is the same as no value
+  function canonJson(v) {
+    if (Array.isArray(v)) return '[' + v.map(canonJson).join(',') + ']';
+    if (v && typeof v === 'object') return '{' + Object.keys(v).sort().filter((k) => v[k] !== '' && v[k] != null).map((k) => JSON.stringify(k) + ':' + canonJson(v[k])).join(',') + '}';
+    return JSON.stringify(v === undefined ? null : v);
+  }
   function snapOf(doc) {
     const cells = {}; const full = {}; (doc.cells || []).forEach((c) => { cells[cellKey(c)] = cellSig(c); full[cellKey(c)] = JSON.stringify(c); });
     return { cells, full, dayTimes: JSON.stringify(doc.dayTimes || {}), dayRooms: JSON.stringify(doc.dayRooms || {}) };
@@ -8579,7 +8594,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const now = {}; (doc.cells || []).forEach((c) => { now[cellKey(c)] = cellSig(c); });
     Object.keys(now).concat(Object.keys(snap.cells || {})).forEach((k) => { if ((now[k] || '') !== ((snap.cells || {})[k] || '')) { keys[k] = 1; days[k.split('|')[0]] = 1; } });
     const dt0 = JSON.parse(snap.dayTimes || '{}'), dt1 = doc.dayTimes || {}, dr0 = JSON.parse(snap.dayRooms || '{}'), dr1 = doc.dayRooms || {};
-    tgDays().forEach((d) => { if (JSON.stringify(dt0[d] || {}) !== JSON.stringify(dt1[d] || {}) || JSON.stringify(dr0[d] || {}) !== JSON.stringify(dr1[d] || {})) days[d] = 1; });
+    // the server hands a map back with its keys in another order than the phone that published typed them: same rooms is not a change
+    tgDays().forEach((d) => { if (canonJson(dt0[d] || {}) !== canonJson(dt1[d] || {}) || canonJson(dr0[d] || {}) !== canonJson(dr1[d] || {})) days[d] = 1; });
     return { keys, days, n: Object.keys(keys).length + Object.keys(days).filter((d) => !Object.keys(keys).some((k) => k.startsWith(d + '|'))).length };
   }
   // changes waiting to be published, per day (for a never-published timetable: the classes filled in each day)
@@ -11503,14 +11519,14 @@ Rules:
       if (idx.length > 1 && idx[idx.length - 1] - idx[0] === idx.length - 1) { (sSpans[l.t] = sSpans[l.t] || []).push({ a: idx[0], z: idx[idx.length - 1], v }); return; }
       sRows[l.t] = sRows[l.t] || {}; sRows[l.t][idx[0]] = (sRows[l.t][idx[0]] || 0) + v;
     });
-    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds().slice(); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u)) ids.push(u); });
-    ids.sort((a, b) => ttName(a).localeCompare(ttName(b)));
+    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds(true).slice(); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u)) ids.push(u); });
+    ids.sort(repCmp);
     const hasOther = Object.keys(other).length > 0;
     const list = ids.map((u) => {
       const cells = cols.map((c, i) => (rows[u] && rows[u][i]) || 0);
       const sp = spans[u] || [];
       const total = cells.reduce((a, b) => a + b, 0) + sp.reduce((a, x) => a + x.v, 0) + (other[u] || 0);
-      return { u, name: trepName(u) + (isPendingUid(u) ? ' (not joined yet)' : ''), cells, spans: sp, other: other[u] || 0, total, sub: subU[u] || 0, subCells: cols.map((c, i) => (sRows[u] && sRows[u][i]) || 0), subSpans: sSpans[u] || [], subOther: sOther[u] || 0 };
+      return { u, name: trepName(u), cells, spans: sp, other: other[u] || 0, total, sub: subU[u] || 0, subCells: cols.map((c, i) => (sRows[u] && sRows[u][i]) || 0), subSpans: sSpans[u] || [], subOther: sOther[u] || 0 };
     });
     return { cols, heads, list, hasOther, only, subOn: !only, grand: list.reduce((a, x) => a + x.total, 0), grandSub: list.reduce((a, x) => a + x.sub, 0) };
   }
@@ -12552,7 +12568,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   const resolvedAdminNameIds = new Set();
 
   function titleCaseName(str) {
-    return str.replace(/\S+/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    // "s.k. agrawal" -> "S.K. Agrawal" (a letter after a dot is a capital too)
+    return str.replace(/\S+/g, (w) => (w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).replace(/\.([a-z])/g, (m, c) => '.' + c.toUpperCase()));
   }
 
   async function resolveAdminNames(ids) {
@@ -15251,7 +15268,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const sel = document.getElementById('adminRepTeacher'); if (!sel || sel._filled === key) return;
     const wing = state.adminReportWing || 'all';
     const coords = (state.adminTeacherIds || []).filter((u) => isCoordUid(u) && (wing === 'all' || !teamWings(u).length || teamWings(u).indexOf(wing) !== -1));
-    const cur = sel.value; const ids = ttTeacherIds().concat(coords).filter((u, i, a) => a.indexOf(u) === i);
+    const cur = sel.value; const ids = ttTeacherIds().concat(coords).filter((u, i, a) => a.indexOf(u) === i).sort(repCmp);
     sel.innerHTML = '<option value="">All teachers</option>' + ids.map((u) => `<option value="${escapeHtml(u)}">${escapeHtml(ttName(u))}</option>`).join('');
     // a teacher from another wing is not kept: back to "All teachers"
     sel.value = ids.indexOf(cur) !== -1 ? cur : ''; sel._filled = key;
@@ -15725,7 +15742,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const byT = {};
     filtered.forEach((c) => { (byT[c.teacherId] = byT[c.teacherId] || []).push(c); });
     Object.keys(state.adminCampus || {}).forEach((tid) => { if (!byT[tid]) byT[tid] = []; });
-    Object.keys(byT).sort((a, b) => ((state.adminNames[a] && state.adminNames[a].name) || '').localeCompare((state.adminNames[b] && state.adminNames[b].name) || '')).forEach((tid) => {
+    Object.keys(byT).sort(repCmp).forEach((tid) => {
       const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
       const cmp = {}; if (state.adminCampus[tid]) cmp[date] = state.adminCampus[tid];
       buildCsvRows(byT[tid], cmp).forEach((r) => rows.push([name].concat(r)));
@@ -15881,7 +15898,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const campusByT = {};
     results.forEach(({ date: dd, campus }) => { Object.keys(campus || {}).forEach((tid) => { (campusByT[tid] = campusByT[tid] || {})[dd] = campus[tid]; if (!byT[tid]) byT[tid] = []; }); });
     allClasses.forEach((c) => { (byT[c.teacherId] = byT[c.teacherId] || []).push(c); });
-    Object.keys(byT).sort((a, b) => ((state.adminNames[a] && state.adminNames[a].name) || '').localeCompare((state.adminNames[b] && state.adminNames[b].name) || '')).forEach((tid) => {
+    Object.keys(byT).sort(repCmp).forEach((tid) => {
       const name = (state.adminNames[tid] && state.adminNames[tid].name) || 'Unnamed teacher';
       buildCsvRows(byT[tid], campusByT[tid] || {}).forEach((r) => rows.push([name].concat(r)));
     });
