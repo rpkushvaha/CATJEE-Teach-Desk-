@@ -2330,6 +2330,18 @@
   .home-seg button.active { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(16,24,40,.12); }
   .ad-tfilters { display: flex; flex-direction: column; gap: 8px; }
   .ad-schedchips { margin-bottom: 4px; }
+  .chap-sug { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chap-sug .chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chap-gap { margin-top: 10px; }
+  .rep-optcard { border: 1px solid var(--line); border-radius: 16px; padding: 10px 10px 12px; background: var(--card); margin-top: 10px; }
+  .rep-optcard[hidden] { display: none !important; }
+  .rep-lbl-s { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin: 2px 2px 6px; }
+  .rep-sub { font-size: 12.5px; color: var(--muted-2); margin: 6px 2px 10px; }
+  .rseg { display: flex; gap: 3px; padding: 3px; background: var(--neutral-soft); border-radius: 14px; }
+  .rseg .chip { flex: 1; min-width: 0; text-align: center; border: 0; background: transparent; color: var(--muted-2); font-size: 13.5px; font-weight: 600; padding: 9px 6px; border-radius: 11px; line-height: 1.2; }
+  .rseg .chip.active { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(16,24,40,.12); }
+  #repResHead:empty, #repResHeadC:empty, #repResHeadS:empty { display: none; }
+  #repResHead, #repResHeadC, #repResHeadS { margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -2642,10 +2654,12 @@
           <div class="checklist-grid ck-list" id="classKindChips"></div>
         </div>
         <div class="ck-topic" id="topicField">
-          <label for="topicInput" class="kf-lbl"><span>Chapter / Topic</span><small>Required</small></label>
-          <textarea class="text-input topic-input" id="topicInput" rows="2" style="resize:vertical; font-family:inherit;" placeholder="Type today's topic" autocapitalize="sentences"></textarea>
-          <button type="button" class="topic-suggest" id="topicSuggest" hidden><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 15 14"/></svg><span id="topicSuggestText"></span></button>
-        </div>
+ <label for="chapterInput" class="kf-lbl"><span>Chapter</span><small>Required</small></label>
+ <input type="text" class="text-input" id="chapterInput" placeholder="Select or enter chapter" maxlength="120" autocomplete="off" autocapitalize="words">
+ <div class="chap-sug" id="chapterSuggest" hidden></div>
+ <label for="topicInput" class="kf-lbl chap-gap"><span>Topic covered</span><small>Optional</small></label>
+ <textarea class="text-input topic-input" id="topicInput" rows="2" style="resize:vertical; font-family:inherit;" placeholder="Enter topic covered today" autocapitalize="sentences"></textarea>
+ </div>
         <div id="classKindFields" hidden></div>
         <div class="hv-note" style="text-align:left; margin-top:-4px;"><span class="ico i-help" aria-hidden="true"></span> Non-class work (paper checking, leave, invigilation) → Today → Activity</div>
 
@@ -2757,7 +2771,7 @@
         </div>
       </div>
       <div class="hv-search" id="hvSearchRow" hidden>
-        <input class="text-input" id="hvSearch" type="search" placeholder="Search batch, topic or date" autocomplete="off">
+        <input class="text-input" id="hvSearch" type="search" placeholder="Search batch, chapter, topic or date" autocomplete="off">
       </div>
       <div class="hv-filters" id="hvFilterRow" hidden>
         <div class="hv-flbl">Class / Batch</div>
@@ -3027,14 +3041,15 @@
           <button class="chip" data-report-range="week">Week</button>
           <button class="chip" data-report-range="month">Month</button>
         </div></div>
-        <div class="rep-opts" id="repTeacherWrap">
-          <label class="rep-lbl" for="adminRepTeacher">Teacher</label>
-          <select class="text-input" id="adminRepTeacher"><option value="">All teachers</option></select>
-        </div>
         <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Day · Week · Month</span></button></div>
         <div class="hv-note" id="repKindNote" style="text-align:left;"></div>
+ <div class="rep-optcard" id="repTeacherWrap">
+ <label class="rep-lbl rep-lbl-s" for="adminRepTeacher">Teacher</label>
+ <select class="text-input" id="adminRepTeacher"><option value="">All teachers</option></select>
+ </div>
         <div id="repStd">
-          <div id="repAttPrev" class="att-prev" hidden></div>
+ <div id="repResHead"></div>
+ <div id="repAttPrev" class="att-prev" hidden></div>
           <div class="rep-lbl">Get it as</div>
           <div class="qa-row" id="repStdTiles" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
             <button type="button" class="qa-btn qa-wa" id="repAttShare" hidden><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
@@ -3043,8 +3058,14 @@
           </div>
         </div>
         <div id="repCount" hidden>
-      <div class="chips" id="trepBasis" style="margin-bottom:8px;"><button type="button" class="chip active" data-trep-basis="logged">Filled in by teachers</button><button type="button" class="chip" data-trep-basis="tt">From the timetable</button></div>
-  <div class="chips" id="trepSubMode" style="margin-bottom:8px;"><button type="button" class="chip active" data-trep-sub="all">All classes + Sub</button><button type="button" class="chip" data-trep-sub="only">Only substitute</button></div>
+      <div class="rep-optcard">
+ <div class="rep-lbl rep-lbl-s">Counted from</div>
+ <div class="rseg" id="trepBasis"><button type="button" class="chip active" data-trep-basis="logged">Filled in by teachers</button><button type="button" class="chip" data-trep-basis="tt">From the timetable</button></div>
+ <div class="rep-sub" id="trepBasisNote">Only the classes teachers filled in themselves.</div>
+ <div class="rep-lbl rep-lbl-s">Show</div>
+ <div class="rseg" id="trepSubMode"><button type="button" class="chip active" data-trep-sub="all">All classes + Sub</button><button type="button" class="chip" data-trep-sub="only">Only substitute</button></div>
+ </div>
+ <div id="repResHeadC"></div>
       <div id="trepBox"><div class="skel short"></div></div>
           <div class="rep-lbl">Get it as</div>
           <div class="qa-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));"> <button type="button" class="qa-btn qa-wa" id="trepImg"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
@@ -3052,7 +3073,11 @@
           </div>
         </div>
         <div id="repSubDay" hidden>
-      <div class="chips" id="subDaySes" style="margin-bottom:8px;"><button type="button" class="chip active" data-sd-ses="morning">Morning batches</button><button type="button" class="chip" data-sd-ses="evening">Evening batches</button></div>
+      <div class="rep-optcard">
+ <div class="rep-lbl rep-lbl-s">Batches</div>
+ <div class="rseg" id="subDaySes"><button type="button" class="chip active" data-sd-ses="morning">Morning batches</button><button type="button" class="chip" data-sd-ses="evening">Evening batches</button></div>
+ </div>
+ <div id="repResHeadS"></div>
       <div id="subDayBox"><div class="skel short"></div></div>
       <div class="rep-lbl">Get it as</div>
       <div class="qa-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));"> <button type="button" class="qa-btn qa-wa" id="subDayImg"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="qa-l">Share picture</span><span class="qa-s">WhatsApp</span></button>
@@ -3513,7 +3538,7 @@
       <div class="dhead"><button class="dicon-btn dback" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><div class="dtitle">How to use</div></div>
       <div class="dscroll dbody">
         <div class="dcard dhelp"><strong>Check in and out</strong><span>Tap the button on the Today tab when you arrive and when you leave campus.</span></div>
-        <div class="dcard dhelp"><strong>Add a class</strong><span>Use "+ Class": pick the batch, timing and topic, and mark what you gave (worksheet, test, homework).</span></div>
+        <div class="dcard dhelp"><strong>Add a class</strong><span>Use "+ Class": pick the batch, timing, chapter and topic, and mark what you gave (worksheet, test, homework).</span></div>
         <div class="dcard dhelp"><strong>Add an activity</strong><span>For anything that isn't a class, like meetings, leave or other work.</span></div>
         <div class="dcard dhelp"><strong>History</strong><span>See any past day, week or month, and download or share a report.</span></div>
         <div class="dcard dhelp"><strong>Schedule</strong><span>Set weekly class reminders and keep personal photos for quick reference.</span></div>
@@ -3527,7 +3552,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.79 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.80 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -3617,7 +3642,7 @@
     adminClasses: [],
     adminCampus: {},
     adminNames: {},
-    form: { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false },
+    form: { batch: null, topic: '', chapter: '', worksheet: false, material: false, test: false, homework: false },
     entryMode: 'class',
     editingId: null,
     editingSourceTab: null,
@@ -4109,9 +4134,11 @@
     return `<span class="badge off">${offLabel}</span>`;
   }
 
+  // "Chapter · Topic" (an old class has only the topic, shown as before)
+  function clsTopicText(c) { return [c && c.chapter, c && c.topic].map((x) => String(x || '').trim()).filter(Boolean).join(' · '); }
   function classCardHtml(cls, showDelete) {
     const title = `${entryBatchLabel(cls)} · ${cls.subject || 'Untitled subject'}`;
-    const topic = cls.topic ? cls.topic : '';
+    const topic = clsTopicText(cls);
     const time = (cls.startTimeStr && cls.endTimeStr) ? `${formatTimeStr(cls.startTimeStr)} – ${formatTimeStr(cls.endTimeStr)}` : '';
     const badges = [
       badgeHtml('Worksheet Given', 'No Worksheet', !!cls.worksheet),
@@ -4821,7 +4848,7 @@
     if (!q) return true;
     const d = dateObj(c.date || todayStr());
     const hay = [
-      c.batch, c.topic, c.note, c.entryType === 'activity' ? activityLabel(c.activityType) : '',
+      c.batch, c.chapter, c.topic, c.note, c.entryType === 'activity' ? activityLabel(c.activityType) : '',
       c.date, d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
       d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), d.toLocaleDateString('en-GB', { weekday: 'long' }),
       `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`, `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
@@ -5556,17 +5583,18 @@
     return (a != null && b != null && b > a) ? b - a : null;
   }
   function renderTopicSuggest() {
-    const btn = document.getElementById('topicSuggest');
-    if (!btn) return;
+    const box = document.getElementById('chapterSuggest'); if (!box) return;
+    const typed = (document.getElementById('chapterInput').value || '').trim().toLowerCase();
+    const items = [];
+    const add = (v, same) => { const t = String(v || '').trim(); if (t && !items.some((x) => x.v.toLowerCase() === t.toLowerCase())) items.push({ v: t, same: !!same }); };
     const last = (!state.editingId && state.entryMode === 'class' && state.form.batch) ? findLastClassForBatch(state.form.batch) : null;
-    const typed = document.getElementById('topicInput').value.trim();
-    if (last && last.topic && typed !== last.topic.trim()) {
-      document.getElementById('topicSuggestText').textContent = `Last used: ${last.topic}`;
-      btn.hidden = false;
-    } else {
-      btn.hidden = true;
-    }
+    if (last && last.chapter) add(last.chapter, true);
+    (state.historyClasses || []).forEach((c) => { if (c.entryType !== 'activity' && c.chapter && (!state.teacherSubject || !c.subject || c.subject === state.teacherSubject)) add(c.chapter, false); });
+    const show = items.filter((x) => x.v.toLowerCase() !== typed && (!typed || x.v.toLowerCase().indexOf(typed) !== -1)).slice(0, 5);
+    box.hidden = !show.length || state.entryMode !== 'class';
+    box.innerHTML = show.map((x) => `<button type="button" class="chip" data-chap="${escapeHtml(x.v)}"${x.same ? ' aria-label="Same chapter as the last class"' : ''}>${x.same ? '↺ ' : ''}${escapeHtml(x.v)}</button>`).join('');
   }
+  function syncChapterLabel() { const sm = document.querySelector('#topicField label[for="chapterInput"] small'); if (sm) sm.textContent = (state.editingId && state.editLegacy) ? 'Optional for this old class' : 'Required'; }
 
   function showFormMsg(text) {
     const el = document.getElementById('formMsg');
@@ -11620,7 +11648,8 @@ Rules:
   function trepTotHtml(total, sub) { return sub ? `${trepFmt(trepHalf(total - sub)) || '0'} <span class="trep-subc">+ ${trepFmt(sub)}</span> <b>= ${trepFmt(total)}</b>` : `<b>${trepFmt(total) || ''}</b>`; }
   function trepRender() {
     const box = document.getElementById('trepBox'); if (!box) return;
-    const t = state.trep; document.querySelectorAll('#trepSubMode [data-trep-sub]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-sub') === (t.sub || 'all'))); document.querySelectorAll('#trepBasis [data-trep-basis]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-basis') === (t.basis || 'logged'))); const tl = document.getElementById('trepLabel'); if (tl) tl.textContent = trepTitle();
+    const t = state.trep; document.querySelectorAll('#trepSubMode [data-trep-sub]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-sub') === (t.sub || 'all'))); document.querySelectorAll('#trepBasis [data-trep-basis]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-trep-basis') === (t.basis || 'logged'))); const bn = document.getElementById('trepBasisNote'); if (bn) bn.textContent = t.basis === 'tt' ? 'Every class of the published timetable. Holidays are left out.' : 'Only the classes teachers filled in themselves.';
+    const tl = document.getElementById('trepLabel'); if (tl) tl.textContent = trepTitle();
     if (t.busy || !t.data) { box.innerHTML = '<div class="skel short"></div>'; return; }
     if (t.data.error) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the report. Check the internet and try again.</div>'; return; }
     const T = trepTable();
@@ -11799,7 +11828,7 @@ Rules:
     return w.finishBlob();
   }
   function trepPer() { return state.trep.mode === 'month' ? 'Month' : state.trep.mode === 'day' ? 'Day' : state.trep.mode === 'custom' ? 'Period' : 'Week'; }
-  function trepTitleText() { const mo = state.trep.mode === 'month'; const dy = state.trep.mode === 'day'; const pre = dy ? 'Daily ' : mo ? 'Monthly ' : state.trep.mode === 'custom' ? '' : 'Weekly '; return (state.trep.sub === 'only' ? `${pre}Substitute Report` : `${pre}Teaching Report`) + (state.trep.basis === 'tt' ? ' (Timetable)' : ''); }
+  function trepTitleText() { const mo = state.trep.mode === 'month'; const dy = state.trep.mode === 'day'; const pre = dy ? 'Daily ' : mo ? 'Monthly ' : state.trep.mode === 'custom' ? '' : 'Weekly '; return (state.trep.sub === 'only' ? `${pre}Substitute Report` : `${pre}Teaching Report`) + ''; }
   function trepFilePrefix() { return (state.trep.sub === 'only' ? 'Substitute-Report' : 'Teaching-Report') + (state.trep.basis === 'tt' ? '-Timetable' : ''); }
   function trepFileTag() { const r = trepRange(); return state.trep.mode === 'month' ? r.from.slice(0, 7) : state.trep.mode === 'custom' ? `${r.from}_to_${r.to}` : r.from; }
   (function bindTeachingReport() {
@@ -13193,7 +13222,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       `<span class="mchip">${I_CLOCK}${escapeHtml(svDur(dur))}${st != null ? ' · till ' + escapeHtml(svEndStr(s).replace(/\s?(AM|PM)$/i, '')) : ''}</span>`].filter(Boolean).join('');
     const src = s.subFor ? `<span class="mchip warn">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span>` : '';
     const from = s.setBy ? (Array.isArray(s.batches) && s.batches.length > 1 ? 'Combined class' : '') : 'Added by you';
-    const topic = m.cls && m.cls.topic ? `<span class="sv-topic">${escapeHtml(m.cls.topic)}</span>` : '';
+    const topic = m.cls && clsTopicText(m.cls) ? `<span class="sv-topic">${escapeHtml(clsTopicText(m.cls))}</span>` : '';
     return `<div class="sv-row ${m.status} ses-${ses}" data-sv-slot="${escapeHtml(s.id)}" role="button" tabindex="0">
       <span class="sv-time">${tm ? `${escapeHtml(tm[1])}<small>${escapeHtml(tm[2].toUpperCase())}</small>` : (t ? escapeHtml(t) : '—')}</span>
       <span class="sv-main"><span class="sv-top"><span class="sv-batch">${nbLabel(slotLabelAll(s))}</span>${pillHtml(m.status, SV_PILL[m.status])}</span>
@@ -13410,7 +13439,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         <div class="hv-d-row"><span>Status</span><span>${SV_PILL[m.status]}</span></div>
         ${slot.room ? `<div class="hv-d-row"><span>Room</span><span>${escapeHtml(slot.room)}</span></div>` : ''}
         ${bySet ? `<div class="hv-d-row"><span>Set by</span><span>Coordinator</span></div>` : ''}
-        ${m.cls && m.cls.topic ? `<div class="hv-d-row"><span>Topic</span><span>${escapeHtml(m.cls.topic)}</span></div>` : ''}
+        ${m.cls && m.cls.chapter ? `<div class="hv-d-row"><span>Chapter</span><span>${escapeHtml(m.cls.chapter)}</span></div>` : ''}${m.cls && m.cls.topic ? `<div class="hv-d-row"><span>Topic</span><span>${escapeHtml(m.cls.topic)}</span></div>` : ''}
       </div>
       ${m.cls ? '<button type="button" class="dbtn-primary dbtn-block" id="svViewClass" style="margin-top:14px;">View logged class</button>' : ''}
       ${canLog ? '<button type="button" class="dbtn-primary dbtn-block" id="svLogClass" style="margin-top:14px;">Log this class</button>' : ''}
@@ -13931,17 +13960,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     showFormMsg(a != null && b != null && b <= a ? 'End time must be after the start time.' : '');
     syncDurChips();
   });
-  document.getElementById('topicInput').addEventListener('input', renderTopicSuggest);
-
-  document.getElementById('topicSuggest').addEventListener('click', () => {
-    const last = state.form.batch ? findLastClassForBatch(state.form.batch) : null;
-    if (!last || !last.topic) return;
-    const t = document.getElementById('topicInput');
-    t.value = last.topic;
-    state.form.topic = last.topic;
-    renderTopicSuggest();
-    t.focus();
-  });
+  document.getElementById('chapterInput').addEventListener('input', () => { state.form.chapter = document.getElementById('chapterInput').value; renderTopicSuggest(); });
+    document.getElementById('chapterSuggest').addEventListener('click', (e) => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-chap]') : null; if (!b) return;
+      const v = b.getAttribute('data-chap'); const ci = document.getElementById('chapterInput'); ci.value = v; state.form.chapter = v; showFormMsg(''); renderTopicSuggest();
+      const ti = document.getElementById('topicInput'); if (ti) ti.focus();
+    });
 
   document.getElementById('modeChips').querySelectorAll('[data-mode]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -14970,7 +14994,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const ed = c.editedAt ? `   [edited ${stampTxt(c.editedAt)}]` : '';
         w.bodyLine(`${i + 1}. ${entryBatchLabel(c)}${up}${ed}`, { bold: true, indent: 14 });
         if (c.startTimeStr && c.endTimeStr) w.bodyLine(`Time: ${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}  (${reportHm(classDuration(c))})`, { indent: 28 });
-        if (c.topic) w.bodyLine(`Chapter / Topic: ${waClean(c.topic)}`, { indent: 28 });
+        if (c.chapter) { w.bodyLine(`Chapter: ${waClean(c.chapter)}`, { indent: 28 }); if (c.topic) w.bodyLine(`Topic: ${waClean(c.topic)}`, { indent: 28 }); } else if (c.topic) w.bodyLine(`Chapter / Topic: ${waClean(c.topic)}`, { indent: 28 });
         classKindLines(c).forEach(([a, b]) => w.bodyLine(`${a}${b ? ': ' + waClean(b) : ''}`, { indent: 28 }));
         if (c.worksheet) w.bodyLine(`Worksheet given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`, { indent: 28 });
         if (c.material) w.bodyLine(`Study material given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`, { indent: 28 });
@@ -15079,7 +15103,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (!cls.length && !acts.length) return;
       const d = dateObj(dt);
       const parts = [];
-      if (cls.length) parts.push(cls.map((c) => `${entryBatchLabel(c)}${c.topic || classKindText(c) ? ' (' + [c.topic, classKindText(c)].filter(Boolean).join(' · ') + ')' : ''}${hvStartedOrPast(c) ? '' : ' _upcoming_'}`).join(', '));
+      if (cls.length) parts.push(cls.map((c) => `${entryBatchLabel(c)}${clsTopicText(c) || classKindText(c) ? ' (' + [clsTopicText(c), classKindText(c)].filter(Boolean).join(' · ') + ')' : ''}${hvStartedOrPast(c) ? '' : ' _upcoming_'}`).join(', '));
       if (acts.length) parts.push(acts.map((a) => (isInvig(a) ? invigSummary(a).title + ' · ' + invigSummary(a).sub : activityLabel(a.activityType)) + (a.note ? ': ' + a.note.replace(/\s*\n+\s*/g, '; ') : '')).join(', '));
       days.push(`• *${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}:* ${parts.join(' | ')}`);
     });
@@ -15212,7 +15236,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         if (i) L.push('');
         L.push(`*${i + 1}. ${entryBatchLabel(c)}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
         if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
-        if (c.topic) L.push(`📌 Chapter / Topic: ${waClean(c.topic)}`);
+        if (c.chapter) { L.push(`📌 Chapter: ${waClean(c.chapter)}`); if (c.topic) L.push(`📝 Topic: ${waClean(c.topic)}`); } else if (c.topic) L.push(`📌 Chapter / Topic: ${waClean(c.topic)}`);
       const KEMO = { 'Revision': '🔁', 'Doubt clearing': '❓', 'Quiz': '☑️', 'Test copies shown': '📋', 'Question paper discussion': '💬', 'Something else': '🏷️' };
       classKindLines(c).forEach(([a, b]) => L.push(`${KEMO[a] || '•'} ${a}${b ? ': ' + waClean(b) : ''}`));
         if (c.worksheet) L.push(`📄 Worksheet Given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`);
@@ -15292,6 +15316,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label; syncRepBack();
     const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
+    { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
+      const hh = `<div class="tsec-title">${escapeHtml(kn)} · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml(label)} · ${escapeHtml(wt)}</div>`;
+      ['repResHead', 'repResHeadC', 'repResHeadS'].forEach((id) => { const e2 = document.getElementById(id); if (e2) e2.innerHTML = hh; }); }
     document.getElementById('repStd').hidden = showCount || subDay;
     const shareT = document.getElementById('repAttShare'); if (shareT) shareT.hidden = kind !== 'att';
     const tiles = document.getElementById('repStdTiles'); if (tiles) tiles.style.gridTemplateColumns = kind === 'att' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
@@ -15635,7 +15662,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   // ---------- Excel / CSV: one layout for every export ----------
   // One row per entry, plus one "Attendance" row per day. A cell is filled only when there is something to say
   // (e.g. the Worksheet cell holds the worksheet name, or "Given"), so there is no column of "No"s to read through.
-  const CSV_HEADER = ['Date', 'Day', 'Entry', 'Batch / Class', 'Subject', 'Topic / Test / Work', 'Start', 'End', 'Duration (min)', 'Worksheet', 'Study Material', 'Class Test', 'Homework', 'Room(s)', 'Remarks', 'Logged At', 'Last Edited'];
+  const CSV_HEADER = ['Date', 'Day', 'Entry', 'Batch / Class', 'Subject', 'Chapter', 'Topic / Test / Work', 'Start', 'End', 'Duration (min)', 'Worksheet', 'Study Material', 'Class Test', 'Homework', 'Room(s)', 'Remarks', 'Logged At', 'Last Edited'];
   const CSV_ORDER = { Attendance: 0, Class: 1, Invigilation: 2, 'Other Work': 3, 'Coordination Work': 3, Leave: 4 };
   function csvDay(date) { return dateObj(date).toLocaleDateString('en-GB', { weekday: 'short' }); }
   function csvStamp(c) { return [c.createdAt && c.createdAt > 1e12 ? stampTxt(c.createdAt) : '', c.editedAt ? stampTxt(c.editedAt) : '']; }
@@ -15645,19 +15672,19 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (isInvig(c)) {
         const parts = c.parts || [];
         const rooms = parts.map((p) => `${p.room ? waClean(p.room) + ' ' : ''}(${formatTimeStr(p.start)}–${formatTimeStr(p.end)})`).join('; ');
-        return base('Invigilation').concat([scopeLabel(c.scope || []), c.subject || '', c.testType || c.testName || '',
+        return base('Invigilation').concat([scopeLabel(c.scope || []), c.subject || '', '', c.testType || c.testName || '',
           parts[0] ? formatTimeStr(parts[0].start) : '', parts.length ? formatTimeStr(parts[parts.length - 1].end) : '',
           invigMinutes(c) || '', '', '', '', '', rooms, waClean(c.note)], csvStamp(c));
       }
       if (c.activityType === 'Leave / Holiday') {
         const r = waClean(c.note);
-        return base('Leave').concat(['', '', '', '', '', '', '', '', '', '', '', /^on leave\.?$/i.test(r) ? '' : r], csvStamp(c));
+        return base('Leave').concat(['', '', '', '', '', '', '', '', '', '', '', '', /^on leave\.?$/i.test(r) ? '' : r], csvStamp(c));
       }
       const work = String(c.note || '').split(/\n+/).map(waSentence).filter(Boolean).join(' ');
-      return base(c.activityType === 'Coordination' ? 'Coordination Work' : 'Other Work').concat(['', '', work, '', '', '', '', '', '', '', '', ''], csvStamp(c));
+      return base(c.activityType === 'Coordination' ? 'Coordination Work' : 'Other Work').concat(['', '', '', work, '', '', '', '', '', '', '', '', ''], csvStamp(c));
     }
     const nb = entryBatches(c).length;
-    return base('Class').concat([entryBatchLabel(c), c.subject || '', [waClean(c.topic), waClean(classKindText(c))].filter(Boolean).join(' · '),
+    return base('Class').concat([entryBatchLabel(c), c.subject || '', waClean(c.chapter), [waClean(c.topic), waClean(classKindText(c))].filter(Boolean).join(' · '),
       c.startTimeStr ? formatTimeStr(c.startTimeStr) : '', c.endTimeStr ? formatTimeStr(c.endTimeStr) : '', classDuration(c) || '',
       c.worksheet ? (waClean(c.worksheetNote) || 'Given') : '',
       c.material ? (waClean(c.materialNote) || 'Given') : '',
@@ -15672,7 +15699,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const spans = ss.map((s) => `${formatTimeStr(toHHMM(s.in))}–${s.out != null ? formatTimeStr(toHHMM(s.out)) : 'in progress'}`).join('; ');
     const edits = reportShowEdits ? ss.map((s, i) => { const a = sessEditMark(s, 'in'), b = sessEditMark(s, 'out'); return a || b ? `${ss.length > 1 ? 'Session ' + (i + 1) + ': ' : ''}${a ? 'check-in ' + a.slice(2, -1) : ''}${a && b ? '; ' : ''}${b ? 'check-out ' + b.slice(2, -1) : ''}` : ''; }).filter(Boolean).join(' | ') : '';
     const note = [ss.length > 1 ? `Sessions: ${spans}` : '', edits, reportShowEdits && campus.adminEdited ? 'Edited by admin' : ''].filter(Boolean).join(' · ');
-    return [date, csvDay(date), 'Attendance', '', '', '', formatTimeStr(toHHMM(ss[0].in)), last.out != null ? formatTimeStr(toHHMM(last.out)) : 'In progress',
+    return [date, csvDay(date), 'Attendance', '', '', '', '', formatTimeStr(toHHMM(ss[0].in)), last.out != null ? formatTimeStr(toHHMM(last.out)) : 'In progress',
       Math.round(campusSeconds(campus) / 60), '', '', '', '', '', note, '', ''];
   }
   function csvSortRows(rows) {
@@ -15689,7 +15716,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const att = csvAttendanceRow(d, (campusByDate || {})[d]);
       if (att) dayRows.push(att);
       (records || []).filter((c) => c.date === d).forEach((c) => dayRows.push(csvRowFor(c)));
-      dayRows.sort((a, b) => (CSV_ORDER[a[2]] - CSV_ORDER[b[2]]) || String(a[6] ? tMin12(a[6]) : 9999).localeCompare(String(b[6] ? tMin12(b[6]) : 9999), undefined, { numeric: true }));
+      dayRows.sort((a, b) => (CSV_ORDER[a[2]] - CSV_ORDER[b[2]]) || String(a[7] ? tMin12(a[7]) : 9999).localeCompare(String(b[7] ? tMin12(b[7]) : 9999), undefined, { numeric: true }));
       dayRows.forEach((r) => rows.push(r));
     });
     return rows;
@@ -16012,8 +16039,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const ic = (k) => { const x = CLASS_KINDS.find((q) => q.k === k); return `<span class="ico i-${x ? x.ic : 'note'}" aria-hidden="true"></span>`; };
     const ks = classKindsOf(c); const notes = (c && c.kindNotes) || {};
     const rows = [];
-    if (withTopic && ks.indexOf('teach') !== -1) rows.push(c.topic ? `<div>${ic('teach')}<span><b>Chapter / Topic:</b> ${escapeHtml(c.topic)}</span></div>` : `<div>${ic('teach')}<span class="faint">Chapter / Topic not added</span></div>`);
-    else if (withTopic && c.topic) rows.push(`<div>${ic('teach')}<span><b>Chapter / Topic:</b> ${escapeHtml(c.topic)}</span></div>`);
+    const chapTopic = () => { const o = []; if (c.chapter) { o.push(`<div>${ic('teach')}<span><b>Chapter:</b> ${escapeHtml(c.chapter)}</span></div>`); if (c.topic) o.push(`<div>${ic('teach')}<span><b>Topic:</b> ${escapeHtml(c.topic)}</span></div>`); } else if (c.topic) o.push(`<div>${ic('teach')}<span><b>Chapter / Topic:</b> ${escapeHtml(c.topic)}</span></div>`); return o; };
+    if (withTopic && ks.indexOf('teach') !== -1) { const r2 = chapTopic(); if (r2.length) r2.forEach((x) => rows.push(x)); else rows.push(`<div>${ic('teach')}<span class="faint">Chapter / Topic not added</span></div>`); } else if (withTopic && (c.topic || c.chapter)) chapTopic().forEach((x) => rows.push(x));
     CLASS_KINDS.filter((x) => x.k !== 'teach' && ks.indexOf(x.k) !== -1).forEach((x) => { const v = String(notes[x.k] || '').trim(); rows.push(`<div>${ic(x.k)}<span><b>${escapeHtml(x.out)}${v ? ':' : ''}</b>${v ? ' ' + escapeHtml(v) : ''}</span></div>`); });
     return rows.length ? `<div class="ck-lines">${rows.join('')}</div>` : '';
   }
@@ -16047,10 +16074,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
   try { if (!state.form.kinds) state.form.kinds = ['teach']; renderClassKinds(); } catch (e) { /* ignore */ }
   function resetClassForm() {
-    state.form = { batch: null, topic: '', worksheet: false, material: false, test: false, homework: false, extra: [], combineOpen: false, kinds: ['teach'], kindNotes: {} };
+    state.form = { batch: null, topic: '', chapter: '', worksheet: false, material: false, test: false, homework: false, extra: [], combineOpen: false, kinds: ['teach'], kindNotes: {} }; state.editLegacy = false;
     try { renderClassKinds(); } catch (e) { /* ignore */ }
-    document.getElementById('topicInput').value = '';
-    document.getElementById('startTimeInput').value = '';
+    document.getElementById('topicInput').value = ''; document.getElementById('chapterInput').value = ''; syncChapterLabel(); document.getElementById('startTimeInput').value = '';
     document.getElementById('endTimeInput').value = '';
     document.getElementById('worksheetNoteInput').value = '';
     document.getElementById('materialNoteInput').value = '';
@@ -16160,7 +16186,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   function selectBatch(batch) {
     setSchedHint('');
     const last = findLastClassForBatch(batch);
-    const typedTopic = document.getElementById('topicInput').value;
+    const typedTopic = document.getElementById('topicInput').value; const typedChapter = document.getElementById('chapterInput').value;
     const keepExtra = ((state.form && state.form.extra) || []).filter((x) => x !== batch);
     const keepOpen = !!(state.form && state.form.combineOpen);
     state.form = {
@@ -16168,6 +16194,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       combineOpen: keepOpen,
       batch,
       topic: typedTopic,
+      chapter: typedChapter,
       worksheet: false,
       material: false,
       test: false,
@@ -16212,6 +16239,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       combineOpen: ex.length > 0,
       batch: cls.batch || currentBatches()[0],
       topic: cls.topic || '',
+      chapter: cls.chapter || '',
       worksheet: !!cls.worksheet,
       material: !!cls.material,
       test: !!cls.test,
@@ -16219,9 +16247,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       kinds: classKindsOf(cls).slice(),
       kindNotes: Object.assign({}, cls.kindNotes || {})
     };
-    renderForm();
-    renderClassKinds();
-    document.getElementById('topicInput').value = cls.topic || '';
+    renderForm(); renderClassKinds(); state.editLegacy = !cls.chapter; document.getElementById('topicInput').value = cls.topic || ''; document.getElementById('chapterInput').value = cls.chapter || ''; syncChapterLabel();
     document.getElementById('startTimeInput').value = cls.startTimeStr || '';
     document.getElementById('endTimeInput').value = cls.endTimeStr || '';
     document.getElementById('worksheetNoteInput').value = cls.worksheetNote || '';
@@ -16697,7 +16723,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!kinds.length) { showFormMsg('Choose what happened in class (Teaching, Quiz…).'); const kc = document.getElementById('classKindChips'); if (kc) kc.scrollIntoView({ block: 'center' }); return; }
     const teaching = kinds.indexOf('teach') !== -1;
     const topic = teaching ? document.getElementById('topicInput').value.trim() : '';
-    if (teaching && !topic) { showFormMsg('Please enter the chapter / topic.'); document.getElementById('topicInput').focus(); return; }
+    const chapter = teaching ? document.getElementById('chapterInput').value.trim() : '';
+    // the chapter is needed for a new class; an old class (it has only a topic) can still be edited without one
+    if (teaching && !chapter && !(state.editingId && state.editLegacy && topic)) { showFormMsg('Please enter the chapter.'); document.getElementById('chapterInput').focus(); return; }
     const kindNotes = {};
     for (const x of CLASS_KINDS) {
       if (x.k === 'teach' || kinds.indexOf(x.k) === -1 || !x.f) continue;
@@ -16749,8 +16777,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const payload = {
         batch: state.form.batch,
         batches: extraB.length ? [state.form.batch].concat(extraB) : null,
-        topic,
-        kinds: kinds.length === 1 && kinds[0] === 'teach' ? null : kinds,
+        chapter,
+      topic,
+      kinds: kinds.length === 1 && kinds[0] === 'teach' ? null : kinds,
         kindNotes: Object.keys(kindNotes).length ? kindNotes : null,
         startTimeStr,
         endTimeStr,
@@ -17624,7 +17653,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       { go: goTab('today'), sel: '#todayClassList', t: 'From Today', x: 'Easiest way: tap Log this class on a class here — batch and time are filled in for you.' },
       { go: goTab('add'), sel: '#batchChips', t: 'Choose the batch', x: 'Or open Add Class and tap the batch.' },
       { go: goTab('add'), sel: '#startTimeInput', t: 'Time', x: 'Start and end time of the class.' },
-      { go: goTab('add'), sel: '#topicInput', t: 'Topic', x: 'What you taught today. Tick worksheet, test or homework below if given.' },
+      { go: goTab('add'), sel: '#chapterInput', t: 'Chapter and topic', x: 'The chapter you taught (needed), and the topic covered today (optional). Tick worksheet, test or homework below if given.' },
       { go: goTab('add'), sel: '#saveClassBtn', t: 'Save', x: 'Tap Save Class. Without internet it is kept and sent later by itself.' } ] },
     schedule: { title: 'Schedule', sub: 'Your week and your own slots', icon: 'cal', who: 'all', steps: [
       { go: goTab('schedule'), sel: '[data-sv-view="list"]', t: 'List or weekly timetable', x: 'See your week as a list or as a timetable.' },
