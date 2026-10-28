@@ -3527,7 +3527,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.77 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.78 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5711,9 +5711,9 @@
     const all = (state.adminTeacherIds || []).slice().sort((a, b) => ((state.adminNames[a] && state.adminNames[a].name) || '').localeCompare((state.adminNames[b] && state.adminNames[b].name) || ''));
     const ids = all.filter((u) => !isRemovedUid(u));
     const removed = all.filter(isRemovedUid);
-    const nDone = ids.filter(teamFilled).length; const nLack = ids.length - nDone;
+    const joined = ids.filter((u) => !isPendingUid(u)); const nDone = joined.filter(teamFilled).length; const nLack = joined.filter((u) => !teamFilled(u) && u !== state.teacherId).length; // the button counts the same people the reminder goes to (not yourself)
     if (!all.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">People appear here after they sign in to the app once.</div>'; return; }
-    el.innerHTML = `<div class="team-sum"><b>${nDone} of ${ids.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLack ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLack}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` + ids.map((uid) => {
+    el.innerHTML = `<div class="team-sum"><b>${nDone} of ${joined.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLack ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLack}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` + ids.map((uid) => {
       const name = ((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed') + (isPendingUid(uid) ? ' (not joined yet)' : '');
       const coord = isCoordUid(uid);
       const w = teamWings(uid);
@@ -5923,9 +5923,14 @@
     el.querySelectorAll('[data-sid-reshare]').forEach((b) => b.addEventListener('click', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(b.getAttribute('data-sid-reshare'))), '_blank')));
     el.querySelectorAll('[data-sid-revoke]').forEach((b) => b.addEventListener('click', async () => {
       const code = b.getAttribute('data-sid-revoke');
-      const ok = await showConfirm(`${code} will stop working. Nobody can create an account with it.`, 'Cancel this Staff ID?', 'Cancel ID');
+      const pend = isPendingUid(code); const pname = pend ? ((state.team[code] && state.team[code].name) || 'The teacher') : '';
+      let nCls = 0; if (pend) { try { nCls = await countPendingClasses(code); } catch (e) { nCls = 0; } }
+      const ok = await showConfirm(`${code} will stop working. Nobody can create an account with it.` + (pend ? `\n${pname} will also be removed from the teacher lists, Teacher Mapping and the calendar.${nCls ? `\n${nCls} timetable class${nCls === 1 ? '' : 'es'} with ${pname} will be left without a teacher.` : ''}` : ''), 'Cancel this Staff ID?', 'Cancel ID');
       if (!ok) return;
-      try { await state.db.doc('staffIds/' + code).delete(); showToast('Staff ID cancelled'); } catch (err) { flashOffline(err); }
+      try {
+        if (pend) await removePendingStaff(code); // first the teacher, then the ID: if something fails the ID is still there and it can be tried again
+        await state.db.doc('staffIds/' + code).delete(); showToast(pend ? `${pname} removed · Staff ID cancelled` : 'Staff ID cancelled');
+      } catch (err) { flashOffline(err); }
     }));
   }
   // Give an existing person (who joined before Staff IDs) their own ID, so they can sign in with it too.
@@ -9826,6 +9831,36 @@ Rules:
   }
   // Admin and Coordinator: what teachers gave in their Profile fills the Team list and the calendar (the Admin's app copies it)
   let syncBusy = false;
+  // ---------- A Staff ID is cancelled for a teacher who has not joined: he goes from the lists, the mapping, the calendar and the timetable ----------
+  async function pendingTtSnap() { const ws0 = shiftDateStr(mondayOf(todayStr()), -7); return state.db.collection('timetables').where('weekStart', '>=', ws0).get(); }
+  async function countPendingClasses(code) { let n = 0; const snap = await pendingTtSnap(); snap.docs.forEach((d) => ((d.data() || {}).cells || []).forEach((c) => { if (!c.ex && (c.t === code || (c.sub && c.sub.t === code))) n++; })); return n; }
+  async function removePendingStaff(code) {
+    // 1) the timetables: his classes are left without a teacher (it shows as a change to publish); a substitute by him is taken back
+    const snap = await pendingTtSnap();
+    for (const d of snap.docs) {
+      const doc = d.data() || {}; let ch = false;
+      const cells = (doc.cells || []).map((c) => { const n = Object.assign({}, c); if (n.t === code) { n.t = ''; ch = true; } if (n.sub && n.sub.t === code) { delete n.sub; ch = true; } return n; });
+      const pubHas = (doc.published || []).some((k) => String(k).indexOf(code + '/') === 0);
+      if (!ch && !pubHas) continue;
+      const upd = Object.assign({}, doc, { cells }); if (doc.published) upd.published = doc.published.filter((k) => String(k).indexOf(code + '/') !== 0);
+      await state.db.collection('timetables').doc(d.id).set(upd);
+    }
+    // 2) the classes already sent to him
+    const sl = await state.db.collection('schedule/' + code + '/slots').get(); let batch = state.db.batch(); let n = 0;
+    for (const d of sl.docs) { batch.delete(d.ref); n++; if (n >= 400) { await batch.commit(); batch = state.db.batch(); n = 0; } }
+    if (n) await batch.commit();
+    // 3) Teacher Mapping
+    const map = Object.assign({}, state.teacherMap || {}); let mchg = false; Object.keys(map).forEach((k) => { if (map[k] === code) { delete map[k]; mchg = true; } });
+    if (mchg) { await state.db.doc('settings/teacherMap').set({ map }); state.teacherMap = map; }
+    // 4) the calendar
+    const list0 = state.birthdays || []; const list = list0.filter((b) => b.uid !== code); if (list.length !== list0.length) await calSaveBd(list, true);
+    // 5) the teacher
+    const t2 = Object.assign({}, state.team);
+  try { await state.db.doc('team/' + code).delete(); delete t2[code]; }
+  catch (e) { if (e && e.code === 'permission-denied') { await state.db.doc('team/' + code).set({ status: 'removed', pending: false, removedAt: Date.now() }, { merge: true }); t2[code] = Object.assign({}, t2[code] || {}, { status: 'removed', pending: false }); } else throw e; }
+  state.team = t2;
+    try { mergePendingStaff(); ttCacheStale(); renderTeamPanel(); } catch (e) { /* ignore */ }
+  }
   // ---------- A teacher added before he had an account joins with his Staff ID: everything that was set on his Staff ID moves to his account ----------
   let linkingStaff = false;
   async function linkPendingStaff() {
@@ -9898,7 +9933,7 @@ Rules:
     return `${md ? '🎂 ' + Number(md.slice(3)) + ' ' + MON_SHORT[Number(md.slice(0, 2)) - 1] : 'No birthday'} · ${(waNumber(u) || waTen(a.wa)) ? 'WhatsApp ✓' : 'No WhatsApp'}`;
   }
   async function teamRemind() {
-    const lack = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !teamFilled(u) && u !== state.teacherId); if (!lack.length) { showToast('Everyone has added their details'); return; }
+    const lack = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u) && !teamFilled(u) && u !== state.teacherId); if (!lack.length) { showToast('Everyone has added their details'); return; }
     if (!(await showConfirm(`${lack.length} teacher${lack.length === 1 ? '' : 's'} will be asked in the app and on their phone to add their WhatsApp number and birthday.`, 'Remind them?', 'Remind'))) return;
     lack.forEach((u) => notify(u, { type: 'profile', title: 'Add your details', body: 'Please add your WhatsApp number and birthday in Menu → Profile.', link: { tab: 'today' } }));
     showToast(`${lack.length} reminded`);
@@ -10658,6 +10693,7 @@ Rules:
     document.getElementById('adminTeacherMeta').textContent = teacherRows.length ? `${presentN} present · ${leaveN} on leave` : '';
     if (!teacherRows.length) {
       listEl.innerHTML = '<div class="hv-note" style="text-align:left;">No teachers found yet.</div>';
+      state._tcRows = []; try { tcApplyFilter([]); } catch (e) { /* ignore */ }
     } else {
       listEl.innerHTML = `<div class="sv-rows">${teacherRows.map((r) => {
         const expanded = state.adminExpandedTeacher === r.tid;
