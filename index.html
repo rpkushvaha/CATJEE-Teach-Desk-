@@ -3527,7 +3527,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.76 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.77 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5964,7 +5964,8 @@
   function repPriority(u) {
     const t = String(ttName(u) || '').toLowerCase().replace(/\b(mr|ms|mrs|dr|sir|madam|ma'?am)\b\.?/g, ' ').replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
     const last = t[t.length - 1] || '';
-    if (/^agrawal/.test(last) && ((t.length >= 3 && t[0].charAt(0) === 's' && t[1].charAt(0) === 'k') || (t.length >= 2 && t[0] === 'sk'))) return 0;
+    // Agrawal / Agarwal / Aggarwal / Agrwal ... (however it is spelled)
+    if (/^ag+a?r+a?w?a?l/.test(last) && ((t.length >= 3 && t[0].charAt(0) === 's' && t[1].charAt(0) === 'k') || (t.length >= 2 && t[0] === 'sk'))) return 0;
     if (t.length >= 2 && (t[0] === 'deepali' || t[0] === 'dipali') && /^pandey/.test(last)) return 1;
     return 2;
   }
