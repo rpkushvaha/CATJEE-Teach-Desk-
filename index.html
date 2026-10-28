@@ -2384,8 +2384,8 @@
           <label>WhatsApp number <span class="opt">(optional)</span></label>
           <input class="text-input" id="authWhatsapp" type="tel" inputmode="numeric" placeholder="10-digit number" autocomplete="tel-national">
           <label style="margin-top:10px;">Birthday <span class="opt">(optional)</span></label>
-          <div style="display:flex; gap:8px;"><select class="text-input" id="authBdDay" aria-label="Day"></select><select class="text-input" id="authBdMon" aria-label="Month"></select></div>
-          <div class="sal-preview">The Admin and Coordinators can see your number. Everyone sees your birthday (day and month) in the CATJEE calendar. The year is not kept.</div>
+          <div style="display:flex; gap:8px;"><select class="text-input" id="authBdDay" aria-label="Day"></select><select class="text-input" id="authBdMon" aria-label="Month"></select><select class="text-input" id="authBdYear" aria-label="Year"></select></div>
+ <div class="sal-preview">The Admin and Coordinators can see your number and the year. Everyone sees your birthday (day and month) in the CATJEE calendar. The year is optional.</div>
         </div>
         <div class="field"> <label id="authEmailLabel">Email or Staff ID</label>
       <input class="text-input" id="authEmail" type="text" placeholder="you@example.com or CTJ-7K4P9X" autocomplete="username">
@@ -3362,8 +3362,8 @@
         <input class="text-input" id="profileWaInput" type="tel" inputmode="numeric" placeholder="10-digit number">
         <div class="sal-preview">Only the Admin and Coordinators can see it.</div>
         <div class="dfield-label" style="margin:12px 0 8px;">Birthday</div>
-        <div style="display:flex; gap:8px;"><select class="text-input" id="profileBdDay" aria-label="Day"></select><select class="text-input" id="profileBdMon" aria-label="Month"></select></div>
-        <div class="sal-preview">Everyone sees your birthday (day and month) in the CATJEE calendar. The year is not kept.</div>
+        <div style="display:flex; gap:8px;"><select class="text-input" id="profileBdDay" aria-label="Day"></select><select class="text-input" id="profileBdMon" aria-label="Month"></select><select class="text-input" id="profileBdYear" aria-label="Year"></select></div>
+ <div class="sal-preview">Everyone sees your birthday (day and month) in the CATJEE calendar. Only the Admin and Coordinators can see the year, and it is optional.</div>
         <button type="button" id="profileContactSave" class="dbtn-primary" style="margin-top:12px; width:100%;">Save</button>
       </div>
       </div>
@@ -3527,7 +3527,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.78 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.79 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5633,7 +5633,7 @@
       snap.docs.forEach((d) => {
         const data = d.data() || {};
         list.push(d.id);
-        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', sal: data.salutation || '', wa: data.whatsapp || '', bd: data.birthMd || '' };
+        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', sal: data.salutation || '', wa: data.whatsapp || '', bd: data.birthMd || '', by: data.birthY || '' };
         resolvedAdminNameIds.add(d.id);
       });
       state.adminTeacherIds = list;
@@ -5685,7 +5685,7 @@
   function mergePendingStaff() {
     const team = state.team || {}; const names = {};
     const ids = (state.adminTeacherIds || []).filter((u) => !(state.adminNames[u] && state.adminNames[u].pending && !isPendingUid(u)));
-    Object.keys(team).forEach((code) => { if (!isPendingUid(code)) return; const t = team[code]; names[code] = { name: t.name ? titleCaseName(t.name) : 'New teacher', sal: t.salutation || '', wa: t.whatsapp || '', bd: t.birthMd || '', pending: true }; if (ids.indexOf(code) === -1) ids.push(code); });
+    Object.keys(team).forEach((code) => { if (!isPendingUid(code)) return; const t = team[code]; names[code] = { name: t.name ? titleCaseName(t.name) : 'New teacher', sal: t.salutation || '', wa: t.whatsapp || '', bd: t.birthMd || '', by: t.birthY || '', pending: true }; if (ids.indexOf(code) === -1) ids.push(code); });
     state.adminNames = Object.assign({}, state.adminNames, names); state.adminTeacherIds = ids;
   }
   function teamWings(uid) { return (state.team[uid] && Array.isArray(state.team[uid].wings)) ? state.team[uid].wings : []; }
@@ -5840,7 +5840,7 @@
   <input class="text-input" id="sidName" type="text" placeholder="Name" value="${escapeHtml(f.name || '')}" autocomplete="off">
   <div class="chips team-chips"><span class="team-lbl">Address</span><button type="button" class="chip${f.sal === 'sir' ? ' active' : ''}" data-sid-sal="sir">Sir</button><button type="button" class="chip${f.sal === 'maam' ? ' active' : ''}" data-sid-sal="maam">Ma'am</button><button type="button" class="chip${f.sal === 'name' ? ' active' : ''}" data-sid-sal="name">Name only</button></div>
   <input class="text-input" id="sidWa" type="tel" inputmode="numeric" placeholder="WhatsApp number (optional)" value="${escapeHtml(f.wa || '')}">
-  <div style="display:flex; gap:8px;"><select class="text-input" id="sidBdDay" aria-label="Birthday day"></select><select class="text-input" id="sidBdMon" aria-label="Birthday month"></select></div>
+  <div style="display:flex; gap:8px;"><select class="text-input" id="sidBdDay" aria-label="Birthday day"></select><select class="text-input" id="sidBdMon" aria-label="Birthday month"></select><select class="text-input" id="sidBdYear" aria-label="Birthday year"></select></div>
   <div class="team-lbl">Subjects (optional: fills Teacher Mapping where nobody is set yet)</div>
   <div class="chips">${subjectsList().map((sj) => `<button type="button" class="chip${(f.subjects || []).indexOf(sj) !== -1 ? ' active' : ''}" data-sid-subj="${escapeHtml(sj)}">${escapeHtml(sj)}</button>`).join('')}</div>
   <input class="text-input" id="sidNote" type="text" placeholder="For (optional), e.g. New Physics teacher" value="${escapeHtml(f.note || '')}">
@@ -5861,9 +5861,9 @@
         <span style="display:flex; gap:12px;"><button type="button" class="hv-back" data-sid-reshare="${escapeHtml(x.code)}" style="padding:0;">Share</button><button type="button" class="team-remove" data-sid-revoke="${escapeHtml(x.code)}">Cancel</button></span></div>`).join('');
     }
     el.innerHTML = html;
-    if (f && !state.lastStaffCode) { fillBdSelects('sidBdDay', 'sidBdMon'); setBd('sidBdDay', 'sidBdMon', f.bd || ''); }
+    if (f && !state.lastStaffCode) { fillBdSelects('sidBdDay', 'sidBdMon', 'sidBdYear'); setBd('sidBdDay', 'sidBdMon', f.bd || '', 'sidBdYear', f.by || ''); }
     const on = (id, fn) => { const b = document.getElementById(id); if (b) b.addEventListener('click', fn); };
-    on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1), name: '', sal: '', wa: '', bd: '', subjects: [] }; renderStaffIdsBlock(); });
+    on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1), name: '', sal: '', wa: '', bd: '', by: '', subjects: [] }; renderStaffIdsBlock(); });
     on('sidCancel', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidX', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidDone', () => { state.lastStaffCode = null; renderStaffIdsBlock(); });
@@ -5871,7 +5871,7 @@
     on('sidShare', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(state.lastStaffCode)), '_blank'));
     const bindIn = (id, key) => { const e2 = document.getElementById(id); if (e2) e2.addEventListener('input', () => { state.staffForm[key] = e2.value; }); };
     bindIn('sidName', 'name'); bindIn('sidWa', 'wa');
-    ['sidBdDay', 'sidBdMon'].forEach((id) => { const e3 = document.getElementById(id); if (e3) e3.addEventListener('change', () => { const r0 = readBd('sidBdDay', 'sidBdMon'); state.staffForm.bd = r0.md || ''; }); });
+    ['sidBdDay', 'sidBdMon', 'sidBdYear'].forEach((id) => { const e3 = document.getElementById(id); if (e3) e3.addEventListener('change', () => { const r0 = readBd('sidBdDay', 'sidBdMon', 'sidBdYear'); state.staffForm.bd = r0.md || ''; state.staffForm.by = r0.y || ''; }); });
     el.querySelectorAll('[data-sid-sal]').forEach((b) => b.addEventListener('click', () => { state.staffForm.sal = b.getAttribute('data-sid-sal'); renderStaffIdsBlock(); }));
     el.querySelectorAll('[data-sid-subj]').forEach((b) => b.addEventListener('click', () => { const sj = b.getAttribute('data-sid-subj'); const a2 = state.staffForm.subjects || (state.staffForm.subjects = []); const k2 = a2.indexOf(sj); if (k2 === -1) a2.push(sj); else a2.splice(k2, 1); renderStaffIdsBlock(); }));
     const noteEl = document.getElementById('sidNote');
@@ -5885,10 +5885,10 @@
     on('sidGenerate', async () => {
       const ff = state.staffForm;
       if (!ff.wings.length) { showToast('Choose a wing', 'error'); return; }
-      const nm = (ff.name || '').trim(); let wa = ''; let bd = '';
+      const nm = (ff.name || '').trim(); let wa = ''; let bd = ''; let by = '';
       if (nm) {
         wa = waTen(ff.wa); if ((ff.wa || '').trim() && !wa) { showToast('Enter a 10-digit mobile number, or leave it empty', 'error'); return; }
-        const b0 = readBd('sidBdDay', 'sidBdMon'); if (b0.err) { showToast(b0.err, 'error'); return; } bd = b0.md || '';
+        const b0 = readBd('sidBdDay', 'sidBdMon', 'sidBdYear'); if (b0.err) { showToast(b0.err, 'error'); return; } bd = b0.md || ''; by = b0.y || '';
       }
       try {
         const code = await newStaffCode();
@@ -5898,7 +5898,7 @@
           try {
             const batch = state.db.batch();
             batch.set(state.db.doc('staffIds/' + code), idDoc);
-            batch.set(state.db.doc('team/' + code), { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code, createdAt: Date.now() });
+            batch.set(state.db.doc('team/' + code), { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code, createdAt: Date.now() });
             await batch.commit(); saved = true;
           } catch (err0) {
             if (err0 && err0.code === 'permission-denied') { await state.db.doc('staffIds/' + code).set(idDoc); showToast("The Staff ID is made, but the database did not allow saving the teacher's details. Ask for the rule to be changed.", 'error'); }
@@ -5906,7 +5906,7 @@
           }
         } else await state.db.doc('staffIds/' + code).set(idDoc);
         if (saved) {
-          state.team = Object.assign({}, state.team, { [code]: { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code } });
+          state.team = Object.assign({}, state.team, { [code]: { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code } });
           try { mergePendingStaff(); syncTeacherData(); } catch (e) { /* ignore */ }
           // Teacher Mapping: only the subjects nobody is set for yet
           if ((ff.subjects || []).length) {
@@ -9462,7 +9462,7 @@ Rules:
       qa('[data-cal-edit]').forEach((b) => b.addEventListener('click', () => { const h = (state.holidays || []).find((x) => x.id === b.getAttribute('data-cal-edit')); if (!h) return; c.form = { id: h.id, type: h.type, name: h.name, from: h.from, to: h.to && h.to !== h.from ? h.to : '', note: h.note || '', pair: h.pair || '', tentative: !!h.tentative, evening: h.evening || '' }; c.mode = 'form'; calRender(); }));
       qa('[data-cal-wish]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-wish')); const n = x && calWa(x); if (n) window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(`Happy Birthday, ${bdName(x)}! 🎂🎉 Wishing you a wonderful year ahead. Team CATJEE`), '_blank'); }));
       qa('[data-cal-quick]').forEach((b) => b.addEventListener('click', () => calQuick(b.getAttribute('data-cal-quick'), c.sel)));
-      qa('[data-cal-bedit]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-bedit')); if (!x) return; c.bform = { id: x.id, uid: x.uid || '', name: x.name, sal: x.sal || '', date: (c.sel || todayStr()).slice(0, 4) + '-' + x.md, other: !x.uid }; c.mode = 'bform'; calRender(); }));
+      qa('[data-cal-bedit]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-bedit')); if (!x) return; c.bform = { id: x.id, uid: x.uid || '', name: x.name, sal: x.sal || '', date: (c.sel || todayStr()).slice(0, 4) + '-' + x.md, md: x.md, y: x.uid ? teacherBirthY(x.uid) : (x.y || ''), ownY: !!(x.uid && (state.adminNames[x.uid] || {}).by), other: !x.uid }; c.mode = 'bform'; calRender(); }));
       const ph = q('#calPhoto'), fi = q('#calFile'); if (ph) ph.addEventListener('click', () => { c.mode = 'ai'; c.ai = { step: 'pick' }; calRender(); });
     } else if (c.mode === 'bform') { calBindBform(body, c);
     } else if (c.mode === 'form') {
@@ -9514,14 +9514,14 @@ Rules:
   const bdName = (b) => salFull(b.name, b.sal) || 'a teacher';
   const bdShort = (b) => salutedName(b.name, b.sal) || b.name || 'a teacher';
   function calBdDateIn(m, b) { const y = Number(m.slice(0, 4)); const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; return b.md === '02-29' && !leap ? `${m}-28` : `${m}-${b.md.slice(3)}`; }
-  const calNewBd = (date) => ({ id: '', uid: '', name: '', sal: '', date: date || todayStr(), other: false });
+  const calNewBd = (date) => ({ id: '', uid: '', name: '', sal: '', date: date || todayStr(), md: (date || todayStr()).slice(5), y: '', ownY: false, other: false });
   function calBformHtml() {
     const f = state.cal.bform; const ids = dsTeacherIds().sort((a, b) => planNameOf(a).localeCompare(planNameOf(b)));
     return `<div id="calRoot"><div class="hv-d-title">${f.id ? 'Change' : 'Add'} birthday 🎂</div>
       <div class="chips" style="margin-top:10px;">${Object.keys(HOL_TYPES).map((k) => `<button type="button" class="chip" data-bf-type="${k}">${HOL_TYPES[k]}</button>`).join('')}<button type="button" class="chip active">Birthday 🎂</button></div>
       <div class="sv-tlbl">Teacher</div><select class="text-input" id="bfWho"><option value="">Choose…</option>${ids.map((u) => `<option value="${escapeHtml(u)}"${f.uid === u && !f.other ? ' selected' : ''}>${escapeHtml(planNameOf(u))}</option>`).join('')}<option value="__other"${f.other ? ' selected' : ''}>Someone else (type the name)</option></select>
       ${f.other ? `<div class="sv-tlbl">Name</div><input class="text-input" id="bfName" type="text" value="${escapeHtml(f.name)}" placeholder="e.g. Anil Sir">` : ''}
-      <div class="sv-tlbl">Day and month</div><input class="text-input" id="bfDate" type="date" value="${escapeHtml(f.date)}"><div class="hv-note" style="text-align:left;">Only the day and the month are kept. It comes back every year, and the wish shows on the teacher's Today page.</div>
+      <div class="sv-tlbl">Date of birth <span class="opt">(the year is optional)</span></div><div style="display:flex; gap:8px;"><select class="text-input" id="bfDay" aria-label="Day"></select><select class="text-input" id="bfMon" aria-label="Month"></select><select class="text-input" id="bfYear" aria-label="Year"></select></div><div class="hv-note" style="text-align:left;">The day and the month come back every year, and the wish shows on the teacher's Today page. The year is seen only by the Admin and the Coordinators.${f.ownY ? ' The teacher gave the year in their own Profile; they change it there.' : ''}</div>
       <button type="button" class="save-btn" id="bfSave" style="margin-top:12px;">Save</button>
       <button type="button" class="btn-secondary" id="bfCancel" style="border-color: var(--line); margin-top:8px; width:100%;">Cancel</button>
       ${f.id ? '<button type="button" class="btn-secondary" id="bfDelete" style="border-color: var(--line); margin-top:8px; width:100%; color:#B42318;">Delete</button>' : ''}</div>`;
@@ -9535,14 +9535,21 @@ Rules:
   function calBindBform(body, c) {
     calEnsureTeachers();
     const q = (sel) => body.querySelector(sel); const f = c.bform;
-    const keep = () => { if (q('#bfDate') && q('#bfDate').value) f.date = q('#bfDate').value; if (q('#bfName')) f.name = q('#bfName').value; };
+    fillBdSelects('bfDay', 'bfMon', 'bfYear'); setBd('bfDay', 'bfMon', f.md || f.date.slice(5), 'bfYear', f.y || ''); if (f.ownY && q('#bfYear')) q('#bfYear').disabled = true;
+    const keep = () => { const r = q('#bfDay') ? readBd('bfDay', 'bfMon', 'bfYear') : null; if (r && r.md) { f.md = r.md; if (!f.ownY) f.y = r.y; f.date = calBdDateIn(String(c.m || todayStr().slice(0, 7)).slice(0, 4) + '-' + r.md.slice(0, 2), { md: r.md }); } if (q('#bfName')) f.name = q('#bfName').value; };
     body.querySelectorAll('[data-bf-type]').forEach((b) => b.addEventListener('click', () => { keep(); c.form = { id: '', type: b.getAttribute('data-bf-type'), name: '', from: f.date, to: '', note: '', pair: '', tentative: false, evening: '' }; c.mode = 'form'; calRender(); }));
-    q('#bfWho').addEventListener('change', (e) => { keep(); const v = e.target.value; if (v === '__other') { f.other = true; f.uid = ''; f.name = ''; f.sal = ''; } else { f.other = false; f.uid = v; const a = state.adminNames[v] || {}; f.name = a.name || planNameOf(v); f.sal = a.sal || ''; } calRender(); });
+    q('#bfWho').addEventListener('change', (e) => { keep(); const v = e.target.value; if (v === '__other') { f.other = true; f.uid = ''; f.name = ''; f.sal = ''; f.y = ''; f.ownY = false; } else { f.other = false; f.uid = v; const a = state.adminNames[v] || {}; f.name = a.name || planNameOf(v); f.sal = a.sal || ''; f.y = teacherBirthY(v); f.ownY = !!a.by; if (a.bd) f.md = a.bd; } calRender(); });
     q('#bfCancel').addEventListener('click', () => { c.mode = 'cal'; calRender(); });
     q('#bfSave').addEventListener('click', async () => {
-      keep(); if (!String(f.name || '').trim()) { showToast('Choose the teacher', 'error'); return; } if (!f.date) { showToast('Choose the day and month', 'error'); return; }
-      const rec = { id: f.id || calId(), uid: f.other ? '' : f.uid, name: String(f.name).trim().slice(0, 60), sal: f.other ? '' : (f.sal || ''), md: f.date.slice(5) };
-      if (await calSaveBd((state.birthdays || []).filter((x) => x.id !== rec.id).concat(rec))) { showToast(f.id ? 'Birthday updated' : 'Birthday added'); c.mode = 'cal'; c.m = f.date.slice(0, 7); c.sel = f.date; calRender(); }
+      const r = readBd('bfDay', 'bfMon', 'bfYear'); if (r.err) { showToast(r.err, 'error'); return; }
+      keep(); if (!String(f.name || '').trim()) { showToast('Choose the teacher', 'error'); return; } if (!r.md) { showToast('Choose the day and month', 'error'); return; }
+      const rec = { id: f.id || calId(), uid: f.other ? '' : f.uid, name: String(f.name).trim().slice(0, 60), sal: f.other ? '' : (f.sal || ''), md: r.md };
+      if (f.other && r.y) rec.y = r.y; // someone who is not a teacher: the year stays with the entry
+      if (await calSaveBd((state.birthdays || []).filter((x) => x.id !== rec.id).concat(rec))) {
+        // a teacher: the year goes to his private team record, never into the calendar list everybody can read
+        if (!f.other && f.uid && !f.ownY) { try { await state.db.doc('team/' + f.uid).set({ birthY: r.y || '' }, { merge: true }); state.team = Object.assign({}, state.team, { [f.uid]: Object.assign({}, state.team[f.uid] || {}, { birthY: r.y || '' }) }); } catch (e) { showToast('The day and month are saved, but the year could not be saved.', 'error'); } }
+        showToast(f.id ? 'Birthday updated' : 'Birthday added'); c.mode = 'cal'; c.m = f.date.slice(0, 7); c.sel = f.date; calRender();
+      }
     });
     const del = q('#bfDelete'); if (del) del.addEventListener('click', async () => { if (!(await showConfirm(`Delete the birthday of ${bdName(f)}?`, 'Delete birthday?', 'Delete'))) return; if (await calSaveBd((state.birthdays || []).filter((x) => x.id !== f.id))) { showToast('Birthday deleted'); c.mode = 'cal'; calRender(); } });
   }
@@ -9793,29 +9800,41 @@ Rules:
   // 10 digits; +91, 91 and a leading 0 are accepted
   function waTen(v) { let d = String(v || '').replace(/\D/g, ''); if (d.length === 12 && d.slice(0, 2) === '91') d = d.slice(2); if (d.length === 11 && d[0] === '0') d = d.slice(1); return /^[6-9]\d{9}$/.test(d) ? d : ''; }
   const MON_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  function fillBdSelects(dayId, monId) {
-    const d = document.getElementById(dayId), m = document.getElementById(monId); if (!d || !m || d.options.length) return;
-    d.innerHTML = '<option value="">Day</option>' + Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
-    m.innerHTML = '<option value="">Month</option>' + MON_SHORT.map((x, i) => `<option value="${i + 1}">${x}</option>`).join('');
+  function fillBdSelects(dayId, monId, yearId) {
+    const d = document.getElementById(dayId), m = document.getElementById(monId); if (!d || !m) return;
+    if (!d.options.length) { d.innerHTML = '<option value="">Day</option>' + Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join(''); m.innerHTML = '<option value="">Month</option>' + MON_SHORT.map((x, i) => `<option value="${i + 1}">${x}</option>`).join(''); }
+    const y = yearId && document.getElementById(yearId);
+    if (y && !y.options.length) { const top = new Date().getFullYear() - 18; y.innerHTML = '<option value="">Year</option>' + Array.from({ length: top - 1939 }, (_, i) => `<option value="${top - i}">${top - i}</option>`).join(''); }
   }
-  function readBd(dayId, monId) {
+  function readBd(dayId, monId, yearId) {
     const d = Number(document.getElementById(dayId).value), m = Number(document.getElementById(monId).value);
-    if (!d && !m) return { md: '' }; if (!d || !m) return { md: '', err: 'Choose both the day and the month of your birthday, or leave both empty.' };
-    if (d > new Date(2024, m, 0).getDate()) return { md: '', err: 'That day does not exist in this month. Check your birthday.' };
-    return { md: String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0') };
+    const ye = yearId ? document.getElementById(yearId) : null; const yv = ye ? Number(ye.value) : 0;
+    if (!d && !m) return yv ? { md: '', y: '', err: 'Choose the day and the month as well, or leave the year empty.' } : { md: '', y: '' };
+    if (!d || !m) return { md: '', y: '', err: 'Choose both the day and the month of your birthday, or leave both empty.' };
+    if (d > new Date(2024, m, 0).getDate()) return { md: '', y: '', err: 'That day does not exist in this month. Check your birthday.' };
+    if (yv && d > new Date(yv, m, 0).getDate()) return { md: '', y: '', err: 'That day does not exist in this month of that year. Check the date of birth.' };
+    return { md: String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'), y: yv ? String(yv) : '' };
   }
-  function setBd(dayId, monId, md) { const d = document.getElementById(dayId), m = document.getElementById(monId); if (!d || !m) return; d.value = md ? String(Number(md.slice(3))) : ''; m.value = md ? String(Number(md.slice(0, 2))) : ''; }
+  function setBd(dayId, monId, md, yearId, y) {
+    const d = document.getElementById(dayId), m = document.getElementById(monId); if (!d || !m) return;
+    d.value = md ? String(Number(md.slice(3))) : ''; m.value = md ? String(Number(md.slice(0, 2))) : '';
+    const ye = yearId ? document.getElementById(yearId) : null; if (ye) ye.value = y ? String(y) : '';
+  }
+  // dd/mm/yyyy (without the year: dd/mm)
+  function fmtDob(md, y) { if (!md) return ''; return `${md.slice(3)}/${md.slice(0, 2)}${y ? '/' + y : ''}`; }
+  // the year of birth of a teacher: what he put in his Profile, else what the Admin noted on his team record. Only the Admin and the Coordinators ever read it.
+  function teacherBirthY(u) { const a = state.adminNames[u] || {}; const t = state.team[u] || {}; return a.by || t.birthY || ''; }
   function renderProfileContact() {
-    fillBdSelects('profileBdDay', 'profileBdMon'); const wa = document.getElementById('profileWaInput'); if (!wa || document.activeElement === wa) return;
-    wa.value = (state.user && state.user.whatsapp) || ''; setBd('profileBdDay', 'profileBdMon', (state.user && state.user.birthMd) || '');
+    fillBdSelects('profileBdDay', 'profileBdMon', 'profileBdYear'); const wa = document.getElementById('profileWaInput'); if (!wa || document.activeElement === wa) return;
+    wa.value = (state.user && state.user.whatsapp) || ''; setBd('profileBdDay', 'profileBdMon', (state.user && state.user.birthMd) || '', 'profileBdYear', (state.user && state.user.birthY) || '');
   }
   (function bindContact() {
-    fillBdSelects('authBdDay', 'authBdMon'); fillBdSelects('profileBdDay', 'profileBdMon');
+    fillBdSelects('authBdDay', 'authBdMon', 'authBdYear'); fillBdSelects('profileBdDay', 'profileBdMon', 'profileBdYear');
     const sv = document.getElementById('profileContactSave');
     if (sv) sv.addEventListener('click', async () => {
-      const raw = document.getElementById('profileWaInput').value.trim(); const wa = waTen(raw); const bd = readBd('profileBdDay', 'profileBdMon');
+      const raw = document.getElementById('profileWaInput').value.trim(); const wa = waTen(raw); const bd = readBd('profileBdDay', 'profileBdMon', 'profileBdYear');
       if (raw && !wa) { showToast('Enter a 10-digit mobile number, or leave it empty', 'error'); return; } if (bd.err) { showToast(bd.err, 'error'); return; }
-      try { await state.db.doc('profile/' + state.teacherId).set({ whatsapp: wa, birthMd: bd.md }, { merge: true }); if (state.user) { state.user.whatsapp = wa; state.user.birthMd = bd.md; } showToast('Saved'); renderHolidayCard(); if (state.canAdmin || state.isCoordinator) { try { loadAdminTeachers(true); } catch (e) { /* ignore */ } } } catch (err) { flashOffline(err); }
+      try { await state.db.doc('profile/' + state.teacherId).set({ whatsapp: wa, birthMd: bd.md, birthY: bd.y || '' }, { merge: true }); if (state.user) { state.user.whatsapp = wa; state.user.birthMd = bd.md; state.user.birthY = bd.y || ''; } showToast('Saved'); renderHolidayCard(); if (state.canAdmin || state.isCoordinator) { try { loadAdminTeachers(true); } catch (e) { /* ignore */ } } } catch (err) { flashOffline(err); }
     });
     const go = document.getElementById('contactGo'), later = document.getElementById('contactLater');
     if (later) later.addEventListener('click', () => { try { localStorage.setItem('ctd_contact_later', String(Date.now())); } catch (e) { /* ignore */ } renderContactCard(); });
@@ -9827,7 +9846,7 @@ Rules:
     const needWa = !(u && u.whatsapp), needBd = !(u && u.birthMd); const show = !!(u && state.teacherId) && (needWa || needBd) && !state.previewCoord && Date.now() - later > 7 * 86400e3 && u.whatsapp !== undefined;
     el.hidden = !show; if (!show) return;
     document.getElementById('contactCardTitle').textContent = needWa && needBd ? 'Add your birthday and WhatsApp number' : (needWa ? 'Add your WhatsApp number' : 'Add your birthday');
-    document.getElementById('contactCardSub').textContent = needWa ? 'Only the Admin and Coordinators see your number. Your birthday (day and month) shows in the CATJEE calendar.' : 'Your birthday (day and month) shows in the CATJEE calendar. The year is not kept.';
+    document.getElementById('contactCardSub').textContent = needWa ? 'Only the Admin and Coordinators see your number. Your birthday (day and month) shows in the CATJEE calendar.' : 'Your birthday (day and month) shows in the CATJEE calendar. The year is optional, and only the Admin and Coordinators see it.';
   }
   // Admin and Coordinator: what teachers gave in their Profile fills the Team list and the calendar (the Admin's app copies it)
   let syncBusy = false;
@@ -9899,6 +9918,7 @@ Rules:
     if (pend.birthMd && !list.some((b) => b.uid === uid)) list.push({ id: calId(), uid, name: pend.name || '', sal: pend.salutation || '', md: pend.birthMd, src: 'staff' });
     if (list.length !== list0.length || (pend.birthMd && !list0.some((b) => b.uid === uid))) await calSaveBd(list, true);
     if (pend.whatsapp) { const t2 = state.team[uid] || {}; if (!t2.phone) await state.db.doc('team/' + uid).set({ phone: pend.whatsapp }, { merge: true }); }
+    if (pend.birthY && !teacherBirthY(uid)) await state.db.doc('team/' + uid).set({ birthY: pend.birthY }, { merge: true });
     // 5) done
     await state.db.doc('team/' + code).set({ joinedUid: uid, pending: false, linkedAt: Date.now() }, { merge: true });
     state.team = Object.assign({}, state.team, { [code]: Object.assign({}, pend, { joinedUid: uid, pending: false }) });
@@ -9929,8 +9949,8 @@ Rules:
   const calWa = (b) => { if (!b.uid) return ''; const n = waNumber(b.uid); if (n) return n; const w = waTen((state.adminNames[b.uid] || {}).wa); return w ? '91' + w : ''; };
   function teamFilled(u) { const a = state.adminNames[u] || {}; const t = state.team[u] || {}; return !!(waNumber(u) || waTen(a.wa)) && !!(a.bd || (state.birthdays || []).some((b) => b.uid === u)); }
   function teamMetaText(u) {
-    const a = state.adminNames[u] || {}; const b = (state.birthdays || []).find((x) => x.uid === u); const md = a.bd || (b && b.md) || '';
-    return `${md ? '🎂 ' + Number(md.slice(3)) + ' ' + MON_SHORT[Number(md.slice(0, 2)) - 1] : 'No birthday'} · ${(waNumber(u) || waTen(a.wa)) ? 'WhatsApp ✓' : 'No WhatsApp'}`;
+    const a = state.adminNames[u] || {}; const b = (state.birthdays || []).find((x) => x.uid === u); const md = a.bd || (b && b.md) || ''; const by = teacherBirthY(u);
+    return `${md ? '🎂 ' + (by ? fmtDob(md, by) : Number(md.slice(3)) + ' ' + MON_SHORT[Number(md.slice(0, 2)) - 1]) : 'No birthday'} · ${(waNumber(u) || waTen(a.wa)) ? 'WhatsApp ✓' : 'No WhatsApp'}`;
   }
   async function teamRemind() {
     const lack = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u) && !teamFilled(u) && u !== state.teacherId); if (!lack.length) { showToast('Everyone has added their details'); return; }
@@ -17239,7 +17259,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         if (!looksLikeStaffId(code)) { showAuthError('Enter the Staff ID you received from the admin.'); btn.disabled = false; return; }
         if (!name) { showAuthError('Please enter your name.'); btn.disabled = false; return; }
         if (!authSalutation) { showAuthError('Choose how we should address you.'); btn.disabled = false; return; }
- const wa0 = waTen(document.getElementById('authWhatsapp').value); const bd0 = readBd('authBdDay', 'authBdMon');
+ const wa0 = waTen(document.getElementById('authWhatsapp').value); const bd0 = readBd('authBdDay', 'authBdMon', 'authBdYear');
  if (document.getElementById('authWhatsapp').value.trim() && !wa0) { showAuthError('Enter a 10-digit mobile number, or leave it empty.'); btn.disabled = false; return; }
  if (bd0.err) { showAuthError(bd0.err); btn.disabled = false; return; }
         const idSnap = await fs.doc('staffIds/' + code).get();
@@ -17260,7 +17280,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
             batch.set(fs.doc('team/' + uid), { staffId: code, role: idData.role || 'teacher', wings: idData.wings || [], status: 'active' });
             batch.set(fs.doc('staffLogin/' + code), { email: cred.user.email });
             await batch.commit();
-            await fs.doc('profile/' + uid).set({ name: name, subject: '', salutation: authSalutation, email: cred.user.email, whatsapp: wa0, birthMd: bd0.md }, { merge: true });
+            await fs.doc('profile/' + uid).set({ name: name, subject: '', salutation: authSalutation, email: cred.user.email, whatsapp: wa0, birthMd: bd0.md, birthY: bd0.y || '' }, { merge: true });
           } catch (claimErr) {
             try { await cred.user.delete(); } catch (e) { /* ignore */ }
             throw new Error('This Staff ID could not be used (it may have just been used by someone else). Please ask the admin.');
@@ -17355,7 +17375,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     unsubscribers.push(db.doc('profile/' + tid).onSnapshot((snap) => {
       const data = snap.data();
       state.teacherSubject = data && data.subject ? data.subject : '';
-      if (state.user) { state.user.salutation = (data && data.salutation) || ''; state.user.whatsapp = (data && data.whatsapp) || ''; state.user.birthMd = (data && data.birthMd) || ''; } renderSubject(); renderProfileSal(); try { renderProfileContact(); } catch (e) { /* ignore */ } renderHello(); }, (err) => flashOffline(err)));
+      if (state.user) { state.user.salutation = (data && data.salutation) || ''; state.user.whatsapp = (data && data.whatsapp) || ''; state.user.birthMd = (data && data.birthMd) || ''; state.user.birthY = (data && data.birthY) || ''; } renderSubject(); renderProfileSal(); try { renderProfileContact(); } catch (e) { /* ignore */ } renderHello(); }, (err) => flashOffline(err)));
 
     unsubscribers.push(db.doc('campusHistory/' + tid).collection('days').doc(today).onSnapshot((snap) => {
       const data = snap.data();
