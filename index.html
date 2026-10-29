@@ -2357,6 +2357,7 @@
   .ad-sess-r:first-of-type { border-top: 0; }
   .ad-sess-r .ad-tloc { display: block; margin-top: 2px; }
   .ad-d { color: var(--muted); }
+  .dsp-title { font-weight: 600; font-size: 14px; color: var(--ink); margin: 12px 2px 6px; }
 </style>
 </head>
 <body>
@@ -3573,7 +3574,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.86 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.87 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7658,25 +7659,30 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const g = tgGroup(); const d = sel.cells[0].split('|')[0];
     const ps = sel.cells.map((k) => Number(k.split('|')[1])); const per = periodsForDay(g.key, d);
     const bats = sel.cells.map((k) => k.split('|').slice(2).join('|')).filter((v, i, a) => a.indexOf(v) === i);
-    const f = { type: '', subject: '', name: '', start: per[Math.min(...ps)].start, end: per[Math.max(...ps)].end };
+    const f = { type: '', subject: '', name: '', diff: false, subs: {}, start: per[Math.min(...ps)].start, end: per[Math.max(...ps)].end };
     const body = document.getElementById('hvSheetBody');
     const draw = () => {
       body.innerHTML = `<div class="hv-d-title">Exam / Test</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · ${escapeHtml(bats.join(', '))}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Name to show (optional)</div><input class="text-input" id="exName" maxlength="40" placeholder="e.g. Half-Yearly Exam" value="${escapeHtml(f.name)}">
         <div class="sv-tlbl" style="margin:12px 0 6px;">Test Type</div><div class="chips">${testTypesList().map((t) => `<button type="button" class="chip${f.type === t ? ' active' : ''}" data-ext="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
-        <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div><div class="chips">${subjectsList().map((t) => `<button type="button" class="chip${f.subject === t ? ' active' : ''}" data-exs="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
+        ${(bats.length >= 2 && f.type !== 'Class Test') ? `<div class="sv-tlbl" style="margin:12px 0 6px;">Different subject for each class?</div><div class="xw-yn"><button type="button" class="xw-ynb${f.diff ? ' active' : ''}" data-exd="1">Yes</button><button type="button" class="xw-ynb${!f.diff ? ' active' : ''}" data-exd="0">No</button></div>` : ''}
+ ${(f.diff && bats.length >= 2 && f.type !== 'Class Test') ? bats.map((b) => `<div class="xw-prow"><span>${escapeHtml(gridBatchLabel(b))}</span><select class="text-input" data-exsub="${escapeHtml(b)}"><option value="">Subject</option>${subjectsList().map((t) => `<option value="${escapeHtml(t)}"${f.subs[b] === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div>`).join('') : `<div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div><div class="chips">${subjectsList().map((t) => `<button type="button" class="chip${f.subject === t ? ' active' : ''}" data-exs="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>`}
         <div class="sv-tlbl" style="margin:12px 0 6px;">Exam Time</div>
         <div class="sv-times"><div><div class="sv-tlbl">From</div><input class="text-input" type="time" id="exS" value="${escapeHtml(f.start)}"></div><div><div class="sv-tlbl">To</div><input class="text-input" type="time" id="exE" value="${escapeHtml(f.end)}"></div></div>
         <div class="hv-note" style="text-align:left; margin-top:8px;">${f.type === 'Class Test' ? 'A class test: the classes stay in the timetable and the teacher takes the class. It also goes to the Exams tab for rooms and invigilators. The class counts for a teacher only when he is on the duty list and logs the class.' : 'The exam takes the place of these classes (they come back if you remove the exam). It also appears in the Exams tab for rooms and invigilators.'}</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="exOk" style="margin:0;">Save</button></div>`;
       body.querySelectorAll('[data-ext]').forEach((x) => x.addEventListener('click', () => { f.type = f.type === x.getAttribute('data-ext') ? '' : x.getAttribute('data-ext'); keepTimes(); draw(); }));
       body.querySelectorAll('[data-exs]').forEach((x) => x.addEventListener('click', () => { f.subject = f.subject === x.getAttribute('data-exs') ? '' : x.getAttribute('data-exs'); keepTimes(); draw(); }));
-      document.getElementById('exCancel').addEventListener('click', closeHvSheet);
+      body.querySelectorAll('[data-exd]').forEach((x) => x.addEventListener('click', () => { keepTimes(); f.diff = x.getAttribute('data-exd') === '1'; draw(); }));
+ body.querySelectorAll('[data-exsub]').forEach((x) => x.addEventListener('change', () => { f.subs[x.getAttribute('data-exsub')] = x.value; }));
+ document.getElementById('exCancel').addEventListener('click', closeHvSheet);
       document.getElementById('exOk').addEventListener('click', async () => {
         keepTimes();
         if (!f.type && !f.name) { showToast('Choose the test type or type a name', 'error'); return; }
         if (!f.start || !f.end || hhmmToMin(f.end) <= hhmmToMin(f.start)) { showToast('Check the exam time', 'error'); return; }
     if (f.type === 'Class Test') { await ctFromSheet(sel, d, bats, f); return; }
+ const perClass = f.diff && bats.length >= 2;
+ if (perClass && bats.some((b) => !f.subs[b])) { showToast('Choose the subject of every class', 'error'); return; }
     const selKeys = sel.cells.slice();
         const others = (state.tg.doc.cells || []).filter((c) => c.d === d && !c.ex && bats.indexOf(c.b) !== -1 && selKeys.indexOf(cellKey(c)) === -1)
           .filter((c) => { const pp = periodsForDay(tgGroup().key, d)[c.p]; return pp && hhmmToMin(pp.start) < hhmmToMin(f.end) && hhmmToMin(f.start) < hhmmToMin(pp.end); })
@@ -7684,11 +7690,13 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
         if (others.length) { const ok = await showConfirm(`These classes are also during the exam time:\n${others.slice(0, 6).join('\n')}${others.length > 6 ? `\n+${others.length - 6} more` : ''}\n\nMark the exam anyway? (You can clear those cells after.)`, '⚠️ Classes during the exam', 'Mark exam'); if (!ok) return; }
         try {
           const ref = state.db.collection('exams').doc();
-          await waitForWrite(ref.set({ type: f.type || f.name, subject: f.subject, name: f.name, date: d, start: f.start, end: f.end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }));
+          const subjOf = (b) => ((perClass ? f.subs[b] : f.subject) || '');
+ const papers = perClass ? (() => { const m = {}; bats.forEach((b) => { (m[f.subs[b]] = m[f.subs[b]] || []).push(b); }); return Object.keys(m).map((sj) => ({ scope: m[sj], subject: sj })); })() : null;
+ await waitForWrite(ref.set(Object.assign({ type: f.type || f.name, subject: perClass ? paperSubjects(papers).join(' / ') : f.subject, name: f.name, date: d, start: f.start, end: f.end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }, (papers && papers.length > 1) ? { papers } : {})));
           tgRemember();
           const doc = state.tg.doc;
-          const label = f.name || `${f.type}${f.subject ? ' · ' + f.subject : ''}`;
-          sel.cells.forEach((k) => { const [dd, pp, ...rest] = k.split('|'); const bb = rest.join('|'); const old = (doc.cells || []).find((c) => c.d === dd && c.p === Number(pp) && c.b === bb && !c.ex); doc.cells = (doc.cells || []).filter((c) => !(c.d === dd && c.p === Number(pp) && c.b === bb)); const nc = { d: dd, p: Number(pp), b: bb, ex: ref.id, s: label, et: `${f.start}-${f.end}` }; if (old && old.s) nc.was = { s: old.s, t: old.t || '', test: !!old.test }; doc.cells.push(nc); });
+          const labelFor = (b) => f.name || `${f.type}${subjOf(b) ? ' · ' + subjOf(b) : ''}`; const label = labelFor(bats[0]);
+          sel.cells.forEach((k) => { const [dd, pp, ...rest] = k.split('|'); const bb = rest.join('|'); const old = (doc.cells || []).find((c) => c.d === dd && c.p === Number(pp) && c.b === bb && !c.ex); doc.cells = (doc.cells || []).filter((c) => !(c.d === dd && c.p === Number(pp) && c.b === bb)); const nc = { d: dd, p: Number(pp), b: bb, ex: ref.id, s: labelFor(bb), et: `${f.start}-${f.end}` }; if (old && old.s) nc.was = { s: old.s, t: old.t || '', test: !!old.test }; doc.cells.push(nc); });
           state.tg.sel = null; tgSave(); closeHvSheet(); renderTgGrid();
           showToast('Exam marked · add the duty plan in Exams');
         } catch (err) { flashOffline(err); }
@@ -11297,10 +11305,12 @@ Rules:
     let html = '';
     if (state.exSel) {
       const live = state.exSel.filter((id) => exams.some((e) => e.id === id)); state.exSel = live;
-      html += `<div class="ex-selbar"><span><b>${live.length}</b> selected · tap more exams</span><span><button type="button" class="btn-secondary" id="exSelAll" style="border-color: var(--line);">All</button><button type="button" class="btn-secondary hv-del" id="exSelDel" style="border-color: var(--line);"${live.length ? '' : ' disabled'}><span class="ico i-trash" aria-hidden="true"></span> Delete${live.length ? ' (' + live.length + ')' : ''}</button><button type="button" class="btn-secondary" id="exSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
+      html += `<div class="ex-selbar"><span><b>${live.length}</b> selected · tap more exams</span><span><button type="button" class="btn-secondary" id="exSelAll" style="border-color: var(--line);">All</button>${live.length >= 2 ? `<button type="button" class="btn-secondary" id="exSelCombine" style="border-color: var(--line);"${examCombineCheck(live, exams).ok ? '' : ' disabled'}>Combine</button>` : ''}<button type="button" class="btn-secondary hv-del" id="exSelDel" style="border-color: var(--line);"${live.length ? '' : ' disabled'}><span class="ico i-trash" aria-hidden="true"></span> Delete${live.length ? ' (' + live.length + ')' : ''}</button><button type="button" class="btn-secondary" id="exSelX" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>${live.length >= 2 && !examCombineCheck(live, exams).ok ? `<div class="hv-note ex-hint">${escapeHtml(examCombineCheck(live, exams).why)}</div>` : ''}`;
     } else if (examRows.length) {
       html += '<div class="hv-note ex-hint">Tap to open · press and hold to select several</div>';
-      const dl = dutyDayList(exams); if (dl.length) html += dutyPicCardHtml(dl);
+      const dl = dutyDayList(exams);
+ dl.forEach((e2) => { html += dutyPicCardHtml([e2], e2.id); });
+ if (dl.length > 1) html += state.exDayPic ? `${dutyPicCardHtml(dl)}<button type="button" class="btn-secondary" id="exDayPicHide" style="border-color: var(--line); margin-top:8px;">Hide the whole-day picture</button>` : '<button type="button" class="btn-secondary" id="exDayPicShow" style="border-color: var(--line); margin-top:8px;">One picture for the whole day</button>';
     }
     if (classRows.length) html += `<div class="ad-grp">Class Tests · ${ct.reduce((s2, c) => s2 + testCount(c), 0) || classRows.length}</div>` + classRows.join('');
     if (examRows.length) html += (classRows.length ? `<div class="ad-grp">Exams · ${examRows.length}</div>` : '') + examRows.join('');
@@ -11322,7 +11332,7 @@ Rules:
   const stableJson = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v).sort().reduce((a, x) => { a[x] = v[x]; return a; }, {}) : v));
   // the same exam gives the same signature whether it comes from the form or from the database
   function dutySig(list) { return stableJson(list.map((e) => [examTitle(e), scopeWithSubjects(e, false), e.start, e.end, e.ptype || 'sub', e.times || {}, planOf(e)])); }
-  function dutyImgId(date) { return 'duty~' + date + '~' + leadWings().map((w) => String(w).replace(/[^A-Za-z0-9]+/g, '')).join('_'); }
+  function dutyImgId(date, exId) { return 'duty~' + date + '~' + leadWings().map((w) => String(w).replace(/[^A-Za-z0-9]+/g, '')).join('_') + (exId ? '~' + exId : ''); }
   function buildDutyCanvas(list) {
     const date = list[0].date; const dd = dateObj(date);
     const nth = (n) => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
@@ -11392,46 +11402,48 @@ Rules:
     return { cv, invig, date };
   }
   // share the duty sheet picture (WhatsApp / save)
-  function dutySheetPicture(exams) {
-    const list = dutyDayList(exams);
-    if (!list.length) { showToast('Choose invigilators first', 'error'); return; }
-    const { cv, date } = buildDutyCanvas(list);
-    cv.toBlob(async (blob) => {
-      const name = `Invigilation-Duty-${date}.png`; const file = new File([blob], name, { type: 'image/png' });
+  function dutySheetPicture(exams) { return dutySheetPictureList(dutyDayList(exams), ''); }
+ function dutySheetPictureList(list, exId) {
+ if (!list.length) { showToast('Choose invigilators first', 'error'); return; }
+ const { cv, date } = buildDutyCanvas(list);
+ cv.toBlob(async (blob) => {
+ const name = `Invigilation-Duty-${date}${exId ? '-' + String(examTitle(list[0])).replace(/[^A-Za-z0-9]+/g, '-') : ''}.png`; const file = new File([blob], name, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Invigilation duty' }); return; } catch (err) { if (err && err.name === 'AbortError') return; } }
       openZoomViewer(cv.toDataURL('image/png'));
       saveFile(name, blob);
     }, 'image/png');
   }
   // the preview card on the Exams tab (above the list), with Publish / Update and Share
-  state.dutyPrev = state.dutyPrev || { sig: '', url: '' };
-  function dutyPicCardHtml(list) {
-    const sig = dutySig(list); const ck = sig + '|' + dutyNameKey(list);
-    if (state.dutyPrev.sig !== ck) { try { const { cv } = buildDutyCanvas(list); state.dutyPrev = { sig: ck, url: cv.toDataURL('image/jpeg', 0.92) }; } catch (e) { state.dutyPrev = { sig: ck, url: '' }; } }
-    const date = list[0].date; const id = dutyImgId(date);
+  state.dutyPrevMap = state.dutyPrevMap || {};
+  function dutyPicCardHtml(list, exId) {
+    const pk = exId || 'day'; const sig = dutySig(list); const ck = sig + '|' + dutyNameKey(list); const prev = state.dutyPrevMap[pk];
+    if (!prev || prev.sig !== ck) { let url = ''; try { const { cv } = buildDutyCanvas(list); url = cv.toDataURL('image/jpeg', 0.92); } catch (e) { url = ''; } state.dutyPrevMap[pk] = { sig: ck, url }; }
+    const date = list[0].date; const id = dutyImgId(date, exId);
     const pub = weekTtImages(mondayOf(date)).find((q) => q.id === id);
     const fresh = pub && pub.sig === sig;
     const st = !pub ? '<span class="dsp-badge wn">Not published yet</span><span class="dsp-note">Teachers cannot see it</span>'
       : (fresh ? `<span class="dsp-badge ok"><span class="ico i-check" aria-hidden="true"></span>Published</span><span class="dsp-note">In every teacher's Gallery · ${escapeHtml(formatTime(pub.publishedAt))}</span>`
         : '<span class="dsp-badge wn">Changed since publishing</span><span class="dsp-note">Update so teachers see the new duties</span>');
-    const pubBtn = !isLeadNow() || fresh ? '' : `<button type="button" class="save-btn dsp-pub" id="dspPublish" style="margin:0;">${pub ? 'Update' : 'Publish'}</button>`;
-    return `<div class="dsp-card" id="exDutyPic"><button type="button" class="dsp-img" id="dspView" aria-label="View the duty sheet">${state.dutyPrev.url ? `<img src="${state.dutyPrev.url}" alt="Duty sheet">` : ''}</button>
-      <div class="dsp-cap"><span class="ico i-cal" aria-hidden="true"></span>Duty sheet picture · tap to view</div>
-      <div class="dsp-st">${st}</div>
-      <div class="dsp-btns${pubBtn ? '' : ' one'}">${pubBtn}<button type="button" class="btn-secondary" id="dspShare" style="border-color: var(--line); margin:0;">Share picture</button></div></div>`;
+    const pubBtn = !isLeadNow() || fresh ? '' : `<button type="button" class="save-btn dsp-pub" style="margin:0;">${pub ? 'Update' : 'Publish'}</button>`;
+    const e0 = exId ? list[0] : null;
+    const head = e0 ? `<div class="dsp-title">${escapeHtml(examTitle(e0))} · ${escapeHtml(scopeWithSubjects(e0, true))} · ${escapeHtml(formatTimeStr(e0.start))} – ${escapeHtml(formatTimeStr(e0.end))}</div>` : '<div class="dsp-title">All exams of the day · one picture</div>';
+    return `${head}<div class="dsp-card" data-dsp="${exId ? escapeHtml(exId) : ''}"><button type="button" class="dsp-img dsp-view" aria-label="View the duty sheet">${state.dutyPrevMap[pk].url ? `<img src="${state.dutyPrevMap[pk].url}" alt="Duty sheet">` : ''}</button>
+ <div class="dsp-cap"><span class="ico i-cal" aria-hidden="true"></span>Duty sheet picture · tap to view</div>
+ <div class="dsp-st">${st}</div>
+ <div class="dsp-btns${pubBtn ? '' : ' one'}">${pubBtn}<button type="button" class="btn-secondary dsp-share" style="border-color: var(--line); margin:0;">Share picture</button></div></div>`;
   }
-  async function publishDutyList(list) {
+  async function publishDutyList(list, exId) {
     if (!list.length) return;
     if (dutyNameKey(list).split(',').indexOf('?') !== -1) { showToast('Teacher names are still loading · try again in a moment', 'error'); return; }
-    const btn = document.getElementById('dspPublish'); if (btn) btn.disabled = true;
+    const btn = document.querySelector(`.dsp-card[data-dsp="${exId || ''}"] .dsp-pub`); if (btn) btn.disabled = true;
     try {
       const { cv, invig, date } = buildDutyCanvas(list);
       const lw = leadWings();
       const wingT = noticeRecipients('all').filter((u) => !teamWings(u).length || teamWings(u).some((w) => lw.indexOf(w) !== -1));
       const teachers = wingT.concat(invig.filter((u) => wingT.indexOf(u) === -1));
-      const id = dutyImgId(date); const ws = mondayOf(date); const dd = dateObj(date);
+      const id = dutyImgId(date, exId); const ws = mondayOf(date); const dd = dateObj(date);
       const had = weekTtImages(ws).some((q) => q.id === id);
-      await state.db.collection('timetableImages').doc(id).set({ kind: 'duty', group: 'duty', label: `Exam duty sheet · ${WD[dd.getDay()]} ${dd.getDate()} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`, weekStart: ws, day: date, image: canvasToStored(cv), thumb: canvasToThumb(cv), publishedAt: Date.now(), teachers, updated: had, sig: dutySig(list) });
+      await state.db.collection('timetableImages').doc(id).set({ kind: 'duty', group: 'duty', label: `Exam duty sheet · ${exId ? examTitle(list[0]) + ' · ' : ''}${WD[dd.getDay()]} ${dd.getDate()} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`, weekStart: ws, day: date, image: canvasToStored(cv), thumb: canvasToThumb(cv), publishedAt: Date.now(), teachers, updated: had, sig: dutySig(list) });
       delete state.ttImgs[ws];
       showToast(had ? 'Duty sheet updated · teachers see the new one' : 'Duty sheet published · teachers can see it in the Gallery');
       renderAdmin();
@@ -11440,10 +11452,58 @@ Rules:
   async function publishDutySheet(exams) { return publishDutyList(dutyDayList(exams)); }
   // after "Save & Publish": the day's exams with the one just saved
   async function publishAfterSave(ex) {
-    const others = (state.adminExams || []).filter((e) => e.date === ex.date && e.id !== ex.id);
-    const list = dutyDayList(others.concat([ex])).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
-    if (!list.some((e) => e.id === ex.id)) { showToast('Saved · add a duty to publish the sheet', 'error'); return; }
-    await publishDutyList(list);
+    if (!dutyDayList([ex]).length) { showToast('Saved · add a duty to publish the sheet', 'error'); return; }
+    await publishDutyList([ex], ex.id);
+  }
+  // ---------- Combine exams: the same day and the same time become one exam, with one duty sheet ----------
+  function examCombineCheck(ids, exams) {
+    const sel = (ids || []).map((id) => exams.find((e) => e.id === id)).filter(Boolean);
+    if (sel.length < 2) return { ok: false, why: 'Select two or more exams to combine.' };
+    if (sel.some((e) => e.date !== sel[0].date)) return { ok: false, why: 'These exams are on different days.' };
+    if (sel.some((e) => e.start !== sel[0].start || e.end !== sel[0].end)) return { ok: false, why: `Different times: ${sel.map((e) => `${examTitle(e)} ${formatTimeStr(e.start)}`).join(' and ')}. Only exams at the same time can be combined.` };
+    if (sel.some((e) => e.ct)) return { ok: false, why: 'A class test cannot be combined.' };
+    if (sel.some((e) => (e.type || '') !== (sel[0].type || ''))) return { ok: false, why: 'The test types are different.' };
+    return { ok: true, why: '' };
+  }
+  function mergeExams(sel) {
+    const keep = sel[0]; const scope = [];
+    sel.forEach((e) => (e.scope || []).forEach((b) => { if (scope.indexOf(b) === -1) scope.push(b); }));
+    const papers = [];
+    sel.forEach((e) => examPapers(e).forEach((pp) => { const q = papers.find((x) => (x.subject || '') === (pp.subject || '')); if (q) (pp.scope || []).forEach((b) => { if (q.scope.indexOf(b) === -1) q.scope.push(b); }); else papers.push({ scope: (pp.scope || []).slice(), subject: pp.subject || '' }); }));
+    const rooms = [];
+    sel.forEach((e) => planOf(e).forEach((r) => {
+      const q = r.room ? rooms.find((x) => x.room === r.room) : null;
+      if (!q) { rooms.push(JSON.parse(JSON.stringify(r))); return; }
+      (r.scope || []).forEach((b) => { q.scope = q.scope || []; if (q.scope.indexOf(b) === -1) q.scope.push(b); });
+      (r.slots || []).forEach((sl) => { q.slots = q.slots || []; const m = q.slots.find((x) => x.start === sl.start && x.end === sl.end); if (m) (sl.teachers || []).forEach((t) => { m.teachers = m.teachers || []; if (m.teachers.indexOf(t) === -1) m.teachers.push(t); }); else q.slots.push(JSON.parse(JSON.stringify(sl))); });
+    }));
+    return Object.assign({}, keep, { scope, subject: paperSubjects(papers).join(' / ') || keep.subject || '', papers: papers.length > 1 ? papers : [], plan: { rooms }, invigilators: planTeachers(rooms), room: rooms.map((r) => r.room).filter(Boolean).join(', ') });
+  }
+  async function examCombine(ids, exams) {
+    const sel = ids.map((id) => exams.find((x) => x.id === id)).filter(Boolean).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    if (sel.length < 2) return; const keep = sel[0]; const gone = sel.slice(1); const goneIds = gone.map((g) => g.id); const merged = mergeExams(sel);
+    const ok = await showConfirm(`${examTitle(merged)}\n${scopeWithSubjects(merged, false)} · ${formatTimeStr(merged.start)} – ${formatTimeStr(merged.end)}\n\nThe rooms and invigilators of all ${sel.length} exams are kept together, and there is one duty sheet.`, `Combine ${sel.length} exams?`, 'Combine');
+    if (!ok) return;
+    try {
+      // a duty already logged for an exam that goes away would lose its link
+      for (const g of gone) { const q = await state.db.collection('classes').where('examId', '==', g.id).limit(1).get(); if (q && q.docs && q.docs.length) { showToast(`Duties are already logged for ${examTitle(g)}; these exams cannot be combined`, 'error'); return; } }
+      // the timetable: the cells of the other exams now point to the combined one
+      const tts = {}; sel.forEach((e) => { if (e.fromTimetable) tts[e.fromTimetable] = 1; });
+      const sw = (v) => { if (typeof v !== 'string') return v; let o = v; goneIds.forEach((g) => { o = o.split(g).join(keep.id); }); return o; };
+      for (const key of Object.keys(tts)) {
+        const snap = await state.db.collection('timetables').doc(key).get(); if (!snap.exists) continue; const doc = snap.data() || {}; let ch = false;
+        const cells = (doc.cells || []).map((c) => { if (c.ex && goneIds.indexOf(c.ex) !== -1) { ch = true; return Object.assign({}, c, { ex: keep.id }); } return c; });
+        if (!ch) continue;
+        const upd = Object.assign({}, doc, { cells });
+        if (doc.pubSnap) { const ps = JSON.parse(JSON.stringify(doc.pubSnap)); Object.keys(ps.cells || {}).forEach((k) => { ps.cells[k] = sw(ps.cells[k]); }); Object.keys(ps.full || {}).forEach((k) => { ps.full[k] = sw(ps.full[k]); }); upd.pubSnap = ps; }
+        await state.db.collection('timetables').doc(key).set(upd);
+      }
+      await state.db.collection('exams').doc(keep.id).set({ scope: merged.scope, subject: merged.subject, papers: merged.papers, plan: merged.plan, invigilators: merged.invigilators, room: merged.room }, { merge: true });
+      for (const g of gone) { await state.db.collection('exams').doc(g.id).delete(); try { await state.db.collection('timetableImages').doc(dutyImgId(g.date, g.id)).delete(); } catch (e) { /* no picture */ } }
+      Object.assign(keep, merged); state.adminExams = (state.adminExams || []).filter((e) => goneIds.indexOf(e.id) === -1);
+      state.exSel = null; state.dutyPrevMap = {}; try { ttCacheStale(); } catch (e) { /* ignore */ }
+      renderAdmin(); showToast(`${sel.length} exams combined into one`);
+    } catch (err) { flashOffline(err); }
   }
   function bindAdminExamList(listEl, exams, nameOf) {
     listEl.querySelectorAll('[data-exam]').forEach((row) => {
@@ -11493,9 +11553,15 @@ Rules:
     }));
     const on = (i, f) => { const el = document.getElementById(i); if (el) el.addEventListener('click', f); };
     on('exSelX', () => { state.exSel = null; renderAdmin(); });
-    on('dspShare', () => dutySheetPicture(exams));
-    on('dspView', () => { if (state.dutyPrev.url) openZoomViewer(state.dutyPrev.url); });
-    on('dspPublish', () => publishDutySheet(exams));
+    listEl.querySelectorAll('.dsp-card').forEach((card) => {
+ const id = card.getAttribute('data-dsp'); const list = id ? [exams.find((x) => x.id === id)].filter(Boolean) : dutyDayList(exams); const key = id || 'day';
+ const v = card.querySelector('.dsp-view'); if (v) v.addEventListener('click', () => { const pv = (state.dutyPrevMap || {})[key]; if (pv && pv.url) openZoomViewer(pv.url); });
+ const sh = card.querySelector('.dsp-share'); if (sh) sh.addEventListener('click', () => dutySheetPictureList(list, id));
+ const pb = card.querySelector('.dsp-pub'); if (pb) pb.addEventListener('click', () => publishDutyList(list, id));
+ });
+ on('exDayPicShow', () => { state.exDayPic = true; renderAdmin(); });
+ on('exDayPicHide', () => { state.exDayPic = false; renderAdmin(); });
+ on('exSelCombine', async () => { const list = (state.exSel || []).slice(); const chk = examCombineCheck(list, exams); if (!chk.ok) { showToast(chk.why, 'error'); return; } await examCombine(list, exams); });
     on('exSelAll', () => { state.exSel = exams.map((e) => e.id); renderAdmin(); });
     on('exSelDel', async () => {
       const list = (state.exSel || []).slice(); if (!list.length) return;
@@ -17759,7 +17825,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     pictures: { title: 'Pictures to share', sub: 'Timetable, batch-wise, duty sheet', icon: 'image', who: 'lead', steps: [
       { go: goAdmin('tt'), sel: '#tgViewImg', t: 'Timetable picture', x: 'Made when you publish. Tap to see it full screen.', ifMissing: 'The picture shows after the first publish.' },
       { go: goAdmin('tt'), sel: '#tgBatchPics', t: 'Batch-wise pictures', x: 'One picture per batch with its room — to send to each batch group.', ifMissing: 'Shows after the first publish.' },
-      { go: goAdmin('exams'), sel: '#exDutyPic', t: 'Duty sheet', x: 'After choosing invigilators, make the duty sheet picture in one tap.', ifMissing: 'Shows when a day has invigilators.' } ] },
+      { go: goAdmin('exams'), sel: '.dsp-card', t: 'Duty sheet', x: 'After choosing invigilators, make the duty sheet picture in one tap.', ifMissing: 'Shows when a day has invigilators.' } ] },
     exams: { title: 'Exams tab', sub: 'Rooms and invigilators', icon: 'file', who: 'lead', steps: [
       { go: goAdmin('exams'), sel: '#adminNewExamBtn', t: 'New exam', x: 'Add an exam here, or mark it in the timetable grid.' },
       { go: goAdmin('exams'), sel: '#adminExamList', t: 'Rooms, then invigilators', x: 'Tap an exam to see who is on duty in each room and how it went. Tap Change invigilators to pick names. Press and hold to select several exams.' } ] },
