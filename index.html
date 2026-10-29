@@ -98,7 +98,10 @@
     background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased;
   }
   .num { font-variant-numeric: tabular-nums; }
-  button { font-family: inherit; transition: transform .12s ease, opacity .12s ease; }
+   button { font-family: inherit; color: var(--ink); transition: transform .12s ease, opacity .12s ease; }
+  button:disabled { color: var(--muted); }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
   button:active { transform: scale(0.96); opacity: 0.82; }
   input { font-family: inherit; }
   #shell {
@@ -2358,6 +2361,11 @@
   .ad-sess-r .ad-tloc { display: block; margin-top: 2px; }
   .ad-d { color: var(--muted); }
   .dsp-title { font-weight: 600; font-size: 14px; color: var(--ink); margin: 12px 2px 6px; }
+  .xs-tf { flex: 1; min-width: 0; }
+  .xs-tw { position: relative; }
+  .xs-tw .text-input { width: 100%; padding-left: 46px !important; box-sizing: border-box; }
+  .xs-tw input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
+  .xs-tc { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--gold); display: flex; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -3574,7 +3582,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.87 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.88 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8425,11 +8433,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     ((state.dashTT && state.dashTT.docs) || []).forEach((doc) => (doc.cells || []).forEach((c) => {
       if (c.d !== date || c.ex || !c.sub) return;
       const tm = cellTimes(doc, c);
-      rows.push({ ts: tm ? tm.start : '', t: tm ? `${formatTimeStr(tm.start)} – ${formatTimeStr(tm.end)}` : '', cls: gridBatchLabel(c.b), subj: effS(c) || '', absent: ttName(c.sub.for), by: ttName(c.sub.t), room: batchRoomOn(c.b, date, doc) || '' });
+      rows.push({ ts: tm ? tm.start : '', t: tm ? `${formatTimeStr(tm.start)} – ${formatTimeStr(tm.end)}` : '', cls: gridBatchLabel(c.b), subj: effS(c) || '', absent: trepName(c.sub.for), by: trepName(c.sub.t), room: batchRoomOn(c.b, date, doc) || '' });
     }));
     if (!rows.length) { showToast('No substitutions on this day'); return; }
     rows.sort((a, b) => a.ts.localeCompare(b.ts) || a.cls.localeCompare(b.cls));
-    const cols = [['Time', 210], ['Class', 110], ['Subject', 150], ['Absent', 200], ['Taken by', 200], ['Room', 90]];
+    const cols = [['Time', 210], ['Class', 110], ['Subject', 150], ['Absent', 250], ['Taken by', 250], ['Room', 90]];
     const tw = cols.reduce((n, c) => n + c[1], 0); const W = tw + 40, rowH = 46, hdrH = 44, titleH = 56, H = 20 + titleH + hdrH + rows.length * rowH + 56;
     const SC = TT_IMG_SCALE; const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC; const x = cv.getContext('2d'); x.scale(SC, SC);
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.lineWidth = 1.5; x.strokeStyle = '#444'; x.textBaseline = 'middle'; x.textAlign = 'center';
@@ -8439,7 +8447,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     cols.forEach(([h, w]) => { box(cx, hy, w, hdrH, '#F8CBAD'); x.fillStyle = '#000'; x.font = 'bold 18px Arial, sans-serif'; x.fillText(h, cx + w / 2, hy + hdrH / 2); cx += w; });
     rows.forEach((r, i) => {
       const y = hy + hdrH + i * rowH; const vals = [r.t, r.cls, r.subj, r.absent, r.by, r.room]; cx = 20;
-      cols.forEach(([h, w], k) => { box(cx, y, w, rowH, i % 2 ? '#DDEBF7' : '#FFFFFF'); x.fillStyle = k === 3 ? '#C00000' : '#000'; x.font = (k === 4 ? 'bold ' : '') + '18px Arial, sans-serif'; x.fillText(String(vals[k]).slice(0, 26), cx + w / 2, y + rowH / 2); cx += w; });
+      cols.forEach(([h, w], k) => { box(cx, y, w, rowH, i % 2 ? '#DDEBF7' : '#FFFFFF'); x.fillStyle = k === 3 ? '#C00000' : '#000'; x.font = (k === 4 ? 'bold ' : '') + '18px Arial, sans-serif'; x.fillText(String(vals[k]).slice(0, 32), cx + w / 2, y + rowH / 2); cx += w; });
     });
     x.fillStyle = '#C00000'; x.font = '14px Arial, sans-serif'; x.textAlign = 'right';
     x.fillText(`Updated: ${new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`, W - 20, H - 24);
@@ -11707,10 +11715,10 @@ Rules:
   }
   const trepFmt = (v) => (v ? String(Math.round(v * 10) / 10) : '');
   // Mr. / Ms. before the name: from "Address me as" (Sir → Mr., Ma'am → Ms.); a title tapped in the report wins
-  function trepTitleOf(u) { const t = (state.staffTitles || {})[u]; if (t) return t; const sal = state.adminNames[u] && state.adminNames[u].sal; return sal === 'sir' ? 'Mr.' : sal === 'maam' ? 'Ms.' : ''; }
+  function trepTitleOf(u) { const t = (state.staffTitles || {})[u]; if (t) return t; const sal = state.adminNames[u] && state.adminNames[u].sal; return sal === 'maam' ? 'Ms.' : 'Mr.'; }
   function trepName(u) { const t = trepTitleOf(u); const n = ttName(u); return t ? `${t} ${n}` : n; }
   async function trepToggleTitle(u) {
-    const cur = trepTitleOf(u); const next = cur === '' ? 'Mr.' : cur === 'Mr.' ? 'Ms.' : '';
+    const cur = trepTitleOf(u); const next = cur === 'Mr.' ? 'Ms.' : 'Mr.';
     const map = Object.assign({}, state.staffTitles || {}); if (next) map[u] = next; else delete map[u];
     state.staffTitles = map; trepRender();
     try { await state.db.doc('settings/staffTitles').set({ map }); } catch (err) { flashOffline(err); }
@@ -11917,7 +11925,7 @@ Rules:
     return w.finishBlob();
   }
   function trepPer() { return state.trep.mode === 'month' ? 'Month' : state.trep.mode === 'day' ? 'Day' : state.trep.mode === 'custom' ? 'Period' : 'Week'; }
-  function trepTitleText() { const mo = state.trep.mode === 'month'; const dy = state.trep.mode === 'day'; const pre = dy ? 'Daily ' : mo ? 'Monthly ' : state.trep.mode === 'custom' ? '' : 'Weekly '; return (state.trep.sub === 'only' ? `${pre}Substitute Report` : `${pre}Teaching Report`) + ''; }
+  function trepTitleText() { const mo = state.trep.mode === 'month'; const dy = state.trep.mode === 'day'; const pre = dy ? 'Daily ' : mo ? 'Monthly ' : state.trep.mode === 'custom' ? '' : 'Weekly '; return (state.trep.sub === 'only' ? `${pre}Substitute Class Report` : `${pre}Teaching Report`) + ''; }
   function trepFilePrefix() { return (state.trep.sub === 'only' ? 'Substitute-Report' : 'Teaching-Report') + (state.trep.basis === 'tt' ? '-Timetable' : ''); }
   function trepFileTag() { const r = trepRange(); return state.trep.mode === 'month' ? r.from.slice(0, 7) : state.trep.mode === 'custom' ? `${r.from}_to_${r.to}` : r.from; }
   (function bindTeachingReport() {
@@ -11985,13 +11993,13 @@ Rules:
   // ----- the daily report: one for the Morning batches, one for the Evening batches -----
   state.subDay = state.subDay || { ses: 'morning', data: null, key: '', busy: false };
   const SUB_SES = { morning: 'Morning', evening: 'Evening' };
-  function subName(u) { const t = trepTitleOf(u); const n = ttName(u); return t === 'Mr.' ? `${n} Sir` : t === 'Ms.' ? `${n} Ma'am` : n; }
+  function subName(u) { return trepName(u); }
   const subTm = (v) => formatTimeStr(v).replace(/\s?AM$/i, ' am').replace(/\s?PM$/i, ' pm');
   function subDayDateText(d) { return repDayFull(d); }
   function subDayRows(ses) { const D = state.subDay.data; if (!D || D.error) return []; return D.rows.filter((x) => (ses === 'evening' ? x.ses === 'evening' : x.ses !== 'evening')); }
   function subDayText(ses) {
     const rows = subDayRows(ses); const d = state.adminDate || todayStr();
-    let t = `*${SUB_SES[ses]} Batches · Substitute Report*\n${subDayDateText(d)}\n`;
+    let t = `*${SUB_SES[ses]} Batches · Substitute Class Report*\n${subDayDateText(d)}\n`;
     if (!rows.length) return t + '\nNo substitute classes.';
     rows.forEach((x, i) => { t += `\n${i + 1}. ${subName(x.t)}${x.f ? `\n    in place of ${subName(x.f)}` : ''}\n    ${x.bs.map(subBatchLabel).join(' + ')} · ${subTm(x.ts)} – ${subTm(x.te)}\n`; });
     return t.trimEnd();
@@ -12004,7 +12012,7 @@ Rules:
     const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#000'; x.lineWidth = 1.5; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
     const tx = (s, cx, cy, size, bold, align, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(s).width > maxW && f > 10) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(s, cx, cy); };
     const w1 = 560; const w2 = 190; const w3 = W - w1 - w2;
-    box(0, 0, W, hT, '#fff'); tx(`${SUB_SES[ses]} Batches · Substitute Report`, W / 2, 40, 34, true); tx(subDayDateText(d), W / 2, 84, 28, true);
+    box(0, 0, W, hT, '#fff'); tx(`${SUB_SES[ses]} Batches · Substitute Class Report`, W / 2, 40, 34, true); tx(subDayDateText(d), W / 2, 84, 28, true);
     let y = hT; box(0, y, w1, hH, '#F2F2F2'); tx('Faculty Name', w1 / 2, y + hH / 2, 24, true); box(w1, y, w2, hH, '#F2F2F2'); tx('Class', w1 + w2 / 2, y + hH / 2, 24, true); box(w1 + w2, y, w3, hH, '#F2F2F2'); tx('Class Time', w1 + w2 + w3 / 2, y + hH / 2, 24, true); y += hH;
     if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No substitute classes', W / 2, y + hR / 2, 26, false); return cv; }
     rows.forEach((r) => {
@@ -12022,7 +12030,7 @@ Rules:
     if (sd.busy || !sd.data) { box.innerHTML = '<div class="skel short"></div>'; return; }
     if (sd.data.error) { box.innerHTML = '<div class="hv-note" style="text-align:left;">Could not make the report. Check the internet and try again.</div>'; return; }
     const rows = subDayRows(sd.ses);
-    let h = `<div class="sd-card"><div class="sd-h">${SUB_SES[sd.ses]} Batches · Substitute Report</div><div class="sd-sub">${escapeHtml(subDayDateText(d))} · ${rows.length} substitute class${rows.length === 1 ? '' : 'es'}</div>`;
+    let h = `<div class="sd-card"><div class="sd-h">${SUB_SES[sd.ses]} Batches · Substitute Class Report</div><div class="sd-sub">${escapeHtml(subDayDateText(d))} · ${rows.length} substitute class${rows.length === 1 ? '' : 'es'}</div>`;
     if (!rows.length) h += `<div class="sd-none">No substitute classes in the ${sd.ses} batches on this day.</div>`;
     else h += `<table class="sd-t"><thead><tr><th>Faculty Name</th><th>Class</th><th>Class Time</th></tr></thead><tbody>${rows.map((r) => `<tr><td><b>${escapeHtml(subName(r.t))}</b>${r.f ? `<br><span>in place of ${escapeHtml(subName(r.f))}</span>` : ''}</td><td>${escapeHtml(r.bs.map(subBatchLabel).join(' + '))}</td><td>${escapeHtml(subTm(r.ts))}<br>${escapeHtml(subTm(r.te))}</td></tr>`).join('')}</tbody></table>`;
     h += '<div class="hv-note" style="text-align:left;">Only substitutes. The time is the time of the period the class was taken in.</div></div>';
@@ -12039,7 +12047,7 @@ Rules:
   function subDayPdfBlob(ses) {
     const rows = subDayRows(ses); const d = state.adminDate || todayStr(); const w = createPdfWriter({ marginX: 48 });
     const w1 = 30; const w2 = 235; const w3 = 90; const w4 = 144; const full = w1 + w2 + w3 + w4; const GREY = [0.95, 0.95, 0.95]; const hh = 20; const rh = 32;
-    w.heading(`${SUB_SES[ses]} Batches - Substitute Report`, 15); w.bodyLine(subDayDateText(d), { size: 11, bold: true }); w.addSpace(6);
+    w.heading(`${SUB_SES[ses]} Batches - Substitute Class Report`, 15); w.bodyLine(subDayDateText(d), { size: 11, bold: true }); w.addSpace(6);
     const header = () => w.trow([{ x: 0, w: w1, t: 'S.N', bold: true, size: 9, fill: GREY }, { x: w1, w: w2, t: 'Faculty Name', bold: true, size: 9, fill: GREY }, { x: w1 + w2, w: w3, t: 'Class', bold: true, size: 9, fill: GREY }, { x: w1 + w2 + w3, w: w4, t: 'Class Time', bold: true, size: 9, fill: GREY }], hh);
     header();
     if (!rows.length) w.trow([{ x: 0, w: full, t: 'No substitute classes', size: 10 }], rh);
@@ -12065,7 +12073,7 @@ Rules:
       const cv = subDayCanvas(sd.ses);
       cv.toBlob((blob) => {
         const name = `Substitute-Report-${sd.ses}-${state.adminDate || todayStr()}.png`; const file = new File([blob], name, { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: `${SUB_SES[sd.ses]} Batches · Substitute Report` }).catch(() => saveFile(name, blob));
+        if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: `${SUB_SES[sd.ses]} Batches · Substitute Class Report` }).catch(() => saveFile(name, blob));
         else saveFile(name, blob);
       }, 'image/png');
     });
@@ -12373,7 +12381,8 @@ Rules:
 
   // ---------- the picker sheet (slot · person not in the app · copy) ----------
   function openXs(x) { state.xs = x; xsRender(); const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
-  const xsTin = (attr, v) => `<input class="text-input" type="time" ${attr} value="${escapeHtml(v || '')}">`;
+  const XS_CLOCK = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>';
+  const xsTin = (attr, v, lbl) => `<div class="xs-tf">${lbl ? `<div class="sv-tlbl">${lbl}</div>` : ''}<div class="xs-tw"><span class="xs-tc">${XS_CLOCK}</span><input class="text-input" type="time" ${attr} value="${escapeHtml(v || '')}"></div></div>`;
   const XS_SEARCH = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>';
   function xsRender() {
     const x = state.xs; const f = state.adminExamForm; const body = document.getElementById('hvSheetBody'); if (!x || !f || !body) return;
@@ -12414,7 +12423,7 @@ Rules:
       : `<div class="hv-d-title">Person not in the app</div><div class="hv-d-wing">${escapeHtml(r.room)} · non-teaching staff or a guest</div>
          <div class="xs-lbl">Name</div><input class="xs-name" type="text" maxlength="40" placeholder="e.g. C.B. Mishra Ji" data-xs-on value="${escapeHtml(x.name || '')}">`;
     const rows = x.slots.map((sl, i) => { const warn = isT ? xwSlotWarn(f, x.ri, x.u, sl) : (sl.start && sl.end && hhmmToMin(sl.end) <= hhmmToMin(sl.start) ? 'the end must be after the start' : '');
-      return `<div class="xs-sl"><div class="xs-slh"><span>Slot ${i + 1}</span>${x.slots.length > 1 ? `<button type="button" class="xs-link" data-xs-rms="${i}">Remove</button>` : ''}</div><div class="xs-two">${xsTin(`data-xs-ss="${i}"`, sl.start)}${xsTin(`data-xs-se="${i}"`, sl.end)}</div>${warn ? `<div class="xs-warn">⚠ ${escapeHtml(warn)}</div>` : ''}</div>`; }).join('');
+      return `<div class="xs-sl"><div class="xs-slh"><span>Slot ${i + 1}</span>${x.slots.length > 1 ? `<button type="button" class="xs-link" data-xs-rms="${i}">Remove</button>` : ''}</div><div class="xs-two">${xsTin(`data-xs-ss="${i}"`, sl.start, 'From')}${xsTin(`data-xs-se="${i}"`, sl.end, 'To')}</div>${warn ? `<div class="xs-warn">⚠ ${escapeHtml(warn)}</div>` : ''}</div>`; }).join('');
     return `${head}${rows}<button type="button" class="xs-addsl" id="xsAddSl">+ Add slot ${x.slots.length + 1}</button>
       <div class="xs-err" id="xsErr"></div>
       <div class="xs-foot"><button type="button" class="xw-b main" id="xsSave">Save</button>${x.existing ? `<button type="button" class="xs-link" id="xsRmP">Remove from ${escapeHtml(r.room)}</button>` : ''}</div>`;
