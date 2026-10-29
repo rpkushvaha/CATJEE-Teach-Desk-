@@ -2342,6 +2342,8 @@
   .rseg .chip.active { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(16,24,40,.12); }
   #repResHead:empty, #repResHeadC:empty, #repResHeadS:empty { display: none; }
   #repResHead, #repResHeadC, #repResHeadS { margin-top: 12px; }
+  .i-layers { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2212%202%202%207%2012%2012%2022%207%2012%202%22/%3E%3Cpolyline%20points%3D%222%2017%2012%2022%2022%2017%22/%3E%3Cpolyline%20points%3D%222%2012%2012%2017%2022%2012%22/%3E%3C/svg%3E"); }
+  .i-target { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20.5%2012.6A9%209%200%201%201%2011.4%203.5%22/%3E%3Cpath%20d%3D%22M16.6%2012.4A5%205%200%201%201%2011.6%207.4%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.4%22/%3E%3Cline%20x1%3D%2212%22%20y1%3D%2212%22%20x2%3D%2220%22%20y2%3D%224%22/%3E%3Cpolyline%20points%3D%2216.5%203.5%2020.5%203.5%2020.5%207.5%22/%3E%3C/svg%3E"); }
 </style>
 </head>
 <body>
@@ -3552,7 +3554,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.80 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.81 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4761,6 +4763,7 @@
     if (from > to) { const x = from; from = to; to = x; }
     return { start: from, end: to };
   }
+  function hvFullLabel() { const h = hvState(); const b = hvBounds(); if (h.range === 'day') return repDayFull(b.start); if (h.range === 'month') return repMonthFull(b.start); return repRangeFull(b.start, b.end); }
   function hvLabelText() {
     const h = hvState();
     const b = hvBounds();
@@ -5252,9 +5255,9 @@
       return { single: d };
     }
     const dates = datesBetween(b.start, b.end);
-    if (h.range === 'week') return { dates, title: 'Weekly Activity Report', period: `Week: ${hvLabelText()}`, fn: weeklyReportFilenameFor(b.start) };
-    if (h.range === 'month') return { dates, title: 'Monthly Activity Report', period: `Month: ${hvLabelText()}`, fn: `CATJEE-Monthly-Report-${b.start.slice(0, 7)}.pdf` };
-    return { dates, title: 'Activity Report', period: `Period: ${hvLabelText()}`, fn: `CATJEE-Report-${b.start}-to-${b.end}.pdf` };
+    if (h.range === 'week') return { dates, title: 'Weekly Activity Report', period: `Week: ${hvFullLabel()}`, fn: weeklyReportFilenameFor(b.start) };
+    if (h.range === 'month') return { dates, title: 'Monthly Activity Report', period: `Month: ${hvFullLabel()}`, fn: `CATJEE-Monthly-Report-${b.start.slice(0, 7)}.pdf` };
+    return { dates, title: 'Activity Report', period: `Period: ${hvFullLabel()}`, fn: `CATJEE-Report-${b.start}-to-${b.end}.pdf` };
   }
   state.hvRepKind = 'full';
   document.querySelectorAll('[data-hv-rt]').forEach((b) => b.addEventListener('click', () => {
@@ -5299,7 +5302,7 @@
   const selfDay = (d) => dateObj(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   function selfSubCounted(D) { return D.subList.filter((x) => x.status === 'filled').reduce((a, x) => a + x.units, 0); }
   function selfSubText(D, r) {
-    let t = `*My substitute classes*\n${state.user && state.user.name ? state.user.name + '\n' : ''}${r.mode === 'day' ? subDayDateText(r.from) : `${r.from} to ${r.to}`}\n`;
+    let t = `*My substitute classes*\n${state.user && state.user.name ? state.user.name + '\n' : ''}${r.mode === 'day' ? subDayDateText(r.from) : (r.mode === 'month' ? repMonthFull(r.from) : repRangeFull(r.from, r.to))}\n`;
     if (!D.subList.length) return t + '\nNo substitute classes in this period.';
     D.subList.forEach((x, i) => { t += `\n${i + 1}. ${selfDay(x.d)} · ${x.bs.map(subBatchLabel).join(' + ')} · ${subTm(m2t(x.a))} - ${subTm(m2t(x.z))}\n    in place of ${x.fn || '-'}${x.status === 'filled' ? ` · counted ${trepFmt(x.units)}` : x.status === 'upcoming' ? ' · still to come' : ' · not filled in'}\n`; });
     return `${t}\nCounted (filled in): ${trepFmt(selfSubCounted(D)) || '0'}`;
@@ -5313,7 +5316,7 @@
   }
   function selfSubPdfBlob(D, r) {
     const w = createPdfWriter({ marginX: 48 }); const ws = [24, 70, 62, 104, 150, 89]; const xs = []; ws.reduce((a, v, i) => { xs[i] = a; return a + v; }, 0); const GREY = [0.95, 0.95, 0.95]; const hh = 20; const rh = 22;
-    w.heading('My Substitute Classes', 15); w.bodyLine(`${state.user && state.user.name ? state.user.name : ''}   ${r.mode === 'day' ? subDayDateText(r.from) : `${r.from} to ${r.to}`}`, { size: 10.5, bold: true }); w.addSpace(6);
+    w.heading('My Substitute Classes', 15); w.bodyLine(`${state.user && state.user.name ? state.user.name : ''}   ${r.mode === 'day' ? subDayDateText(r.from) : (r.mode === 'month' ? repMonthFull(r.from) : repRangeFull(r.from, r.to))}`, { size: 10.5, bold: true }); w.addSpace(6);
     const header = () => w.trow(['S.N', 'Date', 'Class', 'Time', 'In place of', 'Counted'].map((t, i) => ({ x: xs[i], w: ws[i], t, bold: true, size: 9, fill: GREY })), hh);
     header();
     if (!D.subList.length) w.trow([{ x: 0, w: 499, t: 'No substitute classes in this period', size: 10 }], rh);
@@ -5340,7 +5343,7 @@
     const tx = (t, ax, ay, size, bold, color, align, maxW) => { x.fillStyle = color || '#111'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; while (maxW && x.measureText(t).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(t, ax, ay); };
     let y = 1;
     box(1, y, W - 2, hT, '#FFC000'); tx('My Substitute Classes', W / 2, y + hT / 2, 19, true, '#000', 'center'); y += hT;
-    box(1, y, W - 2, hT, '#E26B0A'); tx(`${(state.user && state.user.name) || ''}   ${r.mode === 'day' ? subDayDateText(r.from) : `${r.from} to ${r.to}`}`, W / 2, y + hT / 2, 16, true, '#000', 'center'); y += hT;
+    box(1, y, W - 2, hT, '#E26B0A'); tx(`${(state.user && state.user.name) || ''}   ${r.mode === 'day' ? subDayDateText(r.from) : (r.mode === 'month' ? repMonthFull(r.from) : repRangeFull(r.from, r.to))}`, W / 2, y + hT / 2, 16, true, '#000', 'center'); y += hT;
     const X = [1, 120, 240, 420, 640]; const Wc = [119, 120, 180, 220, W - 2 - 640];
     ['Date', 'Class', 'Time', 'In place of', 'Counted'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); }); y += 30;
     if (!rows.length) { box(1, y, W - 2, hR, '#fff'); tx('No substitute classes in this period', W / 2, y + hR / 2, 14, false, '#666', 'center'); y += hR; }
@@ -5397,14 +5400,14 @@
     if (state.hvRepKind !== 'att') { box.hidden = true; box.innerHTML = ''; return; }
     const sp = hvReportSpec(); const dates = sp.single ? [sp.single] : sp.dates;
     if (dates.length > 93) { box.hidden = false; box.innerHTML = '<div class="hv-note">Choose a range of up to 3 months.</div>'; return; }
-    showAttPreview('hvAttPrev', state.teacherId, dates, sp.period || (sp.single ? `Date: ${dayHeading(sp.single)}` : ''));
+    showAttPreview('hvAttPrev', state.teacherId, dates, sp.period || (sp.single ? `Date: ${repDayFull(sp.single)}` : ''));
   }
   window.__hvAttPreview = hvAttPreview;
   const hvAtt = (kind) => {
     const msg = document.getElementById('historyReportMsg'); const sp = hvReportSpec();
     const dates = sp.single ? [sp.single] : sp.dates;
     if (dates.length > 93) { msg.textContent = 'Choose a range of up to 3 months.'; return true; }
-    attendanceReport(state.teacherId, kind, msg, dates, sp.period || (sp.single ? `Date: ${dayHeading(sp.single)}` : ''));
+    attendanceReport(state.teacherId, kind, msg, dates, sp.period || (sp.single ? `Date: ${repDayFull(sp.single)}` : ''));
     return true;
   };
   document.getElementById('hvReportBtn').addEventListener('click', () => { if (hvSelfOn()) { hvSelfOut('pdf'); return; } if (state.hvRepKind === 'att') { hvAtt('pdf'); return; }
@@ -11495,10 +11498,9 @@ Rules:
     if (t.mode === 'month') { const d = dateObj(a); const from = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-01`; const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); return { from, to: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(last)}` }; }
     const ws = mondayOf(a); return { from: ws, to: shiftDateStr(ws, 6) };
   }
-  function trepTitle() { const r = trepRange(); const f = dateObj(r.from), z = dateObj(r.to); if (state.trep.mode === 'day') return subDayDateText(r.from); if (state.trep.mode === 'custom') return `${f.getDate()} ${f.toLocaleDateString('en-GB', { month: 'long' })} ${f.getFullYear()} - ${z.getDate()} ${z.toLocaleDateString('en-GB', { month: 'long' })} ${z.getFullYear()}`;
+  function trepTitle() { const r = trepRange(); const f = dateObj(r.from), z = dateObj(r.to); if (state.trep.mode === 'day') return subDayDateText(r.from); if (state.trep.mode === 'custom') return repRangeFull(r.from, r.to);
     if (state.trep.mode === 'month') return f.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-    const z2 = dateObj(shiftDateStr(r.to, -1));
-    return `${f.getDate()} ${f.toLocaleDateString('en-GB', { month: 'long' })} – ${pad(z2.getDate())} ${z2.toLocaleDateString('en-GB', { month: 'long' })} ${z.getFullYear()}`;
+    return repRangeFull(r.from, shiftDateStr(r.to, -1));
   }
   // columns: SCHOOL (morning, one per batch), REMEDIAL (special, one), COACHING (evening, one per batch), FOUNDATION (one per session)
   function trepCsvString(T) {
@@ -11673,7 +11675,7 @@ Rules:
         <div class="hv-note" style="text-align:left; margin-top:4px;">Classes whose time is over but the teacher hasn't filled them in. Tap a name to see which.</div></div>`;
     } else if (!T.only && (t.data.ttCount || 0) > 0 && t.data.basis !== 'tt') h += '<div class="trep-ok"><span class="ico i-check" aria-hidden="true"></span> Every class that has happened is filled in</div>';
     const upc = (t.data.upcoming || []).filter((x) => !T.only || x.sub).length;
-    if (upc) h += `<div class="hv-note" style="text-align:left;">Still to come in this ${state.trep.mode === 'month' ? 'month' : 'week'}: ${upc} class${upc === 1 ? '' : 'es'} (counted once they are taken and filled in)</div>`;
+    if (upc) h += `<div class="hv-note" style="text-align:left;">Still to come: ${upc} class${upc === 1 ? '' : 'es'} (counted once they are taken and filled in)</div>`;
     if (T.list.some((row) => !trepTitleOf(row.u))) h += '<div class="hv-note" style="text-align:left;">Mr. / Ms. comes from Sir / Ma\'am chosen by the teacher. For a name without it, tap the name to set Mr. or Ms.</div>';
     if (T.subOn) h += t.data.basis === 'tt' ? '<div class="hv-note" style="text-align:left;">In a cell and in TOTAL: regular <b style="color:#C1121F;">+ substitute</b> (red). Substitute classes are counted for the teacher who takes them.</div>' : '<div class="hv-note" style="text-align:left;">In a cell and in TOTAL: regular <b style="color:#C1121F;">+ substitute</b> (red). The substitute classes are the ones the teacher filled in, with the time filled in.</div>';
     if (T.only) h += t.data.basis === 'tt' ? '<div class="hv-note" style="text-align:left;">Only the substitute classes of the published timetable, for the teacher who takes them.</div>' : '<div class="hv-note" style="text-align:left;">Only the substitute classes the teacher filled in, with the time filled in. A substitute class that is not filled in yet is listed below.</div>';
@@ -11898,7 +11900,7 @@ Rules:
   const SUB_SES = { morning: 'Morning', evening: 'Evening' };
   function subName(u) { const t = trepTitleOf(u); const n = ttName(u); return t === 'Mr.' ? `${n} Sir` : t === 'Ms.' ? `${n} Ma'am` : n; }
   const subTm = (v) => formatTimeStr(v).replace(/\s?AM$/i, ' am').replace(/\s?PM$/i, ' pm');
-  function subDayDateText(d) { const o = dateObj(d); const n = o.getDate(); const sf = (n % 10 === 1 && n !== 11) ? 'st' : (n % 10 === 2 && n !== 12) ? 'nd' : (n % 10 === 3 && n !== 13) ? 'rd' : 'th'; return `${o.toLocaleDateString('en-GB', { weekday: 'long' })}, ${n}${sf} ${o.toLocaleDateString('en-GB', { month: 'long' })} ${o.getFullYear()}`; }
+  function subDayDateText(d) { return repDayFull(d); }
   function subDayRows(ses) { const D = state.subDay.data; if (!D || D.error) return []; return D.rows.filter((x) => (ses === 'evening' ? x.ses === 'evening' : x.ses !== 'evening')); }
   function subDayText(ses) {
     const rows = subDayRows(ses); const d = state.adminDate || todayStr();
@@ -14908,10 +14910,11 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       showActivities: !batch && (kind === 'all' || kind === 'other' || kind === 'leave')
     };
   }
-  function reportDayLabel(date) {
-    const d = dateObj(date);
-    return `${d.toLocaleDateString('en-GB', { weekday: 'long' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'long' })} ${d.getFullYear()}`;
-  }
+  // dates in reports are always written in full: "Monday 26 October 2026", "26 October to 1 November 2026", "October 2026"
+  function repDayFull(ds) { const d = dateObj(ds); return `${d.toLocaleDateString('en-GB', { weekday: 'long' })} ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'long' })} ${d.getFullYear()}`; }
+  function repRangeFull(fromDs, toDs) { const a = dateObj(fromDs), z = dateObj(toDs); const mo = (d) => d.toLocaleDateString('en-GB', { month: 'long' }); return a.getFullYear() === z.getFullYear() ? `${a.getDate()} ${mo(a)} to ${z.getDate()} ${mo(z)} ${z.getFullYear()}` : `${a.getDate()} ${mo(a)} ${a.getFullYear()} to ${z.getDate()} ${mo(z)} ${z.getFullYear()}`; }
+  function repMonthFull(ds) { return dateObj(ds).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); }
+  function reportDayLabel(date) { return repDayFull(date); }
   function reportHm(mins) { return mins ? fmtTeaching(Math.round(mins)) : '0m'; }
   function reportCampus(sec) { return reportHm(Math.round((sec || 0) / 60)); }
   // Unique records for a day (guards against the same record arriving twice).
@@ -15197,9 +15200,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     f = f || reportFilter(false);
     const recs = reportDayRecords(allForDate).filter(f.match);
     const SEP = '──────────';
-    const d = dateObj(date);
-    const dateTxt = `${d.toLocaleDateString('en-GB', { weekday: 'short' })}, ${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}`;
-    const head = ['*DAILY ACTIVITY REPORT*', '', `👤 *Faculty:* ${teacherName}`];
+    const dateTxt = repDayFull(date); const head = ['*DAILY ACTIVITY REPORT*', '', `👤 *Faculty:* ${teacherName}`];
     if (state.teacherSubject) head.push(`📘 *Subject:* ${state.teacherSubject}`);
     head.push(`🗓️ *Date:* ${dateTxt}`);
     if (f.label) head.push(`🔎 _${f.label}_`);
@@ -15236,7 +15237,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         if (i) L.push('');
         L.push(`*${i + 1}. ${entryBatchLabel(c)}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
         if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
-        if (c.chapter) { L.push(`📌 Chapter: ${waClean(c.chapter)}`); if (c.topic) L.push(`📝 Topic: ${waClean(c.topic)}`); } else if (c.topic) L.push(`📌 Chapter / Topic: ${waClean(c.topic)}`);
+        if (c.chapter) { L.push(`🗂️ Chapter: ${waClean(c.chapter)}`); if (c.topic) L.push(`🎯 Topic: ${waClean(c.topic)}`); } else if (c.topic) L.push(`📌 Chapter / Topic: ${waClean(c.topic)}`);
       const KEMO = { 'Revision': '🔁', 'Doubt clearing': '❓', 'Quiz': '☑️', 'Test copies shown': '📋', 'Question paper discussion': '💬', 'Something else': '🏷️' };
       classKindLines(c).forEach(([a, b]) => L.push(`${KEMO[a] || '•'} ${a}${b ? ': ' + waClean(b) : ''}`));
         if (c.worksheet) L.push(`📄 Worksheet Given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`);
@@ -15300,7 +15301,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
 
   async function downloadWeeklyReport(mondayStr, msgEl, useFilter) {
     const dates = datesBetween(mondayStr, shiftDateStr(mondayStr, 6));
-    return downloadRangeReport(dates, 'Weekly Activity Report', `Week: ${weekLabel(mondayStr)}`, 'Summary', weeklyReportFilenameFor(mondayStr), msgEl, useFilter);
+    return downloadRangeReport(dates, 'Weekly Activity Report', `Week: ${repRangeFull(mondayStr, shiftDateStr(mondayStr, 6))}`, 'Summary', weeklyReportFilenameFor(mondayStr), msgEl, useFilter);
   }
 
   // ---------- Reports page: one period, one teacher, one report type ----------
@@ -15312,12 +15313,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   const subDay = kind === 'sub' && range === 'day'; const showCount = kind === 'count' || (kind === 'sub' && range !== 'day');
     document.querySelectorAll('#adminReportRangeChips [data-report-range]').forEach((c) => { const r = c.getAttribute('data-report-range'); c.classList.toggle('active', r === range); c.disabled = false; });
     document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
-    const { label } = adminReportRangeDates();
+    const { label, full, dates: rdates } = adminReportRangeDates();
     const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label; syncRepBack();
     const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
     { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
-      const hh = `<div class="tsec-title">${escapeHtml(kn)} · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml(label)} · ${escapeHtml(wt)}</div>`;
+      const hh = `<div class="tsec-title">${escapeHtml(kn)} · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml((range === 'week' && (kind === 'count' || kind === 'sub') && rdates && rdates[0]) ? repRangeFull(rdates[0], shiftDateStr(rdates[0], 5)) : full)} · ${escapeHtml(wt)}</div>`;
       ['repResHead', 'repResHeadC', 'repResHeadS'].forEach((id) => { const e2 = document.getElementById(id); if (e2) e2.innerHTML = hh; }); }
     document.getElementById('repStd').hidden = showCount || subDay;
     const shareT = document.getElementById('repAttShare'); if (shareT) shareT.hidden = kind !== 'att';
@@ -15360,9 +15361,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (cur && sel.value !== cur) { const m = document.getElementById('adminReportMsg'); if (m) m.textContent = ''; }
   }
   function adminRepSpec() {
-    const { dates, label, fileTag } = adminReportRangeDates();
+    const { dates, label, fileTag, full } = adminReportRangeDates();
     const range = state.adminReportRange || 'day';
-    const period = range === 'day' ? `Date: ${label}` : (range === 'week' ? `Week: ${label}` : `Month: ${label}`);
+    const period = range === 'day' ? `Date: ${full}` : (range === 'week' ? `Week: ${full}` : `Month: ${full}`);
     return { dates, label, fileTag, range, period };
   }
   function repTeacherInfo(tid) {
@@ -15856,6 +15857,11 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   function adminReportRangeDates() {
+    const r = adminReportRangeDatesRaw(); const range = state.adminReportRange || 'day';
+    r.full = range === 'day' ? repDayFull(state.adminDate) : (range === 'week' ? repRangeFull(r.dates[0], r.dates[r.dates.length - 1]) : repMonthFull(state.adminDate));
+    return r;
+  }
+  function adminReportRangeDatesRaw() {
     const range = state.adminReportRange || 'day';
     if (range === 'day') return { dates: [state.adminDate], label: formatStepperDateLabel(state.adminDate), fileTag: state.adminDate };
     if (range === 'week') {
@@ -15919,7 +15925,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const w = createPdfWriter();
     w.heading(`INSTITUTE ${state.adminReportRange === 'month' ? 'MONTHLY' : 'WEEKLY'} ACTIVITY REPORT`, 16);
     w.addSpace(2);
-    w.bodyLine(`Period: ${reportDayLabel(dates[0])} to ${reportDayLabel(dates[dates.length - 1])}`, { bold: true, size: 11 });
+    w.bodyLine(`Period: ${state.adminReportRange === 'month' ? repMonthFull(dates[0]) : (dates.length === 1 ? repDayFull(dates[0]) : repRangeFull(dates[0], dates[dates.length - 1]))}`, { bold: true, size: 11 });
     if (state.adminReportWing !== 'all') w.bodyLine(`Wing: ${state.adminReportWing}`, { size: 11 });
     w.bodyLine(`Teachers: ${teacherIds.length}`, { size: 11 });
     w.addSpace(6);
@@ -16039,7 +16045,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const ic = (k) => { const x = CLASS_KINDS.find((q) => q.k === k); return `<span class="ico i-${x ? x.ic : 'note'}" aria-hidden="true"></span>`; };
     const ks = classKindsOf(c); const notes = (c && c.kindNotes) || {};
     const rows = [];
-    const chapTopic = () => { const o = []; if (c.chapter) { o.push(`<div>${ic('teach')}<span><b>Chapter:</b> ${escapeHtml(c.chapter)}</span></div>`); if (c.topic) o.push(`<div>${ic('teach')}<span><b>Topic:</b> ${escapeHtml(c.topic)}</span></div>`); } else if (c.topic) o.push(`<div>${ic('teach')}<span><b>Chapter / Topic:</b> ${escapeHtml(c.topic)}</span></div>`); return o; };
+    const chapTopic = () => { const o = []; if (c.chapter) { o.push(`<div><span class="ico i-layers" aria-hidden="true"></span><span><b>Chapter:</b> ${escapeHtml(c.chapter)}</span></div>`); if (c.topic) o.push(`<div><span class="ico i-target" aria-hidden="true"></span><span><b>Topic:</b> ${escapeHtml(c.topic)}</span></div>`); } else if (c.topic) o.push(`<div>${ic('teach')}<span><b>Chapter / Topic:</b> ${escapeHtml(c.topic)}</span></div>`); return o; };
     if (withTopic && ks.indexOf('teach') !== -1) { const r2 = chapTopic(); if (r2.length) r2.forEach((x) => rows.push(x)); else rows.push(`<div>${ic('teach')}<span class="faint">Chapter / Topic not added</span></div>`); } else if (withTopic && (c.topic || c.chapter)) chapTopic().forEach((x) => rows.push(x));
     CLASS_KINDS.filter((x) => x.k !== 'teach' && ks.indexOf(x.k) !== -1).forEach((x) => { const v = String(notes[x.k] || '').trim(); rows.push(`<div>${ic(x.k)}<span><b>${escapeHtml(x.out)}${v ? ':' : ''}</b>${v ? ' ' + escapeHtml(v) : ''}</span></div>`); });
     return rows.length ? `<div class="ck-lines">${rows.join('')}</div>` : '';
