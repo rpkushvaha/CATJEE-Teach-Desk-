@@ -2349,6 +2349,14 @@
   .ad-tloc .l-on { color: #15803D; }
   .ad-tloc .l-away { color: var(--gold); }
   .ad-tloc .l-unc { color: #B45309; }
+  .ad-k { font-weight: 600; color: var(--ink); }
+  .ad-tloc.l-away { color: var(--gold); font-weight: 600; }
+  .ad-sess { display: flex; flex-direction: column; gap: 2px; }
+  .ad-sess-h { font-weight: 600; font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+  .ad-sess-r { padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink); }
+  .ad-sess-r:first-of-type { border-top: 0; }
+  .ad-sess-r .ad-tloc { display: block; margin-top: 2px; }
+  .ad-d { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -3174,9 +3182,9 @@
  <div class="rep-lbl rep-lbl-s" style="margin-top:10px;">Campus radius (metres)</div>
  <div style="display:flex; gap:8px;">
  <input class="text-input" id="campusRadiusInput" type="number" inputmode="numeric" min="50" max="2000" step="10" placeholder="250" style="flex:1;">
- <button class="btn-secondary" id="saveRadiusBtn" style="border-color: var(--line); width:auto; padding-left:18px; padding-right:18px;">Save</button>
+ <button type="button" class="save-btn" id="saveRadiusBtn" style="width:auto; margin:0; padding:0 22px;">Save</button>
  </div>
- <div class="admin-sub" id="campusRadiusNote" style="margin:4px 0 6px;">A teacher within this distance is noted as "On campus". 50 to 2000 m. Default 250 m.</div>
+ <div class="admin-sub" id="campusRadiusNote" style="margin:4px 0 6px;">Now: 250 metres (starting value). You can set 50 to 2000 metres.</div>
         <button class="btn-secondary" id="setLocationBtn" style="border-color: var(--line);">Use My Current Location</button>
         <button class="action-btn" id="toggleManualLocBtn" style="margin-top:4px;">Enter coordinates manually</button>
         <div id="manualLocBox" style="display:none; flex-direction:column; gap:10px; margin-top:6px;">
@@ -3565,7 +3573,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.85 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.86 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5656,8 +5664,8 @@
     const c = state.adminCampus[tid];
     const onLeave = (dayEntries || []).some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday');
     const secs = c ? (c.totalSeconds || 0) + (c.checkedIn && c.checkInAt ? (Date.now() - c.checkInAt) / 1000 : 0) : 0;
-    if (c && c.checkedIn && state.adminDate === todayStr()) return { key: 'oncampus', label: 'On campus', secs };
-    if (secs > 0) return { key: 'present', label: 'Present', secs };
+    if (c && c.checkedIn && state.adminDate === todayStr()) return { key: 'oncampus', label: 'Checked in', secs };
+    if (secs > 0) return { key: 'present', label: 'Checked out', secs };
     if (onLeave) return { key: 'leave', label: 'On leave', secs };
     if ((dayEntries || []).some((x) => x.entryType !== 'activity')) return { key: 'nocheck', label: 'No check-in', secs };
     if (isWeeklyOff(state.adminDate) && !(dayEntries || []).length) return { key: 'off', label: 'Weekly off', secs };
@@ -9629,7 +9637,7 @@ Rules:
   }
   (function bindBday() { const el = document.getElementById('bdayCard'); if (el) el.addEventListener('click', (e) => { if (e.target.closest('[data-bd-replay]')) { e.stopPropagation(); bdPlay(); return; } const w = e.target.closest('[data-bd-wish]'); if (w) { e.stopPropagation(); bdWish(w.getAttribute('data-bd-wish'), w.getAttribute('data-bd-name')); return; } const b = e.target.closest('[data-cal-open]'); if (b) calOpen(b.getAttribute('data-cal-open')); }); })();
   // ---------- Save buttons are grey until something is edited, red once it is ----------
-  const SD_IDS = ['saveClassBtn', 'menuNameSaveBtn', 'subjectSaveBtn', 'profileContactSave', 'dnSave', 'pdSave', 'peSave', 'nbSave', 'ntOk', 'exOk', 'asSave', 'apsSave', 'dtSave', 'plSave', 'cfSave', 'bfSave'];
+  const SD_IDS = ['saveClassBtn', 'menuNameSaveBtn', 'subjectSaveBtn', 'profileContactSave', 'dnSave', 'pdSave', 'peSave', 'nbSave', 'saveRadiusBtn', 'ntOk', 'exOk', 'asSave', 'apsSave', 'dtSave', 'plSave', 'cfSave', 'bfSave'];
   const SD_SEL = SD_IDS.map((i) => '#' + i).join(',');
   const SD_NOEDIT = '.hv-d-btns, .sv-form-btns, .back-btn, .hv-back, .btn-secondary, [data-sd-skip]';
   const sd = { base: new WeakMap(), dirty: new WeakMap(), last: null, clicked: null, clickedAt: 0 };
@@ -10770,8 +10778,7 @@ Rules:
           r.cls.forEach((c) => { const b = c.batch || 'Unknown'; counts[b] = (counts[b] || 0) + classUnits(c); });
           const lines = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map((b) => `<div style="display:flex; justify-content:space-between;"><span>${escapeHtml(b)}</span><span style="font-weight:600;">${fmtUnits(counts[b])}</span></div>`).join('');
           detail = `<div class="ad-detail">
-            ${r.st.secs > 0 ? `<div class="hv-note" style="text-align:left;">On campus: ${fmtTeaching(Math.round(r.st.secs / 60))}</div>` : ''}
-            ${campus && (campus.sessions || []).some(sessEdited) ? `<div class="hv-note" style="text-align:left; color: var(--gold);">${(campus.sessions || []).filter(sessEdited).map((s2) => `Check-in ${escapeHtml(formatTimeStr(toHHMM(s2.in)))}${escapeHtml(sessEditMark(s2, 'in'))} · Check-out ${s2.out != null ? escapeHtml(formatTimeStr(toHHMM(s2.out))) + escapeHtml(sessEditMark(s2, 'out')) : 'in progress'}`).join('<br>')}</div>` : ''}
+            ${sessListHtml(campus)}
             ${lines ? `<div class="class-checklist-notes" style="display:flex; flex-direction:column; gap:3px;"><div style="font-weight:600;">Batch-wise</div>${lines}</div>` : ''}
             ${r.entries.length ? entryListHtml(r.entries, true) : '<div class="hv-note" style="text-align:left;">No classes or activities logged.</div>'}
             ${stuckCheckedIn ? `<button class="action-btn" data-force-checkout="${r.tid}" style="color:#B91C1C; border-color:#B91C1C; align-self:flex-start;">Force check-out</button>` : ''}
@@ -10781,7 +10788,8 @@ Rules:
         return `<div class="ad-trow st-${r.st.key}${expanded ? ' open' : ''}" data-teacher-id="${r.tid}" role="button" tabindex="0">
           <div class="ad-tmain">
             <span class="ad-tname">${escapeHtml(nameOf(r.tid))}${campus && (campus.sessions || []).some(sessEdited) ? ' <span class="mchip warn" style="font-size:12px; padding:1px 7px;">edited</span>' : ''}</span>
-            <span class="ad-tsub">${fmtUnits(r.cls.reduce((sum, c) => sum + classUnits(c), 0))} class${r.cls.length === 1 && classUnits(r.cls[0]) === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${invMin ? ` · ${svDur(invMin)} invigilation` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
+            <span class="ad-tsub"><b class="ad-k">Classes:</b> ${fmtUnits(r.cls.reduce((sum, c) => sum + classUnits(c), 0))} · <b class="ad-k">Teaching:</b> ${durLong(r.mins)}${other ? ` · <b class="ad-k">Other work:</b> ${other}` : ''}${invMin ? ` · <b class="ad-k">Invigilation:</b> ${durLong(invMin)}` : ''}</span>
+ ${campusLine(r, campus)}
  ${locNote(campus)}
  </div>
  <span class="ad-pill ${r.st.key}">${r.st.label}</span>
@@ -12860,6 +12868,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
 
   function renderCampusLocationText() {
     const ri = document.getElementById('campusRadiusInput'); if (ri && document.activeElement !== ri) ri.value = state.campusRadius || CAMPUS_RADIUS_M;
+    const rn = document.getElementById('campusRadiusNote'); if (rn) rn.textContent = `Now: ${state.campusRadius || CAMPUS_RADIUS_M} metres${state.campusRadiusSet ? '' : ' (starting value)'}. You can set 50 to 2000 metres.`;
     const el = document.getElementById('campusLocText');
     if (state.campusLocation) {
       el.textContent = `Set (${state.campusLocation.lat.toFixed(5)}, ${state.campusLocation.lng.toFixed(5)})`;
@@ -16042,13 +16051,48 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       state.db.doc('campusLogs/' + date).collection('teachers').doc(state.teacherId).set({ loc: arr }, { merge: true }).catch(() => { /* a note for the Admin: never bothers the teacher */ });
     } catch (e) { /* ignore */ }
   }
-  // the Admin's one-line note in Teacher Activity
+  // words and numbers for the Admin's campus notes (minutes are "min", distances are "metres" or "km")
+  function durLong(mins) { mins = Math.max(0, Math.round(mins || 0)); const h = Math.floor(mins / 60), m = mins % 60; return h ? (m ? `${h} h ${m} min` : `${h} h`) : `${m} min`; }
+  function locPart(e) {
+    const w = e.s === 'on' ? ['Inside campus', 'l-on'] : (e.s === 'away' ? ['Outside campus', 'l-away'] : ['Not sure', 'l-unc']);
+    const dd = typeof e.d === 'number' ? (e.d < 1000 ? `${e.d} metres` : `${(e.d / 1000).toFixed(1)} km`) : '';
+    return `<b class="${w[1]}">${w[0]}</b>${dd ? ' · ' + dd : ''}`;
+  }
+  // the Admin's notes in a Teacher Activity row: the latest check-in (and check-out), and a warning if some check-ins were outside campus
   function locNote(c) {
     const arr = (c && Array.isArray(c.loc)) ? c.loc : []; if (!arr.length) return '';
-    const last = (k) => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i] && arr[i].k === k) return arr[i]; return null; };
-    const one = (lbl, e) => { if (!e) return ''; const cls = e.s === 'on' ? 'l-on' : (e.s === 'away' ? 'l-away' : 'l-unc'); const txt = e.s === 'on' ? 'On campus' : (e.s === 'away' ? 'Away' : 'Not clear'); const dist = typeof e.d === 'number' ? (e.d < 1000 ? ` · ${e.d} m` : ` · ${(e.d / 1000).toFixed(1)} km`) : ''; return `${lbl}: <b class="${cls}">${txt}</b>${dist}`; };
-    const parts = [one('In', last('in')), one('Out', last('out'))].filter(Boolean);
-    return parts.length ? `<span class="ad-tloc">📍 ${parts.join(' · ')}</span>` : '';
+    const ins = arr.filter((e) => e && e.k === 'in'), outs = arr.filter((e) => e && e.k === 'out');
+    const multi = ((c.sessions || []).length > 1) || ins.length > 1;
+    const lastIn = ins[ins.length - 1], lastOut = outs[outs.length - 1];
+    let html = '';
+    if (lastIn) html += `<span class="ad-tloc">📍 <b class="ad-k">${multi ? 'Latest check-in' : 'Check-in'}:</b> ${locPart(lastIn)}</span>`;
+    if (lastOut && (!lastIn || lastOut.at >= lastIn.at)) html += `<span class="ad-tloc">📍 <b class="ad-k">${multi ? 'Latest check-out' : 'Check-out'}:</b> ${locPart(lastOut)}</span>`;
+    if (multi) {
+      const ai = ins.filter((e) => e.s === 'away').length, ao = outs.filter((e) => e.s === 'away').length; const w = [];
+      if (ai) w.push(`${ai} check-in${ai === 1 ? ' was' : 's were'} outside campus`);
+      if (ao) w.push(`${ao} check-out${ao === 1 ? ' was' : 's were'} outside campus`);
+      if (w.length) html += `<span class="ad-tloc l-away">⚠ ${w.join(' · ')}</span>`;
+    }
+    return html;
+  }
+  // total time on campus and how many check-ins
+  function campusLine(r, c) {
+    const n = ((c && c.sessions) || []).length; if (!n && !(r.st.secs > 0)) return '';
+    return `<span class="ad-tsub"><b class="ad-k">On campus:</b> ${durLong(Math.round((r.st.secs || 0) / 60))} · ${n} check-in${n === 1 ? '' : 's'}</span>`;
+  }
+  // every check-in of the day, with the place of each check-in and check-out (shown when the row is opened)
+  function sessListHtml(c) {
+    const ss = (c && c.sessions) || []; if (!ss.length) return '';
+    const loc = Array.isArray(c.loc) ? c.loc : [];
+    const near = (k, ts) => { let best = null; let bd = 10 * 60 * 1000; if (ts == null) return null; loc.forEach((e) => { if (e && e.k === k) { const dd = Math.abs(e.at - ts); if (dd <= bd) { bd = dd; best = e; } } }); return best; };
+    const rows = ss.map((s2, i) => {
+      const tin = formatTimeStr(toHHMM(s2.in)); const tout = s2.out != null ? formatTimeStr(toHHMM(s2.out)) : 'now';
+      const mins = Math.max(0, Math.round(((s2.out != null ? s2.out : Date.now()) - s2.in) / 60000));
+      const a = near('in', s2.in), b2 = s2.out != null ? near('out', s2.out) : null;
+      const lp = [a ? `<b class="ad-k">In:</b> ${locPart(a)}` : '', b2 ? `<b class="ad-k">Out:</b> ${locPart(b2)}` : ''].filter(Boolean).join(' · ');
+      return `<div class="ad-sess-r"><div><b class="ad-k">${i + 1}.</b> ${escapeHtml(tin)}${escapeHtml(sessEditMark(s2, 'in'))} → ${escapeHtml(tout)}${s2.out != null ? escapeHtml(sessEditMark(s2, 'out')) : ''} <span class="ad-d">· ${durLong(mins)}</span></div>${lp ? `<div class="ad-tloc">📍 ${lp}</div>` : ''}</div>`;
+    }).join('');
+    return `<div class="ad-sess"><div class="ad-sess-h">${ss.length === 1 ? 'Check-in today' : 'Check-ins today'}</div>${rows}</div>`;
   }
 
   // ----- "What happened in class?" -----
@@ -16999,7 +17043,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   document.getElementById('saveRadiusBtn').addEventListener('click', async () => {
     const ri = document.getElementById('campusRadiusInput'); const note = document.getElementById('campusRadiusNote'); const v = Math.round(Number(ri.value));
     if (!(v >= 50 && v <= 2000)) { note.textContent = 'Enter a radius between 50 and 2000 metres.'; return; }
-    state.campusRadius = v; note.textContent = 'A teacher within this distance is noted as "On campus". 50 to 2000 m. Default 250 m.';
+    state.campusRadius = v; state.campusRadiusSet = true; renderCampusLocationText();
     if (!state.db) { flashOffline({ code: 'not-connected' }); return; }
     try { await state.db.doc('settings/campusLocation').set({ radius: v }, { merge: true }); showToast(`Campus radius saved: ${v} m`); } catch (err) { flashOffline(err); }
   });
@@ -17540,7 +17584,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     unsubscribers.push(db.doc('settings/campusLocation').onSnapshot((snap) => {
       const data = snap.data();
       state.campusLocation = data && typeof data.lat === 'number' ? { lat: data.lat, lng: data.lng } : null;
-      state.campusRadius = data && Number(data.radius) >= 50 && Number(data.radius) <= 2000 ? Math.round(Number(data.radius)) : CAMPUS_RADIUS_M;
+      state.campusRadiusSet = !!(data && Number(data.radius) >= 50 && Number(data.radius) <= 2000);
+      state.campusRadius = state.campusRadiusSet ? Math.round(Number(data.radius)) : CAMPUS_RADIUS_M;
       renderCampusLocationText();
     }, () => {}));
 
