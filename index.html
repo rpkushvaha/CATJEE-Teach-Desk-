@@ -2344,6 +2344,11 @@
   #repResHead, #repResHeadC, #repResHeadS { margin-top: 12px; }
   .i-layers { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2212%202%202%207%2012%2012%2022%207%2012%202%22/%3E%3Cpolyline%20points%3D%222%2017%2012%2022%2022%2017%22/%3E%3Cpolyline%20points%3D%222%2012%2012%2017%2022%2012%22/%3E%3C/svg%3E"); }
   .i-target { --m: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http://www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%207a5%205%200%201%200%205%205%22/%3E%3Cpath%20d%3D%22M13%203.055a9%209%200%201%200%207.941%207.945%22/%3E%3Cpath%20d%3D%22M15%206v3h3l3-3h-3v-3z%22/%3E%3Cpath%20d%3D%22M15%209l-3%203%22/%3E%3C/svg%3E"); }
+  .ad-tloc { font-size: 12px; color: var(--muted); }
+  .ad-tloc b { font-weight: 600; }
+  .ad-tloc .l-on { color: #15803D; }
+  .ad-tloc .l-away { color: var(--gold); }
+  .ad-tloc .l-unc { color: #B45309; }
 </style>
 </head>
 <body>
@@ -3166,6 +3171,12 @@
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Campus Location</div>
         <div class="admin-sub" style="margin:0 0 4px;">Used to check that teachers are on campus when they check in.</div>
         <div class="admin-sub" id="campusLocText">Not set yet.</div>
+ <div class="rep-lbl rep-lbl-s" style="margin-top:10px;">Campus radius (metres)</div>
+ <div style="display:flex; gap:8px;">
+ <input class="text-input" id="campusRadiusInput" type="number" inputmode="numeric" min="50" max="2000" step="10" placeholder="250" style="flex:1;">
+ <button class="btn-secondary" id="saveRadiusBtn" style="border-color: var(--line); width:auto; padding-left:18px; padding-right:18px;">Save</button>
+ </div>
+ <div class="admin-sub" id="campusRadiusNote" style="margin:4px 0 6px;">A teacher within this distance is noted as "On campus". 50 to 2000 m. Default 250 m.</div>
         <button class="btn-secondary" id="setLocationBtn" style="border-color: var(--line);">Use My Current Location</button>
         <button class="action-btn" id="toggleManualLocBtn" style="margin-top:4px;">Enter coordinates manually</button>
         <div id="manualLocBox" style="display:none; flex-direction:column; gap:10px; margin-top:6px;">
@@ -3554,7 +3565,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.83 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.85 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4048,6 +4059,7 @@
   }
   document.getElementById('reminderAlertClose').addEventListener('click', hideReminderAlert);
 
+  const CAMPUS_RADIUS_M = 250;
   function haversineMeters(lat1, lon1, lat2, lon2) {
     const R = 6371000;
     const toRad = (d) => (d * Math.PI) / 180;
@@ -10770,8 +10782,9 @@ Rules:
           <div class="ad-tmain">
             <span class="ad-tname">${escapeHtml(nameOf(r.tid))}${campus && (campus.sessions || []).some(sessEdited) ? ' <span class="mchip warn" style="font-size:12px; padding:1px 7px;">edited</span>' : ''}</span>
             <span class="ad-tsub">${fmtUnits(r.cls.reduce((sum, c) => sum + classUnits(c), 0))} class${r.cls.length === 1 && classUnits(r.cls[0]) === 1 ? '' : 'es'} · ${fmtTeaching(r.mins)}${other ? ` · ${other} other work` : ''}${invMin ? ` · ${svDur(invMin)} invigilation` : ''}${r.st.secs > 0 ? ` · ${fmtTeaching(Math.round(r.st.secs / 60))} on campus` : ''}</span>
-          </div>
-          <span class="ad-pill ${r.st.key}">${r.st.label}</span>
+ ${locNote(campus)}
+ </div>
+ <span class="ad-pill ${r.st.key}">${r.st.label}</span>
         </div>${detail}`;
       }).join('')}</div>`;
       state._tcRows = teacherRows; try { tcApplyFilter(teacherRows); } catch (e) { /* ignore */ }
@@ -12846,6 +12859,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   function renderCampusLocationText() {
+    const ri = document.getElementById('campusRadiusInput'); if (ri && document.activeElement !== ri) ri.value = state.campusRadius || CAMPUS_RADIUS_M;
     const el = document.getElementById('campusLocText');
     if (state.campusLocation) {
       el.textContent = `Set (${state.campusLocation.lat.toFixed(5)}, ${state.campusLocation.lng.toFixed(5)})`;
@@ -14277,7 +14291,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const logRef = state.db.doc('campusLogs/' + date).collection('teachers').doc(state.teacherId);
     try {
       await historyRef.set(payload);
-      try { await logRef.set(payload); } catch (err) { /* admin mirror is best-effort */ }
+      try { await logRef.set(payload, { merge: true }); } catch (err) { /* admin mirror is best-effort */ }
     } catch (err) { flashOffline(err); }
   }
 
@@ -14381,9 +14395,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     } else {
       sessions.push({ id: genSessionId(), in: Date.now(), out: null });
     }
-    checkFeedback(!state.campusToday.checkedIn);
+    const nowIn = !state.campusToday.checkedIn;
+    checkFeedback(nowIn);
     await pushSessionUpdate(sessions);
-    checkLocationOnce();
+    checkLocationOnce(nowIn ? 'in' : 'out');
   }
 
   // Forgot to check in on a past day (only yesterday for teachers): add the arrival and leaving time
@@ -14485,7 +14500,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const logRef = state.db.doc('campusLogs/' + date).collection('teachers').doc(state.teacherId);
     try {
       await historyRef.set(payload);
-      try { await logRef.set(payload); } catch (err) { /* admin mirror is best-effort */ }
+      try { await logRef.set(payload, { merge: true }); } catch (err) { /* admin mirror is best-effort */ }
     } catch (err) { flashOffline(err); }
   }
 
@@ -16005,24 +16020,35 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     }
   }
 
-  function checkLocationOnce() {
-    const line = document.getElementById('locLine');
-    if (!('geolocation' in navigator)) { line.textContent = ''; return; }
-    line.innerHTML = '<svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Checking location…';
-    navigator.geolocation.getCurrentPosition((pos) => {
-      if (!state.campusLocation) {
-        line.innerHTML = '<svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Location captured (campus reference not set by admin yet)';
-        return;
-      }
-      const d = haversineMeters(pos.coords.latitude, pos.coords.longitude, state.campusLocation.lat, state.campusLocation.lng);
-      if (d < 250) {
-        line.innerHTML = `<svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${Math.round(d)}m from campus — looks right`;
-      } else {
-        line.innerHTML = `<svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${(d / 1000).toFixed(1)}km from campus`;
-      }
-    }, () => {
-      line.innerHTML = '<svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Location unavailable';
-    }, { timeout: 8000 });
+  // Silent note for the Admin: at check-in and check-out the phone's place is compared with the campus point. Nothing is shown to the teacher.
+  function checkLocationOnce(kind) {
+    if (!kind || !state.campusLocation || !state.db || !state.teacherId) return;
+    const save = (r) => saveCampusLoc(kind, r);
+    if (!('geolocation' in navigator)) { save({ s: 'unclear', n: 1 }); return; }
+    try {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const d = Math.round(haversineMeters(pos.coords.latitude, pos.coords.longitude, state.campusLocation.lat, state.campusLocation.lng)); const a = Math.round(pos.coords.accuracy || 0);
+        // inside the campus radius = on campus; outside even after taking the phone's own error away = away; in between = not clear
+        const R = state.campusRadius || CAMPUS_RADIUS_M; save({ s: d <= R ? 'on' : (d - a > R ? 'away' : 'unclear'), d, a });
+      }, () => save({ s: 'unclear', n: 1 }), { timeout: 10000, enableHighAccuracy: true, maximumAge: 0 });
+    } catch (e) { save({ s: 'unclear', n: 1 }); }
+  }
+  function saveCampusLoc(kind, r) {
+    try {
+      const date = todayStr(); const key = `ctd_loc_${state.teacherId}_${date}`; let arr = [];
+      try { arr = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { arr = []; }
+      arr.push(Object.assign({ k: kind, at: Date.now() }, r)); arr = arr.slice(-12);
+      try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) { /* ignore */ }
+      state.db.doc('campusLogs/' + date).collection('teachers').doc(state.teacherId).set({ loc: arr }, { merge: true }).catch(() => { /* a note for the Admin: never bothers the teacher */ });
+    } catch (e) { /* ignore */ }
+  }
+  // the Admin's one-line note in Teacher Activity
+  function locNote(c) {
+    const arr = (c && Array.isArray(c.loc)) ? c.loc : []; if (!arr.length) return '';
+    const last = (k) => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i] && arr[i].k === k) return arr[i]; return null; };
+    const one = (lbl, e) => { if (!e) return ''; const cls = e.s === 'on' ? 'l-on' : (e.s === 'away' ? 'l-away' : 'l-unc'); const txt = e.s === 'on' ? 'On campus' : (e.s === 'away' ? 'Away' : 'Not clear'); const dist = typeof e.d === 'number' ? (e.d < 1000 ? ` · ${e.d} m` : ` · ${(e.d / 1000).toFixed(1)} km`) : ''; return `${lbl}: <b class="${cls}">${txt}</b>${dist}`; };
+    const parts = [one('In', last('in')), one('Out', last('out'))].filter(Boolean);
+    return parts.length ? `<span class="ad-tloc">📍 ${parts.join(' · ')}</span>` : '';
   }
 
   // ----- "What happened in class?" -----
@@ -16959,7 +16985,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       state.campusLocation = loc;
       renderCampusLocationText();
       if (state.db) {
-        try { await state.db.doc('settings/campusLocation').set(loc); showToast('Campus location saved'); } catch (err) { flashOffline(err); }
+        try { await state.db.doc('settings/campusLocation').set(loc, { merge: true }); showToast('Campus location saved'); } catch (err) { flashOffline(err); }
       }
     }, (err) => {
       let reason = 'Could not read your location.';
@@ -16970,6 +16996,13 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     }, { timeout: 10000, enableHighAccuracy: false, maximumAge: 60000 });
   });
 
+  document.getElementById('saveRadiusBtn').addEventListener('click', async () => {
+    const ri = document.getElementById('campusRadiusInput'); const note = document.getElementById('campusRadiusNote'); const v = Math.round(Number(ri.value));
+    if (!(v >= 50 && v <= 2000)) { note.textContent = 'Enter a radius between 50 and 2000 metres.'; return; }
+    state.campusRadius = v; note.textContent = 'A teacher within this distance is noted as "On campus". 50 to 2000 m. Default 250 m.';
+    if (!state.db) { flashOffline({ code: 'not-connected' }); return; }
+    try { await state.db.doc('settings/campusLocation').set({ radius: v }, { merge: true }); showToast(`Campus radius saved: ${v} m`); } catch (err) { flashOffline(err); }
+  });
   document.getElementById('saveManualLocBtn').addEventListener('click', async () => {
     const msgEl = document.getElementById('campusLocText');
     const lat = parseFloat(document.getElementById('manualLat').value);
@@ -16982,7 +17015,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     state.campusLocation = loc;
     renderCampusLocationText();
     if (state.db) {
-      try { await state.db.doc('settings/campusLocation').set(loc); showToast('Campus location saved'); } catch (err) { flashOffline(err); }
+      try { await state.db.doc('settings/campusLocation').set(loc, { merge: true }); showToast('Campus location saved'); } catch (err) { flashOffline(err); }
     } else {
       flashOffline({ code: 'not-connected' });
     }
@@ -17507,6 +17540,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     unsubscribers.push(db.doc('settings/campusLocation').onSnapshot((snap) => {
       const data = snap.data();
       state.campusLocation = data && typeof data.lat === 'number' ? { lat: data.lat, lng: data.lng } : null;
+      state.campusRadius = data && Number(data.radius) >= 50 && Number(data.radius) <= 2000 ? Math.round(Number(data.radius)) : CAMPUS_RADIUS_M;
       renderCampusLocationText();
     }, () => {}));
 
