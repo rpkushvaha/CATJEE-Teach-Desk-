@@ -2366,6 +2366,16 @@
   .xs-tw .text-input { width: 100%; padding-left: 46px !important; box-sizing: border-box; }
   .xs-tw input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
   .xs-tc { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--gold); display: flex; pointer-events: none; }
+  .ct-box { margin: 8px 0 2px; padding: 8px 10px; border-radius: 12px; font-size: 13px; line-height: 1.4; background: var(--gold-soft); }
+  .tl-card.ct-pending { border-left-color: #D97706; }
+  .tl-card.ct-pending .ct-box { background: #FFF1D6; color: #7A4B00; }
+  .tl-card.ct-none .ct-box { background: var(--neutral-soft); }
+  .tl-card.ct-ended { opacity: .5; filter: grayscale(1); }
+  .tl-card.ct-ended .ct-box, .tl-card.ct-none .ct-box { color: var(--ink); }
+  .ct-pill { border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .ct-pill-a { background: #FFF1D6; color: #7A4B00; }
+  .ct-pill-g { background: var(--neutral-soft); color: var(--muted-2); }
+  .tl-log:disabled { background: var(--neutral-soft); color: var(--neutral-text); border-color: var(--neutral-soft); cursor: default; }
 </style>
 </head>
 <body>
@@ -3582,7 +3592,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.88 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.89 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4386,11 +4396,38 @@
     return `<div class="tl-time">${escapeHtml(parts[0])}<small>${escapeHtml(parts[1] || '')}</small></div>`;
   }
   let tlNextId = '';
+  function ctCardHtml(it) {
+    const sl = it.slot; const ex = ctSlotExam(sl); if (!ex) return '';
+    const mine = ctMineFor(ex); const ready = planTeachers(planOf(ex)).length > 0;
+    const nowM = new Date().getHours() * 60 + new Date().getMinutes(); const ended = nowM >= hhmmToMin(ex.end);
+    const endM = sl.time && sl.duration ? hhmmToMin(sl.time) + Number(sl.duration) : null;
+    const range = sl.time ? `${formatTimeStr(sl.time)}${endM != null ? ' – ' + formatTimeStr(`${pad(Math.floor(endM / 60) % 24)}:${pad(endM % 60)}`) : ''}` : '';
+    let cls, pill, box, btn = '', room = '';
+    if (mine) {
+      cls = it.status; pill = pillHtml(it.status, TL_LABEL[it.status]); const line = ctInvigLine(mine, ex); room = line ? `<span class="mchip"><span class="ico i-door" aria-hidden="true"></span>${escapeHtml(line.replace(/^Rooms? /, '').split(' · ')[0])}</span>` : '';
+      box = `<b>Your duty:</b> Invigilation${line ? ' in ' + escapeHtml(line.replace(/^Rooms? /, '')) : ''}${it.status === 'missed' && mine ? '' : ''}<br><b>Counts as:</b> 1 class`;
+      btn = it.status === 'upcoming' ? '' : `<button class="tl-log" data-log-slot="${escapeHtml(sl.id)}">${it.status === 'live' ? 'Log class test' : 'Log it now'}</button>`;
+    } else if (ended) {
+      cls = 'done ct-ended'; pill = '<span class="tl-pill ct-pill ct-pill-g">Ended</span>'; box = 'This test is over. No duty was assigned, so it is not counted as a class.';
+    } else if (ready) {
+      cls = 'upcoming ct-none'; pill = '<span class="tl-pill ct-pill ct-pill-g">No duty</span>'; box = '<b>Your duty:</b> none in this test<br><b>Counts as a class:</b> no';
+    } else {
+      cls = 'upcoming ct-pending'; pill = '<span class="tl-pill ct-pill ct-pill-a">Duty pending</span>'; box = '<b>Your duty:</b> not assigned yet<br><b>Counts as a class:</b> once a duty is assigned';
+      btn = '<button class="tl-log" disabled>Log class test</button>';
+    }
+    return `<div class="tl-item">${tlTimeHtml(it.min)}
+ <div class="tl-card ${cls}">
+ <div class="tl-top"><div class="tl-batch">${nbLabel(slotLabelAll(sl))}</div>${pill}</div>
+ <div class="chiprow">${subjChipHtml(sl.subject)}<span class="mchip">Class test</span>${room}${range ? `<span class="mchip"><span class="ico i-clock" aria-hidden="true"></span>${escapeHtml(range)}</span>` : ''}</div>
+ <div class="ct-box">${box}</div>${btn}
+ </div></div>`;
+  }
   function tlItemHtml(it) {
     const isNext = it.kind === 'slot' && it.slot.id === tlNextId && it.status === 'upcoming';
     const pill = isNext ? '<span class="tl-pill tl-pill-next">Next</span>' : pillHtml(it.status, TL_LABEL[it.status]);
     if (it.kind === 'slot') {
-      const btnTxt = it.status === 'live' ? 'Log this class' : (it.status === 'missed' ? 'Log it now' : 'Log early');
+ if (it.slot.test) { const ctH = ctCardHtml(it); if (ctH) return ctH; }
+ const btnTxt = it.status === 'live' ? 'Log this class' : (it.status === 'missed' ? 'Log it now' : 'Log early');
       const sl = it.slot;
       const endM = sl.time && sl.duration ? hhmmToMin(sl.time) + Number(sl.duration) : null;
       const range = sl.time ? `${formatTimeStr(sl.time)}${endM != null ? ' – ' + formatTimeStr(`${pad(Math.floor(endM / 60) % 24)}:${pad(endM % 60)}`) : ''}` : '';
@@ -4407,7 +4444,7 @@
     const tags = [];
     if (c.worksheet) tags.push('Worksheet');
     if (c.material) tags.push('Material');
-    if (c.test) tags.push('Test');
+    if (c.test) tags.push('Class test');
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-today-rec="${escapeHtml(c.id)}" role="button" tabindex="0">${tlTimeHtml(it.min)}
       <div class="tl-card ${it.status}">
@@ -4561,7 +4598,7 @@
   function plannedDutiesToday() {
     const today = todayStr();
     const logged = (state.classesToday || []).filter((c) => isInvig(c) && c.examId);
-    return myDuties(today).filter((d) => !logged.some((c) => c.examId === d.exam.id));
+    return myDuties(today).filter((d) => !logged.some((c) => c.examId === d.exam.id) && !ctMerged(d.exam));
   }
   function dutyStatus(slots, date) {
     const now = new Date(); const nm = now.getHours() * 60 + now.getMinutes();
@@ -4903,7 +4940,7 @@
     const tags = [];
     if (c.worksheet) tags.push('Worksheet');
     if (c.material) tags.push('Material');
-    if (c.test) tags.push('Test');
+    if (c.test) tags.push('Class test');
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}">${tlTimeHtml(st)}
       <div class="tl-card">
@@ -5457,6 +5494,7 @@
 
 
   function renderForm() {
+ if (state.form && state.form.testLocked) state.form.test = true;
     const isEditing = !!state.editingId;
     document.getElementById('modeChips').style.display = isEditing ? 'none' : 'flex';
     document.getElementById('modeChips').querySelectorAll('[data-mode]').forEach((btn) => {
@@ -7336,6 +7374,29 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }
   }
   const isCt = (c) => !!(c && c.test && c.ctId);
+  // ---- one card for a class test (the duty is inside the card) ----
+  function ctSlotExam(sl) {
+    try {
+      if (!sl || !sl.test) return null; const d = slotDate(sl); const exL = (state.examsFor && state.examsFor[d]) || [];
+      const a = hhmmToMin(sl.time); if (a == null) return null; const z = a + (Number(sl.duration) || 1); const bats = (Array.isArray(sl.batches) && sl.batches.length) ? sl.batches : [sl.label];
+      return (Array.isArray(exL) ? exL : []).find((e) => e.ct && bats.some((b) => expandScope(e.scope || []).indexOf(b) !== -1) && hhmmToMin(e.start) < z && a < hhmmToMin(e.end)) || null;
+    } catch (err) { return null; }
+  }
+  function ctMineFor(ex) { return ex ? (myDuties(ex.date).find((d) => d.exam.id === ex.id) || null) : null; }
+  // "Room F1", or "Room D2 · 7:00 PM – 7:25 PM, 7:50 PM – 8:15 PM" when the duty is only a part of the test
+  function ctInvigLine(mine, ex) {
+    if (!mine) return ''; const sl = mine.slots || []; const whole = sl.length === 1 && sl[0].start === ex.start && sl[0].end === ex.end;
+    const rooms = sl.map((x) => x.room).filter((r, i, a) => r && a.indexOf(r) === i); const r = rooms.length ? (rooms.length > 1 ? 'Rooms ' : 'Room ') + rooms.join(', ') : '';
+    if (whole) return r; const tm = sl.map((x) => `${formatTimeStr(x.start)} – ${formatTimeStr(x.end)}`).join(', ');
+    return [r, tm].filter(Boolean).join(' · ');
+  }
+  function ctInvigFor(examId, date) { try { const ex = ((state.examsFor && state.examsFor[date]) || []).find((e) => e.id === examId); return ex ? ctInvigLine(ctMineFor(ex), ex) : ''; } catch (err) { return ''; } }
+  // my duty in a class test that is also my own class is shown inside the class test card, not as a second card
+  function ctMerged(exam) {
+    if (!exam || !exam.ct) return false;
+    if ((state.classesToday || []).some((c) => c.ctExamId === exam.id)) return true;
+    return (state.scheduleSlots || []).some((sl) => sl && sl.test && slotDate(sl) === exam.date && (ctSlotExam(sl) || {}).id === exam.id);
+  }
   async function ctCreatePlan(list, opt) {
     opt = opt || {};
     const d = list[0].d; const g = tgGroup(); const per = periodsForDay(g.key, d);
@@ -8141,7 +8202,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (!slots.length) { el.innerHTML = '<div class="hv-note">No classes this week yet.</div>'; return; }
     const cellOf = (d, t) => slots.filter((s) => s.date === d && s.time === t);
     el.innerHTML = `<div class="tg-scroll"><table class="tg-table my-tt"><thead><tr><th>Day</th>${times.map((t) => `<th>${escapeHtml(formatTimeStr(t).replace(/\\s?(AM|PM)$/i, ''))}</th>`).join('')}</tr></thead><tbody>
-      ${days.map((d) => `<tr><th class="tg-b">${WD[dateObj(d).getDay()]}<span>${dateObj(d).getDate()}</span></th>${times.map((t) => { const cs = cellOf(d, t); return `<td class="tg-c${cs.length ? ' tg-full' : ''}">${cs.map((s) => `<b>${escapeHtml(gridBatchLabel(s.label || ''))}</b><small>${escapeHtml(slotSubject(s) ? shortSubj(slotSubject(s)) : '')}${s.test ? ' · Test' : ''}</small>${s.subFor ? '<i>Sub</i>' : ''}`).join('')}</td>`; }).join('')}</tr>`).join('')}
+      ${days.map((d) => `<tr><th class="tg-b">${WD[dateObj(d).getDay()]}<span>${dateObj(d).getDate()}</span></th>${times.map((t) => { const cs = cellOf(d, t); return `<td class="tg-c${cs.length ? ' tg-full' : ''}">${cs.map((s) => `<b>${escapeHtml(gridBatchLabel(s.label || ''))}</b><small>${escapeHtml(slotSubject(s) ? shortSubj(slotSubject(s)) : '')}${s.test ? ' · Class Test' : ''}</small>${s.subFor ? '<i>Sub</i>' : ''}`).join('')}</td>`; }).join('')}</tr>`).join('')}
       </tbody></table></div>
       <button type="button" class="btn-secondary" id="myTTImg" style="border-color: var(--line); margin-top:10px;">Download / share as image</button>`;
     document.getElementById('myTTImg').addEventListener('click', () => myWeekImage(ws));
@@ -15334,28 +15395,25 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const L = [`📚 *CLASSES (${classItems.length})*`];
       classItems.forEach((c, i) => {
         if (i) L.push('');
-        L.push(`*${i + 1}. ${entryBatchLabel(c)}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
-        if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
+        L.push(`*${i + 1}. ${entryBatchLabel(c)}${c.test ? ' · Class Test' : ''}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
+ if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
+ if (c.test && c.invigText) L.push(`🚪 Invigilation: ${waClean(c.invigText)}`);
         if (c.chapter) { L.push(`🗒️ Chapter: ${waClean(c.chapter)}`); if (c.topic) L.push(`🎯 Topic: ${waClean(c.topic)}`); } else if (c.topic) L.push(`📌 Chapter / Topic: ${waClean(c.topic)}`);
       const KEMO = { 'Revision': '🔁', 'Doubt clearing': '❓', 'Quiz': '☑️', 'Test copies shown': '📋', 'Question paper discussion': '💬', 'Something else': '🏷️' };
       classKindLines(c).forEach(([a, b]) => L.push(`${KEMO[a] || '•'} ${a}${b ? ': ' + waClean(b) : ''}`));
         if (c.worksheet) L.push(`📄 Worksheet Given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`);
         if (c.material) L.push(`📖 Study Material Given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`);
-        if (c.test) {
-          const nb = entryBatches(c).length;
-          let line = `🖊️ Class Test Conducted${nb > 1 ? ` (${nb} batches)` : ''}${c.testNote ? ': ' + waClean(c.testNote) : ''}`;
-          if (c.testRooms) { const r = waClean(c.testRooms); line += ` · ${/[,&]| and /.test(r) ? 'Rooms' : 'Room'} ${r}`; }
-          L.push(line);
-        }
+        if (c.test) { if (c.testNote) L.push(`🖊️ Test on: ${waClean(c.testNote)}`); if (!c.invigText && c.testRooms) { const r = waClean(c.testRooms); L.push(`🚪 ${/[,&]| and /.test(r) ? 'Rooms' : 'Room'}: ${r}`); } }
         if (c.homework) L.push(`📓 Homework Given${c.homeworkNote ? ': ' + waClean(c.homeworkNote) : ''}`);
       });
       sections.push(L);
     }
     // Invigilation (never counted as a class)
-    if (invs.length) {
-      const total = invs.reduce((s2, a) => s2 + invigMinutes(a), 0);
+    const invs2 = invs.filter((a) => !(a.examId && classItems.some((c) => c.ctExamId === a.examId)));
+ if (invs2.length) {
+      const total = invs2.reduce((s2, a) => s2 + invigMinutes(a), 0);
       const L = [`📋 *INVIGILATION* (${svDur(total)})`];
-      invs.forEach((a, k) => {
+      invs2.forEach((a, k) => {
         if (k) L.push('');
         L.push([a.testName || a.testType, scopeLabel(a.scope || [])].filter(Boolean).join(' · '));
         (a.parts || []).forEach((p) => L.push(`🕙 ${waRange(p.start, p.end)}${p.room ? ' · ' + waClean(p.room) : ''}`));
@@ -16191,7 +16249,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const ks = classKindsOf(c); const notes = (c && c.kindNotes) || {};
     const rows = [];
     const chapTopic = () => { const o = []; if (c.chapter) { o.push(`<div><span class="ico i-layers" aria-hidden="true"></span><span><b>Chapter:</b> ${escapeHtml(c.chapter)}</span></div>`); if (c.topic) o.push(`<div><span class="ico i-target" aria-hidden="true"></span><span><b>Topic:</b> ${escapeHtml(c.topic)}</span></div>`); } else if (c.topic) o.push(`<div>${ic('teach')}<span><b>Chapter / Topic:</b> ${escapeHtml(c.topic)}</span></div>`); return o; };
-    if (withTopic && ks.indexOf('teach') !== -1) { const r2 = chapTopic(); if (r2.length) r2.forEach((x) => rows.push(x)); else rows.push(`<div>${ic('teach')}<span class="faint">Chapter / Topic not added</span></div>`); } else if (withTopic && (c.topic || c.chapter)) chapTopic().forEach((x) => rows.push(x));
+    if (withTopic && ks.indexOf('teach') !== -1) { const r2 = chapTopic(); if (r2.length) r2.forEach((x) => rows.push(x)); else if (!c.test) rows.push(`<div>${ic('teach')}<span class="faint">Chapter / Topic not added</span></div>`); } else if (withTopic && (c.topic || c.chapter)) chapTopic().forEach((x) => rows.push(x));
     CLASS_KINDS.filter((x) => x.k !== 'teach' && ks.indexOf(x.k) !== -1).forEach((x) => { const v = String(notes[x.k] || '').trim(); rows.push(`<div>${ic(x.k)}<span><b>${escapeHtml(x.out)}${v ? ':' : ''}</b>${v ? ' ' + escapeHtml(v) : ''}</span></div>`); });
     return rows.length ? `<div class="ck-lines">${rows.join('')}</div>` : '';
   }
@@ -16325,9 +16383,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const endMin = Math.min(match.startMin + duration, 23 * 60 + 59);
     document.getElementById('startTimeInput').value = match.slot.time;
     document.getElementById('endTimeInput').value = `${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`;
-    if (slot.test) state.form.test = true;
+    if (slot.test) { state.form.test = true; state.form.testLocked = true; state.form.slotSubject = slot.subject || ''; }
     // a class test with a plan: the Class test switch is on and the plan's rooms are filled in
-    { const ctRoomsNow = () => { try { const exL = (state.examsFor && state.examsFor[slot.date]) || []; const pl = (Array.isArray(exL) ? exL : []).find((e) => e.ct && expandScope(e.scope || []).indexOf(batch) !== -1 && hhmmToMin(e.start) < match.startMin + duration && match.startMin < hhmmToMin(e.end)); if (!pl) return false; state.form.test = true; const inp = document.getElementById('testRoomsInput'); if (inp && !inp.value) inp.value = planOf(pl).map((r) => r.room).filter(Boolean).join(', '); return true; } catch (e) { return false; } };
+    { const ctRoomsNow = () => { try { const exL = (state.examsFor && state.examsFor[slot.date]) || []; const pl = (Array.isArray(exL) ? exL : []).find((e) => e.ct && expandScope(e.scope || []).indexOf(batch) !== -1 && hhmmToMin(e.start) < match.startMin + duration && match.startMin < hhmmToMin(e.end)); if (!pl) return false; state.form.test = true; state.form.testLocked = true; state.form.ctExamId = pl.id; const inp = document.getElementById('testRoomsInput'); const my = myDuties(slot.date).find((d) => d.exam.id === pl.id); if (inp && !inp.value) inp.value = my ? my.slots.map((x) => x.room).filter((r, i, a) => r && a.indexOf(r) === i).join(', ') : ''; return true; } catch (e) { return false; } };
       if (slot.test && slot.date) { if (state.examsFor[slot.date] === undefined) loadExamsFor(slot.date).then(() => { if (ctRoomsNow()) { try { renderForm(); } catch (e) { /* ignore */ } } }); else ctRoomsNow(); } }
     if (Array.isArray(slot.batches) && slot.batches.length > 1) { state.form.extra = slot.batches.filter((x) => x !== batch); state.form.combineOpen = true; }
     setSchedHint(`Filled in from your Schedule: ${slotLabelAll(slot)} at ${formatTimeStr(match.slot.time)}${slot.test ? ' · class test ticked' : ''}. Change anything if needed.`);
@@ -16865,18 +16923,18 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       return;
     }
 
-    if (!state.teacherSubject) {
+    if (!state.teacherSubject && !state.form.test) {
       showFormMsg('Please set your subject first (tap "Subject" at the top).');
       return;
     }
     if (!state.form.batch) { showFormMsg('Please select a batch.'); return; }
     const kinds = Array.isArray(state.form.kinds) ? state.form.kinds : ['teach'];
-    if (!kinds.length) { showFormMsg('Choose what happened in class (Teaching, Quiz…).'); const kc = document.getElementById('classKindChips'); if (kc) kc.scrollIntoView({ block: 'center' }); return; }
+    if (!kinds.length && !state.form.test) { showFormMsg('Choose what happened in class (Teaching, Quiz…).'); const kc = document.getElementById('classKindChips'); if (kc) kc.scrollIntoView({ block: 'center' }); return; }
     const teaching = kinds.indexOf('teach') !== -1;
     const topic = teaching ? document.getElementById('topicInput').value.trim() : '';
     const chapter = teaching ? document.getElementById('chapterInput').value.trim() : '';
     // the chapter is needed for a new class; an old class (it has only a topic) can still be edited without one
-    if (teaching && !chapter && !(state.editingId && state.editLegacy && topic)) { showFormMsg('Please enter the chapter.'); document.getElementById('chapterInput').focus(); return; }
+    if (teaching && !chapter && !state.form.test && !(state.editingId && state.editLegacy && topic)) { showFormMsg('Please enter the chapter.'); document.getElementById('chapterInput').focus(); return; }
     const kindNotes = {};
     for (const x of CLASS_KINDS) {
       if (x.k === 'teach' || kinds.indexOf(x.k) === -1 || !x.f) continue;
@@ -16937,7 +16995,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         worksheet: state.form.worksheet,
         material: state.form.material,
         test: state.form.test,
-        homework: state.form.homework,
+ ctExamId: (state.form.test && state.form.ctExamId) || null,
+ invigText: (state.form.test && state.form.ctExamId) ? ctInvigFor(state.form.ctExamId, entryDate) : '',
+ homework: state.form.homework,
         worksheetNote: document.getElementById('worksheetNoteInput').value.trim(),
         materialNote: document.getElementById('materialNoteInput').value.trim(),
         testNote: document.getElementById('testNoteInput').value.trim(),
@@ -16950,7 +17010,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
           entryType: 'class',
           teacherId: state.teacherId,
           date: entryDate,
-          subject: state.teacherSubject,
+          subject: state.teacherSubject || state.form.slotSubject || '',
           createdAt: Date.now()
         }, payload));
       // The entry is stored on the phone right away; don't keep the teacher waiting when the network is slow or offline.
