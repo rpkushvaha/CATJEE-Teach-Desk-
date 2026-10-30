@@ -870,8 +870,8 @@
   .set-acc .set-sum { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; }
   .set-acc > .panel-title > .ic { color: var(--gold); flex-shrink: 0; }
   .set-acc .set-sum .ic { color: var(--muted); }
-  .set-acc .set-chev { transition: transform .2s ease; }
-  .set-acc.open .set-chev { transform: rotate(90deg); }
+  .set-acc .set-chev { transition: transform .2s ease; transform: rotate(90deg); }
+ .set-acc.open .set-chev { transform: rotate(-90deg); }
   .set-acc:not(.open) > *:not(.panel-title) { display: none !important; }
   .set-acc.open > .panel-title { margin-bottom: 12px; }
   #view-admin .set-acc { padding-top: 14px; padding-bottom: 14px; }
@@ -1392,8 +1392,8 @@
   .pv-row .ico { color: #E63946; width: 17px; height: 17px; flex: none; }
   .pv-row .chev { display: inline-flex; align-items: center; }
   .pv-row b { flex: 1; font-weight: 600; font-size: 15px; }
-  .pv-row .chev { color: var(--muted); transition: transform .2s ease; }
-  #adminPreviewPanel.open .pv-row .chev { transform: rotate(90deg); }
+  .pv-row .chev { color: var(--muted); transition: transform .2s ease; transform: rotate(90deg); }
+ #adminPreviewPanel.open .pv-row .chev { transform: rotate(-90deg); }
   #adminPreviewPanel .pv-body { margin-top: 10px; }
   #adminPreviewPanel:not(.open) .pv-body { display: none; }
   .wk-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; font-size: 13px; color: var(--muted-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); }
@@ -2376,6 +2376,10 @@
   .ct-pill-a { background: #FFF1D6; color: #7A4B00; }
   .ct-pill-g { background: var(--neutral-soft); color: var(--muted-2); }
   .tl-log:disabled { background: var(--neutral-soft); color: var(--neutral-text); border-color: var(--neutral-soft); cursor: default; }
+  .ad-chev { display: inline-flex; color: var(--muted); flex-shrink: 0; }
+  .ad-detail { position: relative; }
+  .ad-close { position: absolute; top: 2px; right: 6px; background: transparent; border: 0; color: var(--muted); padding: 8px; display: inline-flex; cursor: pointer; z-index: 1; }
+  .ad-detail .ad-sess-h { padding-right: 36px; }
 </style>
 </head>
 <body>
@@ -2693,6 +2697,7 @@
  <div class="chap-sug" id="chapterSuggest" hidden></div>
  <label for="topicInput" class="kf-lbl chap-gap"><span>Topic covered</span><small>Optional</small></label>
  <textarea class="text-input topic-input" id="topicInput" rows="2" style="resize:vertical; font-family:inherit;" placeholder="Enter topic covered today" autocapitalize="sentences"></textarea>
+ <div class="chap-sug" id="topicSuggest" hidden></div>
  </div>
         <div id="classKindFields" hidden></div>
         <div class="hv-note" style="text-align:left; margin-top:-4px;"><span class="ico i-help" aria-hidden="true"></span> Non-class work (paper checking, leave, invigilation) → Today → Activity</div>
@@ -3592,7 +3597,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.89 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.91 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5563,9 +5568,7 @@
         // A note copied from the last activity doesn't belong to a different type.
         const ta = document.getElementById('activityNoteInput');
         if (nt !== state.activityForm.activityType && !state.editingId && ta.value === (state.activityForm.note || '')) { ta.value = ''; state.activityForm.note = ''; }
-        state.activityForm.activityType = nt;
-        renderForm();
-      });
+        state.activityForm.activityType = nt; if (!state.editingId && !String(ta.value || '').trim()) { const pn = lastActivityNoteFor(nt); if (pn) state.activityForm.note = pn; } renderForm(); { const ta2 = document.getElementById('activityNoteInput'); if (ta2 && state.activityForm.note && !ta2.value) ta2.value = state.activityForm.note; } });
     });
     if (typeof renderInvig === 'function') renderInvig();
 
@@ -5655,15 +5658,27 @@
   function renderTopicSuggest() {
     const box = document.getElementById('chapterSuggest'); if (!box) return;
     const typed = (document.getElementById('chapterInput').value || '').trim().toLowerCase();
-    const items = [];
+ const autoV = String((state.form && state.form.chapterAuto) || '').trim().toLowerCase(); const typedF = (autoV && typed === autoV) ? '' : typed;
+ const items = [];
     const add = (v, same) => { const t = String(v || '').trim(); if (t && !items.some((x) => x.v.toLowerCase() === t.toLowerCase())) items.push({ v: t, same: !!same }); };
     const last = (!state.editingId && state.entryMode === 'class' && state.form.batch) ? findLastClassForBatch(state.form.batch) : null;
     if (last && last.chapter) add(last.chapter, true);
-    (state.historyClasses || []).forEach((c) => { if (c.entryType !== 'activity' && c.chapter && (!state.teacherSubject || !c.subject || c.subject === state.teacherSubject)) add(c.chapter, false); });
-    const show = items.filter((x) => x.v.toLowerCase() !== typed && (!typed || x.v.toLowerCase().indexOf(typed) !== -1)).slice(0, 5);
+    (state.historyClasses || []).forEach((c) => { if (c.entryType !== 'activity' && c.chapter && state.form.batch && entryBatches(c).indexOf(state.form.batch) !== -1 && (!state.teacherSubject || !c.subject || c.subject === state.teacherSubject)) add(c.chapter, false); });
+    const show = items.slice(0, 2).filter((x) => (!!autoV && typed === autoV ? true : x.v.toLowerCase() !== typed) && (!typedF || x.v.toLowerCase().indexOf(typedF) !== -1));
     box.hidden = !show.length || state.entryMode !== 'class';
     box.innerHTML = show.map((x) => `<button type="button" class="chip" data-chap="${escapeHtml(x.v)}"${x.same ? ' aria-label="Same chapter as the last class"' : ''}>${x.same ? '↺ ' : ''}${escapeHtml(x.v)}</button>`).join('');
+ renderTopicChips();
+ }
+  function renderTopicChips() {
+    const box = document.getElementById('topicSuggest'); if (!box) return;
+    const ta = document.getElementById('topicInput'); const typed = ((ta && ta.value) || '').trim().toLowerCase();
+    const autoT = String((state.form && state.form.topicAuto) || '').trim().toLowerCase(); const typedF = (autoT && typed === autoT) ? '' : typed;
+    const items = [];
+    if (state.form.batch && state.entryMode === 'class') (state.historyClasses || []).forEach((c) => { const t = String(c.topic || '').trim(); if (c.entryType !== 'activity' && t && entryBatches(c).indexOf(state.form.batch) !== -1 && !items.some((x) => x.toLowerCase() === t.toLowerCase())) items.push(t); });
+    const show = items.slice(0, 2).filter((v) => !typedF || v.toLowerCase().indexOf(typedF) !== -1);
+    box.hidden = !show.length; box.innerHTML = show.map((v) => `<button type="button" class="chip" data-top="${escapeHtml(v)}">${escapeHtml(v.length > 60 ? v.slice(0, 58) + '…' : v)}</button>`).join('');
   }
+  function lastKindNoteFor(kind, batch) { const c = (state.historyClasses || []).find((x) => x.entryType !== 'activity' && x[kind] && x[kind + 'Note'] && entryBatches(x).indexOf(batch) !== -1); return c ? String(c[kind + 'Note']) : ''; }
   function syncChapterLabel() { const sm = document.querySelector('#topicField label[for="chapterInput"] small'); if (sm) sm.textContent = (state.editingId && state.editLegacy) ? 'Optional for this old class' : 'Required'; }
 
   function showFormMsg(text) {
@@ -6472,7 +6487,19 @@
   }
   // A timetable counts as published once Publish was pressed, even if no class had a teacher yet.
   function tgEverPub(doc) { return !!doc && (((doc.published || []).length > 0) || !!doc.publishedAt || ((doc.pubDays || []).length > 0)); }
-  function tgSave() { if (state.subDay) state.subDay.key = ''; if (state.trep) state.trep.key = '';
+  let ctSweepTimer = null;
+  function ctSweepSoon() {
+    clearTimeout(ctSweepTimer);
+    ctSweepTimer = setTimeout(async () => {
+      try {
+        const doc = state.tg.doc; if (!doc || !state.db || !state.tg.docKey) return; const ws = state.tt.weekStart; if (!ws) return;
+        const exams = await ctExamsInRange(ws, shiftDateStr(ws, 6)); const used = new Set((doc.cells || []).map((c) => c.ctId).filter(Boolean));
+        const orphans = exams.filter((e) => e.fromTimetable === state.tg.docKey && !used.has(e.id)).map((e) => e.id);
+        if (orphans.length) { await ctDropPlans(orphans); showToast(orphans.length === 1 ? 'Class test plan removed too' : `${orphans.length} class test plans removed too`); }
+      } catch (err) { /* ignore */ }
+    }, 1500);
+  }
+  function tgSave() { ctSweepSoon(); if (state.subDay) state.subDay.key = ''; if (state.trep) state.trep.key = '';
     if (state.tg.doc) tgFixCombos(state.tg.doc);
     const doc = state.tg.doc; if (!doc) return;
     ttCacheStale();
@@ -8428,7 +8455,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (clr) clr.addEventListener('click', () => {
       const gone = list.filter((x) => x.read && !x.lead);
       gone.forEach((x) => state.db.doc('notices/' + state.teacherId + '/items/' + x.id).delete().catch(() => {}));
-      state.notices = (state.notices || []).filter((x) => gone.indexOf(x) === -1);
+      { const goneIds = new Set(gone.map((x) => x.id)); state.notices = (state.notices || []).filter((x) => !goneIds.has(x.id)); }
       renderBell(); openNotices(); showToast(`${gone.length} cleared`);
     });
     body.querySelectorAll('[data-nt]').forEach((b) => b.addEventListener('click', () => {
@@ -10855,7 +10882,8 @@ Rules:
           r.cls.forEach((c) => { const b = c.batch || 'Unknown'; counts[b] = (counts[b] || 0) + classUnits(c); });
           const lines = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map((b) => `<div style="display:flex; justify-content:space-between;"><span>${escapeHtml(b)}</span><span style="font-weight:600;">${fmtUnits(counts[b])}</span></div>`).join('');
           detail = `<div class="ad-detail">
-            ${sessListHtml(campus)}
+ <button type="button" class="ad-close" data-ad-close aria-label="Close details">${AD_CHEV_UP}</button>
+ ${sessListHtml(campus)}
             ${lines ? `<div class="class-checklist-notes" style="display:flex; flex-direction:column; gap:3px;"><div style="font-weight:600;">Batch-wise</div>${lines}</div>` : ''}
             ${r.entries.length ? entryListHtml(r.entries, true) : '<div class="hv-note" style="text-align:left;">No classes or activities logged.</div>'}
             ${stuckCheckedIn ? `<button class="action-btn" data-force-checkout="${r.tid}" style="color:#B91C1C; border-color:#B91C1C; align-self:flex-start;">Force check-out</button>` : ''}
@@ -10870,7 +10898,8 @@ Rules:
  ${locNote(campus)}
  </div>
  <span class="ad-pill ${r.st.key}">${r.st.label}</span>
-        </div>${detail}`;
+ <span class="ad-chev" aria-hidden="true">${expanded ? AD_CHEV_UP : AD_CHEV_DOWN}</span>
+ </div>${detail}`;
       }).join('')}</div>`;
       state._tcRows = teacherRows; try { tcApplyFilter(teacherRows); } catch (e) { /* ignore */ }
     listEl.querySelectorAll('[data-teacher-id]').forEach((row) => row.addEventListener('click', () => {
@@ -10878,7 +10907,8 @@ Rules:
         state.adminExpandedTeacher = state.adminExpandedTeacher === tid ? null : tid;
         renderAdmin();
       }));
-      listEl.querySelectorAll('[data-force-checkout]').forEach((btn) => btn.addEventListener('click', async (e) => {
+      listEl.querySelectorAll('[data-ad-close]').forEach((bn) => bn.addEventListener('click', (e) => { e.stopPropagation(); state.adminExpandedTeacher = null; renderAdmin(); }));
+ listEl.querySelectorAll('[data-force-checkout]').forEach((btn) => btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         await adminForceCheckout(btn.getAttribute('data-force-checkout'), state.adminDate);
       }));
@@ -11574,6 +11604,7 @@ Rules:
       renderAdmin(); showToast(`${sel.length} exams combined into one`);
     } catch (err) { flashOffline(err); }
   }
+  let exLastScroll = 0; window.addEventListener('scroll', () => { exLastScroll = Date.now(); }, { passive: true, capture: true });
   function bindAdminExamList(listEl, exams, nameOf) {
     listEl.querySelectorAll('[data-exam]').forEach((row) => {
       const id = row.getAttribute('data-exam');
@@ -11582,9 +11613,9 @@ Rules:
       row.addEventListener('pointerdown', (e) => {
         if (e.target.closest('button')) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
-        stop(); const sx = e.clientX, sy = e.clientY;
-        row._mv = (ev) => { if (Math.abs(ev.clientX - sx) > 10 || Math.abs(ev.clientY - sy) > 10) stop(); };
-        lpT = setTimeout(() => { lpT = null; row._lp = true; if (state.exSel) return; try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ } state.exSel = [id]; state.exOpen = null; renderAdmin(); }, 480);
+        if (Date.now() - exLastScroll < 400) return; stop(); const sx = e.clientX, sy = e.clientY;
+        row._mv = (ev) => { if (Math.abs(ev.clientX - sx) > 8 || Math.abs(ev.clientY - sy) > 8) stop(); };
+        lpT = setTimeout(() => { lpT = null; row._lp = true; setTimeout(() => { row._lp = false; }, 1200); if (state.exSel) return; try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* ignore */ } state.exSel = [id]; state.exOpen = null; renderAdmin(); }, 650);
       });
       row.addEventListener('pointermove', (e) => { if (row._mv) row._mv(e); });
       ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => row.addEventListener(ev, stop));
@@ -14122,6 +14153,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     syncDurChips();
   });
   document.getElementById('chapterInput').addEventListener('input', () => { state.form.chapter = document.getElementById('chapterInput').value; renderTopicSuggest(); });
+ document.getElementById('topicInput').addEventListener('input', () => { state.form.topic = document.getElementById('topicInput').value; renderTopicChips(); });
+ document.getElementById('topicSuggest').addEventListener('click', (e) => { const b = e.target && e.target.closest ? e.target.closest('[data-top]') : null; if (!b) return; const v = b.getAttribute('data-top'); document.getElementById('topicInput').value = v; state.form.topic = v; renderTopicChips(); });
     document.getElementById('chapterSuggest').addEventListener('click', (e) => {
       const b = e.target && e.target.closest ? e.target.closest('[data-chap]') : null; if (!b) return;
       const v = b.getAttribute('data-chap'); const ci = document.getElementById('chapterInput'); ci.value = v; state.form.chapter = v; showFormMsg(''); renderTopicSuggest();
@@ -14149,9 +14182,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const row = trigger.closest('.checklist-item'); const key = row.getAttribute('data-key'); if (key === 'test') return; state.form[key] = !state.form[key];
       renderForm();
       if (state.form[key]) {
-        const input = document.getElementById(key + 'NoteInput');
-        if (input) input.focus();
-      }
+ const input = document.getElementById(key + 'NoteInput');
+ if (input && !input.value) { const pn = lastKindNoteFor(key, state.form.batch); if (pn) input.value = pn; }
+ if (input) input.focus();
+ }
     });
   });
 
@@ -16184,6 +16218,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       state.db.doc('campusLogs/' + date).collection('teachers').doc(state.teacherId).set({ loc: arr }, { merge: true }).catch(() => { /* a note for the Admin: never bothers the teacher */ });
     } catch (e) { /* ignore */ }
   }
+  const AD_CHEV_DOWN = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  const AD_CHEV_UP = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
   // words and numbers for the Admin's campus notes (minutes are "min", distances are "metres" or "km")
   function durLong(mins) { mins = Math.max(0, Math.round(mins || 0)); const h = Math.floor(mins / 60), m = mins % 60; return h ? (m ? `${h} h ${m} min` : `${h} h`) : `${m} min`; }
   function locPart(e) {
@@ -16309,6 +16345,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return state.historyClasses.find((c) => c.entryType !== 'activity' && c.batch === batch) || null;
   }
 
+  function lastActivityNoteFor(type) { const a = (state.historyClasses || []).find((c) => c.entryType === 'activity' && c.activityType === type && c.note); return a ? String(a.note) : ''; }
   function findLastActivity() {
     return state.historyClasses.find((c) => c.entryType === 'activity') || null;
   }
@@ -16398,18 +16435,25 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const typedTopic = document.getElementById('topicInput').value; const typedChapter = document.getElementById('chapterInput').value;
     const keepExtra = ((state.form && state.form.extra) || []).filter((x) => x !== batch);
     const keepOpen = !!(state.form && state.form.combineOpen);
-    state.form = {
-      extra: keepExtra,
-      combineOpen: keepOpen,
-      batch,
-      topic: typedTopic,
-      chapter: typedChapter,
+ // the chapter of this class's last class is filled in; what was typed for another class is not carried over
+ const keepTyped = !state.form || !state.form.batch || state.form.batch === batch;
+ const chap0 = (keepTyped && typedChapter) ? typedChapter : ((last && last.chapter) ? last.chapter : '');
+ const top0 = (keepTyped && typedTopic) ? typedTopic : ((last && last.topic) ? String(last.topic) : '');
+ state.form = {
+ extra: keepExtra,
+ combineOpen: keepOpen,
+ batch,
+ topic: top0,
+ chapter: chap0,
+ chapterAuto: (chap0 && !(keepTyped && typedChapter)) ? chap0 : '',
+ topicAuto: (top0 && !(keepTyped && typedTopic)) ? top0 : '',
       worksheet: false,
       material: false,
       test: false,
       homework: false
     };
-    document.getElementById('worksheetNoteInput').value = '';
+    document.getElementById('chapterInput').value = chap0; document.getElementById('topicInput').value = top0;
+ document.getElementById('worksheetNoteInput').value = '';
     document.getElementById('materialNoteInput').value = '';
     document.getElementById('testNoteInput').value = '';
     document.getElementById('homeworkNoteInput').value = '';
@@ -17010,7 +17054,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
           entryType: 'class',
           teacherId: state.teacherId,
           date: entryDate,
-          subject: state.teacherSubject || state.form.slotSubject || '',
+          subject: state.teacherSubject || '',
           createdAt: Date.now()
         }, payload));
       // The entry is stored on the phone right away; don't keep the teacher waiting when the network is slow or offline.
