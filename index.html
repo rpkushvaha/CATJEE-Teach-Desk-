@@ -3597,7 +3597,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.91 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.92 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14215,7 +14215,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.getElementById('subjectDisplay').style.display = 'flex';
     if (state.db && state.teacherId) {
       try {
-        await state.db.doc('profile/' + state.teacherId).set({ subject: trimmed });
+        await state.db.doc('profile/' + state.teacherId).set({ subject: trimmed }, { merge: true });
         showToast('Subject saved');
       } catch (err) { flashOffline(err); }
     } else {
