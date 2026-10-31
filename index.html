@@ -42,6 +42,251 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
+/* ===== CATJEE Teach Desk: DEMO MODE (only active when the address has ?demo). No real Firebase, no real data. ===== */
+(function () {
+  var q = location.search || '';
+  if (!/[?&]demo(=|&|$)/.test(q)) return;
+  var role = ((q.match(/[?&]demo=([a-z]+)/) || [])[1] || '');
+  window.__DEMO = true; window.__DEMO_ROLE = role;
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+
+  // ---- the demo never touches the real phone storage, the real server or the real notifications ----
+  try {
+    var mem = {};
+    Storage.prototype.getItem = function (k) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; };
+    Storage.prototype.setItem = function (k, v) { mem[k] = String(v); };
+    Storage.prototype.removeItem = function (k) { delete mem[k]; };
+    Storage.prototype.clear = function () { mem = {}; };
+    Storage.prototype.key = function (i) { return Object.keys(mem)[i] || null; };
+    mem['ctd_intro_seen_v1'] = '1';
+  } catch (e) { /* ignore */ }
+  try { var of = window.fetch; window.fetch = function (u, o) { var s = String((u && u.url) || u || ''); if (/workers\.dev|googleapis|gstatic|firebase/i.test(s)) { return Promise.resolve(new Response(JSON.stringify({ ok: false, error: 'This is not available in the demo.' }), { status: 200, headers: { 'Content-Type': 'application/json' } })); } return of.apply(this, arguments); }; } catch (e) { /* ignore */ }
+  try { navigator.geolocation.getCurrentPosition = function (ok, err) { if (err) setTimeout(function () { err({ code: 1, message: 'demo' }); }, 0); }; } catch (e) { /* ignore */ }
+  try { if (window.Notification) { Notification.requestPermission = function () { return Promise.resolve('denied'); }; } } catch (e) { /* ignore */ }
+  try { if (navigator.serviceWorker) navigator.serviceWorker.register = function () { return Promise.reject(new Error('demo')); }; } catch (e) { /* ignore */ }
+
+  // ================= the fake Firebase =================
+  var store = {}; var listeners = [];
+  function clone(o) { return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
+  function getF(o, f) { var p = String(f).split('.'); var v = o; for (var i = 0; i < p.length; i++) { if (v == null) return undefined; v = v[p[i]]; } return v; }
+  function setF(o, f, val) { var p = String(f).split('.'); var v = o; for (var i = 0; i < p.length - 1; i++) { if (typeof v[p[i]] !== 'object' || v[p[i]] === null) v[p[i]] = {}; v = v[p[i]]; } v[p[p.length - 1]] = val; }
+  function deepMerge(a, b) { var o = clone(a) || {}; Object.keys(b).forEach(function (k) { var v = b[k]; if (v && typeof v === 'object' && !Array.isArray(v) && o[k] && typeof o[k] === 'object' && !Array.isArray(o[k])) o[k] = deepMerge(o[k], v); else o[k] = clone(v); }); return o; }
+  function parts(p) { return String(p).split('/').filter(Boolean); }
+  function newId() { return Math.random().toString(36).slice(2, 12); }
+  function kids(prefix) { var pre = prefix + '/'; var out = []; Object.keys(store).forEach(function (k) { if (k.indexOf(pre) === 0 && k.slice(pre.length).indexOf('/') === -1) out.push(k); }); return out; }
+  var notifyT = null;
+  function notify() { clearTimeout(notifyT); notifyT = setTimeout(function () { listeners.slice().forEach(function (l) { if (l.on) l.fire(); }); }, 0); }
+  function docRef(path) {
+    var pp = parts(path);
+    var ref = {
+      id: pp[pp.length - 1], path: pp.join('/'),
+      get parent() { return colRef(pp.slice(0, -1).join('/')); },
+      collection: function (n) { return colRef(pp.join('/') + '/' + n); },
+      get: function () { return Promise.resolve(snapOf(pp.join('/'))); },
+      set: function (d, o) { var k = pp.join('/'); store[k] = (o && o.merge) ? deepMerge(store[k] || {}, d) : clone(d); notify(); return Promise.resolve(); },
+      update: function (d) { var k = pp.join('/'); if (store[k] === undefined) return Promise.reject({ code: 'not-found', message: 'No document to update' }); var cur = clone(store[k]); Object.keys(d).forEach(function (f) { setF(cur, f, clone(d[f])); }); store[k] = cur; notify(); return Promise.resolve(); },
+      delete: function () { delete store[pp.join('/')]; notify(); return Promise.resolve(); },
+      onSnapshot: function (cb, err) { var l = { on: true, fire: function () { try { cb(snapOf(pp.join('/'))); } catch (e) { console.error(e); } } }; listeners.push(l); setTimeout(function () { if (l.on) l.fire(); }, 0); return function () { l.on = false; }; }
+    };
+    return ref;
+  }
+  function snapOf(k) { var d = store[k]; var pp = parts(k); return { id: pp[pp.length - 1], exists: d !== undefined, ref: docRef(k), data: function () { return d === undefined ? undefined : clone(d); }, get: function (f) { return d === undefined ? undefined : getF(d, f); } }; }
+  function cmp(a, b) { if (a === b) return 0; if (a === undefined || a === null) return -1; if (b === undefined || b === null) return 1; return a < b ? -1 : 1; }
+  function colRef(path) {
+    var base = parts(path).join('/'); var st = { wh: [], ob: [], lim: null, sa: null, saI: false, ea: null };
+    function run() {
+      var keys = kids(base); var docs = keys.map(function (k) { return snapOf(k); });
+      st.wh.forEach(function (w) {
+        docs = docs.filter(function (d) {
+          var v = (w.f === '__name__') ? d.id : getF(store[d.ref.path], w.f); var x = w.v;
+          switch (w.op) { case '==': return v === x; case '!=': return v !== x; case '<': return v < x; case '<=': return v <= x; case '>': return v > x; case '>=': return v >= x;
+            case 'in': return Array.isArray(x) && x.indexOf(v) !== -1; case 'not-in': return !(Array.isArray(x) && x.indexOf(v) !== -1);
+            case 'array-contains': return Array.isArray(v) && v.indexOf(x) !== -1; case 'array-contains-any': return Array.isArray(v) && v.some(function (e) { return x.indexOf(e) !== -1; }); default: return true; }
+        });
+      });
+      var obs = st.ob.length ? st.ob : [];
+      if (obs.length) docs.sort(function (a, b) { for (var i = 0; i < obs.length; i++) { var o = obs[i]; var va = o.f === '__name__' ? a.id : getF(store[a.ref.path], o.f); var vb = o.f === '__name__' ? b.id : getF(store[b.ref.path], o.f); var c = cmp(va, vb); if (c) return o.d === 'desc' ? -c : c; } return 0; });
+      else docs.sort(function (a, b) { return cmp(a.id, b.id); });
+      if (st.sa !== null && obs.length) { var f0 = obs[0].f; docs = docs.filter(function (d) { var v = f0 === '__name__' ? d.id : getF(store[d.ref.path], f0); var c = cmp(v, st.sa); return st.saI ? c > 0 : c >= 0; }); }
+      if (st.ea !== null && obs.length) { var f1 = obs[0].f; docs = docs.filter(function (d) { var v = f1 === '__name__' ? d.id : getF(store[d.ref.path], f1); return cmp(v, st.ea) <= 0; }); }
+      if (st.lim !== null) docs = docs.slice(0, st.lim);
+      return { docs: docs, size: docs.length, empty: !docs.length, forEach: function (fn) { docs.forEach(fn); }, docChanges: function () { return docs.map(function (d, i) { return { type: 'added', doc: d, newIndex: i, oldIndex: -1 }; }); } };
+    }
+    var q = {
+      where: function (f, op, v) { st.wh.push({ f: f, op: op, v: v }); return q; },
+      orderBy: function (f, d) { st.ob.push({ f: f, d: d || 'asc' }); return q; },
+      limit: function (n) { st.lim = n; return q; },
+      startAt: function (v) { st.sa = v; st.saI = false; return q; }, startAfter: function (v) { st.sa = v; st.saI = true; return q; }, endAt: function (v) { st.ea = v; return q; },
+      get: function () { return Promise.resolve(run()); },
+      onSnapshot: function (cb, err) { var l = { on: true, fire: function () { try { cb(run()); } catch (e) { console.error(e); } } }; listeners.push(l); setTimeout(function () { if (l.on) l.fire(); }, 0); return function () { l.on = false; }; },
+      doc: function (id) { return docRef(base + '/' + (id || newId())); },
+      add: function (d) { var id = newId(); store[base + '/' + id] = clone(d); notify(); return Promise.resolve(docRef(base + '/' + id)); },
+      get id() { var pp = parts(base); return pp[pp.length - 1]; }, get path() { return base; }
+    };
+    return q;
+  }
+  var db = {
+    doc: function (p) { return docRef(p); }, collection: function (p) { return colRef(p); },
+    batch: function () { var ops = []; return { set: function (r, d, o) { ops.push(function () { return r.set(d, o); }); return this; }, update: function (r, d) { ops.push(function () { return r.update(d); }); return this; }, delete: function (r) { ops.push(function () { return r.delete(); }); return this; }, commit: function () { return Promise.all(ops.map(function (f) { return f(); })).then(function () { return undefined; }); } }; },
+    runTransaction: function (fn) { return Promise.resolve(fn({ get: function (r) { return r.get(); }, set: function (r, d, o) { return r.set(d, o); }, update: function (r, d) { return r.update(d); }, delete: function (r) { return r.delete(); } })); },
+    enablePersistence: function () { return Promise.resolve(); }, settings: function () {}, enableNetwork: function () { return Promise.resolve(); }, disableNetwork: function () { return Promise.resolve(); }
+  };
+  // ---- the fake sign-in: the demo user is always "signed in" (or nobody, on the welcome screen)
+  var DEMO_UID = role === 'admin' ? 'D0' : 'D1';
+  var user = role ? { uid: DEMO_UID, email: 'demo@catjee.app', displayName: role === 'admin' ? 'Demo Admin' : 'Amit Sharma', photoURL: null, emailVerified: true, getIdToken: function () { return Promise.resolve('demo'); }, updateProfile: function () { return Promise.resolve(); } } : null;
+  var authObj = {
+    get currentUser() { return user; },
+    onAuthStateChanged: function (cb) { setTimeout(function () { cb(user); }, 0); return function () {}; },
+    signOut: function () { try { location.replace(location.pathname + '?demo'); } catch (e) { /* ignore */ } return Promise.resolve(); },
+    signInWithEmailAndPassword: function () { return Promise.reject({ code: 'auth/demo', message: 'Sign-in is not available in the demo.' }); },
+    createUserWithEmailAndPassword: function () { return Promise.reject({ code: 'auth/demo', message: 'Creating an account is not available in the demo.' }); },
+    signInWithPopup: function () { return Promise.reject({ code: 'auth/demo', message: 'Sign-in is not available in the demo.' }); },
+    signInWithRedirect: function () { return Promise.reject({ code: 'auth/demo', message: 'Sign-in is not available in the demo.' }); },
+    getRedirectResult: function () { return Promise.resolve({ user: null }); },
+    sendPasswordResetEmail: function () { return Promise.reject({ code: 'auth/demo', message: 'Not available in the demo.' }); },
+    setPersistence: function () { return Promise.resolve(); }
+  };
+  var authFn = function () { return authObj; };
+  authFn.GoogleAuthProvider = function () {}; authFn.Auth = { Persistence: { LOCAL: 'local', SESSION: 'session', NONE: 'none' } };
+  var fsFn = function () { return db; };
+  fsFn.FieldPath = { documentId: function () { return '__name__'; } };
+  fsFn.FieldValue = { delete: function () { return undefined; }, serverTimestamp: function () { return Date.now(); }, increment: function (n) { return n; }, arrayUnion: function () { return []; }, arrayRemove: function () { return []; } };
+  fsFn.Timestamp = { now: function () { return { toMillis: function () { return Date.now(); } }; } };
+  window.firebase = { initializeApp: function () { return {}; }, apps: [{}], auth: authFn, firestore: fsFn, messaging: function () { return {}; } };
+  window.__demoStore = store;
+  // ================= the sample data (all made up; dates follow today) =================
+  (function seed() {
+    var now = new Date();
+    function dstr(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+    function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+    function day(n) { return dstr(addDays(now, n)); }
+    function hm(min) { min = ((min % 1440) + 1440) % 1440; return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
+    function ts(dateStr, minutes) { var p = dateStr.split('-'); return new Date(+p[0], +p[1] - 1, +p[2], Math.floor(minutes / 60), minutes % 60, 0, 0).getTime(); }
+    var nowMin = now.getHours() * 60 + now.getMinutes(); var today = day(0);
+    var dow = (now.getDay() + 6) % 7; var monday = dstr(addDays(now, -dow));
+
+    var T = [
+      ['D0', 'Demo Admin', 'sir', 'Mathematics'], ['D1', 'Amit Sharma', 'sir', 'Mathematics'], ['D2', 'Neha Verma', 'maam', 'Physics'],
+      ['D3', 'Rahul Mehta', 'sir', 'Chemistry'], ['D4', 'Pooja Nair', 'maam', 'Biology'], ['D5', 'Sandeep Rao', 'sir', 'English'], ['D6', 'Anita Joshi', 'maam', 'Reasoning']
+    ];
+    var batches = ['Class 9 - Batch 1', 'Class 9 - Batch 2', 'Class 10 - Batch 1', 'Class 10 - Batch 2', 'Class 10 - Remedial'];
+    var chapters = { Mathematics: ['Real Numbers', 'Polynomials', 'Quadratic Equations', 'Statistics', 'Circles'], Physics: ['Light', 'Electricity', 'Motion'], Chemistry: ['Acids and Bases', 'Metals', 'Carbon Compounds'], Biology: ['Life Processes', 'Heredity'], English: ['Letter Writing', 'Grammar'], Reasoning: ['Series', 'Analogy'] };
+    var topics = { Mathematics: ['Word problems', 'Mode and median', 'Tangents', 'Factorisation'], Physics: ['Reflection', 'Ohm\'s law'], Chemistry: ['pH scale', 'Reactivity series'], Biology: ['Digestion'], English: ['Formal letters'], Reasoning: ['Number series'] };
+    T.forEach(function (t, i) {
+      store['profile/' + t[0]] = { name: t[1], salutation: t[2], subject: t[3], whatsapp: '98000000' + pad(i) + '00', birthMd: pad(((i * 3) % 12) + 1) + '-' + pad(((i * 5) % 27) + 1), email: 'demo' + i + '@catjee.app' };
+      store['team/' + t[0]] = { name: t[1], role: 'teacher', wings: ['Pre-Foundation'], status: 'active', sal: t[2] };
+      store['members/' + t[0]] = { at: Date.now() };
+    });
+    store['admins/D0'] = { at: Date.now() };
+    store['settings/batches'] = { wings: { 'Pre-Foundation': batches } };
+    store['settings/subjects'] = { list: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Reasoning'] };
+    store['settings/rooms'] = { list: ['D1', 'D2', 'E3', 'F1', 'G2'] };
+    store['settings/testTypes'] = { list: ['Class Test', 'Unit Test', 'Weekly Test', 'Half-Yearly'] };
+    store['settings/institute'] = { weeklyOff: ['Sun'], holidays: [], birthdays: [] };
+    store['settings/campusLocation'] = { lat: 25.30358, lng: 82.97919, radius: 250 };
+    store['settings/directorContact'] = { phone: '', email: '' };
+    store['settings/staffTitles'] = { map: {} };
+    store['settings/teacherMap'] = { map: {} };
+
+    // ---- one teacher's day: some slots, which of them are logged ----
+    var slotDefs = [[580, 40], [630, 65], [715, 65], [790, 65], [885, 60]]; // 9:40, 10:30, 11:55, 1:10 PM, 2:45 PM
+    function rel() { var a = Math.max(9 * 60 + 30, Math.min(nowMin, 20 * 60)); return [[a - 150, 60, true], [a - 20, 65, false], [a + 75, 60, false]]; }
+    function mapKind(uid) { return uid; }
+    var cells = []; var PSTART = [540, 580, 630, 715, 790, 885];
+    function pIdx(min) { var bi = 0, bd = 1e9; PSTART.forEach(function (x, i) { var dd = Math.abs(x - min); if (dd < bd) { bd = dd; bi = i; } }); return bi; }
+    T.forEach(function (t, ti) {
+      var uid = t[0]; var subj = t[3];
+      for (var d = -9; d <= 5; d++) {
+        var date = day(d); var wd = (addDays(now, d).getDay() + 6) % 7; if (wd === 6) continue; // no Sunday
+        var defs = d === 0 ? rel() : slotDefs.map(function (s) { return [s[0], s[1], d < 0]; });
+        var n = d === 0 ? 3 : 2 + ((ti + d + 7) % 2);
+        for (var k = 0; k < Math.min(n, defs.length); k++) {
+          var def = defs[(k + ti) % defs.length]; if (d === 0) def = defs[k];
+          var b = batches[(ti + k + ((d + 9) % 3)) % batches.length]; var id = 's_' + uid + '_' + date + '_' + k;
+          if (date >= monday && date <= day(6 - dow) && b !== 'Class 10 - Remedial') cells.push({ d: date, p: pIdx(def[0]), b: b, s: subj, t: uid });
+          store['schedule/' + uid + '/slots/' + id] = { date: date, time: hm(def[0]), duration: def[1], label: b, batches: [b], subject: subj, room: ['D1', 'D2', 'E3', 'F1', 'G2'][(ti + k) % 5], setBy: 'admin', createdAt: Date.now() };
+          if (def[2] || (d < 0)) {
+            var cid = 'c_' + uid + '_' + date + '_' + k; var ch = chapters[subj] || ['Chapter 1']; var tp = topics[subj] || ['Introduction'];
+            store['classes/' + cid] = { entryType: 'class', teacherId: uid, date: date, subject: subj, batch: b, batches: null, chapter: ch[(d + 20 + ti) % ch.length], topic: tp[(d + 20 + k) % tp.length], kinds: null, kindNotes: null, startTimeStr: hm(def[0]), endTimeStr: hm(def[0] + def[1]), worksheet: k === 0 && d % 2 === 0, material: false, test: false, homework: k === 1, worksheetNote: k === 0 && d % 2 === 0 ? 'Practice set 2' : '', materialNote: '', testNote: '', testRooms: '', homeworkNote: k === 1 ? 'Exercise 4.1 Q1 to Q5' : '', createdAt: ts(date, def[0] + def[1]) };
+          }
+        }
+        // attendance of a past day: one check-in and check-out
+        if (d < 0 && !(uid === 'D6' && d % 2 === 0)) {
+          var a0 = ts(date, 540 + ((ti * 7 + d + 20) % 25)); var a1 = ts(date, 1020 + ((ti * 11 + d + 20) % 40));
+          store['campusHistory/' + uid + '/days/' + date] = { totalSeconds: Math.round((a1 - a0) / 1000), checkedIn: false, checkInAt: null, sessionCount: 1, sessions: [{ id: 'a' + date, in: a0, out: a1 }] };
+          store['campusLogs/' + date + '/teachers/' + uid] = { totalSeconds: Math.round((a1 - a0) / 1000), checkedIn: false, checkInAt: null, sessionCount: 1, sessions: [{ id: 'a' + date, in: a0, out: a1 }], loc: [{ k: 'in', at: a0, s: 'on', d: 30 + ti * 9, a: 12 }, { k: 'out', at: a1, s: 'on', d: 40 + ti * 5, a: 12 }] };
+        }
+      }
+      // today
+      if (uid !== 'D5' && uid !== 'D6') {
+        var ci = ts(today, Math.max(0, Math.min(nowMin - 25, 9 * 60 + 5 + ti * 6))); if (nowMin < 9 * 60 + 40) ci = ts(today, Math.max(0, nowMin - 20));
+        var out = (uid === 'D4') ? ci + 2.5 * 3600 * 1000 : null; if (out && out > Date.now()) out = null;
+        var sess = [{ id: 'a' + today, in: ci, out: out }]; var totalS = out ? Math.round((out - ci) / 1000) : 0;
+        var loc = [{ k: 'in', at: ci, s: 'on', d: 40 + ti * 9, a: 12 }]; if (uid === 'D3') loc.push({ k: 'out', at: ci + 2000, s: 'away', d: 3900, a: 15 });
+        var rec = { totalSeconds: totalS, checkedIn: !out, checkInAt: out ? null : ci, sessionCount: 1, sessions: sess, loc: loc };
+        store['campusHistory/' + uid + '/days/' + today] = { totalSeconds: totalS, checkedIn: !out, checkInAt: out ? null : ci, sessionCount: 1, sessions: sess };
+        store['campusLogs/' + today + '/teachers/' + uid] = rec;
+      }
+    });
+
+    // ---- the published timetable of this week (the same classes as in the teachers' schedules) ----
+    var seen = {}; var cells2 = []; cells.forEach(function (c) { var k = c.d + '|' + c.p + '|' + c.b; if (!seen[k]) { seen[k] = 1; cells2.push(c); } });
+    var weekDates = []; for (var wd0 = 0; wd0 < 6; wd0++) weekDates.push(dstr(addDays(now, wd0 - dow)));
+    store['timetables/' + monday + '__Pre-Foundation__morning'] = { group: 'Pre-Foundation|morning', wing: 'Pre-Foundation', session: 'morning', weekStart: monday, sunday: false, cells: cells2, status: 'published', published: weekDates.slice(), pubDays: weekDates.slice(), publishedAt: Date.now() - 86400000 };
+
+    // ---- exams today and tomorrow, with their invigilation duty ----
+    var ctS = Math.max(nowMin + 40, 13 * 60), ctE = ctS + 65;
+    store['exams/ex_ct'] = { type: 'Class Test', subject: 'Mathematics', name: '', date: today, start: hm(ctS), end: hm(ctE), room: 'F1, D1', scope: ['Class 10 - Batch 1', 'Class 10 - Batch 2'], invigilators: ['D1', 'D2'], ct: true, createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'F1', scope: ['Class 10 - Batch 1'], slots: [{ start: hm(ctS), end: hm(ctE), teachers: ['D1'] }] }, { room: 'D1', scope: ['Class 10 - Batch 2'], slots: [{ start: hm(ctS), end: hm(ctE), teachers: ['D2'] }] }] } };
+    store['exams/ex_ut'] = { type: 'Unit Test', subject: 'Physics / Chemistry', name: '', date: day(1), start: '10:00', end: '11:15', room: 'E3, G2', scope: ['Class 9 - Batch 1', 'Class 9 - Batch 2'], papers: [{ scope: ['Class 9 - Batch 1'], subject: 'Physics' }, { scope: ['Class 9 - Batch 2'], subject: 'Chemistry' }], invigilators: ['D3', 'D4', 'D5'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'E3', scope: ['Class 9 - Batch 1'], slots: [{ start: '10:00', end: '10:40', teachers: ['D3'] }, { start: '10:40', end: '11:15', teachers: ['D4'] }] }, { room: 'G2', scope: ['Class 9 - Batch 2'], slots: [{ start: '10:00', end: '11:15', teachers: ['D5'] }] }] } };
+
+    // ---- notices and bell items for the demo teacher ----
+    ['D0', 'D1'].forEach(function (u) {
+      store['notices/' + u + '/items/n_notice'] = { type: 'notice', title: 'Parent-teacher meeting', body: 'On Saturday at 11:00 AM. Please be on campus 15 minutes early.', byName: 'Demo Admin', at: Date.now() - 3600000, read: false };
+      store['notices/' + u + '/items/n_duty'] = { type: 'duty', title: 'Exam duty updated: Class Test · Mathematics · F1', body: 'Today ' + hm(ctS) + ' – ' + hm(ctE), at: Date.now() - 1800000, read: false };
+    });
+  })();
+  // ================= the demo screens: welcome, the DEMO bar, "Get access" =================
+  var CONTACT_WA = ''; // the WhatsApp number of the person who gives Staff IDs (digits with country code). Empty = the button is hidden.
+  function addCss() {
+    var st = document.createElement('style'); st.textContent =
+      '#demoBar{position:sticky;top:0;z-index:99990;background:#FFF1D6;color:#7A4B00;font:600 12.5px/1.2 system-ui,sans-serif;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #f0d9a8}' +
+      '#demoBar .db-t{flex:1;min-width:0}#demoBar a,#demoBar button{font:700 11.5px system-ui,sans-serif;border-radius:99px;padding:5px 11px;text-decoration:none;border:0;cursor:pointer;white-space:nowrap}' +
+      '#demoBar .db-sw{background:#fff;color:#7A4B00;border:1px solid #e6c27a}#demoBar .db-ga{background:#E63946;color:#fff}' +
+      '#demoWelcome,#demoAccess{position:fixed;inset:0;z-index:100000;background:#fff;color:#171717;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow:auto}' +
+      '#demoWelcome .dw-logo,#demoAccess .dw-logo{font-weight:800;font-size:26px;color:#E63946;margin:0 0 4px}#demoWelcome .dw-sub,#demoAccess .dw-sub{color:#555;font-size:14px;margin:0 0 20px;max-width:320px}' +
+      '#demoWelcome .dw-card,#demoAccess .dw-card{border:1px solid #e6e6e6;border-left:4px solid #E63946;border-radius:14px;padding:12px 14px;text-align:left;max-width:340px;margin-bottom:16px;font-size:13.5px;line-height:1.4}' +
+      '.dw-btn{display:block;width:100%;max-width:340px;box-sizing:border-box;border-radius:14px;padding:14px;font:700 15px system-ui,sans-serif;text-decoration:none;margin:6px 0;border:1.5px solid #ddd;color:#171717;background:#fff;cursor:pointer}' +
+      '.dw-btn.red{background:#E63946;border-color:#E63946;color:#fff}.dw-link{color:#777;font-size:13px;margin-top:14px;text-decoration:underline}' +
+      '#demoAccess[hidden]{display:none}#installCard,#pushCard,#menuInstallRow{display:none!important}';
+    document.head.appendChild(st);
+  }
+  function other() { return role === 'admin' ? 'teacher' : 'admin'; }
+  function build() {
+    addCss(); var base = location.pathname;
+    if (!role) {
+      var w = document.createElement('div'); w.id = 'demoWelcome';
+      w.innerHTML = '<div class="dw-logo">CATJEE Teach Desk</div><div class="dw-sub">Attendance, classes, exams and reports in one app</div>' +
+        '<div class="dw-card"><b>Take a 2-minute tour</b><br>No login needed. You will see sample data, not real teachers or classes.</div>' +
+        '<a class="dw-btn red" href="' + base + '?demo=teacher">Explore as a Teacher</a><a class="dw-btn" href="' + base + '?demo=admin">Explore as Admin / Director</a>' +
+        '<a class="dw-link" href="' + base + '">I already have a Staff ID · Sign in</a>';
+      document.body.appendChild(w); return;
+    }
+    var bar = document.createElement('div'); bar.id = 'demoBar';
+    bar.innerHTML = '<span class="db-t">DEMO · Sample data · Nothing is saved</span><a class="db-sw" href="' + base + '?demo=' + other() + '">' + (role === 'admin' ? 'Teacher view' : 'Admin view') + '</a><button class="db-ga" type="button">Get access</button>';
+    document.body.insertBefore(bar, document.body.firstChild);
+    var acc = document.createElement('div'); acc.id = 'demoAccess'; acc.hidden = true;
+    acc.innerHTML = '<div class="dw-logo" style="font-size:22px">Want to use it for real?</div><div class="dw-sub">To sign in you need a Staff ID.</div>' +
+      '<div class="dw-card"><b>How to get access</b><br>1. Ask Ravi Kushvaha Sir for a Staff ID<br>2. Open the app link and tap Sign in<br>3. Enter your Staff ID once</div>' +
+      (CONTACT_WA ? '<a class="dw-btn red" target="_blank" rel="noopener" href="https://wa.me/' + CONTACT_WA + '?text=' + encodeURIComponent('Hello Sir, I saw the CATJEE Teach Desk demo. Please share a Staff ID for me.') + '">Message Ravi Kushvaha Sir on WhatsApp</a>' : '') +
+      '<button class="dw-btn" type="button" id="demoBack">Back to the demo</button>';
+    document.body.appendChild(acc);
+    bar.querySelector('.db-ga').addEventListener('click', function () { acc.hidden = false; });
+    acc.querySelector('#demoBack').addEventListener('click', function () { acc.hidden = true; });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
+})();
+</script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyDYGbU6ih5-MSBYfTIGtkKqjooDYBHVpCA",
     authDomain: "catjee-teach-desk.firebaseapp.com",
@@ -3597,7 +3842,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.92 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.94 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -15390,6 +15635,11 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return t;
   }
 
+  function waFooterLines() {
+    let base = 'https://rpkushvaha.github.io/CATJEE-Teach-Desk-/';
+    try { if (location.origin && location.origin !== 'null' && /^https?:/.test(location.origin)) base = location.origin + location.pathname.replace(/[^/]*$/, ''); } catch (e) { /* ignore */ }
+    return ['📲 *Made in CATJEE Teach Desk*', 'Attendance, classes and reports in one app', '👀 Demo: ' + base + '?demo'];
+  }
   function buildWhatsAppReportText(date, allForDate, campusForDate, teacherName, f) {
     f = f || reportFilter(false);
     const recs = reportDayRecords(allForDate).filter(f.match);
@@ -15468,7 +15718,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!sections.length) {
       sections.push(isWeeklyOff(date) && !f.label ? ['🗓️ *WEEKLY OFF*'] : ['_No activity recorded for this day._']);
     }
-    return head.join('\n') + '\n' + sections.map((sec) => SEP + '\n' + sec.join('\n')).join('\n');
+    return head.join('\n') + '\n' + sections.map((sec) => SEP + '\n' + sec.join('\n')).join('\n') + '\n' + SEP + '\n' + waFooterLines().join('\n');
   }
 
 
