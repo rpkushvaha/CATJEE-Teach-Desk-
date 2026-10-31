@@ -232,7 +232,18 @@
     // ---- the published timetable of this week (the same classes as in the teachers' schedules) ----
     var seen = {}; var cells2 = []; cells.forEach(function (c) { var k = c.d + '|' + c.p + '|' + c.b; if (!seen[k]) { seen[k] = 1; cells2.push(c); } });
     var weekDates = []; for (var wd0 = 0; wd0 < 6; wd0++) weekDates.push(dstr(addDays(now, wd0 - dow)));
-    store['timetables/' + monday + '__Pre-Foundation__morning'] = { group: 'Pre-Foundation|morning', wing: 'Pre-Foundation', session: 'morning', weekStart: monday, sunday: false, cells: cells2, status: 'published', published: weekDates.slice(), pubDays: weekDates.slice(), publishedAt: Date.now() - 86400000 };
+    function hashStr(str) { var h = 5381; for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0; return h.toString(36); }
+    var ttId = monday + '__Pre-Foundation__morning';
+    // class tests in the timetable: with duty, with the duty chart made without this teacher, with no chart yet, with no exam record
+    store['exams/ex_ct2'] = { type: 'Class Test', subject: 'Chemistry', name: '', date: today, start: '10:30', end: '11:35', room: '', scope: ['Class 9 - Batch 1'], invigilators: [], ct: true, createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [] } };
+    store['exams/ex_ct3'] = { type: 'Class Test', subject: 'Biology', name: '', date: today, start: '11:55', end: '13:00', room: 'G2', scope: ['Class 9 - Batch 2'], invigilators: ['D1'], ct: true, createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'G2', scope: ['Class 9 - Batch 2'], slots: [{ start: '11:55', end: '13:00', teachers: ['D1'] }] }] } };
+    [{ b: 'Class 10 - Batch 1', t: 'D1', ex: 'ex_ct', s: 'Mathematics' }, { b: 'Class 10 - Batch 2', t: 'D2', ex: 'ex_ct', s: 'Physics' }, { b: 'Class 9 - Batch 1', t: 'D3', ex: 'ex_ct2', s: 'Chemistry' }, { b: 'Class 9 - Batch 2', t: 'D4', ex: 'ex_ct3', s: 'Biology' }, { b: 'Class 9 - Batch 1', t: 'D5', ex: 'ex_gone', s: 'English' }].forEach(function (q, qi) {
+      var c = { d: today, p: 2, b: q.b + '', s: q.s, t: q.t, test: true, ctId: q.ex }; if (qi === 4) c.p = 3;
+      var k = c.d + '|' + c.p + '|' + c.b; for (var z = cells2.length - 1; z >= 0; z--) { if (cells2[z].d + '|' + cells2[z].p + '|' + cells2[z].b === k) cells2.splice(z, 1); }
+      cells2.push(c);
+    });
+    var pubIds = cells2.map(function (c) { return c.t + '/tt_' + hashStr(ttId + '#' + c.d + '|' + c.p + '|' + c.b); });
+    store['timetables/' + ttId] = { group: 'Pre-Foundation|morning', wing: 'Pre-Foundation', session: 'morning', weekStart: monday, sunday: false, cells: cells2, status: 'published', published: pubIds, pubDays: weekDates.slice(), publishedAt: Date.now() - 86400000 };
 
     // ---- exams today and tomorrow, with their invigilation duty ----
     var ctS = Math.max(nowMin + 40, 13 * 60), ctE = ctS + 65;
@@ -3874,7 +3885,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.97 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.98 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -12011,12 +12022,14 @@ Rules:
           if ((doc.published || []).indexOf(T + '/' + slotIdFor(doc._id, c)) === -1) return;
           const tm = cellTimes(doc, c); if (!tm) return;
           if (c.cb) { const ms = tgComboOf(doc.cells, c); const g0 = ttGroups().find((x) => x.key === doc.group); if (ms.length > 1 && g0) { const lead = ms.slice().sort((a, b) => g0.batches.indexOf(a.b) - g0.batches.indexOf(b.b))[0]; if (lead.b !== c.b) return; } }
-          tt.push({ t: T, d: c.d, b: c.b, bs: c.cb ? tgComboOf(doc.cells, c).map((m0) => m0.b) : [c.b], a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p, sub: c.sub ? 1 : 0, f: c.sub ? (c.sub.for || c.t || '') : '' });
+          tt.push({ t: T, d: c.d, b: c.b, bs: c.cb ? tgComboOf(doc.cells, c).map((m0) => m0.b) : [c.b], a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p, sub: c.sub ? 1 : 0, f: c.sub ? (c.sub.for || c.t || '') : '', ct: (c.test && c.ctId) ? c.ctId : '' });
         }));
       }
       // "From the timetable": every published class counts (not the days that are a holiday in the calendar), for the teacher it is on; no need for the teacher to fill it in
     if (t.basis === 'tt') {
-      const ttf = tt.filter((x) => { const h0 = holDay(x.d); return !(h0 && h0.type === 'holiday'); });
+      const cexams = tt.some((x) => x.ct) ? await ctExamsInRange(r.from, r.to) : [];
+ // a class test counts only when its duty chart is made and the teacher is in it (no exam record at all: it counts as a class)
+ const ttf = tt.filter((x) => { const h0 = holDay(x.d); if (h0 && h0.type === 'holiday') return false; if (x.ct) { const e = cexams.find((q) => q.id === x.ct); if (e && planTeachers(planOf(e)).indexOf(x.t) === -1) return false; } return true; });
       t.data = { logs: ttf.map((x) => ({ t: x.t, d: x.d, bs: x.bs, a: x.a, z: x.z })), missing: [], upcoming: [], subs: ttf.filter((x) => x.sub).map((x) => ({ t: x.t, f: x.f, d: x.d, bs: x.bs, a: x.a, z: x.z })), from: r.from, to: r.to, ttCount: tt.length, basis: 'tt' };
       t.busy = false; trepRender(); return;
     }
