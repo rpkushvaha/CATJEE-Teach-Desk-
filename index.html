@@ -239,6 +239,9 @@
     store['exams/ex_ct'] = { type: 'Class Test', subject: 'Mathematics', name: '', date: today, start: hm(ctS), end: hm(ctE), room: 'F1, D1', scope: ['Class 10 - Batch 1', 'Class 10 - Batch 2'], invigilators: ['D1', 'D2'], ct: true, createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'F1', scope: ['Class 10 - Batch 1'], slots: [{ start: hm(ctS), end: hm(ctE), teachers: ['D1'] }] }, { room: 'D1', scope: ['Class 10 - Batch 2'], slots: [{ start: hm(ctS), end: hm(ctE), teachers: ['D2'] }] }] } };
     store['exams/ex_ut'] = { type: 'Unit Test', subject: 'Physics / Chemistry', name: '', date: day(1), start: '10:00', end: '11:15', room: 'E3, G2', scope: ['Class 9 - Batch 1', 'Class 9 - Batch 2'], papers: [{ scope: ['Class 9 - Batch 1'], subject: 'Physics' }, { scope: ['Class 9 - Batch 2'], subject: 'Chemistry' }], invigilators: ['D3', 'D4', 'D5'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'E3', scope: ['Class 9 - Batch 1'], slots: [{ start: '10:00', end: '10:40', teachers: ['D3'] }, { start: '10:40', end: '11:15', teachers: ['D4'] }] }, { room: 'G2', scope: ['Class 9 - Batch 2'], slots: [{ start: '10:00', end: '11:15', teachers: ['D5'] }] }] } };
 
+    store['exams/ex_ev'] = { type: 'Weekly Test', subject: 'Reasoning', name: '', date: today, start: '19:00', end: '20:15', room: 'D2', scope: ['Class 10 - Remedial'], invigilators: ['D4', 'D5'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'D2', scope: ['Class 10 - Remedial'], slots: [{ start: '19:00', end: '19:40', teachers: ['D4'] }, { start: '19:40', end: '20:15', teachers: ['D5'] }] }] } };
+    store['exams/ex_hy'] = { type: 'Half-Yearly', subject: 'English', name: '', date: day(-2), start: '09:00', end: '11:00', room: 'E3, G2', scope: ['Class 9 - Batch 1', 'Class 9 - Batch 2'], invigilators: ['D5', 'D6', 'D1'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'E3', scope: ['Class 9 - Batch 1'], slots: [{ start: '09:00', end: '10:00', teachers: ['D5'] }, { start: '10:00', end: '11:00', teachers: ['D6'] }] }, { room: 'G2', scope: ['Class 9 - Batch 2'], slots: [{ start: '09:00', end: '11:00', teachers: ['D1'] }] }] } };
+
     // ---- notices and bell items for the demo teacher ----
     ['D0', 'D1'].forEach(function (u) {
       store['notices/' + u + '/items/n_notice'] = { type: 'notice', title: 'Parent-teacher meeting', body: 'On Saturday at 11:00 AM. Please be on campus 15 minutes early.', byName: 'Demo Admin', at: Date.now() - 3600000, read: false };
@@ -2625,6 +2628,17 @@
   .ad-detail { position: relative; }
   .ad-close { position: absolute; top: 2px; right: 6px; background: transparent; border: 0; color: var(--muted); padding: 8px; display: inline-flex; cursor: pointer; z-index: 1; }
   .ad-detail .ad-sess-h { padding-right: 36px; }
+  .dty-day { background: #FFF59D; color: #171717; font-weight: 700; padding: 6px 10px; margin-top: 10px; border-radius: 8px; font-size: 13px; }
+  .dty-ex { margin-top: 8px; font-size: 13px; color: var(--ink); }
+  .dty-room { border: 1.5px solid var(--ink); border-radius: 8px; margin-top: 4px; overflow: hidden; }
+  .dty-rh, .dty-rr { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; font-size: 12.5px; }
+  .dty-rh { font-weight: 700; background: #F2F2F2; color: #171717; }
+  .dty-rr { border-top: 1px solid var(--line); }
+  .dty-th, .dty-tr { display: grid; grid-template-columns: 1.6fr .5fr .8fr 1.4fr; gap: 6px; padding: 6px 10px; font-size: 12.5px; align-items: center; }
+  .dty-th { font-weight: 700; background: #F2F2F2; color: #171717; }
+  .dty-tr { border-top: 1px solid var(--line); }
+  .dty-tr.hot { background: #FDE7E7; font-weight: 600; }
+  .dty-tr.zero { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -3325,7 +3339,7 @@
           <button class="chip" data-report-range="week">Week</button>
           <button class="chip" data-report-range="month">Month</button>
         </div></div>
-        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Day · Week · Month</span></button></div>
+        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Day · Week · Month</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="duty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 13l2 2 4-4"/></svg><span class="qa-l">Invigilation duty</span><span class="qa-s">Rooms · timings</span></button></div>
         <div class="hv-note" id="repKindNote" style="text-align:left;"></div>
  <div class="rep-optcard" id="repTeacherWrap">
  <label class="rep-lbl rep-lbl-s" for="adminRepTeacher">Teacher</label>
@@ -3341,7 +3355,23 @@
             <button type="button" class="qa-btn qa-xl" id="downloadAdminCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button>
           </div>
         </div>
-        <div id="repCount" hidden>
+        <div id="repDuty" hidden>
+ <div class="rep-optcard">
+ <div class="rep-lbl rep-lbl-s">Sessions</div>
+ <div class="rseg" id="dutySess"><button type="button" class="chip active" data-duty-sess="all">Morning + Evening</button><button type="button" class="chip" data-duty-sess="morning">Morning</button><button type="button" class="chip" data-duty-sess="evening">Evening</button></div>
+ <div class="rep-lbl rep-lbl-s">Show</div>
+ <div class="rseg" id="dutyView"><button type="button" class="chip active" data-duty-view="sheet">Duty sheet</button><button type="button" class="chip" data-duty-view="teacher">Teacher-wise</button></div>
+ </div>
+ <div id="dutyPrev"></div>
+ <div class="rep-lbl">Get it as</div>
+ <div class="qa-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+ <button type="button" class="qa-btn" id="dutyPdfBtn"><span class="qa-l">PDF</span><span class="qa-s">Download</span></button>
+ <button type="button" class="qa-btn qa-xl" id="dutyCsvBtn"><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button>
+ <button type="button" class="qa-btn qa-wa" id="dutyWaBtn"><span class="qa-l">WhatsApp</span><span class="qa-s">Share report</span></button>
+ </div>
+ <div class="admin-sub" id="dutyMsg" style="text-align:center;"></div>
+ </div>
+ <div id="repCount" hidden>
       <div class="rep-optcard">
  <div class="rep-lbl rep-lbl-s">Counted from</div>
  <div class="rseg" id="trepBasis"><button type="button" class="chip active" data-trep-basis="logged">Filled in by teachers</button><button type="button" class="chip" data-trep-basis="tt">From the timetable</button></div>
@@ -3842,7 +3872,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 13.94 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 13.95 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14189,6 +14219,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     renderRepControls();
   }));
   document.getElementById('repPrev').addEventListener('click', () => shiftRepPeriod(-1));
+ document.querySelectorAll('#dutySess [data-duty-sess]').forEach((b) => b.addEventListener('click', () => { state.duty.sess = b.getAttribute('data-duty-sess'); document.querySelectorAll('#dutySess [data-duty-sess]').forEach((x) => x.classList.toggle('active', x === b)); dutyDraw(); }));
+ document.querySelectorAll('#dutyView [data-duty-view]').forEach((b) => b.addEventListener('click', () => { state.duty.view = b.getAttribute('data-duty-view'); document.querySelectorAll('#dutyView [data-duty-view]').forEach((x) => x.classList.toggle('active', x === b)); dutyDraw(); }));
+ document.getElementById('dutyPdfBtn').addEventListener('click', () => dutyOut('pdf'));
+ document.getElementById('dutyCsvBtn').addEventListener('click', () => dutyOut('csv'));
+ document.getElementById('dutyWaBtn').addEventListener('click', () => dutyOut('wa'));
+ { const wsel = document.getElementById('adminWingSel'); if (wsel) wsel.addEventListener('change', () => setTimeout(() => { if ((state.adminRepKind || '') === 'duty') dutyDraw(); }, 0)); }
   document.getElementById('repAttShare').addEventListener('click', () => attendanceReport(document.getElementById('adminRepTeacher').value || null, 'share-img', document.getElementById('adminReportMsg')));
   document.getElementById('adminRepTeacher').addEventListener('change', () => { document.getElementById('adminReportMsg').textContent = ''; if ((state.adminRepKind || 'full') === 'att') renderRepControls(); });
   document.getElementById('repNext').addEventListener('click', () => shiftRepPeriod(1));
@@ -15746,7 +15782,104 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   // ---------- Reports page: one period, one teacher, one report type ----------
-  const REP_NOTE = { full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.' };
+  // ---------- Invigilation duty report (Admin / Coordinator): the duties of one wing for a day, a week or a month ----------
+  state.duty = { sess: 'all', view: 'sheet', key: '', exams: [], model: null };
+  function dutyExamSessions(e) { const set = {}; expandScope(e.scope || []).forEach((b) => { const x = batchSession(b); set[x === 'special' ? 'evening' : x] = 1; }); const k = Object.keys(set); return k.length ? k : ['morning']; }
+  function dutyExamWings(e) { const set = {}; expandScope(e.scope || []).forEach((b) => { set[wingOfBatch(b)] = 1; }); return Object.keys(set); }
+  function dutyRows() {
+    const wing = state.adminReportWing || 'all'; const sess = state.duty.sess; const rows = [];
+    (state.duty.exams || []).forEach((e) => {
+      if (wing !== 'all') { const ws = dutyExamWings(e); if (ws.length && ws.indexOf(wing) === -1) return; }
+      if (sess !== 'all' && dutyExamSessions(e).indexOf(sess) === -1) return;
+      planOf(e).forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => rows.push({ date: e.date, eid: e.id, title: examTitle(e), cls: scopeLabel(e.scope || []), es: e.start, ee: e.end, room: r.room || '', uid: u, start: sl.start || e.start, end: sl.end || e.end }))));
+    });
+    return rows;
+  }
+  const dutyMin = (r) => { const a = hhmmToMin(r.start), b = hhmmToMin(r.end); return (a != null && b != null && b > a) ? b - a : 0; };
+  const dutyRng = (a, b) => `${formatTimeStr(a)} – ${formatTimeStr(b)}`;
+  function dutyDays(rows) {
+    const days = {};
+    rows.forEach((r) => { const d = days[r.date] || (days[r.date] = { ex: {} }); const e = d.ex[r.eid] || (d.ex[r.eid] = { title: r.title, cls: r.cls, es: r.es, ee: r.ee, rooms: {} }); (e.rooms[r.room] = e.rooms[r.room] || []).push(r); });
+    return Object.keys(days).sort().map((dt) => ({ date: dt, exams: Object.keys(days[dt].ex).map((k) => days[dt].ex[k]).sort((a, b) => (hhmmToMin(a.es) || 0) - (hhmmToMin(b.es) || 0)).map((e) => ({ title: e.title, cls: e.cls, es: e.es, ee: e.ee, rooms: Object.keys(e.rooms).sort().map((rn) => ({ room: rn, lines: e.rooms[rn].slice().sort((a, b) => (hhmmToMin(a.start) || 0) - (hhmmToMin(b.start) || 0)) })) })) }));
+  }
+  function dutyPeople(rows) {
+    try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
+    const sel = document.getElementById('adminRepTeacher'); const ids = sel ? Array.from(sel.options).map((o) => o.value).filter(Boolean) : [];
+    rows.forEach((r) => { if (ids.indexOf(r.uid) === -1) ids.push(r.uid); });
+    const m = {}; ids.forEach((u) => { m[u] = { u, n: 0, min: 0, days: {} }; });
+    rows.forEach((r) => { const p = m[r.uid]; p.n += 1; p.min += dutyMin(r); p.days[r.date] = 1; });
+    return Object.keys(m).map((k) => m[k]).sort((x, y) => y.n - x.n || trepName(x.u).localeCompare(trepName(y.u)));
+  }
+  const dutyDayShort = (dt) => { const d = dateObj(dt); return `${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.getDate()}`; };
+  function dutyModel() {
+    const sp = adminRepSpec(); const rows = dutyRows(); const ws = document.getElementById('adminWingSel');
+    const wingLabel = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
+    const sessLabel = { all: 'Morning + Evening', morning: 'Morning', evening: 'Evening' }[state.duty.sess];
+    return { sp, rows, days: dutyDays(rows), people: dutyPeople(rows), wingLabel, sessLabel, view: state.duty.view };
+  }
+  function dutyDraw() {
+    const box = document.getElementById('dutyPrev'); if (!box) return;
+    const m = dutyModel(); state.duty.model = m; const rn = { day: 'Day', week: 'Week', month: 'Month' }[m.sp.range] || '';
+    let h = `<div class="tsec-title">Invigilation duty · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml(m.sp.period.replace(/^(Date|Week|Month): /, ''))} · ${escapeHtml(m.wingLabel)} · ${escapeHtml(m.sessLabel)}</div>`;
+    if (m.view === 'sheet') {
+      if (!m.days.length) h += '<div class="hv-note" style="text-align:left;">No invigilation duty in this period.</div>';
+      m.days.forEach((day) => {
+        h += `<div class="dty-day">${escapeHtml(reportDayLabel(day.date))}</div>`;
+        day.exams.forEach((ex) => {
+          h += `<div class="dty-ex"><b>${escapeHtml(ex.title)}</b> · ${escapeHtml(ex.cls)} · ${escapeHtml(dutyRng(ex.es, ex.ee))}</div>`;
+          ex.rooms.forEach((rm) => { h += `<div class="dty-room"><div class="dty-rh"><span>${escapeHtml(rm.room)} ROOM</span><span>Duty timing</span></div>${rm.lines.map((l) => `<div class="dty-rr"><span>${escapeHtml(trepName(l.uid))}</span><span>${escapeHtml(dutyRng(l.start, l.end))}</span></div>`).join('')}</div>`; });
+        });
+      });
+    } else {
+      h += '<div class="dty-room"><div class="dty-th"><span>Teacher</span><span>Duties</span><span>Time</span><span>Days</span></div>';
+      const mx = m.people.reduce((a, p) => Math.max(a, p.n), 0);
+      m.people.forEach((p) => { h += `<div class="dty-tr${p.n && p.n === mx ? ' hot' : ''}${p.n ? '' : ' zero'}"><span>${escapeHtml(trepName(p.u))}</span><span>${p.n}</span><span>${escapeHtml(reportHm(p.min))}</span><span>${escapeHtml(Object.keys(p.days).sort().map(dutyDayShort).join(' · ') || '–')}</span></div>`; });
+      h += '</div>';
+    }
+    box.innerHTML = h;
+  }
+  async function dutyRender() {
+    const box = document.getElementById('dutyPrev'); if (!box || !state.db) return;
+    const sp = adminRepSpec(); const from = sp.dates[0], to = sp.dates[sp.dates.length - 1]; const key = `${from}|${to}`;
+    if (state.duty.key !== key) {
+      state.duty.key = key; box.innerHTML = '<div class="hv-note" style="text-align:left;">Loading…</div>';
+      try { const sn = await state.db.collection('exams').where('date', '>=', from).where('date', '<=', to).get(); state.duty.exams = sn.docs.map(normDoc); } catch (err) { state.duty.exams = []; }
+      if (state.duty.key !== key) return;
+    }
+    dutyDraw();
+  }
+  async function dutyOut(kind) {
+    const msgEl = document.getElementById('dutyMsg'); msgEl.textContent = 'Preparing…';
+    try {
+      await dutyRender(); const m = state.duty.model || dutyModel(); const fileBase = `CATJEE-Invigilation-Duty-${m.view === 'teacher' ? 'Teacher-wise-' : ''}${m.sp.fileTag}`;
+      if (kind === 'csv') {
+        const L = m.view === 'sheet' ? [['Date', 'Day', 'Exam', 'Classes', 'Exam time', 'Room', 'Teacher', 'Duty from', 'Duty to', 'Minutes']] : [['Teacher', 'Duties', 'Time (min)', 'Days']];
+        if (m.view === 'sheet') m.days.forEach((d) => d.exams.forEach((ex) => ex.rooms.forEach((rm) => rm.lines.forEach((l) => L.push([d.date, WD[dateObj(d.date).getDay()], ex.title, ex.cls, dutyRng(ex.es, ex.ee), rm.room, trepName(l.uid), formatTimeStr(l.start), formatTimeStr(l.end), dutyMin(l)])))));
+        else m.people.forEach((p) => L.push([trepName(p.u), p.n, p.min, Object.keys(p.days).sort().map(dutyDayShort).join(' · ')]));
+        saveFile(fileBase + '.csv', '\ufeff' + L.map((x) => x.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = 'Saved.'; showToast('Duty report saved'); return;
+      }
+      if (kind === 'wa') {
+        const L = [`*INVIGILATION DUTY · ${m.wingLabel}*`, m.sp.period, m.sessLabel, ''];
+        if (m.view === 'sheet') {
+          if (!m.days.length) L.push('_No invigilation duty in this period._');
+          m.days.forEach((d) => { L.push('──────────'); L.push(`*${reportDayLabel(d.date)}*`); d.exams.forEach((ex) => { L.push(`*${ex.title}* · ${ex.cls} · ${dutyRng(ex.es, ex.ee)}`); ex.rooms.forEach((rm) => rm.lines.forEach((l) => L.push(`🚪 ${rm.room}: ${trepName(l.uid)} · ${dutyRng(l.start, l.end)}`))); L.push(''); }); });
+        } else { m.people.forEach((p) => L.push(`• *${trepName(p.u)}* — ${p.n} ${p.n === 1 ? 'duty' : 'duties'}${p.n ? ` · ${reportHm(p.min)} · ${Object.keys(p.days).sort().map(dutyDayShort).join(', ')}` : ''}`)); }
+        await shareReportText(L.join('\n').trim(), msgEl); return;
+      }
+      const w = createPdfWriter(); const HEAD = [0.93, 0.94, 0.96], ALT = [0.97, 0.975, 0.985], HOT = [0.99, 0.93, 0.93];
+      w.heading(m.view === 'teacher' ? 'INVIGILATION DUTY · TEACHER-WISE' : 'INVIGILATION DUTY REPORT', 17); w.addSpace(2);
+      w.bodyLine(m.sp.period, { size: 11 }); w.bodyLine(`${m.wingLabel} · ${m.sessLabel}`, { size: 11 });
+      if (m.view === 'sheet') {
+        if (!m.days.length) { w.addSpace(8); w.bodyLine('No invigilation duty in this period.', { size: 11 }); }
+        m.days.forEach((d) => { w.addSpace(10); w.bodyLine(reportDayLabel(d.date), { bold: true, size: 12.5 }); d.exams.forEach((ex) => { w.addSpace(4); w.bodyLine(`${ex.title} · ${ex.cls} · ${dutyRng(ex.es, ex.ee)}`, { bold: true, size: 10.5 }); const X = [0, 90, 330]; w.row(['Room', 'Teacher', 'Duty timing'], X, { bold: true, size: 9.5, fill: HEAD }); let i = 0; ex.rooms.forEach((rm) => rm.lines.forEach((l, li) => { w.row([li === 0 ? rm.room : '', trepName(l.uid), dutyRng(l.start, l.end)], X, { size: 9.5, fill: i++ % 2 ? ALT : null }); })); }); });
+      } else {
+        w.addSpace(8); const X = [0, 190, 240, 300]; w.row(['Teacher', 'Duties', 'Time', 'Days'], X, { bold: true, size: 9.5, fill: HEAD }); const mx = m.people.reduce((a, p) => Math.max(a, p.n), 0);
+        m.people.forEach((p, i) => { let dd = Object.keys(p.days).sort().map(dutyDayShort).join(' · ') || '-'; if (dd.length > 44) dd = dd.slice(0, 41) + '...'; w.row([trepName(p.u), p.n, reportHm(p.min), dd], X, { size: 9.5, fill: p.n && p.n === mx ? HOT : (i % 2 ? ALT : null) }); });
+      }
+      saveFile(fileBase + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('Duty report saved');
+    } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
+  }
+  const REP_NOTE = { full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
   function renderRepControls() {
     try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
     const kind = state.adminRepKind || 'full'; let range = state.adminReportRange || 'day';
@@ -15756,17 +15889,18 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
     const { label, full, dates: rdates } = adminReportRangeDates();
     const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label; syncRepBack();
-    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub';
+    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub' || kind === 'duty';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
-    { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
+    { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
       const hh = `<div class="tsec-title">${escapeHtml(kn)} · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml((range === 'week' && (kind === 'count' || kind === 'sub') && rdates && rdates[0]) ? repRangeFull(rdates[0], shiftDateStr(rdates[0], 5)) : full)} · ${escapeHtml(wt)}</div>`;
       ['repResHead', 'repResHeadC', 'repResHeadS'].forEach((id) => { const e2 = document.getElementById(id); if (e2) e2.innerHTML = hh; }); }
-    document.getElementById('repStd').hidden = showCount || subDay;
+    document.getElementById('repStd').hidden = showCount || subDay || kind === 'duty';
     const shareT = document.getElementById('repAttShare'); if (shareT) shareT.hidden = kind !== 'att';
     const tiles = document.getElementById('repStdTiles'); if (tiles) tiles.style.gridTemplateColumns = kind === 'att' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
     const ap = document.getElementById('repAttPrev');
     if (ap) { if (kind === 'att') { const sp = adminRepSpec(); showAttPreview('repAttPrev', document.getElementById('adminRepTeacher').value || null, null, null); void sp; } else { ap.hidden = true; ap.innerHTML = ''; } }
-    document.getElementById('repCount').hidden = !showCount; const sdv = document.getElementById('repSubDay'); if (sdv) sdv.hidden = !subDay;
+    { const dp = document.getElementById('repDuty'); if (dp) dp.hidden = kind !== 'duty'; if (kind === 'duty') dutyRender(); }
+ document.getElementById('repCount').hidden = !showCount; const sdv = document.getElementById('repSubDay'); if (sdv) sdv.hidden = !subDay;
     if (showCount && typeof trepEnsure === 'function') trepEnsure();
     if (subDay) subDayEnsure();
   }
