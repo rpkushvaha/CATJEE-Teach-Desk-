@@ -294,12 +294,15 @@
     if (!role) {
       var w = document.createElement('div'); w.id = 'demoWelcome';
       w.innerHTML = '<div class="dw-logo">CATJEE Teach Desk</div><div class="dw-sub">Attendance, classes, exams and reports in one app</div>' +
+        '<div class="hg-lang dw-lang" id="dwLang"><button type="button" data-wl="en">English</button><button type="button" data-wl="hi" class="on">Hinglish</button></div>' +
         '<div class="dw-card"><b>I am a Teacher</b><br>A walkthrough of about 4 minutes, on sample data.</div>' +
-        '<a class="dw-btn red" href="' + base + '?demo=teacher&walk=1">▶ Start the walkthrough</a><a class="dw-btn" href="' + base + '?demo=teacher">Explore on my own</a>' +
+        '<a class="dw-btn red" href="' + base + '?demo=teacher&walk=1&hl=hi">▶ Start the walkthrough</a><a class="dw-btn" href="' + base + '?demo=teacher&hl=hi">Explore on my own</a>' +
         '<div class="dw-card" style="margin-top:14px;"><b>I am an Admin or Coordinator</b><br>A walkthrough of about 6 minutes, on sample data.</div>' +
-        '<a class="dw-btn red" href="' + base + '?demo=admin&walk=1">▶ Start the walkthrough</a><a class="dw-btn" href="' + base + '?demo=admin">Explore on my own</a>' +
+        '<a class="dw-btn red" href="' + base + '?demo=admin&walk=1&hl=hi">▶ Start the walkthrough</a><a class="dw-btn" href="' + base + '?demo=admin&hl=hi">Explore on my own</a>' +
         '<a class="dw-link" href="' + base + '">I already have a Staff ID · Sign in</a>';
-      document.body.appendChild(w); return;
+      document.body.appendChild(w);
+      w.querySelectorAll('[data-wl]').forEach(function (bt) { bt.addEventListener('click', function () { var l = bt.getAttribute('data-wl'); w.querySelectorAll('[data-wl]').forEach(function (x) { x.classList.toggle('on', x === bt); }); w.querySelectorAll('a.dw-btn').forEach(function (a) { if (/[?&]hl=/.test(a.href)) a.href = a.href.replace(/([?&])hl=[a-z]*/, '$1hl=' + l); }); }); });
+      return;
     }
     var bar = document.createElement('div'); bar.id = 'demoBar';
     if (window.__DEMO_PRACTICE) { bar.innerHTML = '<span class="db-t">PRACTICE · Sample data · Nothing is saved</span>' + (window.__DEMO_LEAD ? '<a class="db-sw" href="' + base + '?demo=' + other() + '&practice=1&lead=1">' + (role === 'admin' ? 'Teacher view' : 'Admin view') + '</a>' : '') + '<a class="db-ga" href="' + base + '" style="text-decoration:none; display:inline-block;">Exit</a>'; } else { bar.innerHTML = '<span class="db-t">DEMO · Sample data · Nothing is saved</span><a class="db-sw" href="' + base + '?demo=' + other() + '">' + (role === 'admin' ? 'Teacher view' : 'Admin view') + '</a><button class="db-ga" type="button">Get access</button>'; }
@@ -2695,6 +2698,9 @@
   .wt-sub { color: var(--muted-2); font-size: 14px; margin-top: 4px; }
   .wt-btns { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
   .wt-btns .btn-secondary, .wt-btns .save-btn { width: auto; padding: 10px 16px; margin: 0; }
+  .dw-lang { max-width: 340px; width: 100%; margin: 0 0 14px; }
+  .wt-lang { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+  .wt-lang .hg-lang { font-size: 12px; }
 </style>
 </head>
 <body>
@@ -3944,7 +3950,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.11 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.12 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -18751,6 +18757,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const sIn = body.querySelector('#hcSearch'); if (sIn) sIn.addEventListener('input', () => { HC.q = sIn.value; const m = body.querySelector('#hcMain'); if (m) m.innerHTML = HC.q.trim() ? helpListHtml(HC.q) : hcCards(helpLangIdx()); });
   }
   // a guide is shown by the same tour engine as the other tours, on the SAMPLE data (a practice page), so every button is there
+  const BASICS_HI = [['Check in aur check out', 'Campus pahunchte hi Check In dabao, aur jaate waqt Check Out.'], ['Aaj ki classes', 'Aaj ki aap ki classes. Agli class par Next likha hota hai. Class shuru hone par Log this class dabakar use bharo.'], ['Add Class', 'Jo class aap ne li use bharo: batch, samay, topic, worksheet, test.'], ['Schedule', 'Aap ka hafta. Published timetable ki classes yahan apne aap aati hain.'], ['History', 'Aap ne jo kuch bhara, din ke hisaab se.'], ['Menu', 'Gallery, aap ka profile aur ye Help. Koi bhi tour yahan se dobara khol sakte ho.']];
+  function helpBasicsKey() { if (helpLangIdx() === 0) return 'basics'; const T = TOURS.basics; TOURS.basics_hi = { title: 'Quick tour', sub: T.sub, icon: T.icon, who: 'none', steps: T.steps.map((st, i) => Object.assign({}, st, { t: BASICS_HI[i][0], x: BASICS_HI[i][1] })) }; return 'basics_hi'; }
   function helpPreset(name) {
     try {
       if (name === 'out' || name === 'in') { if (window.__demoPreset) window.__demoPreset(name); return; }
@@ -18798,24 +18806,26 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   // ---------- the walkthrough (sample data only): the guides, one after the other ----------
   const WALK = { teacher: ['basics', 'checkin', 'addclass', 'combineb', 'otherwork', 'leave', 'schedslot', 'whatsapp', 'reminder'], admin: ['admincheck', 'ttfill', 'ttphoto', 'substitute', 'classtest', 'duty', 'pictures', 'reports', 'team', 'lists'] };
   function wtTitle(id, li) { if (id === 'basics') return 'Quick tour'; const g = HELP_GUIDES.find((x) => x.id === id); return g ? g.t[li] : id; }
-  function wtCard(html) { let el = document.getElementById('wtCard'); if (!el) { el = document.createElement('div'); el.id = 'wtCard'; el.className = 'wt-card'; document.body.appendChild(el); } el.innerHTML = html; el.hidden = false; return el; }
+  function wtCard(build, bind) {
+    let el = document.getElementById('wtCard'); if (!el) { el = document.createElement('div'); el.id = 'wtCard'; el.className = 'wt-card'; document.body.appendChild(el); }
+    const draw = () => { const li = helpLangIdx(); el.innerHTML = `<div class="wt-lang">${hcLangChips()}</div>` + build(li); bind(el, li); el.querySelectorAll('[data-hglang]').forEach((bt) => bt.addEventListener('click', () => { helpSetLang(Number(bt.getAttribute('data-hglang'))); draw(); })); };
+    draw(); el.hidden = false; return el;
+  }
   function wtHide() { const el = document.getElementById('wtCard'); if (el) el.hidden = true; }
-  function wtDone(role) {
-    const li = helpLangIdx(); const practice = !!window.__DEMO_PRACTICE;
-    const el = wtCard(`<b>${li === 0 ? 'That is the walkthrough.' : 'Walkthrough poora hua.'}</b><div class="wt-sub">${li === 0 ? 'You can open any guide again from the menu: Help.' : 'Koi bhi guide menu me Help se dobara dekh sakte ho.'}</div><div class="wt-btns">${practice ? '' : `<button type="button" class="btn-secondary" id="wtAccess" style="border-color: var(--line);">Get access</button>`}<button type="button" class="save-btn" id="wtClose" style="margin:0;">${li === 0 ? 'Explore on my own' : 'Khud dekhein'}</button></div>`);
-    el.querySelector('#wtClose').addEventListener('click', wtHide); const ac = el.querySelector('#wtAccess'); if (ac) ac.addEventListener('click', () => { wtHide(); const b = document.querySelector('.db-ga'); if (b) b.click(); });
+  function wtDone() {
+    const practice = !!window.__DEMO_PRACTICE;
+    wtCard((li) => `<b>${li === 0 ? 'That is the walkthrough.' : 'Walkthrough poora hua.'}</b><div class="wt-sub">${li === 0 ? 'You can open any guide again from the menu: Help.' : 'Koi bhi guide menu me Help se dobara dekh sakte ho.'}</div><div class="wt-btns">${practice ? '' : '<button type="button" class="btn-secondary" id="wtAccess" style="border-color: var(--line);">Get access</button>'}<button type="button" class="save-btn" id="wtClose" style="margin:0;">${li === 0 ? 'Explore on my own' : 'Khud dekhein'}</button></div>`, (el) => { el.querySelector('#wtClose').addEventListener('click', wtHide); const ac = el.querySelector('#wtAccess'); if (ac) ac.addEventListener('click', () => { wtHide(); const bt = document.querySelector('.db-ga'); if (bt) bt.click(); }); });
   }
   function helpWalk(role, i) {
-    const list = WALK[role] || WALK.teacher; const n = list.length; const li = helpLangIdx(); i = i || 0; wtHide();
-    if (i >= n) { wtDone(role); return; }
-    const id = list[i]; const key = id === 'basics' ? 'basics' : helpBuildTour(id); if (!key) { helpWalk(role, i + 1); return; }
+    const list = WALK[role] || WALK.teacher; const n = list.length; const li0 = helpLangIdx(); i = i || 0; wtHide();
+    if (i >= n) { wtDone(); return; }
+    const id = list[i]; const key = id === 'basics' ? helpBasicsKey() : helpBuildTour(id); if (!key) { helpWalk(role, i + 1); return; }
     startTour(key); if (!tourState) return;
-    tourState.title = (li === 0 ? 'Part ' : 'Hissa ') + (i + 1) + '/' + n + ' · ' + tourState.title;
+    tourState.title = (li0 === 0 ? 'Part ' : 'Hissa ') + (i + 1) + '/' + n + ' · ' + tourState.title;
     tourState.onEnd = (how) => {
-      if (how !== 'done') { const el = wtCard(`<b>${li === 0 ? 'Walkthrough stopped.' : 'Walkthrough ruk gaya.'}</b><div class="wt-btns"><button type="button" class="btn-secondary" id="wtClose2" style="border-color: var(--line);">${li === 0 ? 'Close' : 'Band karo'}</button><button type="button" class="save-btn" id="wtAgain" style="margin:0;">${li === 0 ? 'Continue' : 'Aage chalo'}</button></div>`); el.querySelector('#wtClose2').addEventListener('click', wtHide); el.querySelector('#wtAgain').addEventListener('click', () => helpWalk(role, i + 1)); return; }
-      if (i + 1 >= n) { wtDone(role); return; }
-      const el = wtCard(`<b>${li === 0 ? 'Part ' : 'Hissa '}${i + 1}/${n} ${li === 0 ? 'done' : 'poora'}</b><div class="wt-sub">${li === 0 ? 'Next' : 'Agla'}: ${escapeHtml(wtTitle(list[i + 1], li))}</div><div class="wt-btns"><button type="button" class="btn-secondary" id="wtStop" style="border-color: var(--line);">${li === 0 ? 'Stop' : 'Rukein'}</button><button type="button" class="save-btn" id="wtGo" style="margin:0;">${li === 0 ? 'Continue ▶' : 'Aage chalein ▶'}</button></div>`);
-      el.querySelector('#wtStop').addEventListener('click', wtHide); el.querySelector('#wtGo').addEventListener('click', () => helpWalk(role, i + 1));
+      if (how !== 'done') { wtCard((li) => `<b>${li === 0 ? 'Walkthrough stopped.' : 'Walkthrough ruk gaya.'}</b><div class="wt-btns"><button type="button" class="btn-secondary" id="wtClose2" style="border-color: var(--line);">${li === 0 ? 'Close' : 'Band karo'}</button><button type="button" class="save-btn" id="wtAgain" style="margin:0;">${li === 0 ? 'Continue' : 'Aage chalo'}</button></div>`, (el) => { el.querySelector('#wtClose2').addEventListener('click', wtHide); el.querySelector('#wtAgain').addEventListener('click', () => helpWalk(role, i + 1)); }); return; }
+      if (i + 1 >= n) { wtDone(); return; }
+      wtCard((li) => `<b>${li === 0 ? 'Part ' : 'Hissa '}${i + 1}/${n} ${li === 0 ? 'done' : 'poora'}</b><div class="wt-sub">${li === 0 ? 'Next' : 'Agla'}: ${escapeHtml(wtTitle(list[i + 1], li))}</div><div class="wt-btns"><button type="button" class="btn-secondary" id="wtStop" style="border-color: var(--line);">${li === 0 ? 'Stop' : 'Rukein'}</button><button type="button" class="save-btn" id="wtGo" style="margin:0;">${li === 0 ? 'Continue ▶' : 'Aage chalein ▶'}</button></div>`, (el) => { el.querySelector('#wtStop').addEventListener('click', wtHide); el.querySelector('#wtGo').addEventListener('click', () => helpWalk(role, i + 1)); });
     };
   }
   (function bindHelpC() {
@@ -18826,7 +18836,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (t.hasAttribute('data-hccat')) { HC.v = 'cat'; HC.cat = t.getAttribute('data-hccat'); helpcRender(); return; }
       if (t.hasAttribute('data-guide')) { HC.from = (HC.v === 'cat') ? 'cat' : 'home'; HC.v = 'guide'; HC.id = t.getAttribute('data-guide'); helpcRender(); return; }
       if (t.hasAttribute('data-hcback')) { const to = t.getAttribute('data-hcback'); HC.v = to === 'cat' ? 'cat' : 'home'; helpcRender(); return; }
-      if (t.id === 'hcQuick') { helpStartTour('basics'); return; }
+      if (t.id === 'hcQuick') { helpStartTour(helpBasicsKey()); return; }
       if (t.id === 'hcWalk') { try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(() => helpWalk(window.__DEMO_ROLE === 'admin' ? 'admin' : 'teacher', 0), 450); return; }
       if (t.id === 'hcWritten') { openMenuPanel('help'); return; }
       if (t.id === 'hgShow') helpShowMe(HC.id);
