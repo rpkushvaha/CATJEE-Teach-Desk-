@@ -2668,7 +2668,6 @@
   .hc-card small { color: var(--muted); font-size: 12px; font-weight: 500; }
   .hc-ic { color: var(--gold); margin-bottom: 6px; }
   .hc-ic svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; display: block; }
-  .hc-tour { border-left: 4px solid var(--gold); }
   .hc-sec { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2); margin: 18px 2px 8px; }
   .hc-back { background: none; border: 0; color: var(--ink); font: inherit; font-size: 15px; font-weight: 600; padding: 4px 0; cursor: pointer; }
   .hc-list { display: flex; flex-direction: column; gap: 8px; }
@@ -3919,7 +3918,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.07 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.08 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -18383,42 +18382,6 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       { go: goTab('today'), sel: '.nav-item[data-tab="schedule"]', t: 'Schedule', x: 'Your week. Classes from the published timetable appear here by themselves.' },
       { go: goTab('today'), sel: '.nav-item[data-tab="history"]', t: 'History', x: 'Everything you filled in, day by day.' },
       { go: goTab('today'), sel: '#menuOpenBtn', t: 'Menu', x: 'Gallery, your profile and this Help — open any tour again from here.' } ] },
-    checkin: { title: 'Check in', sub: 'Check in, check out, forgot to check in', icon: 'user', who: 'all', steps: [
-      { go: goTab('today'), sel: '#checkBtn', t: 'Check In', x: 'Tap when you reach campus. Tap again (Check Out) when you leave.' },
-      { go: goTab('today'), sel: '#lateInBtn', t: 'Forgot to check in?', x: 'Tap here and choose the time you actually arrived.', ifMissing: 'This shows when you are not checked in.' },
-      { go: goTab('today'), sel: '#sessionsSection', t: "Today's sessions", x: 'See or correct today’s check-in and check-out times.', ifMissing: 'This shows after your first check-in of the day.' } ] },
-    fill: { title: 'Fill a class', sub: 'Log the class you took', icon: 'note', who: 'all', steps: [
-      { go: goTab('today'), sel: '#todayClassList', t: 'From Today', x: 'Easiest way: tap Log this class on a class here — batch and time are filled in for you.' },
-      { go: goTab('add'), sel: '#batchChips', t: 'Choose the batch', x: 'Or open Add Class and tap the batch.' },
-      { go: goTab('add'), sel: '#startTimeInput', t: 'Time', x: 'Start and end time of the class.' },
-      { go: goTab('add'), sel: '#chapterInput', t: 'Chapter and topic', x: 'The chapter you taught (needed), and the topic covered today (optional). Tick worksheet, test or homework below if given.' },
-      { go: goTab('add'), sel: '#saveClassBtn', t: 'Save', x: 'Tap Save Class. Without internet it is kept and sent later by itself.' } ] },
-    schedule: { title: 'Schedule', sub: 'Your week and your own slots', icon: 'cal', who: 'all', steps: [
-      { go: goTab('schedule'), sel: '[data-sv-view="list"]', t: 'List or weekly timetable', x: 'See your week as a list or as a timetable.' },
-      { go: goTab('schedule'), sel: '#svAddBtn', t: 'Add Slot', x: 'Add a class of your own (for example an extra class).' },
-      { go: goTab('schedule'), sel: '#svSummary', t: 'Week at a glance', x: 'Classes and teaching time this week. Press and hold your own slots to delete several at once.' } ] },
-    timetable: { title: 'Make the timetable', sub: 'Group, week, paint, publish', icon: 'cal', who: 'lead', steps: [
-      { go: goAdmin('tt'), sel: '[data-tg-group]', t: 'Choose the group', x: 'Morning, Evening, Special… each has its own timetable.' },
-      { go: goAdmin('tt'), sel: '[data-tg-day]', t: 'Choose the day', x: 'Fill one day at a time. A number on the day means changes not sent yet.' },
-      { go: goAdmin('tt'), sel: '.tg-paint', t: 'Paint', x: 'Pick a subject, then tap cells to fill them quickly. Tap Off when done.', ifMissing: 'Tap Edit timetable first to change a published timetable.' },
-      { go: goAdmin('tt'), sel: '.tg-table', t: 'The grid', x: 'Tap a cell to set subject and teacher. Press and hold a cell to select several (Class test, Exam, Combine, Clear).' },
-      { go: goAdmin('tt'), sel: '#tgCopyWeek', t: 'Copy', x: 'Copy last week, or copy this day to other days.', ifMissing: 'Copy buttons show in edit mode.' },
-      { go: goAdmin('tt'), sel: '#tgPublish', t: 'Publish', x: 'Send this day or the whole week to the teachers. The picture is made by itself.', ifMissing: 'Publish shows when there is something new to send.' } ] },
-    exam: { title: 'Exam, class test, combine', sub: 'Several cells at once', icon: 'note', who: 'lead', steps: [
-      { go: goAdmin('tt'), sel: '#tgExam', t: 'Exam / Class test', x: 'Tap this (or press and hold a cell), then tap all the cells of the exam or test.', ifMissing: 'Tap Edit timetable first.' },
-      { go: goAdmin('tt'), sel: '.tg-table', t: 'Then choose', x: 'Class test keeps the class (it counts for the teacher). Exam / Test makes one block and adds it to the Exams tab; Note makes a block like Doubt Clearing. Combine joins batches into one class.' },
-      { go: goAdmin('tt'), sel: '[data-tg-ph]', t: 'Periods of this day', x: 'Tap a period heading to change its time, remove it or join it with the next one — for this day only.' },
-      { go: goAdmin('tt'), sel: '#tgAddPer', t: '＋ Period, Day note, ＋ Batch', x: 'Add a period, write a whole-day note (like Doubt Clearing Day) or add a new batch.', ifMissing: 'These show in edit mode.' } ] },
-    pictures: { title: 'Pictures to share', sub: 'Timetable, batch-wise, duty sheet', icon: 'image', who: 'lead', steps: [
-      { go: goAdmin('tt'), sel: '#tgViewImg', t: 'Timetable picture', x: 'Made when you publish. Tap to see it full screen.', ifMissing: 'The picture shows after the first publish.' },
-      { go: goAdmin('tt'), sel: '#tgBatchPics', t: 'Batch-wise pictures', x: 'One picture per batch with its room — to send to each batch group.', ifMissing: 'Shows after the first publish.' },
-      { go: goAdmin('exams'), sel: '.dsp-card', t: 'Duty sheet', x: 'After choosing invigilators, make the duty sheet picture in one tap.', ifMissing: 'Shows when a day has invigilators.' } ] },
-    exams: { title: 'Exams tab', sub: 'Rooms and invigilators', icon: 'file', who: 'lead', steps: [
-      { go: goAdmin('exams'), sel: '#adminNewExamBtn', t: 'New exam', x: 'Add an exam here, or mark it in the timetable grid.' },
-      { go: goAdmin('exams'), sel: '#adminExamList', t: 'Rooms, then invigilators', x: 'Tap an exam to see who is on duty in each room and how it went. Tap Change invigilators to pick names. Press and hold to select several exams.' } ] },
-    reports: { title: 'Teaching Report', sub: 'Weekly and monthly', icon: 'file', who: 'lead', steps: [
-      { go: goAdmin('reports'), sel: '#trepSec', t: 'Teaching Report', x: 'Classes of every teacher, batch-wise. Choose Weekly or Monthly and the week or month.' },
-      { go: goAdmin('reports'), sel: '#trepImg', t: 'Share', x: 'Share the picture on WhatsApp or download Excel.' } ] }
   };
   const tourSeenKey = (k) => 'ctd_tour_' + k;
   let tourState = null;
@@ -18469,170 +18432,171 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     window.addEventListener('scroll', () => { if (tourState) tourPlace(); }, { passive: true });
   })();
   const HELP_GUIDES = [
-  { id: 'checkin', g: 'Daily work', who: 'all', go: 'today', t: ['Check in and check out', 'Check-in aur check-out karna'], k: 'attendance campus aana jaana hajri in out चेक इन चेक आउट हाजिरी',
+  { id: 'checkin', t: ['Check in and check out', 'Check-in aur check-out karna'], who: 'all', k: 'attendance campus aana jaana hajri in out चेक इन चेक आउट हाजिरी',
     s: [['Open the **Today** page.', 'When you reach campus, tap **Check In**.', 'When you leave, tap **Check Out**.', 'Your time on campus goes into the attendance report.'],
-        ['**Today** page kholo.', 'Campus pahunchte hi **Check In** dabao.', 'Jaate waqt **Check Out** dabao.', 'Campus me aap ka samay attendance report me jata hai.']] },
-  { id: 'forgot', g: 'Daily work', who: 'all', go: 'today', t: ['Forgot to check in? Add the times', 'Check-in bhool gaye? Samay jodna'], k: 'add check in check out missed bhool chhoot time jodna चेक इन भूल',
-    s: [['Open the **Today** page.', 'Tap **Forgot to check in?**', 'Enter the time you came and the time you left.', 'Save it.'],
-        ['**Today** page kholo.', '**Forgot to check in?** dabao.', 'Aane ka aur jaane ka samay bharo.', 'Save karo.']],
-    n: ['You can add times for today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap aaj aur kal ka samay jod sakte ho. Usse purane din ke liye Admin ya Coordinator se kaho.'] },
-  { id: 'editsess', g: 'Daily work', who: 'all', go: 'today', t: ['Correct your check-in or check-out time', 'Check-in ya check-out ka samay theek karna'], k: 'edit change session time galat sudharna badalna delete समय बदलना',
-    s: [['Open the **Today** page.', 'Tap **Today\'s sessions · view or edit times**.', 'Find the session and change its **Check-in** or **Check-out** time.', 'To add one more visit, tap **+ Add another session**.', 'To remove a wrong session, delete it. The app asks you to confirm.'],
-        ['**Today** page kholo.', '**Today\'s sessions · view or edit times** dabao.', 'Jis session ko badalna hai, uska **Check-in** ya **Check-out** samay badlo.', 'Ek aur visit jodne ke liye **+ Add another session** dabao.', 'Galat session hatana ho to delete karo. App pooch kar hatata hai.']],
-    n: ['You can change only today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap sirf aaj aur kal badal sakte ho. Purane din ke liye Admin ya Coordinator se kaho.'] },
-  { id: 'addclass', g: 'Daily work', who: 'all', go: 'add', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
+        ['**Today** page kholo.', 'Campus pahunchte hi **Check In** dabao.', 'Jaate waqt **Check Out** dabao.', 'Campus me aap ka samay attendance report me jata hai.']],
+    m: [['today', '.nav-item[data-tab="today"]'], ['today', '#checkBtn'], ['today', '#checkBtn'], ['today', '#statusCard']] },
+  { id: 'fixtime', t: ['Forgot to check in, or a wrong time? Correct it', 'Check-in bhool gaye ya galat samay? Theek karo'], who: 'all', k: 'forgot add check in check out missed edit change session time delete bhool chhoot jodna galat sudharna badalna चेक इन भूल समय बदलना',
+    s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap **Today\'s sessions · view or edit times** and change the **Check-in** or **Check-out** time.', 'To add one more visit, tap **+ Add another session**. To remove a wrong session, delete it. The app asks you to confirm.'],
+        ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to **Today\'s sessions · view or edit times** dabao aur **Check-in** ya **Check-out** samay badlo.', 'Ek aur visit jodne ke liye **+ Add another session** dabao. Galat session hatana ho to delete karo. App pooch kar hatata hai.']],
+    n: ['You can change only today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap sirf aaj aur kal badal sakte ho. Purane din ke liye Admin ya Coordinator se kaho.'],
+    m: [['today', '.nav-item[data-tab="today"]'], ['today', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#sessionsSection']] },
+  { id: 'addclass', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], who: 'all', k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
     s: [['Tap **Add Class** at the bottom.', 'Stay on the **Class** tab. Choose the batch under **Select Class / Batch**.', 'Check **Class Timing**: Start and End, or tap 40m, 50m, 1h or 1h 5m.', 'Under **What happened in class?** choose **Teaching** and write the **Chapter**. The topic is optional.', 'Under **Class deliverables** tick Worksheet, Study material or Homework if you gave them.', 'Tap **Save Class**.'],
         ['Neeche **Add Class** dabao.', '**Class** tab par raho. **Select Class / Batch** me batch chuno.', '**Class Timing** dekho: Start aur End, ya 40m, 50m, 1h, 1h 5m dabao.', '**What happened in class?** me **Teaching** chuno aur **Chapter** likho. Topic optional hai.', '**Class deliverables** me Worksheet, Study material ya Homework chuno, agar diya ho.', '**Save Class** dabao.']],
-    n: ['If the class is in your Schedule, Add Class fills the batch and time for you.', 'Class aap ke Schedule me ho to Add Class batch aur samay khud bhar deta hai.'] },
-  { id: 'combineb', g: 'Daily work', who: 'all', go: 'add', t: ['Join two classes (batches) in one class', 'Do class (batch) ek saath jodna'], k: 'combine join two batches together do batch ek saath sath milakar बैच जोड़ना',
+    n: ['If the class is in your Schedule, Add Class fills the batch and time for you.', 'Class aap ke Schedule me ho to Add Class batch aur samay khud bhar deta hai.'],
+    m: [['today', '.nav-item[data-tab="add"]'], ['add', '#allBatchesToggle'], ['add', '#durChips'], ['add', '#classKindChips'], ['add', '.checklist-grid'], ['add', '#saveClassBtn']] },
+  { id: 'combineb', t: ['Join two classes (batches) in one class', 'Do class (batch) ek saath jodna'], who: 'all', k: 'combine join two batches together do batch ek saath sath milakar बैच जोड़ना',
     s: [['Tap **Add Class**.', 'Choose the first batch under **Select Class / Batch**.', 'Tap **+ Combine another batch** and choose the other batch under **Combined with**.', 'Fill in the rest and tap **Save Class**.'],
         ['**Add Class** dabao.', '**Select Class / Batch** me pehla batch chuno.', '**+ Combine another batch** dabao aur **Combined with** me doosra batch chuno.', 'Baaki bharo aur **Save Class** dabao.']],
-    n: ['This is for a class test of several batches in one slot. It counts as one class; the test counts for each batch.', 'Ye kai batch ke class test ke liye hai jo ek slot me hota hai. Ye ek class ginti hai; test har batch ke liye ginta hai.'] },
-  { id: 'longclass', g: 'Daily work', who: 'all', go: 'add', t: ['A class that is longer than one period (two periods together)', 'Ek period se lambi class (do period saath)'], k: 'two periods combine double period long class do period combine lambi दो पीरियड',
+    n: ['This is for a class test of several batches in one slot. It counts as one class; the test counts for each batch.', 'Ye kai batch ke class test ke liye hai jo ek slot me hota hai. Ye ek class ginti hai; test har batch ke liye ginta hai.'],
+    m: [['today', '.nav-item[data-tab="add"]'], ['add', '#allBatchesToggle'], ['add', '#combineToggle', ['This shows after you choose a batch.', 'Ye batch chunne ke baad dikhta hai.']], ['add', '#saveClassBtn']] },
+  { id: 'longclass', t: ['A class that is longer than one period (two periods together)', 'Ek period se lambi class (do period saath)'], who: 'all', k: 'two periods combine double period long class do period combine lambi दो पीरियड',
     s: [['Tap **Add Class** and choose the batch.', 'Set **Start** and **End** to cover the whole time, for example the two periods together.', 'Tap **Save Class**.'],
         ['**Add Class** dabao aur batch chuno.', '**Start** aur **End** aise rakho ki poora samay aa jaye, jaise do period saath.', '**Save Class** dabao.']],
-    n: ['One class counts up to 1 h 10 min, and up to 1 h 45 min counts as 1.5 classes. The Timetable does not join two periods into one box: fill both periods with the same subject and teacher.', 'Ek class 1 ghanta 10 minute tak ginti hai, aur 1 ghanta 45 minute tak 1.5 class. Timetable me do period ek dabbe me nahi judte: dono period me wahi subject aur teacher bharo.'] },
-  { id: 'otherwork', g: 'Daily work', who: 'all', go: 'add:activity', t: ['Other work (paper checking, meeting, extra work)', 'Other work (copy check, meeting, extra kaam)'], k: 'other activity activity work paper checking meeting kaam extra coordination doosra kaam अदर वर्क काम',
-    s: [['Tap **Add Class**, then the **Activity** tab.', 'Under **Activity Type** choose **Other Work**.', 'Write what you did in **Work Details**.', 'Tap **Save Activity**.'],
-        ['**Add Class** dabao, phir **Activity** tab.', '**Activity Type** me **Other Work** chuno.', '**Work Details** me likho ki aap ne kya kaam kiya.', '**Save Activity** dabao.']],
-    n: ['It also comes in your WhatsApp report under OTHER WORK. You can also open Activity from Today, under Quick Actions.', 'Ye WhatsApp report me OTHER WORK ke neeche aata hai. Activity Today ke Quick Actions se bhi khul sakta hai.'] },
-  { id: 'leave', g: 'Daily work', who: 'all', go: 'add:activity', t: ['Mark a leave', 'Chhutti (leave) lagana'], k: 'leave holiday chhutti chutti absent cancel leave छुट्टी लीव',
-    s: [['Tap **Add Class**, then the **Activity** tab.', 'Under **Activity Type** choose **Leave / Holiday**.', 'Under **Dates** choose **Single day** or **Multiple days** and pick the date.', 'Write a reason if you want. It is optional.', 'Tap **Save Activity**.'],
-        ['**Add Class** dabao, phir **Activity** tab.', '**Activity Type** me **Leave / Holiday** chuno.', '**Dates** me **Single day** ya **Multiple days** chuno aur tareekh lo.', 'Chaho to karan likho. Ye optional hai.', '**Save Activity** dabao.']],
-    n: ['Only you can cancel your own future leave (**Cancel leave**).', 'Aap ki aage ki chhutti sirf aap hi hata sakte ho (**Cancel leave**).'] },
-  { id: 'holidayduty', g: 'Daily work', who: 'all', go: 'add:activity', t: ['Holiday duty', 'Holiday duty (chhutti ke din kaam)'], k: 'holiday duty sunday working chhutti duty छुट्टी ड्यूटी',
-    s: [['Tap **Add Class**, then the **Activity** tab.', 'Under **Activity Type** choose **Holiday Duty**.', 'Fill in the date and details and tap **Save Activity**.'],
-        ['**Add Class** dabao, phir **Activity** tab.', '**Activity Type** me **Holiday Duty** chuno.', 'Tareekh aur details bharo aur **Save Activity** dabao.']] },
-  { id: 'invig', g: 'Daily work', who: 'all', go: 'today', t: ['Log your invigilation duty', 'Apni invigilation duty log karna'], k: 'invigilation duty exam test log room nigrani इन्विजिलेशन ड्यूटी',
-    s: [['Open the **Today** page.', 'Find the **Invigilation** card of your duty.', 'When the duty is done, log it from that card.'],
-        ['**Today** page kholo.', 'Apni duty ka **Invigilation** card dhundho.', 'Duty poori hone par usi card se log karo.']],
-    n: ['Your duty appears only when the Admin or a Coordinator has set it. A class test in your own class shows as one card.', 'Duty tabhi dikhti hai jab Admin ya Coordinator ne lagayi ho. Apni class ka class test ek hi card me dikhta hai.'] },
-  { id: 'whatsapp', g: 'Daily work', who: 'all', go: 'today', t: ['Share your report on WhatsApp', 'Apni report WhatsApp par bhejna'], k: 'whatsapp report share bhejna send व्हाट्सएप रिपोर्ट',
-    s: [['Open the **Today** page.', 'Under **Quick Actions** tap **WhatsApp** (Share report).', 'Choose WhatsApp and the group or person.', 'Send. The report text is already filled in.'],
-        ['**Today** page kholo.', '**Quick Actions** me **WhatsApp** (Share report) dabao.', 'WhatsApp aur group ya vyakti chuno.', 'Bhej do. Report ka text pehle se bhara hota hai.']],
-    n: ['For another day: **History**, choose the day, **Full report**, then **WhatsApp**. If WhatsApp opens empty on a phone, open the app in Chrome and try again.', 'Doosre din ke liye: **History**, din chuno, **Full report**, phir **WhatsApp**. Agar kisi phone me WhatsApp khali khule, to app ko Chrome me kholkar dobara karo.'] },
-  { id: 'pdf', g: 'Daily work', who: 'all', go: 'today', t: ['Download your report as a PDF', 'Apni report PDF me download karna'], k: 'pdf report download file पीडीएफ रिपोर्ट',
-    s: [['Open the **Today** page.', 'Under **Quick Actions** tap **PDF report** (Download).', 'The file is saved on your phone.'],
-        ['**Today** page kholo.', '**Quick Actions** me **PDF report** (Download) dabao.', 'File aap ke phone me save ho jati hai.']],
-    n: ['For another day or a week or month, use **History**.', 'Doosre din, hafte ya mahine ke liye **History** use karo.'] },
-  { id: 'schedslot', g: 'Daily work', who: 'all', go: 'schedule', t: ['Add a class to your Schedule', 'Apne Schedule me class jodna'], k: 'schedule slot add slot weekly timetable plan शेड्यूल',
+    n: ['One class counts up to 1 h 10 min, and up to 1 h 45 min counts as 1.5 classes. The Timetable does not join two periods into one box: fill both periods with the same subject and teacher.', 'Ek class 1 ghanta 10 minute tak ginti hai, aur 1 ghanta 45 minute tak 1.5 class. Timetable me do period ek dabbe me nahi judte: dono period me wahi subject aur teacher bharo.'],
+    m: [['today', '.nav-item[data-tab="add"]'], ['add', '#startTimeInput'], ['add', '#saveClassBtn']] },
+  { id: 'schedslot', t: ['Add a class to your Schedule', 'Apne Schedule me class jodna'], who: 'all', k: 'schedule slot add slot weekly timetable plan शेड्यूल',
     s: [['Open **Schedule**.', 'Tap **+ Add Slot**.', 'Choose the day, the time and the batch, and save.'],
         ['**Schedule** kholo.', '**+ Add Slot** dabao.', 'Din, samay aur batch chuno aur save karo.']],
-    n: ['The Schedule does not repeat every week. A slot set by the Admin from the timetable shows here by itself.', 'Schedule har hafte apne aap nahi doharta. Admin ne timetable se jo slot lagaya hai wo yahin dikhta hai.'] },
-  { id: 'mysub', g: 'Daily work', who: 'all', go: 'history', t: ['See your substitute classes', 'Apni substitute classes dekhna'], k: 'substitute class count my substitute classes sub dusre ki class सब्स्टीट्यूट',
-    s: [['Open **History**.', 'Choose **Week** or **Month**.', 'Open the class count and the substitute view. Substitute classes are in red.'],
-        ['**History** kholo.', '**Week** ya **Month** chuno.', 'Class count aur substitute wala hissa kholo. Substitute classes laal rang me hoti hain.']],
-    n: ['A substitute class counts when you have filled it in with **Add Class**.', 'Substitute class tabhi ginti hai jab aap ne use **Add Class** se bhar diya ho.'] },
-  { id: 'reminder', g: 'Daily work', who: 'all', go: 'menu:settings', t: ['Class reminder before a class', 'Class se pehle reminder lagana'], k: 'reminder class reminder alert remind minutes before yaad रिमाइंडर',
-    s: [['Open the menu (top left).', 'Open **Settings** (Reminders, display, text size, update).', 'Find **Class reminders** and switch it on.', 'Choose how many minutes before the class: 5, 10 or 15.'],
-        ['Menu kholo (upar bayen).', '**Settings** kholo (Reminders, display, text size, update).', '**Class reminders** dhundho aur chalu karo.', 'Class se kitne minute pehle chahiye: 5, 10 ya 15 chuno.']],
-    n: ['To get alerts when the app is closed, also turn on **Phone notifications**.', 'App band hone par bhi alert chahiye to **Phone notifications** bhi chalu karo.'] },
-  { id: 'phonealerts', g: 'Daily work', who: 'all', go: 'menu:push', t: ['Phone alerts when the app is closed', 'App band ho tab bhi phone par alert'], k: 'phone notifications notification alert push bell नोटिफिकेशन',
-    s: [['Open the menu (top left).', 'Tap **Phone notifications**.', 'Switch the notifications on and allow them when the phone asks.'],
-        ['Menu kholo (upar bayen).', '**Phone notifications** dabao.', 'Notifications chalu karo aur phone pooche to allow karo.']],
-    n: ['On an iPhone, first put the app on the Home Screen. The alerts work best when the app is opened in Chrome or installed from Chrome.', 'iPhone me pehle app ko Home Screen par lagao. Alerts Chrome me ya Chrome se install kiye app me sabse achhe chalte hain.'] },
+    n: ['The Schedule does not repeat every week. A slot set by the Admin from the timetable shows here by itself.', 'Schedule har hafte apne aap nahi doharta. Admin ne timetable se jo slot lagaya hai wo yahin dikhta hai.'],
+    m: [['schedule', '.nav-item[data-tab="schedule"]'], ['schedule', '#svAddBtn'], ['', '']] },
+  { id: 'mysub', t: ['See your substitute classes', 'Apni substitute classes dekhna'], who: 'all', k: 'substitute class count my substitute classes sub dusre ki class सब्स्टीट्यूट',
+    s: [['Open **History**.', 'Choose **Week** or **Month**.', 'Tap **Substitute report** (Where · when · whose). The classes you took in place of another teacher are listed there.'],
+        ['**History** kholo.', '**Week** ya **Month** chuno.', '**Substitute report** (Where · when · whose) dabao. Jo classes aap ne kisi doosre teacher ki jagah li, wo wahan dikhti hain.']],
+    n: ['A substitute class counts when you have filled it in with **Add Class**.', 'Substitute class tabhi ginti hai jab aap ne use **Add Class** se bhar diya ho.'],
+    m: [['history', '.nav-item[data-tab="history"]'], ['history', '#hvRange'], ['history', '#hvActions']] },
+  { id: 'otherwork', t: ['Other work or holiday duty', 'Other work ya holiday duty'], who: 'all', k: 'other activity other work activity work paper checking meeting kaam extra coordination doosra kaam holiday duty sunday working chhutti duty अदर वर्क काम',
+    s: [['Tap **Add Class**, then the **Activity** tab.', 'Under **Activity Type** choose **Other Work** (or **Holiday Duty**).', 'Write what you did in **Work Details**.', 'Tap **Save Activity**.'],
+        ['**Add Class** dabao, phir **Activity** tab.', '**Activity Type** me **Other Work** (ya **Holiday Duty**) chuno.', '**Work Details** me likho ki aap ne kya kaam kiya.', '**Save Activity** dabao.']],
+    n: ['It also comes in your WhatsApp report under OTHER WORK. You can also open Activity from Today, under Quick Actions.', 'Ye WhatsApp report me OTHER WORK ke neeche aata hai. Activity Today ke Quick Actions se bhi khul sakta hai.'],
+    m: [['add:activity', '#modeChips'], ['add:activity', '#activityChips'], ['add:activity', '#activityNoteInput'], ['add:activity', '#saveClassBtn']] },
+  { id: 'leave', t: ['Mark a leave', 'Chhutti (leave) lagana'], who: 'all', k: 'leave holiday chhutti chutti absent cancel leave छुट्टी लीव',
+    s: [['Tap **Add Class**, then the **Activity** tab.', 'Under **Activity Type** choose **Leave / Holiday**.', 'Under **Dates** choose **Single day** or **Multiple days** and pick the date.', 'Write a reason if you want. It is optional.', 'Tap **Save Activity**.'],
+        ['**Add Class** dabao, phir **Activity** tab.', '**Activity Type** me **Leave / Holiday** chuno.', '**Dates** me **Single day** ya **Multiple days** chuno aur tareekh lo.', 'Chaho to karan likho. Ye optional hai.', '**Save Activity** dabao.']],
+    n: ['Only you can cancel your own future leave (**Cancel leave**).', 'Aap ki aage ki chhutti sirf aap hi hata sakte ho (**Cancel leave**).'],
+    m: [['add:activity', '#modeChips'], ['add:activity', '#activityChips'], ['add:activity:leave', '#leaveModeChips', ['This shows after you choose Leave / Holiday.', 'Ye Leave / Holiday chunne ke baad dikhta hai.']], ['add:activity:leave', '#activityNoteInput'], ['add:activity:leave', '#saveClassBtn']] },
+  { id: 'invig', t: ['Log your invigilation duty', 'Apni invigilation duty log karna'], who: 'all', k: 'invigilation duty exam test log room nigrani इन्विजिलेशन ड्यूटी',
+    s: [['Open the **Today** page.', 'Find the **Invigilation** card of your duty.', 'When the duty is done, log it from that card.'],
+        ['**Today** page kholo.', 'Apni duty ka **Invigilation** card dhundho.', 'Duty poori hone par usi card se log karo.']],
+    n: ['Your duty appears only when the Admin or a Coordinator has set it. A class test in your own class shows as one card.', 'Duty tabhi dikhti hai jab Admin ya Coordinator ne lagayi ho. Apni class ka class test ek hi card me dikhta hai.'],
+    m: [['today', '.nav-item[data-tab="today"]'], ['today', '#myDutySec', ['This shows only when you have a duty today.', 'Ye tabhi dikhta hai jab aaj aap ki duty ho.']], ['today', '#todayClassList']] },
+  { id: 'whatsapp', t: ['Send your report on WhatsApp or as a PDF', 'Apni report WhatsApp ya PDF me bhejna'], who: 'all', k: 'whatsapp report share bhejna send pdf download file व्हाट्सएप पीडीएफ रिपोर्ट',
+    s: [['Open the **Today** page.', 'Under **Quick Actions** tap **WhatsApp** (Share report). Choose WhatsApp and the group, and send. The report text is already filled in.', 'For a PDF, tap **PDF report** (Download). The file is saved on your phone.', 'For another day, a week or a month, open **History**, choose the period and use **Full report**.'],
+        ['**Today** page kholo.', '**Quick Actions** me **WhatsApp** (Share report) dabao. WhatsApp aur group chuno aur bhej do. Report ka text pehle se bhara hota hai.', 'PDF ke liye **PDF report** (Download) dabao. File aap ke phone me save ho jati hai.', 'Doosre din, hafte ya mahine ke liye **History** kholo, avadhi chuno aur **Full report** use karo.']],
+    n: ['If WhatsApp opens empty on a phone, open the app in Chrome and try again.', 'Agar kisi phone me WhatsApp khali khule, to app ko Chrome me kholkar dobara karo.'],
+    m: [['today', '.nav-item[data-tab="today"]'], ['today', '#shareWhatsappBtn'], ['today', '#downloadReportBtn'], ['history', '.nav-item[data-tab="history"]']] },
+  { id: 'reminder', t: ['Class reminder and phone alerts', 'Class reminder aur phone alerts'], who: 'all', k: 'reminder class reminder alert remind minutes before yaad phone notifications notification push bell रिमाइंडर नोटिफिकेशन',
+    s: [['Open the menu (top left).', 'Open **Settings** (Reminders, display, text size, update). Find **Class reminders**, switch it on and choose 5, 10 or 15 minutes before the class.', 'To get alerts when the app is closed, open **Phone notifications** in the menu and switch it on. Allow it when the phone asks.'],
+        ['Menu kholo (upar bayen).', '**Settings** kholo (Reminders, display, text size, update). **Class reminders** dhundho, chalu karo aur class se 5, 10 ya 15 minute pehle chuno.', 'App band hone par bhi alert chahiye to menu me **Phone notifications** kholo aur chalu karo. Phone pooche to allow karo.']],
+    n: ['On an iPhone, first put the app on the Home Screen. The alerts work best when the app is opened in Chrome or installed from Chrome.', 'iPhone me pehle app ko Home Screen par lagao. Alerts Chrome me ya Chrome se install kiye app me sabse achhe chalte hain.'],
+    m: [['today', '#menuOpenBtn'], ['', ''], ['', '']] },
 
-  { id: 'ttfill', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Fill the timetable by hand', 'Timetable haath se bharna'], k: 'timetable fill paint bharna subject cell टाइमटेबल भरना',
-    s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the wing, then the group (for example Pre-Foundation · Morning).', 'Tap **Edit timetable**.', 'In the **Paint** row tap a subject, for example Mathematics.', 'Tap the cells where that subject is taught. Tap **Off** in the Paint row to clear a cell.', 'When it looks right, tap **Publish** to send it to the teachers.'],
-        ['**Admin** kholo, phir **Timetable**.', 'Hafta aur wing chuno, phir group (jaise Pre-Foundation · Morning).', '**Edit timetable** dabao.', '**Paint** row me subject dabao, jaise Mathematics.', 'Jin cell me wo subject padhta hai unhe dabao. Cell saaf karne ke liye Paint row me **Off** dabao.', 'Sahi lage to **Publish** dabao, taaki teachers ko mile.']] },
-  { id: 'ttphoto', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Make the timetable with AI (from a photo)', 'AI se timetable banana (photo se)'], k: 'ai photo picture timetable fill from a photo gemini scan banana timetable photo se एआई फोटो टाइमटेबल',
+  { id: 'ttfill', t: ['Fill the timetable by hand', 'Timetable haath se bharna'], who: 'lead', k: 'timetable fill paint bharna subject cell publish send teachers draft टाइमटेबल भरना टाइमटेबल पब्लिश',
+    s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the wing, then the group (for example Pre-Foundation · Morning).', 'Tap **Edit timetable**.', 'In the **Paint** row tap a subject, for example Mathematics.', 'Tap the cells where that subject is taught. Tap **Off** in the Paint row to clear a cell.', 'When it looks right, tap **Publish**. You can publish the whole week or one day.'],
+        ['**Admin** kholo, phir **Timetable**.', 'Hafta aur wing chuno, phir group (jaise Pre-Foundation · Morning).', '**Edit timetable** dabao.', '**Paint** row me subject dabao, jaise Mathematics.', 'Jin cell me wo subject padhta hai unhe dabao. Cell saaf karne ke liye Paint row me **Off** dabao.', 'Sahi lage to **Publish** dabao. Poora hafta ya ek din publish kar sakte ho.']],
+    n: ['Changes stay as a draft until you publish. After publishing, a substitute or a swap reaches the teachers at once.', 'Publish karne tak badlav draft rehte hain. Publish ke baad substitute ya swap teachers tak turant pahunchta hai.'],
+    m: [['admin:tt', '#adminTabs [data-atab-btn="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit', ['Tap Edit timetable only for a published timetable.', 'Edit timetable sirf published timetable ke liye dabana padta hai.']], ['admin:tt', '.tg-paint', ['The Paint row shows in edit mode.', 'Paint row edit mode me dikhti hai.']], ['admin:tt', '.tg-table'], ['admin:tt', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
+  { id: 'ttphoto', t: ['Make the timetable with AI (from a photo)', 'AI se timetable banana (photo se)'], who: 'lead', k: 'ai photo picture timetable fill from a photo gemini scan banana timetable photo se एआई फोटो टाइमटेबल',
     s: [['Open **Admin**, then **Timetable**. Choose the week, the wing and the group.', 'Tap **Edit timetable**. In the list of actions tap **Fill from a photo**.', 'Tap **Choose a picture of the timetable** and pick a clear, straight picture of the whole table.', 'Wait while the AI reads it (**Reading the picture…**).', 'Check what was read and correct any cell that is wrong.', 'Tap **Put in draft**. Nothing is saved or published until you do this.', 'Look at the timetable, and tap **Publish** when it is right.'],
         ['**Admin** kholo, phir **Timetable**. Hafta, wing aur group chuno.', '**Edit timetable** dabao. Kaam ki list me **Fill from a photo** dabao.', '**Choose a picture of the timetable** dabao aur poori table ki saaf, seedhi photo chuno.', 'AI padhta hai, thoda ruko (**Reading the picture…**).', 'Jo padha gaya use dekho aur galat cell theek karo.', '**Put in draft** dabao. Isse pehle kuch save ya publish nahi hota.', 'Timetable dekho, aur sahi lage to **Publish** dabao.']],
-    n: ['The picture goes to Google\'s AI only to be read. If it says the AI is not set up, the Admin must open Settings → AI. A Coordinator needs the Admin to add their login email first.', 'Photo sirf padhne ke liye Google ke AI ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga. Coordinator ka login email pehle Admin ko jodna padta hai.'] },
-  { id: 'ttpublish', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Publish the timetable', 'Timetable publish karna'], k: 'publish timetable send teachers draft टाइमटेबल पब्लिश',
-    s: [['Open **Admin**, then **Timetable**.', 'Check the cells. Changes stay as a draft until you publish.', 'Tap **Publish**. You can publish the whole week or one day.', 'The teachers see their classes in their Schedule.'],
-        ['**Admin** kholo, phir **Timetable**.', 'Cell dekho. Publish karne tak badlav draft rehte hain.', '**Publish** dabao. Poora hafta ya ek din publish kar sakte ho.', 'Teachers ko apni classes Schedule me dikhti hain.']],
-    n: ['After publishing, a substitute or a swap reaches the teachers at once. You do not publish again.', 'Publish ke baad substitute ya swap teachers tak turant pahunchta hai. Dobara publish nahi karna padta.'] },
-  { id: 'ttcell', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Change one class (edit or swap)', 'Ek class badalna (edit ya swap)'], k: 'change edit swap class cell badlo टाइमटेबल बदलना',
+    n: ['The picture goes to Google\'s AI only to be read. If it says the AI is not set up, the Admin must open Settings → AI. A Coordinator needs the Admin to add their login email first.', 'Photo sirf padhne ke liye Google ke AI ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga. Coordinator ka login email pehle Admin ko jodna padta hai.'],
+    m: [['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgMoreList', ['The list of actions shows in edit mode. In the demo the AI part does not run.', 'Kaam ki list edit mode me dikhti hai. Demo me AI wala hissa nahi chalta.']], ['', ''], ['', ''], ['', ''], ['', ''], ['admin:tt', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
+  { id: 'ttcell', t: ['Change one class (edit or swap)', 'Ek class badalna (edit ya swap)'], who: 'lead', k: 'change edit swap class cell badlo बदलना',
     s: [['Open **Admin**, then **Timetable**.', 'Tap **Edit timetable**.', 'Tap the cell. Change the subject or the teacher, or choose **Swap with** to exchange two classes of one batch.', 'Tap **Publish** to tell the teachers.'],
-        ['**Admin** kholo, phir **Timetable**.', '**Edit timetable** dabao.', 'Cell dabao. Subject ya teacher badlo, ya **Swap with** se ek batch ki do class badlo.', 'Teachers ko batane ke liye **Publish** dabao.']] },
-  { id: 'substitute', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Substitute: someone else takes a class', 'Substitute lagana (koi aur teacher class lega)'], k: 'substitute sub replacement dusra teacher class leave absent badle सब्स्टीट्यूट लगाना',
+        ['**Admin** kholo, phir **Timetable**.', '**Edit timetable** dabao.', 'Cell dabao. Subject ya teacher badlo, ya **Swap with** se ek batch ki do class badlo.', 'Teachers ko batane ke liye **Publish** dabao.']],
+    m: [['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt', '.tg-table'], ['admin:tt', '#tgPublish']] },
+  { id: 'substitute', t: ['Substitute: someone else takes a class', 'Substitute lagana (koi aur teacher class lega)'], who: 'lead', k: 'substitute sub replacement dusra teacher class leave absent badle सब्स्टीट्यूट लगाना',
     s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the group.', 'Tap the class that needs a substitute.', 'Tap **Someone else takes this class (substitute)**.', 'Choose the teacher who will take it.', 'Tap **Apply substitute**.', 'To tell the teachers, tap **Share substitutions on WhatsApp**.'],
         ['**Admin** kholo, phir **Timetable**.', 'Hafta aur group chuno.', 'Jis class me substitute chahiye, us par dabao.', '**Someone else takes this class (substitute)** dabao.', 'Wo teacher chuno jo class lega.', '**Apply substitute** dabao.', 'Teachers ko batane ke liye **Share substitutions on WhatsApp** dabao.']],
-    n: ['The substitute reaches the teachers at once. You do not publish again.', 'Substitute teachers tak turant pahunchta hai. Dobara publish nahi karna padta.'] },
-  { id: 'ttjoin', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Two batches sit together (combined class)', 'Do batch ek saath baithte hain (combined class)'], k: 'combine join sit together combined class do batch ek saath कंबाइन क्लास',
+    n: ['The substitute reaches the teachers at once. You do not publish again.', 'Substitute teachers tak turant pahunchta hai. Dobara publish nahi karna padta.'],
+    m: [['admin:tt', '#adminTabs [data-atab-btn="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '.tg-table'], ['', ''], ['', ''], ['', ''], ['', '']] },
+  { id: 'ttjoin', t: ['Two batches sit together (combined class)', 'Do batch ek saath baithte hain (combined class)'], who: 'lead', k: 'combine join sit together combined class do batch ek saath कंबाइन क्लास',
     s: [['Open **Admin**, then **Timetable**, and tap **Edit timetable**.', 'Tap the class cell and look for **Sit together** or **Combined class** to join the other batch.', 'A change of subject or teacher then applies to every batch in the combined class.', 'Tap **Publish**.'],
         ['**Admin** kholo, phir **Timetable**, aur **Edit timetable** dabao.', 'Class cell dabao aur doosre batch ko jodne ke liye **Sit together** ya **Combined class** dhundho.', 'Phir subject ya teacher ka badlav combined class ke har batch par lagta hai.', '**Publish** dabao.']],
-    n: ['To swap or change only one batch, separate the combined class first.', 'Sirf ek batch ko badalna ya swap karna ho to pehle combined class ko alag karo.'] },
-  { id: 'ttcopy', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Copy last week', 'Pichhla hafta copy karna'], k: 'copy last week repeat previous week pichhla hafta कॉपी हफ्ता',
+    n: ['To swap or change only one batch, separate the combined class first.', 'Sirf ek batch ko badalna ya swap karna ho to pehle combined class ko alag karo.'],
+    m: [['admin:tt', '#tgEdit'], ['admin:tt', '.tg-table'], ['', ''], ['admin:tt', '#tgPublish']] },
+  { id: 'ttcopy', t: ['Copy last week', 'Pichhla hafta copy karna'], who: 'lead', k: 'copy last week repeat previous week pichhla hafta कॉपी हफ्ता',
     s: [['Open **Admin**, then **Timetable**, and choose the new week.', 'Tap **Copy last week**. It asks you to confirm.', 'Fix what is different and tap **Publish**.'],
         ['**Admin** kholo, phir **Timetable**, aur naya hafta chuno.', '**Copy last week** dabao. Ye pooch kar karta hai.', 'Jo alag hai usse theek karo aur **Publish** dabao.']],
-    n: ['You can also copy one day to other days.', 'Ek din ko doosre dino par bhi copy kar sakte ho.'] },
+    n: ['You can also copy one day to other days.', 'Ek din ko doosre dino par bhi copy kar sakte ho.'],
+    m: [['admin:tt', '#ttWhich'], ['admin:tt', '#tgMoreList', ['The copy buttons show in edit mode.', 'Copy ke button edit mode me dikhte hain.']], ['admin:tt', '#tgPublish']] },
+  { id: 'pictures', t: ['Share the timetable or the duty sheet as a picture', 'Timetable ya duty sheet ko tasveer ki tarah bhejna'], who: 'lead', k: 'picture image share timetable duty sheet batch wise tasveer photo bhejna',
+    s: [['Open **Admin**, then **Timetable**. After publishing, a picture of the timetable is made by itself: tap **Published timetable picture** to see it and share it.', 'For one batch at a time, tap **Batch-wise pictures**.', 'For the duty sheet, open **Admin → Exams**, open the exam and share its duty sheet picture.'],
+        ['**Admin** kholo, phir **Timetable**. Publish ke baad timetable ki tasveer apne aap banti hai: use dekhne aur bhejne ke liye **Published timetable picture** dabao.', 'Ek-ek batch ke liye **Batch-wise pictures** dabao.', 'Duty sheet ke liye **Admin → Exams** kholo, exam kholo aur uski duty sheet ki tasveer bhejo.']],
+    m: [['admin:tt', '#tgViewImg', ['The picture shows after the timetable is published.', 'Tasveer timetable publish hone ke baad dikhti hai.']], ['admin:tt', '#tgBatchPics', ['This shows after the timetable is published.', 'Ye timetable publish hone ke baad dikhta hai.']], ['admin:exams', '#adminExamList']] },
 
-  { id: 'newexam', g: 'Exams and duty', who: 'lead', go: 'admin:exams', t: ['Make an exam', 'Exam banana'], k: 'exam new exam half yearly banana एग्जाम',
-    s: [['Open **Admin**, then **Exams**.', 'Tap **+ New Exam**.', 'Choose the **Test type** and the **Subject** from the menus, then the date and the time.', 'Choose the classes (batches) and save.', 'Then set the rooms and invigilators from the exam card.'],
-        ['**Admin** kholo, phir **Exams**.', '**+ New Exam** dabao.', 'Menu se **Test type** aur **Subject** chuno, phir tareekh aur samay.', 'Classes (batch) chuno aur save karo.', 'Phir exam card se rooms aur invigilators lagao.']] },
-  { id: 'newtest', g: 'Exams and duty', who: 'lead', go: 'admin:exams', t: ['Make a test (weekly test, unit test)', 'Test banana (weekly test, unit test)'], k: 'test weekly test unit test banana टेस्ट',
-    s: [['Open **Admin**, then **Exams**, and tap **+ New Exam**.', 'Choose a **Test type** such as Weekly Test.', 'Fill in the subject, the date, the time and the classes, and save.'],
-        ['**Admin** kholo, phir **Exams**, aur **+ New Exam** dabao.', '**Test type** chuno, jaise Weekly Test.', 'Subject, tareekh, samay aur classes bharo aur save karo.']],
-    n: ['Tests and exams are made in the same place. Only the Test type is different. The list of test types is in **Settings → Test Types**.', 'Test aur exam ek hi jagah bante hain. Sirf Test type alag hota hai. Test type ki list **Settings → Test Types** me hai.'] },
-  { id: 'classtest', g: 'Exams and duty', who: 'lead', go: 'admin:tt', t: ['Make a class test (in the Timetable)', 'Class test banana (Timetable me)'], k: 'class test timetable exam test cell क्लास टेस्ट',
+  { id: 'newexam', t: ['Make an exam or a test', 'Exam ya test banana'], who: 'lead', k: 'exam new exam half yearly test weekly test unit test banana एग्जाम टेस्ट',
+    s: [['Open **Admin**, then **Exams**.', 'Tap **+ New Exam**.', 'Choose the **Test type** (for example Half-Yearly or Weekly Test) and the **Subject** from the menus, then the date and the time.', 'Choose the classes (batches) and save.', 'Then set the rooms and invigilators from the exam card.'],
+        ['**Admin** kholo, phir **Exams**.', '**+ New Exam** dabao.', 'Menu se **Test type** (jaise Half-Yearly ya Weekly Test) aur **Subject** chuno, phir tareekh aur samay.', 'Classes (batch) chuno aur save karo.', 'Phir exam card se rooms aur invigilators lagao.']],
+    n: ['Tests and exams are made in the same place. Only the Test type is different. The list of test types is in **Settings → Test Types**.', 'Test aur exam ek hi jagah bante hain. Sirf Test type alag hota hai. Test type ki list **Settings → Test Types** me hai.'],
+    m: [['admin:exams', '#adminTabs [data-atab-btn="exams"]'], ['admin:exams', '#adminNewExamBtn'], ['', ''], ['', ''], ['admin:exams', '#adminExamList']] },
+  { id: 'classtest', t: ['Make a class test (in the Timetable)', 'Class test banana (Timetable me)'], who: 'lead', k: 'class test timetable exam test cell क्लास टेस्ट',
     s: [['Open **Admin**, then **Timetable**, and tap **Edit timetable**.', 'Tap the cell of the class.', 'Open **Exam / Test** and choose **Class Test** and the subject.', 'If each class has a different subject, choose **Yes** for **Different subject for each class?**', 'Tap **Publish**. The class test also shows in **Admin → Exams**, where you set the duty.'],
         ['**Admin** kholo, phir **Timetable**, aur **Edit timetable** dabao.', 'Class ka cell dabao.', '**Exam / Test** kholo aur **Class Test** aur subject chuno.', 'Har class ka subject alag ho to **Different subject for each class?** me **Yes** chuno.', '**Publish** dabao. Class test **Admin → Exams** me bhi dikhta hai, wahan duty lagao.']],
-    n: ['A class test counts as a class only for a teacher who has a duty in it.', 'Class test usi teacher ki class ginti hai jiski usme duty ho.'] },
-  { id: 'duty', g: 'Exams and duty', who: 'lead', go: 'admin:exams', t: ['Set the invigilation duty', 'Invigilation duty lagana'], k: 'invigilation duty room invigilator exam nigrani lagana ड्यूटी लगाना इन्विजिलेशन',
+    n: ['A class test counts as a class only for a teacher who has a duty in it.', 'Class test usi teacher ki class ginti hai jiski usme duty ho.'],
+    m: [['admin:tt', '#tgEdit'], ['admin:tt', '.tg-table'], ['', ''], ['', ''], ['admin:tt', '#tgPublish']] },
+  { id: 'duty', t: ['Set the invigilation duty', 'Invigilation duty lagana'], who: 'lead', k: 'invigilation duty room invigilator exam nigrani lagana ड्यूटी लगाना इन्विजिलेशन',
     s: [['Open **Admin**, then **Exams**, and open the exam card.', 'Tap **Add rooms**. Add the rooms in **Settings → Rooms** first.', 'In each room tap **+ Add invigilator** and choose the teacher and the duty time.', 'Make the **Duty sheet picture** and tap **Publish**, so teachers can see it.'],
         ['**Admin** kholo, phir **Exams**, aur exam card kholo.', '**Add rooms** dabao. Rooms pehle **Settings → Rooms** me jodo.', 'Har room me **+ Add invigilator** dabao aur teacher aur duty ka samay chuno.', '**Duty sheet picture** banao aur **Publish** dabao, taaki teachers dekh sakein.']],
-    n: ['A teacher who has not joined yet can also be given a duty. You can also use the **Combine** button to make one duty sheet for several exams.', 'Jo teacher abhi app me nahi aaya use bhi duty de sakte ho. Kai exam ki ek hi duty sheet ke liye **Combine** button bhi hai.'] },
-  { id: 'dutyphoto', g: 'Exams and duty', who: 'lead', go: 'admin:exams', t: ['Make the invigilation duty with AI (from a photo)', 'AI se invigilation duty banana (photo se)'], k: 'ai photo picture duty invigilation fill from a photo gemini duty sheet scan एआई फोटो ड्यूटी',
+    n: ['A teacher who has not joined yet can also be given a duty. The **Combine** button makes one duty sheet for several exams.', 'Jo teacher abhi app me nahi aaya use bhi duty de sakte ho. Kai exam ki ek hi duty sheet ke liye **Combine** button hai.'],
+    m: [['admin:exams', '#adminExamList'], ['admin:exams', '#adminExamList'], ['', ''], ['', '']] },
+  { id: 'dutyphoto', t: ['Make the invigilation duty with AI (from a photo)', 'AI se invigilation duty banana (photo se)'], who: 'lead', k: 'ai photo picture duty invigilation fill from a photo gemini duty sheet scan एआई फोटो ड्यूटी',
     s: [['Open **Admin**, then **Exams**, and open the exam card.', 'Tap **Fill rooms and invigilators from a photo**. The page **Duty sheet from a photo** opens.', 'Tap **Choose a picture of the duty sheet** and pick a clear picture.', 'Wait while the AI reads it (**Reading the duty sheet…**). It reads the rooms, the names, the duty times, the breaks and the staff counts.', 'Check everything that was read.', 'Tap **Check and save**.'],
         ['**Admin** kholo, phir **Exams**, aur exam card kholo.', '**Fill rooms and invigilators from a photo** dabao. **Duty sheet from a photo** page khulta hai.', '**Choose a picture of the duty sheet** dabao aur saaf photo chuno.', 'AI padhta hai, thoda ruko (**Reading the duty sheet…**). Wo rooms, naam, duty ke samay, break aur staff ki ginti padhta hai.', 'Jo padha gaya sab dekho.', '**Check and save** dabao.']],
-    n: ['A break in a duty becomes separate slots. The picture goes to Google\'s Gemini only to be read. If it says the AI is not set up, the Admin must open Settings → AI.', 'Duty me break alag slot ban jata hai. Photo sirf padhne ke liye Google ke Gemini ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga.'] },
-  { id: 'dutyreport', g: 'Exams and duty', who: 'lead', go: 'admin:reports:duty', t: ['Invigilation duty report (day, week, month)', 'Invigilation duty report (din, hafta, mahina)'], k: 'duty report invigilation week month sheet teacher wise ड्यूटी रिपोर्ट',
-    s: [['Open **Admin**, then **Reports**, then **Invigilation duty**.', 'Choose **Day**, **Week** or **Month** and the wing.', 'Choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Tap **WhatsApp** to share the picture, or **PDF** or **Excel**.'],
-        ['**Admin** kholo, phir **Reports**, phir **Invigilation duty**.', '**Day**, **Week** ya **Month** aur wing chuno.', '**Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) chuno.', '**WhatsApp** se tasveer bhejo, ya **PDF** ya **Excel** lo.']],
-    n: ['Days without a duty do not appear. Teachers with zero duties show in the Teacher-wise view.', 'Jis din duty nahi, wo din nahi aata. Zero duty wale teacher Teacher-wise me dikhte hain.'] },
+    n: ['A break in a duty becomes separate slots. The picture goes to Google\'s Gemini only to be read. If it says the AI is not set up, the Admin must open Settings → AI.', 'Duty me break alag slot ban jata hai. Photo sirf padhne ke liye Google ke Gemini ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga.'],
+    m: [['admin:exams', '#adminExamList'], ['', ''], ['', ''], ['', ''], ['', ''], ['', '']] },
 
-  { id: 'reports', g: 'Reports', who: 'lead', go: 'admin:reports', t: ['Get a report (day, week, month)', 'Report nikalna (din, hafta, mahina)'], k: 'report full attendance class count substitute pdf excel whatsapp रिपोर्ट',
-    s: [['Open **Admin**, then **Reports**.', 'Choose **Day**, **Week** or **Month** and the date.', 'Tap the report: **Full report**, **Attendance report**, **Class count report**, **Substitute report** or **Invigilation duty**.', 'Choose the wing and the teacher if you need.', 'Get it as **PDF**, **Excel** (CSV file) or on **WhatsApp**.'],
-        ['**Admin** kholo, phir **Reports**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Report dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report** ya **Invigilation duty**.', 'Chaho to wing aur teacher chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo.']] },
-  { id: 'classcount', g: 'Reports', who: 'lead', go: 'admin:reports:count', t: ['Class count report', 'Class count report'], k: 'class count counted from timetable filled in by teachers ginti not using the app क्लास काउंट',
+  { id: 'reports', t: ['Get a report (day, week, month)', 'Report nikalna (din, hafta, mahina)'], who: 'lead', k: 'report full attendance class count substitute pdf excel whatsapp invigilation duty report week month sheet teacher wise रिपोर्ट ड्यूटी रिपोर्ट',
+    s: [['Open **Admin**, then **Reports**.', 'Choose **Day**, **Week** or **Month** and the date.', 'Tap the report: **Full report**, **Attendance report**, **Class count report**, **Substitute report** or **Invigilation duty**.', 'Choose the wing and the teacher if you need. For **Invigilation duty** also choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Get it as **PDF**, **Excel** (CSV file) or on **WhatsApp**.'],
+        ['**Admin** kholo, phir **Reports**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Report dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report** ya **Invigilation duty**.', 'Chaho to wing aur teacher chuno. **Invigilation duty** me **Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) bhi chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo.']],
+    n: ['In the Invigilation duty report, days without a duty do not appear, and teachers with zero duties show in the Teacher-wise view.', 'Invigilation duty report me jis din duty nahi wo din nahi aata, aur zero duty wale teacher Teacher-wise me dikhte hain.'],
+    m: [['admin:reports', '#adminTabs [data-atab-btn="reports"]'], ['admin:reports', '#adminReportRangeChips'], ['admin:reports', '#adminRepKind'], ['admin:reports', '#adminWingSel'], ['admin:reports', '#repStdTiles']] },
+  { id: 'classcount', t: ['Class count report', 'Class count report'], who: 'lead', k: 'class count counted from timetable filled in by teachers ginti not using the app क्लास काउंट',
     s: [['Open **Admin**, then **Reports**, then **Class count report**.', 'Choose **Day**, **Week** or **Month**.', 'Under **Counted from** choose **Filled in by teachers** or **From the timetable**.', 'Get it as **PDF**, **Excel** or **WhatsApp**.'],
         ['**Admin** kholo, phir **Reports**, phir **Class count report**.', '**Day**, **Week** ya **Month** chuno.', '**Counted from** me **Filled in by teachers** ya **From the timetable** chuno.', '**PDF**, **Excel** ya **WhatsApp** me lo.']],
-    n: ['Use **From the timetable** for a teacher who does not use the app. A class test counts only for a teacher who has a duty in it.', 'Jo teacher app nahi chalate unke liye **From the timetable** use karo. Class test usi teacher ki ginti hai jiski usme duty ho.'] },
+    n: ['Use **From the timetable** for a teacher who does not use the app. A class test counts only for a teacher who has a duty in it.', 'Jo teacher app nahi chalate unke liye **From the timetable** use karo. Class test usi teacher ki ginti hai jiski usme duty ho.'],
+    m: [['admin:reports:count', '#adminRepKind'], ['admin:reports:count', '#adminReportRangeChips'], ['admin:reports:count', '#trepBasis'], ['admin:reports:count', '#repCount']] },
 
-  { id: 'notice', g: 'Staff and notices', who: 'lead', go: 'menu:notice', t: ['Send a notice to the teachers', 'Teachers ko notice bhejna'], k: 'notice send announcement sandesh suchna नोटिस',
+  { id: 'notice', t: ['Send a notice to the teachers', 'Teachers ko notice bhejna'], who: 'lead', k: 'notice send announcement sandesh suchna नोटिस',
     s: [['Open the menu and tap **Send a notice**, or use **+ New notice** on the Admin home.', 'Write the notice and choose who gets it.', 'Send it. Each teacher taps **Got it**.'],
-        ['Menu kholo aur **Send a notice** dabao, ya Admin home par **+ New notice** dabao.', 'Notice likho aur chuno ki kisko jana hai.', 'Bhej do. Har teacher **Got it** dabata hai.']] },
-  { id: 'team', g: 'Staff and notices', who: 'lead', go: 'admin:settings:Team', t: ['Add a teacher (create a Staff ID)', 'Teacher jodna (Staff ID banana)'], k: 'staff id add teacher team new sign up login naya teacher टीचर जोड़ना स्टाफ आईडी',
+        ['Menu kholo aur **Send a notice** dabao, ya Admin home par **+ New notice** dabao.', 'Notice likho aur chuno ki kisko jana hai.', 'Bhej do. Har teacher **Got it** dabata hai.']],
+    m: [['admin:dash', '#noticesSec', ['You can also open the menu and tap Send a notice.', 'Menu kholkar Send a notice bhi dabaya ja sakta hai.']], ['', ''], ['', '']] },
+  { id: 'team', t: ['Add a teacher (create a Staff ID)', 'Teacher jodna (Staff ID banana)'], who: 'lead', k: 'staff id add teacher team new sign up login naya teacher टीचर जोड़ना स्टाफ आईडी',
     s: [['Open **Admin**, then **Settings**, then **Team**.', 'Tap **+ Add staff (create Staff ID)**.', 'Fill in the name and details and save. Give the Staff ID to the teacher.', 'The teacher opens the app, taps **Sign in** and enters the Staff ID once.'],
         ['**Admin** kholo, phir **Settings**, phir **Team**.', '**+ Add staff (create Staff ID)** dabao.', 'Naam aur details bharo aur save karo. Staff ID teacher ko do.', 'Teacher app kholkar **Sign in** dabata hai aur Staff ID ek baar daalta hai.']],
-    n: ['Nobody except the teacher creates a password.', 'Password sirf teacher khud banata hai.'] },
-  { id: 'admincheck', g: 'Staff and notices', who: 'lead', go: 'admin:dash', t: ['Correct, add or force a teacher\'s check-in times', 'Teacher ka check-in samay theek karna, jodna ya force check-out'], k: 'edit check in check out teacher force checkout correct add times galat चेक इन समय',
+    n: ['Nobody except the teacher creates a password.', 'Password sirf teacher khud banata hai.'],
+    m: [['admin:settings:#adminTeamPanel', '#adminTeamPanel'], ['admin:settings:#adminTeamPanel', '#staffIdsBlock'], ['', ''], ['', '']] },
+  { id: 'admincheck', t: ['Correct, add or force a teacher\'s check-in times', 'Teacher ka check-in samay theek karna, jodna ya force check-out'], who: 'lead', k: 'edit check in check out teacher force checkout correct add times galat चेक इन समय',
     s: [['Open **Admin**, then **Home**, then the **Teachers** list.', 'Tap the teacher\'s name to open the row.', 'Tap **Correct check-in times** (or **Add check-in times** if there are none).', 'If a teacher forgot to check out, tap **Force check-out**.'],
         ['**Admin** kholo, phir **Home**, phir **Teachers** list.', 'Teacher ke naam par dabao.', '**Correct check-in times** dabao (agar kuch nahi hai to **Add check-in times**).', 'Teacher check-out bhool gaya ho to **Force check-out** dabao.']],
-    n: ['For a day older than yesterday, the report shows "edited" once.', 'Kal se purane din ke liye report me ek baar "edited" likha aata hai.'] },
+    n: ['For a day older than yesterday, the report shows "edited" once.', 'Kal se purane din ke liye report me ek baar "edited" likha aata hai.'],
+    m: [['admin:dash', '#homeSeg'], ['admin:dash:teachers', '#adminTeacherList'], ['', ''], ['', '']] },
 
-  { id: 'mapping', g: 'Settings', who: 'lead', go: 'admin:settings:Teacher Mapping', t: ['Teacher Mapping', 'Teacher Mapping'], k: 'teacher mapping subject teacher class default teacher टीचर मैपिंग',
+  { id: 'mapping', t: ['Teacher Mapping', 'Teacher Mapping'], who: 'lead', k: 'teacher mapping subject teacher class default teacher टीचर मैपिंग',
     s: [['Open **Admin**, then **Settings**, then **Teacher Mapping**.', 'For each class (batch), choose which teacher teaches which subject.', 'Save.'],
         ['**Admin** kholo, phir **Settings**, phir **Teacher Mapping**.', 'Har class (batch) ke liye chuno ki kaun sa teacher kaun sa subject padhata hai.', 'Save karo.']],
-    n: ['When you paint a subject in the Timetable, the teacher is filled in for you from here.', 'Timetable me subject paint karte hi teacher yahin se apne aap bhar jata hai.'] },
-  { id: 'batches', g: 'Settings', who: 'lead', go: 'admin:settings:Class / Batch', t: ['Class / Batch List', 'Class / Batch List'], k: 'batch class list add batch rename wing बैच लिस्ट',
+    n: ['When you paint a subject in the Timetable, the teacher is filled in for you from here.', 'Timetable me subject paint karte hi teacher yahin se apne aap bhar jata hai.'],
+    m: [['admin:settings:#adminMappingPanel', '#adminMappingPanel'], ['admin:settings:#adminMappingPanel', '#adminMappingPanel'], ['', '']] },
+  { id: 'batches', t: ['Class / Batch List', 'Class / Batch List'], who: 'lead', k: 'batch class list add batch rename wing बैच लिस्ट',
     s: [['Open **Admin**, then **Settings**, then **Class / Batch List**.', 'Choose the wing and add, rename or remove a batch.'],
         ['**Admin** kholo, phir **Settings**, phir **Class / Batch List**.', 'Wing chuno aur batch jodo, naam badlo ya hatao.']],
-    n: ['Renaming a batch changes it everywhere. Remedial and Evening batches stay separate groups.', 'Batch ka naam badalne se wo har jagah badal jata hai. Remedial aur Evening batch alag group rehte hain.'] },
-  { id: 'periods', g: 'Settings', who: 'lead', go: 'admin:settings:Periods', t: ['Periods & Timings', 'Periods & Timings (period ka samay)'], k: 'period timings period times morning evening special samay पीरियड समय',
+    n: ['Renaming a batch changes it everywhere. Remedial and Evening batches stay separate groups.', 'Batch ka naam badalne se wo har jagah badal jata hai. Remedial aur Evening batch alag group rehte hain.'],
+    m: [['admin:settings:#adminBatchPanel', '#adminBatchPanel'], ['admin:settings:#adminBatchPanel', '#adminBatchPanel']] },
+  { id: 'periods', t: ['Periods & Timings', 'Periods & Timings (period ka samay)'], who: 'lead', k: 'period timings period times morning evening special samay पीरियड समय',
     s: [['Open **Admin**, then **Settings**, then **Periods & Timings**.', 'Choose the group (Morning, Evening, Special…).', 'Set the start and end time of each period and save.'],
         ['**Admin** kholo, phir **Settings**, phir **Periods & Timings**.', 'Group chuno (Morning, Evening, Special…).', 'Har period ka start aur end samay bharo aur save karo.']],
-    n: ['Each timetable group has its own period times.', 'Har timetable group ke apne period ke samay hote hain.'] },
-  { id: 'subjects', g: 'Settings', who: 'lead', go: 'admin:settings:Subjects', t: ['Subjects', 'Subjects (vishay)'], k: 'subjects add subject vishay विषय सब्जेक्ट',
-    s: [['Open **Admin**, then **Settings**, then **Subjects**.', 'Add a subject or remove one you do not use.'],
-        ['**Admin** kholo, phir **Settings**, phir **Subjects**.', 'Subject jodo, ya jo kaam ka nahi use hatao.']] },
-  { id: 'rooms', g: 'Settings', who: 'lead', go: 'admin:settings:Rooms', t: ['Rooms', 'Rooms (kamre)'], k: 'rooms add room kamra रूम कमरे',
-    s: [['Open **Admin**, then **Settings**, then **Rooms**.', 'Add the rooms of the institute.'],
-        ['**Admin** kholo, phir **Settings**, phir **Rooms**.', 'Institute ke rooms jodo.']],
-    n: ['The rooms are used for classes and for the invigilation duty.', 'Rooms class aur invigilation duty dono me kaam aate hain.'] },
-  { id: 'testtypes', g: 'Settings', who: 'lead', go: 'admin:settings:Test Types', t: ['Test Types', 'Test Types'], k: 'test types class test weekly test unit test half yearly टेस्ट टाइप',
-    s: [['Open **Admin**, then **Settings**, then **Test Types**.', 'Add the kinds of test and exam you hold, for example Weekly Test.'],
-        ['**Admin** kholo, phir **Settings**, phir **Test Types**.', 'Jo test aur exam aap karwate ho unke naam jodo, jaise Weekly Test.']],
-    n: ['These names appear in the **Test type** menu when you make an exam.', 'Ye naam exam banate waqt **Test type** menu me aate hain.'] },
-  { id: 'weeklyoff', g: 'Settings', who: 'lead', go: 'admin:settings:Weekly Off', t: ['Weekly Off', 'Weekly Off (saptahik chhutti)'], k: 'weekly off sunday holiday chhutti साप्ताहिक छुट्टी',
-    s: [['Open **Admin**, then **Settings**, then **Weekly Off**.', 'Choose the day that is the weekly off (Sunday by default).'],
-        ['**Admin** kholo, phir **Settings**, phir **Weekly Off**.', 'Saptahik chhutti ka din chuno (shuru me Sunday).']] },
-  { id: 'campus', g: 'Settings', who: 'lead', go: 'admin:settings:Campus Location', t: ['Campus Location', 'Campus Location'], k: 'campus location radius gps inside outside कैंपस लोकेशन',
+    n: ['Each timetable group has its own period times.', 'Har timetable group ke apne period ke samay hote hain.'],
+    m: [['admin:settings:#adminPeriodsPanel', '#adminPeriodsPanel'], ['admin:settings:#adminPeriodsPanel', '#adminPeriodsPanel'], ['', '']] },
+  { id: 'lists', t: ['Subjects, Rooms, Test Types and Weekly Off', 'Subjects, Rooms, Test Types aur Weekly Off'], who: 'lead', k: 'subjects add subject vishay rooms add room kamra test types class test weekly test unit test half yearly weekly off sunday holiday chhutti विषय सब्जेक्ट रूम कमरे टेस्ट टाइप साप्ताहिक छुट्टी',
+    s: [['Open **Admin**, then **Settings**.', '**Subjects**: add the subjects you teach, or remove one you do not use.', '**Rooms**: add the rooms of the institute. They are used for classes and for the invigilation duty.', '**Test Types**: add the kinds of test and exam you hold, for example Weekly Test. These names appear in the **Test type** menu when you make an exam.', '**Weekly Off**: choose the day that is the weekly off (Sunday by default).'],
+        ['**Admin** kholo, phir **Settings**.', '**Subjects**: jo subject padhate ho wo jodo, ya jo kaam ka nahi use hatao.', '**Rooms**: institute ke rooms jodo. Ye class aur invigilation duty dono me kaam aate hain.', '**Test Types**: jo test aur exam karwate ho unke naam jodo, jaise Weekly Test. Ye naam exam banate waqt **Test type** menu me aate hain.', '**Weekly Off**: saptahik chhutti ka din chuno (shuru me Sunday).']],
+    m: [['admin:settings', '#adminTabs [data-atab-btn="settings"]'], ['admin:settings:#adminSubjectsPanel', '#adminSubjectsPanel'], ['admin:settings:#adminRoomsPanel', '#adminRoomsPanel'], ['admin:settings:#adminTestTypesPanel', '#adminTestTypesPanel'], ['admin:settings:#adminWeeklyOffPanel', '#adminWeeklyOffPanel']] },
+  { id: 'campus', t: ['Campus Location', 'Campus Location'], who: 'lead', k: 'campus location radius gps inside outside कैंपस लोकेशन',
     s: [['Open **Admin**, then **Settings**, then **Campus Location**.', 'Set the campus point and the radius (50 to 2000 metres), and save.'],
         ['**Admin** kholo, phir **Settings**, phir **Campus Location**.', 'Campus ka point aur radius (50 se 2000 meter) set karo aur save karo.']],
-    n: ['At check-in and check-out the app quietly notes if the phone was inside the campus. Only the Admin sees this. The teacher sees nothing.', 'Check-in aur check-out par app chupke se dekhta hai ki phone campus ke andar tha ya nahi. Ye sirf Admin ko dikhta hai, teacher ko kuch nahi dikhta.'] }
+    n: ['At check-in and check-out the app quietly notes if the phone was inside the campus. Only the Admin sees this. The teacher sees nothing.', 'Check-in aur check-out par app chupke se dekhta hai ki phone campus ke andar tha ya nahi. Ye sirf Admin ko dikhta hai, teacher ko kuch nahi dikhta.'],
+    m: [['admin:settings:#adminCampusPanel', '#adminCampusPanel'], ['admin:settings:#adminCampusPanel', '#campusRadiusInput']] }
 ];
 
   // ---------- Help: a full page in the menu with topic cards, short lists, guides, tours ----------
@@ -18640,24 +18604,21 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   const helpSetLang = (i) => { try { localStorage.setItem('ctd_help_lang', i === 0 ? 'en' : 'hi'); } catch (e) { /* ignore */ } };
   const hgFmt = (t) => escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   const HELP_CATS = [
-    { k: 'att', t: 'Check-in and attendance', who: 'all', ic: 'clock', ids: ['checkin', 'forgot', 'editsess'] },
+    { k: 'att', t: 'Check-in and attendance', who: 'all', ic: 'clock', ids: ['checkin', 'fixtime'] },
     { k: 'cls', t: 'Classes', who: 'all', ic: 'book', ids: ['addclass', 'combineb', 'longclass', 'schedslot', 'mysub'] },
-    { k: 'oth', t: 'Other work and leave', who: 'all', ic: 'edit', ids: ['otherwork', 'leave', 'holidayduty', 'invig'] },
-    { k: 'rep', t: 'Report and WhatsApp', who: 'all', ic: 'send', ids: ['whatsapp', 'pdf'] },
-    { k: 'alt', t: 'Alerts', who: 'all', ic: 'bell', ids: ['reminder', 'phonealerts'] },
-    { k: 'tt', t: 'Timetable', who: 'lead', ic: 'cal', ids: ['ttfill', 'ttphoto', 'ttpublish', 'ttcell', 'substitute', 'ttjoin', 'ttcopy'] },
-    { k: 'ex', t: 'Exams and duty', who: 'lead', ic: 'clip', ids: ['newexam', 'newtest', 'classtest', 'duty', 'dutyphoto', 'dutyreport'] },
+    { k: 'oth', t: 'Other work and leave', who: 'all', ic: 'edit', ids: ['otherwork', 'leave', 'invig'] },
+    { k: 'rep', t: 'Report and alerts', who: 'all', ic: 'send', ids: ['whatsapp', 'reminder'] },
+    { k: 'tt', t: 'Timetable', who: 'lead', ic: 'cal', ids: ['ttfill', 'ttphoto', 'ttcell', 'substitute', 'ttjoin', 'ttcopy', 'pictures'] },
+    { k: 'ex', t: 'Exams and duty', who: 'lead', ic: 'clip', ids: ['newexam', 'classtest', 'duty', 'dutyphoto'] },
     { k: 'rp', t: 'Reports', who: 'lead', ic: 'chart', ids: ['reports', 'classcount'] },
     { k: 'st', t: 'Staff and notices', who: 'lead', ic: 'users', ids: ['notice', 'team', 'admincheck'] },
-    { k: 'se', t: 'Settings', who: 'lead', ic: 'gear', ids: ['mapping', 'batches', 'periods', 'subjects', 'rooms', 'testtypes', 'weeklyoff', 'campus'] }
+    { k: 'se', t: 'Settings', who: 'lead', ic: 'gear', ids: ['mapping', 'batches', 'periods', 'lists', 'campus'] }
   ];
   const HC_ICONS = {
     clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>',
     book: '<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
     edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>',
     send: '<svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>',
-    bell: '<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>',
-    play: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>',
     cal: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
     clip: '<svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>',
     chart: '<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
@@ -18665,7 +18626,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>'
   };
   const HC = { v: 'home', cat: '', id: '', q: '', from: 'home' };
-  function helpScore(g, qs) { const hay = (g.t[0] + ' ' + g.t[1] + ' ' + (g.k || '') + ' ' + g.g).toLowerCase(); const title = (g.t[0] + ' ' + g.t[1]).toLowerCase(); const words = hay.split(/[^a-z0-9\u0900-\u097f]+/).filter(Boolean); let sc = 0; for (let i = 0; i < qs.length; i++) { const w = qs[i]; const hit = w.length <= 2 ? words.some((x) => x === w) : hay.indexOf(w) >= 0; if (!hit) return 0; sc += title.indexOf(w) >= 0 ? 3 : 1; } return sc; }
+  function helpScore(g, qs) { const hay = (g.t[0] + ' ' + g.t[1] + ' ' + (g.k || '')).toLowerCase(); const title = (g.t[0] + ' ' + g.t[1]).toLowerCase(); const words = hay.split(/[^a-z0-9\u0900-\u097f]+/).filter(Boolean); let sc = 0; for (let i = 0; i < qs.length; i++) { const w = qs[i]; const hit = w.length <= 2 ? words.some((x) => x === w) : hay.indexOf(w) >= 0; if (!hit) return 0; sc += title.indexOf(w) >= 0 ? 3 : 1; } return sc; }
   function hcGuideBtn(g, li, tag) { return `<button type="button" class="help-item hg-item" data-guide="${g.id}"><span><b>${escapeHtml(g.t[li])}</b>${tag && g.who === 'lead' ? '<small>Admin / Coordinator</small>' : ''}</span></button>`; }
   function helpListHtml(q) {
     const lead = isLeadUser(); const li = helpLangIdx();
@@ -18675,14 +18636,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return `<div class="hc-list">${list.map((g) => hcGuideBtn(g, li, true)).join('')}</div>`;
   }
   const hcLangChips = () => { const i = helpLangIdx(); return `<div class="hg-lang hc-lang" role="group" aria-label="Language"><button type="button" data-hglang="0" class="${i === 0 ? 'on' : ''}">EN</button><button type="button" data-hglang="1" class="${i === 1 ? 'on' : ''}">Hinglish</button></div>`; };
-  const hcTours = () => { const lead = isLeadUser(); return Object.keys(TOURS).filter((k) => TOURS[k].who === 'all' || (lead && TOURS[k].who === 'lead')); };
   function hcCard(c, li) { const n = c.ids.length; return `<button type="button" class="hc-card" data-hccat="${c.k}"><span class="hc-ic">${HC_ICONS[c.ic]}</span><b>${escapeHtml(c.t)}</b><small>${n} ${li === 0 ? (n === 1 ? 'guide' : 'guides') : 'guide'}</small></button>`; }
   function hcCards(li) {
-    const lead = isLeadUser(); const nT = hcTours().length;
-    const tourCard = `<button type="button" class="hc-card hc-tour" data-hccat="tours"><span class="hc-ic">${HC_ICONS.play}</span><b>${li === 0 ? 'Guided tours' : 'Guided tours'}</b><small>${nT} ${li === 0 ? 'tours on the real screen' : 'tour, asli screen par'}</small></button>`;
-    let h = `<div class="hc-grid">${HELP_CATS.filter((c) => c.who === 'all').map((c) => hcCard(c, li)).join('')}${tourCard}</div>`;
+    const lead = isLeadUser();
+    let h = `<div class="hc-grid">${HELP_CATS.filter((c) => c.who === 'all').map((c) => hcCard(c, li)).join('')}</div>`;
     if (lead) h += `<div class="hc-sec">${li === 0 ? 'For Admin and Coordinator' : 'Admin aur Coordinator ke liye'}</div><div class="hc-grid">${HELP_CATS.filter((c) => c.who === 'lead').map((c) => hcCard(c, li)).join('')}</div>`;
-    h += `<button type="button" class="help-item" id="hcWritten" style="margin-top:14px; width:100%;"><span class="ico i-file" aria-hidden="true"></span><span><b>Written guide</b><small>${li === 0 ? 'A short guide to each tab' : 'Har tab ki chhoti guide'}</small></span></button>`;
+    h += `<div class="hc-list" style="margin-top:14px;"><button type="button" class="help-item" id="hcQuick"><span class="ico i-spark" aria-hidden="true"></span><span><b>${li === 0 ? 'Quick tour' : 'Quick tour'}</b><small>${li === 0 ? 'The main things, in one minute' : 'Mukhya baatein, ek minute me'}</small></span></button><button type="button" class="help-item" id="hcWritten"><span class="ico i-file" aria-hidden="true"></span><span><b>Written guide</b><small>${li === 0 ? 'A short guide to each tab' : 'Har tab ki chhoti guide'}</small></span></button></div>`;
     return h;
   }
   function helpcRender(keepScroll) {
@@ -18692,41 +18651,49 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     } else if (HC.v === 'cat') {
       const c = HELP_CATS.find((x) => x.k === HC.cat); const gs = c.ids.map((id) => HELP_GUIDES.find((g) => g.id === id)).filter(Boolean);
       h = `<div class="hc-top" style="justify-content:space-between;">${back('home')}${hcLangChips()}</div><h2 class="hc-title">${escapeHtml(c.t)}</h2><div class="hc-sub">${gs.length} ${li === 0 ? (gs.length === 1 ? 'guide' : 'guides') : 'guide'}</div><div class="hc-list">${gs.map((g) => hcGuideBtn(g, li, false)).join('')}</div>`;
-    } else if (HC.v === 'tours') {
-      const lead = isLeadUser(); const item = (k) => { const T = TOURS[k]; return `<button type="button" class="help-item" data-tour="${k}"><span class="ico i-${T.icon}" aria-hidden="true"></span><span><b>${escapeHtml(T.title)}</b><small>${escapeHtml(T.sub)}</small></span></button>`; };
-      const all = Object.keys(TOURS).filter((k) => TOURS[k].who === 'all'); const leadK = Object.keys(TOURS).filter((k) => TOURS[k].who === 'lead');
-      h = `<div class="hc-top" style="justify-content:space-between;">${back('home')}${hcLangChips()}</div><h2 class="hc-title">Guided tours</h2><div class="hc-sub">${li === 0 ? 'The app shows you, step by step, on the real screen' : 'App asli screen par aap ko kadam-kadam dikhata hai'}</div><div class="hc-list">${all.map(item).join('')}</div>${lead && leadK.length ? `<div class="hc-sec">Timetable &amp; exams</div><div class="hc-list">${leadK.map(item).join('')}</div>` : ''}`;
     } else if (HC.v === 'guide') {
       const g = HELP_GUIDES.find((x) => x.id === HC.id);
-      h = `<div class="hc-top" style="justify-content:space-between;">${back(HC.from)}${hcLangChips()}</div><h2 class="hc-title">${escapeHtml(g.t[li])}</h2><div class="hc-sub">${g.who === 'lead' ? 'Admin / Coordinator' : (li === 0 ? 'Everyone' : 'Sab ke liye')}</div><ol class="hg-steps">${g.s[li].map((x) => `<li>${hgFmt(x)}</li>`).join('')}</ol>${g.n ? `<div class="hg-note">${hgFmt(g.n[li])}</div>` : ''}${g.go ? `<button type="button" class="save-btn" id="hgGo">${li === 0 ? 'Take me there' : 'Wahan le chalo'}</button>` : ''}`;
+      h = `<div class="hc-top" style="justify-content:space-between;">${back(HC.from)}${hcLangChips()}</div><h2 class="hc-title">${escapeHtml(g.t[li])}</h2><div class="hc-sub">${g.who === 'lead' ? 'Admin / Coordinator' : (li === 0 ? 'Everyone' : 'Sab ke liye')}</div><ol class="hg-steps">${g.s[li].map((x) => `<li>${hgFmt(x)}</li>`).join('')}</ol>${g.n ? `<div class="hg-note">${hgFmt(g.n[li])}</div>` : ''}<button type="button" class="save-btn" id="hgShow">▶ ${li === 0 ? 'Show me on the screen' : 'Screen par dikhao'}</button>`;
     }
     body.innerHTML = h; if (!keepScroll) body.scrollTop = 0;
     const sIn = body.querySelector('#hcSearch'); if (sIn) sIn.addEventListener('input', () => { HC.q = sIn.value; const m = body.querySelector('#hcMain'); if (m) m.innerHTML = HC.q.trim() ? helpListHtml(HC.q) : hcCards(helpLangIdx()); });
   }
+  // a guide is shown on the real screen by the same tour engine as the other tours; the words are the guide's own steps (no second copy)
+  function helpTourGo(spec) {
+    const p = String(spec || '').split(':'); const a = p[0]; if (!a) return null;
+    return () => { try {
+      if (a === 'today' || a === 'add' || a === 'history' || a === 'schedule') {
+        goTab(a)();
+        if (a === 'add') { const ch = document.querySelectorAll('#modeChips > *'); const want = ch[p[1] === 'activity' ? 1 : 0]; if (want && !want.classList.contains('active')) want.click(); if (p[2] === 'leave') setTimeout(() => { const lc = Array.from(document.querySelectorAll('#activityChips > *')).find((x) => /leave/i.test(x.innerText || '')); if (lc && !lc.classList.contains('active')) lc.click(); }, 150); }
+        return;
+      }
+      if (a === 'admin') {
+        goAdmin(p[1] || 'dash')();
+        if (p[1] === 'dash' && p[2] === 'teachers') setTimeout(() => { const sg = document.querySelectorAll('#homeSeg > *')[1]; if (sg && !sg.classList.contains('active')) sg.click(); }, 150);
+        if (p[1] === 'reports' && p[2]) setTimeout(() => { const k = document.querySelector('#adminRepKind [data-rep-kind="' + p[2] + '"]'); if (k) k.click(); }, 150);
+        if (p[1] === 'settings' && p[2]) setTimeout(() => { const t = document.querySelector(p.slice(2).join(':') + ' .panel-title'); if (t && t.getAttribute('aria-expanded') !== 'true') t.click(); }, 200);
+      }
+    } catch (e) { /* ignore */ } };
+  }
+  function helpStartTour(key) { try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(() => startTour(key), 450); }
+  function helpShowMe(id) {
+    const g = HELP_GUIDES.find((x) => x.id === id); if (!g) return; const li = helpLangIdx();
+    TOURS['g_' + id] = { title: g.t[li], who: 'none', steps: g.m.map((mm, i) => ({ go: helpTourGo(mm[0]), sel: mm[1] || '', t: (li === 0 ? 'Step ' : 'Kadam ') + (i + 1), x: g.s[li][i].replace(/\*\*/g, ''), ifMissing: mm[2] ? mm[2][li] : '' })) };
+    helpStartTour('g_' + id);
+  }
   (function bindHelpC() {
     const body = document.getElementById('helpcBody'); if (!body) return;
     body.addEventListener('click', (e) => {
-      const t = e.target.closest('[data-hglang],[data-hccat],[data-guide],[data-hcback],[data-tour],#hcWritten,#hgGo'); if (!t) return;
+      const t = e.target.closest('[data-hglang],[data-hccat],[data-guide],[data-hcback],#hcQuick,#hcWritten,#hgShow'); if (!t) return;
       if (t.hasAttribute('data-hglang')) { helpSetLang(Number(t.getAttribute('data-hglang'))); helpcRender(true); return; }
-      if (t.hasAttribute('data-hccat')) { const k = t.getAttribute('data-hccat'); if (k === 'tours') HC.v = 'tours'; else { HC.v = 'cat'; HC.cat = k; } helpcRender(); return; }
+      if (t.hasAttribute('data-hccat')) { HC.v = 'cat'; HC.cat = t.getAttribute('data-hccat'); helpcRender(); return; }
       if (t.hasAttribute('data-guide')) { HC.from = (HC.v === 'cat') ? 'cat' : 'home'; HC.v = 'guide'; HC.id = t.getAttribute('data-guide'); helpcRender(); return; }
       if (t.hasAttribute('data-hcback')) { const to = t.getAttribute('data-hcback'); HC.v = to === 'cat' ? 'cat' : 'home'; helpcRender(); return; }
-      if (t.hasAttribute('data-tour')) { startTour(t.getAttribute('data-tour')); return; }
+      if (t.id === 'hcQuick') { helpStartTour('basics'); return; }
       if (t.id === 'hcWritten') { openMenuPanel('help'); return; }
-      if (t.id === 'hgGo') { const g = HELP_GUIDES.find((x) => x.id === HC.id); if (g && g.go) helpGo(g.go); }
+      if (t.id === 'hgShow') helpShowMe(HC.id);
     });
   })();
-  function helpGo(spec) {
-    try { closeMenu(); } catch (e) { /* ignore */ }
-    const q = (sel) => document.querySelector(sel);
-    const byText = (scope, txt) => { const r = q(scope) || document; return Array.from(r.querySelectorAll('button, [role=button], .set-acc, .chip, label, div, span')).find((x) => x.children.length < 6 && (x.innerText || '').trim().toLowerCase().indexOf(txt.toLowerCase()) === 0); };
-    const p = String(spec).split(':'); const a = p[0];
-    setTimeout(() => { try {
-      if (a === 'today' || a === 'add' || a === 'history' || a === 'schedule') { switchTab(a); if (a === 'add' && p[1] === 'activity') setTimeout(() => { const e = byText('#view-add', 'Activity'); if (e) e.click(); }, 300); return; }
-      if (a === 'admin') { switchTab('admin'); setTimeout(() => { const b = q('#adminTabs [data-atab-btn="' + p[1] + '"]'); if (b) b.click(); if (p[1] === 'reports' && p[2]) setTimeout(() => { const k = q('#adminRepKind [data-rep-kind="' + p[2] + '"]'); if (k) k.click(); }, 300); if (p[1] === 'settings' && p[2]) setTimeout(() => { const e = byText('#view-admin', p.slice(2).join(':')); if (e) e.click(); }, 400); }, 300); return; }
-      if (a === 'menu') { openMenu(); if (p[1]) setTimeout(() => { const rows = { settings: '.drow[data-open="settings"]', push: '#pushDrawRow', notice: '#noticeDrawRow' }; const e = q(rows[p[1]]); if (e) e.click(); }, 450); }
-    } catch (e) { /* ignore */ } }, 650);
-  }
   function openHelp() { const st = history.state && history.state.catjeeMenu; if (st === 'helpc') return; if (!st) { openMenu(); setTimeout(() => openMenuPanel('helpc'), 260); } else openMenuPanel('helpc'); }
   function openHelpSheetOld() {
     const lead = isLeadUser();
