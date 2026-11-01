@@ -3825,7 +3825,12 @@
           <button type="button" class="btn-secondary" id="appUpdateNow" style="border-color: var(--line); width:100%;">Update app now</button>
           <div class="dnote" style="margin-top:8px;" id="appVerNote">Loads the newest version of Teach Desk.</div>
         </div>
-      </div>
+        <div class="dcard" id="ciCard">
+  <div class="dfield-label" style="margin-bottom:10px;">Check-in sounds</div>
+  <div class="toggle-row" id="ciSoundRow" style="cursor:pointer; border:none; padding:0; background:none;"><span class="toggle-label">Ting sound<br><small class="dnote">A soft ting-ting when you check in and check out</small></span><span class="switch" id="ciSoundSwitch"><span class="knob"></span></span></div>
+  <div class="toggle-row" id="ciSpeakRow" style="cursor:pointer; border:none; padding:0; background:none; margin-top:16px;"><span class="toggle-label">Spoken greeting<br><small class="dnote">The phone says Good morning and Thank you</small></span><span class="switch" id="ciSpeakSwitch"><span class="knob"></span></span></div>
+  </div>
+  </div>
     </section>
 
     <!-- MY SAVED PHOTOS -->
@@ -3918,7 +3923,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.09 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.10 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14687,7 +14692,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!s) return;
     history.go(s === 'main' ? -1 : -2);
   }
-  function openMenuPanel(name) { if (name === 'helpc') { HC.v = 'home'; HC.q = ''; HC.cat = ''; helpcRender(); } if (name === 'password') preparePasswordPanel();
+  function openMenuPanel(name) { if (name === 'settings') ciRenderSwitches(); if (name === 'helpc') { HC.v = 'home'; HC.q = ''; HC.cat = ''; helpcRender(); } if (name === 'password') preparePasswordPanel();
     if (name === 'contact') prepareContactPanel();
     if (name === 'share') document.getElementById('shareLinkText').textContent = appShareUrl();
     history.pushState({ catjeeMenu: name, catjeeNav: state.navDepth }, '');
@@ -15008,23 +15013,54 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (state.campusToday.checkedIn) { closeHvSheet(); return; }
       closeHvSheet();
       sessions.push({ id: genSessionId(), in: ts, out: null, setLater: true });
-      checkFeedback(true);
-      showToast('Checked in from ' + formatTime(ts));
+      checkFeedback(true, true); showToast('Checked in from ' + formatTime(ts));
       await pushSessionUpdate(sessions);
       checkLocationOnce();
     });
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
 
-  function checkFeedback(checkingIn) {
+  // ---------- Check-in sounds: a soft ting-ting, and the phone says Good morning / Thank you ----------
+  const CI_SOUND_KEY = 'ctd_ci_sound', CI_SPEAK_KEY = 'ctd_ci_speak', CI_GREET_KEY = 'ctd_ci_greeted';
+  const ciOn = (k) => { try { return localStorage.getItem(k) !== '0'; } catch (e) { return true; } };
+  function ciRenderSwitches() { [['ciSoundSwitch', CI_SOUND_KEY], ['ciSpeakSwitch', CI_SPEAK_KEY]].forEach(([id, k]) => { const sw = document.getElementById(id); if (sw) sw.classList.toggle('on', ciOn(k)); }); }
+  const ciPart = (d) => { const h = (d || new Date()).getHours(); return h >= 5 && h < 12 ? 'morning' : (h >= 12 && h < 17 ? 'afternoon' : 'evening'); };
+  function ciTing(checkingIn) {
+    if (!ciOn(CI_SOUND_KEY)) return;
+    try {
+      unlockAudio(); if (!audioCtx) return;
+      const t0 = audioCtx.currentTime + 0.02; const notes = checkingIn ? [659.25, 880] : [880, 659.25];
+      notes.forEach((f, i) => { const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type = 'sine'; o.frequency.value = f; const t = t0 + i * 0.17; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.14, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38); o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.4); });
+    } catch (e) { /* no sound on this phone */ }
+  }
+  function ciSay(text) {
+    if (!ciOn(CI_SPEAK_KEY)) return;
+    try {
+      if (!('speechSynthesis' in window)) return;
+      const u = new SpeechSynthesisUtterance(text); u.lang = 'en-IN'; u.rate = 0.95; u.volume = 0.85;
+      const vs = speechSynthesis.getVoices ? speechSynthesis.getVoices() : []; const v = vs.find((x) => /en[-_]IN/i.test(x.lang)) || vs.find((x) => /^en/i.test(x.lang)); if (v) u.voice = v;
+      speechSynthesis.cancel(); setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) { /* ignore */ } }, 450);
+    } catch (e) { /* no voice on this phone */ }
+  }
+  function ciAfterCheck(checkingIn) {
+    ciTing(checkingIn);
+    const who = salutedName(state.user && state.user.name, state.user && state.user.salutation); const nm = who ? ', ' + who : ''; const part = ciPart();
+    if (checkingIn) {
+      const day = todayStr(); let seen = ''; try { seen = localStorage.getItem(CI_GREET_KEY) || ''; } catch (e) { seen = ''; }
+      const parts = seen.indexOf(day + ':') === 0 ? seen.slice(day.length + 1).split(',').filter(Boolean) : [];
+      if (parts.indexOf(part) === -1) { parts.push(part); try { localStorage.setItem(CI_GREET_KEY, day + ':' + parts.join(',')); } catch (e) { /* ignore */ } ciSay('Good ' + part + nm + '.'); }
+    } else ciSay('Thank you' + nm + '. Have a nice ' + (part === 'morning' ? 'day' : part) + '.');
+  }
+  [['ciSoundRow', CI_SOUND_KEY], ['ciSpeakRow', CI_SPEAK_KEY]].forEach(([id, k]) => { const r = document.getElementById(id); if (r) r.addEventListener('click', () => { try { localStorage.setItem(k, ciOn(k) ? '0' : '1'); } catch (e) { /* ignore */ } ciRenderSwitches(); if (k === CI_SOUND_KEY && ciOn(k)) ciTing(true); }); });
+  ciRenderSwitches();
+  function checkFeedback(checkingIn, quiet) {
     try { if (navigator.vibrate) navigator.vibrate(checkingIn ? [25, 60, 25] : 35); } catch (err) { /* ignore */ }
     const card = document.getElementById('statusCard');
     const dot = document.getElementById('statusDot');
     [card, dot].forEach((el) => { if (!el) return; el.classList.remove('pulse', 'pop'); void el.offsetWidth; });
     if (card) card.classList.add('pulse');
     if (dot) dot.classList.add('pop');
-    showToast((checkingIn ? 'Checked in at ' : 'Checked out at ') + formatTime(Date.now()));
-  }
+    showToast((checkingIn ? 'Checked in at ' : 'Checked out at ') + formatTime(Date.now())); if (!quiet) ciAfterCheck(checkingIn); }
 
   async function pushSessionUpdateForDate(date, sessions) {
     const totalSeconds = sumSessions(sessions);
