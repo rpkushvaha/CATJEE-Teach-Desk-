@@ -3918,7 +3918,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.08 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.09 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7360,6 +7360,21 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     } catch (err) { state.tg.saving = false; flashOffline(err); }
   }
   // Draw a few lines of text centred in a box, shrinking them so they always stay inside it.
+  function noteLines(ctx, text, w, size, maxLines) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim(); if (!t) return [];
+  ctx.font = `700 ${size}px Arial, sans-serif`;
+  const fits = (l) => ctx.measureText(l).width <= w - 16;
+  if (fits(t)) return [t];
+  // two sentences go on two lines, as they are written
+  const sent = t.replace(/([.!?])\s+/g, '$1|').split('|').filter(Boolean);
+  if (sent.length > 1 && sent.length <= maxLines && sent.every(fits)) return sent;
+  const wrap = (limit) => { const lines = []; let cur = ''; t.split(' ').forEach((wd) => { const tryL = cur ? cur + ' ' + wd : wd; if (!cur || ctx.measureText(tryL).width <= limit) cur = tryL; else { lines.push(cur); cur = wd; } }); if (cur) lines.push(cur); return lines; };
+  let lines = wrap(w - 16);
+  // spread the words evenly over the same number of lines (no lonely last word)
+  if (lines.length > 1 && lines.length <= maxLines) { const even = wrap(Math.min(w - 16, ctx.measureText(t).width / lines.length * 1.1 + 12)); if (even.length === lines.length) lines = even; }
+  if (lines.length > maxLines) { const keep = lines.slice(0, maxLines - 1); keep.push(lines.slice(maxLines - 1).join(' ')); return keep; }
+  return lines;
+  }
   function fitLines(ctx, lines, cx, top, w, h) {
     const lh = 1.18; const pad = 6;
     let total = lines.reduce((a, l) => a + l[2] * lh, 0);
@@ -7557,8 +7572,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (note) {
         const hasCls = (doc.cells || []).some((c) => c.d === d);
         const pc = colX.filter((o) => !o.c.br);
-        if (!hasCls && pc.length) { const xa = colX[0].x, xz = colX[colX.length - 1].x + colX[colX.length - 1].w; const ro = runOf[d]; if (!ro) { box(xa, y, xz - xa, dh, shade); fitLines(x, [[note, '#000', 20]], xa + (xz - xa) / 2, y, xz - xa, dh); } else { if (d === ro.first) { runY[ro.first] = y; runShade[ro.first] = shade; } if (d === ro.last) { const y0 = runY[ro.first], hh = y + dh - y0; box(xa, y0, xz - xa, hh, runShade[ro.first]); fitLines(x, [[note, '#000', 20]], xa + (xz - xa) / 2, y0, xz - xa, hh); } } }
-        else txt(note, 20 + colDate / 2, y + dh - 14, 11, true, '#C00000', colDate - 8);
+        if (!hasCls && pc.length) { const xa = colX[0].x, xz = colX[colX.length - 1].x + colX[colX.length - 1].w; const ro = runOf[d]; if (!ro) { box(xa, y, xz - xa, dh, shade); fitLines(x, noteLines(x, note, xz - xa, 20, 3).map((l) => [l, '#000', 20]), xa + (xz - xa) / 2, y, xz - xa, dh); } else { if (d === ro.first) { runY[ro.first] = y; runShade[ro.first] = shade; } if (d === ro.last) { const y0 = runY[ro.first], hh = y + dh - y0; box(xa, y0, xz - xa, hh, runShade[ro.first]); fitLines(x, noteLines(x, note, xz - xa, 20, 3).map((l) => [l, '#000', 20]), xa + (xz - xa) / 2, y0, xz - xa, hh); } } }
+        else { const nl = noteLines(x, note, colDate - 8, 11, 4); nl.forEach((l, i) => txt(l, 20 + colDate / 2, y + dh - 14 - (nl.length - 1 - i) * 13, 11, true, '#C00000', colDate - 8)); }
       }
       y += dh;
     });
@@ -7637,14 +7652,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const body = document.getElementById('hvSheetBody');
     body.innerHTML = `<div class="hv-d-title">Note for the whole day</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · all batches</div>
       <div class="chips" style="margin-top:12px;">${quick.map((q) => `<button type="button" class="chip${cur === q ? ' active' : ''}" data-dn-q="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}</div>
-      <input class="text-input" id="dnText" maxlength="60" placeholder="Or type your own" value="${escapeHtml(cur)}" style="margin-top:10px;">
-      <div class="hv-note" style="text-align:left; margin-top:8px;">With no classes that day, the timetable picture shows the note across the whole day.</div>
+      <textarea class="text-input" id="dnText" maxlength="200" rows="3" placeholder="Or type your own" style="margin-top:10px; resize:none; line-height:1.4;">${escapeHtml(cur)}</textarea>
+      <div class="hv-note" style="text-align:left; margin-top:8px;">With no classes that day, the timetable picture shows the note across the whole day, in two or three lines. Up to 200 letters.</div>
       <div class="hv-d-btns">${cur ? '<button type="button" class="btn-secondary hv-del" id="dnDel" style="border-color: var(--line);">Remove note</button>' : '<button type="button" class="btn-secondary" id="dnCancel" style="border-color: var(--line);">Cancel</button>'}<button type="button" class="save-btn" id="dnSave" style="margin:0;">Save</button></div>`;
     body.querySelectorAll('[data-dn-q]').forEach((b) => b.addEventListener('click', () => { document.getElementById('dnText').value = b.getAttribute('data-dn-q'); body.querySelectorAll('[data-dn-q]').forEach((x) => x.classList.toggle('active', x === b)); }));
     const c0 = document.getElementById('dnCancel'); if (c0) c0.addEventListener('click', closeHvSheet);
     const dl = document.getElementById('dnDel'); if (dl) dl.addEventListener('click', () => tgSetDayTimes(d, (day) => { delete day.note; }));
     document.getElementById('dnSave').addEventListener('click', () => {
-      const v = document.getElementById('dnText').value.trim();
+      const v = document.getElementById('dnText').value.replace(/\s+/g, ' ').trim();
       if (!v) { showToast('Choose or type the note', 'error'); return; }
       tgSetDayTimes(d, (day) => { day.note = v; });
     });
@@ -8600,9 +8615,29 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     return canvasToSmallJpeg(cv);
   }
   // a small copy for the cards on Home and in the Gallery (the big one opens only when the card is tapped)
+  function canvasLooksBlank(c) { try { const t = document.createElement('canvas'); t.width = 16; t.height = 16; const x = t.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 16, 16); x.drawImage(c, 0, 0, 16, 16); const d = x.getImageData(0, 0, 16, 16).data; let sum = 0; for (let i = 0; i < d.length; i += 4) sum += d[i] + d[i + 1] + d[i + 2]; return sum / (256 * 3) < 40; } catch (e) { return false; } }
   function canvasToThumb(cv) {
-    try { const w = 480, h = Math.max(1, Math.round(cv.height * w / cv.width)); const c2 = document.createElement('canvas'); c2.width = w; c2.height = h; const x2 = c2.getContext('2d'); x2.fillStyle = '#fff'; x2.fillRect(0, 0, w, h); x2.imageSmoothingQuality = 'high'; x2.drawImage(cv, 0, 0, w, h); return c2.toDataURL('image/jpeg', 0.72); } catch (e) { return ''; }
+    try {
+      const w = 480, h = Math.max(1, Math.round(cv.height * w / cv.width));
+      const mk = (src, tw, th) => { const c2 = document.createElement('canvas'); c2.width = tw; c2.height = th; const x2 = c2.getContext('2d'); x2.fillStyle = '#fff'; x2.fillRect(0, 0, tw, th); x2.imageSmoothingQuality = 'high'; x2.drawImage(src, 0, 0, tw, th); return c2; };
+      // a big picture is made smaller in steps (half each time), not squeezed in one go
+      let cur = cv, cw = cv.width, ch = cv.height;
+      while (cw / 2 > w) { cw = Math.round(cw / 2); ch = Math.round(ch / 2); cur = mk(cur, cw, ch); }
+      const out = mk(cur, w, h);
+      if (canvasLooksBlank(out)) return ''; // a black copy is not kept: the Gallery then shows the full picture
+      return out.toDataURL('image/jpeg', 0.72);
+    } catch (e) { return ''; }
   }
+  // a stored thumbnail that comes out black on a phone is replaced by the full picture
+  function ttFullOf(id) { const all = [].concat(state.myTtImages || []); Object.keys(state.ttImgs || {}).forEach((k) => { all.push(...(state.ttImgs[k] || [])); }); const f = all.find((q) => q && q.id === id); return f ? f.image : ''; }
+  document.addEventListener('load', (e) => {
+    const im = e.target; if (!im || im.tagName !== 'IMG' || !im.hasAttribute('data-heal') || im.hasAttribute('data-healed')) return;
+    try {
+      const t = document.createElement('canvas'); t.width = 16; t.height = 16; const x = t.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 16, 16); x.drawImage(im, 0, 0, 16, 16);
+      const d = x.getImageData(0, 0, 16, 16).data; let sum = 0; for (let i = 0; i < d.length; i += 4) sum += d[i] + d[i + 1] + d[i + 2];
+      if (sum / (256 * 3) < 40) { const full = ttFullOf(im.getAttribute('data-heal')); if (full) { im.setAttribute('data-healed', '1'); im.src = full; } }
+    } catch (err) { /* ignore */ }
+  }, true);
   function canvasToSmallJpeg(cv) {
     let scale = 1, url = cv.toDataURL('image/jpeg', 0.8);
     while (url.length > 900000 && scale > 0.4) {
@@ -8643,7 +8678,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     document.getElementById('photoLightboxModal').classList.add('active');
   }
   function ttImgTiles(list) {
-    return list.map((x) => `<button type="button" class="tti-tile" data-tti="${escapeHtml(x.id)}"><img src="${x.thumb || x.image}" alt="Timetable" loading="lazy"><span>${escapeHtml(x.label)}${x.updated ? ' <em class="tti-upd">Updated</em>' : ''}</span></button>`).join('');
+    return list.map((x) => `<button type="button" class="tti-tile" data-tti="${escapeHtml(x.id)}"><img src="${x.thumb || x.image}"${x.thumb ? ` data-heal="${escapeHtml(x.id)}"` : ''} alt="Timetable" loading="lazy"><span>${escapeHtml(x.label)}${x.updated ? ' <em class="tti-upd">Updated</em>' : ''}</span></button>`).join('');
   }
   function bindTtImgTiles(root, list) {
     root.querySelectorAll('[data-tti]').forEach((b) => b.addEventListener('click', () => { const x = list.find((y) => y.id === b.getAttribute('data-tti')); if (x) openZoomViewer(x.image, { turn: true }); }));
@@ -13513,7 +13548,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       }
       if (x.kind === 'duty') { gl = 'Exam duty sheet'; what = what.replace(/ only$/, ''); }
       const k = 'tt:' + x.id;
-      return `<div class="gal-card${picked(k) ? ' gal-pick' : ''}" data-gal-k="${escapeHtml(k)}"><div class="gal-th"><img src="${x.thumb || x.image}" alt="Timetable" loading="lazy"></div>
+      return `<div class="gal-card${picked(k) ? ' gal-pick' : ''}" data-gal-k="${escapeHtml(k)}"><div class="gal-th"><img src="${x.thumb || x.image}"${x.thumb ? ` data-heal="${escapeHtml(x.id)}"` : ''} alt="Timetable" loading="lazy"></div>
         <div class="gal-bd"><div class="gal-t">${escapeHtml(gl)}</div><div class="gal-s">${dayOnly ? `<span class="gal-day">${escapeHtml(what)}</span>` : escapeHtml(what)}${x.updated ? '<span class="gal-up">Updated</span>' : ''}</div></div></div>`;
     };
     const byWeek = {}; ttl.forEach((x) => { (byWeek[x.weekStart] = byWeek[x.weekStart] || []).push(x); });
