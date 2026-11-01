@@ -2657,26 +2657,26 @@
   .dty-tr.hot { background: #FDE7E7; font-weight: 600; }
   .dty-tr.zero { color: var(--muted); }
   .hg-lang { display: flex; background: var(--line); border-radius: 12px; padding: 3px; }
-  .hg-lang button { flex: 1; border: 0; background: transparent; padding: 7px 10px; border-radius: 10px; font: inherit; font-weight: 600; font-size: 13px; color: var(--muted); cursor: pointer; }
+  .hg-lang button { flex: 1; border: 0; background: transparent; padding: 7px 10px; border-radius: 10px; font: inherit; font-weight: 600; font-size: 13px; color: var(--muted-2); cursor: pointer; }
   .hg-lang button.on { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
   .hc-top { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
   .hc-top .text-input { flex: 1; min-width: 0; }
   .hc-lang { flex: none; }
   .hc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .hc-card { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; font: inherit; color: var(--ink); cursor: pointer; min-height: 96px; }
-  .hc-card b { font-size: 14px; font-weight: 600; line-height: 1.25; }
-  .hc-card small { color: var(--muted); font-size: 12px; }
-  .hc-ic { color: var(--gold); margin-bottom: 4px; }
+  .hc-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; font: inherit; color: var(--ink); cursor: pointer; min-height: 96px; }
+  .hc-card b { font-size: 15px; font-weight: 600; line-height: 1.25; color: var(--ink); }
+  .hc-card small { color: var(--muted-2); font-size: 13px; }
+  .hc-ic { color: var(--gold); margin-bottom: 6px; }
   .hc-ic svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; display: block; }
   .hc-tour { border-left: 4px solid var(--gold); }
-  .hc-sec { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 18px 2px 8px; }
-  .hc-back { background: none; border: 0; color: var(--gold); font: inherit; font-weight: 700; padding: 4px 0; cursor: pointer; }
+  .hc-sec { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2); margin: 18px 2px 8px; }
+  .hc-back { background: none; border: 0; color: var(--ink); font: inherit; font-size: 15px; font-weight: 600; padding: 4px 0; cursor: pointer; }
   .hc-list { display: flex; flex-direction: column; gap: 8px; }
-  .hc-title { font-size: 20px; font-weight: 700; margin: 0 0 2px; color: var(--ink); }
-  .hc-sub { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
-  .hg-item b { font-weight: 600; } .hg-item small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
-  .hg-steps { margin: 10px 0 10px 20px; padding: 0; } .hg-steps li { margin: 8px 0; line-height: 1.5; font-size: 15px; }
-  .hg-note { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; line-height: 1.45; margin: 6px 0 12px; color: var(--ink); }
+  .hc-title { font-size: 17px; font-weight: 600; margin: 0; color: var(--ink); line-height: 1.35; }
+  .hc-sub { color: var(--muted); font-size: 13px; margin: 2px 0 12px; }
+  .hg-item small { display: block; color: var(--muted-2); font-size: 13px; margin-top: 2px; }
+  .hg-steps { margin: 10px 0 10px 20px; padding: 0; } .hg-steps li { margin: 8px 0; line-height: 1.55; font-size: 15px; color: var(--muted-2); } .hg-steps li b { color: var(--ink); font-weight: 600; }
+  .hg-note { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.5; margin: 6px 0 12px; color: var(--muted-2); } .hg-note b { color: var(--ink); font-weight: 600; }
   .hg-none { color: var(--muted); font-size: 14px; padding: 8px 2px; }
 </style>
 </head>
@@ -3917,7 +3917,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.05 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.06 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -18533,6 +18533,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   { id: 'ttfill', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Fill the timetable by hand', 'Timetable haath se bharna'], k: 'timetable fill paint bharna subject cell टाइमटेबल भरना',
     s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the wing, then the group (for example Pre-Foundation · Morning).', 'Tap **Edit timetable**.', 'In the **Paint** row tap a subject, for example Mathematics.', 'Tap the cells where that subject is taught. Tap **Off** in the Paint row to clear a cell.', 'When it looks right, tap **Publish** to send it to the teachers.'],
         ['**Admin** kholo, phir **Timetable**.', 'Hafta aur wing chuno, phir group (jaise Pre-Foundation · Morning).', '**Edit timetable** dabao.', '**Paint** row me subject dabao, jaise Mathematics.', 'Jin cell me wo subject padhta hai unhe dabao. Cell saaf karne ke liye Paint row me **Off** dabao.', 'Sahi lage to **Publish** dabao, taaki teachers ko mile.']] },
+  { id: 'ttphoto', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Make the timetable with AI (from a photo)', 'AI se timetable banana (photo se)'], k: 'ai photo picture timetable fill from a photo gemini scan banana timetable photo se एआई फोटो टाइमटेबल',
+    s: [['Open **Admin**, then **Timetable**. Choose the week, the wing and the group.', 'Tap **Edit timetable**. In the list of actions tap **Fill from a photo**.', 'Tap **Choose a picture of the timetable** and pick a clear, straight picture of the whole table.', 'Wait while the AI reads it (**Reading the picture…**).', 'Check what was read and correct any cell that is wrong.', 'Tap **Put in draft**. Nothing is saved or published until you do this.', 'Look at the timetable, and tap **Publish** when it is right.'],
+        ['**Admin** kholo, phir **Timetable**. Hafta, wing aur group chuno.', '**Edit timetable** dabao. Kaam ki list me **Fill from a photo** dabao.', '**Choose a picture of the timetable** dabao aur poori table ki saaf, seedhi photo chuno.', 'AI padhta hai, thoda ruko (**Reading the picture…**).', 'Jo padha gaya use dekho aur galat cell theek karo.', '**Put in draft** dabao. Isse pehle kuch save ya publish nahi hota.', 'Timetable dekho, aur sahi lage to **Publish** dabao.']],
+    n: ['The picture goes to Google\'s AI only to be read. If it says the AI is not set up, the Admin must open Settings → AI. A Coordinator needs the Admin to add their login email first.', 'Photo sirf padhne ke liye Google ke AI ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga. Coordinator ka login email pehle Admin ko jodna padta hai.'] },
   { id: 'ttpublish', g: 'Timetable', who: 'lead', go: 'admin:tt', t: ['Publish the timetable', 'Timetable publish karna'], k: 'publish timetable send teachers draft टाइमटेबल पब्लिश',
     s: [['Open **Admin**, then **Timetable**.', 'Check the cells. Changes stay as a draft until you publish.', 'Tap **Publish**. You can publish the whole week or one day.', 'The teachers see their classes in their Schedule.'],
         ['**Admin** kholo, phir **Timetable**.', 'Cell dekho. Publish karne tak badlav draft rehte hain.', '**Publish** dabao. Poora hafta ya ek din publish kar sakte ho.', 'Teachers ko apni classes Schedule me dikhti hain.']],
@@ -18568,9 +18572,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Open **Admin**, then **Exams**, and open the exam card.', 'Tap **Add rooms**. Add the rooms in **Settings → Rooms** first.', 'In each room tap **+ Add invigilator** and choose the teacher and the duty time.', 'Make the **Duty sheet picture** and tap **Publish**, so teachers can see it.'],
         ['**Admin** kholo, phir **Exams**, aur exam card kholo.', '**Add rooms** dabao. Rooms pehle **Settings → Rooms** me jodo.', 'Har room me **+ Add invigilator** dabao aur teacher aur duty ka samay chuno.', '**Duty sheet picture** banao aur **Publish** dabao, taaki teachers dekh sakein.']],
     n: ['A teacher who has not joined yet can also be given a duty. You can also use the **Combine** button to make one duty sheet for several exams.', 'Jo teacher abhi app me nahi aaya use bhi duty de sakte ho. Kai exam ki ek hi duty sheet ke liye **Combine** button bhi hai.'] },
-  { id: 'dutyphoto', g: 'Exams and duty', who: 'lead', go: 'admin:exams', t: ['Fill the duty from a photo', 'Duty ko photo se bharna'], k: 'duty photo picture ai fill from photo ड्यूटी फोटो',
-    s: [['Open **Admin**, then **Exams**, and open the exam card.', 'Tap **Fill rooms and invigilators from a photo**.', 'Choose a picture of the duty sheet.', 'Check the result and save it.'],
-        ['**Admin** kholo, phir **Exams**, aur exam card kholo.', '**Fill rooms and invigilators from a photo** dabao.', 'Duty sheet ki photo chuno.', 'Natija dekho aur save karo.']] },
+  { id: 'dutyphoto', g: 'Exams and duty', who: 'lead', go: 'admin:exams', t: ['Make the invigilation duty with AI (from a photo)', 'AI se invigilation duty banana (photo se)'], k: 'ai photo picture duty invigilation fill from a photo gemini duty sheet scan एआई फोटो ड्यूटी',
+    s: [['Open **Admin**, then **Exams**, and open the exam card.', 'Tap **Fill rooms and invigilators from a photo**. The page **Duty sheet from a photo** opens.', 'Tap **Choose a picture of the duty sheet** and pick a clear picture.', 'Wait while the AI reads it (**Reading the duty sheet…**). It reads the rooms, the names, the duty times, the breaks and the staff counts.', 'Check everything that was read.', 'Tap **Check and save**.'],
+        ['**Admin** kholo, phir **Exams**, aur exam card kholo.', '**Fill rooms and invigilators from a photo** dabao. **Duty sheet from a photo** page khulta hai.', '**Choose a picture of the duty sheet** dabao aur saaf photo chuno.', 'AI padhta hai, thoda ruko (**Reading the duty sheet…**). Wo rooms, naam, duty ke samay, break aur staff ki ginti padhta hai.', 'Jo padha gaya sab dekho.', '**Check and save** dabao.']],
+    n: ['A break in a duty becomes separate slots. The picture goes to Google\'s Gemini only to be read. If it says the AI is not set up, the Admin must open Settings → AI.', 'Duty me break alag slot ban jata hai. Photo sirf padhne ke liye Google ke Gemini ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga.'] },
   { id: 'dutyreport', g: 'Exams and duty', who: 'lead', go: 'admin:reports:duty', t: ['Invigilation duty report (day, week, month)', 'Invigilation duty report (din, hafta, mahina)'], k: 'duty report invigilation week month sheet teacher wise ड्यूटी रिपोर्ट',
     s: [['Open **Admin**, then **Reports**, then **Invigilation duty**.', 'Choose **Day**, **Week** or **Month** and the wing.', 'Choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Tap **WhatsApp** to share the picture, or **PDF** or **Excel**.'],
         ['**Admin** kholo, phir **Reports**, phir **Invigilation duty**.', '**Day**, **Week** ya **Month** aur wing chuno.', '**Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) chuno.', '**WhatsApp** se tasveer bhejo, ya **PDF** ya **Excel** lo.']],
@@ -18638,7 +18643,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     { k: 'oth', t: 'Other work and leave', who: 'all', ic: 'edit', ids: ['otherwork', 'leave', 'holidayduty', 'invig'] },
     { k: 'rep', t: 'Report and WhatsApp', who: 'all', ic: 'send', ids: ['whatsapp', 'pdf'] },
     { k: 'alt', t: 'Alerts', who: 'all', ic: 'bell', ids: ['reminder', 'phonealerts'] },
-    { k: 'tt', t: 'Timetable', who: 'lead', ic: 'cal', ids: ['ttfill', 'ttpublish', 'ttcell', 'substitute', 'ttjoin', 'ttcopy'] },
+    { k: 'tt', t: 'Timetable', who: 'lead', ic: 'cal', ids: ['ttfill', 'ttphoto', 'ttpublish', 'ttcell', 'substitute', 'ttjoin', 'ttcopy'] },
     { k: 'ex', t: 'Exams and duty', who: 'lead', ic: 'clip', ids: ['newexam', 'newtest', 'classtest', 'duty', 'dutyphoto', 'dutyreport'] },
     { k: 'rp', t: 'Reports', who: 'lead', ic: 'chart', ids: ['reports', 'classcount'] },
     { k: 'st', t: 'Staff and notices', who: 'lead', ic: 'users', ids: ['notice', 'team', 'admincheck'] },
@@ -18658,7 +18663,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>'
   };
   const HC = { v: 'home', cat: '', id: '', q: '', from: 'home' };
-  function helpScore(g, qs) { const hay = (g.t[0] + ' ' + g.t[1] + ' ' + (g.k || '') + ' ' + g.g).toLowerCase(); const title = (g.t[0] + ' ' + g.t[1]).toLowerCase(); let sc = 0; for (let i = 0; i < qs.length; i++) { if (hay.indexOf(qs[i]) < 0) return 0; sc += title.indexOf(qs[i]) >= 0 ? 3 : 1; } return sc; }
+  function helpScore(g, qs) { const hay = (g.t[0] + ' ' + g.t[1] + ' ' + (g.k || '') + ' ' + g.g).toLowerCase(); const title = (g.t[0] + ' ' + g.t[1]).toLowerCase(); const words = hay.split(/[^a-z0-9\u0900-\u097f]+/).filter(Boolean); let sc = 0; for (let i = 0; i < qs.length; i++) { const w = qs[i]; const hit = w.length <= 2 ? words.some((x) => x === w) : hay.indexOf(w) >= 0; if (!hit) return 0; sc += title.indexOf(w) >= 0 ? 3 : 1; } return sc; }
   function hcGuideBtn(g, li, tag) { return `<button type="button" class="help-item hg-item" data-guide="${g.id}"><span><b>${escapeHtml(g.t[li])}</b>${tag && g.who === 'lead' ? '<small>Admin / Coordinator</small>' : ''}</span></button>`; }
   function helpListHtml(q) {
     const lead = isLeadUser(); const li = helpLangIdx();
