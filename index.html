@@ -2656,12 +2656,25 @@
   .dty-tr { border-top: 1px solid var(--line); }
   .dty-tr.hot { background: #FDE7E7; font-weight: 600; }
   .dty-tr.zero { color: var(--muted); }
-  .hg-top { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 8px; }
-  .hg-lang { display: flex; background: var(--line); border-radius: 12px; padding: 3px; margin: 6px 0; }
-  .hg-lang button { flex: 1; border: 0; background: transparent; padding: 8px 0; border-radius: 10px; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .hg-lang { display: flex; background: var(--line); border-radius: 12px; padding: 3px; }
+  .hg-lang button { flex: 1; border: 0; background: transparent; padding: 7px 10px; border-radius: 10px; font: inherit; font-weight: 600; font-size: 13px; color: var(--muted); cursor: pointer; }
   .hg-lang button.on { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
-  .hg-list { display: flex; flex-direction: column; gap: 8px; }
-  .hg-item b { font-weight: 600; } .hg-item small { display: block; color: var(--muted-2); font-size: 11.5px; margin-top: 2px; }
+  .hc-top { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .hc-top .text-input { flex: 1; min-width: 0; }
+  .hc-lang { flex: none; }
+  .hc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hc-card { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; font: inherit; color: var(--ink); cursor: pointer; min-height: 96px; }
+  .hc-card b { font-size: 14px; font-weight: 600; line-height: 1.25; }
+  .hc-card small { color: var(--muted); font-size: 12px; }
+  .hc-ic { color: var(--gold); margin-bottom: 4px; }
+  .hc-ic svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; display: block; }
+  .hc-tour { border-left: 4px solid var(--gold); }
+  .hc-sec { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 18px 2px 8px; }
+  .hc-back { background: none; border: 0; color: var(--gold); font: inherit; font-weight: 700; padding: 4px 0; cursor: pointer; }
+  .hc-list { display: flex; flex-direction: column; gap: 8px; }
+  .hc-title { font-size: 20px; font-weight: 700; margin: 0 0 2px; color: var(--ink); }
+  .hc-sub { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  .hg-item b { font-weight: 600; } .hg-item small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
   .hg-steps { margin: 10px 0 10px 20px; padding: 0; } .hg-steps li { margin: 8px 0; line-height: 1.5; font-size: 15px; }
   .hg-note { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; line-height: 1.45; margin: 6px 0 12px; color: var(--ink); }
   .hg-none { color: var(--muted); font-size: 14px; padding: 8px 2px; }
@@ -3649,7 +3662,7 @@
             <span class="dlabel">Contact director<small>WhatsApp or email</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
-        <button class="drow" id="menuHelpRow" type="button" style="--i:8">
+        <button class="drow" id="menuHelpRow" data-open="helpc" type="button" style="--i:8">
             <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
             <span class="dlabel">Help &amp; guided tours<small>Tours and the written guide</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
@@ -3892,13 +3905,19 @@
       </div>
     </section>
 
-    <!-- ABOUT -->
+    <!-- HELP -->
+  <section class="dpanel dsub" id="dpanel-helpc">
+  <div class="dhead"><button class="dicon-btn dback" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><div class="dtitle">Help</div></div>
+  <div class="dscroll dbody" id="helpcBody"></div>
+  </section>
+
+  <!-- ABOUT -->
     <section class="dpanel dsub" id="dpanel-about">
       <div class="dhead"><button class="dicon-btn dback" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><div class="dtitle">About</div></div>
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.04 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.05 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14632,8 +14651,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (!s) return;
     history.go(s === 'main' ? -1 : -2);
   }
-  function openMenuPanel(name) {
-    if (name === 'password') preparePasswordPanel();
+  function openMenuPanel(name) { if (name === 'helpc') { HC.v = 'home'; HC.q = ''; HC.cat = ''; helpcRender(); } if (name === 'password') preparePasswordPanel();
     if (name === 'contact') prepareContactPanel();
     if (name === 'share') document.getElementById('shareLinkText').textContent = appShareUrl();
     history.pushState({ catjeeMenu: name, catjeeNav: state.navDepth }, '');
@@ -18610,41 +18628,89 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     n: ['At check-in and check-out the app quietly notes if the phone was inside the campus. Only the Admin sees this. The teacher sees nothing.', 'Check-in aur check-out par app chupke se dekhta hai ki phone campus ke andar tha ya nahi. Ye sirf Admin ko dikhta hai, teacher ko kuch nahi dikhta.'] }
 ];
 
-  // ---------- Help: how-to guides with search, English and Hinglish, and "Take me there" ----------
+  // ---------- Help: a full page in the menu with topic cards, short lists, guides, tours ----------
   const helpLangIdx = () => { try { return localStorage.getItem('ctd_help_lang') === 'en' ? 0 : 1; } catch (e) { return 1; } };
   const helpSetLang = (i) => { try { localStorage.setItem('ctd_help_lang', i === 0 ? 'en' : 'hi'); } catch (e) { /* ignore */ } };
   const hgFmt = (t) => escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-  function helpLangChips() { const i = helpLangIdx(); return `<div class="hg-lang" role="group" aria-label="Language"><button type="button" data-hglang="0" class="${i === 0 ? 'on' : ''}">English</button><button type="button" data-hglang="1" class="${i === 1 ? 'on' : ''}">Hinglish</button></div>`; }
+  const HELP_CATS = [
+    { k: 'att', t: 'Check-in and attendance', who: 'all', ic: 'clock', ids: ['checkin', 'forgot', 'editsess'] },
+    { k: 'cls', t: 'Classes', who: 'all', ic: 'book', ids: ['addclass', 'combineb', 'longclass', 'schedslot', 'mysub'] },
+    { k: 'oth', t: 'Other work and leave', who: 'all', ic: 'edit', ids: ['otherwork', 'leave', 'holidayduty', 'invig'] },
+    { k: 'rep', t: 'Report and WhatsApp', who: 'all', ic: 'send', ids: ['whatsapp', 'pdf'] },
+    { k: 'alt', t: 'Alerts', who: 'all', ic: 'bell', ids: ['reminder', 'phonealerts'] },
+    { k: 'tt', t: 'Timetable', who: 'lead', ic: 'cal', ids: ['ttfill', 'ttpublish', 'ttcell', 'substitute', 'ttjoin', 'ttcopy'] },
+    { k: 'ex', t: 'Exams and duty', who: 'lead', ic: 'clip', ids: ['newexam', 'newtest', 'classtest', 'duty', 'dutyphoto', 'dutyreport'] },
+    { k: 'rp', t: 'Reports', who: 'lead', ic: 'chart', ids: ['reports', 'classcount'] },
+    { k: 'st', t: 'Staff and notices', who: 'lead', ic: 'users', ids: ['notice', 'team', 'admincheck'] },
+    { k: 'se', t: 'Settings', who: 'lead', ic: 'gear', ids: ['mapping', 'batches', 'periods', 'subjects', 'rooms', 'testtypes', 'weeklyoff', 'campus'] }
+  ];
+  const HC_ICONS = {
+    clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>',
+    book: '<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+    edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>',
+    send: '<svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>',
+    bell: '<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>',
+    play: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>',
+    cal: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+    clip: '<svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>',
+    chart: '<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+    users: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+    gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>'
+  };
+  const HC = { v: 'home', cat: '', id: '', q: '', from: 'home' };
   function helpScore(g, qs) { const hay = (g.t[0] + ' ' + g.t[1] + ' ' + (g.k || '') + ' ' + g.g).toLowerCase(); const title = (g.t[0] + ' ' + g.t[1]).toLowerCase(); let sc = 0; for (let i = 0; i < qs.length; i++) { if (hay.indexOf(qs[i]) < 0) return 0; sc += title.indexOf(qs[i]) >= 0 ? 3 : 1; } return sc; }
+  function hcGuideBtn(g, li, tag) { return `<button type="button" class="help-item hg-item" data-guide="${g.id}"><span><b>${escapeHtml(g.t[li])}</b>${tag && g.who === 'lead' ? '<small>Admin / Coordinator</small>' : ''}</span></button>`; }
   function helpListHtml(q) {
     const lead = isLeadUser(); const li = helpLangIdx();
     const qs = String(q || '').toLowerCase().split(/[^a-z0-9\u0900-\u097f]+/).filter(Boolean);
-    let list = HELP_GUIDES.filter((g) => g.who === 'all' || lead);
-    if (qs.length) list = list.map((g) => ({ g, sc: helpScore(g, qs) })).filter((x) => x.sc > 0).sort((a, b) => b.sc - a.sc).map((x) => x.g);
+    const list = HELP_GUIDES.filter((g) => g.who === 'all' || lead).map((g) => ({ g, sc: helpScore(g, qs) })).filter((x) => x.sc > 0).sort((a, b) => b.sc - a.sc).map((x) => x.g);
     if (!list.length) return `<div class="hg-none">${li === 0 ? 'No guide found. Try a short word like timetable, leave or duty.' : 'Koi guide nahi mila. Chhota shabd likho, jaise timetable, leave ya duty.'}</div>`;
-    let h = ''; let grp = '';
-    list.forEach((g) => { if (!qs.length && g.g !== grp) { grp = g.g; h += `<div class="help-grp">${escapeHtml(g.g)}</div>`; } h += `<button type="button" class="help-item hg-item" data-guide="${g.id}"><span><b>${escapeHtml(g.t[li])}</b>${g.who === 'lead' && qs.length ? '<small>Admin / Coordinator</small>' : ''}</span></button>`; });
+    return `<div class="hc-list">${list.map((g) => hcGuideBtn(g, li, true)).join('')}</div>`;
+  }
+  const hcLangChips = () => { const i = helpLangIdx(); return `<div class="hg-lang hc-lang" role="group" aria-label="Language"><button type="button" data-hglang="0" class="${i === 0 ? 'on' : ''}">EN</button><button type="button" data-hglang="1" class="${i === 1 ? 'on' : ''}">Hinglish</button></div>`; };
+  const hcTours = () => { const lead = isLeadUser(); return Object.keys(TOURS).filter((k) => TOURS[k].who === 'all' || (lead && TOURS[k].who === 'lead')); };
+  function hcCard(c, li) { const n = c.ids.length; return `<button type="button" class="hc-card" data-hccat="${c.k}"><span class="hc-ic">${HC_ICONS[c.ic]}</span><b>${escapeHtml(c.t)}</b><small>${n} ${li === 0 ? (n === 1 ? 'guide' : 'guides') : 'guide'}</small></button>`; }
+  function hcCards(li) {
+    const lead = isLeadUser(); const nT = hcTours().length;
+    const tourCard = `<button type="button" class="hc-card hc-tour" data-hccat="tours"><span class="hc-ic">${HC_ICONS.play}</span><b>${li === 0 ? 'Guided tours' : 'Guided tours'}</b><small>${nT} ${li === 0 ? 'tours on the real screen' : 'tour, asli screen par'}</small></button>`;
+    let h = `<div class="hc-grid">${HELP_CATS.filter((c) => c.who === 'all').map((c) => hcCard(c, li)).join('')}${tourCard}</div>`;
+    if (lead) h += `<div class="hc-sec">${li === 0 ? 'For Admin and Coordinator' : 'Admin aur Coordinator ke liye'}</div><div class="hc-grid">${HELP_CATS.filter((c) => c.who === 'lead').map((c) => hcCard(c, li)).join('')}</div>`;
+    h += `<button type="button" class="help-item" id="hcWritten" style="margin-top:14px; width:100%;"><span class="ico i-file" aria-hidden="true"></span><span><b>Written guide</b><small>${li === 0 ? 'A short guide to each tab' : 'Har tab ki chhoti guide'}</small></span></button>`;
     return h;
   }
-  function helpTopHtml() { const li = helpLangIdx(); return `<div class="hg-top">${helpLangChips()}<input type="search" class="text-input" id="hgSearch" placeholder="${li === 0 ? 'Search: timetable, leave, duty…' : 'Khojo: timetable, chhutti, duty…'}" autocomplete="off"><div class="hg-list" id="hgList">${helpListHtml('')}</div></div>`; }
-  function helpBindTop(root) {
-    const rerender = () => { const sIn = root.querySelector('#hgSearch'); const list = root.querySelector('#hgList'); if (list) list.innerHTML = helpListHtml(sIn ? sIn.value : ''); bindItems(); };
-    const bindItems = () => root.querySelectorAll('[data-guide]').forEach((b) => { b.onclick = () => openGuide(b.getAttribute('data-guide')); });
-    root.querySelectorAll('[data-hglang]').forEach((b) => b.addEventListener('click', () => { helpSetLang(Number(b.getAttribute('data-hglang'))); openHelp(); }));
-    const sIn = root.querySelector('#hgSearch'); if (sIn) sIn.addEventListener('input', rerender);
-    bindItems();
+  function helpcRender(keepScroll) {
+    const body = document.getElementById('helpcBody'); if (!body) return; const li = helpLangIdx(); const back = (to) => `<button type="button" class="hc-back" data-hcback="${to}">‹ ${li === 0 ? 'Back' : 'Wapas'}</button>`; let h = '';
+    if (HC.v === 'home') {
+      h = `<div class="hc-top"><input type="search" class="text-input" id="hcSearch" placeholder="${li === 0 ? 'Search…' : 'Khojo…'}" value="${escapeHtml(HC.q)}" autocomplete="off">${hcLangChips()}</div><div id="hcMain">${HC.q ? helpListHtml(HC.q) : hcCards(li)}</div>`;
+    } else if (HC.v === 'cat') {
+      const c = HELP_CATS.find((x) => x.k === HC.cat); const gs = c.ids.map((id) => HELP_GUIDES.find((g) => g.id === id)).filter(Boolean);
+      h = `<div class="hc-top" style="justify-content:space-between;">${back('home')}${hcLangChips()}</div><h2 class="hc-title">${escapeHtml(c.t)}</h2><div class="hc-sub">${gs.length} ${li === 0 ? (gs.length === 1 ? 'guide' : 'guides') : 'guide'}</div><div class="hc-list">${gs.map((g) => hcGuideBtn(g, li, false)).join('')}</div>`;
+    } else if (HC.v === 'tours') {
+      const lead = isLeadUser(); const item = (k) => { const T = TOURS[k]; return `<button type="button" class="help-item" data-tour="${k}"><span class="ico i-${T.icon}" aria-hidden="true"></span><span><b>${escapeHtml(T.title)}</b><small>${escapeHtml(T.sub)}</small></span></button>`; };
+      const all = Object.keys(TOURS).filter((k) => TOURS[k].who === 'all'); const leadK = Object.keys(TOURS).filter((k) => TOURS[k].who === 'lead');
+      h = `<div class="hc-top" style="justify-content:space-between;">${back('home')}${hcLangChips()}</div><h2 class="hc-title">Guided tours</h2><div class="hc-sub">${li === 0 ? 'The app shows you, step by step, on the real screen' : 'App asli screen par aap ko kadam-kadam dikhata hai'}</div><div class="hc-list">${all.map(item).join('')}</div>${lead && leadK.length ? `<div class="hc-sec">Timetable &amp; exams</div><div class="hc-list">${leadK.map(item).join('')}</div>` : ''}`;
+    } else if (HC.v === 'guide') {
+      const g = HELP_GUIDES.find((x) => x.id === HC.id);
+      h = `<div class="hc-top" style="justify-content:space-between;">${back(HC.from)}${hcLangChips()}</div><h2 class="hc-title">${escapeHtml(g.t[li])}</h2><div class="hc-sub">${g.who === 'lead' ? 'Admin / Coordinator' : (li === 0 ? 'Everyone' : 'Sab ke liye')}</div><ol class="hg-steps">${g.s[li].map((x) => `<li>${hgFmt(x)}</li>`).join('')}</ol>${g.n ? `<div class="hg-note">${hgFmt(g.n[li])}</div>` : ''}${g.go ? `<button type="button" class="save-btn" id="hgGo">${li === 0 ? 'Take me there' : 'Wahan le chalo'}</button>` : ''}`;
+    }
+    body.innerHTML = h; if (!keepScroll) body.scrollTop = 0;
+    const sIn = body.querySelector('#hcSearch'); if (sIn) sIn.addEventListener('input', () => { HC.q = sIn.value; const m = body.querySelector('#hcMain'); if (m) m.innerHTML = HC.q.trim() ? helpListHtml(HC.q) : hcCards(helpLangIdx()); });
   }
-  function openGuide(id) {
-    const g = HELP_GUIDES.find((x) => x.id === id); if (!g) return; const li = helpLangIdx();
-    const body = document.getElementById('hvSheetBody');
-    body.innerHTML = `<div class="hv-d-title">${escapeHtml(g.t[li])}</div><div class="hv-d-wing">${g.who === 'lead' ? 'Admin or Coordinator' : (li === 0 ? 'Everyone' : 'Sab ke liye')}</div>${helpLangChips()}<ol class="hg-steps">${g.s[li].map((x) => `<li>${hgFmt(x)}</li>`).join('')}</ol>${g.n ? `<div class="hg-note">${hgFmt(g.n[li])}</div>` : ''}${g.go ? `<button type="button" class="save-btn" id="hgGo">${li === 0 ? 'Take me there' : 'Wahan le chalo'}</button>` : ''}<div class="hv-d-btns" style="grid-template-columns: 1fr;"><button type="button" class="btn-secondary" id="hgBack" style="border-color: var(--line);">‹ ${li === 0 ? 'Help' : 'Help par wapas'}</button></div>`;
-    body.querySelectorAll('[data-hglang]').forEach((b) => b.addEventListener('click', () => { helpSetLang(Number(b.getAttribute('data-hglang'))); openGuide(id); }));
-    document.getElementById('hgBack').addEventListener('click', openHelp);
-    const go = document.getElementById('hgGo'); if (go) go.addEventListener('click', () => helpGo(g.go));
-    body.scrollTop = 0; const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
-  }
+  (function bindHelpC() {
+    const body = document.getElementById('helpcBody'); if (!body) return;
+    body.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-hglang],[data-hccat],[data-guide],[data-hcback],[data-tour],#hcWritten,#hgGo'); if (!t) return;
+      if (t.hasAttribute('data-hglang')) { helpSetLang(Number(t.getAttribute('data-hglang'))); helpcRender(true); return; }
+      if (t.hasAttribute('data-hccat')) { const k = t.getAttribute('data-hccat'); if (k === 'tours') HC.v = 'tours'; else { HC.v = 'cat'; HC.cat = k; } helpcRender(); return; }
+      if (t.hasAttribute('data-guide')) { HC.from = (HC.v === 'cat') ? 'cat' : 'home'; HC.v = 'guide'; HC.id = t.getAttribute('data-guide'); helpcRender(); return; }
+      if (t.hasAttribute('data-hcback')) { const to = t.getAttribute('data-hcback'); HC.v = to === 'cat' ? 'cat' : 'home'; helpcRender(); return; }
+      if (t.hasAttribute('data-tour')) { startTour(t.getAttribute('data-tour')); return; }
+      if (t.id === 'hcWritten') { openMenuPanel('help'); return; }
+      if (t.id === 'hgGo') { const g = HELP_GUIDES.find((x) => x.id === HC.id); if (g && g.go) helpGo(g.go); }
+    });
+  })();
   function helpGo(spec) {
-    try { closeHvSheet(); } catch (e) { /* ignore */ }
+    try { closeMenu(); } catch (e) { /* ignore */ }
     const q = (sel) => document.querySelector(sel);
     const byText = (scope, txt) => { const r = q(scope) || document; return Array.from(r.querySelectorAll('button, [role=button], .set-acc, .chip, label, div, span')).find((x) => x.children.length < 6 && (x.innerText || '').trim().toLowerCase().indexOf(txt.toLowerCase()) === 0); };
     const p = String(spec).split(':'); const a = p[0];
@@ -18652,25 +18718,25 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       if (a === 'today' || a === 'add' || a === 'history' || a === 'schedule') { switchTab(a); if (a === 'add' && p[1] === 'activity') setTimeout(() => { const e = byText('#view-add', 'Activity'); if (e) e.click(); }, 300); return; }
       if (a === 'admin') { switchTab('admin'); setTimeout(() => { const b = q('#adminTabs [data-atab-btn="' + p[1] + '"]'); if (b) b.click(); if (p[1] === 'reports' && p[2]) setTimeout(() => { const k = q('#adminRepKind [data-rep-kind="' + p[2] + '"]'); if (k) k.click(); }, 300); if (p[1] === 'settings' && p[2]) setTimeout(() => { const e = byText('#view-admin', p.slice(2).join(':')); if (e) e.click(); }, 400); }, 300); return; }
       if (a === 'menu') { openMenu(); if (p[1]) setTimeout(() => { const rows = { settings: '.drow[data-open="settings"]', push: '#pushDrawRow', notice: '#noticeDrawRow' }; const e = q(rows[p[1]]); if (e) e.click(); }, 450); }
-    } catch (e) { /* ignore */ } }, 300);
+    } catch (e) { /* ignore */ } }, 650);
   }
-  function openHelp() {
+  function openHelp() { const st = history.state && history.state.catjeeMenu; if (st === 'helpc') return; if (!st) { openMenu(); setTimeout(() => openMenuPanel('helpc'), 260); } else openMenuPanel('helpc'); }
+  function openHelpSheetOld() {
     const lead = isLeadUser();
     const item = (k) => { const T = TOURS[k]; return `<button type="button" class="help-item" data-tour="${k}"><span class="ico i-${T.icon}" aria-hidden="true"></span><span><b>${escapeHtml(T.title)}</b><small>${escapeHtml(T.sub)}</small></span></button>`; };
     const all = Object.keys(TOURS).filter((k) => TOURS[k].who === 'all');
     const leadK = Object.keys(TOURS).filter((k) => TOURS[k].who === 'lead');
     const body = document.getElementById('hvSheetBody');
-    body.innerHTML = `<div class="hv-d-title">Help</div><div class="hv-d-wing">Search a guide, or take a guided tour on the real screen</div>${helpTopHtml()}  <div class="help-list"><div class="help-grp">Guided tours · shown on the real screen</div>${all.map(item).join('')}${lead ? `<div class="help-grp">Timetable &amp; exams</div>${leadK.map(item).join('')}` : ''}
+    body.innerHTML = `<div class="hv-d-title">Help &amp; guided tours</div><div class="hv-d-wing">Tap a topic — the app shows you, step by step, on the real screen</div>
+      <div class="help-list"><div class="help-grp">For everyone</div>${all.map(item).join('')}${lead ? `<div class="help-grp">Timetable &amp; exams</div>${leadK.map(item).join('')}` : ''}
         <div class="help-grp">Prefer reading?</div><button type="button" class="help-item" id="helpGuide"><span class="ico i-file" aria-hidden="true"></span><span><b>Written guide</b><small>A short guide to each tab</small></span></button></div>
       <div class="hv-d-btns"><button type="button" class="btn-secondary" id="helpClose" style="border-color: var(--line);">Close</button></div>`;
     body.querySelectorAll('[data-tour]').forEach((b) => b.addEventListener('click', () => startTour(b.getAttribute('data-tour'))));
-    document.getElementById('helpClose').addEventListener('click', closeHvSheet); helpBindTop(body);
+    document.getElementById('helpClose').addEventListener('click', closeHvSheet);
     document.getElementById('helpGuide').addEventListener('click', () => { closeHvSheet(); setTimeout(() => { try { openMenu(); } catch (e) { /* ignore */ } setTimeout(() => openMenuPanel('help'), 200); }, 200); });
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
-  (function bindHelp() {
-    const r = document.getElementById('menuHelpRow'); if (r) r.addEventListener('click', () => { try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(openHelp, 250); });
-  })();
+  
   // first time on this phone: the quick tour (after the welcome slides); people already using the app get a one-line "what's new"
   window.__ctdFirstTour = function () {
     let seenB = false, seenNew = false; try { seenB = localStorage.getItem(tourSeenKey('basics')) === '1'; seenNew = localStorage.getItem(tourSeenKey('new71')) === '1'; } catch (e) { seenB = true; seenNew = true; }
