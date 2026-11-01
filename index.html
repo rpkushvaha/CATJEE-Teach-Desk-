@@ -52,6 +52,7 @@
   if (!/[?&]demo(=|&|$)/.test(q)) return;
   var role = ((q.match(/[?&]demo=([a-z]+)/) || [])[1] || '');
   window.__DEMO = true; window.__DEMO_ROLE = role;
+  var qs = new URLSearchParams(location.search); window.__DEMO_PRACTICE = qs.has('practice'); window.__DEMO_LEAD = qs.has('lead'); window.__DEMO_TOUR = qs.get('tour') || ''; window.__DEMO_WALK = qs.has('walk'); var DEMO_HL = qs.get('hl') || '';
   var pad = function (n) { return String(n).padStart(2, '0'); };
 
   // ---- the demo never touches the real phone storage, the real server or the real notifications ----
@@ -62,7 +63,7 @@
     Storage.prototype.removeItem = function (k) { delete mem[k]; };
     Storage.prototype.clear = function () { mem = {}; };
     Storage.prototype.key = function (i) { return Object.keys(mem)[i] || null; };
-    mem['ctd_intro_seen_v1'] = '1';
+    mem['ctd_intro_seen_v1'] = '1'; if (window.__DEMO_PRACTICE || window.__DEMO_TOUR || window.__DEMO_WALK) { mem['ctd_tour_basics'] = '1'; mem['ctd_tour_new71'] = '1'; } if (DEMO_HL) mem['ctd_help_lang'] = DEMO_HL === 'en' ? 'en' : 'hi';
   } catch (e) { /* ignore */ }
   try { var of = window.fetch; window.fetch = function (u, o) { var s = String((u && u.url) || u || ''); if (/workers\.dev|googleapis|gstatic|firebase/i.test(s)) { return Promise.resolve(new Response(JSON.stringify({ ok: false, error: 'This is not available in the demo.' }), { status: 200, headers: { 'Content-Type': 'application/json' } })); } return of.apply(this, arguments); }; } catch (e) { /* ignore */ }
   try { navigator.geolocation.getCurrentPosition = function (ok, err) { if (err) setTimeout(function () { err({ code: 1, message: 'demo' }); }, 0); }; } catch (e) { /* ignore */ }
@@ -141,7 +142,7 @@
   var authObj = {
     get currentUser() { return user; },
     onAuthStateChanged: function (cb) { setTimeout(function () { cb(user); }, 0); return function () {}; },
-    signOut: function () { try { location.replace(location.pathname + '?demo'); } catch (e) { /* ignore */ } return Promise.resolve(); },
+    signOut: function () { try { location.replace(location.pathname + (window.__DEMO_PRACTICE ? '' : '?demo')); } catch (e) { /* ignore */ } return Promise.resolve(); },
     signInWithEmailAndPassword: function () { return Promise.reject({ code: 'auth/demo', message: 'Sign-in is not available in the demo.' }); },
     createUserWithEmailAndPassword: function () { return Promise.reject({ code: 'auth/demo', message: 'Creating an account is not available in the demo.' }); },
     signInWithPopup: function () { return Promise.reject({ code: 'auth/demo', message: 'Sign-in is not available in the demo.' }); },
@@ -259,6 +260,7 @@
 
     store['team/CTJ-DEMO01'] = { name: 'Vikram Patel', role: 'teacher', wings: ['Pre-Foundation'], status: 'active', pending: true, sal: 'sir', code: 'CTJ-DEMO01' };
     store['exams/ex_ev'].plan.rooms[0].slots[1].teachers = ['CTJ-DEMO01']; store['exams/ex_ev'].invigilators = ['D4', 'CTJ-DEMO01'];
+    store['exams/ex_wk'] = { type: 'Weekly Test', subject: 'Biology', name: '', date: today, start: '15:00', end: '16:15', room: 'F1', scope: ['Class 9 - Batch 2'], invigilators: ['D1', 'D2'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'F1', scope: ['Class 9 - Batch 2'], slots: [{ start: '15:00', end: '16:15', teachers: ['D1', 'D2'] }] }] } };
     // ---- notices and bell items for the demo teacher ----
     ['D0', 'D1'].forEach(function (u) {
       store['notices/' + u + '/items/n_notice'] = { type: 'notice', title: 'Parent-teacher meeting', body: 'On Saturday at 11:00 AM. Please be on campus 15 minutes early.', byName: 'Demo Admin', at: Date.now() - 3600000, read: false };
@@ -266,6 +268,12 @@
     });
   })();
   // ================= the demo screens: welcome, the DEMO bar, "Get access" =================
+  window.__demoPreset = function (name) {
+    var dd = new Date(); var p2 = function (n) { return String(n).padStart(2, '0'); }; var day = dd.getFullYear() + '-' + p2(dd.getMonth() + 1) + '-' + p2(dd.getDate());
+    var kH = 'campusHistory/' + DEMO_UID + '/days/' + day, kL = 'campusLogs/' + day + '/teachers/' + DEMO_UID; var rec = store[kH]; if (!rec) return;
+    if (name === 'out' && rec.checkedIn) { var ss = (rec.sessions || []).map(function (x) { return x.out == null ? { id: x.id, in: x.in, out: Date.now() } : x; }); var tot = Math.round((Date.now() - ss[0].in) / 1000); [kH, kL].forEach(function (k) { if (store[k]) store[k] = Object.assign({}, store[k], { checkedIn: false, checkInAt: null, sessions: ss, totalSeconds: tot }); }); notify(); }
+    if (name === 'in' && !rec.checkedIn) { var ss2 = (rec.sessions || []).concat([{ id: 'p' + Date.now(), in: Date.now(), out: null }]); [kH, kL].forEach(function (k) { if (store[k]) store[k] = Object.assign({}, store[k], { checkedIn: true, checkInAt: Date.now(), sessions: ss2 }); }); notify(); }
+  };
   var CONTACT_WA = ''; // the WhatsApp number of the person who gives Staff IDs (digits with country code). Empty = the button is hidden.
   function addCss() {
     var st = document.createElement('style'); st.textContent =
@@ -286,13 +294,15 @@
     if (!role) {
       var w = document.createElement('div'); w.id = 'demoWelcome';
       w.innerHTML = '<div class="dw-logo">CATJEE Teach Desk</div><div class="dw-sub">Attendance, classes, exams and reports in one app</div>' +
-        '<div class="dw-card"><b>Take a 2-minute tour</b><br>No login needed. You will see sample data, not real teachers or classes.</div>' +
-        '<a class="dw-btn red" href="' + base + '?demo=teacher">Explore as a Teacher</a><a class="dw-btn" href="' + base + '?demo=admin">Explore as Admin / Director</a>' +
+        '<div class="dw-card"><b>I am a Teacher</b><br>A walkthrough of about 4 minutes, on sample data.</div>' +
+        '<a class="dw-btn red" href="' + base + '?demo=teacher&walk=1">▶ Start the walkthrough</a><a class="dw-btn" href="' + base + '?demo=teacher">Explore on my own</a>' +
+        '<div class="dw-card" style="margin-top:14px;"><b>I am an Admin or Coordinator</b><br>A walkthrough of about 6 minutes, on sample data.</div>' +
+        '<a class="dw-btn red" href="' + base + '?demo=admin&walk=1">▶ Start the walkthrough</a><a class="dw-btn" href="' + base + '?demo=admin">Explore on my own</a>' +
         '<a class="dw-link" href="' + base + '">I already have a Staff ID · Sign in</a>';
       document.body.appendChild(w); return;
     }
     var bar = document.createElement('div'); bar.id = 'demoBar';
-    bar.innerHTML = '<span class="db-t">DEMO · Sample data · Nothing is saved</span><a class="db-sw" href="' + base + '?demo=' + other() + '">' + (role === 'admin' ? 'Teacher view' : 'Admin view') + '</a><button class="db-ga" type="button">Get access</button>';
+    if (window.__DEMO_PRACTICE) { bar.innerHTML = '<span class="db-t">PRACTICE · Sample data · Nothing is saved</span>' + (window.__DEMO_LEAD ? '<a class="db-sw" href="' + base + '?demo=' + other() + '&practice=1&lead=1">' + (role === 'admin' ? 'Teacher view' : 'Admin view') + '</a>' : '') + '<a class="db-ga" href="' + base + '" style="text-decoration:none; display:inline-block;">Exit</a>'; } else { bar.innerHTML = '<span class="db-t">DEMO · Sample data · Nothing is saved</span><a class="db-sw" href="' + base + '?demo=' + other() + '">' + (role === 'admin' ? 'Teacher view' : 'Admin view') + '</a><button class="db-ga" type="button">Get access</button>'; }
     document.body.insertBefore(bar, document.body.firstChild);
     var acc = document.createElement('div'); acc.id = 'demoAccess'; acc.hidden = true;
     acc.innerHTML = '<div class="dw-logo" style="font-size:22px">Want to use it for real?</div><div class="dw-sub">To sign in you need a Staff ID.</div>' +
@@ -300,7 +310,7 @@
       (CONTACT_WA ? '<a class="dw-btn red" target="_blank" rel="noopener" href="https://wa.me/' + CONTACT_WA + '?text=' + encodeURIComponent('Hello Sir, I saw the CATJEE Teach Desk demo. Please share a Staff ID for me.') + '">Message Ravi Kushvaha Sir on WhatsApp</a>' : '') +
       '<button class="dw-btn" type="button" id="demoBack">Back to the demo</button>';
     document.body.appendChild(acc);
-    bar.querySelector('.db-ga').addEventListener('click', function () { acc.hidden = false; });
+    if (!window.__DEMO_PRACTICE) bar.querySelector('.db-ga').addEventListener('click', function () { acc.hidden = false; });
     acc.querySelector('#demoBack').addEventListener('click', function () { acc.hidden = true; });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
@@ -2679,6 +2689,12 @@
   .hg-steps { margin: 10px 0 10px 20px; padding: 0; } .hg-steps li { margin: 8px 0; line-height: 1.55; font-size: 15px; color: var(--muted-2); } .hg-steps li b { color: var(--ink); font-weight: 600; }
   .hg-note { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.5; margin: 6px 0 12px; color: var(--muted-2); } .hg-note b { color: var(--ink); font-weight: 600; }
   .hg-none { color: var(--muted); font-size: 14px; padding: 8px 2px; }
+  .wt-card { position: fixed; left: 12px; right: 12px; bottom: 18px; z-index: 100002; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.28); padding: 14px; }
+  .wt-card[hidden] { display: none; }
+  .wt-card b { font-size: 15px; font-weight: 600; }
+  .wt-sub { color: var(--muted-2); font-size: 14px; margin-top: 4px; }
+  .wt-btns { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+  .wt-btns .btn-secondary, .wt-btns .save-btn { width: auto; padding: 10px 16px; margin: 0; }
 </style>
 </head>
 <body>
@@ -3665,7 +3681,12 @@
           </button>
         <button class="drow" id="menuHelpRow" data-open="helpc" type="button" style="--i:8">
             <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
-            <span class="dlabel">Help &amp; guided tours<small>Tours and the written guide</small></span>
+            <span class="dlabel">Help<small>Guides in English and Hinglish</small></span>
+            <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </button>
+  <button class="drow" id="menuPracticeRow" type="button" style="--i:9">
+            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg></span>
+            <span class="dlabel">Practice with sample data<small>Learn the app. Nothing real is saved.</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
         <button class="drow" id="menuReportRow" type="button" style="--i:9">
@@ -3923,7 +3944,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.10 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.11 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -18494,9 +18515,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     document.getElementById('tour').hidden = false;
     setTimeout(tourShow, 200);
   }
-  function endTour() { if (!tourState) return; try { localStorage.setItem(tourSeenKey(tourState.key), '1'); } catch (e) { /* ignore */ } tourState = null; document.getElementById('tour').hidden = true; }
+  function endTour(how) { if (!tourState) return; const cb = tourState.onEnd; try { localStorage.setItem(tourSeenKey(tourState.key), '1'); } catch (e) { /* ignore */ } tourState = null; document.getElementById('tour').hidden = true; if (cb) cb(how === 'done' ? 'done' : 'skip'); }
   (function bindTour() {
-    document.getElementById('tourNext').addEventListener('click', () => { if (!tourState) return; if (tourState.i >= tourState.steps.length - 1) { endTour(); return; } tourState.i++; tourShow(); });
+    document.getElementById('tourNext').addEventListener('click', () => { if (!tourState) return; if (tourState.i >= tourState.steps.length - 1) { endTour('done'); return; } tourState.i++; tourShow(); });
     document.getElementById('tourBack').addEventListener('click', () => { if (!tourState || !tourState.i) return; tourState.i--; tourShow(); });
     document.getElementById('tourSkip').addEventListener('click', endTour);
     window.addEventListener('resize', () => { if (tourState) tourPlace(); });
@@ -18511,7 +18532,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap **Today\'s sessions · view or edit times** and change the **Check-in** or **Check-out** time.', 'To add one more visit, tap **+ Add another session**. To remove a wrong session, delete it. The app asks you to confirm.'],
         ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to **Today\'s sessions · view or edit times** dabao aur **Check-in** ya **Check-out** samay badlo.', 'Ek aur visit jodne ke liye **+ Add another session** dabao. Galat session hatana ho to delete karo. App pooch kar hatata hai.']],
     n: ['You can change only today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap sirf aaj aur kal badal sakte ho. Purane din ke liye Admin ya Coordinator se kaho.'],
-    m: [['today', '.nav-item[data-tab="today"]'], ['today', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#sessionsSection']] },
+    m: [['today', '.nav-item[data-tab="today"]'], ['today+out', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#sessionsSection']] },
   { id: 'addclass', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], who: 'all', k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
     s: [['Tap **Add Class** at the bottom.', 'Stay on the **Class** tab. Choose the batch under **Select Class / Batch**.', 'Check **Class Timing**: Start and End, or tap 40m, 50m, 1h or 1h 5m.', 'Under **What happened in class?** choose **Teaching** and write the **Chapter**. The topic is optional.', 'Under **Class deliverables** tick Worksheet, Study material or Homework if you gave them.', 'Tap **Save Class**.'],
         ['Neeche **Add Class** dabao.', '**Class** tab par raho. **Select Class / Batch** me batch chuno.', '**Class Timing** dekho: Start aur End, ya 40m, 50m, 1h, 1h 5m dabao.', '**What happened in class?** me **Teaching** chuno aur **Chapter** likho. Topic optional hai.', '**Class deliverables** me Worksheet, Study material ya Homework chuno, agar diya ho.', '**Save Class** dabao.']],
@@ -18521,7 +18542,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Tap **Add Class**.', 'Choose the first batch under **Select Class / Batch**.', 'Tap **+ Combine another batch** and choose the other batch under **Combined with**.', 'Fill in the rest and tap **Save Class**.'],
         ['**Add Class** dabao.', '**Select Class / Batch** me pehla batch chuno.', '**+ Combine another batch** dabao aur **Combined with** me doosra batch chuno.', 'Baaki bharo aur **Save Class** dabao.']],
     n: ['This is for a class test of several batches in one slot. It counts as one class; the test counts for each batch.', 'Ye kai batch ke class test ke liye hai jo ek slot me hota hai. Ye ek class ginti hai; test har batch ke liye ginta hai.'],
-    m: [['today', '.nav-item[data-tab="add"]'], ['add', '#allBatchesToggle'], ['add', '#combineToggle', ['This shows after you choose a batch.', 'Ye batch chunne ke baad dikhta hai.']], ['add', '#saveClassBtn']] },
+    m: [['today', '.nav-item[data-tab="add"]'], ['add', '#allBatchesToggle'], ['add+batch', '#combineToggle', ['This shows after you choose a batch.', 'Ye batch chunne ke baad dikhta hai.']], ['add', '#saveClassBtn']] },
   { id: 'longclass', t: ['A class that is longer than one period (two periods together)', 'Ek period se lambi class (do period saath)'], who: 'all', k: 'two periods combine double period long class do period combine lambi दो पीरियड',
     s: [['Tap **Add Class** and choose the batch.', 'Set **Start** and **End** to cover the whole time, for example the two periods together.', 'Tap **Save Class**.'],
         ['**Add Class** dabao aur batch chuno.', '**Start** aur **End** aise rakho ki poora samay aa jaye, jaise do period saath.', '**Save Class** dabao.']],
@@ -18551,7 +18572,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Open the **Today** page.', 'Find the **Invigilation** card of your duty.', 'When the duty is done, log it from that card.'],
         ['**Today** page kholo.', 'Apni duty ka **Invigilation** card dhundho.', 'Duty poori hone par usi card se log karo.']],
     n: ['Your duty appears only when the Admin or a Coordinator has set it. A class test in your own class shows as one card.', 'Duty tabhi dikhti hai jab Admin ya Coordinator ne lagayi ho. Apni class ka class test ek hi card me dikhta hai.'],
-    m: [['today', '.nav-item[data-tab="today"]'], ['today', '#myDutySec', ['This shows only when you have a duty today.', 'Ye tabhi dikhta hai jab aaj aap ki duty ho.']], ['today', '#todayClassList']] },
+    m: [['today', '.nav-item[data-tab="today"]'], ['today', '#todayClassList .tl-duty', ['This shows only when you have a duty today.', 'Ye tabhi dikhta hai jab aaj aap ki duty ho.']], ['today', '#todayClassList']] },
   { id: 'whatsapp', t: ['Send your report on WhatsApp or as a PDF', 'Apni report WhatsApp ya PDF me bhejna'], who: 'all', k: 'whatsapp report share bhejna send pdf download file व्हाट्सएप पीडीएफ रिपोर्ट',
     s: [['Open the **Today** page.', 'Under **Quick Actions** tap **WhatsApp** (Share report). Choose WhatsApp and the group, and send. The report text is already filled in.', 'For a PDF, tap **PDF report** (Download). The file is saved on your phone.', 'For another day, a week or a month, open **History**, choose the period and use **Full report**.'],
         ['**Today** page kholo.', '**Quick Actions** me **WhatsApp** (Share report) dabao. WhatsApp aur group chuno aur bhej do. Report ka text pehle se bhara hota hai.', 'PDF ke liye **PDF report** (Download) dabao. File aap ke phone me save ho jati hai.', 'Doosre din, hafte ya mahine ke liye **History** kholo, avadhi chuno aur **Full report** use karo.']],
@@ -18561,22 +18582,22 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Open the menu (top left).', 'Open **Settings** (Reminders, display, text size, update). Find **Class reminders**, switch it on and choose 5, 10 or 15 minutes before the class.', 'To get alerts when the app is closed, open **Phone notifications** in the menu and switch it on. Allow it when the phone asks.'],
         ['Menu kholo (upar bayen).', '**Settings** kholo (Reminders, display, text size, update). **Class reminders** dhundho, chalu karo aur class se 5, 10 ya 15 minute pehle chuno.', 'App band hone par bhi alert chahiye to menu me **Phone notifications** kholo aur chalu karo. Phone pooche to allow karo.']],
     n: ['On an iPhone, first put the app on the Home Screen. The alerts work best when the app is opened in Chrome or installed from Chrome.', 'iPhone me pehle app ko Home Screen par lagao. Alerts Chrome me ya Chrome se install kiye app me sabse achhe chalte hain.'],
-    m: [['today', '#menuOpenBtn'], ['', ''], ['', '']] },
+    m: [['today', '#menuOpenBtn'], ['menu:settings', '#menuReminderToggleRow'], ['menu:push', '#pushSwitch']] },
 
   { id: 'ttfill', t: ['Fill the timetable by hand', 'Timetable haath se bharna'], who: 'lead', k: 'timetable fill paint bharna subject cell publish send teachers draft टाइमटेबल भरना टाइमटेबल पब्लिश',
     s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the wing, then the group (for example Pre-Foundation · Morning).', 'Tap **Edit timetable**.', 'In the **Paint** row tap a subject, for example Mathematics.', 'Tap the cells where that subject is taught. Tap **Off** in the Paint row to clear a cell.', 'When it looks right, tap **Publish**. You can publish the whole week or one day.'],
         ['**Admin** kholo, phir **Timetable**.', 'Hafta aur wing chuno, phir group (jaise Pre-Foundation · Morning).', '**Edit timetable** dabao.', '**Paint** row me subject dabao, jaise Mathematics.', 'Jin cell me wo subject padhta hai unhe dabao. Cell saaf karne ke liye Paint row me **Off** dabao.', 'Sahi lage to **Publish** dabao. Poora hafta ya ek din publish kar sakte ho.']],
     n: ['Changes stay as a draft until you publish. After publishing, a substitute or a swap reaches the teachers at once.', 'Publish karne tak badlav draft rehte hain. Publish ke baad substitute ya swap teachers tak turant pahunchta hai.'],
-    m: [['admin:tt', '#adminTabs [data-atab-btn="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit', ['Tap Edit timetable only for a published timetable.', 'Edit timetable sirf published timetable ke liye dabana padta hai.']], ['admin:tt', '.tg-paint', ['The Paint row shows in edit mode.', 'Paint row edit mode me dikhti hai.']], ['admin:tt', '.tg-table'], ['admin:tt', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
+    m: [['admin:tt', '#adminTabs [data-atab-btn="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-paint'], ['admin:tt+edit', '.tg-table'], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'ttphoto', t: ['Make the timetable with AI (from a photo)', 'AI se timetable banana (photo se)'], who: 'lead', k: 'ai photo picture timetable fill from a photo gemini scan banana timetable photo se एआई फोटो टाइमटेबल',
     s: [['Open **Admin**, then **Timetable**. Choose the week, the wing and the group.', 'Tap **Edit timetable**. In the list of actions tap **Fill from a photo**.', 'Tap **Choose a picture of the timetable** and pick a clear, straight picture of the whole table.', 'Wait while the AI reads it (**Reading the picture…**).', 'Check what was read and correct any cell that is wrong.', 'Tap **Put in draft**. Nothing is saved or published until you do this.', 'Look at the timetable, and tap **Publish** when it is right.'],
         ['**Admin** kholo, phir **Timetable**. Hafta, wing aur group chuno.', '**Edit timetable** dabao. Kaam ki list me **Fill from a photo** dabao.', '**Choose a picture of the timetable** dabao aur poori table ki saaf, seedhi photo chuno.', 'AI padhta hai, thoda ruko (**Reading the picture…**).', 'Jo padha gaya use dekho aur galat cell theek karo.', '**Put in draft** dabao. Isse pehle kuch save ya publish nahi hota.', 'Timetable dekho, aur sahi lage to **Publish** dabao.']],
     n: ['The picture goes to Google\'s AI only to be read. If it says the AI is not set up, the Admin must open Settings → AI. A Coordinator needs the Admin to add their login email first.', 'Photo sirf padhne ke liye Google ke AI ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga. Coordinator ka login email pehle Admin ko jodna padta hai.'],
-    m: [['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgMoreList', ['The list of actions shows in edit mode. In the demo the AI part does not run.', 'Kaam ki list edit mode me dikhti hai. Demo me AI wala hissa nahi chalta.']], ['', ''], ['', ''], ['', ''], ['', ''], ['admin:tt', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
+    m: [['admin:tt', '#ttGroupSel'], ['admin:tt+edit', '#tgMoreList', ['The list of actions shows in edit mode. In the demo the AI part does not run.', 'Kaam ki list edit mode me dikhti hai. Demo me AI wala hissa nahi chalta.']], ['', ''], ['', ''], ['', ''], ['', ''], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'ttcell', t: ['Change one class (edit or swap)', 'Ek class badalna (edit ya swap)'], who: 'lead', k: 'change edit swap class cell badlo बदलना',
     s: [['Open **Admin**, then **Timetable**.', 'Tap **Edit timetable**.', 'Tap the cell. Change the subject or the teacher, or choose **Swap with** to exchange two classes of one batch.', 'Tap **Publish** to tell the teachers.'],
         ['**Admin** kholo, phir **Timetable**.', '**Edit timetable** dabao.', 'Cell dabao. Subject ya teacher badlo, ya **Swap with** se ek batch ki do class badlo.', 'Teachers ko batane ke liye **Publish** dabao.']],
-    m: [['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt', '.tg-table'], ['admin:tt', '#tgPublish']] },
+    m: [['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-table'], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'substitute', t: ['Substitute: someone else takes a class', 'Substitute lagana (koi aur teacher class lega)'], who: 'lead', k: 'substitute sub replacement dusra teacher class leave absent badle सब्स्टीट्यूट लगाना',
     s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the group.', 'Tap the class that needs a substitute.', 'Tap **Someone else takes this class (substitute)**.', 'Choose the teacher who will take it.', 'Tap **Apply substitute**.', 'To tell the teachers, tap **Share substitutions on WhatsApp**.'],
         ['**Admin** kholo, phir **Timetable**.', 'Hafta aur group chuno.', 'Jis class me substitute chahiye, us par dabao.', '**Someone else takes this class (substitute)** dabao.', 'Wo teacher chuno jo class lega.', '**Apply substitute** dabao.', 'Teachers ko batane ke liye **Share substitutions on WhatsApp** dabao.']],
@@ -18586,12 +18607,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Open **Admin**, then **Timetable**, and tap **Edit timetable**.', 'Tap the class cell and look for **Sit together** or **Combined class** to join the other batch.', 'A change of subject or teacher then applies to every batch in the combined class.', 'Tap **Publish**.'],
         ['**Admin** kholo, phir **Timetable**, aur **Edit timetable** dabao.', 'Class cell dabao aur doosre batch ko jodne ke liye **Sit together** ya **Combined class** dhundho.', 'Phir subject ya teacher ka badlav combined class ke har batch par lagta hai.', '**Publish** dabao.']],
     n: ['To swap or change only one batch, separate the combined class first.', 'Sirf ek batch ko badalna ya swap karna ho to pehle combined class ko alag karo.'],
-    m: [['admin:tt', '#tgEdit'], ['admin:tt', '.tg-table'], ['', ''], ['admin:tt', '#tgPublish']] },
+    m: [['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-table'], ['', ''], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'ttcopy', t: ['Copy last week', 'Pichhla hafta copy karna'], who: 'lead', k: 'copy last week repeat previous week pichhla hafta कॉपी हफ्ता',
     s: [['Open **Admin**, then **Timetable**, and choose the new week.', 'Tap **Copy last week**. It asks you to confirm.', 'Fix what is different and tap **Publish**.'],
         ['**Admin** kholo, phir **Timetable**, aur naya hafta chuno.', '**Copy last week** dabao. Ye pooch kar karta hai.', 'Jo alag hai usse theek karo aur **Publish** dabao.']],
     n: ['You can also copy one day to other days.', 'Ek din ko doosre dino par bhi copy kar sakte ho.'],
-    m: [['admin:tt', '#ttWhich'], ['admin:tt', '#tgMoreList', ['The copy buttons show in edit mode.', 'Copy ke button edit mode me dikhte hain.']], ['admin:tt', '#tgPublish']] },
+    m: [['admin:tt', '#ttWhich'], ['admin:tt+edit', '#tgCopyWeek'], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'pictures', t: ['Share the timetable or the duty sheet as a picture', 'Timetable ya duty sheet ko tasveer ki tarah bhejna'], who: 'lead', k: 'picture image share timetable duty sheet batch wise tasveer photo bhejna',
     s: [['Open **Admin**, then **Timetable**. After publishing, a picture of the timetable is made by itself: tap **Published timetable picture** to see it and share it.', 'For one batch at a time, tap **Batch-wise pictures**.', 'For the duty sheet, open **Admin → Exams**, open the exam and share its duty sheet picture.'],
         ['**Admin** kholo, phir **Timetable**. Publish ke baad timetable ki tasveer apne aap banti hai: use dekhne aur bhejne ke liye **Published timetable picture** dabao.', 'Ek-ek batch ke liye **Batch-wise pictures** dabao.', 'Duty sheet ke liye **Admin → Exams** kholo, exam kholo aur uski duty sheet ki tasveer bhejo.']],
@@ -18601,12 +18622,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Open **Admin**, then **Exams**.', 'Tap **+ New Exam**.', 'Choose the **Test type** (for example Half-Yearly or Weekly Test) and the **Subject** from the menus, then the date and the time.', 'Choose the classes (batches) and save.', 'Then set the rooms and invigilators from the exam card.'],
         ['**Admin** kholo, phir **Exams**.', '**+ New Exam** dabao.', 'Menu se **Test type** (jaise Half-Yearly ya Weekly Test) aur **Subject** chuno, phir tareekh aur samay.', 'Classes (batch) chuno aur save karo.', 'Phir exam card se rooms aur invigilators lagao.']],
     n: ['Tests and exams are made in the same place. Only the Test type is different. The list of test types is in **Settings → Test Types**.', 'Test aur exam ek hi jagah bante hain. Sirf Test type alag hota hai. Test type ki list **Settings → Test Types** me hai.'],
-    m: [['admin:exams', '#adminTabs [data-atab-btn="exams"]'], ['admin:exams', '#adminNewExamBtn'], ['', ''], ['', ''], ['admin:exams', '#adminExamList']] },
+    m: [['admin:exams', '#adminTabs [data-atab-btn="exams"]'], ['admin:exams', '#adminNewExamBtn'], ['admin:exams+newexam', '#adminExamType'], ['admin:exams+newexam', '#adminExamScope'], ['admin:exams+newexam', '#xwBar']] },
   { id: 'classtest', t: ['Make a class test (in the Timetable)', 'Class test banana (Timetable me)'], who: 'lead', k: 'class test timetable exam test cell क्लास टेस्ट',
     s: [['Open **Admin**, then **Timetable**, and tap **Edit timetable**.', 'Tap the cell of the class.', 'Open **Exam / Test** and choose **Class Test** and the subject.', 'If each class has a different subject, choose **Yes** for **Different subject for each class?**', 'Tap **Publish**. The class test also shows in **Admin → Exams**, where you set the duty.'],
         ['**Admin** kholo, phir **Timetable**, aur **Edit timetable** dabao.', 'Class ka cell dabao.', '**Exam / Test** kholo aur **Class Test** aur subject chuno.', 'Har class ka subject alag ho to **Different subject for each class?** me **Yes** chuno.', '**Publish** dabao. Class test **Admin → Exams** me bhi dikhta hai, wahan duty lagao.']],
     n: ['A class test counts as a class only for a teacher who has a duty in it.', 'Class test usi teacher ki class ginti hai jiski usme duty ho.'],
-    m: [['admin:tt', '#tgEdit'], ['admin:tt', '.tg-table'], ['', ''], ['', ''], ['admin:tt', '#tgPublish']] },
+    m: [['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-table'], ['admin:tt+edit', '#tgExam'], ['admin:tt+edit', '#tgExam'], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'duty', t: ['Set the invigilation duty', 'Invigilation duty lagana'], who: 'lead', k: 'invigilation duty room invigilator exam nigrani lagana ड्यूटी लगाना इन्विजिलेशन',
     s: [['Open **Admin**, then **Exams**, and open the exam card.', 'Tap **Add rooms**. Add the rooms in **Settings → Rooms** first.', 'In each room tap **+ Add invigilator** and choose the teacher and the duty time.', 'Make the **Duty sheet picture** and tap **Publish**, so teachers can see it.'],
         ['**Admin** kholo, phir **Exams**, aur exam card kholo.', '**Add rooms** dabao. Rooms pehle **Settings → Rooms** me jodo.', 'Har room me **+ Add invigilator** dabao aur teacher aur duty ka samay chuno.', '**Duty sheet picture** banao aur **Publish** dabao, taaki teachers dekh sakein.']],
@@ -18632,7 +18653,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   { id: 'notice', t: ['Send a notice to the teachers', 'Teachers ko notice bhejna'], who: 'lead', k: 'notice send announcement sandesh suchna नोटिस',
     s: [['Open the menu and tap **Send a notice**, or use **+ New notice** on the Admin home.', 'Write the notice and choose who gets it.', 'Send it. Each teacher taps **Got it**.'],
         ['Menu kholo aur **Send a notice** dabao, ya Admin home par **+ New notice** dabao.', 'Notice likho aur chuno ki kisko jana hai.', 'Bhej do. Har teacher **Got it** dabata hai.']],
-    m: [['admin:dash', '#noticesSec', ['You can also open the menu and tap Send a notice.', 'Menu kholkar Send a notice bhi dabaya ja sakta hai.']], ['', ''], ['', '']] },
+    m: [['admin:dash', '#noticesSec'], ['admin:dash+notice', '#nnText'], ['admin:dash+notice', '#nnPost']] },
   { id: 'team', t: ['Add a teacher (create a Staff ID)', 'Teacher jodna (Staff ID banana)'], who: 'lead', k: 'staff id add teacher team new sign up login naya teacher टीचर जोड़ना स्टाफ आईडी',
     s: [['Open **Admin**, then **Settings**, then **Team**.', 'Tap **+ Add staff (create Staff ID)**.', 'Fill in the name and details and save. Give the Staff ID to the teacher.', 'The teacher opens the app, taps **Sign in** and enters the Staff ID once.'],
         ['**Admin** kholo, phir **Settings**, phir **Team**.', '**+ Add staff (create Staff ID)** dabao.', 'Naam aur details bharo aur save karo. Staff ID teacher ko do.', 'Teacher app kholkar **Sign in** dabata hai aur Staff ID ek baar daalta hai.']],
@@ -18642,7 +18663,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     s: [['Open **Admin**, then **Home**, then the **Teachers** list.', 'Tap the teacher\'s name to open the row.', 'Tap **Correct check-in times** (or **Add check-in times** if there are none).', 'If a teacher forgot to check out, tap **Force check-out**.'],
         ['**Admin** kholo, phir **Home**, phir **Teachers** list.', 'Teacher ke naam par dabao.', '**Correct check-in times** dabao (agar kuch nahi hai to **Add check-in times**).', 'Teacher check-out bhool gaya ho to **Force check-out** dabao.']],
     n: ['For a day older than yesterday, the report shows "edited" once.', 'Kal se purane din ke liye report me ek baar "edited" likha aata hai.'],
-    m: [['admin:dash', '#homeSeg'], ['admin:dash:teachers', '#adminTeacherList'], ['', ''], ['', '']] },
+    m: [['admin:dash', '#homeSeg'], ['admin:dash+teachers', '#adminTeacherList'], ['', ''], ['', '']] },
 
   { id: 'mapping', t: ['Teacher Mapping', 'Teacher Mapping'], who: 'lead', k: 'teacher mapping subject teacher class default teacher टीचर मैपिंग',
     s: [['Open **Admin**, then **Settings**, then **Teacher Mapping**.', 'For each class (batch), choose which teacher teaches which subject.', 'Save.'],
@@ -18712,7 +18733,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const lead = isLeadUser();
     let h = `<div class="hc-grid">${HELP_CATS.filter((c) => c.who === 'all').map((c) => hcCard(c, li)).join('')}</div>`;
     if (lead) h += `<div class="hc-sec">${li === 0 ? 'For Admin and Coordinator' : 'Admin aur Coordinator ke liye'}</div><div class="hc-grid">${HELP_CATS.filter((c) => c.who === 'lead').map((c) => hcCard(c, li)).join('')}</div>`;
-    h += `<div class="hc-list" style="margin-top:14px;"><button type="button" class="help-item" id="hcQuick"><span class="ico i-spark" aria-hidden="true"></span><span><b>${li === 0 ? 'Quick tour' : 'Quick tour'}</b><small>${li === 0 ? 'The main things, in one minute' : 'Mukhya baatein, ek minute me'}</small></span></button><button type="button" class="help-item" id="hcWritten"><span class="ico i-file" aria-hidden="true"></span><span><b>Written guide</b><small>${li === 0 ? 'A short guide to each tab' : 'Har tab ki chhoti guide'}</small></span></button></div>`;
+    h += `<div class="hc-list" style="margin-top:14px;">${window.__DEMO ? `<button type="button" class="help-item" id="hcWalk"><span class="ico i-spark" aria-hidden="true"></span><span><b>${li === 0 ? 'Full walkthrough' : 'Poora walkthrough'}</b><small>${li === 0 ? 'All the guides, one after the other' : 'Saare guide, ek ke baad ek'}</small></span></button>` : ''}<button type="button" class="help-item" id="hcQuick"><span class="ico i-spark" aria-hidden="true"></span><span><b>${li === 0 ? 'Quick tour' : 'Quick tour'}</b><small>${li === 0 ? 'The main things, in one minute' : 'Mukhya baatein, ek minute me'}</small></span></button><button type="button" class="help-item" id="hcWritten"><span class="ico i-file" aria-hidden="true"></span><span><b>Written guide</b><small>${li === 0 ? 'A short guide to each tab' : 'Har tab ki chhoti guide'}</small></span></button></div>`;
     return h;
   }
   function helpcRender(keepScroll) {
@@ -18729,42 +18750,91 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     body.innerHTML = h; if (!keepScroll) body.scrollTop = 0;
     const sIn = body.querySelector('#hcSearch'); if (sIn) sIn.addEventListener('input', () => { HC.q = sIn.value; const m = body.querySelector('#hcMain'); if (m) m.innerHTML = HC.q.trim() ? helpListHtml(HC.q) : hcCards(helpLangIdx()); });
   }
-  // a guide is shown on the real screen by the same tour engine as the other tours; the words are the guide's own steps (no second copy)
+  // a guide is shown by the same tour engine as the other tours, on the SAMPLE data (a practice page), so every button is there
+  function helpPreset(name) {
+    try {
+      if (name === 'out' || name === 'in') { if (window.__demoPreset) window.__demoPreset(name); return; }
+      if (name === 'edit') {
+        const e = document.getElementById('tgEdit'); if (e) e.click();
+        // on the sample data only: one small not-yet-sent change, so that the Publish button is there to be shown
+        if (window.__DEMO) setTimeout(() => { if (!document.getElementById('tgPublish') && document.getElementById('tgDayNote')) { const dayBtn = document.querySelector('[data-tg-day]'); if (dayBtn) dayBtn.click(); setTimeout(() => { const nb = document.getElementById('tgDayNote'); if (!nb) return; nb.click(); setTimeout(() => { const t = document.getElementById('dnText'); const sv = document.getElementById('dnSave'); if (t && sv) { t.value = 'Sample note'; t.dispatchEvent(new Event('input', { bubbles: true })); setTimeout(() => sv.click(), 120); } }, 250); }, 200); } }, 350);
+        return;
+      }
+      if (name === 'batch') { const c = document.querySelector('#recentChips > *'); if (c) c.click(); return; }
+      if (name === 'newexam') { const e = document.getElementById('adminNewExamBtn'); const f = document.getElementById('adminExamForm'); if (e && f && f.hidden) e.click(); return; }
+      if (name === 'notice') { const e = Array.from(document.querySelectorAll('#noticesSec button')).find((x) => /new/i.test(x.innerText || '')); if (e && !document.getElementById('nnText')) e.click(); return; }
+      if (name === 'teachers') { const sg = document.querySelectorAll('#homeSeg > *')[1]; if (sg && !sg.classList.contains('active')) sg.click(); }
+    } catch (e) { /* ignore */ }
+  }
   function helpTourGo(spec) {
-    const p = String(spec || '').split(':'); const a = p[0]; if (!a) return null;
+    const parts = String(spec || '').split('+'); const p = parts[0].split(':'); const a = p[0]; const pre = parts.slice(1); if (!a && !pre.length) return null;
     return () => { try {
       if (a === 'today' || a === 'add' || a === 'history' || a === 'schedule') {
         goTab(a)();
         if (a === 'add') { const ch = document.querySelectorAll('#modeChips > *'); const want = ch[p[1] === 'activity' ? 1 : 0]; if (want && !want.classList.contains('active')) want.click(); if (p[2] === 'leave') setTimeout(() => { const lc = Array.from(document.querySelectorAll('#activityChips > *')).find((x) => /leave/i.test(x.innerText || '')); if (lc && !lc.classList.contains('active')) lc.click(); }, 150); }
-        return;
-      }
-      if (a === 'admin') {
+      } else if (a === 'admin') {
         goAdmin(p[1] || 'dash')();
-        if (p[1] === 'dash' && p[2] === 'teachers') setTimeout(() => { const sg = document.querySelectorAll('#homeSeg > *')[1]; if (sg && !sg.classList.contains('active')) sg.click(); }, 150);
         if (p[1] === 'reports' && p[2]) setTimeout(() => { const k = document.querySelector('#adminRepKind [data-rep-kind="' + p[2] + '"]'); if (k) k.click(); }, 150);
         if (p[1] === 'settings' && p[2]) setTimeout(() => { const t = document.querySelector(p.slice(2).join(':') + ' .panel-title'); if (t && t.getAttribute('aria-expanded') !== 'true') t.click(); }, 200);
+      } else if (a === 'menu') {
+        if (!(history.state && history.state.catjeeMenu)) openMenu();
+        if (p[1]) setTimeout(() => { const rows = { settings: '.drow[data-open="settings"]', push: '#pushDrawRow', notice: '#noticeDrawRow' }; const e = document.querySelector(rows[p[1]]); if (e) e.click(); }, 450);
       }
+      pre.forEach((nm, i) => setTimeout(() => helpPreset(nm), 250 + i * 150));
     } catch (e) { /* ignore */ } };
+  }
+  function helpBuildTour(id) {
+    const g = HELP_GUIDES.find((x) => x.id === id); if (!g) return null; const li = helpLangIdx();
+    TOURS['g_' + id] = { title: g.t[li], who: 'none', steps: g.m.map((mm, i) => ({ go: helpTourGo(mm[0]), sel: mm[1] || '', t: (li === 0 ? 'Step ' : 'Kadam ') + (i + 1), x: g.s[li][i].replace(/\*\*/g, ''), ifMissing: mm[2] ? mm[2][li] : '' })) };
+    return 'g_' + id;
   }
   function helpStartTour(key) { try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(() => startTour(key), 450); }
   function helpShowMe(id) {
     const g = HELP_GUIDES.find((x) => x.id === id); if (!g) return; const li = helpLangIdx();
-    TOURS['g_' + id] = { title: g.t[li], who: 'none', steps: g.m.map((mm, i) => ({ go: helpTourGo(mm[0]), sel: mm[1] || '', t: (li === 0 ? 'Step ' : 'Kadam ') + (i + 1), x: g.s[li][i].replace(/\*\*/g, ''), ifMissing: mm[2] ? mm[2][li] : '' })) };
-    helpStartTour('g_' + id);
+    // in the real app the guide is shown on the sample data: the practice page opens, and the tour starts there
+    if (!window.__DEMO) { location.href = location.pathname + '?demo=' + (g.who === 'lead' ? 'admin' : 'teacher') + '&practice=1' + (isLeadUser() ? '&lead=1' : '') + '&tour=' + id + '&hl=' + (li === 0 ? 'en' : 'hi'); return; }
+    const key = helpBuildTour(id); if (key) helpStartTour(key);
+  }
+  // ---------- the walkthrough (sample data only): the guides, one after the other ----------
+  const WALK = { teacher: ['basics', 'checkin', 'addclass', 'combineb', 'otherwork', 'leave', 'schedslot', 'whatsapp', 'reminder'], admin: ['admincheck', 'ttfill', 'ttphoto', 'substitute', 'classtest', 'duty', 'pictures', 'reports', 'team', 'lists'] };
+  function wtTitle(id, li) { if (id === 'basics') return 'Quick tour'; const g = HELP_GUIDES.find((x) => x.id === id); return g ? g.t[li] : id; }
+  function wtCard(html) { let el = document.getElementById('wtCard'); if (!el) { el = document.createElement('div'); el.id = 'wtCard'; el.className = 'wt-card'; document.body.appendChild(el); } el.innerHTML = html; el.hidden = false; return el; }
+  function wtHide() { const el = document.getElementById('wtCard'); if (el) el.hidden = true; }
+  function wtDone(role) {
+    const li = helpLangIdx(); const practice = !!window.__DEMO_PRACTICE;
+    const el = wtCard(`<b>${li === 0 ? 'That is the walkthrough.' : 'Walkthrough poora hua.'}</b><div class="wt-sub">${li === 0 ? 'You can open any guide again from the menu: Help.' : 'Koi bhi guide menu me Help se dobara dekh sakte ho.'}</div><div class="wt-btns">${practice ? '' : `<button type="button" class="btn-secondary" id="wtAccess" style="border-color: var(--line);">Get access</button>`}<button type="button" class="save-btn" id="wtClose" style="margin:0;">${li === 0 ? 'Explore on my own' : 'Khud dekhein'}</button></div>`);
+    el.querySelector('#wtClose').addEventListener('click', wtHide); const ac = el.querySelector('#wtAccess'); if (ac) ac.addEventListener('click', () => { wtHide(); const b = document.querySelector('.db-ga'); if (b) b.click(); });
+  }
+  function helpWalk(role, i) {
+    const list = WALK[role] || WALK.teacher; const n = list.length; const li = helpLangIdx(); i = i || 0; wtHide();
+    if (i >= n) { wtDone(role); return; }
+    const id = list[i]; const key = id === 'basics' ? 'basics' : helpBuildTour(id); if (!key) { helpWalk(role, i + 1); return; }
+    startTour(key); if (!tourState) return;
+    tourState.title = (li === 0 ? 'Part ' : 'Hissa ') + (i + 1) + '/' + n + ' · ' + tourState.title;
+    tourState.onEnd = (how) => {
+      if (how !== 'done') { const el = wtCard(`<b>${li === 0 ? 'Walkthrough stopped.' : 'Walkthrough ruk gaya.'}</b><div class="wt-btns"><button type="button" class="btn-secondary" id="wtClose2" style="border-color: var(--line);">${li === 0 ? 'Close' : 'Band karo'}</button><button type="button" class="save-btn" id="wtAgain" style="margin:0;">${li === 0 ? 'Continue' : 'Aage chalo'}</button></div>`); el.querySelector('#wtClose2').addEventListener('click', wtHide); el.querySelector('#wtAgain').addEventListener('click', () => helpWalk(role, i + 1)); return; }
+      if (i + 1 >= n) { wtDone(role); return; }
+      const el = wtCard(`<b>${li === 0 ? 'Part ' : 'Hissa '}${i + 1}/${n} ${li === 0 ? 'done' : 'poora'}</b><div class="wt-sub">${li === 0 ? 'Next' : 'Agla'}: ${escapeHtml(wtTitle(list[i + 1], li))}</div><div class="wt-btns"><button type="button" class="btn-secondary" id="wtStop" style="border-color: var(--line);">${li === 0 ? 'Stop' : 'Rukein'}</button><button type="button" class="save-btn" id="wtGo" style="margin:0;">${li === 0 ? 'Continue ▶' : 'Aage chalein ▶'}</button></div>`);
+      el.querySelector('#wtStop').addEventListener('click', wtHide); el.querySelector('#wtGo').addEventListener('click', () => helpWalk(role, i + 1));
+    };
   }
   (function bindHelpC() {
     const body = document.getElementById('helpcBody'); if (!body) return;
     body.addEventListener('click', (e) => {
-      const t = e.target.closest('[data-hglang],[data-hccat],[data-guide],[data-hcback],#hcQuick,#hcWritten,#hgShow'); if (!t) return;
+      const t = e.target.closest('[data-hglang],[data-hccat],[data-guide],[data-hcback],#hcQuick,#hcWritten,#hcWalk,#hgShow'); if (!t) return;
       if (t.hasAttribute('data-hglang')) { helpSetLang(Number(t.getAttribute('data-hglang'))); helpcRender(true); return; }
       if (t.hasAttribute('data-hccat')) { HC.v = 'cat'; HC.cat = t.getAttribute('data-hccat'); helpcRender(); return; }
       if (t.hasAttribute('data-guide')) { HC.from = (HC.v === 'cat') ? 'cat' : 'home'; HC.v = 'guide'; HC.id = t.getAttribute('data-guide'); helpcRender(); return; }
       if (t.hasAttribute('data-hcback')) { const to = t.getAttribute('data-hcback'); HC.v = to === 'cat' ? 'cat' : 'home'; helpcRender(); return; }
       if (t.id === 'hcQuick') { helpStartTour('basics'); return; }
+      if (t.id === 'hcWalk') { try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(() => helpWalk(window.__DEMO_ROLE === 'admin' ? 'admin' : 'teacher', 0), 450); return; }
       if (t.id === 'hcWritten') { openMenuPanel('help'); return; }
       if (t.id === 'hgShow') helpShowMe(HC.id);
     });
   })();
+  if (window.__DEMO && window.__DEMO_TOUR) setTimeout(() => helpShowMe(window.__DEMO_TOUR), 2600);
+  if (window.__DEMO && window.__DEMO_WALK) setTimeout(() => helpWalk(window.__DEMO_ROLE === 'admin' ? 'admin' : 'teacher', 0), 2600);
+  (function bindPractice() { const r = document.getElementById('menuPracticeRow'); if (!r) return; if (window.__DEMO) { r.style.display = 'none'; return; } r.addEventListener('click', () => { location.href = location.pathname + '?demo=' + (isLeadUser() ? 'admin&lead=1' : 'teacher') + '&practice=1'; }); })();
   function openHelp() { const st = history.state && history.state.catjeeMenu; if (st === 'helpc') return; if (!st) { openMenu(); setTimeout(() => openMenuPanel('helpc'), 260); } else openMenuPanel('helpc'); }
   function openHelpSheetOld() {
     const lead = isLeadUser();
