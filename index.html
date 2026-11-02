@@ -3981,7 +3981,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.14 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.16 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10205,7 +10205,8 @@ Rules:
       m.addedNodes.forEach((n) => { if (n.nodeType === 1) (n.matches(SD_SEL) ? [n] : Array.from(n.querySelectorAll(SD_SEL))).forEach((b) => fresh.push(b)); });
     });
     fresh.forEach((b) => {
-      if (b.dataset.sdReady) { sdSet(b, true); return; }
+  const o0 = gone.get(b.id); if (o0 && o0.dataset && o0.dataset.sdReady && !b.dataset.sdReady) b.dataset.sdReady = '1';
+  if (b.dataset.sdReady) { sdSet(b, true); return; }
       const old = gone.get(b.id); const was = old ? !!sd.dirty.get(old) : false; const recent = !!(old && sd.last && Date.now() - sd.last.t < 700);
       sdSet(b, was || recent);
     });
@@ -14523,7 +14524,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     renderSvForm();
   });
   document.getElementById('addClassLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'class'; prefillClassFromLast(); switchTab('add'); });
-  document.getElementById('addActivityLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast(); if (coordView() && !state.editingId) { state.activityForm = { activityType: 'Coordination', note: '', coordTags: [] }; renderForm(); document.getElementById('activityNoteInput').value = ''; } switchTab('add'); });
+  document.getElementById('addActivityLink').addEventListener('click', () => { state.editingId = null; state.editingSourceTab = null; state.addTargetDate = null; state.entryMode = 'activity'; prefillActivityFromLast(); if (coordView() && !state.editingId) { state.activityForm = { activityType: 'Coordination', note: '', coordTags: [] }; renderForm(); document.getElementById('activityNoteInput').value = ''; } switchTab('add');
+    try { const af = state.activityForm; if (af && String(af.note || '').trim() && !/leave/i.test(af.activityType || '')) sdReady('saveClassBtn'); } catch (e) { /* ignore */ } });
   setInterval(() => { if (state.tab === 'today') { renderTodayList(); renderMyDuties(); } }, 30000);
   document.getElementById('downloadReportBtn').addEventListener('click', () => {
     downloadReportForDate(todayStr(), document.getElementById('reportMsg'));
@@ -17888,8 +17890,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   let reminderFired24h = false;
   const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   setInterval(() => { pruneExpiredScheduleSlots(); }, 60000);
-  setInterval(() => {
-    if (state.tab === 'today') renderStatus();
+  const remMinsText = (m) => { const n = Math.max(1, Math.ceil(m)); return n + (n === 1 ? ' minute' : ' minutes'); };
+  const appTick = () => {
+  if (state.tab === 'today') renderStatus();
     if (state.tab === 'admin') renderAdmin();
 
     const remindersOn = localStorage.getItem(REMINDER_PREF_KEY) === '1';
@@ -17910,9 +17913,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const [h, m] = String(sl.start).split(':').map(Number);
         const mins = (new Date(now2.getFullYear(), now2.getMonth(), now2.getDate(), h, m).getTime() - now2.getTime()) / 60000;
         const key = 'duty_' + today2 + '_' + exam.id + '_' + sl.start + '_' + sl.room;
-        if (mins <= lead && mins > lead - 1 && !state.firedScheduleReminders[key]) {
+        if (mins <= lead && mins > 0 && !state.firedScheduleReminders[key]) {
           state.firedScheduleReminders[key] = true;
-          showReminderAlert(`Invigilation duty in ${sl.room} at ${formatTimeStr(sl.start)} — in ${lead} minutes.`);
+          showReminderAlert(`Invigilation duty in ${sl.room} at ${formatTimeStr(sl.start)} — in ${remMinsText(mins)}.`);
         }
       }));
     }
@@ -17925,13 +17928,16 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const slotDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
         const minsUntil = (slotDate.getTime() - now.getTime()) / 60000;
         const fireKey = today + '_' + slot.id;
-        if (minsUntil <= lead && minsUntil > lead - 1 && !state.firedScheduleReminders[fireKey]) {
+        if (minsUntil <= lead && minsUntil > 0 && !state.firedScheduleReminders[fireKey]) {
           state.firedScheduleReminders[fireKey] = true;
-          showReminderAlert(`${slot.label} starts at ${formatTimeStr(slot.time)} — in ${lead} minutes.`);
+          showReminderAlert(`${slot.label} starts at ${formatTimeStr(slot.time)} — in ${remMinsText(minsUntil)}.`);
         }
       });
     }
-  }, 1000);
+  };
+  setInterval(appTick, 1000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { setTimeout(appTick, 200); setTimeout(appTick, 1500); } });
+  window.addEventListener('pageshow', () => setTimeout(appTick, 200));
 
   // ---------- admin date subscription ----------
 
