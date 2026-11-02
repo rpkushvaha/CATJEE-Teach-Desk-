@@ -2718,6 +2718,23 @@
   .set-grp-lbl[hidden] { display: none; }
   .hc-practice { display: flex; flex-direction: row; align-items: center; gap: 12px; min-height: 0; width: 100%; margin-bottom: 12px; border-left: 4px solid var(--red); text-align: left; }
   .hc-practice b { display: block; }
+  /* a clock inside every time box (the phone shows none), and the app's own time sheet */
+  input[type="time"]::-webkit-calendar-picker-indicator { display: none !important; }
+  input[type="time"] { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C81E32' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><polyline points='12 7 12 12 15 14'/></svg>") !important; background-repeat: no-repeat !important; background-position: right 12px center !important; background-size: 17px 17px !important; padding-right: 36px !important; }
+  input[type="time"].tp-empty[data-ph] { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C81E32' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><polyline points='12 7 12 12 15 14'/></svg>"), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='40'><text x='2' y='26' font-family='Arial,sans-serif' font-size='15' fill='%23999'>Not yet</text></svg>") !important; background-repeat: no-repeat, no-repeat !important; background-position: right 12px center, left 12px center !important; background-size: 17px 17px, auto 100% !important; }
+  .xs-tw input[type="time"], input[type="time"][data-pe-s], input[type="time"][data-pe-e], input[type="time"][data-inv-start], input[type="time"][data-inv-end] { background-image: none !important; padding-right: 8px !important; }
+  .tp-ov { position: fixed; inset: 0; z-index: 100005; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
+  .tp-sheet { width: 100%; max-width: 480px; max-height: 94vh; overflow-y: auto; background: var(--card); color: var(--ink); border-radius: 20px 20px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -8px 28px rgba(0,0,0,.3); box-sizing: border-box; }
+  .tp-title { text-align: center; font-size: 15px; font-weight: 600; color: var(--muted-2); }
+  .tp-big { text-align: center; font-size: 34px; font-weight: 700; margin: 6px 0 12px; }
+  .tp-big small { font-size: 16px; font-weight: 600; color: var(--muted-2); margin-left: 4px; }
+  .tp-cols { display: grid; grid-template-columns: 1fr 1fr .8fr; gap: 8px; }
+  .tp-col { height: 200px; overflow-y: auto; background: rgba(127,127,127,.12); border-radius: 14px; padding: 4px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .tp-col button { display: block; width: 100%; height: 44px; border: 1.5px solid transparent; background: transparent; font: inherit; font-size: 17px; font-weight: 500; color: var(--muted-2); border-radius: 10px; cursor: pointer; }
+  .tp-col button.sel { background: var(--card); border-color: var(--accent); color: var(--ink); font-weight: 700; }
+  .tp-ap { display: flex; flex-direction: column; justify-content: center; gap: 8px; overflow: visible; height: auto; min-height: 200px; }
+  .tp-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .tp-btns button { flex: 1 1 28%; min-width: 0; margin: 0; padding: 12px 8px; width: auto; }
 </style>
 </head>
 <body>
@@ -3964,7 +3981,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.13 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.14 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -15205,7 +15222,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
             </div>
             <div style="flex:1;">
               <label style="font-size:13px; font-weight:600; color:var(--muted-2);">Check-out${isOvernight ? ' <span style="color:var(--gold);">(next day)</span>' : ''}</label>
-              <input class="text-input" type="time" data-session-field="out" data-session-id="${s.id}" value="${outVal}" style="margin-top:4px; padding:9px 10px;">
+              <input class="text-input${outVal ? '' : ' tp-empty'}" data-ph="Not yet" type="time" data-session-field="out" data-session-id="${s.id}" value="${outVal}" style="margin-top:4px; padding:9px 10px;">
             </div>
           </div>
           ${s.out != null ? `
@@ -18932,8 +18949,50 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   // ---------- Time boxes: tap anywhere in the box to open the clock ----------
   document.addEventListener('click', (e) => {
     const t = e.target; if (!t || t.tagName !== 'INPUT' || !/^(time|date)$/.test(t.type)) return;
+    if (t.type === 'time') { e.preventDefault(); e.stopPropagation(); tpOpen(t); return; }
     try { if (typeof t.showPicker === 'function') t.showPicker(); } catch (err) { /* some phones open it themselves */ }
   });
+  // ---------- The app's own time picker: the phone's own box can be bigger than the screen on a phone with a large display size ----------
+  let tpState = null;
+  const tp2 = (n) => String(n).padStart(2, '0');
+  function tpFire(inp) { inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); }
+  function tpClose() { const o = document.getElementById('tpOverlay'); if (o) o.remove(); tpState = null; }
+  function tpDraw() {
+    if (!tpState) return; const o = document.getElementById('tpOverlay'); if (!o) return;
+    o.querySelector('#tpBig').innerHTML = `${tpState.h}:${tp2(tpState.m)} <small>${tpState.pm ? 'PM' : 'AM'}</small>`;
+    o.querySelectorAll('[data-tph]').forEach((b) => b.classList.toggle('sel', Number(b.getAttribute('data-tph')) === tpState.h));
+    o.querySelectorAll('[data-tpm]').forEach((b) => b.classList.toggle('sel', Number(b.getAttribute('data-tpm')) === tpState.m));
+    o.querySelectorAll('[data-tpa]').forEach((b) => b.classList.toggle('sel', (b.getAttribute('data-tpa') === '1') === tpState.pm));
+  }
+  function tpOpen(inp) {
+    if (!inp || tpState || inp.disabled) return;
+    try { inp.blur(); } catch (e) { /* ignore */ }
+    const mm = /^(\d{1,2}):(\d{2})/.exec(String(inp.value || '')); let h24; let m;
+    if (mm) { h24 = Number(mm[1]) % 24; m = Number(mm[2]) % 60; } else { const d = new Date(); h24 = d.getHours(); m = d.getMinutes(); }
+    tpState = { inp, h: (h24 % 12) || 12, m, pm: h24 >= 12 };
+    const lab = inp.parentElement && inp.parentElement.querySelector('label, .sv-tlbl, .micro-label, .xs-lbl'); let title = lab ? String(lab.textContent || '').replace(/\s+/g, ' ').trim() : ''; if (!title || title.length > 32) title = 'Set time';
+    const hours = Array.from({ length: 12 }, (_, i) => `<button type="button" data-tph="${i + 1}">${i + 1}</button>`).join('');
+    const mins = Array.from({ length: 60 }, (_, i) => `<button type="button" data-tpm="${i}">${tp2(i)}</button>`).join('');
+    const o = document.createElement('div'); o.id = 'tpOverlay'; o.className = 'tp-ov';
+    o.innerHTML = `<div class="tp-sheet" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="tp-title">${escapeHtml(title)}</div><div class="tp-big" id="tpBig"></div><div class="tp-cols"><div class="tp-col" id="tpH">${hours}</div><div class="tp-col" id="tpM">${mins}</div><div class="tp-col tp-ap"><button type="button" data-tpa="0">AM</button><button type="button" data-tpa="1">PM</button></div></div><div class="tp-btns"><button type="button" class="btn-secondary" id="tpCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="btn-secondary" id="tpClear" style="border-color: var(--line);">Clear</button><button type="button" class="save-btn" id="tpSet">Set</button></div></div>`;
+    o.addEventListener('click', (e) => {
+      const t = e.target; if (t === o) { tpClose(); return; } const b = t.closest && t.closest('button'); if (!b || !tpState) return;
+      if (b.hasAttribute('data-tph')) { tpState.h = Number(b.getAttribute('data-tph')); tpDraw(); return; }
+      if (b.hasAttribute('data-tpm')) { tpState.m = Number(b.getAttribute('data-tpm')); tpDraw(); return; }
+      if (b.hasAttribute('data-tpa')) { tpState.pm = b.getAttribute('data-tpa') === '1'; tpDraw(); return; }
+      if (b.id === 'tpCancel') { tpClose(); return; }
+      if (b.id === 'tpClear') { const i = tpState.inp; i.value = ''; tpClose(); tpFire(i); return; }
+      if (b.id === 'tpSet') { const i = tpState.inp; const h24 = (tpState.h % 12) + (tpState.pm ? 12 : 0); i.value = tp2(h24) + ':' + tp2(tpState.m); tpClose(); tpFire(i); }
+    });
+    document.body.appendChild(o); tpDraw();
+    ['tpH', 'tpM'].forEach((id) => { const col = o.querySelector('#' + id); const sel = col && col.querySelector('.sel'); if (col && sel) col.scrollTop = Math.max(0, sel.offsetTop - col.clientHeight / 2 + sel.offsetHeight / 2); });
+  }
+  document.addEventListener('keydown', (e) => { const t = e.target; if (t && t.tagName === 'INPUT' && t.type === 'time' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tpOpen(t); } });
+  // a time box keeps the phone's own box away, and an empty running check-out says "Not yet"
+  const tpMark = (root) => { try { (root.querySelectorAll ? root.querySelectorAll('input[type="time"]') : []).forEach((i) => { if (!i.readOnly) i.readOnly = true; }); if (root.matches && root.matches('input[type="time"]')) root.readOnly = true; } catch (e) { /* ignore */ } };
+  tpMark(document);
+  new MutationObserver((list) => { list.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType === 1) tpMark(n); })); }).observe(document.documentElement, { childList: true, subtree: true });
+  ['input', 'change'].forEach((ev) => document.addEventListener(ev, (e) => { const t = e.target; if (t && t.matches && t.matches('input[type="time"][data-ph]')) t.classList.toggle('tp-empty', !t.value); }, true));
   // ---------- Text size and "Update app now" (Menu → Settings) ----------
   (function textSizeAndUpdate() {
     const KEY = 'ctd_text_size';
