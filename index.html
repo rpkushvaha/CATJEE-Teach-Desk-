@@ -2743,6 +2743,9 @@
   .tp-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
   .tp-btns button { flex: 1 1 28%; min-width: 0; margin: 0; padding: 12px 8px; width: auto; }
   :root { --accent: var(--gold); }
+  .tp-now { display: block; margin: -4px auto 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 4px 10px; }
+  .tp-btns { position: sticky; bottom: 0; background: var(--card); padding-top: 8px; }
+  @media (max-height: 600px) { .tp-wheel { height: 176px; padding: 66px 0; } .tp-band { top: 66px; } .tp-hint { display: none; } .tp-big { font-size: 28px; margin: 2px 0 6px; } .tp-ap { min-height: 176px; } }
 </style>
 </head>
 <body>
@@ -3996,7 +3999,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.21 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.22 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -19054,20 +19057,23 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const hours = Array.from({ length: 12 }, (_, i) => `<button type="button" data-tph="${i + 1}">${i + 1}</button>`).join('');
     const mins = Array.from({ length: 60 }, (_, i) => `<button type="button" data-tpm="${i}">${tp2(i)}</button>`).join('');
     const o = document.createElement('div'); o.id = 'tpOverlay'; o.className = 'tp-ov';
-    o.innerHTML = `<div class="tp-sheet" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="tp-title">${escapeHtml(title)}</div><div class="tp-big" id="tpBig"></div><div class="tp-heads"><span>Hour</span><span>Minute</span><span>AM / PM</span></div><div class="tp-cols"><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpH">${hours}</div></div><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpM">${mins}</div></div><div class="tp-ap"><button type="button" data-tpa="0">AM</button><button type="button" data-tpa="1">PM</button></div></div><div class="tp-hint">Scroll the hour and the minute. The number in the box is the time.</div><div class="tp-btns"><button type="button" class="btn-secondary" id="tpCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="btn-secondary" id="tpClear" style="border-color: var(--line);">Clear</button><button type="button" class="save-btn" id="tpSet">Set</button></div></div>`;
+    o.innerHTML = `<div class="tp-sheet" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="tp-title">${escapeHtml(title)}</div><div class="tp-big" id="tpBig"></div><button type="button" class="tp-now" id="tpNow">Set to now</button><div class="tp-heads"><span>Hour</span><span>Minute</span><span>AM / PM</span></div><div class="tp-cols"><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpH">${hours}</div></div><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpM">${mins}</div></div><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpA"><button type="button" data-tpa="0">AM</button><button type="button" data-tpa="1">PM</button></div></div></div><div class="tp-hint">Scroll the hour and the minute. The number in the box is the time.</div><div class="tp-btns"><button type="button" class="btn-secondary" id="tpCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="btn-secondary" id="tpClear" style="border-color: var(--line);">Clear</button><button type="button" class="save-btn" id="tpSet">Set</button></div></div>`;
     const onWheel = (col, attr) => { const i = Math.max(0, Math.min(col.children.length - 1, Math.round(col.scrollTop / TP_ROW))); const v = Number(col.children[i].getAttribute(attr)); if (!tpState) return; if (attr === 'data-tph' ? v !== tpState.h : v !== tpState.m) { if (attr === 'data-tph') tpState.h = v; else tpState.m = v; tpDraw(); } };
     ['tpH', 'tpM'].forEach((id) => { const col = o.querySelector('#' + id); const attr = id === 'tpH' ? 'data-tph' : 'data-tpm'; col.addEventListener('scroll', () => onWheel(col, attr)); });
+    const colA = o.querySelector('#tpA'); colA.addEventListener('scroll', () => { const pm = Math.round(colA.scrollTop / TP_ROW) >= 1; if (tpState && pm !== tpState.pm) { tpState.pm = pm; tpDraw(); } });
+    const goTo = () => { const a = o.querySelector('#tpH'); const b2 = o.querySelector('#tpM'); const c3 = o.querySelector('#tpA'); const tryTo = (el, top) => { try { el.scrollTo({ top, behavior: 'smooth' }); } catch (e2) { el.scrollTop = top; } }; tryTo(a, (tpState.h - 1) * TP_ROW); tryTo(b2, tpState.m * TP_ROW); tryTo(c3, (tpState.pm ? 1 : 0) * TP_ROW); };
     o.addEventListener('click', (e) => {
       const t = e.target; if (t === o) { tpClose(); return; } const b = t.closest && t.closest('button'); if (!b || !tpState) return;
       if (b.hasAttribute('data-tph')) { tpState.h = Number(b.getAttribute('data-tph')); tpDraw(); const c1 = o.querySelector('#tpH'); try { c1.scrollTo({ top: (tpState.h - 1) * TP_ROW, behavior: 'smooth' }); } catch (e2) { c1.scrollTop = (tpState.h - 1) * TP_ROW; } return; }
       if (b.hasAttribute('data-tpm')) { tpState.m = Number(b.getAttribute('data-tpm')); tpDraw(); const c2 = o.querySelector('#tpM'); try { c2.scrollTo({ top: tpState.m * TP_ROW, behavior: 'smooth' }); } catch (e2) { c2.scrollTop = tpState.m * TP_ROW; } return; }
-      if (b.hasAttribute('data-tpa')) { tpState.pm = b.getAttribute('data-tpa') === '1'; tpDraw(); return; }
+      if (b.hasAttribute('data-tpa')) { tpState.pm = b.getAttribute('data-tpa') === '1'; tpDraw(); const c4 = o.querySelector('#tpA'); try { c4.scrollTo({ top: (tpState.pm ? 1 : 0) * TP_ROW, behavior: 'smooth' }); } catch (e2) { c4.scrollTop = (tpState.pm ? 1 : 0) * TP_ROW; } return; }
+      if (b.id === 'tpNow') { const d0 = new Date(); const hh = d0.getHours(); tpState.h = (hh % 12) || 12; tpState.m = d0.getMinutes(); tpState.pm = hh >= 12; tpDraw(); goTo(); return; }
       if (b.id === 'tpCancel') { tpClose(); return; }
       if (b.id === 'tpClear') { const i = tpState.inp; i.value = ''; tpClose(); tpFire(i); return; }
       if (b.id === 'tpSet') { const i = tpState.inp; const h24 = (tpState.h % 12) + (tpState.pm ? 12 : 0); i.value = tp2(h24) + ':' + tp2(tpState.m); tpClose(); tpFire(i); }
     });
     document.body.appendChild(o); tpDraw();
-    o.querySelector('#tpH').scrollTop = (tpState.h - 1) * TP_ROW; o.querySelector('#tpM').scrollTop = tpState.m * TP_ROW;
+    o.querySelector('#tpH').scrollTop = (tpState.h - 1) * TP_ROW; o.querySelector('#tpM').scrollTop = tpState.m * TP_ROW; o.querySelector('#tpA').scrollTop = (tpState.pm ? 1 : 0) * TP_ROW;
   }
   document.addEventListener('keydown', (e) => { const t = e.target; if (t && t.tagName === 'INPUT' && t.type === 'time' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tpOpen(t); } });
   // a time box keeps the phone's own box away, and an empty running check-out says "Not yet"
