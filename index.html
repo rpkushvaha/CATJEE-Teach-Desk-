@@ -3885,6 +3885,13 @@
   <div class="dfield-label" style="margin-bottom:10px;">Check-in sounds</div>
   <div class="toggle-row" id="ciSoundRow" style="cursor:pointer; border:none; padding:0; background:none;"><span class="toggle-label">Ting sound<br><small class="dnote">A soft ting-ting when you check in and check out</small></span><span class="switch" id="ciSoundSwitch"><span class="knob"></span></span></div>
   <div class="toggle-row" id="ciSpeakRow" style="cursor:pointer; border:none; padding:0; background:none; margin-top:16px;"><span class="toggle-label">Spoken greeting<br><small class="dnote">The phone says Good morning and Thank you</small></span><span class="switch" id="ciSpeakSwitch"><span class="knob"></span></span></div>
+  <div id="ciVoiceBox" style="margin-top:16px;">
+    <div class="dfield-label" style="margin-bottom:8px;">Greeting voice</div>
+    <select class="text-input" id="ciVoiceSel" aria-label="Greeting voice"></select>
+    <div class="sal-preview" id="ciVoiceNote" style="margin-top:6px;"></div>
+    <div class="chips" id="ciRateChips" style="margin-top:8px;"><button type="button" class="chip" data-ci-rate="0.85">Slow</button><button type="button" class="chip" data-ci-rate="0.95">Normal</button></div>
+    <button type="button" class="btn-secondary" id="ciVoiceTest" style="border-color: var(--line); width:100%; margin-top:10px;">▶ Test the voice</button>
+  </div>
   </div>
   <div class="dgroup" id="sPushWrap"><button class="drow" id="pushDrawRow" data-open="push" style="--i:0" hidden><span class="dtile"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span><span class="dlabel">Phone notifications<small id="pushDrawState">Checking…</small></span><svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg></button></div><div class="dgroup" id="sPwdWrap"><button class="drow" data-open="password" style="--i:0">
             <span class="dtile"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
@@ -3989,7 +3996,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.20 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.21 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -15100,7 +15107,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   // ---------- Check-in sounds: a soft ting-ting, and the phone says Good morning / Thank you ----------
   const CI_SOUND_KEY = 'ctd_ci_sound', CI_SPEAK_KEY = 'ctd_ci_speak', CI_GREET_KEY = 'ctd_ci_greeted';
   const ciOn = (k) => { try { return localStorage.getItem(k) !== '0'; } catch (e) { return true; } };
-  function ciRenderSwitches() { [['ciSoundSwitch', CI_SOUND_KEY], ['ciSpeakSwitch', CI_SPEAK_KEY]].forEach(([id, k]) => { const sw = document.getElementById(id); if (sw) sw.classList.toggle('on', ciOn(k)); }); }
+  function ciRenderSwitches() { [['ciSoundSwitch', CI_SOUND_KEY], ['ciSpeakSwitch', CI_SPEAK_KEY]].forEach(([id, k]) => { const sw = document.getElementById(id); if (sw) sw.classList.toggle('on', ciOn(k)); }); try { ciVoiceRender(); } catch (e) { /* ignore */ } }
   const ciPart = (d) => { const h = (d || new Date()).getHours(); return h >= 5 && h < 12 ? 'morning' : (h >= 12 && h < 17 ? 'afternoon' : 'evening'); };
   function ciTing(checkingIn) {
     if (!ciOn(CI_SOUND_KEY)) return;
@@ -15111,28 +15118,55 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     } catch (e) { /* no sound on this phone */ }
   }
   let ciVoiceCache = null; let ciWarmAt = 0;
-  function ciPickVoice() { try { const vs = speechSynthesis.getVoices ? speechSynthesis.getVoices() : []; return vs.find((x) => /en[-_]IN/i.test(x.lang)) || vs.find((x) => /^en/i.test(x.lang)) || null; } catch (e) { return null; } }
+  const CI_VOICE_KEY = 'ctd_ci_voice', CI_RATE_KEY = 'ctd_ci_rate';
+  const ciVKey = (v) => v.voiceURI || (v.name + '|' + v.lang);
+  const ciVoices = () => { try { return speechSynthesis.getVoices ? Array.from(speechSynthesis.getVoices()) : []; } catch (e) { return []; } };
+  const ciRank = (v) => (/^en[-_]IN/i.test(v.lang) ? 0 : (/^hi/i.test(v.lang) ? 1 : (/^en/i.test(v.lang) ? 2 : 3)));
+  function ciVoiceList() { return ciVoices().filter((v) => /^(en|hi)/i.test(v.lang)).sort((x, y) => ciRank(x) - ciRank(y) || String(x.name).localeCompare(String(y.name))); }
+  const ciLangName = (l) => { const c = String(l || '').replace('_', '-').toLowerCase(); return ({ 'en-in': 'English (India)', 'hi-in': 'Hindi (India)', 'en-us': 'English (US)', 'en-gb': 'English (UK)', 'en-au': 'English (Australia)' })[c] || String(l || ''); };
+  function ciPickVoice() {
+    const list = ciVoices(); let k = ''; try { k = localStorage.getItem(CI_VOICE_KEY) || ''; } catch (e) { k = ''; }
+    if (k) { const hit = list.find((v) => ciVKey(v) === k); if (hit) return hit; }
+    return list.find((v) => /^en[-_]IN/i.test(v.lang)) || list.find((v) => /^hi/i.test(v.lang)) || list.find((v) => /^en/i.test(v.lang)) || null;
+  }
+  const ciRate = () => { try { const r = Number(localStorage.getItem(CI_RATE_KEY)); return r >= 0.6 && r <= 1.3 ? r : 0.95; } catch (e) { return 0.95; } };
+  function ciVoiceRender() {
+    const sel = document.getElementById('ciVoiceSel'); if (!sel) return;
+    const list = ciVoiceList(); let k = ''; try { k = localStorage.getItem(CI_VOICE_KEY) || ''; } catch (e) { k = ''; }
+    sel.innerHTML = '<option value="">Automatic (Indian voice first)</option>' + list.map((v) => `<option value="${escapeHtml(ciVKey(v))}">${escapeHtml(ciLangName(v.lang))} · ${escapeHtml(v.name)}</option>`).join('');
+    sel.value = list.some((v) => ciVKey(v) === k) ? k : '';
+    const note = document.getElementById('ciVoiceNote'); const auto = ciPickVoice();
+    if (note) note.textContent = list.length ? `${list.length} voice${list.length === 1 ? '' : 's'} on this phone. ${k ? '' : 'Automatic uses: ' + (auto ? ciLangName(auto.lang) + ' · ' + auto.name : 'the phone\'s own voice') + '. '}For a better voice: Phone Settings → Text-to-speech → Google → install English (India).` : 'This phone has not shown its voices yet. Open Phone Settings → Text-to-speech, choose Google, install the English (India) voice, then come back.';
+    document.querySelectorAll('#ciRateChips [data-ci-rate]').forEach((b) => b.classList.toggle('active', Math.abs(Number(b.getAttribute('data-ci-rate')) - ciRate()) < 0.02));
+  }
+  function ciUtt(text) { const u = new SpeechSynthesisUtterance(text); const v = ciVoiceCache || ciPickVoice(); u.lang = (v && v.lang) || 'en-IN'; u.rate = ciRate(); u.volume = 0.85; if (v) { u.voice = v; ciVoiceCache = v; } return u; }
+  function ciSpeakNow(text) { try { if (!('speechSynthesis' in window)) return; if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel(); speechSynthesis.speak(ciUtt(text)); } catch (e) { /* ignore */ } }
+  function ciSample() { const who = salutedName(state.user && state.user.name, state.user && state.user.salutation); return 'Good ' + ciPart() + (who ? ', ' + who : '') + '.'; }
+  (function bindVoiceBox() {
+    const sel = document.getElementById('ciVoiceSel'); if (sel) sel.addEventListener('change', () => { try { if (sel.value) localStorage.setItem(CI_VOICE_KEY, sel.value); else localStorage.removeItem(CI_VOICE_KEY); } catch (e) { /* ignore */ } ciVoiceCache = null; ciVoiceCache = ciPickVoice(); ciVoiceRender(); ciSpeakNow(ciSample()); });
+    const tb = document.getElementById('ciVoiceTest'); if (tb) tb.addEventListener('click', () => ciSpeakNow(ciSample()));
+    document.querySelectorAll('#ciRateChips [data-ci-rate]').forEach((b) => b.addEventListener('click', () => { try { localStorage.setItem(CI_RATE_KEY, b.getAttribute('data-ci-rate')); } catch (e) { /* ignore */ } ciVoiceRender(); ciSpeakNow(ciSample()); }));
+  })();
   // the phone's voice engine can take a second to start the first time: it is woken up, silently, on the first touch and when the app comes back
   function ciWarm() {
     if (!ciOn(CI_SPEAK_KEY)) return;
     try {
       if (!('speechSynthesis' in window)) return; const now = Date.now(); if (now - ciWarmAt < 8 * 60000) return; ciWarmAt = now;
-      ciVoiceCache = ciPickVoice(); const u = new SpeechSynthesisUtterance('.'); u.volume = 0; u.rate = 2; u.lang = 'en-IN'; if (ciVoiceCache) u.voice = ciVoiceCache; speechSynthesis.speak(u);
+      ciVoiceCache = ciPickVoice(); const u = new SpeechSynthesisUtterance('.'); u.volume = 0; u.rate = 2; u.lang = (ciVoiceCache && ciVoiceCache.lang) || 'en-IN'; if (ciVoiceCache) u.voice = ciVoiceCache; speechSynthesis.speak(u);
     } catch (e) { /* ignore */ }
   }
   function ciSay(text) {
     if (!ciOn(CI_SPEAK_KEY)) return;
     try {
       if (!('speechSynthesis' in window)) return;
-      const u = new SpeechSynthesisUtterance(text); u.lang = 'en-IN'; u.rate = 0.95; u.volume = 0.85;
-      const v = ciVoiceCache || ciPickVoice(); if (v) { u.voice = v; ciVoiceCache = v; }
+      const u = ciUtt(text);
       if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
       ciWarmAt = Date.now(); setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) { /* ignore */ } }, 180);
     } catch (e) { /* no voice on this phone */ }
   }
   ['pointerdown', 'keydown'].forEach((ev) => document.addEventListener(ev, () => ciWarm(), { capture: true, once: true }));
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(ciWarm, 600); });
-  try { if ('speechSynthesis' in window && speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', () => { ciVoiceCache = ciPickVoice(); }); } catch (e) { /* ignore */ }
+  try { if ('speechSynthesis' in window && speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', () => { ciVoiceCache = null; ciVoiceCache = ciPickVoice(); ciVoiceRender(); }); } catch (e) { /* ignore */ }
   function ciAfterCheck(checkingIn) {
     ciTing(checkingIn);
     const who = salutedName(state.user && state.user.name, state.user && state.user.salutation); const nm = who ? ', ' + who : ''; const part = ciPart();
