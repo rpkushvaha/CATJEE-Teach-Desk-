@@ -309,7 +309,7 @@
     document.body.insertBefore(bar, document.body.firstChild);
     var acc = document.createElement('div'); acc.id = 'demoAccess'; acc.hidden = true;
     acc.innerHTML = '<div class="dw-logo" style="font-size:22px">Want to use it for real?</div><div class="dw-sub">To sign in you need a Staff ID.</div>' +
-      '<div class="dw-card"><b>How to get access</b><br>1. Ask Ravi Kushvaha Sir for a Staff ID<br>2. Open the app link and tap Sign in<br>3. Enter your Staff ID once</div>' +
+      '<div class="dw-card"><b>How to get access</b><br>1. Ask Ravi Kushvaha Sir for a Staff ID<br>2. Open the app link and tap Create Account<br>3. Enter your Staff ID, name, email and a password</div>' +
       (CONTACT_WA ? '<a class="dw-btn red" target="_blank" rel="noopener" href="https://wa.me/' + CONTACT_WA + '?text=' + encodeURIComponent('Hello Sir, I saw the CATJEE Teach Desk demo. Please share a Staff ID for me.') + '">Message Ravi Kushvaha Sir on WhatsApp</a>' : '') +
       '<button class="dw-btn" type="button" id="demoBack">Back to the demo</button>';
     document.body.appendChild(acc);
@@ -2714,7 +2714,7 @@
   .sacc-b > * { margin-top: 12px; }
   .sacc-b .dcard { border: 0; box-shadow: none; padding: 0; background: transparent; }
   .sacc-b .dcard + .dcard, .sacc-b .dgroup + .dcard { padding-top: 12px; border-top: 1px solid var(--line); }
-  .set-grp-lbl { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2); margin: 18px 2px 8px; }
+    .set-grp-lbl { grid-column: 1 / -1; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2); margin: 18px 2px 8px; }
   .set-grp-lbl[hidden] { display: none; }
   .hc-practice { display: flex; flex-direction: row; align-items: center; gap: 12px; min-height: 0; width: 100%; margin-bottom: 12px; border-left: 4px solid var(--red); text-align: left; }
   .hc-practice b { display: block; }
@@ -2728,11 +2728,18 @@
   .tp-title { text-align: center; font-size: 15px; font-weight: 600; color: var(--muted-2); }
   .tp-big { text-align: center; font-size: 34px; font-weight: 700; margin: 6px 0 12px; }
   .tp-big small { font-size: 16px; font-weight: 600; color: var(--muted-2); margin-left: 4px; }
+  .tp-heads { display: grid; grid-template-columns: 1fr 1fr .8fr; gap: 8px; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 4px; }
   .tp-cols { display: grid; grid-template-columns: 1fr 1fr .8fr; gap: 8px; }
-  .tp-col { height: 200px; overflow-y: auto; background: rgba(127,127,127,.12); border-radius: 14px; padding: 4px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-  .tp-col button { display: block; width: 100%; height: 44px; border: 1.5px solid transparent; background: transparent; font: inherit; font-size: 17px; font-weight: 500; color: var(--muted-2); border-radius: 10px; cursor: pointer; }
-  .tp-col button.sel { background: var(--card); border-color: var(--accent); color: var(--ink); font-weight: 700; }
-  .tp-ap { display: flex; flex-direction: column; justify-content: center; gap: 8px; overflow: visible; height: auto; min-height: 200px; }
+  .tp-ww { position: relative; background: rgba(127,127,127,.12); border-radius: 14px; overflow: hidden; }
+  .tp-wheel { height: 220px; overflow-y: auto; scroll-snap-type: y mandatory; padding: 88px 0; box-sizing: border-box; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; -webkit-mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent); mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent); }
+  .tp-wheel::-webkit-scrollbar { display: none; }
+  .tp-wheel button { display: block; width: 100%; height: 44px; border: 0; background: transparent; font: inherit; font-size: 19px; font-weight: 500; color: var(--muted-2); scroll-snap-align: center; cursor: pointer; }
+  .tp-wheel button.sel { color: var(--ink); font-weight: 700; font-size: 22px; }
+  .tp-band { position: absolute; left: 6px; right: 6px; top: 88px; height: 44px; border: 2px solid var(--accent); border-radius: 12px; background: rgba(230,57,70,.06); pointer-events: none; }
+  .tp-ap { display: flex; flex-direction: column; justify-content: center; gap: 8px; min-height: 220px; }
+  .tp-ap button { display: block; width: 100%; height: 44px; border: 1.5px solid transparent; background: transparent; font: inherit; font-size: 17px; font-weight: 500; color: var(--muted-2); border-radius: 12px; cursor: pointer; }
+  .tp-ap button.sel { background: var(--card); border-color: var(--accent); color: var(--ink); font-weight: 700; }
+  .tp-hint { text-align: center; font-size: 12px; color: var(--muted-2); margin-top: 8px; }
   .tp-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
   .tp-btns button { flex: 1 1 28%; min-width: 0; margin: 0; padding: 12px 8px; width: auto; }
 </style>
@@ -3721,9 +3728,9 @@
       </div>
       <div class="dgroup-lbl">App</div>
       <div class="dgroup">
-        <button class="drow" data-open="share" id="menuShareAppBtn" style="--i:7">
-            <span class="dtile"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line></svg></span>
-            <span class="dlabel">Share app<small>Link for a new colleague</small></span>
+        <button class="drow" id="menuShareAppBtn" style="--i:7">
+            <span class="dtile"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg></span>
+            <span class="dlabel">Add a teacher<small>Create a Staff ID and share the app</small></span>
             <svg class="dchev" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
           </button>
         <button class="drow" id="menuInstallRow" type="button" style="--i:8" hidden>
@@ -3981,7 +3988,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.16 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.18 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6316,10 +6323,17 @@
       if (state.tab === 'admin') renderAdmin();
     }, () => {});
   }
+  function staffInfo(code) { const m = (state.staffInfoMem && state.staffInfoMem[code]) || null; const t = (state.team && state.team[code]) || null; return { name: String((m && m.name) || (t && t.name) || '').trim(), sal: (m && m.sal) || (t && t.salutation) || '', wa: String((m && m.wa) || (t && t.whatsapp) || '') }; }
+  function staffGreeting(code) {
+    const i = staffInfo(code); const first = i.name.split(/\s+/)[0] || '';
+    if (first) return i.sal === 'sir' ? `Hello ${first} Sir,` : (i.sal === 'maam' ? `Hello ${first} Ma'am,` : `Hello ${first},`);
+    return i.sal === 'sir' ? 'Hello Sir,' : (i.sal === 'maam' ? "Hello Ma'am," : 'Hello,');
+  }
   function staffShareText(code) {
     const link = location.href.split('#')[0].split('?')[0];
-    return `CATJEE Teach Desk\n\nYour Staff ID: *${code}*\n\nOpen ${link} → Create Account → enter this Staff ID, your name, email and a password.\nAfter that you can sign in with your Staff ID or your email.`;
+    return `CATJEE Teach Desk\n\n${staffGreeting(code)}\n\nYour Staff ID: *${code}*\n\n1. Open ${link}\n2. Tap *Create Account*\n3. Enter this Staff ID, your name, email and a password.\n\nAfter that you can sign in with your Staff ID or your email.`;
   }
+  function staffWaUrl(code) { let n = String(staffInfo(code).wa || '').replace(/\D/g, ''); if (n.length === 10) n = '91' + n; return 'https://wa.me/' + n + '?text=' + encodeURIComponent(staffShareText(code)); }
   function renderStaffIdsBlock() {
     const el = document.getElementById('staffIdsBlock');
     if (!el) return;
@@ -6334,7 +6348,7 @@
     } else if (f) {
       html += `<div class="sid-form"><div class="sv-form-head"><div class="panel-title" style="margin:0;">New Staff ID</div><button type="button" class="hv-sheet-x" id="sidX" aria-label="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
         <div class="team-lbl">Teacher details (optional: fill the name to add the teacher now)</div>
-  <input class="text-input" id="sidName" type="text" placeholder="Name" value="${escapeHtml(f.name || '')}" autocomplete="off">
+  <input class="text-input" id="sidName" type="text" placeholder="Name" value="${escapeHtml(f.name || '')}" autocomplete="off"><div class="sal-preview" style="margin:-2px 0 4px;">The name and Sir / Ma'am are used in the WhatsApp message.</div>
   <div class="chips team-chips"><span class="team-lbl">Address</span><button type="button" class="chip${f.sal === 'sir' ? ' active' : ''}" data-sid-sal="sir">Sir</button><button type="button" class="chip${f.sal === 'maam' ? ' active' : ''}" data-sid-sal="maam">Ma'am</button><button type="button" class="chip${f.sal === 'name' ? ' active' : ''}" data-sid-sal="name">Name only</button></div>
   <input class="text-input" id="sidWa" type="tel" inputmode="numeric" placeholder="WhatsApp number (optional)" value="${escapeHtml(f.wa || '')}">
   <div style="display:flex; gap:8px;"><select class="text-input" id="sidBdDay" aria-label="Birthday day"></select><select class="text-input" id="sidBdMon" aria-label="Birthday month"></select><select class="text-input" id="sidBdYear" aria-label="Birthday year"></select></div>
@@ -6365,7 +6379,7 @@
     on('sidX', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidDone', () => { state.lastStaffCode = null; renderStaffIdsBlock(); });
     on('sidCopy', async () => { try { await navigator.clipboard.writeText(state.lastStaffCode); showToast('Staff ID copied'); } catch (e) { showToast(state.lastStaffCode); } });
-    on('sidShare', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(state.lastStaffCode)), '_blank'));
+    on('sidShare', () => window.open(staffWaUrl(state.lastStaffCode), '_blank'));
     const bindIn = (id, key) => { const e2 = document.getElementById(id); if (e2) e2.addEventListener('input', () => { state.staffForm[key] = e2.value; }); };
     bindIn('sidName', 'name'); bindIn('sidWa', 'wa');
     ['sidBdDay', 'sidBdMon', 'sidBdYear'].forEach((id) => { const e3 = document.getElementById(id); if (e3) e3.addEventListener('change', () => { const r0 = readBd('sidBdDay', 'sidBdMon', 'sidBdYear'); state.staffForm.bd = r0.md || ''; state.staffForm.by = r0.y || ''; }); });
@@ -6413,11 +6427,12 @@
           }
           showToast(`${nm} added · share the Staff ID so ${ff.sal === 'sir' ? 'he' : 'they'} can create an account`);
         }
-        state.staffForm = null; state.lastStaffCode = code;
-        renderStaffIdsBlock();
+        try { state.staffInfoMem = Object.assign({}, state.staffInfoMem, { [code]: { name: String(nm || '').trim(), sal: ff.sal || '', wa: String(ff.wa || '') } }); } catch (e) { /* ignore */ }
+  state.staffForm = null; state.lastStaffCode = code;
+  renderStaffIdsBlock();
       } catch (err) { flashOffline(err); }
     });
-    el.querySelectorAll('[data-sid-reshare]').forEach((b) => b.addEventListener('click', () => window.open('https://wa.me/?text=' + encodeURIComponent(staffShareText(b.getAttribute('data-sid-reshare'))), '_blank')));
+    el.querySelectorAll('[data-sid-reshare]').forEach((b) => b.addEventListener('click', () => window.open(staffWaUrl(b.getAttribute('data-sid-reshare')), '_blank')));
     el.querySelectorAll('[data-sid-revoke]').forEach((b) => b.addEventListener('click', async () => {
       const code = b.getAttribute('data-sid-revoke');
       const pend = isPendingUid(code); const pname = pend ? ((state.team[code] && state.team[code].name) || 'The teacher') : '';
@@ -14722,7 +14737,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const cu = firebase.auth().currentUser;
     document.getElementById('menuHeadEmail').textContent = (cu && cu.email) || '';
     document.getElementById('menuAvatar').innerHTML = document.getElementById('avatarBox').innerHTML;
-    document.getElementById('menuShareAppBtn').style.display = (state.canAdmin || state.isCoordinator) ? 'flex' : 'none';
+    document.getElementById('menuShareAppBtn').style.display = state.canAdmin ? 'flex' : 'none';
     renderProfileSal(); renderReminderLead(); try { renderProfileContact(); } catch (e) { /* ignore */ } }
 
   // Drawer navigation is kept in browser history, so the phone's Back button
@@ -15038,12 +15053,13 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
           if (!r.i || !r.o) { err.textContent = `Enter both times for session ${have.length + k + 1}`; return; }
           const tin = mk(r.i), tout = mk(r.o);
           if (tout <= tin) { err.textContent = `Session ${have.length + k + 1}: leaving time must be after the reaching time`; return; }
+  if (date === todayStr() && (tin > Date.now() + 60000 || tout > Date.now() + 60000)) { err.textContent = `Session ${have.length + k + 1}: that time is still to come`; return; }
           add.push({ id: genSessionId(), in: tin, out: tout, setLater: true });
         }
         const all = have.concat(add).slice().sort((a, b) => a.in - b.in);
         for (let k = 1; k < all.length; k++) { if (all[k].in < (all[k - 1].out || Infinity)) { err.textContent = 'Two sessions overlap — check the times'; return; } }
         closeHvSheet();
-        try { await pushSessionUpdateForDate(date, all); showToast(add.length > 1 ? `${add.length} sessions added for ${dayHeading(date)}` : 'Check-in added for ' + dayHeading(date)); if (after) after(); } catch (e) { flashOffline(e); }
+        try { await pushSessionUpdateForDate(date, all); showToast(add.length > 1 ? `${add.length} sessions added for ${dayHeading(date)}` : (date === todayStr() ? 'Session added' : 'Check-in added for ' + dayHeading(date))); if (after) after(); } catch (e) { flashOffline(e); }
       });
     };
     draw();
@@ -15285,6 +15301,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const cnt = document.getElementById('sessCount');
     if (cnt) cnt.textContent = `${sessions.length} · view or edit times`;
     wireSessionsEvents(list, todayStr(), sessions, renderSessions);
+  if (!state.campusToday.checkedIn && !sessions.some((x) => x.out == null)) { list.insertAdjacentHTML('beforeend', '<button type="button" class="btn-secondary add-sess-btn" id="todayMoreSess">+ Add another session</button>'); const mb = document.getElementById('todayMoreSess'); if (mb) mb.addEventListener('click', () => openAddPastSession(todayStr(), null, sessions)); }
   }
 
   document.getElementById('checkBtn').addEventListener('click', performCheckToggle);
@@ -18572,8 +18589,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         ['**Today** page kholo.', 'Campus pahunchte hi **Check In** dabao.', 'Jaate waqt **Check Out** dabao.', 'Campus me aap ka samay attendance report me jata hai.']],
     m: [['today', '.nav-item[data-tab="today"]'], ['today', '#checkBtn'], ['today', '#checkBtn'], ['today', '#statusCard']] },
   { id: 'fixtime', t: ['Forgot to check in, or a wrong time? Correct it', 'Check-in bhool gaye ya galat samay? Theek karo'], who: 'all', k: 'forgot add check in check out missed edit change session time delete bhool chhoot jodna galat sudharna badalna चेक इन भूल समय बदलना',
-    s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap **Today\'s sessions · view or edit times** and change the **Check-in** or **Check-out** time.', 'To add one more visit, tap **+ Add another session**. To remove a wrong session, delete it. The app asks you to confirm.'],
-        ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to **Today\'s sessions · view or edit times** dabao aur **Check-in** ya **Check-out** samay badlo.', 'Ek aur visit jodne ke liye **+ Add another session** dabao. Galat session hatana ho to delete karo. App pooch kar hatata hai.']],
+    s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap **Today\'s sessions · view or edit times** and change the **Check-in** or **Check-out** time.', 'To remove a wrong session, tap the bin on it. The app asks you to confirm. To add another visit to an earlier day, open **History**, open that day and tap **+ Add another session**.'],
+        ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to **Today\'s sessions · view or edit times** dabao aur **Check-in** ya **Check-out** samay badlo.', 'Galat session hatana ho to us par bin dabao. App pooch kar hatata hai. Kisi pichhle din ka ek aur visit jodne ke liye **History** kholo, wo din kholo aur **+ Add another session** dabao.']],
     n: ['You can change only today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap sirf aaj aur kal badal sakte ho. Purane din ke liye Admin ya Coordinator se kaho.'],
     m: [['today', '.nav-item[data-tab="today"]'], ['today+out', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#sessionsSection']] },
   { id: 'addclass', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], who: 'all', k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
@@ -18698,8 +18715,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         ['Menu kholo aur **Send a notice** dabao, ya Admin home par **+ New notice** dabao.', 'Notice likho aur chuno ki kisko jana hai.', 'Bhej do. Har teacher **Got it** dabata hai.']],
     m: [['admin:dash', '#noticesSec'], ['admin:dash+notice', '#nnText'], ['admin:dash+notice', '#nnPost']] },
   { id: 'team', t: ['Add a teacher (create a Staff ID)', 'Teacher jodna (Staff ID banana)'], who: 'lead', k: 'staff id add teacher team new sign up login naya teacher टीचर जोड़ना स्टाफ आईडी',
-    s: [['Open **Admin**, then **Settings**, then **Team**.', 'Tap **+ Add staff (create Staff ID)**.', 'Fill in the name and details and save. Give the Staff ID to the teacher.', 'The teacher opens the app, taps **Sign in** and enters the Staff ID once.'],
-        ['**Admin** kholo, phir **Settings**, phir **Team**.', '**+ Add staff (create Staff ID)** dabao.', 'Naam aur details bharo aur save karo. Staff ID teacher ko do.', 'Teacher app kholkar **Sign in** dabata hai aur Staff ID ek baar daalta hai.']],
+    s: [['Tap the menu, then **Add a teacher** (or open **Admin**, then **Settings**, then **Team**).', 'Tap **+ Add staff (create Staff ID)**.', 'Fill in the name, **Sir** or **Ma\'am**, and the other details, then create the ID. Tap **Share on WhatsApp**: the message has the teacher\'s name, the Staff ID and the steps.', 'The teacher opens the link, taps **Create Account** and enters the Staff ID, name, email and a password. After that they can sign in with the Staff ID or the email.'],
+        ['Menu kholo, phir **Add a teacher** dabao (ya **Admin**, phir **Settings**, phir **Team**).', '**+ Add staff (create Staff ID)** dabao.', 'Naam, **Sir** ya **Ma\'am** aur baaki details bharo, phir ID banao. **Share on WhatsApp** dabao: sandesh me teacher ka naam, Staff ID aur kadam hote hain.', 'Teacher link kholkar **Create Account** dabata hai aur Staff ID, naam, email aur password daalta hai. Uske baad Staff ID ya email se sign in kar sakta hai.']],
     n: ['Nobody except the teacher creates a password.', 'Password sirf teacher khud banata hai.'],
     m: [['admin:settings:#adminTeamPanel', '#adminTeamPanel'], ['admin:settings:#adminTeamPanel', '#staffIdsBlock'], ['', ''], ['', '']] },
   { id: 'admincheck', t: ['Correct, add or force a teacher\'s check-in times', 'Teacher ka check-in samay theek karna, jodna ya force check-out'], who: 'lead', k: 'edit check in check out teacher force checkout correct add times galat चेक इन समय',
@@ -18888,6 +18905,13 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   })();
   if (window.__DEMO && window.__DEMO_TOUR) setTimeout(() => helpShowMe(window.__DEMO_TOUR), 2600);
   if (window.__DEMO && window.__DEMO_WALK) setTimeout(() => helpWalk(window.__DEMO_ROLE === 'admin' ? 'admin' : 'teacher', 0), 2600);
+  (function bindAddTeacher() {
+    const r = document.getElementById('menuShareAppBtn'); if (!r) return;
+    r.addEventListener('click', () => {
+      const go = () => { try { goAdmin('settings')(); } catch (e) { /* ignore */ } setTimeout(() => { const t = document.querySelector('#adminTeamPanel .panel-title'); if (t && t.getAttribute('aria-expanded') !== 'true') t.click(); setTimeout(() => { const b = document.getElementById('sidAdd'); if (b) { b.click(); try { b.scrollIntoView({ block: 'center' }); } catch (e) { /* ignore */ } } }, 250); }, 300); };
+      try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(go, 350);
+    });
+  })();
   (function organiseSettings() {
     const panel = document.getElementById('dpanel-settings'); if (!panel) return; const body = panel.querySelector('.dscroll'); if (!body || body.getAttribute('data-org')) return; body.setAttribute('data-org', '1');
     const cards = Array.from(body.children).filter((x) => x.classList.contains('dcard'));
@@ -18912,7 +18936,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Timetable', ['adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Exams', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
-      const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
+      const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
       ids.forEach((id) => { const el = document.getElementById(id); if (el) par.insertBefore(el, ref); });
     });
     let busy = false; const sync = () => { busy = false; labels.forEach(([lb, ids]) => { lb.hidden = !ids.some((id) => { const el = document.getElementById(id); return el && !el.hidden && el.style.display !== 'none'; }); }); };
@@ -18970,6 +18994,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     o.querySelectorAll('[data-tpm]').forEach((b) => b.classList.toggle('sel', Number(b.getAttribute('data-tpm')) === tpState.m));
     o.querySelectorAll('[data-tpa]').forEach((b) => b.classList.toggle('sel', (b.getAttribute('data-tpa') === '1') === tpState.pm));
   }
+  const TP_ROW = 44;
   function tpOpen(inp) {
     if (!inp || tpState || inp.disabled) return;
     try { inp.blur(); } catch (e) { /* ignore */ }
@@ -18980,18 +19005,20 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const hours = Array.from({ length: 12 }, (_, i) => `<button type="button" data-tph="${i + 1}">${i + 1}</button>`).join('');
     const mins = Array.from({ length: 60 }, (_, i) => `<button type="button" data-tpm="${i}">${tp2(i)}</button>`).join('');
     const o = document.createElement('div'); o.id = 'tpOverlay'; o.className = 'tp-ov';
-    o.innerHTML = `<div class="tp-sheet" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="tp-title">${escapeHtml(title)}</div><div class="tp-big" id="tpBig"></div><div class="tp-cols"><div class="tp-col" id="tpH">${hours}</div><div class="tp-col" id="tpM">${mins}</div><div class="tp-col tp-ap"><button type="button" data-tpa="0">AM</button><button type="button" data-tpa="1">PM</button></div></div><div class="tp-btns"><button type="button" class="btn-secondary" id="tpCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="btn-secondary" id="tpClear" style="border-color: var(--line);">Clear</button><button type="button" class="save-btn" id="tpSet">Set</button></div></div>`;
+    o.innerHTML = `<div class="tp-sheet" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="tp-title">${escapeHtml(title)}</div><div class="tp-big" id="tpBig"></div><div class="tp-heads"><span>Hour</span><span>Minute</span><span>AM / PM</span></div><div class="tp-cols"><div class="tp-ww"><div class="tp-wheel" id="tpH">${hours}</div><div class="tp-band"></div></div><div class="tp-ww"><div class="tp-wheel" id="tpM">${mins}</div><div class="tp-band"></div></div><div class="tp-ap"><button type="button" data-tpa="0">AM</button><button type="button" data-tpa="1">PM</button></div></div><div class="tp-hint">Scroll the hour and the minute. The number in the box is the time.</div><div class="tp-btns"><button type="button" class="btn-secondary" id="tpCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="btn-secondary" id="tpClear" style="border-color: var(--line);">Clear</button><button type="button" class="save-btn" id="tpSet">Set</button></div></div>`;
+    const onWheel = (col, attr) => { const i = Math.max(0, Math.min(col.children.length - 1, Math.round(col.scrollTop / TP_ROW))); const v = Number(col.children[i].getAttribute(attr)); if (!tpState) return; if (attr === 'data-tph' ? v !== tpState.h : v !== tpState.m) { if (attr === 'data-tph') tpState.h = v; else tpState.m = v; tpDraw(); } };
+    ['tpH', 'tpM'].forEach((id) => { const col = o.querySelector('#' + id); const attr = id === 'tpH' ? 'data-tph' : 'data-tpm'; col.addEventListener('scroll', () => onWheel(col, attr)); });
     o.addEventListener('click', (e) => {
       const t = e.target; if (t === o) { tpClose(); return; } const b = t.closest && t.closest('button'); if (!b || !tpState) return;
-      if (b.hasAttribute('data-tph')) { tpState.h = Number(b.getAttribute('data-tph')); tpDraw(); return; }
-      if (b.hasAttribute('data-tpm')) { tpState.m = Number(b.getAttribute('data-tpm')); tpDraw(); return; }
+      if (b.hasAttribute('data-tph')) { tpState.h = Number(b.getAttribute('data-tph')); tpDraw(); const c1 = o.querySelector('#tpH'); try { c1.scrollTo({ top: (tpState.h - 1) * TP_ROW, behavior: 'smooth' }); } catch (e2) { c1.scrollTop = (tpState.h - 1) * TP_ROW; } return; }
+      if (b.hasAttribute('data-tpm')) { tpState.m = Number(b.getAttribute('data-tpm')); tpDraw(); const c2 = o.querySelector('#tpM'); try { c2.scrollTo({ top: tpState.m * TP_ROW, behavior: 'smooth' }); } catch (e2) { c2.scrollTop = tpState.m * TP_ROW; } return; }
       if (b.hasAttribute('data-tpa')) { tpState.pm = b.getAttribute('data-tpa') === '1'; tpDraw(); return; }
       if (b.id === 'tpCancel') { tpClose(); return; }
       if (b.id === 'tpClear') { const i = tpState.inp; i.value = ''; tpClose(); tpFire(i); return; }
       if (b.id === 'tpSet') { const i = tpState.inp; const h24 = (tpState.h % 12) + (tpState.pm ? 12 : 0); i.value = tp2(h24) + ':' + tp2(tpState.m); tpClose(); tpFire(i); }
     });
     document.body.appendChild(o); tpDraw();
-    ['tpH', 'tpM'].forEach((id) => { const col = o.querySelector('#' + id); const sel = col && col.querySelector('.sel'); if (col && sel) col.scrollTop = Math.max(0, sel.offsetTop - col.clientHeight / 2 + sel.offsetHeight / 2); });
+    o.querySelector('#tpH').scrollTop = (tpState.h - 1) * TP_ROW; o.querySelector('#tpM').scrollTop = tpState.m * TP_ROW;
   }
   document.addEventListener('keydown', (e) => { const t = e.target; if (t && t.tagName === 'INPUT' && t.type === 'time' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tpOpen(t); } });
   // a time box keeps the phone's own box away, and an empty running check-out says "Not yet"
