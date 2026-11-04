@@ -2755,6 +2755,13 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lockup-light { display: none !important; } :root:not([data-theme="light"]) .lockup-dark { display: block !important; } }
   :root[data-theme="dark"] .lockup-light { display: none !important; }
   :root[data-theme="dark"] .lockup-dark { display: block !important; }
+  /* Summary tiles (Today, History, Admin): icon on top, then the number, then a label that may take two short lines, so that "Worksheet / DPP" fits and the numbers stay in one line */
+  .sum-lbl { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.15; }
+  #sumGrid .sum-lbl, #hvSum .sum-lbl { min-height: 2.3em; }
+  .sum-grid.stack .sum-lbl { min-height: 0 !important; flex: 1 1 auto !important; min-width: 0; white-space: normal; text-align: left; }
+  .sum-grid.stack .sum-tile { flex-wrap: wrap; row-gap: 0; }
+  .sum-grid.stack .sum-tile { align-items: center; }
+  .sum-grid.stack .sum-tile::before { margin: 0 4px 0 0 !important; flex: none; }
 </style>
 </head>
 <body>
@@ -4018,7 +4025,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.27 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.28 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
