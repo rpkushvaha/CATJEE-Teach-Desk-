@@ -2753,12 +2753,12 @@
 .splash .splash-disc, .splash .splash-sub { display: none; }
 #logoSplash { position: fixed; inset: 0; z-index: 100010; background: #FFFFFF; animation: spBg 2s linear forwards; -webkit-tap-highlight-color: transparent; }
 #logoSplash img { position: absolute; left: 50%; top: 50%; height: auto; opacity: 0; transform: translate(-50%, -50%); pointer-events: none; user-select: none; -webkit-user-select: none; }
-#logoSplash .sp1 { width: min(56vw, 240px); animation: sp1 2s ease-in-out forwards; }
-#logoSplash .sp2 { width: min(84vw, 400px); animation: sp2 2s ease-in-out forwards; }
+#logoSplash .sp1 { width: min(240px, 72vw); opacity: 1; animation: sp1 2s ease-in-out forwards; }
+#logoSplash .sp2 { width: min(92vw, 460px); animation: sp2 2s ease-in-out forwards; }
 #logoSplash.bye { animation: none; opacity: 0; visibility: hidden; transition: opacity .18s, visibility 0s .18s; }
-@keyframes sp1 { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.9); } 17.5% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 40% { opacity: 1; transform: translate(-50%,-50%) scale(1.03); } 60% { opacity: 0; transform: translate(-50%,-50%) scale(1.06); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.06); } }
-@keyframes sp2 { 0%, 40% { opacity: 0; transform: translate(-50%,-50%) scale(.96); } 60% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 1; transform: translate(-50%,-50%) scale(1.02); } }
-@keyframes spBg { 0%, 82.5% { opacity: 1; visibility: visible; } 99.9% { opacity: 0; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
+@keyframes sp1 { 0%, 22.5% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 62.5% { opacity: 0; transform: translate(-50%,-50%) scale(1.04); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.04); } }
+@keyframes sp2 { 0%, 22.5% { opacity: 0; transform: translate(-50%,-50%) scale(.97); } 62.5% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 1; transform: translate(-50%,-50%) scale(1.015); } }
+@keyframes spBg { 0%, 85% { opacity: 1; visibility: visible; } 99.9% { opacity: 0; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
 @media (prefers-reduced-motion: reduce) { #logoSplash { animation: spBgR .8s linear forwards; } #logoSplash .sp1 { display: none; } #logoSplash .sp2 { animation: none; opacity: 1; transform: translate(-50%,-50%); } }
 @keyframes spBgR { 0%, 60% { opacity: 1; visibility: visible; } 99.9% { opacity: 0; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
 </style>
@@ -4015,7 +4015,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.23 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.24 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
