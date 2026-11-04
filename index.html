@@ -2960,7 +2960,7 @@
         <div class="sum-grid" id="sumGrid">
           <div class="sum-tile"><div class="sum-num" id="sumClasses">0</div><div class="sum-lbl">Classes</div></div>
           <div class="sum-tile"><div class="sum-num" id="sumHours">0m</div><div class="sum-lbl">Teaching</div></div>
-          <div class="sum-tile"><div class="sum-num" id="sumWorksheets">0</div><div class="sum-lbl">Worksheets</div></div>
+          <div class="sum-tile"><div class="sum-num" id="sumWorksheets">0</div><div class="sum-lbl">Worksheet / DPP</div></div>
           <div class="sum-tile"><div class="sum-num" id="sumTests">0</div><div class="sum-lbl">Tests</div></div>
         </div>
       </section>
@@ -3044,7 +3044,13 @@
           </div>
         </div>
 
-        <div class="field">
+        <div class="field" id="partField" hidden>
+  <label>Subject taught today <small style="font-weight:500; color:var(--muted);">Optional</small></label>
+  <div class="chips" id="partChips"></div>
+  <div class="hv-fnote">Choose one, or both if you taught both.</div>
+  </div>
+
+  <div class="field">
           <label>Class Timing</label>
           <div style="display:flex; gap:10px;">
             <div style="flex:1;">
@@ -3087,10 +3093,10 @@
             <div class="toggle-row checklist-item" data-key="worksheet">
               <div class="checklist-toggle-trigger">
                 <span class="checklist-icon"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>
-                <span class="toggle-label">Worksheet</span>
+                <span class="toggle-label">Worksheet / DPP</span>
                 <span class="switch"><span class="knob"></span></span>
               </div>
-              <input type="text" class="checklist-note-input" id="worksheetNoteInput" placeholder="Which worksheet? (optional)">
+              <input type="text" class="checklist-note-input" id="worksheetNoteInput" placeholder="Which worksheet or DPP? (optional)">
             </div>
             <div class="toggle-row checklist-item" data-key="material">
               <div class="checklist-toggle-trigger">
@@ -3200,7 +3206,7 @@
           <button type="button" class="chip active" data-kind="all">All</button>
           <button type="button" class="chip" data-kind="classes">Classes</button>
           <button type="button" class="chip" data-kind="tests">Tests</button>
-          <button type="button" class="chip" data-kind="worksheets">Worksheets</button>
+          <button type="button" class="chip" data-kind="worksheets">Worksheet / DPP</button>
           <button type="button" class="chip" data-kind="other">Other Work</button>
           <button type="button" class="chip" data-kind="leave">Leave</button>
         </div>
@@ -3449,7 +3455,7 @@
       </section>
 
       <section class="tsec" data-atab="dash" hidden style="display:none;">
-        <div class="wk-line"><b>This week</b> <span class="wk-dim" id="adWeekLabel"></span><span>Classes <b id="adWkClasses">0</b></span><span>Teaching <b id="adWkTeaching">0m</b></span><span>Worksheets <b id="adWkWorksheets">0</b></span><span>Tests <b id="adWkTests">0</b></span><div id="adWeekGrid" hidden></div></div>
+        <div class="wk-line"><b>This week</b> <span class="wk-dim" id="adWeekLabel"></span><span>Classes <b id="adWkClasses">0</b></span><span>Teaching <b id="adWkTeaching">0m</b></span><span>Worksheet / DPP <b id="adWkWorksheets">0</b></span><span>Tests <b id="adWkTests">0</b></span><div id="adWeekGrid" hidden></div></div>
       </section>
 
       <section class="tsec" id="adminReportsSec" data-atab="reports">
@@ -3992,7 +3998,7 @@
       <div class="dhead"><button class="dicon-btn dback" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><div class="dtitle">How to use</div></div>
       <div class="dscroll dbody">
         <div class="dcard dhelp"><strong>Check in and out</strong><span>Tap the button on the Today tab when you arrive and when you leave campus.</span></div>
-        <div class="dcard dhelp"><strong>Add a class</strong><span>Use "+ Class": pick the batch, timing, chapter and topic, and mark what you gave (worksheet, test, homework).</span></div>
+        <div class="dcard dhelp"><strong>Add a class</strong><span>Use "+ Class": pick the batch, timing, chapter and topic, and mark what you gave (worksheet / DPP, test, homework).</span></div>
         <div class="dcard dhelp"><strong>Add an activity</strong><span>For anything that isn't a class, like meetings, leave or other work.</span></div>
         <div class="dcard dhelp"><strong>History</strong><span>See any past day, week or month, and download or share a report.</span></div>
         <div class="dcard dhelp"><strong>Schedule</strong><span>Set weekly class reminders and keep personal photos for quick reference.</span></div>
@@ -4012,7 +4018,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.25 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.27 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4598,17 +4604,17 @@
   // "Chapter · Topic" (an old class has only the topic, shown as before)
   function clsTopicText(c) { return [c && c.chapter, c && c.topic].map((x) => String(x || '').trim()).filter(Boolean).join(' · '); }
   function classCardHtml(cls, showDelete) {
-    const title = `${entryBatchLabel(cls)} · ${cls.subject || 'Untitled subject'}`;
+    const title = `${entryBatchLabel(cls)} · ${clsSubj(cls) || 'Untitled subject'}`;
     const topic = clsTopicText(cls);
     const time = (cls.startTimeStr && cls.endTimeStr) ? `${formatTimeStr(cls.startTimeStr)} – ${formatTimeStr(cls.endTimeStr)}` : '';
     const badges = [
-      badgeHtml('Worksheet Given', 'No Worksheet', !!cls.worksheet),
+      badgeHtml('Worksheet / DPP Given', 'No Worksheet / DPP', !!cls.worksheet),
       badgeHtml('Material Given', 'No Material', !!cls.material),
       badgeHtml('Test Conducted', 'No Test', !!cls.test, 'test'),
       badgeHtml('Homework Given', 'No Homework Given', !!cls.homework)
     ].join('');
     const noteParts = [];
-    if (cls.worksheet && cls.worksheetNote) noteParts.push(`Worksheet: ${cls.worksheetNote}`);
+    if (cls.worksheet && cls.worksheetNote) noteParts.push(`Worksheet / DPP: ${cls.worksheetNote}`);
     if (cls.material && cls.materialNote) noteParts.push(`Material: ${cls.materialNote}`);
     if (cls.test && cls.testNote) noteParts.push(`Test: ${cls.testNote}`);
     if (cls.homework && cls.homeworkNote) noteParts.push(`Homework: ${cls.homeworkNote}`);
@@ -4862,14 +4868,14 @@
     const c = it.cls;
     const range = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)}` : '';
     const tags = [];
-    if (c.worksheet) tags.push('Worksheet');
+    if (c.worksheet) tags.push('Worksheet / DPP');
     if (c.material) tags.push('Material');
     if (c.test) tags.push('Class test');
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-today-rec="${escapeHtml(c.id)}" role="button" tabindex="0">${tlTimeHtml(it.min)}
       <div class="tl-card ${it.status}">
         <div class="tl-top"><div class="tl-batch">${nbLabel(entryBatchLabel(c))}</div>${pill}</div>
-        ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
+        ${clsSubj(c) ? `<div class="chiprow">${subjChipHtml(clsSubj(c))}</div>` : ''}
         ${classKindHtml(c, true)}
         ${it.status === 'upcoming' ? '<div class="tl-meta"><span class="tl-filled">✓ Details filled</span></div>' : ''}
         <div class="tl-bottom">
@@ -5169,7 +5175,7 @@
         <div class="day-count">${n} class${n === 1 ? '' : 'es'}${activities.length ? ` &middot; Other Work` : ''}${sessions}</div>
         ${onLeave ? `<div class="badges"><span class="badge leave"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.9" y1="4.9" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.1" y2="19.1"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.9" y1="19.1" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.1" y2="4.9"/></svg>On Leave / Holiday</span></div>` : ''}
         ${n > 0 ? `<div class="badges">
-          <span class="badge on">Worksheet ${ws}/${n}</span>
+          <span class="badge on">Worksheet / DPP ${ws}/${n}</span>
           <span class="badge on">Material ${mat}/${n}</span>
           <span class="badge test">Test ${test}/${n}</span>
           <span class="badge on">Homework ${hw}/${n}</span>
@@ -5358,14 +5364,14 @@
     const st = hhmmToMin(c.startTimeStr);
     const range = (c.startTimeStr && c.endTimeStr) ? `${formatTimeStr(c.startTimeStr)} – ${formatTimeStr(c.endTimeStr)}` : '';
     const tags = [];
-    if (c.worksheet) tags.push('Worksheet');
+    if (c.worksheet) tags.push('Worksheet / DPP');
     if (c.material) tags.push('Material');
     if (c.test) tags.push('Class test');
     if (c.homework) tags.push('Homework');
     return `<div class="tl-item hv-rec" data-hv-open="${escapeHtml(c.id)}">${tlTimeHtml(st)}
       <div class="tl-card">
         <div class="tl-top"><div class="tl-batch">${nbLabel(entryBatchLabel(c))}</div>${hvStartedOrPast(c) ? '' : pillHtml('upcoming', 'Upcoming')}</div>
-        ${c.subject ? `<div class="chiprow">${subjChipHtml(c.subject)}</div>` : ''}
+        ${clsSubj(c) ? `<div class="chiprow">${subjChipHtml(clsSubj(c))}</div>` : ''}
         ${classKindHtml(c, true)}
         ${tags.length ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">${t}</span>`).join('')}</div>` : ''}
         ${range ? `<div class="tl-meta">${range}</div>` : ''}
@@ -5399,7 +5405,7 @@
       }
     }));
   }
-  const HV_SUM_CELLS = [['hvsClasses', 'Classes'], ['hvsTeaching', 'Teaching'], ['hvsCampus', 'On Campus'], ['hvsWorksheets', 'Worksheets'], ['hvsTests', 'Tests'], ['hvsHomework', 'Homework']];
+  const HV_SUM_CELLS = [['hvsClasses', 'Classes'], ['hvsTeaching', 'Teaching'], ['hvsCampus', 'On Campus'], ['hvsWorksheets', 'Worksheet / DPP'], ['hvsTests', 'Tests'], ['hvsHomework', 'Homework']];
   function renderHvSummary(dates) {
     const h = hvState();
     const el = document.getElementById('hvSum');
@@ -5434,7 +5440,7 @@
     document.getElementById('hvSearchBtn').setAttribute('aria-expanded', h.searchOpen ? 'true' : 'false');
     document.getElementById('hvFilterBtn').setAttribute('aria-expanded', h.filterOpen ? 'true' : 'false');
     document.getElementById('hvFilterDot').hidden = h.batch === 'all' && h.kind === 'all';
-    const KIND_TXT = { classes: 'Classes only', tests: 'Tests only', worksheets: 'Worksheets only', other: 'Other Work only', leave: 'Leave only' };
+    const KIND_TXT = { classes: 'Classes only', tests: 'Tests only', worksheets: 'Worksheet / DPP only', other: 'Other Work only', leave: 'Leave only' };
     const fParts = [];
     if (h.batch !== 'all') fParts.push(h.batch);
     if (h.kind !== 'all') fParts.push(KIND_TXT[h.kind] || h.kind);
@@ -5613,7 +5619,7 @@
           <div class="hv-d-row"><span>Duration</span><span>${dur ? fmtTeaching(dur) : '—'}</span></div>
         </div>
         <div style="margin-top:8px;">
-          ${checkRowHtml(!!c.worksheet, 'Worksheet given', 'No worksheet', c.worksheetNote)}
+          ${checkRowHtml(!!c.worksheet, 'Worksheet / DPP given', 'No worksheet / DPP', c.worksheetNote)}
           ${checkRowHtml(!!c.material, 'Study material given', 'No study material', c.materialNote)}
           ${checkRowHtml(!!c.test, 'Class test conducted', 'No class test', [c.testNote, c.testRooms ? 'Rooms: ' + c.testRooms : ''].filter(Boolean).join(' · '))}
           ${checkRowHtml(!!c.homework, 'Homework given', 'No homework', c.homeworkNote)}
@@ -5913,8 +5919,34 @@
   });
 
 
-  function renderForm() {
- if (state.form && state.form.testLocked) state.form.test = true;
+  // ---------- Subject taught today (only for a subject that is two in one) ----------
+  const subjPartsOf = (n) => { const t = String(n || '').toLowerCase().replace(/[^a-z]/g, ''); if (!t) return null; if (t.indexOf('geo') >= 0 && t.indexOf('eco') >= 0) return ['Geography', 'Economics']; if (t.indexOf('his') >= 0 && t.indexOf('pol') >= 0) return ['History', 'Political Science']; return null; };
+  const clsSubj = (c) => (c && Array.isArray(c.parts) && c.parts.length) ? c.parts.join(' + ') : ((c && c.subject) || '');
+  function partOptions() {
+    const f = state.form || {}; const subs = []; const b = f.batch; const m = state.teacherMap || {}; const me = state.teacherId;
+    Object.keys(m).forEach((k) => { if (m[k] !== me) return; const i = k.indexOf('|'); const kb = k.slice(0, i); const ks = k.slice(i + 1); if (!b || kb === '*' || kb === b) subs.push(ks); });
+    if (f.slotSubject) subs.push(f.slotSubject);
+    if (b) (state.scheduleSlots || []).forEach((sl) => { if (!sl || sl.cancelled || !sl.subject) return; if (sl.label === b || (Array.isArray(sl.batches) && sl.batches.indexOf(b) >= 0)) subs.push(sl.subject); });
+    if (!subs.length) { try { teacherSubjects(me).concat([mySubject()]).forEach((x) => { if (x) subs.push(x); }); } catch (e) { /* ignore */ } }
+    const out = []; subs.forEach((sn) => { const p = subjPartsOf(sn); if (p) p.forEach((x) => { if (out.indexOf(x) < 0) out.push(x); }); });
+    if (state.editingId) (f.parts || []).forEach((x) => { if (out.indexOf(x) < 0) out.push(x); });
+    return out;
+  }
+  function renderPartChips() {
+    const fld = document.getElementById('partField'); const box = document.getElementById('partChips'); if (!fld || !box || !state.form) return;
+    const opts = state.entryMode === 'class' ? partOptions() : [];
+    if (!opts.length) { fld.hidden = true; state.form.parts = []; return; }
+    state.form.parts = (state.form.parts || []).filter((x) => opts.indexOf(x) >= 0); fld.hidden = false;
+    box.innerHTML = opts.map((p) => `<button type="button" class="chip${state.form.parts.indexOf(p) >= 0 ? ' active' : ''}" data-part="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('');
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target && e.target.closest && e.target.closest('#partChips [data-part]'); if (!b || !state.form) return;
+    const p = b.getAttribute('data-part'); const a = (state.form.parts || []).slice(); const i = a.indexOf(p); if (i >= 0) a.splice(i, 1); else a.push(p);
+    state.form.parts = a; renderPartChips(); try { sdReady('saveClassBtn'); } catch (e2) { /* ignore */ }
+  });
+  function renderForm() { renderFormBase(); try { renderPartChips(); } catch (e) { /* ignore */ } }
+  function renderFormBase() {
+  if (state.form && state.form.testLocked) state.form.test = true;
     const isEditing = !!state.editingId;
     document.getElementById('modeChips').style.display = isEditing ? 'none' : 'flex';
     document.getElementById('modeChips').querySelectorAll('[data-mode]').forEach((btn) => {
@@ -13871,7 +13903,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const t = st != null ? formatTimeStr(s.time) : '';
     const tm = t.match(/^(.*?)\s?(AM|PM)$/i);
     const ses = batchSession(s.label || '') || 'morning';
-    const chips = [subjChipHtml(slotSubject(s)), s.test ? `<span class="mchip">Class test</span>` : '', slotRoom(s) ? `<span class="mchip">${I_DOOR}${escapeHtml(slotRoom(s))}</span>` : '',
+    const chips = [subjChipHtml(m.cls && Array.isArray(m.cls.parts) && m.cls.parts.length ? clsSubj(m.cls) : slotSubject(s)), s.test ? `<span class="mchip">Class test</span>` : '', slotRoom(s) ? `<span class="mchip">${I_DOOR}${escapeHtml(slotRoom(s))}</span>` : '',
       `<span class="mchip">${I_CLOCK}${escapeHtml(svDur(dur))}${st != null ? ' · till ' + escapeHtml(svEndStr(s).replace(/\s?(AM|PM)$/i, '')) : ''}</span>`].filter(Boolean).join('');
     const src = s.subFor ? `<span class="mchip warn">Substitute${s.subForName ? ' for ' + escapeHtml(s.subForName) : ''}</span>` : '';
     const from = s.setBy ? (Array.isArray(s.batches) && s.batches.length > 1 ? 'Combined class' : '') : 'Added by you';
@@ -15619,7 +15651,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   // ---------- Reports (PDF + WhatsApp) — one shared engine for Day / Week / Month / Custom ----------
-  const REPORT_KIND_TXT = { classes: 'Classes only', tests: 'Tests only', worksheets: 'Worksheets only', other: 'Other Work only', leave: 'Leave only' };
+  const REPORT_KIND_TXT = { classes: 'Classes only', tests: 'Tests only', worksheets: 'Worksheet / DPP only', other: 'Other Work only', leave: 'Leave only' };
   function reportFilter(useFilter) {
     const h = state.hv || {};
     const batch = useFilter && h.batch && h.batch !== 'all' ? h.batch : null;
@@ -15690,7 +15722,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
   function checklistLines(c) {
     return [
-      { label: 'Worksheet', given: c.worksheet, note: c.worksheetNote },
+      { label: 'Worksheet / DPP', given: c.worksheet, note: c.worksheetNote },
       { label: 'Study Material', given: c.material, note: c.materialNote },
       { label: 'Class Test', given: c.test, note: [c.testNote, c.testRooms ? 'Rooms: ' + c.testRooms : ''].filter(Boolean).join(' · ') },
       { label: 'Homework', given: c.homework, note: c.homeworkNote }
@@ -15731,10 +15763,11 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         const up = hvStartedOrPast(c) ? '' : '   [Upcoming - not counted]';
         const ed = c.editedAt ? `   [edited ${stampTxt(c.editedAt)}]` : '';
         w.bodyLine(`${i + 1}. ${entryBatchLabel(c)}${up}${ed}`, { bold: true, indent: 14 });
-        if (c.startTimeStr && c.endTimeStr) w.bodyLine(`Time: ${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)}  (${reportHm(classDuration(c))})`, { indent: 28 });
+        if (c.startTimeStr && c.endTimeStr) w.bodyLine(`Time: ${formatTimeStr(c.startTimeStr)} - ${formatTimeStr(c.endTimeStr)} (${reportHm(classDuration(c))})`, { indent: 28 });
+  if (Array.isArray(c.parts) && c.parts.length) w.bodyLine(`Subject: ${c.parts.join(' + ')}`, { indent: 28 });
         if (c.chapter) { w.bodyLine(`Chapter: ${waClean(c.chapter)}`, { indent: 28 }); if (c.topic) w.bodyLine(`Topic: ${waClean(c.topic)}`, { indent: 28 }); } else if (c.topic) w.bodyLine(`Chapter / Topic: ${waClean(c.topic)}`, { indent: 28 });
         classKindLines(c).forEach(([a, b]) => w.bodyLine(`${a}${b ? ': ' + waClean(b) : ''}`, { indent: 28 }));
-        if (c.worksheet) w.bodyLine(`Worksheet given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`, { indent: 28 });
+        if (c.worksheet) w.bodyLine(`Worksheet / DPP given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`, { indent: 28 });
         if (c.material) w.bodyLine(`Study material given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`, { indent: 28 });
         if (c.test) {
           const nb = entryBatches(c).length;
@@ -15770,7 +15803,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (f.showClasses) rows.push([['Classes taken', fmtUnits(t.classes)], ['Teaching time', reportHm(t.mins)]]);
     rows.push([['On-campus time', reportCampus(t.campusSec)], f.showActivities ? ['Invigilation', `${reportHm(t.invigMin)}${t.invig ? ` (${t.invig} dut${t.invig === 1 ? 'y' : 'ies'})` : ''}`] : null]);
     if (f.showClasses) {
-      rows.push([['Worksheets given', t.ws], ['Study material given', t.mat || 0]]);
+      rows.push([['Worksheet / DPP given', t.ws], ['Study material given', t.mat || 0]]);
       rows.push([['Class tests conducted', t.tests], ['Homework given', t.hw]]);
     }
     if (f.showActivities) rows.push([['Other work', t.other], ['Leave', `${t.leave} day${t.leave === 1 ? '' : 's'}`]]);
@@ -15830,7 +15863,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       L.push(`📚 *Classes:* ${fmtUnits(t.classes)}   ⏱ *Teaching:* ${reportHm(t.mins)}`);
     }
     L.push(`🕐 *On campus:* ${reportCampus(t.campusSec)}`);
-    if (f.showClasses) L.push(`📄 Worksheets: ${t.ws}   📝 Tests: ${t.tests}   🏠 Homework: ${t.hw}`);
+    if (f.showClasses) L.push(`📄 Worksheet / DPP: ${t.ws}   📝 Tests: ${t.tests}   🏠 Homework: ${t.hw}`);
     if (f.showActivities) L.push(`🗂 Other Work: ${t.other}   Leave: ${t.leave}`);
     if (f.showActivities && t.invig) L.push(`📋 Invigilation: ${reportHm(t.invigMin)}`);
     const days = [];
@@ -15977,14 +16010,15 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         if (i) L.push('');
         L.push(`*${i + 1}. ${entryBatchLabel(c)}${c.test ? ' · Class Test' : ''}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
  if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
+  if (Array.isArray(c.parts) && c.parts.length) L.push(`📘 ${c.parts.join(' + ')}`);
  if (c.test && c.invigText) L.push(`🚪 Invigilation: ${waClean(c.invigText)}`);
         if (c.chapter) { L.push(`🗒️ Chapter: ${waClean(c.chapter)}`); if (c.topic) L.push(`🎯 Topic: ${waClean(c.topic)}`); } else if (c.topic) L.push(`📌 Chapter / Topic: ${waClean(c.topic)}`);
       const KEMO = { 'Revision': '🔁', 'Doubt clearing': '❓', 'Quiz': '☑️', 'Test copies shown': '📋', 'Question paper discussion': '💬', 'Something else': '🏷️' };
       classKindLines(c).forEach(([a, b]) => L.push(`${KEMO[a] || '•'} ${a}${b ? ': ' + waClean(b) : ''}`));
-        if (c.worksheet) L.push(`📄 Worksheet Given${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`);
-        if (c.material) L.push(`📖 Study Material Given${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`);
+        if (c.worksheet) L.push(`📄 Worksheet / DPP${c.worksheetNote ? ': ' + waClean(c.worksheetNote) : ''}`);
+        if (c.material) L.push(`📖 Study Material${c.materialNote ? ': ' + waClean(c.materialNote) : ''}`);
         if (c.test) { if (c.testNote) L.push(`🖊️ Test on: ${waClean(c.testNote)}`); if (!c.invigText && c.testRooms) { const r = waClean(c.testRooms); L.push(`🚪 ${/[,&]| and /.test(r) ? 'Rooms' : 'Room'}: ${r}`); } }
-        if (c.homework) L.push(`📓 Homework Given${c.homeworkNote ? ': ' + waClean(c.homeworkNote) : ''}`);
+        if (c.homework) L.push(`📓 Homework${c.homeworkNote ? ': ' + waClean(c.homeworkNote) : ''}`);
       });
       sections.push(L);
     }
@@ -16540,7 +16574,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   // ---------- Excel / CSV: one layout for every export ----------
   // One row per entry, plus one "Attendance" row per day. A cell is filled only when there is something to say
   // (e.g. the Worksheet cell holds the worksheet name, or "Given"), so there is no column of "No"s to read through.
-  const CSV_HEADER = ['Date', 'Day', 'Entry', 'Batch / Class', 'Subject', 'Chapter', 'Topic / Test / Work', 'Start', 'End', 'Duration (min)', 'Worksheet', 'Study Material', 'Class Test', 'Homework', 'Room(s)', 'Remarks', 'Logged At', 'Last Edited'];
+  const CSV_HEADER = ['Date', 'Day', 'Entry', 'Batch / Class', 'Subject', 'Chapter', 'Topic / Test / Work', 'Start', 'End', 'Duration (min)', 'Worksheet / DPP', 'Study Material', 'Class Test', 'Homework', 'Room(s)', 'Remarks', 'Logged At', 'Last Edited'];
   const CSV_ORDER = { Attendance: 0, Class: 1, Invigilation: 2, 'Other Work': 3, 'Coordination Work': 3, Leave: 4 };
   function csvDay(date) { return dateObj(date).toLocaleDateString('en-GB', { weekday: 'short' }); }
   function csvStamp(c) { return [c.createdAt && c.createdAt > 1e12 ? stampTxt(c.createdAt) : '', c.editedAt ? stampTxt(c.editedAt) : '']; }
@@ -16562,7 +16596,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       return base(c.activityType === 'Coordination' ? 'Coordination Work' : 'Other Work').concat(['', '', '', work, '', '', '', '', '', '', '', '', ''], csvStamp(c));
     }
     const nb = entryBatches(c).length;
-    return base('Class').concat([entryBatchLabel(c), c.subject || '', waClean(c.chapter), [waClean(c.topic), waClean(classKindText(c))].filter(Boolean).join(' · '),
+    return base('Class').concat([entryBatchLabel(c), clsSubj(c), waClean(c.chapter), [waClean(c.topic), waClean(classKindText(c))].filter(Boolean).join(' · '),
       c.startTimeStr ? formatTimeStr(c.startTimeStr) : '', c.endTimeStr ? formatTimeStr(c.endTimeStr) : '', classDuration(c) || '',
       c.worksheet ? (waClean(c.worksheetNote) || 'Given') : '',
       c.material ? (waClean(c.materialNote) || 'Given') : '',
@@ -17005,7 +17039,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
   try { if (!state.form.kinds) state.form.kinds = ['teach']; renderClassKinds(); } catch (e) { /* ignore */ }
   function resetClassForm() {
-    state.form = { batch: null, topic: '', chapter: '', worksheet: false, material: false, test: false, homework: false, extra: [], combineOpen: false, kinds: ['teach'], kindNotes: {} }; state.editLegacy = false;
+    state.form = { batch: null, topic: '', chapter: '', worksheet: false, material: false, test: false, homework: false, extra: [], combineOpen: false, kinds: ['teach'], kindNotes: {}, parts: [], slotSubject: '' }; state.editLegacy = false;
     try { renderClassKinds(); } catch (e) { /* ignore */ }
     document.getElementById('topicInput').value = ''; document.getElementById('chapterInput').value = ''; syncChapterLabel(); document.getElementById('startTimeInput').value = '';
     document.getElementById('endTimeInput').value = '';
@@ -17095,7 +17129,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const match = { slot, startMin };
     state.formWing = wing;
     selectBatch(batch);
-    const last = slot.duration ? null : findLastClassForBatch(batch);
+  if (state.form) state.form.slotSubject = slot.subject || '';
+  const last = slot.duration ? null : findLastClassForBatch(batch);
     let duration = slot.duration ? slotDuration(slot) : DEFAULT_DURATION;
     if (last && last.startTimeStr && last.endTimeStr) {
       const [sh, sm] = last.startTimeStr.split(':').map(Number);
@@ -17184,7 +17219,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       test: !!cls.test,
       homework: !!cls.homework,
       kinds: classKindsOf(cls).slice(),
-      kindNotes: Object.assign({}, cls.kindNotes || {})
+  parts: Array.isArray(cls.parts) ? cls.parts.slice() : [],
+  kindNotes: Object.assign({}, cls.kindNotes || {})
     };
     renderForm(); renderClassKinds(); state.editLegacy = !cls.chapter; document.getElementById('topicInput').value = cls.topic || ''; document.getElementById('chapterInput').value = cls.chapter || ''; syncChapterLabel();
     document.getElementById('startTimeInput').value = cls.startTimeStr || '';
@@ -17728,7 +17764,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
  ctExamId: (state.form.test && state.form.ctExamId) || null,
  invigText: (state.form.test && state.form.ctExamId) ? ctInvigFor(state.form.ctExamId, entryDate) : '',
  homework: state.form.homework,
-        worksheetNote: document.getElementById('worksheetNoteInput').value.trim(),
+  parts: (state.form.parts && state.form.parts.length) ? state.form.parts.slice() : null,
+  worksheetNote: document.getElementById('worksheetNoteInput').value.trim(),
         materialNote: document.getElementById('materialNoteInput').value.trim(),
         testNote: document.getElementById('testNoteInput').value.trim(),
         testRooms: state.form.test ? document.getElementById('testRoomsInput').value.trim() : '',
@@ -18595,7 +18632,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     basics: { title: 'Quick tour', sub: 'The main things, in one minute', icon: 'spark', who: 'all', steps: [
       { go: goTab('today'), sel: '#checkBtn', t: 'Check in and out', x: 'Tap Check In when you reach campus, and Check Out when you leave.' },
       { go: goTab('today'), sel: '#todayClassList', t: "Today's classes", x: 'Your classes for today. The next one is marked Next — when it starts, tap Log this class to fill it in.' },
-      { go: goTab('today'), sel: '.nav-item[data-tab="add"]', t: 'Add Class', x: 'Fill in a class you took: batch, time, topic, worksheet, test.' },
+      { go: goTab('today'), sel: '.nav-item[data-tab="add"]', t: 'Add Class', x: 'Fill in a class you took: batch, time, topic, worksheet / DPP, test.' },
       { go: goTab('today'), sel: '.nav-item[data-tab="schedule"]', t: 'Schedule', x: 'Your week. Classes from the published timetable appear here by themselves.' },
       { go: goTab('today'), sel: '.nav-item[data-tab="history"]', t: 'History', x: 'Everything you filled in, day by day.' },
       { go: goTab('today'), sel: '#menuOpenBtn', t: 'Menu', x: 'Gallery, your profile and this Help — open any tour again from here.' } ] },
@@ -18659,9 +18696,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     n: ['You can change only today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap sirf aaj aur kal badal sakte ho. Purane din ke liye Admin ya Coordinator se kaho.'],
     m: [['today', '.nav-item[data-tab="today"]'], ['today+out', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#sessionsSection']] },
   { id: 'addclass', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], who: 'all', k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
-    s: [['Tap **Add Class** at the bottom.', 'Stay on the **Class** tab. Choose the batch under **Select Class / Batch**.', 'Check **Class Timing**: Start and End, or tap 40m, 50m, 1h or 1h 5m.', 'Under **What happened in class?** choose **Teaching** and write the **Chapter**. The topic is optional.', 'Under **Class deliverables** tick Worksheet, Study material or Homework if you gave them.', 'Tap **Save Class**.'],
-        ['Neeche **Add Class** dabao.', '**Class** tab par raho. **Select Class / Batch** me batch chuno.', '**Class Timing** dekho: Start aur End, ya 40m, 50m, 1h, 1h 5m dabao.', '**What happened in class?** me **Teaching** chuno aur **Chapter** likho. Topic optional hai.', '**Class deliverables** me Worksheet, Study material ya Homework chuno, agar diya ho.', '**Save Class** dabao.']],
-    n: ['If the class is in your Schedule, Add Class fills the batch and time for you.', 'Class aap ke Schedule me ho to Add Class batch aur samay khud bhar deta hai.'],
+    s: [['Tap **Add Class** at the bottom.', 'Stay on the **Class** tab. Choose the batch under **Select Class / Batch**.', 'Check **Class Timing**: Start and End, or tap 40m, 50m, 1h or 1h 5m.', 'Under **What happened in class?** choose **Teaching** and write the **Chapter**. The topic is optional.', 'Under **Class deliverables** tick Worksheet / DPP, Study material or Homework if you gave them.', 'Tap **Save Class**.'],
+        ['Neeche **Add Class** dabao.', '**Class** tab par raho. **Select Class / Batch** me batch chuno.', '**Class Timing** dekho: Start aur End, ya 40m, 50m, 1h, 1h 5m dabao.', '**What happened in class?** me **Teaching** chuno aur **Chapter** likho. Topic optional hai.', '**Class deliverables** me Worksheet / DPP, Study material ya Homework chuno, agar diya ho.', '**Save Class** dabao.']],
+    n: ['If the class is in your Schedule, Add Class fills the batch and time for you. For History / Political Science or Geography / Economics, choose which one you taught under Subject taught today (or both).', 'Class aap ke Schedule me ho to Add Class batch aur samay khud bhar deta hai. History / Political Science ya Geography / Economics me **Subject taught today** me chuno ki kaun sa padhaya (ya dono).'],
     m: [['today', '.nav-item[data-tab="add"]'], ['add', '#allBatchesToggle'], ['add', '#durChips'], ['add', '#classKindChips'], ['add', '.checklist-grid'], ['add', '#saveClassBtn']] },
   { id: 'combineb', t: ['Join two classes (batches) in one class', 'Do class (batch) ek saath jodna'], who: 'all', k: 'combine join two batches together do batch ek saath sath milakar बैच जोड़ना',
     s: [['Tap **Add Class**.', 'Choose the first batch under **Select Class / Batch**.', 'Tap **+ Combine another batch** and choose the other batch under **Combined with**.', 'Fill in the rest and tap **Save Class**.'],
@@ -18877,7 +18914,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const sIn = body.querySelector('#hcSearch'); if (sIn) sIn.addEventListener('input', () => { HC.q = sIn.value; const m = body.querySelector('#hcMain'); if (m) m.innerHTML = HC.q.trim() ? helpListHtml(HC.q) : hcCards(helpLangIdx()); });
   }
   // a guide is shown by the same tour engine as the other tours, on the SAMPLE data (a practice page), so every button is there
-  const BASICS_HI = [['Check in aur check out', 'Campus pahunchte hi Check In dabao, aur jaate waqt Check Out.'], ['Aaj ki classes', 'Aaj ki aap ki classes. Agli class par Next likha hota hai. Class shuru hone par Log this class dabakar use bharo.'], ['Add Class', 'Jo class aap ne li use bharo: batch, samay, topic, worksheet, test.'], ['Schedule', 'Aap ka hafta. Published timetable ki classes yahan apne aap aati hain.'], ['History', 'Aap ne jo kuch bhara, din ke hisaab se.'], ['Menu', 'Gallery, aap ka profile aur ye Help. Koi bhi tour yahan se dobara khol sakte ho.']];
+  const BASICS_HI = [['Check in aur check out', 'Campus pahunchte hi Check In dabao, aur jaate waqt Check Out.'], ['Aaj ki classes', 'Aaj ki aap ki classes. Agli class par Next likha hota hai. Class shuru hone par Log this class dabakar use bharo.'], ['Add Class', 'Jo class aap ne li use bharo: batch, samay, topic, worksheet / DPP, test.'], ['Schedule', 'Aap ka hafta. Published timetable ki classes yahan apne aap aati hain.'], ['History', 'Aap ne jo kuch bhara, din ke hisaab se.'], ['Menu', 'Gallery, aap ka profile aur ye Help. Koi bhi tour yahan se dobara khol sakte ho.']];
   function helpBasicsKey() { if (helpLangIdx() === 0) return 'basics'; const T = TOURS.basics; TOURS.basics_hi = { title: 'Quick tour', sub: T.sub, icon: T.icon, who: 'none', steps: T.steps.map((st, i) => Object.assign({}, st, { t: BASICS_HI[i][0], x: BASICS_HI[i][1] })) }; return 'basics_hi'; }
   function helpPreset(name) {
     try {
