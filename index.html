@@ -137,8 +137,8 @@
     enablePersistence: function () { return Promise.resolve(); }, settings: function () {}, enableNetwork: function () { return Promise.resolve(); }, disableNetwork: function () { return Promise.resolve(); }
   };
   // ---- the fake sign-in: the demo user is always "signed in" (or nobody, on the welcome screen)
-  var DEMO_UID = role === 'admin' ? 'D0' : 'D1';
-  var user = role ? { uid: DEMO_UID, email: 'demo@catjee.app', displayName: role === 'admin' ? 'Demo Admin' : 'Amit Sharma', photoURL: null, emailVerified: true, getIdToken: function () { return Promise.resolve('demo'); }, updateProfile: function () { return Promise.resolve(); } } : null;
+  var DEMO_UID = (role === 'admin' || role === 'principal') ? 'D0' : 'D1';
+  var user = role ? { uid: DEMO_UID, email: 'demo@catjee.app', displayName: role === 'admin' ? 'Demo Admin' : (role === 'principal' ? 'Neha Gupta' : 'Amit Sharma'), photoURL: null, emailVerified: true, getIdToken: function () { return Promise.resolve('demo'); }, updateProfile: function () { return Promise.resolve(); } } : null;
   var authObj = {
     get currentUser() { return user; },
     onAuthStateChanged: function (cb) { setTimeout(function () { cb(user); }, 0); return function () {}; },
@@ -183,6 +183,7 @@
       store['members/' + t[0]] = { at: Date.now() };
     });
     store['admins/D0'] = { at: Date.now() };
+  if (role === 'principal') { delete store['admins/D0']; store['team/D0'] = Object.assign({}, store['team/D0'], { name: 'Neha Gupta', role: 'coordinator', principal: true, wings: ['Pre-Foundation', 'Foundation'], sal: 'maam' }); store['profile/D0'] = Object.assign({}, store['profile/D0'], { name: 'Neha Gupta', salutation: 'maam' }); }
     store['settings/batches'] = { wings: { 'Pre-Foundation': batches } };
     store['settings/subjects'] = { list: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Reasoning'] };
     store['settings/rooms'] = { list: ['D1', 'D2', 'E3', 'F1', 'G2'] };
@@ -2762,6 +2763,8 @@
   .sum-grid.stack .sum-tile { flex-wrap: wrap; row-gap: 0; }
   .sum-grid.stack .sum-tile { align-items: center; }
   .sum-grid.stack .sum-tile::before { margin: 0 4px 0 0 !important; flex: none; }
+  /* the Principal's screens: the buttons that change things are not shown */
+  body.principal-mode #adminTabs [data-atab-btn="settings"], body.principal-mode #tgEdit, body.principal-mode #tgPublish, body.principal-mode #tgPublishDay, body.principal-mode #tgMoreList, body.principal-mode #tgDiscard, body.principal-mode #adminNewExamBtn, body.principal-mode .ex-edit-main, body.principal-mode [data-force-checkout], body.principal-mode [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
 </style>
 </head>
 <body>
@@ -4025,7 +4028,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.28 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.30 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6245,7 +6248,8 @@
   // ---------- Team: roles and wings (Admin → Settings → Team) ----------
   // team/{uid} = { role: 'teacher' | 'coordinator', wings: ['Pre-Foundation', 'Foundation'] }
   state.team = state.team || {};
-  function isCoordUid(uid) { return !!(state.team[uid] && state.team[uid].role === 'coordinator' && state.team[uid].status !== 'removed'); }
+  function isCoordUid(uid) { return !!(state.team[uid] && state.team[uid].role === 'coordinator' && state.team[uid].principal !== true && state.team[uid].status !== 'removed'); }
+  function isPrincipalUid(uid) { return !!(state.team[uid] && state.team[uid].role === 'coordinator' && state.team[uid].principal === true && state.team[uid].status !== 'removed'); }
   function isRemovedUid(uid) { return !!(state.team[uid] && state.team[uid].status === 'removed'); }
   // A teacher added by the Admin before he has an account: team/<Staff ID> = { pending: true, name, salutation, whatsapp, birthMd, ... }. When he joins with that Staff ID he is linked (linkPendingStaff).
   function isPendingUid(u) { const t = state.team && state.team[u]; return !!(t && t.pending === true && !t.joinedUid && t.status !== 'removed'); }
@@ -6258,7 +6262,7 @@
   function teamWings(uid) { return (state.team[uid] && Array.isArray(state.team[uid].wings)) ? state.team[uid].wings : []; }
   // Admin "Preview as Coordinator": the admin sees exactly the coordinator's screens (permissions stay the admin's).
   state.previewCoord = null;
-  function coordView() { return (state.isCoordinator && !state.canAdmin) || !!state.previewCoord; }
+  function coordView() { return (state.isCoordinator && !state.canAdmin && !state.isPrincipal) || !!state.previewCoord; }
   function viewWings() { return state.previewCoord ? state.previewCoord.wings : (state.coordWings || []); }
   function leadWings() { if (state.previewCoord) return state.previewCoord.wings; return state.canAdmin ? ['Pre-Foundation', 'Foundation'] : (state.coordWings || []); }
   let unsubTeam = null;
@@ -6282,8 +6286,8 @@
     if (!all.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">People appear here after they sign in to the app once.</div>'; return; }
     el.innerHTML = `<div class="team-sum"><b>${nDone} of ${joined.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLack ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLack}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` + ids.map((uid) => {
       const name = ((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed') + (isPendingUid(uid) ? ' (not joined yet)' : '');
-      const coord = isCoordUid(uid);
-      const w = teamWings(uid);
+      const coord = isCoordUid(uid); const prin = isPrincipalUid(uid);
+  const w = teamWings(uid);
       const open = state.teamOpen === uid;
       const sid = state.team[uid] && state.team[uid].staffId;
       return `<div class="team-row${open ? ' open' : ''}">
@@ -6295,8 +6299,9 @@
         ${open ? `<div class="team-body">
         <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}">${waNumber(uid) ? `<button type="button" class="tg-mini" data-team-wa="${uid}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:4px;"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Chat</button>` : ''}</div>
         <div class="chips team-chips">
-          <button type="button" class="chip${coord ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
-          <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
+          <button type="button" class="chip${(coord || prin) ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
+  <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
+  <button type="button" class="chip${prin ? ' active' : ''}" data-team-role="principal" data-uid="${uid}">Principal</button>
         </div>
         <div class="chips team-chips">
           <span class="team-lbl">Wing</span>
@@ -6320,13 +6325,17 @@
     el.querySelectorAll('[data-team-wa]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const n = waNumber(b.getAttribute('data-team-wa')); if (n) window.open('https://wa.me/' + n, '_blank'); }));
     el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-uid'); const role = b.getAttribute('data-team-role');
-      if ((role === 'coordinator') === isCoordUid(uid)) return;
+  const cur = isPrincipalUid(uid) ? 'principal' : (isCoordUid(uid) ? 'coordinator' : 'teacher'); if (role === cur) return;
       const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person';
       if (role === 'coordinator') {
         const ok = await showConfirm(`${name} will see the Coordinator dashboard for their wing(s) and will no longer appear in teacher lists. Choose their wing below.`, 'Make coordinator?', 'Make coordinator');
         if (!ok) return;
       }
-      save(uid, { role }, role === 'coordinator' ? `${name} is now a coordinator` : `${name} is now a teacher`);
+      if (role === 'principal') {
+  const okp = await showConfirm(`${name} will get the Principal tab: both wings, view only (notices and the calendar can be changed). ${name} stays in the teacher lists and logs their own classes as before.`, 'Make Principal?', 'Make Principal'); if (!okp) return;
+  save(uid, { role: 'coordinator', principal: true, wings: ['Pre-Foundation', 'Foundation'] }, `${name} is now the Principal`); return;
+  }
+  save(uid, { role, principal: false }, role === 'coordinator' ? `${name} is now a coordinator` : `${name} is now a teacher`);
     }));
     el.querySelectorAll('[data-team-mkid]').forEach((b) => b.addEventListener('click', () => createIdForExisting(b.getAttribute('data-team-mkid'))));
     el.querySelectorAll('[data-team-remove]').forEach((b) => b.addEventListener('click', async () => {
@@ -6420,7 +6429,7 @@
   <input class="text-input" id="sidNote" type="text" placeholder="For (optional), e.g. New Physics teacher" value="${escapeHtml(f.note || '')}">
         <div class="chips team-chips"><span class="team-lbl">Role</span>
           <button type="button" class="chip${f.role === 'teacher' ? ' active' : ''}" data-sid-role="teacher">Teacher</button>
-          <button type="button" class="chip${f.role === 'coordinator' ? ' active' : ''}" data-sid-role="coordinator">Coordinator</button></div>
+          <button type="button" class="chip${f.role === 'coordinator' ? ' active' : ''}" data-sid-role="coordinator">Coordinator</button> <button type="button" class="chip${f.role === 'principal' ? ' active' : ''}" data-sid-role="principal">Principal</button></div>
         <div class="chips team-chips"><span class="team-lbl">Wing</span>
           <button type="button" class="chip${f.wings.indexOf('Pre-Foundation') !== -1 ? ' active' : ''}" data-sid-wing="Pre-Foundation">Pre-Foundation</button>
           <button type="button" class="chip${f.wings.indexOf('Foundation') !== -1 ? ' active' : ''}" data-sid-wing="Foundation">Foundation</button></div>
@@ -6431,7 +6440,7 @@
     }
     if (unused.length) {
       html += `<div class="team-lbl" style="margin:10px 0 2px;">Waiting to be used (${unused.length})</div>` + unused.map((x) => `<div class="team-rm-row">
-        <span><b style="font-weight:600; color: var(--ink);">${escapeHtml(x.code)}</b>${x.note ? ' · ' + escapeHtml(x.note) : ''} · ${x.role === 'coordinator' ? 'Coordinator' : 'Teacher'}</span>
+        <span><b style="font-weight:600; color: var(--ink);">${escapeHtml(x.code)}</b>${x.note ? ' · ' + escapeHtml(x.note) : ''} · ${x.principal ? 'Principal' : (x.role === 'coordinator' ? 'Coordinator' : 'Teacher')}</span>
         <span style="display:flex; gap:12px;"><button type="button" class="hv-back" data-sid-reshare="${escapeHtml(x.code)}" style="padding:0;">Share</button><button type="button" class="team-remove" data-sid-revoke="${escapeHtml(x.code)}">Cancel</button></span></div>`).join('');
     }
     el.innerHTML = html;
@@ -6450,7 +6459,7 @@
     el.querySelectorAll('[data-sid-subj]').forEach((b) => b.addEventListener('click', () => { const sj = b.getAttribute('data-sid-subj'); const a2 = state.staffForm.subjects || (state.staffForm.subjects = []); const k2 = a2.indexOf(sj); if (k2 === -1) a2.push(sj); else a2.splice(k2, 1); renderStaffIdsBlock(); }));
     const noteEl = document.getElementById('sidNote');
     if (noteEl) noteEl.addEventListener('input', () => { state.staffForm.note = noteEl.value; });
-    el.querySelectorAll('[data-sid-role]').forEach((b) => b.addEventListener('click', () => { state.staffForm.role = b.getAttribute('data-sid-role'); renderStaffIdsBlock(); }));
+    el.querySelectorAll('[data-sid-role]').forEach((b) => b.addEventListener('click', () => { state.staffForm.role = b.getAttribute('data-sid-role'); if (state.staffForm.role === 'principal') state.staffForm.wings = ['Pre-Foundation', 'Foundation']; renderStaffIdsBlock(); }));
     el.querySelectorAll('[data-sid-wing]').forEach((b) => b.addEventListener('click', () => {
       const w = b.getAttribute('data-sid-wing'); const k = state.staffForm.wings.indexOf(w);
       if (k === -1) state.staffForm.wings.push(w); else state.staffForm.wings.splice(k, 1);
@@ -6466,13 +6475,13 @@
       }
       try {
         const code = await newStaffCode();
-        const idDoc = { note: (ff.note || '').trim() || nm, role: ff.role, wings: ff.wings.slice(), status: 'unused', createdAt: Date.now(), createdBy: state.teacherId };
+        const idDoc = { note: (ff.note || '').trim() || nm, role: ff.role === 'principal' ? 'coordinator' : ff.role, wings: ff.wings.slice(), status: 'unused', createdAt: Date.now(), createdBy: state.teacherId }; if (ff.role === 'principal') idDoc.principal = true;
         let saved = false;
         if (nm) {
           try {
             const batch = state.db.batch();
             batch.set(state.db.doc('staffIds/' + code), idDoc);
-            batch.set(state.db.doc('team/' + code), { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code, createdAt: Date.now() });
+            batch.set(state.db.doc('team/' + code), { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role === 'principal' ? 'coordinator' : ff.role, wings: ff.wings.slice(), status: 'active', staffId: code, createdAt: Date.now(), ...(ff.role === 'principal' ? { principal: true } : {}) });
             await batch.commit(); saved = true;
           } catch (err0) {
             if (err0 && err0.code === 'permission-denied') { await state.db.doc('staffIds/' + code).set(idDoc); showToast("The Staff ID is made, but the database did not allow saving the teacher's details. Ask for the rule to be changed.", 'error'); }
@@ -6517,7 +6526,7 @@
     try {
       const code = await newStaffCode();
       const batch = state.db.batch();
-      batch.set(state.db.doc('staffIds/' + code), { note: '', role: isCoordUid(uid) ? 'coordinator' : 'teacher', wings: teamWings(uid), status: 'used', usedBy: uid, usedAt: Date.now(), createdAt: Date.now(), createdBy: state.teacherId });
+      batch.set(state.db.doc('staffIds/' + code), { note: '', role: (isCoordUid(uid) || isPrincipalUid(uid)) ? 'coordinator' : 'teacher', wings: teamWings(uid), status: 'used', usedBy: uid, usedAt: Date.now(), createdAt: Date.now(), createdBy: state.teacherId });
       batch.set(state.db.doc('staffLogin/' + code), { email });
       batch.set(state.db.doc('team/' + uid), { staffId: code }, { merge: true });
       await batch.commit();
@@ -7097,7 +7106,7 @@
       <span class="tg-st-acts">${canUndo ? '<button type="button" class="tg-mini" id="tgUndo">↶ Undo</button>' : ''}
       ${editable && pend && doc.pubSnap && tgEverPub(doc) ? '<button type="button" class="tg-mini" id="tgDiscard">✕ Discard changes</button>' : ''}
       ${tgEverPub(doc) ? (editable ? '<button type="button" class="tg-mini" id="tgEditDone">✓ Done</button>' : '<button type="button" class="tg-mini tg-mini-gold" id="tgEdit"><span class="ico i-edit" aria-hidden="true"></span> Edit timetable</button>') : ''}</span></div>
-    ${editable ? '' : '<div class="hv-note tg-lock"><span class="ico i-lock" aria-hidden="true"></span> Published timetable · tap “Edit timetable” to make changes</div>'}`;
+    ${editable ? '' : '<div class="hv-note tg-lock"><span class="ico i-lock" aria-hidden="true"></span> ' + ((state.isPrincipal && !state.canAdmin) ? 'Published timetable · view only' : 'Published timetable · tap “Edit timetable” to make changes') + '</div>'}`;
     html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; const pn = tgPendDays()[d] || 0; const isPub = (doc.pubDays || []).indexOf(d) !== -1 || (!doc.pubDays && (doc.published || []).length && n); return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}${pn ? ' chg' : ''}${tgDayCls(d)}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small>${pn ? `<i class="tg-dn">${pn}</i>` : (isPub ? '<i class="tg-dok">✓</i>' : '')}</button>`; }).join('')}</div>`;
     html += tgHolidayCards(doc, days, editable);
     // paint bar
@@ -9420,19 +9429,19 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
 
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
-    const coordOnly = coordView();
+    const coordOnly = coordView(); const prin = !!(state.isPrincipal && !state.canAdmin); document.body.classList.toggle('principal-mode', prin); if (prin && state.adminTab === 'settings') { state.adminTab = 'dash'; try { applyAdminTab(); } catch (e) { /* ignore */ } }
     const bar = document.getElementById('coordPreviewBar');
     if (bar) { bar.hidden = !state.previewCoord; if (state.previewCoord) document.getElementById('coordPreviewWing').textContent = state.previewCoord.wings.join(', '); }
     document.body.classList.toggle('coord-mode', coordOnly);
     document.getElementById('navAdmin').style.display = (state.canAdmin || state.isCoordinator) ? 'flex' : 'none';
     const lbl = document.querySelector('#navAdmin span');
-    if (lbl) lbl.textContent = coordOnly ? 'Coordinator' : 'Admin';
+    if (lbl) lbl.textContent = prin ? 'Principal' : (coordOnly ? 'Coordinator' : 'Admin');
     ['navAdd', 'navHistory', 'navSchedule'].forEach((id) => { const n = document.getElementById(id); if (n) n.style.display = coordOnly ? 'none' : ''; });
     document.querySelectorAll('#view-admin .admin-only').forEach((el) => el.classList.toggle('atab-off2', !state.canAdmin || coordOnly));
     const t0 = document.querySelector('#view-admin .hv-title');
     if (!coordOnly) {
       document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((b) => { b.style.display = ''; });
-      if (t0) t0.textContent = 'Admin';
+      if (t0) t0.textContent = prin ? 'Principal' : 'Admin';
     }
     if (coordOnly) {
       const w = viewWings();
@@ -9669,7 +9678,7 @@ Keep it short (not more than about 1.3 times the original, and under 380 charact
   // ===== AI: fill the timetable grid from a picture (Admin only) =====
   // The AI only READS the picture. What it read is shown first; the app matches classes and subjects to its own lists,
   // asks about anything it is not sure of, and puts the result in the DRAFT only after "Put in draft". Nothing is published.
-  function aiReady() { try { return !!((state.canAdmin || state.isCoordinator) && aiUrl()); } catch (e) { return false; } }
+  function aiReady() { try { return !!((state.canAdmin || (state.isCoordinator && !state.isPrincipal)) && aiUrl()); } catch (e) { return false; } }
   const TP_SYSTEM = `You read a school timetable from a picture and answer with JSON only.
 Rules:
 - Copy every subject exactly as printed (for example "His/Pol.Sc." or "Geo/Eco"); never translate, expand or correct it.
@@ -10573,7 +10582,8 @@ Rules:
     if (pend.whatsapp) { const t2 = state.team[uid] || {}; if (!t2.phone) await state.db.doc('team/' + uid).set({ phone: pend.whatsapp }, { merge: true }); }
     if (pend.birthY && !teacherBirthY(uid)) await state.db.doc('team/' + uid).set({ birthY: pend.birthY }, { merge: true });
     // 5) done
-    await state.db.doc('team/' + code).set({ joinedUid: uid, pending: false, linkedAt: Date.now() }, { merge: true });
+    if (pend.principal) await state.db.doc('team/' + uid).set({ principal: true }, { merge: true });
+  await state.db.doc('team/' + code).set({ joinedUid: uid, pending: false, linkedAt: Date.now() }, { merge: true });
     state.team = Object.assign({}, state.team, { [code]: Object.assign({}, pend, { joinedUid: uid, pending: false }) });
     try { ttCacheStale(); await loadAdminTeachers(true); } catch (e) { /* ignore */ }
     showToast(`${pend.name || 'The teacher'} has joined · the classes are on the account now`);
@@ -10620,15 +10630,14 @@ Rules:
   function roleFollow(msg) {
     applyRoleUI(); try { renderHolidayUi(); } catch (e) { /* ignore */ }
     if (!(state.canAdmin || state.isCoordinator)) { state.adminTeacherIds = []; if (state.tab === 'admin') switchTab('today'); }
-    else { try { loadAdminTeachers(true); } catch (e) { /* ignore */ } if (state.isCoordinator && !state.canAdmin) switchTab('admin'); }
-    if (msg) showToast(msg);
+    else { try { loadAdminTeachers(true); } catch (e) { /* ignore */ } if (state.isCoordinator && !state.canAdmin && !state.isPrincipal) switchTab('admin'); } if (msg) showToast(msg);
   }
   function watchRole(db, uid) {
     unsubscribers.push(db.doc('team/' + uid).onSnapshot((snap) => {
       const td = snap.data() || {}; const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
       if (td.status === 'removed' && !state.canAdmin) { if (!state.accessRemoved) { state.accessRemoved = true; try { firebase.auth().signOut(); } catch (e) { /* ignore */ } showAuthScreen(); showAuthError('Your access to CATJEE Teach Desk has been removed by the admin. Please contact the director if this is a mistake.'); } return; }
-      const was = state.isCoordinator; if (co === was && JSON.stringify(wings) === JSON.stringify(state.coordWings || [])) return;
-      state.isCoordinator = co; state.coordWings = wings; roleFollow(co !== was ? (co ? 'You are now a Coordinator' : 'Your role is now Teacher') : '');
+      const prin = co && (td.principal === true || !!state.principalViaId); const wasP = !!state.isPrincipal; const was = state.isCoordinator; const wings2 = (prin && !wings.length) ? ['Pre-Foundation', 'Foundation'] : wings; if (co === was && prin === wasP && JSON.stringify(wings2) === JSON.stringify(state.coordWings || [])) return;
+  state.isCoordinator = co; state.isPrincipal = prin; state.coordWings = wings2; roleFollow(co !== was ? (co ? 'You are now a Coordinator' : 'Your role is now Teacher') : '');
     }, () => { /* if it cannot be watched, the role is read again at the next sign-in */ }));
     unsubscribers.push(db.doc('admins/' + uid).onSnapshot((snap) => {
       const ad = snap.exists; if (ad === state.canAdmin) return; state.canAdmin = ad; roleFollow(ad ? 'You are now an Admin' : 'You are no longer an Admin');
@@ -15288,7 +15297,8 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   // teachers change their check-in / check-out only for today and yesterday; admin and coordinators any day
-  function canEditSessionsOn(date) { if (state.canAdmin || state.isCoordinator) return true; return date >= shiftDateStr(todayStr(), -1); }
+  function canEditSessionsOn(date) { if (state.canAdmin || (state.isCoordinator && !state.isPrincipal)) return true;
+  return date >= shiftDateStr(todayStr(), -1); }
   // "(edited 2×, was 9:40 AM)" — only when the time really differs from the first one
   function sessEditMark(s, field) {
     return ''; // "edited" marks are switched off everywhere (decided by the admin)
@@ -18386,7 +18396,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const teamSnap = await db.doc('team/' + firebaseUser.uid).get();
       const td = teamSnap.data() || {};
       state.isCoordinator = td.role === 'coordinator';
-      state.coordWings = Array.isArray(td.wings) ? td.wings : [];
+  state.coordWings = Array.isArray(td.wings) ? td.wings : [];
+  state.principalViaId = false; state.isPrincipal = state.isCoordinator && td.principal === true;
+  if (state.isCoordinator && !state.isPrincipal && td.staffId) { try { const sdoc = await db.doc('staffIds/' + td.staffId).get(); state.principalViaId = !!(sdoc.exists && (sdoc.data() || {}).principal === true); state.isPrincipal = state.principalViaId; } catch (e) { /* ignore */ } }
+  if (state.isPrincipal && !state.coordWings.length) state.coordWings = ['Pre-Foundation', 'Foundation'];
       if (td.status === 'removed' && !state.canAdmin) {
         state.accessRemoved = true;
         try { await firebase.auth().signOut(); } catch (e) { /* ignore */ }
@@ -18395,7 +18408,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         return;
       }
     } catch (err) { state.isCoordinator = false; state.coordWings = []; }
-    applyRoleUI(); if (state.isCoordinator && !state.canAdmin) switchTab('admin'); renderScheduleNotice(); try { pushInit(); } catch (e) { /* ignore */ } try { renderHolidayUi(); } catch (e) { /* ignore */ } if (state.canAdmin || state.isCoordinator) setTimeout(() => { try { loadAdminTeachers(false); } catch (e) { /* ignore */ } }, 2500); const today = todayStr(); const tid = state.teacherId; try { watchRole(db, firebaseUser.uid); } catch (e) { /* ignore */ }
+    applyRoleUI(); if (state.isCoordinator && !state.canAdmin && !state.isPrincipal) switchTab('admin'); renderScheduleNotice(); try { pushInit(); } catch (e) { /* ignore */ } try { renderHolidayUi(); } catch (e) { /* ignore */ } if (state.canAdmin || state.isCoordinator) setTimeout(() => { try { loadAdminTeachers(false); } catch (e) { /* ignore */ } }, 2500); const today = todayStr(); const tid = state.teacherId; try { watchRole(db, firebaseUser.uid); } catch (e) { /* ignore */ }
 
     unsubscribers.push(db.doc('profile/' + tid).onSnapshot((snap) => {
       const data = snap.data();
@@ -19138,6 +19151,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   tpMark(document);
   new MutationObserver((list) => { list.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType === 1) tpMark(n); })); }).observe(document.documentElement, { childList: true, subtree: true });
   ['input', 'change'].forEach((ev) => document.addEventListener(ev, (e) => { const t = e.target; if (t && t.matches && t.matches('input[type="time"][data-ph]')) t.classList.toggle('tp-empty', !t.value); }, true));
+  // ---------- Principal: view only (notices and the calendar stay open) ----------
+  const PRIN_BLOCK = ['#tgEdit', '#tgEditDone', '#tgPublish', '#tgPublishDay', '#tgMoreList', '#tgMoreList *', '#tgUndo', '#tgDiscard', '#tgFixTeachers', '#tgAddBatch', '#tgAddPer', '#tgSunday', '#tgDayNote', '#tgEditSubj', '.tg-paint', '.tg-paint *', '#tgWrap .tg-table td', '#adminNewExamBtn', '[data-ex-edit]', '[data-ex-photo]', '[data-ex-cancelduty]', '[data-ex-t]', '[data-ex-step]', '[data-force-checkout]', '[data-adm-sess]', '#view-admin .del-btn[data-edit]', '#view-admin .del-btn[data-del]', '#galSelDel', '.dsp-pub'].join(',');
+  document.addEventListener('click', (e) => { if (!state.isPrincipal || state.canAdmin) return; const t = e.target && e.target.closest && e.target.closest(PRIN_BLOCK); if (!t) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); showToast('Principal can only view this'); }, true);
   // ---------- Text size and "Update app now" (Menu → Settings) ----------
   (function textSizeAndUpdate() {
     const KEY = 'ctd_text_size';
