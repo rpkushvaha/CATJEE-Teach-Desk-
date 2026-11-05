@@ -2817,7 +2817,9 @@
   #view-today .sc-main { min-width: 0; }
   #view-today .sc-sub { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 4px; line-height: 1.4; }
   #view-today .sc-sub:empty { display: none; }
-  #view-today .timer-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 10px; }
+  #view-today .timer-row { display: flex; flex-direction: column; gap: 0; }
+  #view-today .timer-line { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 10px; }
+  #view-today .timer-line .sess-chip { margin-left: auto; }
   #view-today .status-card.pre .timer-row { display: none; }
   #view-today .sess-chip { display: inline-flex; align-items: center; gap: 4px; flex: none; background: var(--card); background: color-mix(in srgb, var(--card) 62%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px 6px 12px; font: inherit; font-size: 12px; font-weight: 600; color: var(--muted-2); cursor: pointer; white-space: nowrap; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
   #view-today .sess-chip[hidden] { display: none; }
@@ -3023,12 +3025,14 @@
   </div>
   </div>
   <div class="timer-row">
-  <div class="timer">
+  <div class="timer-line">
   <div class="timer-num num" id="timerNum">00:00:00</div>
+  <button type="button" class="sess-chip" id="sessToggle" aria-expanded="false" hidden><span id="sessCount"></span><svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+  </div>
+  <div class="timer">
   <div class="timer-label" id="timerLabel">Time on campus today</div>
   <div class="timer-label" id="sessionCountLabel" style="text-transform:none; letter-spacing:0;"></div>
   </div>
-  <button type="button" class="sess-chip" id="sessToggle" aria-expanded="false" hidden><span id="sessCount"></span><svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
   <button class="btn btn-checkin" id="checkBtn">Check In</button>
   <button type="button" class="hv-back" id="lateInBtn" style="display:none; margin:10px auto 0; padding:0; font-size:15px;"><span class="ico i-clock" aria-hidden="true"></span>Forgot to check in?</button>
@@ -4159,7 +4163,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.43 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.44 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4692,8 +4696,8 @@
   card.classList.toggle('on-leave', onLeaveToday);
   card.classList.toggle('done', !c.checkedIn && n > 0);
   const subEl = document.getElementById('scSub');
-  if (subEl) subEl.textContent = (c.checkedIn && c.checkInAt) ? `Since ${formatTime(c.checkInAt)}${(Date.now() - c.checkInAt >= 12 * 3600000) ? ` · open for ${Math.floor((Date.now() - c.checkInAt) / 3600000)}h` : ''}` : ((n > 0 && lastOut) ? `Checked out at ${formatTime(lastOut)}` : (onLeaveToday ? "On leave today. Check in only if you come." : 'Tap Check In when you reach campus.'));
-  if (timerLabel) timerLabel.textContent = (!c.checkedIn && n > 0) ? 'Total time on campus today' : 'Time on campus today';
+  if (subEl) subEl.textContent = (c.checkedIn && c.checkInAt) ? `Since ${formatTime(c.checkInAt)}` : ((n > 0 && lastOut) ? `Checked out at ${formatTime(lastOut)}` : (onLeaveToday ? "On leave today. Check in only if you come." : 'Tap Check In when you reach campus.'));
+  if (timerLabel) timerLabel.textContent = 'Time on campus today';
   // the breaks between the sessions, in one line (the details are in the list of the sessions chip)
   if (sessLabel) {
     const live = sess.filter((x) => x && x.in != null && !state.pendingDeleteIds.has(x.id)).slice().sort((p, q) => p.in - q.in); let bc = 0; let bt = 0;
