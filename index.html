@@ -3641,13 +3641,15 @@
         </div>
       </div>
   <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
-        <button type="button" class="pv-row" id="pvToggle" aria-expanded="false"><span class="ico i-eye2" aria-hidden="true"></span><b>Preview as Coordinator</b><span class="chev"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span></button>
-        <div class="pv-body"><div class="admin-sub" style="margin:0 0 10px;">See the coordinator's screens. Changes made here are real.</div>
+        <button type="button" class="pv-row" id="pvToggle" aria-expanded="false"><span class="ico i-eye2" aria-hidden="true"></span><b>Preview as</b><span class="chev"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span></button>
+        <div class="pv-body"><div class="admin-sub" style="margin:0 0 10px;">See what a Coordinator or the Principal sees. Changes you make here are real.</div>
+  <div class="admin-sub" style="margin:8px 0 6px; font-weight:700;">Coordinator</div>
         <div class="chips">
           <button type="button" class="chip" data-preview-wing="Pre-Foundation">Pre-Foundation</button>
           <button type="button" class="chip" data-preview-wing="Foundation">Foundation</button>
-          <button type="button" class="chip" data-preview-wing="both">Both wings</button>
-        </div></div>
+          <button type="button" class="chip" data-preview-wing="both">Both wings</button> </div>
+  <div class="admin-sub" style="margin:12px 0 6px; font-weight:700;">Principal</div>
+  <div class="chips"><button type="button" class="chip" data-preview-principal>Preview as Principal</button></div></div>
       </div>
     </div>
 
@@ -3680,7 +3682,7 @@
 
 </div>
 
-<div id="coordPreviewBar" hidden><span><span class="ico i-eye" aria-hidden="true"></span> Coordinator preview · <b id="coordPreviewWing"></b></span><button type="button" id="coordPreviewExit">Exit</button></div>
+<div id="coordPreviewBar" hidden><span><span class="ico i-eye" aria-hidden="true"></span> <span id="coordPreviewLbl">Coordinator preview</span> · <b id="coordPreviewWing"></b></span><button type="button" id="coordPreviewExit">Exit</button></div>
 <button type="button" id="scrollTopBtn" aria-label="Back to top"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg></button>
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-card">
@@ -4028,7 +4030,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.30 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.31 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6261,7 +6263,8 @@
   }
   function teamWings(uid) { return (state.team[uid] && Array.isArray(state.team[uid].wings)) ? state.team[uid].wings : []; }
   // Admin "Preview as Coordinator": the admin sees exactly the coordinator's screens (permissions stay the admin's).
-  state.previewCoord = null;
+  state.previewCoord = null; state.previewPrincipal = false;
+  function principalView() { return !!((state.isPrincipal && !state.canAdmin) || state.previewPrincipal); }
   function coordView() { return (state.isCoordinator && !state.canAdmin && !state.isPrincipal) || !!state.previewCoord; }
   function viewWings() { return state.previewCoord ? state.previewCoord.wings : (state.coordWings || []); }
   function leadWings() { if (state.previewCoord) return state.previewCoord.wings; return state.canAdmin ? ['Pre-Foundation', 'Foundation'] : (state.coordWings || []); }
@@ -7106,7 +7109,7 @@
       <span class="tg-st-acts">${canUndo ? '<button type="button" class="tg-mini" id="tgUndo">↶ Undo</button>' : ''}
       ${editable && pend && doc.pubSnap && tgEverPub(doc) ? '<button type="button" class="tg-mini" id="tgDiscard">✕ Discard changes</button>' : ''}
       ${tgEverPub(doc) ? (editable ? '<button type="button" class="tg-mini" id="tgEditDone">✓ Done</button>' : '<button type="button" class="tg-mini tg-mini-gold" id="tgEdit"><span class="ico i-edit" aria-hidden="true"></span> Edit timetable</button>') : ''}</span></div>
-    ${editable ? '' : '<div class="hv-note tg-lock"><span class="ico i-lock" aria-hidden="true"></span> ' + ((state.isPrincipal && !state.canAdmin) ? 'Published timetable · view only' : 'Published timetable · tap “Edit timetable” to make changes') + '</div>'}`;
+    ${editable ? '' : '<div class="hv-note tg-lock"><span class="ico i-lock" aria-hidden="true"></span> ' + (principalView() ? 'Published timetable · view only' : 'Published timetable · tap “Edit timetable” to make changes') + '</div>'}`;
     html += `<div class="tg-days" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">${days.map((d) => { const n = (doc.cells || []).filter((c) => c.d === d).length; const pn = tgPendDays()[d] || 0; const isPub = (doc.pubDays || []).indexOf(d) !== -1 || (!doc.pubDays && (doc.published || []).length && n); return `<button type="button" class="tg-day${d === state.tg.day ? ' active' : ''}${n ? ' has' : ''}${pn ? ' chg' : ''}${tgDayCls(d)}" data-tg-day="${d}"><b>${WD[dateObj(d).getDay()]}</b><small>${dateObj(d).getDate()}</small>${pn ? `<i class="tg-dn">${pn}</i>` : (isPub ? '<i class="tg-dok">✓</i>' : '')}</button>`; }).join('')}</div>`;
     html += tgHolidayCards(doc, days, editable);
     // paint bar
@@ -9429,15 +9432,15 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
 
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
-    const coordOnly = coordView(); const prin = !!(state.isPrincipal && !state.canAdmin); document.body.classList.toggle('principal-mode', prin); if (prin && state.adminTab === 'settings') { state.adminTab = 'dash'; try { applyAdminTab(); } catch (e) { /* ignore */ } }
+    const coordOnly = coordView(); const prin = principalView(); document.body.classList.toggle('principal-mode', prin); if (prin && state.adminTab === 'settings') { state.adminTab = 'dash'; try { applyAdminTab(); } catch (e) { /* ignore */ } }
     const bar = document.getElementById('coordPreviewBar');
-    if (bar) { bar.hidden = !state.previewCoord; if (state.previewCoord) document.getElementById('coordPreviewWing').textContent = state.previewCoord.wings.join(', '); }
+    if (bar) { bar.hidden = !(state.previewCoord || state.previewPrincipal); const pl = document.getElementById('coordPreviewLbl'); if (pl) pl.textContent = state.previewPrincipal ? 'Principal preview' : 'Coordinator preview'; if (state.previewCoord) document.getElementById('coordPreviewWing').textContent = state.previewCoord.wings.join(', '); else if (state.previewPrincipal) document.getElementById('coordPreviewWing').textContent = 'both wings'; }
     document.body.classList.toggle('coord-mode', coordOnly);
     document.getElementById('navAdmin').style.display = (state.canAdmin || state.isCoordinator) ? 'flex' : 'none';
     const lbl = document.querySelector('#navAdmin span');
     if (lbl) lbl.textContent = prin ? 'Principal' : (coordOnly ? 'Coordinator' : 'Admin');
     ['navAdd', 'navHistory', 'navSchedule'].forEach((id) => { const n = document.getElementById(id); if (n) n.style.display = coordOnly ? 'none' : ''; });
-    document.querySelectorAll('#view-admin .admin-only').forEach((el) => el.classList.toggle('atab-off2', !state.canAdmin || coordOnly));
+    document.querySelectorAll('#view-admin .admin-only').forEach((el) => el.classList.toggle('atab-off2', !state.canAdmin || coordOnly || prin));
     const t0 = document.querySelector('#view-admin .hv-title');
     if (!coordOnly) {
       document.querySelectorAll('#adminWingChips [data-admin-wing]').forEach((b) => { b.style.display = ''; });
@@ -9455,7 +9458,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     }
   }
   function startCoordPreview(wings) {
-    state.previewCoord = { wings: wings.slice() };
+  state.previewPrincipal = false;
+  state.previewCoord = { wings: wings.slice() };
     state.adminReportWing = wings.length === 1 ? wings[0] : 'all';
     state.adminTab = 'dash';
     state.adminSetOpen = null;
@@ -9464,8 +9468,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     renderAdmin();
     window.scrollTo({ top: 0 });
   }
-  function stopCoordPreview() {
-    state.previewCoord = null;
+  function startPrincipalPreview() {
+  state.previewCoord = null; state.previewPrincipal = true;
+  state.adminReportWing = 'all'; state.adminTab = 'dash'; state.adminSetOpen = null;
+  if (state.tt) { state.tt.form = null; state.tt.teacher = 'all'; state.tt.key = ''; }
+  applyRoleUI(); switchTab('admin'); renderAdmin(); window.scrollTo({ top: 0 });
+}
+function stopCoordPreview() {
+  state.previewCoord = null; state.previewPrincipal = false;
     state.adminReportWing = 'all';
     state.adminTab = 'settings';
     if (state.tt) { state.tt.form = null; state.tt.key = ''; }
@@ -9475,6 +9485,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     showToast('Back to Admin');
   }
   document.getElementById('coordPreviewExit').addEventListener('click', stopCoordPreview);
+document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventListener('click', startPrincipalPreview));
   document.getElementById('bellBtn').addEventListener('click', openNotices);
   document.querySelectorAll('[data-preview-wing]').forEach((b) => b.addEventListener('click', () => {
     const w = b.getAttribute('data-preview-wing');
@@ -9678,7 +9689,7 @@ Keep it short (not more than about 1.3 times the original, and under 380 charact
   // ===== AI: fill the timetable grid from a picture (Admin only) =====
   // The AI only READS the picture. What it read is shown first; the app matches classes and subjects to its own lists,
   // asks about anything it is not sure of, and puts the result in the DRAFT only after "Put in draft". Nothing is published.
-  function aiReady() { try { return !!((state.canAdmin || (state.isCoordinator && !state.isPrincipal)) && aiUrl()); } catch (e) { return false; } }
+  function aiReady() { try { return !!(!state.previewPrincipal && (state.canAdmin || (state.isCoordinator && !state.isPrincipal)) && aiUrl()); } catch (e) { return false; } }
   const TP_SYSTEM = `You read a school timetable from a picture and answer with JSON only.
 Rules:
 - Copy every subject exactly as printed (for example "His/Pol.Sc." or "Geo/Eco"); never translate, expand or correct it.
@@ -14809,7 +14820,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const cu = firebase.auth().currentUser;
     document.getElementById('menuHeadEmail').textContent = (cu && cu.email) || '';
     document.getElementById('menuAvatar').innerHTML = document.getElementById('avatarBox').innerHTML;
-    document.getElementById('menuShareAppBtn').style.display = state.canAdmin ? 'flex' : 'none';
+    document.getElementById('menuShareAppBtn').style.display = (state.canAdmin && !state.previewPrincipal) ? 'flex' : 'none';
     renderProfileSal(); renderReminderLead(); try { renderProfileContact(); } catch (e) { /* ignore */ } }
 
   // Drawer navigation is kept in browser history, so the phone's Back button
@@ -15297,7 +15308,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   }
 
   // teachers change their check-in / check-out only for today and yesterday; admin and coordinators any day
-  function canEditSessionsOn(date) { if (state.canAdmin || (state.isCoordinator && !state.isPrincipal)) return true;
+  function canEditSessionsOn(date) { if (!state.previewPrincipal && (state.canAdmin || (state.isCoordinator && !state.isPrincipal))) return true;
   return date >= shiftDateStr(todayStr(), -1); }
   // "(edited 2×, was 9:40 AM)" — only when the time really differs from the first one
   function sessEditMark(s, field) {
@@ -19153,7 +19164,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   ['input', 'change'].forEach((ev) => document.addEventListener(ev, (e) => { const t = e.target; if (t && t.matches && t.matches('input[type="time"][data-ph]')) t.classList.toggle('tp-empty', !t.value); }, true));
   // ---------- Principal: view only (notices and the calendar stay open) ----------
   const PRIN_BLOCK = ['#tgEdit', '#tgEditDone', '#tgPublish', '#tgPublishDay', '#tgMoreList', '#tgMoreList *', '#tgUndo', '#tgDiscard', '#tgFixTeachers', '#tgAddBatch', '#tgAddPer', '#tgSunday', '#tgDayNote', '#tgEditSubj', '.tg-paint', '.tg-paint *', '#tgWrap .tg-table td', '#adminNewExamBtn', '[data-ex-edit]', '[data-ex-photo]', '[data-ex-cancelduty]', '[data-ex-t]', '[data-ex-step]', '[data-force-checkout]', '[data-adm-sess]', '#view-admin .del-btn[data-edit]', '#view-admin .del-btn[data-del]', '#galSelDel', '.dsp-pub'].join(',');
-  document.addEventListener('click', (e) => { if (!state.isPrincipal || state.canAdmin) return; const t = e.target && e.target.closest && e.target.closest(PRIN_BLOCK); if (!t) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); showToast('Principal can only view this'); }, true);
+  document.addEventListener('click', (e) => { if (!principalView()) return; const t = e.target && e.target.closest && e.target.closest(PRIN_BLOCK); if (!t) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); showToast('Principal can only view this'); }, true);
   // ---------- Text size and "Update app now" (Menu → Settings) ----------
   (function textSizeAndUpdate() {
     const KEY = 'ctd_text_size';
