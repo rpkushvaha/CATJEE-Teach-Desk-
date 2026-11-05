@@ -2789,12 +2789,19 @@
   .ent-del { background: none; border: 1px solid var(--line); color: var(--gold); border-radius: 8px; padding: 5px 12px; font-weight: 600; font-size: 13px; cursor: pointer; }
   body.principal-mode .entry-edit { display: none !important; }
   /* Class entry record: teacher first, then his class, then a form */
-  .ent-tfield { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; background: var(--card); font-size: 15px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: left; }
-  .ent-tfield .ph { color: var(--muted); font-weight: 500; }
   button.ent-class { width: 100%; text-align: left; cursor: pointer; font: inherit; color: inherit; }
   .ent-go { font-size: 13px; font-weight: 600; color: var(--muted-2); }
-  .ent-trow { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 4px; border: 0; border-top: 1px solid var(--line); background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
-  .ent-trow small { display: block; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  /* Class entry record: same weights and colours as the other cards of the app */
+  .ent-top { font-weight: 600; }
+  .ent-nm { font-weight: 600; }
+  .ent-sub { font-weight: 400; }
+  .ent-red { color: var(--gold); font-weight: 600; }
+  .ent-grey { font-weight: 500; }
+  .ent-chip, .ent-type { font-weight: 600; }
+  .ent-go { font-weight: 500; }
+  .ent-done { font-weight: 500; }
+  .ent-msg { font-weight: 500; }
+  #entryPrev { margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -3284,7 +3291,7 @@
   <div class="hv-sheet-backdrop" id="enSheetBd"></div>
   <div class="hv-sheet" role="dialog" aria-modal="true" aria-label="Class entry">
   <div class="hv-grab"></div>
-  <button type="button" class="hv-sheet-x" id="enSheetX" aria-label="Close"></button>
+  <button type="button" class="hv-sheet-x" id="enSheetX" aria-label="Close"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   <div id="enSheetBody"></div>
   </div>
   </div>
@@ -3560,6 +3567,10 @@
   <div class="rep-optcard">
   <div class="rep-lbl rep-lbl-s">Batches</div>
   <div class="rseg" id="entrySess"><button type="button" class="chip active" data-entry-sess="morning">Morning</button><button type="button" class="chip" data-entry-sess="evening">Evening</button><button type="button" class="chip" data-entry-sess="all">Both</button></div>
+  </div>
+  <div class="rep-optcard entry-edit" id="entryTeacherWrap" hidden>
+  <label class="rep-lbl rep-lbl-s" for="entryTeacher">Teacher</label>
+  <select class="text-input" id="entryTeacher"><option value="">Choose the teacher</option></select>
   </div>
   <div id="entryFill"></div>
   <div id="entryList"></div>
@@ -4100,7 +4111,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.34 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.35 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14460,7 +14471,9 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const zv = document.getElementById('zoomViewer');
     if (zv && zv.classList.contains('open')) return () => { const c = document.getElementById('zvX'); if (c) c.click(); else zv.classList.remove('open'); };
     const sheet = document.getElementById('hvSheet');
-    if (sheet && sheet.classList.contains('open')) return () => closeHvSheet();
+  if (sheet && sheet.classList.contains('open')) return () => closeHvSheet();
+  const enS = document.getElementById('enSheet');
+  if (enS && enS.classList.contains('open')) return () => enClose();
     const lb = document.getElementById('photoLightboxModal');
     if (lb && lb.classList.contains('active')) return () => closePhotoLightbox();
     const cal = document.getElementById('calendarModal');
@@ -16386,7 +16399,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const E = state.entry; const sp = adminRepSpec(); const from = sp.dates[0]; const to = sp.dates[sp.dates.length - 1]; const day = sp.range === 'day';
     document.querySelectorAll('#entrySess [data-entry-sess]').forEach((c) => c.classList.toggle('active', c.getAttribute('data-entry-sess') === E.ses));
     const tok = ++E.tok; const wing = state.adminReportWing || 'all';
-    try { await entryRetry(); } catch (e) { /* ignore */ }
+    try { if (await entryRetry()) E.savedAt = 0; } catch (e) { /* ignore */ }
     const ckey = `${from}|${day ? 'd' : 'p'}|${wing}`; let cls = E.cls;
     if (force || E.clsKey !== ckey) { cls = []; if (day) { try { cls = await entryCollect(from); } catch (e) { cls = []; } } }
     const skey = `${from}|${to}|${wing}`; let sv;
@@ -16404,31 +16417,28 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   function enClose() { const r = document.getElementById('enSheet'); if (!r) return; r.classList.remove('open'); r.setAttribute('aria-hidden', 'true'); state.entry.formRow = null; }
   function entryTeachers() { const E = state.entry; const map = {}; (E.cls || []).filter((r) => r.ses === E.ses).forEach((r) => { map[r.u] = (map[r.u] || 0) + 1; }); return Object.keys(map).map((u) => ({ u, name: entryName(u), n: map[u] })).sort((x, y) => x.name.localeCompare(y.name)); }
   function entryTypeChip(r) { return r.type === 'SUBSTITUTE' ? '<span class="ent-type sub">SUBSTITUTE</span>' : '<span class="ent-type">SELF</span>'; }
+  function entrySyncTeacherSelect(show) {
+    const wrap = document.getElementById('entryTeacherWrap'); const sel = document.getElementById('entryTeacher'); if (!wrap || !sel) return; const E = state.entry;
+    wrap.hidden = !show; if (!show) return;
+    const ts = entryTeachers(); const sig = ts.map((t) => t.u + '|' + t.name).join(';');
+    if (sel._sig !== sig && document.activeElement !== sel) { sel.innerHTML = '<option value="">Choose the teacher</option>' + ts.map((t) => `<option value="${escapeHtml(t.u)}">${escapeHtml(t.name)}</option>`).join(''); sel._sig = sig; }
+    if (document.activeElement !== sel) sel.value = E.teacher || '';
+  }
   function entryDrawFill() {
     const box = document.getElementById('entryFill'); if (!box) return; const E = state.entry; const day = (state.adminReportRange || 'day') === 'day';
     const note = (t) => `<div class="hv-note" style="text-align:left;">${t}</div>`;
-    if (!day) { box.innerHTML = note('To fill the entry times, choose <b>Day</b> above. For a week or a month you see and download the recorded delays.'); return; }
-    if (E.ses === 'all') { box.innerHTML = note('Choose <b>Morning</b> or <b>Evening</b> to fill the entry times.'); return; }
+    if (!day) { entrySyncTeacherSelect(false); box.innerHTML = note('To fill the entry times, choose <b>Day</b> above. For a week or a month you see and download the recorded delays.'); return; }
+    if (E.ses === 'all') { entrySyncTeacherSelect(false); box.innerHTML = note('Choose <b>Morning</b> or <b>Evening</b> to fill the entry times.'); return; }
     const ts = entryTeachers();
-    if (!ts.length) { box.innerHTML = note('No classes in the published timetable for this day and these batches.'); return; }
-    const tn = E.teacher ? entryName(E.teacher) : '';
-    let h = `<div class="rep-lbl">Teacher</div><button type="button" class="ent-tfield entry-edit" id="entryTeacherBtn"><span class="${tn ? '' : 'ph'}">${tn ? escapeHtml(tn) : 'Tap to choose the teacher'}</span><span>▾</span></button>`;
-    if (E.teacher) {
-      const done = {}; E.saved.forEach((x) => { done[x.id] = x; });
-      const rows = (E.cls || []).filter((r) => r.u === E.teacher && r.ses === E.ses);
-      h += `<div class="rep-lbl entry-edit">${escapeHtml(tn)} · ${E.ses === 'evening' ? 'Evening' : 'Morning'} classes</div>` + rows.map((r) => {
-        const rec = done[r.id]; const place = r.type === 'SUBSTITUTE' && r.f ? ` · in place of ${escapeHtml(entryName(r.f))}` : '';
-        return `<button type="button" class="ent-card ent-class entry-edit${rec ? ' done' : ''}" data-eopen="${escapeHtml(r.id)}"><div class="ent-top"><b>${escapeHtml(entryBatchText(r.bs))}</b>${entryTypeChip(r)}</div><div class="ent-sub">starts ${escapeHtml(formatTimeStr(r.ts))}${place}</div>${rec ? `<div><span class="ent-chip ok">Recorded · ${rec.delayMin} minutes late</span></div>` : '<div class="ent-go">Tap to set the entry time ›</div>'}</button>`;
-      }).join('');
-    }
-    box.innerHTML = h;
-  }
-  function entryOpenTeachers() {
-    const ts = entryTeachers(); const E = state.entry;
-    enOpen(`<div class="hv-d-title">Choose the teacher</div><input class="text-input" id="enSearch" type="search" placeholder="Search a name" autocomplete="off" style="margin:8px 0;"><div id="enTList">${ts.map((t) => `<button type="button" class="ent-trow" data-epick="${escapeHtml(t.u)}" data-ename="${escapeHtml(t.name.toLowerCase())}"><span><b>${escapeHtml(t.name)}</b><small>${t.n} class${t.n === 1 ? '' : 'es'}</small></span></button>`).join('')}</div>`);
-    const q = document.getElementById('enSearch');
-    q.addEventListener('input', () => { const v = q.value.trim().toLowerCase(); document.querySelectorAll('#enTList [data-epick]').forEach((b2) => { b2.style.display = (!v || b2.getAttribute('data-ename').indexOf(v) !== -1) ? '' : 'none'; }); });
-    document.getElementById('enTList').addEventListener('click', (e) => { const b2 = e.target.closest && e.target.closest('[data-epick]'); if (!b2) return; E.teacher = b2.getAttribute('data-epick'); enClose(); E.sig = ''; entryDrawFill(); });
+    if (!ts.length) { entrySyncTeacherSelect(false); box.innerHTML = note('No classes in the published timetable for this day and these batches.'); return; }
+    entrySyncTeacherSelect(true);
+    if (!E.teacher) { box.innerHTML = ''; return; }
+    const tn = entryName(E.teacher); const done = {}; E.saved.forEach((x) => { done[x.id] = x; });
+    const rows = (E.cls || []).filter((r) => r.u === E.teacher && r.ses === E.ses);
+    box.innerHTML = `<div class="rep-lbl entry-edit">${escapeHtml(tn)} · ${E.ses === 'evening' ? 'Evening' : 'Morning'} classes</div>` + rows.map((r) => {
+      const rec = done[r.id]; const place = r.type === 'SUBSTITUTE' && r.f ? ` · in place of ${escapeHtml(entryName(r.f))}` : '';
+      return `<button type="button" class="ent-card ent-class entry-edit${rec ? ' done' : ''}" data-eopen="${escapeHtml(r.id)}"><div class="ent-top"><span class="ent-nm">${escapeHtml(entryBatchText(r.bs))}</span>${entryTypeChip(r)}</div><div class="ent-sub">starts ${escapeHtml(formatTimeStr(r.ts))}${place}</div>${rec ? `<div><span class="ent-chip ok">Recorded · ${rec.delayMin} minutes late</span></div>` : '<div class="ent-go">Tap to set the entry time ›</div>'}</button>`;
+    }).join('');
   }
   function entryOpenClass(id) {
     const E = state.entry; const r = (E.cls || []).find((x) => x.id === id); if (!r) return; E.formRow = r;
@@ -16470,13 +16480,13 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const head = '<div class="rep-lbl">Delays recorded</div>';
     const warn = E.err ? '<div class="hv-note ent-red" style="text-align:left;">Could not read the cloud. Showing only what is on this phone.</div>' : '';
     if (!rows.length) { box.innerHTML = head + '<div class="hv-note" style="text-align:left;">No delay recorded.</div>' + warn; return; }
-    box.innerHTML = head + warn + rows.map((x) => `<div class="ent-card done"><div class="ent-top"><b>${escapeHtml(x.teacherName)}</b><span class="ent-red">${x.delayMin} Minutes</span></div><div class="ent-sub">${escapeHtml(x.batch)} · ${escapeHtml(entryTm(x.startTimeStr))} to ${escapeHtml(entryTm(x.entryTimeStr))} · ${escapeHtml(x.classType)}${multi ? ' · ' + escapeHtml(entryDateShort(x.date)) + ' ' + (x.session === 'evening' ? 'Evening' : 'Morning') : ''}</div><div class="ent-row2">${x._pending ? '<span class="ent-chip wn">Not in the cloud yet, will retry</span>' : '<span class="ent-chip ok">Saved ✓</span>'}<button type="button" class="ent-del entry-edit" data-edel="${escapeHtml(x.id)}">Delete</button></div></div>`).join('');
+    box.innerHTML = head + warn + rows.map((x) => `<div class="ent-card done"><div class="ent-top"><span class="ent-nm">${escapeHtml(x.teacherName)}</span><span class="ent-red">${x.delayMin} Minutes</span></div><div class="ent-sub">${escapeHtml(x.batch)} · ${escapeHtml(entryTm(x.startTimeStr))} to ${escapeHtml(entryTm(x.entryTimeStr))} · ${escapeHtml(x.classType)}${multi ? ' · ' + escapeHtml(entryDateShort(x.date)) + ' ' + (x.session === 'evening' ? 'Evening' : 'Morning') : ''}</div><div class="ent-row2">${x._pending ? '<span class="ent-chip wn">Not in the cloud yet, will retry</span>' : '<span class="ent-chip ok">Saved ✓</span>'}<button type="button" class="ent-del entry-edit" data-edel="${escapeHtml(x.id)}">Delete</button></div></div>`).join('');
   }
   function entryModel() {
     const E = state.entry; const sp = adminRepSpec(); const rows = entryRowsOut(); const day = sp.range === 'day'; const sn = E.ses === 'evening' ? 'Evening' : 'Morning';
     const ws = document.getElementById('adminWingSel'); const wingLabel = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
     let t1; let t2;
-    if (day && E.ses !== 'all') { t1 = `${sn} Batches Teachers' Classes Entry Record ${sp.dates[0] === todayStr() ? 'Today ' + sn + ':' : sn + ':'}`; t2 = entryDateText(sp.dates[0]); }
+    if (day && E.ses !== 'all') { t1 = `${sn} Batches Teachers' Classes Entry Record`; t2 = entryDateText(sp.dates[0]); }
     else if (day) { t1 = "Teachers' Classes Entry Record (Morning and Evening)"; t2 = entryDateText(sp.dates[0]); }
     else { t1 = "Teachers' Classes Entry Record"; t2 = sp.period.replace(/^(Date|Week|Month): /, '') + (E.ses === 'all' ? '' : ' · ' + sn + ' batches'); }
     const fileTag = (day && E.ses !== 'all' ? sn + '-' : '') + sp.fileTag;
@@ -16565,9 +16575,10 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     document.querySelectorAll('#entrySess [data-entry-sess]').forEach((c) => c.addEventListener('click', () => { state.entry.ses = c.getAttribute('data-entry-sess'); entryRender(); }));
     on('entryPdfBtn', () => entryOut('pdf')); on('entryCsvBtn', () => entryOut('csv')); on('entryWaBtn', () => entryOut('wa'));
     const fill = document.getElementById('entryFill');
-    if (fill) fill.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('#entryTeacherBtn')) { entryOpenTeachers(); return; } const c = e.target.closest && e.target.closest('[data-eopen]'); if (c) entryOpenClass(c.getAttribute('data-eopen')); });
+    if (fill) fill.addEventListener('click', (e) => { const c = e.target.closest && e.target.closest('[data-eopen]'); if (c) entryOpenClass(c.getAttribute('data-eopen')); });
     const lst = document.getElementById('entryList'); if (lst) lst.addEventListener('click', (e) => { const d = e.target.closest && e.target.closest('[data-edel]'); if (d) entryDelete(d.getAttribute('data-edel')); });
     on('enSheetBd', enClose); on('enSheetX', enClose);
+    const tsel = document.getElementById('entryTeacher'); if (tsel) tsel.addEventListener('change', () => { state.entry.teacher = tsel.value; state.entry.sig = ''; entryDrawFill(); });
     const wsel = document.getElementById('adminWingSel'); if (wsel) wsel.addEventListener('change', () => setTimeout(() => { if ((state.adminRepKind || '') === 'entry') entryRender(true); }, 0));
   })();
   const REP_NOTE = { entry: 'Classes that began more than 5 minutes late. Up to 5 minutes is not counted. Set the entry time of the teacher, then get the record as a picture, PDF or Excel.',  full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
