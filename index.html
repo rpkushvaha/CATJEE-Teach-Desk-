@@ -2802,6 +2802,9 @@
   .ent-done { font-weight: 500; }
   .ent-msg { font-weight: 500; }
   #entryPrev { margin-top: 14px; }
+  .chip[disabled] { opacity: .5; pointer-events: none; }
+  #addrRows .team-row { display: block; }
+  #addrRows .team-name, #addrRows .team-info { display: block; width: 100%; max-width: none; white-space: normal; }
 </style>
 </head>
 <body>
@@ -2860,7 +2863,7 @@
       <div class="chips sal-chips" id="authSalChips">
         <button type="button" class="chip" data-sal="sir">Sir</button>
         <button type="button" class="chip" data-sal="maam">Ma'am</button>
-        <button type="button" class="chip" data-sal="name">Name only</button>
+        <button type="button" class="chip" data-sal="ji">Ji</button>
       </div>
       <div class="sal-preview" id="authSalPreview"></div>
     </div>
@@ -3620,6 +3623,11 @@
         <div id="staffIdsBlock" class="sid-block"></div>
         <div id="teamRows" style="display:flex; flex-direction:column; margin-top:6px;"></div>
       </div>
+  <div class="panel set-acc admin-only" id="adminAddrPanel" data-atab="settings">
+  <div class="panel-title">How to address teachers</div>
+  <div class="admin-sub" style="margin:0;">Sir, Ma'am or Ji after the name, for teachers who have not chosen their own in Profile. A teacher's own choice always comes first.</div>
+  <div id="addrRows" style="display:flex; flex-direction:column; margin-top:6px;"></div>
+  </div>
   <div class="panel set-acc" id="adminPushPanel" data-atab="settings" hidden>
         <div class="panel-title"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Phone notifications</div>
         <div class="admin-sub" style="margin:0;">Alerts that reach a teacher's phone even when the app is closed. Each teacher turns them on once, on the Today page.</div>
@@ -3909,7 +3917,7 @@
           <div class="chips sal-chips" id="profileSalChips">
             <button type="button" class="chip" data-psal="sir">Sir</button>
             <button type="button" class="chip" data-psal="maam">Ma'am</button>
-            <button type="button" class="chip" data-psal="name">Name only</button>
+            <button type="button" class="chip" data-psal="ji">Ji</button>
           </div>
           <div class="sal-preview" id="profileSalPreview"></div> </div>
       <div class="dcard" id="profileContactCard">
@@ -4111,7 +4119,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.36 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.37 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4834,7 +4842,7 @@
   }
   function renderHello() {
     const greet = greetingWord();
-    const who = salutedName(state.user && state.user.name, state.user && state.user.salutation);
+    const who = salutedName(state.user && state.user.name, mySal());
     const title = who ? `${greet}, ${who}` : greet;
     const nowD = new Date();
     const dateTxt = `${nowD.toLocaleDateString('en-GB', { weekday: 'long' })}, ${nowD.getDate()} ${nowD.toLocaleDateString('en-GB', { month: 'long' })}`;
@@ -5882,7 +5890,7 @@
   function selfTrepSet() {
     const r = hvSelfRange(); const t = state.trep; const me = state.teacherId;
     t.self = true; t.mode = r.mode; t.selfRange = { from: r.from, to: r.to }; t.sub = 'all'; t.data = state.hvSelf.data; t.busy = false; t.key = `self|${r.from}|${r.to}`;
-    state.adminNames = state.adminNames || {}; if (!state.adminNames[me]) state.adminNames[me] = { name: (state.user && state.user.name) || 'Teacher', sal: (state.user && state.user.salutation) || '' };
+    state.adminNames = state.adminNames || {}; if (!state.adminNames[me]) state.adminNames[me] = { name: (state.user && state.user.name) || 'Teacher', own: salNorm(state.user && state.user.salutation), sal: mySal() };
   }
   const selfDay = (d) => dateObj(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   function selfSubCounted(D) { return D.subList.filter((x) => x.status === 'filled').reduce((a, x) => a + x.units, 0); }
@@ -6286,7 +6294,7 @@
       snap.docs.forEach((d) => {
         const data = d.data() || {};
         list.push(d.id);
-        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', sal: data.salutation || '', wa: data.whatsapp || '', bd: data.birthMd || '', by: data.birthY || '' };
+        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data.salutation), sal: salNorm(data.salutation) || addrOf(d.id), wa: data.whatsapp || '', bd: data.birthMd || '', by: data.birthY || '' };
         resolvedAdminNameIds.add(d.id);
       });
       state.adminTeacherIds = list;
@@ -6356,9 +6364,27 @@
       const t = {};
       snap.docs.forEach((d) => { t[d.id] = d.data() || {}; });
       state.team = t;
-    try { const k0 = Object.keys(t).filter((c) => isPendingUid(c)).join(','); mergePendingStaff(); if (k0 !== state._pendKey) { state._pendKey = k0; syncTeacherData(); } linkPendingStaff(); } catch (e) { /* ignore */ }
+  try { refreshAdminSal(); } catch (e) { /* ignore */ }
+  try { const k0 = Object.keys(t).filter((c) => isPendingUid(c)).join(','); mergePendingStaff(); if (k0 !== state._pendKey) { state._pendKey = k0; syncTeacherData(); } linkPendingStaff(); } catch (e) { /* ignore */ }
     if (state.tab === 'admin') renderAdmin();
   }, () => {});
+  }
+  async function addrSet(uid, v) {
+    if (!uid || !salNorm(v) || !state.db) return;
+    const own = state.adminNames[uid] && state.adminNames[uid].own; if (own) return;
+    try { await state.db.doc('team/' + uid).set({ addr: v }, { merge: true }); } catch (err) { flashOffline(err); return; }
+    state.team = Object.assign({}, state.team, { [uid]: Object.assign({}, state.team[uid] || {}, { addr: v }) });
+    refreshAdminSal(); showToast('Saved'); try { renderTeamPanel( ); } catch (e) { /* ignore */ } try { renderAddrPanel(); } catch (e) { /* ignore */ }
+  }
+  function renderAddrPanel() {
+    const el = document.getElementById('addrRows'); if (!el) return;
+    const ids = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u)).sort((a, b) => ((state.adminNames[a] && state.adminNames[a].name) || '').localeCompare((state.adminNames[b] && state.adminNames[b].name) || ''));
+    if (!ids.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">People appear here after they sign in to the app once.</div>'; return; }
+    el.innerHTML = ids.map((u) => { const n = state.adminNames[u] || {}; const own = n.own || ''; const ad = addrOf(u);
+      const note = own ? `Teacher's own choice: ${salWord(own)} (used)` : (ad ? 'Not chosen by the teacher. Your choice is used.' : 'Not chosen by the teacher');
+      return `<div class="team-row" style="padding:10px 0;"><div class="team-name">${escapeHtml(n.name || 'Unnamed')}</div><div class="team-info" style="margin:2px 0 8px;">${escapeHtml(note)}</div><div class="chips sal-chips">${['sir', 'maam', 'ji'].map((v) => `<button type="button" class="chip${(own || ad) === v ? ' active' : ''}" data-addr-set="${v}" data-uid="${escapeHtml(u)}"${own ? ' disabled' : ''}>${salWord(v)}</button>`).join('')}</div></div>`; }).join('');
+    el.querySelectorAll('[data-addr-set]').forEach((b) => b.addEventListener('click', () => addrSet(b.getAttribute('data-uid'), b.getAttribute('data-addr-set'))));
+    try { renderSettingsAccordion(); } catch (e) { /* ignore */ }
   }
   function renderTeamPanel() {
     const el = document.getElementById('teamRows');
@@ -6386,7 +6412,8 @@
           <button type="button" class="chip${(coord || prin) ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
   <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
   <button type="button" class="chip${prin ? ' active' : ''}" data-team-role="principal" data-uid="${uid}">Principal</button>
-        </div>
+  </div>
+  ${isPendingUid(uid) ? '' : (() => { const own = (state.adminNames[uid] && state.adminNames[uid].own) || ''; const ad = addrOf(uid); return `<div class="chips team-chips"><span class="team-lbl">Address</span>${['sir', 'maam', 'ji'].map((v) => `<button type="button" class="chip${(own ? own : ad) === v ? ' active' : ''}" data-team-addr="${v}" data-uid="${uid}"${own ? ' disabled' : ''}>${salWord(v)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">${own ? `The teacher chose ${salWord(own)} in Profile. That is used.` : (ad ? 'The teacher has not chosen. Your choice is used.' : 'The teacher has not chosen. Choose how to address this teacher.')}</div>`; })()}
         <div class="chips team-chips">
           <span class="team-lbl">Wing</span>
           <button type="button" class="chip${w.indexOf('Pre-Foundation') !== -1 ? ' active' : ''}" data-team-wing="Pre-Foundation" data-uid="${uid}">Pre-Foundation</button>
@@ -6401,13 +6428,14 @@
     };
     // one person open at a time; tapping the row opens or closes it
     el.querySelectorAll('[data-team-open]').forEach((h) => {
-      const tog = (e) => { if (e.target.closest('[data-team-mkid]')) return; const u = h.getAttribute('data-team-open'); state.teamOpen = state.teamOpen === u ? null : u; renderTeamPanel(); };
+      const tog = (e) => { if (e.target.closest('[data-team-mkid]')) return; const u = h.getAttribute('data-team-open'); state.teamOpen = state.teamOpen === u ? null : u; renderTeamPanel(); try { renderAddrPanel(); } catch (e) { /* ignore */ } };
       h.addEventListener('click', tog); h.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tog(e); } });
     });
     el.querySelectorAll('[data-team-remind]').forEach((b) => b.addEventListener('click', teamRemind));
     el.querySelectorAll('[data-team-copy]').forEach((b) => b.addEventListener('click', teamCopyNumbers));
     el.querySelectorAll('[data-team-wa]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const n = waNumber(b.getAttribute('data-team-wa')); if (n) window.open('https://wa.me/' + n, '_blank'); }));
-    el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
+    el.querySelectorAll('[data-team-addr]').forEach((b) => b.addEventListener('click', () => addrSet(b.getAttribute('data-uid'), b.getAttribute('data-team-addr'))));
+  el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-uid'); const role = b.getAttribute('data-team-role');
   const cur = isPrincipalUid(uid) ? 'principal' : (isCoordUid(uid) ? 'coordinator' : 'teacher'); if (role === cur) return;
       const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person';
@@ -6482,8 +6510,8 @@
   function staffInfo(code) { const m = (state.staffInfoMem && state.staffInfoMem[code]) || null; const t = (state.team && state.team[code]) || null; return { name: String((m && m.name) || (t && t.name) || '').trim(), sal: (m && m.sal) || (t && t.salutation) || '', wa: String((m && m.wa) || (t && t.whatsapp) || '') }; }
   function staffGreeting(code) {
     const i = staffInfo(code); const first = i.name.split(/\s+/)[0] || '';
-    if (first) return i.sal === 'sir' ? `Hello ${first} Sir,` : (i.sal === 'maam' ? `Hello ${first} Ma'am,` : `Hello ${first},`);
-    return i.sal === 'sir' ? 'Hello Sir,' : (i.sal === 'maam' ? "Hello Ma'am," : 'Hello,');
+    if (first) return i.sal === 'sir' ? `Hello ${first} Sir,` : (i.sal === 'maam' ? `Hello ${first} Ma'am,` : (i.sal === 'ji' ? `Hello ${first} Ji,` : `Hello ${first},`));
+  return i.sal === 'sir' ? 'Hello Sir,' : (i.sal === 'maam' ? "Hello Ma'am," : 'Hello,');
   }
   function staffShareText(code) {
     const link = location.href.split('#')[0].split('?')[0];
@@ -6504,8 +6532,8 @@
     } else if (f) {
       html += `<div class="sid-form"><div class="sv-form-head"><div class="panel-title" style="margin:0;">New Staff ID</div><button type="button" class="hv-sheet-x" id="sidX" aria-label="Close" style="position:static;"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
         <div class="team-lbl">Teacher details (optional: fill the name to add the teacher now)</div>
-  <input class="text-input" id="sidName" type="text" placeholder="Name" value="${escapeHtml(f.name || '')}" autocomplete="off"><div class="sal-preview" style="margin:-2px 0 4px;">The name and Sir / Ma'am are used in the WhatsApp message.</div>
-  <div class="chips team-chips"><span class="team-lbl">Address</span><button type="button" class="chip${f.sal === 'sir' ? ' active' : ''}" data-sid-sal="sir">Sir</button><button type="button" class="chip${f.sal === 'maam' ? ' active' : ''}" data-sid-sal="maam">Ma'am</button><button type="button" class="chip${f.sal === 'name' ? ' active' : ''}" data-sid-sal="name">Name only</button></div>
+  <input class="text-input" id="sidName" type="text" placeholder="Name" value="${escapeHtml(f.name || '')}" autocomplete="off"><div class="sal-preview" style="margin:-2px 0 4px;">The name and Sir / Ma'am / Ji are used in the WhatsApp message.</div>
+  <div class="chips team-chips"><span class="team-lbl">Address</span><button type="button" class="chip${f.sal === 'sir' ? ' active' : ''}" data-sid-sal="sir">Sir</button><button type="button" class="chip${f.sal === 'maam' ? ' active' : ''}" data-sid-sal="maam">Ma'am</button><button type="button" class="chip${f.sal === 'ji' ? ' active' : ''}" data-sid-sal="ji">Ji</button></div>
   <input class="text-input" id="sidWa" type="tel" inputmode="numeric" placeholder="WhatsApp number (optional)" value="${escapeHtml(f.wa || '')}">
   <div style="display:flex; gap:8px;"><select class="text-input" id="sidBdDay" aria-label="Birthday day"></select><select class="text-input" id="sidBdMon" aria-label="Birthday month"></select><select class="text-input" id="sidBdYear" aria-label="Birthday year"></select></div>
   <div class="team-lbl">Subjects (optional: fills Teacher Mapping where nobody is set yet)</div>
@@ -9611,7 +9639,8 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     if (id === 'adminMappingPanel') return `${Object.keys(state.teacherMap || {}).length} set`;
     if (id === 'adminWeeklyOffPanel') return (state.weeklyOff || []).join(', ') || 'None';
     if (id === 'adminTeamPanel') { const ids = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u)); const c = ids.filter(isCoordUid).length; return `${ids.length - c} teacher${ids.length - c === 1 ? '' : 's'} · ${c} coordinator${c === 1 ? '' : 's'}`; }
-    if (id === 'adminCampusPanel') return /^Set/.test(document.getElementById('campusLocText').textContent) ? 'Set' : 'Not set';
+    if (id === 'adminAddrPanel') { const ids = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u)); const n = ids.filter((u) => !(state.adminNames[u] && state.adminNames[u].sal)).length; return n ? `${n} not set` : 'All set'; }
+  if (id === 'adminCampusPanel') return /^Set/.test(document.getElementById('campusLocText').textContent) ? 'Set' : 'Not set';
     if (id === 'adminContactPanel') return (document.getElementById('directorPhoneInput').value || document.getElementById('directorEmailInput').value) ? 'Set' : 'Not set';
     return '';
   }
@@ -10264,7 +10293,7 @@ Rules:
   const bdHits = (date) => (state.birthdays || []).filter((b) => mdOn(b.md, date));
   const calHasBd = (date) => bdHits(date).length > 0;
   // someone else's birthday: the FULL name and Sir / Ma'am after it (two teachers can both be "Ravi"); your own card keeps the short name
-  function salFull(name, sal) { const n = String(name || '').trim().replace(/\s+/g, ' '); if (!n) return ''; return sal === 'sir' ? n + ' Sir' : sal === 'maam' ? n + " Ma'am" : n; }
+  function salFull(name, sal) { const n = String(name || '').trim().replace(/\s+/g, ' '); if (!n) return ''; return sal === 'sir' ? n + ' Sir' : sal === 'maam' ? n + " Ma'am" : sal === 'ji' ? n + ' Ji' : n; }
   const bdName = (b) => salFull(b.name, b.sal) || 'a teacher';
   const bdShort = (b) => salutedName(b.name, b.sal) || b.name || 'a teacher';
   function calBdDateIn(m, b) { const y = Number(m.slice(0, 4)); const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; return b.md === '02-29' && !leap ? `${m}-28` : `${m}-${b.md.slice(3)}`; }
@@ -10333,7 +10362,7 @@ Rules:
   const bdKey = (b) => b.id || b.uid || bdName(b);
   function bdWish(id, name) {
     const b = (state.birthdays || []).find((x) => x.id === id); const num = b ? calWa(b) : '';
-    const me = salFull(state.user && state.user.name, state.user && state.user.salutation);
+    const me = salFull(state.user && state.user.name, mySal());
     const msg = `Happy Birthday, ${name}! 🎂🎉 Wishing you a wonderful year ahead.${me ? ' — ' + me : ' Team CATJEE'}`;
     window.open('https://wa.me/' + (num || '') + '?text=' + encodeURIComponent(msg), '_blank');
     bdWishedAdd(id || name); renderBdayCard();
@@ -10633,7 +10662,7 @@ Rules:
   try { await state.db.doc('team/' + code).delete(); delete t2[code]; }
   catch (e) { if (e && e.code === 'permission-denied') { await state.db.doc('team/' + code).set({ status: 'removed', pending: false, removedAt: Date.now() }, { merge: true }); t2[code] = Object.assign({}, t2[code] || {}, { status: 'removed', pending: false }); } else throw e; }
   state.team = t2;
-    try { mergePendingStaff(); ttCacheStale(); renderTeamPanel(); } catch (e) { /* ignore */ }
+    try { mergePendingStaff(); ttCacheStale(); renderTeamPanel(); try { renderAddrPanel(); } catch (e) { /* ignore */ } } catch (e) { /* ignore */ }
   }
   // ---------- A teacher added before he had an account joins with his Staff ID: everything that was set on his Staff ID moves to his account ----------
   let linkingStaff = false;
@@ -10678,6 +10707,7 @@ Rules:
     if (pend.principal) await state.db.doc('team/' + uid).set({ principal: true }, { merge: true });
   await state.db.doc('team/' + code).set({ joinedUid: uid, pending: false, linkedAt: Date.now() }, { merge: true });
     state.team = Object.assign({}, state.team, { [code]: Object.assign({}, pend, { joinedUid: uid, pending: false }) });
+  { const pa = salNorm(pend.salutation); if (pa && !addrOf(uid)) { try { await state.db.doc('team/' + uid).set({ addr: pa }, { merge: true }); state.team = Object.assign({}, state.team, { [uid]: Object.assign({}, state.team[uid] || {}, { addr: pa }) }); refreshAdminSal(); } catch (e) { /* the Admin can set it later */ } } }
     try { ttCacheStale(); await loadAdminTeachers(true); } catch (e) { /* ignore */ }
     showToast(`${pend.name || 'The teacher'} has joined · the classes are on the account now`);
   }
@@ -10727,7 +10757,7 @@ Rules:
   }
   function watchRole(db, uid) {
     unsubscribers.push(db.doc('team/' + uid).onSnapshot((snap) => {
-      const td = snap.data() || {}; const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
+      const td = snap.data() || {}; { const ad = salNorm(td.addr); if (ad !== (state.myAddr || '')) { state.myAddr = ad; try { renderHello(); renderProfileSal(); } catch (e) { /* ignore */ } } } const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
       if (td.status === 'removed' && !state.canAdmin) { if (!state.accessRemoved) { state.accessRemoved = true; try { firebase.auth().signOut(); } catch (e) { /* ignore */ } showAuthScreen(); showAuthError('Your access to CATJEE Teach Desk has been removed by the admin. Please contact the director if this is a mistake.'); } return; }
       const prin = co && (td.principal === true || !!state.principalViaId); const wasP = !!state.isPrincipal; const was = state.isCoordinator; const wings2 = (prin && !wings.length) ? ['Pre-Foundation', 'Foundation'] : wings; if (co === was && prin === wasP && JSON.stringify(wings2) === JSON.stringify(state.coordWings || [])) return;
   state.isCoordinator = co; state.isPrincipal = prin; state.coordWings = wings2; roleFollow(co !== was ? (co ? 'You are now a Coordinator' : 'Your role is now Teacher') : '');
@@ -11272,7 +11302,7 @@ Rules:
     if (state.canAdmin) {
       subscribeStaffIds();
       const tp = document.getElementById('adminTeamPanel');
-      if (!(tp && tp.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) renderTeamPanel();
+      if (!(tp && tp.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) renderTeamPanel(); try { renderAddrPanel(); } catch (e) { /* ignore */ }
       if (!state.staffForm && !state.lastStaffCode) renderStaffIdsBlock();
     }
     if (state.adminTab === 'tt') renderTimetable();
@@ -12409,7 +12439,7 @@ Rules:
   }
   const trepFmt = (v) => (v ? String(Math.round(v * 10) / 10) : '');
   // Mr. / Ms. before the name: from "Address me as" (Sir → Mr., Ma'am → Ms.); a title tapped in the report wins
-  function trepTitleOf(u) { const t = (state.staffTitles || {})[u]; if (t) return t; const sal = state.adminNames[u] && state.adminNames[u].sal; return sal === 'maam' ? 'Ms.' : 'Mr.'; }
+  function trepTitleOf(u) { const t = (state.staffTitles || {})[u]; if (t) return t; const sal = state.adminNames[u] && state.adminNames[u].sal; return sal === 'maam' ? 'Ms.' : (sal === 'sir' ? 'Mr.' : ''); }
   function trepName(u) { const t = trepTitleOf(u); const n = ttName(u); return t ? `${t} ${n}` : n; }
   async function trepToggleTitle(u) {
     const cur = trepTitleOf(u); const next = cur === 'Mr.' ? 'Ms.' : 'Mr.';
@@ -13462,7 +13492,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const newNames = {};
       results.forEach(({ id, data }) => {
         resolvedAdminNameIds.add(id);
-        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher', sal: (data && data.salutation) || '' };
+        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data && data.salutation), sal: salNorm(data && data.salutation) || addrOf(id) };
       });
       state.adminNames = Object.assign({}, state.adminNames, newNames);
       const listEl = document.getElementById('adminTeacherList');
@@ -14897,11 +14927,11 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
 
   function renderProfileSalLead() { renderReminderLead(); }
   function renderProfileSal() {
-    const sal = (state.user && state.user.salutation) || '';
-    document.querySelectorAll('#profileSalChips [data-psal]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-psal') === sal));
-    const who = salutedName(state.user && state.user.name, sal);
-    const pv = document.getElementById('profileSalPreview');
-    if (pv) pv.textContent = (sal && who) ? `You'll see: ${greetingWord()}, ${who}` : 'Not chosen yet. Your first name is shown for now.';
+  const own = salNorm(state.user && state.user.salutation); const eff = mySal();
+  document.querySelectorAll('#profileSalChips [data-psal]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-psal') === own));
+  const who = salutedName(state.user && state.user.name, eff);
+  const pv = document.getElementById('profileSalPreview');
+  if (pv) pv.textContent = (own && who) ? `You'll see: ${greetingWord()}, ${who}` : ((eff && who) ? `Set by the Admin: ${who}. Choose your own to change it.` : 'Not chosen yet. Your first name is shown for now.');
   }
   document.querySelectorAll('#profileSalChips [data-psal]').forEach((b) => b.addEventListener('click', async () => {
     const sal = b.getAttribute('data-psal');
@@ -15317,7 +15347,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   }
   function ciUtt(text) { const u = new SpeechSynthesisUtterance(text); const v = ciVoiceCache || ciPickVoice(); u.lang = (v && v.lang) || 'en-IN'; u.rate = ciRate(); u.volume = 0.85; if (v) { u.voice = v; ciVoiceCache = v; } return u; }
   function ciSpeakNow(text) { try { if (!('speechSynthesis' in window)) return; if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel(); speechSynthesis.speak(ciUtt(text)); } catch (e) { /* ignore */ } }
-  function ciSample() { const who = salutedName(state.user && state.user.name, state.user && state.user.salutation); return 'Good ' + ciPart() + (who ? ', ' + who : '') + '.'; }
+  function ciSample() { const who = salutedName(state.user && state.user.name, mySal()); return 'Good ' + ciPart() + (who ? ', ' + who : '') + '.'; }
   (function bindVoiceBox() {
     const sel = document.getElementById('ciVoiceSel'); if (sel) sel.addEventListener('change', () => { try { if (sel.value) localStorage.setItem(CI_VOICE_KEY, sel.value); else localStorage.removeItem(CI_VOICE_KEY); } catch (e) { /* ignore */ } ciVoiceCache = null; ciVoiceCache = ciPickVoice(); ciVoiceRender(); ciSpeakNow(ciSample()); });
     const tb = document.getElementById('ciVoiceTest'); if (tb) tb.addEventListener('click', () => ciSpeakNow(ciSample()));
@@ -15345,7 +15375,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   try { if ('speechSynthesis' in window && speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', () => { ciVoiceCache = null; ciVoiceCache = ciPickVoice(); ciVoiceRender(); }); } catch (e) { /* ignore */ }
   function ciAfterCheck(checkingIn) {
     ciTing(checkingIn);
-    const who = salutedName(state.user && state.user.name, state.user && state.user.salutation); const nm = who ? ', ' + who : ''; const part = ciPart();
+    const who = salutedName(state.user && state.user.name, mySal()); const nm = who ? ', ' + who : ''; const part = ciPart();
     if (checkingIn) {
       const day = todayStr(); let seen = ''; try { seen = localStorage.getItem(CI_GREET_KEY) || ''; } catch (e) { seen = ''; }
       const parts = seen.indexOf(day + ':') === 0 ? seen.slice(day.length + 1).split(',').filter(Boolean) : [];
@@ -18587,13 +18617,21 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.7 19.7 0 0 1 4.22-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a19.86 19.86 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
   });
 
-  // ----- "Address me as" (Sir / Ma'am / Name only) -----
+  // ----- "Address me as" (Sir / Ma'am / Ji). The teacher's own choice wins; if he has not chosen, the Admin's choice is used -----
+  const SAL_SET = ['sir', 'maam', 'ji'];
+  function salNorm(v) { return SAL_SET.indexOf(v) !== -1 ? v : ''; }
+  function mySal() { return salNorm(state.user && state.user.salutation) || salNorm(state.myAddr); }
+  function addrOf(uid) { const t = state.team && state.team[uid]; return salNorm(t && t.addr); }
+  function refreshAdminSal() { const n = state.adminNames || {}; Object.keys(n).forEach((u) => { if (n[u] && n[u].own !== undefined) n[u].sal = n[u].own || addrOf(u); }); }
+  function salWord(v) { return v === 'sir' ? 'Sir' : v === 'maam' ? "Ma'am" : v === 'ji' ? 'Ji' : ''; }
+  
   function salutedName(fullName, sal) {
     const first = String(fullName || '').trim().split(/\s+/)[0] || '';
     if (!first) return '';
     if (sal === 'sir') return `${first} Sir`;
     if (sal === 'maam') return `${first} Ma'am`;
-    return first;
+  if (sal === 'ji') return `${first} Ji`;
+  return first;
   }
   function greetingWord() {
     const hr = new Date().getHours();
@@ -19410,7 +19448,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   // Admin Settings: the same rows, in four small groups
   (function organiseAdminSettings() {
-    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Timetable', ['adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Exams', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+    const order = [['People', ['adminTeamPanel', 'adminAddrPanel', 'adminMappingPanel', 'adminContactPanel']], ['Timetable', ['adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Exams', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
       const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
