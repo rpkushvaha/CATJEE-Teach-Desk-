@@ -2825,6 +2825,13 @@
   @media (prefers-reduced-motion: no-preference) { #view-today .status-card.in .status-dot::after { content: ''; position: absolute; inset: 0; border-radius: 999px; background: rgba(22,163,74,.5); animation: scDotPulse 2.4s ease-out infinite; } }
   @keyframes scDotPulse { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(2.6); opacity: 0; } }
   #view-today #sessionsSection { border-top: 1px solid var(--line); padding-top: 8px; }
+  /* The sessions list inside the check-in card: room to show the whole time ("9:27 AM"), also with a larger text size on the phone */
+  #view-today #sessionsList .class-card { padding: 10px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
+  #view-today #sessionsList .class-card:first-child { border-top: 0; padding-top: 2px !important; }
+  #view-today #sessionsList .sess-two { flex-wrap: wrap; }
+  #view-today #sessionsList .sess-two > div { flex: 1 1 150px !important; min-width: 0; }
+  #view-today #sessionsList input[type="time"] { padding-left: 9px !important; padding-right: 32px !important; background-position: right 9px center !important; }
+  #view-today #sessionsList input[type="time"].tp-empty[data-ph] { background-position: right 9px center, left 9px center !important; }
 </style>
 </head>
 <body>
@@ -4135,7 +4142,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.39 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.40 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -15505,7 +15512,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
             <div class="class-title" style="font-size:13px;">Session ${i + 1}${s.out == null ? ' · In progress' : ''}${s.setLater ? ' · <span style="color:var(--gold);">check-in time set later</span>' : ''}${sessEdited(s) ? ' · <span style="color:var(--gold);">edited</span>' : ''}</div>
             <button class="del-btn" data-del-session="${s.id}" aria-label="Delete session">${svgTrash()}</button>
           </div>
-          <div style="display:flex; gap:8px;">
+          <div class="sess-two" style="display:flex; gap:8px;">
             <div style="flex:1;">
               <label style="font-size:13px; font-weight:600; color:var(--muted-2);">Check-in</label>
               <input class="text-input" type="time" data-session-field="in" data-session-id="${s.id}" value="${inVal}" style="margin-top:4px; padding:9px 10px;">
