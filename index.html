@@ -2813,8 +2813,6 @@
   #view-today .sess-chip[hidden] { display: none; }
   #view-today .sess-chip svg { display: block; transition: transform .2s; }
   #view-today .sess-chip[aria-expanded="true"] svg { transform: rotate(180deg); }
-  #view-today .sc-tod { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; background: linear-gradient(160deg, var(--sc-i1, #FFE9C7), var(--sc-i2, #FFD8A8)); color: var(--sc-ifg, #B45309); box-shadow: 0 0 16px var(--sc-glow, rgba(251,146,60,.5)); }
-  #view-today .sc-tod[hidden] { display: none; }
   #view-today .status-card.pre .timer { display: none; }
   #view-today #sessionCountLabel { color: var(--muted); font-weight: 500; font-size: 13px; margin-top: 4px; }
   #view-today #sessionCountLabel:empty { display: none; }
@@ -3011,7 +3009,7 @@
   <div class="sc-sub" id="scSub"></div>
   </div>
   <button type="button" class="sess-chip" id="sessToggle" aria-expanded="false" hidden><span id="sessCount"></span><svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-  <div class="sc-tod" id="scTod" aria-hidden="true" hidden></div>
+  
   </div>
   <div class="timer">
   <div class="timer-num num" id="timerNum">00:00:00</div>
@@ -4147,7 +4145,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.41 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.42 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4690,15 +4688,8 @@
     sessLabel.textContent = bc ? `${bc} break${bc === 1 ? '' : 's'} · ${bf}${bc > 1 ? ' in all' : ''}` : '';
   }
   {
-    const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes(); const openMs = (c.checkedIn && c.checkInAt) ? Date.now() - c.checkInAt : 0;
-    let acc; let sky = false;
-    if (onLeaveToday) acc = [217, 119, 6];
-    else if (c.checkedIn) acc = openMs >= 12 * 3600000 ? [217, 119, 6] : [22, 163, 74];
-    else if (n > 0) acc = [100, 116, 139];
-    else { acc = skyRgb(mins); sky = true; }
-    applyCardColours(card, acc);
-    const tod = document.getElementById('scTod');
-    if (tod) { tod.hidden = !(beforeFirst && !onLeaveToday); const hr = now.getHours(); const kind = (hr >= 5 && hr < 12) ? 'rise' : ((hr >= 12 && hr < 17) ? 'sun' : 'moon'); if (tod.getAttribute('data-k') !== kind) { tod.setAttribute('data-k', kind); tod.innerHTML = kind === 'rise' ? svgSunrise() : (kind === 'sun' ? svgSun() : svgMoon()); } }
+    const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes();
+    applyCardColours(card, onLeaveToday ? [217, 119, 6] : skyRgb(mins));
   }
 
     if (c.checkedIn) {
@@ -4724,19 +4715,14 @@
   }
 
   // the colour of the sky at a given minute of the day (it glides from dawn orange to noon gold, dusk violet and night indigo)
-  const SKY_KEYS = [[0, [99, 102, 241]], [270, [99, 102, 241]], [330, [249, 115, 22]], [480, [251, 146, 60]], [600, [245, 158, 11]], [900, [245, 158, 11]], [1020, [234, 124, 58]], [1080, [168, 85, 247]], [1170, [99, 102, 241]], [1440, [99, 102, 241]]];
+  const SKY_KEYS = [[0, [99, 102, 241]], [300, [99, 102, 241]], [540, [249, 115, 22]], [720, [245, 158, 11]], [1020, [245, 158, 11]], [1095, [234, 124, 58]], [1140, [147, 51, 234]], [1215, [99, 102, 241]], [1440, [99, 102, 241]]];
   function skyRgb(mins) { for (let i = 1; i < SKY_KEYS.length; i++) { const a = SKY_KEYS[i - 1]; const b = SKY_KEYS[i]; if (mins <= b[0]) { const t = (mins - a[0]) / Math.max(1, b[0] - a[0]); return [0, 1, 2].map((k) => Math.round(a[1][k] + (b[1][k] - a[1][k]) * t)); } } return SKY_KEYS[SKY_KEYS.length - 1][1]; }
   function isDarkUi() { const th = document.documentElement.getAttribute('data-theme'); return th === 'dark' || (th !== 'light' && !!window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
   function applyCardColours(card, acc) {
     const dark = isDarkUi(); const mix = (c, w, t) => c.map((v, i) => Math.round(v + (w[i] - v) * t)); const rgb = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`; const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
     const bar = dark ? mix(acc, [255, 255, 255], 0.15) : acc;
-    card.style.setProperty('--sc-accent', rgb(bar)); card.style.setProperty('--sc-tint', rgba(acc, dark ? 0.16 : 0.10));
-    card.style.setProperty('--sc-i1', dark ? rgba(acc, 0.34) : rgb(mix(acc, [255, 255, 255], 0.78))); card.style.setProperty('--sc-i2', dark ? rgba(acc, 0.20) : rgb(mix(acc, [255, 255, 255], 0.52)));
-    card.style.setProperty('--sc-ifg', dark ? rgb(mix(acc, [255, 255, 255], 0.30)) : rgb(mix(acc, [0, 0, 0], 0.38))); card.style.setProperty('--sc-glow', rgba(acc, dark ? 0.45 : 0.55));
+    card.style.setProperty('--sc-accent', rgb(bar)); card.style.setProperty('--sc-tint', rgba(acc, dark ? 0.18 : 0.14));
   }
-  function svgSunrise() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m8 6 4-4 4 4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>'; }
-  function svgSun() { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>'; }
-  function svgMoon() { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>'; }
   function svgLogin() {
     return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>';
   }
