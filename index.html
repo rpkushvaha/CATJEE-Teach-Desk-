@@ -2803,19 +2803,31 @@
   .ent-msg { font-weight: 500; }
   #entryPrev { margin-top: 14px; }
   .chip[disabled] { opacity: .5; pointer-events: none; }
-  /* Check-in card: the bar on the left and the tint follow the state (and the clock before the first check-in) */
-  #view-today #statusCard { box-shadow: inset 4px 0 0 var(--sc-accent, transparent), 0 1px 3px rgba(23,23,23,0.06); background-image: linear-gradient(160deg, var(--sc-tint, transparent) 0%, transparent 55%); }
-  #view-today .sc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  /* Check-in card (Style 1): two soft patches of light in the colour of the hour, the bar on the left, the sun and the moon on one path */
+  #view-today #statusCard { position: relative; flex-shrink: 0; overflow: hidden; overflow: clip; box-shadow: inset 4px 0 0 var(--sc-accent, transparent), 0 8px 24px rgba(20,20,40,0.06); }
+  #view-today #statusCard::before { content: ''; position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, var(--sc-b1, transparent) 0%, transparent 66%); filter: blur(8px); pointer-events: none; z-index: 0; }
+  #view-today #statusCard::after { content: ''; position: absolute; left: -90px; bottom: -110px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, var(--sc-b2, transparent) 0%, transparent 68%); filter: blur(10px); pointer-events: none; z-index: 0; }
+  #view-today #statusCard > :not(.sc-sky) { position: relative; z-index: 1; }
+  #view-today .sc-sky { position: absolute; right: 16px; top: 20px; width: 84px; height: 52px; pointer-events: none; z-index: 0; }
+  #view-today .sc-orb { position: absolute; border-radius: 50%; opacity: 0; }
+  #view-today .sc-star { position: absolute; border-radius: 50%; background: #8E95D8; opacity: 0; }
+  @media (prefers-reduced-motion: no-preference) { #view-today .sc-moon { animation: scGlow 4.5s ease-in-out infinite; } }
+  @keyframes scGlow { 0%, 100% { filter: brightness(.94); } 50% { filter: brightness(1.08); } }
+  #view-today .sc-head { padding-right: 92px; min-height: 46px; }
   #view-today .sc-main { min-width: 0; }
   #view-today .sc-sub { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 4px; line-height: 1.4; }
   #view-today .sc-sub:empty { display: none; }
-  #view-today .sess-chip { display: inline-flex; align-items: center; gap: 4px; flex: none; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px 6px 12px; font: inherit; font-size: 12px; font-weight: 600; color: var(--muted-2); cursor: pointer; white-space: nowrap; }
+  #view-today .timer-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 10px; }
+  #view-today .status-card.pre .timer-row { display: none; }
+  #view-today .sess-chip { display: inline-flex; align-items: center; gap: 4px; flex: none; background: var(--card); background: color-mix(in srgb, var(--card) 62%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px 6px 12px; font: inherit; font-size: 12px; font-weight: 600; color: var(--muted-2); cursor: pointer; white-space: nowrap; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
   #view-today .sess-chip[hidden] { display: none; }
   #view-today .sess-chip svg { display: block; transition: transform .2s; }
   #view-today .sess-chip[aria-expanded="true"] svg { transform: rotate(180deg); }
-  #view-today .status-card.pre .timer { display: none; }
   #view-today #sessionCountLabel { color: var(--muted); font-weight: 500; font-size: 13px; margin-top: 4px; }
   #view-today #sessionCountLabel:empty { display: none; }
+  @media (max-width: 360px) { #view-today #timerNum { font-size: 32px; } }
+  #view-today #checkBtn { background-image: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0)); box-shadow: 0 6px 16px rgba(16,16,19,0.18); }
+  #view-today #checkBtn.btn-checkin { box-shadow: 0 6px 16px rgba(230,57,70,0.26); }
   #view-today .status-card.in .status-dot { position: relative; box-shadow: 0 0 0 4px rgba(22,163,74,.18); }
   @media (prefers-reduced-motion: no-preference) { #view-today .status-card.in .status-dot::after { content: ''; position: absolute; inset: 0; border-radius: 999px; background: rgba(22,163,74,.5); animation: scDotPulse 2.4s ease-out infinite; } }
   @keyframes scDotPulse { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(2.6); opacity: 0; } }
@@ -3000,6 +3012,7 @@
   <div id="holidayCard" hidden></div>
 
       <div class="status-card" id="statusCard">
+  <div class="sc-sky" id="scSky" aria-hidden="true"><span class="sc-star" style="left:6px;top:8px;width:2px;height:2px;"></span><span class="sc-star" style="left:26px;top:2px;width:3px;height:3px;"></span><span class="sc-star" style="left:46px;top:16px;width:2px;height:2px;"></span><span class="sc-star" style="left:66px;top:4px;width:3px;height:3px;"></span><span class="sc-star" style="left:80px;top:22px;width:2px;height:2px;"></span><span class="sc-orb" id="scSun"></span><span class="sc-orb sc-moon" id="scMoon"></span></div>
   <div class="sc-head">
   <div class="sc-main">
   <div class="status-row">
@@ -3008,13 +3021,14 @@
   </div>
   <div class="sc-sub" id="scSub"></div>
   </div>
-  <button type="button" class="sess-chip" id="sessToggle" aria-expanded="false" hidden><span id="sessCount"></span><svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-  
   </div>
+  <div class="timer-row">
   <div class="timer">
   <div class="timer-num num" id="timerNum">00:00:00</div>
   <div class="timer-label" id="timerLabel">Time on campus today</div>
   <div class="timer-label" id="sessionCountLabel" style="text-transform:none; letter-spacing:0;"></div>
+  </div>
+  <button type="button" class="sess-chip" id="sessToggle" aria-expanded="false" hidden><span id="sessCount"></span><svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
   <button class="btn btn-checkin" id="checkBtn">Check In</button>
   <button type="button" class="hv-back" id="lateInBtn" style="display:none; margin:10px auto 0; padding:0; font-size:15px;"><span class="ico i-clock" aria-hidden="true"></span>Forgot to check in?</button>
@@ -4145,7 +4159,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.42 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.43 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4678,7 +4692,7 @@
   card.classList.toggle('on-leave', onLeaveToday);
   card.classList.toggle('done', !c.checkedIn && n > 0);
   const subEl = document.getElementById('scSub');
-  if (subEl) subEl.textContent = (c.checkedIn && c.checkInAt) ? `Since ${formatTime(c.checkInAt)}${(Date.now() - c.checkInAt >= 12 * 3600000) ? ` · open for ${Math.floor((Date.now() - c.checkInAt) / 3600000)}h` : ''}` : ((n > 0 && lastOut) ? `Checked out at ${formatTime(lastOut)}` : (onLeaveToday ? "You're on leave today. Check in only if you come to campus." : 'Tap Check In when you reach campus.'));
+  if (subEl) subEl.textContent = (c.checkedIn && c.checkInAt) ? `Since ${formatTime(c.checkInAt)}${(Date.now() - c.checkInAt >= 12 * 3600000) ? ` · open for ${Math.floor((Date.now() - c.checkInAt) / 3600000)}h` : ''}` : ((n > 0 && lastOut) ? `Checked out at ${formatTime(lastOut)}` : (onLeaveToday ? "On leave today. Check in only if you come." : 'Tap Check In when you reach campus.'));
   if (timerLabel) timerLabel.textContent = (!c.checkedIn && n > 0) ? 'Total time on campus today' : 'Time on campus today';
   // the breaks between the sessions, in one line (the details are in the list of the sessions chip)
   if (sessLabel) {
@@ -4689,7 +4703,7 @@
   }
   {
     const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes();
-    applyCardColours(card, onLeaveToday ? [217, 119, 6] : skyRgb(mins));
+    applyCardColours(card, onLeaveToday ? [217, 119, 6] : skyRgb(mins)); updateSky(card, mins); if (card.scrollTop) card.scrollTop = 0;
   }
 
     if (c.checkedIn) {
@@ -4714,14 +4728,74 @@
     }
   }
 
-  // the colour of the sky at a given minute of the day (it glides from dawn orange to noon gold, dusk violet and night indigo)
-  const SKY_KEYS = [[0, [99, 102, 241]], [300, [99, 102, 241]], [540, [249, 115, 22]], [720, [245, 158, 11]], [1020, [245, 158, 11]], [1095, [234, 124, 58]], [1140, [147, 51, 234]], [1215, [99, 102, 241]], [1440, [99, 102, 241]]];
-  function skyRgb(mins) { for (let i = 1; i < SKY_KEYS.length; i++) { const a = SKY_KEYS[i - 1]; const b = SKY_KEYS[i]; if (mins <= b[0]) { const t = (mins - a[0]) / Math.max(1, b[0] - a[0]); return [0, 1, 2].map((k) => Math.round(a[1][k] + (b[1][k] - a[1][k]) * t)); } } return SKY_KEYS[SKY_KEYS.length - 1][1]; }
-  function isDarkUi() { const th = document.documentElement.getAttribute('data-theme'); return th === 'dark' || (th !== 'light' && !!window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
+  // the sun at the campus, worked out from its location and today's date (no internet)
+  let sunCache = { key: '', val: null };
+  function sunRiseSetMins(date, lat, lng) {
+    const rad = Math.PI / 180; const deg = 180 / Math.PI; const md = (x, m) => ((x % m) + m) % m;
+    const y = date.getFullYear(); const mo = date.getMonth(); const d = date.getDate(); const base = Date.UTC(y, mo, d);
+    const N = Math.floor((base - Date.UTC(y, 0, 0)) / 86400000); const lngHour = lng / 15;
+    const calc = (rising) => {
+      const t = N + (((rising ? 6 : 18) - lngHour) / 24); const M = (0.9856 * t) - 3.289;
+      const L = md(M + (1.916 * Math.sin(M * rad)) + (0.020 * Math.sin(2 * M * rad)) + 282.634, 360);
+      let RA = md(deg * Math.atan(0.91764 * Math.tan(L * rad)), 360); RA = (RA + (Math.floor(L / 90) * 90 - Math.floor(RA / 90) * 90)) / 15;
+      const sinDec = 0.39782 * Math.sin(L * rad); const cosDec = Math.cos(Math.asin(sinDec));
+      const cosH = (Math.cos(90.833 * rad) - (sinDec * Math.sin(lat * rad))) / (cosDec * Math.cos(lat * rad));
+      if (cosH > 1 || cosH < -1) return null;
+      const H = (rising ? 360 - (deg * Math.acos(cosH)) : (deg * Math.acos(cosH))) / 15;
+      const ut = md(H + RA - (0.06571 * t) - 6.622 - lngHour, 24); const dt = new Date(base + (ut * 3600000));
+      return (dt.getHours() * 60) + dt.getMinutes() + (dt.getSeconds() / 60);
+    };
+    const sr = calc(true); const ss = calc(false); return (sr == null || ss == null) ? null : { sr, ss };
+  }
+  function sunTimesToday() {
+    const now = new Date(); const loc = state.campusLocation; const lat = loc ? loc.lat : 25.30358; const lng = loc ? loc.lng : 82.97919;
+    const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}|${lat.toFixed(3)}|${lng.toFixed(3)}`;
+    if (sunCache.key === key && sunCache.val) return sunCache.val;
+    let r = null; try { r = sunRiseSetMins(now, lat, lng); } catch (e) { r = null; }
+    if (!r || !(r.sr > 120 && r.sr < r.ss - 300 && r.ss < 1400)) r = { sr: 370, ss: 1025 };
+    sunCache = { key, val: r }; return r;
+  }
+  // the colours of the day, as in the photo, moved with the real sunrise and sunset: night indigo, orange in the morning, gold at noon, orange and violet at dusk
+  function skyRgb(mins) {
+    const t = sunTimesToday(); const SR = t.sr; const SS = t.ss; const IND = [99, 102, 241];
+    const K = [[0, IND], [SR - 70, IND], [SR + 170, [249, 115, 22]], [SR + 350, [245, 158, 11]], [SS, [245, 158, 11]], [SS + 70, [234, 124, 58]], [SS + 115, [147, 51, 234]], [SS + 190, IND], [1440, IND]];
+    for (let i = 1; i < K.length; i++) { const a = K[i - 1]; const b = K[i]; if (mins <= b[0]) { const f = (mins - a[0]) / Math.max(1, b[0] - a[0]); return [0, 1, 2].map((k) => Math.round(a[1][k] + (b[1][k] - a[1][k]) * f)); } }
+    return IND;
+  }
+    function isDarkUi() { const th = document.documentElement.getAttribute('data-theme'); return th === 'dark' || (th !== 'light' && !!window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
   function applyCardColours(card, acc) {
     const dark = isDarkUi(); const mix = (c, w, t) => c.map((v, i) => Math.round(v + (w[i] - v) * t)); const rgb = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`; const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
-    const bar = dark ? mix(acc, [255, 255, 255], 0.15) : acc;
-    card.style.setProperty('--sc-accent', rgb(bar)); card.style.setProperty('--sc-tint', rgba(acc, dark ? 0.18 : 0.14));
+    card.style.setProperty('--sc-accent', rgb(dark ? mix(acc, [255, 255, 255], 0.15) : acc));
+    card.style.setProperty('--sc-b1', rgba(acc, dark ? 0.50 : 0.46)); card.style.setProperty('--sc-b2', rgba(mix(acc, [99, 102, 241], 0.55), dark ? 0.26 : 0.20));
+  }
+  // the sun and the moon travel on ONE path from A (left) to B (right): the sun from A to B, the moon from B back to A,
+  // so the moon appears where the sun set and the sun appears where the moon went down. Whole orb and its glow stay inside the card.
+  function updateSky(card, mins) {
+    const t = sunTimesToday(); const SR = t.sr; const SS = t.ss; const key = `${Math.floor(mins)}|${SR.toFixed(0)}|${SS.toFixed(0)}`; if (card._skyKey === key) return; card._skyKey = key;
+    const cl = (x, a, b) => Math.max(a, Math.min(b, x)); const rr = (m, a, b) => { const q = cl((m - a) / (b - a), 0, 1); return q * q * (3 - 2 * q); };
+    const mixc = (c, w, f) => c.map((v, i) => Math.round(v + (w[i] - v) * f)); const rgb = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`; const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+    const sunEl = document.getElementById('scSun'); const moonEl = document.getElementById('scMoon'); if (!sunEl || !moonEl) return;
+    const put = (el, r, p, h, op, bg, haloCol, want) => {
+      const x = 14 + 56 * p; const y = 38 - 28 * h; const cy = 20 + y; const spaceTop = cy - r - 2; const spaceRight = (100 - x - r) - 2;
+      const reach = Math.max(4, Math.min(want, spaceTop / 1.15, spaceRight / 1.15));
+      el.style.left = `${(x - r).toFixed(1)}px`; el.style.top = `${(y - r).toFixed(1)}px`; el.style.width = `${r * 2}px`; el.style.height = `${r * 2}px`;
+      el.style.background = bg; el.style.boxShadow = `0 0 ${(reach * 1.1).toFixed(0)}px ${(reach * 0.22).toFixed(0)}px ${haloCol}`; el.style.opacity = op.toFixed(2);
+    };
+    // the sun
+    const u = (mins - SR) / (SS - SR); const sop = rr(mins, SR - 5, SR + 20) * (1 - rr(mins, SS - 10, SS + 10));
+    if (sop > 0.01) {
+      const p = cl(u, 0, 1); const h = Math.sin(Math.PI * p); const col = h < 0.35 ? mixc([220, 38, 38], [249, 115, 22], h / 0.35) : mixc([249, 115, 22], [254, 240, 138], cl((h - 0.35) / 0.5, 0, 1));
+      put(sunEl, 14, p, h, sop, `radial-gradient(circle at 35% 32%, #fff 0%, ${rgb(mixc(col, [255, 255, 255], 0.55))} 35%, ${rgb(col)} 100%)`, rgba(col, 0.45), 22 + 14 * (1 - h));
+    } else sunEl.style.opacity = '0';
+    // the moon
+    const mm = mins >= 720 ? mins : mins + 1440; const v = cl((mm - SS) / ((SR + 1440) - SS), 0, 1); const mop = rr(mm, SS + 5, SS + 35) * (1 - rr(mm, SR + 1440 - 35, SR + 1440 - 5));
+    if (mop > 0.01) {
+      const h = Math.sin(Math.PI * v); const glow = cl(h * 1.2, 0.25, 1);
+      put(moonEl, 12, 1 - v, h, mop, 'radial-gradient(circle at 35% 32%, #fff 0%, #E9ECFF 45%, #C7CCF2 100%)', `rgba(200, 208, 255, ${(0.22 + 0.34 * glow).toFixed(2)})`, 16 + 16 * glow);
+    } else moonEl.style.opacity = '0';
+    // the stars
+    const n = mins >= SS ? cl((mins - SS) / 90, 0, 1) : (mins < SR ? 1 - cl((mins - (SR - 75)) / 75, 0, 1) : 0);
+    card.querySelectorAll('.sc-star').forEach((el) => { el.style.opacity = n > 0.3 ? (((n - 0.3) / 0.7) * 0.8).toFixed(2) : '0'; });
   }
   function svgLogin() {
     return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>';
@@ -19134,8 +19208,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         ['**Today** page kholo.', 'Campus pahunchte hi **Check In** dabao.', 'Jaate waqt **Check Out** dabao.', 'Campus me aap ka samay attendance report me jata hai.']],
     m: [['today', '.nav-item[data-tab="today"]'], ['today', '#checkBtn'], ['today', '#checkBtn'], ['today', '#statusCard']] },
   { id: 'fixtime', t: ['Forgot to check in, or a wrong time? Correct it', 'Check-in bhool gaye ya galat samay? Theek karo'], who: 'all', k: 'forgot add check in check out missed edit change session time delete bhool chhoot jodna galat sudharna badalna चेक इन भूल समय बदलना',
-    s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap the **sessions** chip at the top right of the check-in card and change the **Check-in** or **Check-out** time.', 'To remove a wrong session, tap the bin on it. The app asks you to confirm. To add another visit to an earlier day, open **History**, open that day and tap **+ Add another session**.'],
-        ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to check-in card ke upar daayen **sessions** wala chip dabao aur **Check-in** ya **Check-out** samay badlo.', 'Galat session hatana ho to us par bin dabao. App pooch kar hatata hai. Kisi pichhle din ka ek aur visit jodne ke liye **History** kholo, wo din kholo aur **+ Add another session** dabao.']],
+    s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap the **sessions** chip next to the timer on the check-in card and change the **Check-in** or **Check-out** time.', 'To remove a wrong session, tap the bin on it. The app asks you to confirm. To add another visit to an earlier day, open **History**, open that day and tap **+ Add another session**.'],
+        ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to check-in card par timer ke daayen **sessions** wala chip dabao aur **Check-in** ya **Check-out** samay badlo.', 'Galat session hatana ho to us par bin dabao. App pooch kar hatata hai. Kisi pichhle din ka ek aur visit jodne ke liye **History** kholo, wo din kholo aur **+ Add another session** dabao.']],
     n: ['You can change only today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap sirf aaj aur kal badal sakte ho. Purane din ke liye Admin ya Coordinator se kaho.'],
     m: [['today', '.nav-item[data-tab="today"]'], ['today+out', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#statusCard']] },
   { id: 'addclass', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], who: 'all', k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
