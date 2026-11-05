@@ -2766,6 +2766,28 @@
   .sum-grid.stack .sum-tile::before { margin: 0 4px 0 0 !important; flex: none; }
   /* the Principal's screens: the buttons that change things are not shown */
   body.principal-mode #adminTabs [data-atab-btn="settings"], body.principal-mode #tgEdit, body.principal-mode #tgPublish, body.principal-mode #tgPublishDay, body.principal-mode #tgMoreList, body.principal-mode #tgDiscard, body.principal-mode #adminNewExamBtn, body.principal-mode .ex-edit-main, body.principal-mode [data-force-checkout], body.principal-mode [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
+  /* Class entry record */
+  .ent-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .ent-card.done { background: var(--neutral-soft); }
+  .ent-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; }
+  .ent-sub { font-size: 12.5px; color: var(--muted); }
+  .ent-type { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--neutral-soft); color: var(--muted-2); flex: none; }
+  .ent-type.sub { background: var(--gold-soft); color: var(--gold); }
+  .ent-in { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .ent-in label { font-size: 13px; font-weight: 600; color: var(--muted-2); flex: 0 0 auto; }
+  .ent-in input { flex: 1; min-width: 0; }
+  .ent-msg { font-size: 13px; min-height: 18px; }
+  .ent-red { color: #D40000; font-weight: 700; }
+  .ent-grey { color: var(--muted); font-weight: 600; }
+  .ent-add { margin-top: 4px; }
+  .ent-add:disabled { opacity: .45; }
+  .ent-done { font-size: 13px; font-weight: 600; color: var(--muted-2); }
+  .ent-row2 { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; }
+  .ent-chip { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .ent-chip.ok { background: rgba(22,163,74,.12); color: #15803D; }
+  .ent-chip.wn { background: rgba(217,119,6,.14); color: #B45309; }
+  .ent-del { background: none; border: 1px solid var(--line); color: var(--gold); border-radius: 8px; padding: 5px 12px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  body.principal-mode .entry-edit { display: none !important; }
 </style>
 </head>
 <body>
@@ -3486,7 +3508,7 @@
           <button class="chip" data-report-range="week">Week</button>
           <button class="chip" data-report-range="month">Month</button>
         </div></div>
-        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Day · Week · Month</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="duty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 13l2 2 4-4"/></svg><span class="qa-l">Invigilation duty</span><span class="qa-s">Rooms · timings</span></button></div>
+        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Everything</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Day · Week · Month</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="duty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 13l2 2 4-4"/></svg><span class="qa-l">Invigilation duty</span><span class="qa-s">Rooms · timings</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="entry"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span class="qa-l">Class entry record</span><span class="qa-s">Late entries</span></button></div>
         <div class="hv-note" id="repKindNote" style="text-align:left;"></div>
  <div class="rep-optcard" id="repTeacherWrap">
  <label class="rep-lbl rep-lbl-s" for="adminRepTeacher">Teacher</label>
@@ -3518,6 +3540,22 @@
  </div>
  <div class="admin-sub" id="dutyMsg" style="text-align:center;"></div>
  </div>
+  <div id="repEntry" hidden>
+  <div class="rep-optcard">
+  <div class="rep-lbl rep-lbl-s">Batches</div>
+  <div class="rseg" id="entrySess"><button type="button" class="chip active" data-entry-sess="morning">Morning</button><button type="button" class="chip" data-entry-sess="evening">Evening</button><button type="button" class="chip" data-entry-sess="all">Both</button></div>
+  </div>
+  <div id="entryFill"></div>
+  <div id="entryList"></div>
+  <div id="entryPrev"></div>
+  <div class="rep-lbl">Get it as</div>
+  <div class="qa-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+  <button type="button" class="qa-btn qa-wa" id="entryWaBtn"><span class="qa-l">WhatsApp</span><span class="qa-s">Share picture</span></button>
+  <button type="button" class="qa-btn" id="entryPdfBtn"><span class="qa-l">PDF</span><span class="qa-s">Download</span></button>
+  <button type="button" class="qa-btn qa-xl" id="entryCsvBtn"><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button>
+  </div>
+  <div class="admin-sub" id="entryMsg" style="text-align:center;"></div>
+  </div>
  <div id="repCount" hidden>
       <div class="rep-optcard">
  <div class="rep-lbl rep-lbl-s">Counted from</div>
@@ -4046,7 +4084,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.32 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.33 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -16277,7 +16315,217 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       saveFile(fileBase + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('Duty report saved');
     } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
   }
-  const REP_NOTE = { full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
+  // ---------- Class entry record: classes that began more than 5 minutes late ----------
+  state.entry = { ses: 'morning', cls: [], saved: [], err: false, times: {}, tok: 0 };
+  const ENTRY_GRACE = 5; const ENTRY_PEND = 'ctd_late_pending';
+  function entryName(u) { const n = state.adminNames && state.adminNames[u]; return salFull(ttName(u), n && n.sal); }
+  function entryTm(v) { const m = /^(\d{1,2}):(\d{2})/.exec(String(v || '')); if (!m) return ''; const h = Number(m[1]); return String((h % 12) || 12).padStart(2, '0') + ':' + m[2] + (h >= 12 ? 'pm' : 'am'); }
+  function entryDateText(d) { const o = dateObj(d); const n = o.getDate(); const sfx = (n % 10 === 1 && n !== 11) ? 'st' : (n % 10 === 2 && n !== 12) ? 'nd' : (n % 10 === 3 && n !== 13) ? 'rd' : 'th'; return `${o.toLocaleDateString('en-GB', { weekday: 'long' })}, ${String(n).padStart(2, '0')}${sfx} ${o.toLocaleDateString('en-GB', { month: 'long' })} ${String(o.getFullYear()).slice(2)}`; }
+  function entryDateShort(d) { const o = dateObj(d); return `${o.toLocaleDateString('en-GB', { weekday: 'short' })} ${String(o.getDate()).padStart(2, '0')} ${o.toLocaleDateString('en-GB', { month: 'short' })}`; }
+  function entryBatchText(bs) { return (bs || []).map((b) => { const n = classOfBatchNum(b); const m = String(b).match(/batch\s*(\d+)/i); return n ? `${n}th${m ? ' B' + m[1] : ''}` : String(b); }).join(' + '); }
+  function entryId(r) { return `${r.d}_${r.u}_${String(r.ts).replace(':', '')}_${String(r.b).replace(/[^A-Za-z0-9]+/g, '-')}`; }
+  function entryPendRead() { try { const a = JSON.parse(localStorage.getItem(ENTRY_PEND) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function entryPendWrite(a) { try { localStorage.setItem(ENTRY_PEND, JSON.stringify(a)); } catch (e) { /* ignore */ } }
+  async function entryCloudSet(rec) {
+    const d = Object.assign({}, rec); delete d.id; delete d._pending;
+    await Promise.race([state.db.collection('lateEntries').doc(rec.id).set(d), new Promise((res, rej) => setTimeout(() => rej(new Error('timeout')), 9000))]);
+  }
+  async function entryRetry() {
+    const a = entryPendRead(); if (!a.length || !state.db) return false; let moved = false;
+    for (const rec of a) { try { await entryCloudSet(rec); entryPendWrite(entryPendRead().filter((x) => x.id !== rec.id)); moved = true; } catch (e) { /* stays on the phone */ } }
+    return moved;
+  }
+  window.addEventListener('online', () => { entryRetry().then((m) => { if (m && state.adminRepKind === 'entry') entryRender(); }); });
+  // the day's classes from the published timetable (faculty, class, starting time, SELF or SUBSTITUTE)
+  async function entryCollect(d) {
+    const out = []; const wings = leadWings(); const wsel = state.adminReportWing || 'all';
+    const docs = await loadWeekTimetables(mondayOf(d), false);
+    docs.forEach((doc) => (doc.cells || []).forEach((c) => {
+      if (c.ex || c.d !== d) return;
+      const sub = c.sub && c.sub.t ? c.sub : null; const who = sub ? sub.t : c.t; if (!who) return;
+      if ((doc.published || []).indexOf(who + '/' + slotIdFor(doc._id, c)) === -1) return;
+      const w = wingOfBatch(c.b); if (wings.indexOf(w) === -1 || (wsel !== 'all' && w !== wsel)) return;
+      const tm = cellTimes(doc, c); if (!tm) return;
+      let bs = [c.b];
+      if (c.cb) { const ms = tgComboOf(doc.cells, c); const g0 = ttGroups().find((x) => x.key === doc.group); if (ms.length > 1 && g0) { const srt = ms.slice().sort((a, b) => g0.batches.indexOf(a.b) - g0.batches.indexOf(b.b)); if (srt[0].b !== c.b) return; bs = srt.map((x) => x.b); } }
+      out.push({ u: who, type: sub ? 'SUBSTITUTE' : 'SELF', f: sub ? (sub.for || c.t || '') : '', d, b: c.b, bs, ts: tm.start, te: tm.end, a: hhmmToMin(tm.start), ses: batchSession(c.b) === 'evening' ? 'evening' : 'morning', wing: w });
+    }));
+    out.forEach((r) => { r.id = entryId(r); });
+    out.sort((x, y) => (x.ts + x.b).localeCompare(y.ts + y.b));
+    return out;
+  }
+  async function entryLoadSaved(from, to) {
+    let docs = []; let err = false;
+    try { const sn = await state.db.collection('lateEntries').where('date', '>=', from).where('date', '<=', to).get(); docs = sn.docs.map((x) => Object.assign({ id: x.id }, x.data())); } catch (e) { err = true; }
+    const ids = {}; docs.forEach((x) => { ids[x.id] = 1; });
+    const pend = entryPendRead().filter((x) => x.date >= from && x.date <= to && !ids[x.id]).map((x) => Object.assign({}, x, { _pending: true }));
+    const wings = leadWings(); const wsel = state.adminReportWing || 'all';
+    const list = docs.concat(pend).filter((x) => wings.indexOf(x.wing) !== -1 && (wsel === 'all' || x.wing === wsel));
+    list.sort((x, y) => (x.date + x.startTimeStr + x.teacherName).localeCompare(y.date + y.startTimeStr + y.teacherName));
+    return { list, err };
+  }
+  function entryRowsOut() { const E = state.entry; return E.ses === 'all' ? E.saved.slice() : E.saved.filter((x) => x.session === E.ses); }
+  async function entryRender() {
+    const root = document.getElementById('repEntry'); if (!root || !state.db) return;
+    const E = state.entry; const sp = adminRepSpec(); const from = sp.dates[0]; const to = sp.dates[sp.dates.length - 1]; const day = sp.range === 'day';
+    document.querySelectorAll('#entrySess [data-entry-sess]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-entry-sess') === E.ses));
+    const tok = ++E.tok; document.getElementById('entryMsg').textContent = '';
+    try { await entryRetry(); } catch (e) { /* ignore */ }
+    let cls = []; if (day && E.ses !== 'all') { try { cls = await entryCollect(from); } catch (e) { cls = []; } }
+    const sv = await entryLoadSaved(from, to);
+    if (tok !== E.tok) return;
+    E.cls = cls; E.saved = sv.list; E.err = sv.err;
+    entryDrawFill(); entryDrawList(); entryDrawPrev();
+  }
+  function entryCardHtml(r, rec) {
+    const tm = state.entry.times[r.id] || '';
+    const ty = r.type === 'SUBSTITUTE' ? '<span class="ent-type sub">SUBSTITUTE</span>' : '<span class="ent-type">SELF</span>';
+    const place = r.type === 'SUBSTITUTE' && r.f ? ` · in place of ${escapeHtml(entryName(r.f))}` : '';
+    const head = `<div class="ent-top"><b>${escapeHtml(entryName(r.u))}</b>${ty}</div><div class="ent-sub">${escapeHtml(entryBatchText(r.bs))} · starts ${escapeHtml(formatTimeStr(r.ts))}${place}</div>`;
+    if (rec) return `<div class="ent-card done">${head}<div class="ent-done">Recorded · ${rec.delayMin} minutes late · entry ${escapeHtml(entryTm(rec.entryTimeStr))}${rec._pending ? ' · not in the cloud yet' : ''}</div></div>`;
+    const id = escapeHtml(r.id);
+    return `<div class="ent-card">${head}<div class="ent-in entry-edit"><label>Entry time</label><input type="time" class="text-input" data-ph="Tap to set" data-ekey="${id}" value="${escapeHtml(tm)}"></div><div class="ent-msg entry-edit" data-emsg="${id}"></div><button type="button" class="save-btn ent-add entry-edit" data-eadd="${id}" disabled>Add to the record</button></div>`;
+  }
+  function entryDrawFill() {
+    const box = document.getElementById('entryFill'); if (!box) return; const E = state.entry; const day = (state.adminReportRange || 'day') === 'day';
+    const note = (t) => `<div class="hv-note" style="text-align:left;">${t}</div>`;
+    if (!day) { box.innerHTML = note('To fill the entry times, choose <b>Day</b> above. For a week or a month you see and download the recorded delays.'); return; }
+    if (E.ses === 'all') { box.innerHTML = note('Choose <b>Morning</b> or <b>Evening</b> to fill the entry times.'); return; }
+    const done = {}; E.saved.forEach((x) => { done[x.id] = x; });
+    const rows = (E.cls || []).filter((r) => r.ses === E.ses);
+    if (!rows.length) { box.innerHTML = note('No classes in the published timetable for this day and these batches.'); return; }
+    box.innerHTML = '<div class="rep-lbl">Classes from the timetable. Set the entry time of a teacher who was late.</div>' + rows.map((r) => entryCardHtml(r, done[r.id])).join('');
+    box.querySelectorAll('input[type="time"][data-ekey]').forEach((i) => entryMsgFor(i));
+  }
+  function entryMsgFor(inp) {
+    const id = inp.getAttribute('data-ekey'); const r = (state.entry.cls || []).find((x) => x.id === id); if (!r) return;
+    const q = (a) => document.querySelector(`[${a}="${(window.CSS && CSS.escape) ? CSS.escape(id) : id}"]`); const msg = q('data-emsg'); const btn = q('data-eadd'); if (!msg || !btn) return;
+    const v = inp.value; state.entry.times[id] = v;
+    if (!v) { msg.textContent = ''; btn.disabled = true; return; }
+    const dl = hhmmToMin(v) - r.a;
+    if (dl > ENTRY_GRACE) { msg.innerHTML = `<span class="ent-red">${dl} minutes late</span>`; btn.disabled = false; }
+    else { msg.innerHTML = `<span class="ent-grey">${dl > 0 ? dl + ' minute' + (dl === 1 ? '' : 's') + ' late' : 'On time'}. Up to ${ENTRY_GRACE} minutes is not counted.</span>`; btn.disabled = true; }
+  }
+  async function entryAdd(id) {
+    const r = (state.entry.cls || []).find((x) => x.id === id); const v = state.entry.times[id]; if (!r || !v) return;
+    const dl = hhmmToMin(v) - r.a; if (dl <= ENTRY_GRACE) return;
+    const rec = { id, date: r.d, session: r.ses, teacherId: r.u, teacherName: entryName(r.u), batch: entryBatchText(r.bs), batches: r.bs.slice(), wing: r.wing, startTimeStr: r.ts, entryTimeStr: v, delayMin: dl, classType: r.type, forName: r.f ? entryName(r.f) : '', by: state.teacherId, byName: (state.user && state.user.name) || '', createdAt: Date.now() };
+    const msg = document.getElementById('entryMsg'); msg.textContent = 'Saving…';
+    try { await entryCloudSet(rec); entryPendWrite(entryPendRead().filter((x) => x.id !== id)); showToast('✓ Saved'); }
+    catch (err) { const a = entryPendRead().filter((x) => x.id !== id); a.push(rec); entryPendWrite(a); showToast((err && err.code === 'permission-denied') ? 'The cloud did not allow this save. Kept on this phone.' : 'Could not reach the cloud. Kept on this phone, will retry.', 'error'); }
+    msg.textContent = ''; delete state.entry.times[id]; entryRender();
+  }
+  async function entryDelete(id) {
+    const ok = await showConfirm('This delay record will be removed.', 'Delete this record?', 'Delete'); if (!ok) return;
+    const was = entryPendRead().some((x) => x.id === id); entryPendWrite(entryPendRead().filter((x) => x.id !== id));
+    try { await state.db.collection('lateEntries').doc(id).delete(); } catch (e) { if (!was) { showToast('Could not delete. Please try again.', 'error'); entryRender(); return; } }
+    showToast('Deleted'); entryRender();
+  }
+  function entryDrawList() {
+    const box = document.getElementById('entryList'); if (!box) return; const E = state.entry; const rows = entryRowsOut(); const multi = (state.adminReportRange || 'day') !== 'day' || E.ses === 'all';
+    const head = '<div class="rep-lbl">Delays recorded</div>';
+    const warn = E.err ? '<div class="hv-note ent-red" style="text-align:left;">Could not read the cloud. Showing only what is on this phone.</div>' : '';
+    if (!rows.length) { box.innerHTML = head + '<div class="hv-note" style="text-align:left;">No delay recorded.</div>' + warn; return; }
+    box.innerHTML = head + warn + rows.map((x) => `<div class="ent-card done"><div class="ent-top"><b>${escapeHtml(x.teacherName)}</b><span class="ent-red">${x.delayMin} Minutes</span></div><div class="ent-sub">${escapeHtml(x.batch)} · ${escapeHtml(entryTm(x.startTimeStr))} to ${escapeHtml(entryTm(x.entryTimeStr))} · ${escapeHtml(x.classType)}${multi ? ' · ' + escapeHtml(entryDateShort(x.date)) + ' ' + (x.session === 'evening' ? 'Evening' : 'Morning') : ''}</div><div class="ent-row2">${x._pending ? '<span class="ent-chip wn">Not in the cloud yet, will retry</span>' : '<span class="ent-chip ok">Saved ✓</span>'}<button type="button" class="ent-del entry-edit" data-edel="${escapeHtml(x.id)}">Delete</button></div></div>`).join('');
+  }
+  function entryModel() {
+    const E = state.entry; const sp = adminRepSpec(); const rows = entryRowsOut(); const day = sp.range === 'day'; const sn = E.ses === 'evening' ? 'Evening' : 'Morning';
+    const ws = document.getElementById('adminWingSel'); const wingLabel = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
+    let t1; let t2;
+    if (day && E.ses !== 'all') { t1 = `${sn} Batches Teachers' Classes Entry Record ${sp.dates[0] === todayStr() ? 'Today ' + sn + ':' : sn + ':'}`; t2 = entryDateText(sp.dates[0]); }
+    else if (day) { t1 = "Teachers' Classes Entry Record (Morning and Evening)"; t2 = entryDateText(sp.dates[0]); }
+    else { t1 = "Teachers' Classes Entry Record"; t2 = sp.period.replace(/^(Date|Week|Month): /, '') + (E.ses === 'all' ? '' : ' · ' + sn + ' batches'); }
+    const fileTag = (day && E.ses !== 'all' ? sn + '-' : '') + sp.fileTag;
+    return { rows, sp, day, ses: E.ses, t1, t2, wingLabel, multi: !day || E.ses === 'all', fileTag };
+  }
+  function entryCanvas(M) {
+    const rows = M.rows; const W = 1100;
+    const cols = M.multi ? [{ k: 'dt', t: 'Date', f: 0.14 }, { k: 'nm', t: 'Faculty Name', f: 0.25 }, { k: 'cl', t: 'Class', f: 0.10 }, { k: 'st', t: 'Class Starting Time', f: 0.13 }, { k: 'en', t: 'Teacher Entry Time', f: 0.14 }, { k: 'ty', t: 'Class Type', f: 0.12 }, { k: 'dl', t: 'Delay in Entry', f: 0.12 }]
+      : [{ k: 'nm', t: 'Faculty Name', f: 0.26 }, { k: 'cl', t: 'Class', f: 0.12 }, { k: 'st', t: 'Class Starting Time', f: 0.13 }, { k: 'en', t: 'Teacher Entry Time', f: 0.14 }, { k: 'ty', t: 'Class Type', f: 0.16 }, { k: 'dl', t: 'Delay in Entry', f: 0.19 }];
+    const tot = cols.reduce((a, c) => a + c.f, 0); let xx = 0; cols.forEach((c) => { c.w = Math.round(W * c.f / tot); c.x = xx; xx += c.w; }); cols[cols.length - 1].w = W - cols[cols.length - 1].x;
+    const hT = 118; const hH = 96; const hR = 84; const nRows = Math.max(rows.length, 1); const H = hT + hH + hR * nRows + 2;
+    const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
+    const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#000'; x.lineWidth = 1.5; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
+    const fnt = (size, bold) => `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`;
+    const tx = (str, cx, cy, size, bold, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = fnt(f, bold); x.textAlign = 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(str).width > maxW && f > 10) { f -= 1; x.font = fnt(f, bold); } x.fillText(str, cx, cy); };
+    const wrap = (str, maxW, size, bold) => { x.font = fnt(size, bold); const words = String(str).split(' '); const lines = []; let cur = ''; words.forEach((w2) => { const t = cur ? cur + ' ' + w2 : w2; if (x.measureText(t).width > maxW && cur) { lines.push(cur); cur = w2; } else cur = t; }); if (cur) lines.push(cur); return lines; };
+    box(0, 0, W, hT, '#fff'); tx(M.t1, W / 2, 40, 30, true, W - 40); tx(M.t2, W / 2, 84, 28, true, W - 40);
+    let y = hT;
+    cols.forEach((c) => { box(c.x, y, c.w, hH, '#fff'); const red = c.k === 'dl'; const L = wrap(c.t, c.w - 16, 24, true); const lh = 30; L.forEach((ln, i) => tx(ln, c.x + c.w / 2, y + hH / 2 + (i - (L.length - 1) / 2) * lh, 24, true, c.w - 12, red ? '#D40000' : '#000')); });
+    y += hH;
+    if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No delay recorded', W / 2, y + hR / 2, 26, true); return cv; }
+    rows.forEach((r) => {
+      cols.forEach((c) => {
+        box(c.x, y, c.w, hR, '#fff'); const cx = c.x + c.w / 2; const cy = y + hR / 2; const mw = c.w - 14;
+        if (c.k === 'dt') { tx(entryDateShort(r.date), cx, cy - 13, 20, true, mw); tx(r.session === 'evening' ? 'Evening' : 'Morning', cx, cy + 15, 18, false, mw, '#555'); }
+        else if (c.k === 'nm') tx(r.teacherName, cx, cy, 25, true, mw);
+        else if (c.k === 'cl') tx(r.batch, cx, cy, 25, true, mw);
+        else if (c.k === 'st') tx(entryTm(r.startTimeStr), cx, cy, 25, true, mw);
+        else if (c.k === 'en') tx(entryTm(r.entryTimeStr), cx, cy, 25, true, mw);
+        else if (c.k === 'ty') tx(r.classType, cx, cy, 25, true, mw);
+        else tx(`${r.delayMin} Minutes`, cx, cy, 25, true, mw, '#D40000');
+      });
+      y += hR;
+    });
+    return cv;
+  }
+  function entryDrawPrev() {
+    const box = document.getElementById('entryPrev'); if (!box) return; const M = entryModel(); const rn = { day: 'Day', week: 'Week', month: 'Month' }[M.sp.range] || '';
+    const head = `<div class="tsec-title">Class entry record · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml(M.t2)} · ${escapeHtml(M.wingLabel)}</div>`;
+    let url = ''; try { url = entryCanvas(M).toDataURL('image/png'); } catch (e) { url = ''; }
+    if (!url) { box.innerHTML = head + '<div class="hv-note" style="text-align:left;">Could not make the picture.</div>'; return; }
+    box.innerHTML = head + `<div class="att-prev"><button type="button" class="att-pic" aria-label="Open the entry record picture"><img src="${url}" alt="Class entry record"><span>Tap to open big</span></button></div>`;
+    box.querySelector('.att-pic').addEventListener('click', () => openZoomViewer(url, { turn: false }));
+  }
+  async function entryOut(kind) {
+    const msgEl = document.getElementById('entryMsg'); msgEl.textContent = 'Preparing…';
+    try {
+      const M = entryModel(); const base = `CATJEE-Class-Entry-Record-${M.fileTag}`;
+      if (kind === 'csv') {
+        const L = [['Date', 'Day', 'Session', 'Faculty', 'Class', 'Class starting time', 'Teacher entry time', 'Class type', 'Delay (minutes)']];
+        M.rows.forEach((r) => L.push([r.date, WD[dateObj(r.date).getDay()], r.session === 'evening' ? 'Evening' : 'Morning', r.teacherName, r.batch, entryTm(r.startTimeStr), entryTm(r.entryTimeStr), r.classType, r.delayMin]));
+        saveFile(base + '.csv', '\ufeff' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = 'Saved.'; showToast('Excel file saved'); return;
+      }
+      if (kind === 'wa') {
+        const cv = entryCanvas(M);
+        await new Promise((res) => cv.toBlob(async (blob) => {
+          const name = base + '.png'; const file = new File([blob], name, { type: 'image/png' });
+          try {
+            if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Class entry record' });
+            else { saveFile(name, blob); showToast('Picture saved. Share it from your gallery.'); }
+          } catch (e) { if (!(e && e.name === 'AbortError')) { try { saveFile(name, blob); showToast('Could not share. The picture is saved on your phone.'); } catch (e2) { /* ignore */ } } }
+          res();
+        }, 'image/png'));
+        msgEl.textContent = ''; return;
+      }
+      const w = createPdfWriter({ marginX: 48 }); const GREY = [0.95, 0.95, 0.95]; const RED = [0.83, 0, 0];
+      w.heading(M.t1.replace(/:$/, ''), 15); w.bodyLine(M.t2, { size: 11, bold: true }); w.addSpace(6);
+      const cs = M.multi ? [['S.N', 26], ['Date', 62], ['Faculty Name', 120], ['Class', 52], ['Starting', 52], ['Entry', 52], ['Type', 66], ['Delay', 69]] : [['S.N', 30], ['Faculty Name', 150], ['Class', 60], ['Starting', 62], ['Entry', 62], ['Type', 70], ['Delay', 65]];
+      let ax = 0; const cells = cs.map((c) => { const o = { x: ax, w: c[1], t: c[0] }; ax += c[1]; return o; }); const full = ax; const hh = 20; const rh = 24;
+      const header = () => w.trow(cells.map((c) => ({ x: c.x, w: c.w, t: c.t, bold: true, size: 9, fill: GREY, color: c.t === 'Delay' ? RED : null })), hh);
+      header();
+      if (!M.rows.length) w.trow([{ x: 0, w: full, t: 'No delay recorded', size: 10 }], rh);
+      M.rows.forEach((r, i) => {
+        if (!w.room(rh)) { w.page(); header(); }
+        const v = M.multi ? [String(i + 1), `${entryDateShort(r.date)} ${r.session === 'evening' ? 'E' : 'M'}`, r.teacherName, r.batch, entryTm(r.startTimeStr), entryTm(r.entryTimeStr), r.classType, `${r.delayMin} Minutes`] : [String(i + 1), r.teacherName, r.batch, entryTm(r.startTimeStr), entryTm(r.entryTimeStr), r.classType, `${r.delayMin} Minutes`];
+        w.trow(cells.map((c, k) => ({ x: c.x, w: c.w, t: v[k], size: 9, bold: k === v.length - 1 || c.t === 'Faculty Name', color: k === v.length - 1 ? RED : null })), rh);
+      });
+      w.addSpace(8); w.bodyLine(`${M.rows.length} late entr${M.rows.length === 1 ? 'y' : 'ies'}. Up to ${ENTRY_GRACE} minutes is not counted.`, { size: 8.5 });
+      if (M.multi && M.rows.length) { const tw = {}; M.rows.forEach((r) => { const t = tw[r.teacherName] = tw[r.teacherName] || { n: 0, m: 0 }; t.n += 1; t.m += r.delayMin; }); w.addSpace(6); w.bodyLine('Teacher-wise', { bold: true, size: 10 }); Object.keys(tw).sort().forEach((k) => w.bodyLine(`${k}: ${tw[k].n} late ${tw[k].n === 1 ? 'entry' : 'entries'}, ${tw[k].m} minutes in all`, { size: 9 })); }
+      saveFile(base + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('PDF saved');
+    } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
+  }
+  (function bindEntry() {
+    const on = (id, f) => { const el = document.getElementById(id); if (el) el.addEventListener('click', f); };
+    document.querySelectorAll('#entrySess [data-entry-sess]').forEach((b) => b.addEventListener('click', () => { state.entry.ses = b.getAttribute('data-entry-sess'); entryRender(); }));
+    on('entryPdfBtn', () => entryOut('pdf')); on('entryCsvBtn', () => entryOut('csv')); on('entryWaBtn', () => entryOut('wa'));
+    const fill = document.getElementById('entryFill');
+    if (fill) { ['input', 'change'].forEach((ev) => fill.addEventListener(ev, (e) => { const i = e.target; if (i && i.matches && i.matches('input[type="time"][data-ekey]')) entryMsgFor(i); })); fill.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-eadd]'); if (b && !b.disabled) entryAdd(b.getAttribute('data-eadd')); }); }
+    const lst = document.getElementById('entryList'); if (lst) lst.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-edel]'); if (b) entryDelete(b.getAttribute('data-edel')); });
+    const wsel = document.getElementById('adminWingSel'); if (wsel) wsel.addEventListener('change', () => setTimeout(() => { if ((state.adminRepKind || '') === 'entry') entryRender(); }, 0));
+  })();
+  const REP_NOTE = { entry: 'Classes that began more than 5 minutes late. Up to 5 minutes is not counted. Set the entry time of the teacher, then get the record as a picture, PDF or Excel.',  full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
   function renderRepControls() {
     try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
     const kind = state.adminRepKind || 'full'; let range = state.adminReportRange || 'day';
@@ -16287,17 +16535,18 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
     const { label, full, dates: rdates } = adminReportRangeDates();
     const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label; syncRepBack();
-    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub' || kind === 'duty';
+    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub' || kind === 'duty' || kind === 'entry';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
-    { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
+    { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty', entry: 'Class entry record' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
       const hh = `<div class="tsec-title">${escapeHtml(kn)} · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml((range === 'week' && (kind === 'count' || kind === 'sub') && rdates && rdates[0]) ? repRangeFull(rdates[0], shiftDateStr(rdates[0], 5)) : full)} · ${escapeHtml(wt)}</div>`;
       ['repResHead', 'repResHeadC', 'repResHeadS'].forEach((id) => { const e2 = document.getElementById(id); if (e2) e2.innerHTML = hh; }); }
-    document.getElementById('repStd').hidden = showCount || subDay || kind === 'duty';
+    document.getElementById('repStd').hidden = showCount || subDay || kind === 'duty' || kind === 'entry';
     const shareT = document.getElementById('repAttShare'); if (shareT) shareT.hidden = kind !== 'att';
     const tiles = document.getElementById('repStdTiles'); if (tiles) tiles.style.gridTemplateColumns = kind === 'att' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
     const ap = document.getElementById('repAttPrev');
     if (ap) { if (kind === 'att') { const sp = adminRepSpec(); showAttPreview('repAttPrev', document.getElementById('adminRepTeacher').value || null, null, null); void sp; } else { ap.hidden = true; ap.innerHTML = ''; } }
     { const dp = document.getElementById('repDuty'); if (dp) dp.hidden = kind !== 'duty'; if (kind === 'duty') dutyRender(); }
+  { const ep = document.getElementById('repEntry'); if (ep) ep.hidden = kind !== 'entry'; if (kind === 'entry') entryRender(); }
  document.getElementById('repCount').hidden = !showCount; const sdv = document.getElementById('repSubDay'); if (sdv) sdv.hidden = !subDay;
     if (showCount && typeof trepEnsure === 'function') trepEnsure();
     if (subDay) subDayEnsure();
@@ -18871,6 +19120,11 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         ['**Admin** kholo, phir **Reports**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Report dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report** ya **Invigilation duty**.', 'Chaho to wing aur teacher chuno. **Invigilation duty** me **Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) bhi chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo.']],
     n: ['In the Invigilation duty report, days without a duty do not appear, and teachers with zero duties show in the Teacher-wise view.', 'Invigilation duty report me jis din duty nahi wo din nahi aata, aur zero duty wale teacher Teacher-wise me dikhte hain.'],
     m: [['admin:reports', '#adminTabs [data-atab-btn="reports"]'], ['admin:reports', '#adminReportRangeChips'], ['admin:reports', '#adminRepKind'], ['admin:reports', '#adminWingSel'], ['admin:reports', '#repStdTiles']] },
+  { id: 'entryrec', t: ['Record class entry delays', 'Class me entry ki deri ka record'], who: 'lead', k: 'class entry record delay late entry teacher entry time morning evening देरी',
+  s: [['Open **Admin**, then **Reports**.', 'Tap **Class entry record**. Choose **Day**, the date, and **Morning** or **Evening**.', 'The classes of the timetable are listed. For a teacher who entered late, set the **Entry time**.', 'Up to 5 minutes is not counted. Above 5 minutes the app shows the delay: tap **Add to the record**.', 'Get it as **PDF**, **Excel** or **WhatsApp** (picture). To remove a record tap **Delete** on it.'],
+  ['**Admin** kholo, phir **Reports**.', '**Class entry record** dabao. **Day**, tareekh aur **Morning** ya **Evening** chuno.', 'Timetable ki classes dikhti hain. Jo teacher late aaya, uska **Entry time** bharo.', '5 minute tak ginti me nahi. 5 se zyada ho to delay dikhta hai: **Add to the record** dabao.', '**PDF**, **Excel** ya **WhatsApp** (tasveer) me lo. Record hatana ho to uspar **Delete** dabao.']],
+  n: ['Only delays are kept. The record is saved in the cloud like other records; if the phone is offline it stays on the phone and is sent later.', 'Sirf deri ka record rakha jata hai. Ye baaki records ki tarah cloud me save hota hai; phone offline ho to phone me rehta hai aur baad me chala jata hai.'],
+  m: [['admin:reports', '#adminTabs [data-atab-btn="reports"]'], ['admin:reports:entry', '#adminRepKind'], ['admin:reports:entry', '#entrySess'], ['admin:reports:entry', '#entryFill'], ['admin:reports:entry', '#entryPrev']] },
   { id: 'classcount', t: ['Class count report', 'Class count report'], who: 'lead', k: 'class count counted from timetable filled in by teachers ginti not using the app क्लास काउंट',
     s: [['Open **Admin**, then **Reports**, then **Class count report**.', 'Choose **Day**, **Week** or **Month**.', 'Under **Counted from** choose **Filled in by teachers** or **From the timetable**.', 'Get it as **PDF**, **Excel** or **WhatsApp**.'],
         ['**Admin** kholo, phir **Reports**, phir **Class count report**.', '**Day**, **Week** ya **Month** chuno.', '**Counted from** me **Filled in by teachers** ya **From the timetable** chuno.', '**PDF**, **Excel** ya **WhatsApp** me lo.']],
@@ -18929,7 +19183,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     { k: 'rep', t: 'Report and alerts', who: 'all', ic: 'send', ids: ['whatsapp', 'reminder'] },
     { k: 'tt', t: 'Timetable', who: 'lead', ic: 'cal', ids: ['ttfill', 'ttphoto', 'ttcell', 'substitute', 'ttjoin', 'ttcopy', 'pictures'] },
     { k: 'ex', t: 'Exams and duty', who: 'lead', ic: 'clip', ids: ['newexam', 'classtest', 'duty', 'dutyphoto'] },
-    { k: 'rp', t: 'Reports', who: 'lead', ic: 'chart', ids: ['reports', 'classcount'] },
+    { k: 'rp', t: 'Reports', who: 'lead', ic: 'chart', ids: ['reports', 'entryrec', 'classcount'] },
     { k: 'st', t: 'Staff and notices', who: 'lead', ic: 'users', ids: ['notice', 'team', 'admincheck'] },
     { k: 'se', t: 'Settings', who: 'lead', ic: 'gear', ids: ['mapping', 'batches', 'periods', 'lists', 'campus'] }
   ];
@@ -19197,7 +19451,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   new MutationObserver((list) => { list.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType === 1) tpMark(n); })); }).observe(document.documentElement, { childList: true, subtree: true });
   ['input', 'change'].forEach((ev) => document.addEventListener(ev, (e) => { const t = e.target; if (t && t.matches && t.matches('input[type="time"][data-ph]')) t.classList.toggle('tp-empty', !t.value); }, true));
   // ---------- Principal: view only (notices and the calendar stay open) ----------
-  const PRIN_BLOCK = ['#tgEdit', '#tgEditDone', '#tgPublish', '#tgPublishDay', '#tgMoreList', '#tgMoreList *', '#tgUndo', '#tgDiscard', '#tgFixTeachers', '#tgAddBatch', '#tgAddPer', '#tgSunday', '#tgDayNote', '#tgEditSubj', '.tg-paint', '.tg-paint *', '#tgWrap .tg-table td', '#adminNewExamBtn', '[data-ex-edit]', '[data-ex-photo]', '[data-ex-cancelduty]', '[data-ex-t]', '[data-ex-step]', '[data-force-checkout]', '[data-adm-sess]', '#view-admin .del-btn[data-edit]', '#view-admin .del-btn[data-del]', '#galSelDel', '.dsp-pub'].join(',');
+  const PRIN_BLOCK = ['#tgEdit', '#tgEditDone', '#tgPublish', '#tgPublishDay', '#tgMoreList', '#tgMoreList *', '#tgUndo', '#tgDiscard', '#tgFixTeachers', '#tgAddBatch', '#tgAddPer', '#tgSunday', '#tgDayNote', '#tgEditSubj', '.tg-paint', '.tg-paint *', '#tgWrap .tg-table td', '#adminNewExamBtn', '[data-ex-edit]', '[data-ex-photo]', '[data-ex-cancelduty]', '[data-ex-t]', '[data-ex-step]', '[data-force-checkout]', '[data-adm-sess]', '#view-admin .del-btn[data-edit]', '#view-admin .del-btn[data-del]', '#galSelDel', '.dsp-pub', '.entry-edit', '.entry-edit *'].join(',');
   document.addEventListener('click', (e) => { if (!principalView()) return; const t = e.target && e.target.closest && e.target.closest(PRIN_BLOCK); if (!t) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); showToast('Principal can only view this'); }, true);
   // ---------- Text size and "Update app now" (Menu → Settings) ----------
   (function textSizeAndUpdate() {
