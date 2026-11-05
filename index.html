@@ -2803,10 +2803,8 @@
   .ent-msg { font-weight: 500; }
   #entryPrev { margin-top: 14px; }
   .chip[disabled] { opacity: .5; pointer-events: none; }
-  /* Check-in card: a soft tint for each state, the live dot, the sessions chip */
-  #view-today .status-card.in { box-shadow: 0 1px 3px rgba(23,23,23,0.06); background-image: linear-gradient(160deg, rgba(22,163,74,.09) 0%, rgba(22,163,74,0) 55%); }
-  #view-today .status-card.pre:not(.on-leave) { background-image: linear-gradient(160deg, rgba(230,57,70,.08) 0%, rgba(230,57,70,0) 55%); }
-  #view-today .status-card.done { background-image: linear-gradient(160deg, rgba(128,128,128,.10) 0%, rgba(128,128,128,0) 55%); }
+  /* Check-in card: the bar on the left and the tint follow the state (and the clock before the first check-in) */
+  #view-today #statusCard { box-shadow: inset 4px 0 0 var(--sc-accent, transparent), 0 1px 3px rgba(23,23,23,0.06); background-image: linear-gradient(160deg, var(--sc-tint, transparent) 0%, transparent 55%); }
   #view-today .sc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   #view-today .sc-main { min-width: 0; }
   #view-today .sc-sub { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 4px; line-height: 1.4; }
@@ -2815,8 +2813,7 @@
   #view-today .sess-chip[hidden] { display: none; }
   #view-today .sess-chip svg { display: block; transition: transform .2s; }
   #view-today .sess-chip[aria-expanded="true"] svg { transform: rotate(180deg); }
-  #view-today .sc-tod { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; background: linear-gradient(160deg, rgba(251,191,36,.30), rgba(251,146,60,.30)); color: #B45309; }
-  #view-today .sc-tod.moon { background: linear-gradient(160deg, rgba(99,102,241,.22), rgba(79,70,229,.22)); color: #4F46E5; }
+  #view-today .sc-tod { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; background: linear-gradient(160deg, var(--sc-i1, #FFE9C7), var(--sc-i2, #FFD8A8)); color: var(--sc-ifg, #B45309); box-shadow: 0 0 16px var(--sc-glow, rgba(251,146,60,.5)); }
   #view-today .sc-tod[hidden] { display: none; }
   #view-today .status-card.pre .timer { display: none; }
   #view-today #sessionCountLabel { color: var(--muted); font-weight: 500; font-size: 13px; margin-top: 4px; }
@@ -2824,14 +2821,15 @@
   #view-today .status-card.in .status-dot { position: relative; box-shadow: 0 0 0 4px rgba(22,163,74,.18); }
   @media (prefers-reduced-motion: no-preference) { #view-today .status-card.in .status-dot::after { content: ''; position: absolute; inset: 0; border-radius: 999px; background: rgba(22,163,74,.5); animation: scDotPulse 2.4s ease-out infinite; } }
   @keyframes scDotPulse { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(2.6); opacity: 0; } }
-  #view-today #sessionsSection { border-top: 1px solid var(--line); padding-top: 8px; }
-  /* The sessions list inside the check-in card: room to show the whole time ("9:27 AM"), also with a larger text size on the phone */
-  #view-today #sessionsList .class-card { padding: 10px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
-  #view-today #sessionsList .class-card:first-child { border-top: 0; padding-top: 2px !important; }
-  #view-today #sessionsList .sess-two { flex-wrap: wrap; }
-  #view-today #sessionsList .sess-two > div { flex: 1 1 150px !important; min-width: 0; }
-  #view-today #sessionsList input[type="time"] { padding-left: 9px !important; padding-right: 32px !important; background-position: right 9px center !important; }
-  #view-today #sessionsList input[type="time"].tp-empty[data-ph] { background-position: right 9px center, left 9px center !important; }
+  /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
+  #sessSheet #sessionsList { flex-direction: column; gap: 0; }
+  #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
+  #sessSheet #sessionsList .class-card:first-child { border-top: 0; }
+  #sessSheet #sessionsList .sess-two { flex-wrap: wrap; }
+  #sessSheet #sessionsList .sess-two > div { flex: 1 1 150px !important; min-width: 0; }
+  #sessSheet #sessionsList input[type="time"] { padding-left: 9px !important; padding-right: 32px !important; background-position: right 9px center !important; }
+  #sessSheet #sessionsList input[type="time"].tp-empty[data-ph] { background-position: right 9px center, left 9px center !important; }
+  #sessSheet #sessionsList .add-sess-btn { margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -3024,9 +3022,6 @@
   <button type="button" class="hv-back" id="lateInBtn" style="display:none; margin:10px auto 0; padding:0; font-size:15px;"><span class="ico i-clock" aria-hidden="true"></span>Forgot to check in?</button>
   <div id="stuckCheckinWarning" style="display:none; background:#FEE2E2; border:1px solid #B91C1C; color:#B91C1C; border-radius:12px; padding:10px 12px; font-size:13px; font-weight:700; margin-top:10px; text-align:center; line-height:1.4;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>You've been checked in for over 24 hours. If you forgot to check out, please check out now.</div>
   <div class="loc-line" id="locLine"></div>
-  <div id="sessionsSection" style="display:none;">
-  <div class="class-list" id="sessionsList" style="margin-top:4px; display:none;"></div>
-  </div>
   </div>
 
   <section class="tsec" id="myDutySec" hidden>
@@ -3324,6 +3319,16 @@
   <div class="hv-grab"></div>
   <button type="button" class="hv-sheet-x" id="enSheetX" aria-label="Close"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   <div id="enSheetBody"></div>
+  </div>
+  </div>
+
+  <div class="hv-sheet-root" id="sessSheet" aria-hidden="true">
+  <div class="hv-sheet-backdrop" id="sessSheetBd"></div>
+  <div class="hv-sheet" role="dialog" aria-modal="true" aria-label="Today's sessions">
+  <div class="hv-grab"></div>
+  <button type="button" class="hv-sheet-x" id="sessSheetX" aria-label="Close"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div class="hv-d-title">Today's sessions</div>
+  <div id="sessionsSection" style="margin-top:8px;"><div class="class-list" id="sessionsList" style="display:flex;"></div></div>
   </div>
   </div>
 
@@ -4142,7 +4147,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.40 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.41 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4675,7 +4680,7 @@
   card.classList.toggle('on-leave', onLeaveToday);
   card.classList.toggle('done', !c.checkedIn && n > 0);
   const subEl = document.getElementById('scSub');
-  if (subEl) subEl.textContent = (c.checkedIn && c.checkInAt) ? `Since ${formatTime(c.checkInAt)}` : ((n > 0 && lastOut) ? `Checked out at ${formatTime(lastOut)}` : (onLeaveToday ? "You're on leave today. Check in only if you come to campus." : 'Tap Check In when you reach campus.'));
+  if (subEl) subEl.textContent = (c.checkedIn && c.checkInAt) ? `Since ${formatTime(c.checkInAt)}${(Date.now() - c.checkInAt >= 12 * 3600000) ? ` · open for ${Math.floor((Date.now() - c.checkInAt) / 3600000)}h` : ''}` : ((n > 0 && lastOut) ? `Checked out at ${formatTime(lastOut)}` : (onLeaveToday ? "You're on leave today. Check in only if you come to campus." : 'Tap Check In when you reach campus.'));
   if (timerLabel) timerLabel.textContent = (!c.checkedIn && n > 0) ? 'Total time on campus today' : 'Time on campus today';
   // the breaks between the sessions, in one line (the details are in the list of the sessions chip)
   if (sessLabel) {
@@ -4684,8 +4689,17 @@
     const bm = Math.round(bt / 60000); const bf = bm < 1 ? '<1m' : (bm >= 60 ? `${Math.floor(bm / 60)}h ${String(bm % 60).padStart(2, '0')}m` : `${bm}m`);
     sessLabel.textContent = bc ? `${bc} break${bc === 1 ? '' : 's'} · ${bf}${bc > 1 ? ' in all' : ''}` : '';
   }
-  const tod = document.getElementById('scTod');
-  if (tod) { const hr = new Date().getHours(); const dayTime = hr >= 5 && hr < 17; tod.hidden = !(beforeFirst && !onLeaveToday); tod.classList.toggle('moon', !dayTime); const want = dayTime ? 'sun' : 'moon'; if (tod.getAttribute('data-k') !== want) { tod.setAttribute('data-k', want); tod.innerHTML = dayTime ? svgSun() : svgMoon(); } }
+  {
+    const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes(); const openMs = (c.checkedIn && c.checkInAt) ? Date.now() - c.checkInAt : 0;
+    let acc; let sky = false;
+    if (onLeaveToday) acc = [217, 119, 6];
+    else if (c.checkedIn) acc = openMs >= 12 * 3600000 ? [217, 119, 6] : [22, 163, 74];
+    else if (n > 0) acc = [100, 116, 139];
+    else { acc = skyRgb(mins); sky = true; }
+    applyCardColours(card, acc);
+    const tod = document.getElementById('scTod');
+    if (tod) { tod.hidden = !(beforeFirst && !onLeaveToday); const hr = now.getHours(); const kind = (hr >= 5 && hr < 12) ? 'rise' : ((hr >= 12 && hr < 17) ? 'sun' : 'moon'); if (tod.getAttribute('data-k') !== kind) { tod.setAttribute('data-k', kind); tod.innerHTML = kind === 'rise' ? svgSunrise() : (kind === 'sun' ? svgSun() : svgMoon()); } }
+  }
 
     if (c.checkedIn) {
       card.classList.add('in');
@@ -4709,6 +4723,18 @@
     }
   }
 
+  // the colour of the sky at a given minute of the day (it glides from dawn orange to noon gold, dusk violet and night indigo)
+  const SKY_KEYS = [[0, [99, 102, 241]], [270, [99, 102, 241]], [330, [249, 115, 22]], [480, [251, 146, 60]], [600, [245, 158, 11]], [900, [245, 158, 11]], [1020, [234, 124, 58]], [1080, [168, 85, 247]], [1170, [99, 102, 241]], [1440, [99, 102, 241]]];
+  function skyRgb(mins) { for (let i = 1; i < SKY_KEYS.length; i++) { const a = SKY_KEYS[i - 1]; const b = SKY_KEYS[i]; if (mins <= b[0]) { const t = (mins - a[0]) / Math.max(1, b[0] - a[0]); return [0, 1, 2].map((k) => Math.round(a[1][k] + (b[1][k] - a[1][k]) * t)); } } return SKY_KEYS[SKY_KEYS.length - 1][1]; }
+  function isDarkUi() { const th = document.documentElement.getAttribute('data-theme'); return th === 'dark' || (th !== 'light' && !!window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
+  function applyCardColours(card, acc) {
+    const dark = isDarkUi(); const mix = (c, w, t) => c.map((v, i) => Math.round(v + (w[i] - v) * t)); const rgb = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`; const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+    const bar = dark ? mix(acc, [255, 255, 255], 0.15) : acc;
+    card.style.setProperty('--sc-accent', rgb(bar)); card.style.setProperty('--sc-tint', rgba(acc, dark ? 0.16 : 0.10));
+    card.style.setProperty('--sc-i1', dark ? rgba(acc, 0.34) : rgb(mix(acc, [255, 255, 255], 0.78))); card.style.setProperty('--sc-i2', dark ? rgba(acc, 0.20) : rgb(mix(acc, [255, 255, 255], 0.52)));
+    card.style.setProperty('--sc-ifg', dark ? rgb(mix(acc, [255, 255, 255], 0.30)) : rgb(mix(acc, [0, 0, 0], 0.38))); card.style.setProperty('--sc-glow', rgba(acc, dark ? 0.45 : 0.55));
+  }
+  function svgSunrise() { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m8 6 4-4 4 4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>'; }
   function svgSun() { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>'; }
   function svgMoon() { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>'; }
   function svgLogin() {
@@ -15571,30 +15597,25 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   }
 
   function renderSessions() {
-    const section = document.getElementById('sessionsSection');
     const list = document.getElementById('sessionsList');
     const sessions = (state.campusToday.sessions || []).filter((s) => !state.pendingDeleteIds.has(s.id));
     const chipEl = document.getElementById('sessToggle');
-  if (sessions.length === 0) { section.style.display = 'none'; if (chipEl) { chipEl.hidden = true; chipEl.setAttribute('aria-expanded', 'false'); } list.style.display = 'none'; return; }
-  if (chipEl) chipEl.hidden = false;
-  section.style.display = list.style.display === 'none' ? 'none' : 'block';
+    if (sessions.length === 0) { if (chipEl) { chipEl.hidden = true; chipEl.setAttribute('aria-expanded', 'false'); } list.innerHTML = ''; sessSheetClose(); return; }
+    if (chipEl) chipEl.hidden = false;
     list.innerHTML = sessionsCardsHtml(sessions);
     const cnt = document.getElementById('sessCount');
     if (cnt) cnt.textContent = `${sessions.length} session${sessions.length === 1 ? '' : 's'}`;
     wireSessionsEvents(list, todayStr(), sessions, renderSessions);
-  if (!state.campusToday.checkedIn && !sessions.some((x) => x.out == null)) { list.insertAdjacentHTML('beforeend', '<button type="button" class="btn-secondary add-sess-btn" id="todayMoreSess">+ Add another session</button>'); const mb = document.getElementById('todayMoreSess'); if (mb) mb.addEventListener('click', () => openAddPastSession(todayStr(), null, sessions)); }
+    if (!state.campusToday.checkedIn && !sessions.some((x) => x.out == null)) { list.insertAdjacentHTML('beforeend', '<button type="button" class="btn-secondary add-sess-btn" id="todayMoreSess">+ Add another session</button>'); const mb = document.getElementById('todayMoreSess'); if (mb) mb.addEventListener('click', () => openAddPastSession(todayStr(), null, sessions)); }
   }
-
+  function sessSheetOpen() { const r = document.getElementById('sessSheet'); if (!r) return; renderSessions(); if (document.getElementById('sessToggle').hidden) return; r.classList.add('open'); r.setAttribute('aria-hidden', 'false'); document.getElementById('sessToggle').setAttribute('aria-expanded', 'true'); if (!state.sessPushed) { try { history.pushState({ catjeeNav: state.navDepth, catjeeSheet: 'sess' }, ''); state.sessPushed = true; } catch (e) { /* ignore */ } } }
+  function sessSheetClose(fromPop) { const r = document.getElementById('sessSheet'); if (!r) return; const wasOpen = r.classList.contains('open'); r.classList.remove('open'); r.setAttribute('aria-hidden', 'true'); const t = document.getElementById('sessToggle'); if (t) t.setAttribute('aria-expanded', 'false'); if (state.sessPushed) { state.sessPushed = false; if (!fromPop && wasOpen && history.state && history.state.catjeeSheet === 'sess') { try { history.back(); } catch (e) { /* ignore */ } } } }
+  window.addEventListener('popstate', () => { const r = document.getElementById('sessSheet'); if (r && r.classList.contains('open') && !(history.state && history.state.catjeeSheet === 'sess')) { state.sessPushed = false; sessSheetClose(true); } });
   document.getElementById('checkBtn').addEventListener('click', performCheckToggle);
   document.getElementById('lateInBtn').addEventListener('click', openLateCheckIn);
-  document.getElementById('sessToggle').addEventListener('click', () => {
-    const list = document.getElementById('sessionsList');
-    const btn = document.getElementById('sessToggle');
-    const open = list.style.display === 'none';
-    list.style.display = open ? 'flex' : 'none';
-  const secEl = document.getElementById('sessionsSection'); if (secEl) secEl.style.display = open ? 'block' : 'none';
-  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
+  document.getElementById('sessToggle').addEventListener('click', sessSheetOpen);
+  document.getElementById('sessSheetBd').addEventListener('click', sessSheetClose);
+  document.getElementById('sessSheetX').addEventListener('click', sessSheetClose);
 
   function reportFilenameFor(date) {
     return `CATJEE-Report-${date}.pdf`;
