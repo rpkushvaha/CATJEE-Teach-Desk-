@@ -2803,6 +2803,28 @@
   .ent-msg { font-weight: 500; }
   #entryPrev { margin-top: 14px; }
   .chip[disabled] { opacity: .5; pointer-events: none; }
+  /* Check-in card: a soft tint for each state, the live dot, the sessions chip */
+  #view-today .status-card.in { box-shadow: 0 1px 3px rgba(23,23,23,0.06); background-image: linear-gradient(160deg, rgba(22,163,74,.09) 0%, rgba(22,163,74,0) 55%); }
+  #view-today .status-card.pre:not(.on-leave) { background-image: linear-gradient(160deg, rgba(230,57,70,.08) 0%, rgba(230,57,70,0) 55%); }
+  #view-today .status-card.done { background-image: linear-gradient(160deg, rgba(128,128,128,.10) 0%, rgba(128,128,128,0) 55%); }
+  #view-today .sc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  #view-today .sc-main { min-width: 0; }
+  #view-today .sc-sub { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+  #view-today .sc-sub:empty { display: none; }
+  #view-today .sess-chip { display: inline-flex; align-items: center; gap: 4px; flex: none; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px 6px 12px; font: inherit; font-size: 12px; font-weight: 600; color: var(--muted-2); cursor: pointer; white-space: nowrap; }
+  #view-today .sess-chip[hidden] { display: none; }
+  #view-today .sess-chip svg { display: block; transition: transform .2s; }
+  #view-today .sess-chip[aria-expanded="true"] svg { transform: rotate(180deg); }
+  #view-today .sc-tod { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; background: linear-gradient(160deg, rgba(251,191,36,.30), rgba(251,146,60,.30)); color: #B45309; }
+  #view-today .sc-tod.moon { background: linear-gradient(160deg, rgba(99,102,241,.22), rgba(79,70,229,.22)); color: #4F46E5; }
+  #view-today .sc-tod[hidden] { display: none; }
+  #view-today .status-card.pre .timer { display: none; }
+  #view-today #sessionCountLabel { color: var(--muted); font-weight: 500; font-size: 13px; margin-top: 4px; }
+  #view-today #sessionCountLabel:empty { display: none; }
+  #view-today .status-card.in .status-dot { position: relative; box-shadow: 0 0 0 4px rgba(22,163,74,.18); }
+  @media (prefers-reduced-motion: no-preference) { #view-today .status-card.in .status-dot::after { content: ''; position: absolute; inset: 0; border-radius: 999px; background: rgba(22,163,74,.5); animation: scDotPulse 2.4s ease-out infinite; } }
+  @keyframes scDotPulse { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(2.6); opacity: 0; } }
+  #view-today #sessionsSection { border-top: 1px solid var(--line); padding-top: 8px; }
 </style>
 </head>
 <body>
@@ -2975,31 +2997,32 @@
   <div id="holidayCard" hidden></div>
 
       <div class="status-card" id="statusCard">
-        <div class="status-row">
-          <span class="status-dot" id="statusDot"></span>
-          <div class="status-text" id="statusText">Not on Campus</div>
-        </div>
-        <div class="timer">
-          <div class="timer-num num" id="timerNum">00:00:00</div>
-          <div class="timer-label" id="timerLabel">Time on campus today</div>
-          <div class="timer-label" id="sessionCountLabel" style="text-transform:none; letter-spacing:0; margin-top:3px; font-weight:500;"></div>
-        </div>
-        <button class="btn btn-checkin" id="checkBtn">Check In</button>
-        <button type="button" class="hv-back" id="lateInBtn" style="display:none; margin:10px auto 0; padding:0; font-size:15px;"><span class="ico i-clock" aria-hidden="true"></span>Forgot to check in?</button>
-        <div id="stuckCheckinWarning" style="display:none; background:#FEE2E2; border:1px solid #B91C1C; color:#B91C1C; border-radius:12px; padding:10px 12px; font-size:13px; font-weight:700; margin-top:10px; text-align:center; line-height:1.4;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>You've been checked in for over 24 hours. If you forgot to check out, please check out now.</div>
-        <div class="loc-line" id="locLine"></div>
-      </div>
+  <div class="sc-head">
+  <div class="sc-main">
+  <div class="status-row">
+  <span class="status-dot" id="statusDot"></span>
+  <div class="status-text" id="statusText">Not on Campus</div>
+  </div>
+  <div class="sc-sub" id="scSub"></div>
+  </div>
+  <button type="button" class="sess-chip" id="sessToggle" aria-expanded="false" hidden><span id="sessCount"></span><svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+  <div class="sc-tod" id="scTod" aria-hidden="true" hidden></div>
+  </div>
+  <div class="timer">
+  <div class="timer-num num" id="timerNum">00:00:00</div>
+  <div class="timer-label" id="timerLabel">Time on campus today</div>
+  <div class="timer-label" id="sessionCountLabel" style="text-transform:none; letter-spacing:0;"></div>
+  </div>
+  <button class="btn btn-checkin" id="checkBtn">Check In</button>
+  <button type="button" class="hv-back" id="lateInBtn" style="display:none; margin:10px auto 0; padding:0; font-size:15px;"><span class="ico i-clock" aria-hidden="true"></span>Forgot to check in?</button>
+  <div id="stuckCheckinWarning" style="display:none; background:#FEE2E2; border:1px solid #B91C1C; color:#B91C1C; border-radius:12px; padding:10px 12px; font-size:13px; font-weight:700; margin-top:10px; text-align:center; line-height:1.4;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>You've been checked in for over 24 hours. If you forgot to check out, please check out now.</div>
+  <div class="loc-line" id="locLine"></div>
+  <div id="sessionsSection" style="display:none;">
+  <div class="class-list" id="sessionsList" style="margin-top:4px; display:none;"></div>
+  </div>
+  </div>
 
-      <div id="sessionsSection" style="display:none;">
-        <button class="sess-toggle" id="sessToggle" aria-expanded="false">
-          <span class="sess-t">Today's sessions</span>
-          <span class="sess-count" id="sessCount"></span>
-          <svg class="ic sess-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="class-list" id="sessionsList" style="margin-top:8px; display:none;"></div>
-      </div>
-
-      <section class="tsec" id="myDutySec" hidden>
+  <section class="tsec" id="myDutySec" hidden>
         <div class="tsec-head"><div class="tsec-title">My Invigilation Duty</div></div>
         <div id="myDutyList" style="display:flex; flex-direction:column; gap:8px;"></div>
       </section>
@@ -4112,7 +4135,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.38 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.39 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4637,19 +4660,25 @@
     const timerLabel = document.getElementById('timerLabel');
     const sess = c.sessions || [];
     const n = c.sessionCount || sess.length || 0;
-    const countTxt = n > 1 ? ` · ${n} check-ins today` : '';
     let lastOut = null;
-    sess.forEach((s) => { if (s.out != null && (lastOut == null || s.out > lastOut)) lastOut = s.out; });
-    if (sessLabel) {
-      if (c.checkedIn && c.checkInAt) sessLabel.textContent = `Checked in at ${formatTime(c.checkInAt)}${countTxt}`;
-      else if (n > 0 && lastOut) sessLabel.textContent = `Checked out at ${formatTime(lastOut)}${countTxt}`;
-      else sessLabel.textContent = '';
-    }
-    const beforeFirst = !c.checkedIn && n === 0;
-    const onLeaveToday = beforeFirst && (state.classesToday || []).some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday' && !state.pendingDeleteIds.has(x.id));
-    card.classList.toggle('pre', beforeFirst);
-    card.classList.toggle('on-leave', onLeaveToday);
-    if (timerLabel) timerLabel.textContent = onLeaveToday ? "You're on leave today. Check in only if you come to campus." : beforeFirst ? 'Tap Check In when you reach campus.' : ((!c.checkedIn && n > 0) ? 'Total time on campus today' : 'Time on campus today');
+  sess.forEach((s) => { if (s.out != null && (lastOut == null || s.out > lastOut)) lastOut = s.out; });
+  const beforeFirst = !c.checkedIn && n === 0;
+  const onLeaveToday = beforeFirst && (state.classesToday || []).some((x) => x.entryType === 'activity' && x.activityType === 'Leave / Holiday' && !state.pendingDeleteIds.has(x.id));
+  card.classList.toggle('pre', beforeFirst);
+  card.classList.toggle('on-leave', onLeaveToday);
+  card.classList.toggle('done', !c.checkedIn && n > 0);
+  const subEl = document.getElementById('scSub');
+  if (subEl) subEl.textContent = (c.checkedIn && c.checkInAt) ? `Since ${formatTime(c.checkInAt)}` : ((n > 0 && lastOut) ? `Checked out at ${formatTime(lastOut)}` : (onLeaveToday ? "You're on leave today. Check in only if you come to campus." : 'Tap Check In when you reach campus.'));
+  if (timerLabel) timerLabel.textContent = (!c.checkedIn && n > 0) ? 'Total time on campus today' : 'Time on campus today';
+  // the breaks between the sessions, in one line (the details are in the list of the sessions chip)
+  if (sessLabel) {
+    const live = sess.filter((x) => x && x.in != null && !state.pendingDeleteIds.has(x.id)).slice().sort((p, q) => p.in - q.in); let bc = 0; let bt = 0;
+    for (let i = 1; i < live.length; i++) { const po = live[i - 1].out; if (po != null && live[i].in > po) { bc += 1; bt += live[i].in - po; } }
+    const bm = Math.round(bt / 60000); const bf = bm < 1 ? '<1m' : (bm >= 60 ? `${Math.floor(bm / 60)}h ${String(bm % 60).padStart(2, '0')}m` : `${bm}m`);
+    sessLabel.textContent = bc ? `${bc} break${bc === 1 ? '' : 's'} · ${bf}${bc > 1 ? ' in all' : ''}` : '';
+  }
+  const tod = document.getElementById('scTod');
+  if (tod) { const hr = new Date().getHours(); const dayTime = hr >= 5 && hr < 17; tod.hidden = !(beforeFirst && !onLeaveToday); tod.classList.toggle('moon', !dayTime); const want = dayTime ? 'sun' : 'moon'; if (tod.getAttribute('data-k') !== want) { tod.setAttribute('data-k', want); tod.innerHTML = dayTime ? svgSun() : svgMoon(); } }
 
     if (c.checkedIn) {
       card.classList.add('in');
@@ -4673,6 +4702,8 @@
     }
   }
 
+  function svgSun() { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>'; }
+  function svgMoon() { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>'; }
   function svgLogin() {
     return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>';
   }
@@ -15536,11 +15567,13 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const section = document.getElementById('sessionsSection');
     const list = document.getElementById('sessionsList');
     const sessions = (state.campusToday.sessions || []).filter((s) => !state.pendingDeleteIds.has(s.id));
-    if (sessions.length === 0) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
+    const chipEl = document.getElementById('sessToggle');
+  if (sessions.length === 0) { section.style.display = 'none'; if (chipEl) { chipEl.hidden = true; chipEl.setAttribute('aria-expanded', 'false'); } list.style.display = 'none'; return; }
+  if (chipEl) chipEl.hidden = false;
+  section.style.display = list.style.display === 'none' ? 'none' : 'block';
     list.innerHTML = sessionsCardsHtml(sessions);
     const cnt = document.getElementById('sessCount');
-    if (cnt) cnt.textContent = `${sessions.length} · view or edit times`;
+    if (cnt) cnt.textContent = `${sessions.length} session${sessions.length === 1 ? '' : 's'}`;
     wireSessionsEvents(list, todayStr(), sessions, renderSessions);
   if (!state.campusToday.checkedIn && !sessions.some((x) => x.out == null)) { list.insertAdjacentHTML('beforeend', '<button type="button" class="btn-secondary add-sess-btn" id="todayMoreSess">+ Add another session</button>'); const mb = document.getElementById('todayMoreSess'); if (mb) mb.addEventListener('click', () => openAddPastSession(todayStr(), null, sessions)); }
   }
@@ -15552,7 +15585,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const btn = document.getElementById('sessToggle');
     const open = list.style.display === 'none';
     list.style.display = open ? 'flex' : 'none';
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  const secEl = document.getElementById('sessionsSection'); if (secEl) secEl.style.display = open ? 'block' : 'none';
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
   function reportFilenameFor(date) {
@@ -19086,10 +19120,10 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         ['**Today** page kholo.', 'Campus pahunchte hi **Check In** dabao.', 'Jaate waqt **Check Out** dabao.', 'Campus me aap ka samay attendance report me jata hai.']],
     m: [['today', '.nav-item[data-tab="today"]'], ['today', '#checkBtn'], ['today', '#checkBtn'], ['today', '#statusCard']] },
   { id: 'fixtime', t: ['Forgot to check in, or a wrong time? Correct it', 'Check-in bhool gaye ya galat samay? Theek karo'], who: 'all', k: 'forgot add check in check out missed edit change session time delete bhool chhoot jodna galat sudharna badalna चेक इन भूल समय बदलना',
-    s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap **Today\'s sessions · view or edit times** and change the **Check-in** or **Check-out** time.', 'To remove a wrong session, tap the bin on it. The app asks you to confirm. To add another visit to an earlier day, open **History**, open that day and tap **+ Add another session**.'],
-        ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to **Today\'s sessions · view or edit times** dabao aur **Check-in** ya **Check-out** samay badlo.', 'Galat session hatana ho to us par bin dabao. App pooch kar hatata hai. Kisi pichhle din ka ek aur visit jodne ke liye **History** kholo, wo din kholo aur **+ Add another session** dabao.']],
+    s: [['Open the **Today** page.', 'If you did not check in, tap **Forgot to check in?** and enter the time you came and the time you left.', 'To change a time, tap the **sessions** chip at the top right of the check-in card and change the **Check-in** or **Check-out** time.', 'To remove a wrong session, tap the bin on it. The app asks you to confirm. To add another visit to an earlier day, open **History**, open that day and tap **+ Add another session**.'],
+        ['**Today** page kholo.', 'Agar check-in nahi kiya, to **Forgot to check in?** dabao aur aane aur jaane ka samay bharo.', 'Samay badalna ho to check-in card ke upar daayen **sessions** wala chip dabao aur **Check-in** ya **Check-out** samay badlo.', 'Galat session hatana ho to us par bin dabao. App pooch kar hatata hai. Kisi pichhle din ka ek aur visit jodne ke liye **History** kholo, wo din kholo aur **+ Add another session** dabao.']],
     n: ['You can change only today and yesterday. For an older day, ask the Admin or a Coordinator.', 'Aap sirf aaj aur kal badal sakte ho. Purane din ke liye Admin ya Coordinator se kaho.'],
-    m: [['today', '.nav-item[data-tab="today"]'], ['today+out', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#sessionsSection']] },
+    m: [['today', '.nav-item[data-tab="today"]'], ['today+out', '#lateInBtn', ['This shows only when you are not checked in.', 'Ye tabhi dikhta hai jab aap check-in nahi ho.']], ['today', '#sessToggle', ['This shows after your first check-in of the day.', 'Ye din ke pehle check-in ke baad dikhta hai.']], ['today', '#statusCard']] },
   { id: 'addclass', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], who: 'all', k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
     s: [['Tap **Add Class** at the bottom.', 'Stay on the **Class** tab. Choose the batch under **Select Class / Batch**.', 'Check **Class Timing**: Start and End, or tap 40m, 50m, 1h or 1h 5m.', 'Under **What happened in class?** choose **Teaching** and write the **Chapter**. The topic is optional.', 'Under **Class deliverables** tick Worksheet / DPP, Study material or Homework if you gave them.', 'Tap **Save Class**.'],
         ['Neeche **Add Class** dabao.', '**Class** tab par raho. **Select Class / Batch** me batch chuno.', '**Class Timing** dekho: Start aur End, ya 40m, 50m, 1h, 1h 5m dabao.', '**What happened in class?** me **Teaching** chuno aur **Chapter** likho. Topic optional hai.', '**Class deliverables** me Worksheet / DPP, Study material ya Homework chuno, agar diya ho.', '**Save Class** dabao.']],
