@@ -4194,7 +4194,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.47 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.48 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6198,22 +6198,51 @@ function teachesReasoning() {
   return false;
 }
   const clsSubj = (c) => (c && Array.isArray(c.parts) && c.parts.length) ? c.parts.join(' + ') : ((c && c.subject) || '');
-  function partOptions() {
-    const f = state.form || {}; const subs = []; const b = f.batch; const m = state.teacherMap || {}; const me = state.teacherId;
-    Object.keys(m).forEach((k) => { if (m[k] !== me) return; const i = k.indexOf('|'); const kb = k.slice(0, i); const ks = k.slice(i + 1); if (!b || kb === '*' || kb === b) subs.push(ks); });
-    if (f.slotSubject) subs.push(f.slotSubject);
-    if (b) (state.scheduleSlots || []).forEach((sl) => { if (!sl || sl.cancelled || !sl.subject) return; if (sl.label === b || (Array.isArray(sl.batches) && sl.batches.indexOf(b) >= 0)) subs.push(sl.subject); });
-    if (!subs.length) { try { teacherSubjects(me).concat([mySubject()]).forEach((x) => { if (x) subs.push(x); }); } catch (e) { /* ignore */ } }
-    const out = []; subs.forEach((sn) => { const p = subjPartsOf(sn); if (p) p.forEach((x) => { if (out.indexOf(x) < 0) out.push(x); }); });
+  function partSubs() {
+  const f = state.form || {}; const subs = []; const b = f.batch; const m = state.teacherMap || {}; const me = state.teacherId;
+  Object.keys(m).forEach((k) => { if (m[k] !== me) return; const i = k.indexOf('|'); const kb = k.slice(0, i); const ks = k.slice(i + 1); if (!b || kb === '*' || kb === b) subs.push(ks); });
+  if (f.slotSubject) subs.push(f.slotSubject);
+  if (b) (state.scheduleSlots || []).forEach((sl) => { if (!sl || sl.cancelled || !sl.subject) return; if (sl.label === b || (Array.isArray(sl.batches) && sl.batches.indexOf(b) >= 0)) subs.push(sl.subject); });
+  if (!subs.length) { try { teacherSubjects(me).concat([mySubject()]).forEach((x) => { if (x) subs.push(x); }); } catch (e) { /* ignore */ } }
+  return subs;
+}
+// a subject that is exactly one of the parts ("Reasoning", "History", ...)
+function subjSingleOf(n) {
+  const w = String(n || '').toLowerCase().split(/[^a-z]+/).filter(Boolean); const st = (x) => w.some((q) => q.indexOf(x) === 0);
+  const f = []; if (st('his')) f.push('History'); if (st('pol')) f.push('Political Science'); if (st('geo') && !st('geom')) f.push('Geography'); if (st('eco')) f.push('Economics'); if (st('reas')) f.push('Reasoning');
+  return f.length === 1 ? f[0] : null;
+}
+// a teacher who has a "two in one" subject anywhere (Teacher Mapping, Schedule, his own subject)
+function teachesTwoInOne() {
+  const m = state.teacherMap || {}; const me = state.teacherId;
+  if (Object.keys(m).some((k) => m[k] === me && subjPartsOf(k.slice(k.indexOf('|') + 1)))) return true;
+  if ((state.scheduleSlots || []).some((sl) => sl && !sl.cancelled && subjPartsOf(sl.subject))) return true;
+  try { if (teacherSubjects(me).concat([state.user && state.user.subject]).some((x) => subjPartsOf(x))) return true; } catch (e) { /* ignore */ }
+  return false;
+}
+function partOptions() {
+  const f = state.form || {}; const subs = partSubs();
+  const out = []; subs.forEach((sn) => { const p = subjPartsOf(sn); if (p) p.forEach((x) => { if (out.indexOf(x) < 0) out.push(x); }); });
   if (out.length && out.indexOf('Reasoning') < 0) { try { if (teachesReasoning()) out.push('Reasoning'); } catch (e) { /* ignore */ } }
-    if (state.editingId) (f.parts || []).forEach((x) => { if (out.indexOf(x) < 0) out.push(x); });
-    return out;
-  }
-  function renderPartChips() {
+  // such a teacher also sees a class of one single part (e.g. a Reasoning batch), so that the subject shows in the box
+  if (!out.length) { try { if (teachesTwoInOne()) subs.forEach((sn) => { const one = subjSingleOf(sn); if (one && out.indexOf(one) < 0) out.push(one); }); } catch (e) { /* ignore */ } }
+  if (state.editingId) (f.parts || []).forEach((x) => { if (out.indexOf(x) < 0) out.push(x); });
+  return out;
+}
+// which option to choose by itself: the subject of the Schedule slot, or the only single subject of the batch
+function partAutoPick(opts) {
+  const f = state.form || {}; const subs = partSubs(); const multi = subs.some((sn) => subjPartsOf(sn));
+  if (f.slotSubject) { const one = subjSingleOf(f.slotSubject); if (one && opts.indexOf(one) >= 0) return one; }
+  const singles = []; subs.forEach((sn) => { const one = subjSingleOf(sn); if (one && singles.indexOf(one) < 0) singles.push(one); });
+  if (!multi && singles.length === 1 && opts.indexOf(singles[0]) >= 0) return singles[0];
+  return null;
+}
+function renderPartChips() {
     const fld = document.getElementById('partField'); const box = document.getElementById('partChips'); if (!fld || !box || !state.form) return;
     const opts = state.entryMode === 'class' ? partOptions() : [];
     if (!opts.length) { fld.hidden = true; state.form.parts = []; return; }
     state.form.parts = (state.form.parts || []).filter((x) => opts.indexOf(x) >= 0); fld.hidden = false;
+  { const key = `${state.form.batch || ''}|${state.form.slotSubject || ''}`; if (!state.editingId && !state.form.parts.length && state.form._autoKey !== key) { state.form._autoKey = key; const pk = partAutoPick(opts); if (pk) state.form.parts = [pk]; } }
     box.innerHTML = opts.map((p) => `<button type="button" class="chip${state.form.parts.indexOf(p) >= 0 ? ' active' : ''}" data-part="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('');
   }
   document.addEventListener('click', (e) => {
