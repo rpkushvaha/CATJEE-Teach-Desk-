@@ -2807,10 +2807,9 @@
   #view-today #statusCard { position: relative; flex-shrink: 0; overflow: hidden; overflow: clip; box-shadow: inset 4px 0 0 var(--sc-accent, transparent), 0 8px 24px rgba(20,20,40,0.06); }
   #view-today #statusCard::before { content: ''; position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, var(--sc-b1, transparent) 0%, transparent 66%); filter: blur(8px); pointer-events: none; z-index: 0; }
   #view-today #statusCard::after { content: ''; position: absolute; left: -90px; bottom: -110px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, var(--sc-b2, transparent) 0%, transparent 68%); filter: blur(10px); pointer-events: none; z-index: 0; }
-  #view-today #statusCard > :not(.sc-sky) { position: relative; z-index: 1; }
+  #view-today #statusCard > :not(.sc-sky):not(.sc-fx) { position: relative; z-index: 1; }
   #view-today .sc-sky { position: absolute; right: 16px; top: 20px; width: 84px; height: 52px; pointer-events: none; z-index: 0; }
   #view-today .sc-orb { position: absolute; border-radius: 50%; opacity: 0; }
-  #view-today .sc-star { position: absolute; border-radius: 50%; background: #8E95D8; opacity: 0; }
   @media (prefers-reduced-motion: no-preference) { #view-today .sc-moon { animation: scGlow 4.5s ease-in-out infinite; } }
   @keyframes scGlow { 0%, 100% { filter: brightness(.94); } 50% { filter: brightness(1.08); } }
   #view-today .sc-head { padding-right: 92px; min-height: 46px; }
@@ -2835,6 +2834,33 @@
   #view-today .status-card.in .status-dot { position: relative; box-shadow: 0 0 0 4px rgba(22,163,74,.18); }
   @media (prefers-reduced-motion: no-preference) { #view-today .status-card.in .status-dot::after { content: ''; position: absolute; inset: 0; border-radius: 999px; background: rgba(22,163,74,.5); animation: scDotPulse 2.4s ease-out infinite; } }
   @keyframes scDotPulse { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(2.6); opacity: 0; } }
+  /* clouds by day, twinkling stars at night, birds at sunrise and sunset: a background layer, nothing else moves */
+  #view-today .sc-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; display: none; container-type: inline-size; }
+  #view-today .sc-birds { left: 34%; color: var(--sc-bird, #4B5563); }
+  #view-today .sc-cloud { position: absolute; }
+  #view-today .sc-cloud i { position: absolute; border-radius: 50%; background: var(--sc-cloud, rgba(255,255,255,.92)); filter: blur(1.4px); box-shadow: inset 0 -5px 7px rgba(120,140,175,.16); }
+  #view-today .sc-stars { position: absolute; inset: 0; }
+  #view-today .sc-star { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 6px 2px rgba(124,131,232,.85); opacity: .8; }
+  #view-today .sc-star.sp::before, #view-today .sc-star.sp::after { content: ""; position: absolute; left: 50%; top: 50%; background: #fff; border-radius: 2px; transform: translate(-50%, -50%); box-shadow: 0 0 4px rgba(124,131,232,.9); }
+  #view-today .sc-star.sp::before { width: 11px; height: 1.4px; }
+  #view-today .sc-star.sp::after { width: 1.4px; height: 11px; }
+  #view-today .sc-bird { position: absolute; left: 0; top: 0; opacity: 0; }
+  #view-today .sc-bird svg { display: block; transform-origin: 50% 60%; }
+  #view-today .sc-birds.pm .sc-bird svg { transform: scaleX(-1); }
+  #view-today .sc-bird.b1 { --y0: 36px; --y1: 14px; } #view-today .sc-bird.b2 { --y0: 50px; --y1: 28px; } #view-today .sc-bird.b3 { --y0: 26px; --y1: 8px; }
+  @media (prefers-reduced-motion: no-preference) {
+    #view-today .sc-star { animation: scTw 3.4s ease-in-out infinite; }
+    #view-today .sc-c1 { animation: scCDrift 80s linear infinite; animation-delay: -12s; } #view-today .sc-c2 { animation: scCDrift 105s linear infinite; animation-delay: -60s; } #view-today .sc-c3 { animation: scCDrift 130s linear infinite; animation-delay: -30s; }
+    #view-today .sc-bird svg { animation: scFlap .42s ease-in-out infinite alternate; }
+    #view-today .sc-birds.am .sc-bird { animation: scFlyR linear infinite; } #view-today .sc-birds.pm .sc-bird { animation: scFlyL linear infinite; }
+    #view-today .sc-birds .sc-bird.b1 { animation-duration: 15s; } #view-today .sc-birds .sc-bird.b2 { animation-duration: 19s; animation-delay: -6s; } #view-today .sc-birds .sc-bird.b3 { animation-duration: 23s; animation-delay: -13s; }
+  }
+  @media (prefers-reduced-motion: reduce) { #view-today .sc-cloud { opacity: 1; transform: translateX(40px); } #view-today .sc-bird { opacity: .7; left: 30%; } }
+  @keyframes scTw { 0%, 100% { opacity: .25; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.18); } }
+  @keyframes scCDrift { 0% { transform: translateX(-70px); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateX(250px); transform: translateX(calc(100cqw + 20px)); opacity: 0; } }
+  @keyframes scFlap { from { transform: scaleY(1); } to { transform: scaleY(.4); } }
+  @keyframes scFlyR { 0% { transform: translate(-16px, var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(250px, var(--y1)); transform: translate(calc(100cqw + 16px), var(--y1)); opacity: 0; } }
+  @keyframes scFlyL { 0% { transform: translate(250px, var(--y0)); transform: translate(calc(100cqw + 16px), var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(-16px, var(--y1)); opacity: 0; } }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -3016,7 +3042,10 @@
   <div id="holidayCard" hidden></div>
 
       <div class="status-card" id="statusCard">
-  <div class="sc-sky" id="scSky" aria-hidden="true"><span class="sc-star" style="left:6px;top:8px;width:2px;height:2px;"></span><span class="sc-star" style="left:26px;top:2px;width:3px;height:3px;"></span><span class="sc-star" style="left:46px;top:16px;width:2px;height:2px;"></span><span class="sc-star" style="left:66px;top:4px;width:3px;height:3px;"></span><span class="sc-star" style="left:80px;top:22px;width:2px;height:2px;"></span><span class="sc-orb" id="scSun"></span><span class="sc-orb sc-moon" id="scMoon"></span></div>
+  <div class="sc-sky" id="scSky" aria-hidden="true"><div class="sc-stars" id="scStars"><i class="sc-star sp" style="left:8px;top:10px;width:3px;height:3px;animation-duration:2.6s;animation-delay:-0.0s"></i><i class="sc-star" style="left:28px;top:3px;width:2px;height:2px;animation-duration:3.3s;animation-delay:-1.2s"></i><i class="sc-star sp" style="left:48px;top:18px;width:3px;height:3px;animation-duration:4.0s;animation-delay:-2.2s"></i><i class="sc-star" style="left:68px;top:6px;width:2px;height:2px;animation-duration:4.5s;animation-delay:-3.1s"></i><i class="sc-star" style="left:80px;top:26px;width:3px;height:3px;animation-duration:2.9s;animation-delay:-0.5s"></i><i class="sc-star sp" style="left:16px;top:32px;width:2px;height:2px;animation-duration:4.2s;animation-delay:-2.6s"></i><i class="sc-star" style="left:58px;top:34px;width:2px;height:2px;animation-duration:3.6s;animation-delay:-1.7s"></i></div><span class="sc-orb" id="scSun"></span><span class="sc-orb sc-moon" id="scMoon"></span></div>
+  <div class="sc-fx" id="scClouds" aria-hidden="true"><span class="sc-cloud sc-c1" style="right:60px;top:8px"><i style="left:0px;top:10px;width:30px;height:18px"></i><i style="left:12px;top:2px;width:26px;height:26px"></i><i style="left:28px;top:9px;width:30px;height:19px"></i></span><span class="sc-cloud sc-c2" style="right:20px;top:44px"><i style="left:0px;top:7px;width:22px;height:14px"></i><i style="left:9px;top:1px;width:19px;height:19px"></i><i style="left:21px;top:6px;width:22px;height:15px"></i></span><span class="sc-cloud sc-c3" style="right:120px;top:26px"><i style="left:0px;top:8px;width:26px;height:16px"></i><i style="left:10px;top:1px;width:22px;height:22px"></i><i style="left:24px;top:8px;width:26px;height:16px"></i></span></div>
+  <div class="sc-fx sc-birds am" id="scBirdsAM" aria-hidden="true"><span class="sc-bird b1"><svg width="13" height="8" viewBox="0 0 13 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6 Q3.5 0.5 6.5 4 Q9.5 0.5 12 6"/></svg></span><span class="sc-bird b2"><svg width="13" height="8" viewBox="0 0 13 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6 Q3.5 0.5 6.5 4 Q9.5 0.5 12 6"/></svg></span><span class="sc-bird b3"><svg width="13" height="8" viewBox="0 0 13 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6 Q3.5 0.5 6.5 4 Q9.5 0.5 12 6"/></svg></span></div>
+  <div class="sc-fx sc-birds pm" id="scBirdsPM" aria-hidden="true"><span class="sc-bird b1"><svg width="13" height="8" viewBox="0 0 13 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6 Q3.5 0.5 6.5 4 Q9.5 0.5 12 6"/></svg></span><span class="sc-bird b2"><svg width="13" height="8" viewBox="0 0 13 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6 Q3.5 0.5 6.5 4 Q9.5 0.5 12 6"/></svg></span></div>
   <div class="sc-head">
   <div class="sc-main">
   <div class="status-row">
@@ -4165,7 +4194,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.45 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.46 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4772,7 +4801,7 @@
   function applyCardColours(card, acc) {
     const dark = isDarkUi(); const mix = (c, w, t) => c.map((v, i) => Math.round(v + (w[i] - v) * t)); const rgb = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`; const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
     card.style.setProperty('--sc-accent', rgb(dark ? mix(acc, [255, 255, 255], 0.15) : acc));
-    card.style.setProperty('--sc-b1', rgba(acc, dark ? 0.50 : 0.46)); card.style.setProperty('--sc-b2', rgba(mix(acc, [99, 102, 241], 0.55), dark ? 0.26 : 0.20));
+    card.style.setProperty('--sc-cloud', dark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.92)'); card.style.setProperty('--sc-bird', dark ? '#C9CED8' : '#4B5563'); card.style.setProperty('--sc-b1', rgba(acc, dark ? 0.50 : 0.46)); card.style.setProperty('--sc-b2', rgba(mix(acc, [99, 102, 241], 0.55), dark ? 0.26 : 0.20));
   }
   // the sun and the moon travel on ONE path from A (left) to B (right): the sun from A to B, the moon from B back to A,
   // so the moon appears where the sun set and the sun appears where the moon went down. Whole orb and its glow stay inside the card.
@@ -4799,9 +4828,13 @@
       const h = Math.sin(Math.PI * v); const glow = cl(h * 1.2, 0.25, 1);
       put(moonEl, 12, 1 - v, h, mop, 'radial-gradient(circle at 35% 32%, #fff 0%, #E9ECFF 45%, #C7CCF2 100%)', `rgba(200, 208, 255, ${(0.22 + 0.34 * glow).toFixed(2)})`, 16 + 16 * glow);
     } else moonEl.style.opacity = '0';
-    // the stars
+    // the stars, the clouds, the birds: each one has its window of the day (outside it, it is not even drawn, so it costs nothing)
     const n = mins >= SS ? cl((mins - SS) / 90, 0, 1) : (mins < SR ? 1 - cl((mins - (SR - 75)) / 75, 0, 1) : 0);
-    card.querySelectorAll('.sc-star').forEach((el) => { el.style.opacity = n > 0.3 ? (((n - 0.3) / 0.7) * 0.8).toFixed(2) : '0'; });
+    const fx = (id, op) => { const el = document.getElementById(id); if (!el) return; el.style.opacity = op.toFixed(2); el.style.display = op > 0.02 ? 'block' : 'none'; };
+    fx('scStars', n > 0.3 ? (n - 0.3) / 0.7 : 0);
+    fx('scClouds', rr(mins, SR + 30, SR + 90) * (1 - rr(mins, SS - 90, SS - 30)) * 0.95);
+    fx('scBirdsAM', rr(mins, SR - 20, SR + 5) * (1 - rr(mins, SR + 55, SR + 85)));
+    fx('scBirdsPM', rr(mins, SS - 80, SS - 55) * (1 - rr(mins, SS - 10, SS + 15)));
   }
   function svgLogin() {
     return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>';
