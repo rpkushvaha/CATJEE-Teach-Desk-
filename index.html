@@ -4194,7 +4194,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.46 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.47 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6177,7 +6177,26 @@
 
 
   // ---------- Subject taught today (only for a subject that is two in one) ----------
-  const subjPartsOf = (n) => { const t = String(n || '').toLowerCase().replace(/[^a-z]/g, ''); if (!t) return null; if (t.indexOf('geo') >= 0 && t.indexOf('eco') >= 0) return ['Geography', 'Economics']; if (t.indexOf('his') >= 0 && t.indexOf('pol') >= 0) return ['History', 'Political Science']; return null; };
+  const subjPartsOf = (n) => {
+  const t = String(n || '').toLowerCase().replace(/[^a-z]/g, ''); if (!t) return null;
+  const w = String(n || '').toLowerCase().split(/[^a-z]+/).filter(Boolean); const st = (x) => w.some((q) => q.indexOf(x) === 0);
+  const his = st('his'); const pol = st('pol'); const geo = st('geo') && !st('geom'); const eco = st('eco'); const rea = st('reas');
+  if (rea && (his || pol || geo || eco)) { const o = []; if (his) o.push('History'); if (pol) o.push('Political Science'); if (geo) o.push('Geography'); if (eco) o.push('Economics'); o.push('Reasoning'); return o; }
+  if (t.indexOf('geo') >= 0 && t.indexOf('eco') >= 0) return ['Geography', 'Economics'];
+  if (t.indexOf('his') >= 0 && t.indexOf('pol') >= 0) return ['History', 'Political Science'];
+  return null;
+};
+// does this teacher also teach Reasoning (in the Teacher Mapping, in the Schedule, or as his own subject)?
+function teachesReasoning() {
+  const isR = (x) => String(x || '').toLowerCase().split(/[^a-z]+/).some((q) => q.indexOf('reas') === 0);
+  const m = state.teacherMap || {}; const me = state.teacherId;
+  if (Object.keys(m).some((k) => m[k] === me && isR(k.slice(k.indexOf('|') + 1)))) return true;
+  if ((state.scheduleSlots || []).some((sl) => sl && !sl.cancelled && isR(sl.subject))) return true;
+  try { if (teacherSubjects(me).concat([mySubject(), state.user && state.user.subject]).some(isR)) return true; } catch (e) { /* ignore */ }
+  // or he has already logged a Reasoning class
+  if ((state.historyClasses || []).concat(state.classesToday || []).some((c) => c && c.entryType === 'class' && (isR(c.subject) || (Array.isArray(c.parts) && c.parts.some(isR))))) return true;
+  return false;
+}
   const clsSubj = (c) => (c && Array.isArray(c.parts) && c.parts.length) ? c.parts.join(' + ') : ((c && c.subject) || '');
   function partOptions() {
     const f = state.form || {}; const subs = []; const b = f.batch; const m = state.teacherMap || {}; const me = state.teacherId;
@@ -6186,6 +6205,7 @@
     if (b) (state.scheduleSlots || []).forEach((sl) => { if (!sl || sl.cancelled || !sl.subject) return; if (sl.label === b || (Array.isArray(sl.batches) && sl.batches.indexOf(b) >= 0)) subs.push(sl.subject); });
     if (!subs.length) { try { teacherSubjects(me).concat([mySubject()]).forEach((x) => { if (x) subs.push(x); }); } catch (e) { /* ignore */ } }
     const out = []; subs.forEach((sn) => { const p = subjPartsOf(sn); if (p) p.forEach((x) => { if (out.indexOf(x) < 0) out.push(x); }); });
+  if (out.length && out.indexOf('Reasoning') < 0) { try { if (teachesReasoning()) out.push('Reasoning'); } catch (e) { /* ignore */ } }
     if (state.editingId) (f.parts || []).forEach((x) => { if (out.indexOf(x) < 0) out.push(x); });
     return out;
   }
@@ -19254,7 +19274,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   { id: 'addclass', t: ['Add a class (log a class)', 'Class jodna (class log karna)'], who: 'all', k: 'class log save chapter topic worksheet homework study material add class padhaya क्लास जोड़ना',
     s: [['Tap **Add Class** at the bottom.', 'Stay on the **Class** tab. Choose the batch under **Select Class / Batch**.', 'Check **Class Timing**: Start and End, or tap 40m, 50m, 1h or 1h 5m.', 'Under **What happened in class?** choose **Teaching** and write the **Chapter**. The topic is optional.', 'Under **Class deliverables** tick Worksheet / DPP, Study material or Homework if you gave them.', 'Tap **Save Class**.'],
         ['Neeche **Add Class** dabao.', '**Class** tab par raho. **Select Class / Batch** me batch chuno.', '**Class Timing** dekho: Start aur End, ya 40m, 50m, 1h, 1h 5m dabao.', '**What happened in class?** me **Teaching** chuno aur **Chapter** likho. Topic optional hai.', '**Class deliverables** me Worksheet / DPP, Study material ya Homework chuno, agar diya ho.', '**Save Class** dabao.']],
-    n: ['If the class is in your Schedule, Add Class fills the batch and time for you. For History / Political Science or Geography / Economics, choose which one you taught under Subject taught today (or both).', 'Class aap ke Schedule me ho to Add Class batch aur samay khud bhar deta hai. History / Political Science ya Geography / Economics me **Subject taught today** me chuno ki kaun sa padhaya (ya dono).'],
+    n: ['If the class is in your Schedule, Add Class fills the batch and time for you. For History / Political Science (with Reasoning too) or Geography / Economics, choose which one you taught under Subject taught today (or more than one).', 'Class aap ke Schedule me ho to Add Class batch aur samay khud bhar deta hai. History / Political Science (Reasoning ke saath bhi) ya Geography / Economics me **Subject taught today** me chuno ki kaun sa padhaya (ya ek se zyada).'],
     m: [['today', '.nav-item[data-tab="add"]'], ['add', '#allBatchesToggle'], ['add', '#durChips'], ['add', '#classKindChips'], ['add', '.checklist-grid'], ['add', '#saveClassBtn']] },
   { id: 'combineb', t: ['Join two classes (batches) in one class', 'Do class (batch) ek saath jodna'], who: 'all', k: 'combine join two batches together do batch ek saath sath milakar बैच जोड़ना',
     s: [['Tap **Add Class**.', 'Choose the first batch under **Select Class / Batch**.', 'Tap **+ Combine another batch** and choose the other batch under **Combined with**.', 'Fill in the rest and tap **Save Class**.'],
