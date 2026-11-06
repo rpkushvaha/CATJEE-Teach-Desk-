@@ -4194,7 +4194,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.48 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.49 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6221,18 +6221,27 @@ function teachesTwoInOne() {
   return false;
 }
 function partOptions() {
-  const f = state.form || {}; const subs = partSubs();
-  const out = []; subs.forEach((sn) => { const p = subjPartsOf(sn); if (p) p.forEach((x) => { if (out.indexOf(x) < 0) out.push(x); }); });
-  if (out.length && out.indexOf('Reasoning') < 0) { try { if (teachesReasoning()) out.push('Reasoning'); } catch (e) { /* ignore */ } }
-  // such a teacher also sees a class of one single part (e.g. a Reasoning batch), so that the subject shows in the box
-  if (!out.length) { try { if (teachesTwoInOne()) subs.forEach((sn) => { const one = subjSingleOf(sn); if (one && out.indexOf(one) < 0) out.push(one); }); } catch (e) { /* ignore */ } }
+  const f = state.form || {}; const subs = partSubs(); let out = [];
+  // a class that comes from a Today / Schedule card: only its own subject(s) are offered
+  const fromSlot = !!(f.slotSubject && f.slotBatch && f.slotBatch === f.batch);
+  if (fromSlot) {
+    const sp = subjPartsOf(f.slotSubject);
+    if (sp) out = sp.slice();
+    else { const one = subjSingleOf(f.slotSubject); if (one) { try { if (teachesTwoInOne()) out = [one]; } catch (e) { /* ignore */ } } }
+  }
+  if (!out.length) {
+    subs.forEach((sn) => { const p = subjPartsOf(sn); if (p) p.forEach((x) => { if (out.indexOf(x) < 0) out.push(x); }); });
+    if (out.length && out.indexOf('Reasoning') < 0) { try { if (teachesReasoning()) out.push('Reasoning'); } catch (e) { /* ignore */ } }
+    // such a teacher also sees a class of one single part (e.g. a Reasoning batch), so that the subject shows in the box
+    if (!out.length) { try { if (teachesTwoInOne()) subs.forEach((sn) => { const one = subjSingleOf(sn); if (one && out.indexOf(one) < 0) out.push(one); }); } catch (e) { /* ignore */ } }
+  }
   if (state.editingId) (f.parts || []).forEach((x) => { if (out.indexOf(x) < 0) out.push(x); });
   return out;
 }
 // which option to choose by itself: the subject of the Schedule slot, or the only single subject of the batch
 function partAutoPick(opts) {
   const f = state.form || {}; const subs = partSubs(); const multi = subs.some((sn) => subjPartsOf(sn));
-  if (f.slotSubject) { const one = subjSingleOf(f.slotSubject); if (one && opts.indexOf(one) >= 0) return one; }
+  if (f.slotSubject && f.slotBatch === f.batch) { const one = subjSingleOf(f.slotSubject); if (one && opts.indexOf(one) >= 0) return one; }
   const singles = []; subs.forEach((sn) => { const one = subjSingleOf(sn); if (one && singles.indexOf(one) < 0) singles.push(one); });
   if (!multi && singles.length === 1 && opts.indexOf(singles[0]) >= 0) return singles[0];
   return null;
@@ -17723,7 +17732,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const match = { slot, startMin };
     state.formWing = wing;
     selectBatch(batch);
-  if (state.form) state.form.slotSubject = slot.subject || '';
+  if (state.form) { state.form.slotSubject = slot.subject || ''; state.form.slotBatch = batch; }
   const last = slot.duration ? null : findLastClassForBatch(batch);
     let duration = slot.duration ? slotDuration(slot) : DEFAULT_DURATION;
     if (last && last.startTimeStr && last.endTimeStr) {
