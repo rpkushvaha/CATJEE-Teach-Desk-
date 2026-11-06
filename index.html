@@ -2861,6 +2861,12 @@
   @keyframes scFlap { from { transform: scaleY(1); } to { transform: scaleY(.4); } }
   @keyframes scFlyR { 0% { transform: translate(-16px, var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(250px, var(--y1)); transform: translate(calc(100cqw + 16px), var(--y1)); opacity: 0; } }
   @keyframes scFlyL { 0% { transform: translate(250px, var(--y0)); transform: translate(calc(100cqw + 16px), var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(-16px, var(--y1)); opacity: 0; } }
+  /* Team, Teacher Mapping and Subjects: the two wings */
+  .team-grp-h, .grp-h { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; padding: 0 2px; }
+  .team-grp-h[data-team-grp] { cursor: pointer; }
+  .wtags { display: flex; gap: 4px; margin-top: 4px; }
+  .wtag { font: inherit; font-size: 10.5px; font-weight: 700; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--muted-2); padding: 2px 8px; cursor: pointer; line-height: 1.3; }
+  .wtag.on { background: #FDECEE; color: #C0222F; border-color: #F6C3C8; }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -4194,7 +4200,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.49 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.50 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6221,6 +6227,7 @@ function teachesTwoInOne() {
   return false;
 }
 function partOptions() {
+  if (state.myDept) return adminPartOptions();
   const f = state.form || {}; const subs = partSubs(); let out = [];
   // a class that comes from a Today / Schedule card: only its own subject(s) are offered
   const fromSlot = !!(f.slotSubject && f.slotBatch && f.slotBatch === f.batch);
@@ -6240,6 +6247,7 @@ function partOptions() {
 }
 // which option to choose by itself: the subject of the Schedule slot, or the only single subject of the batch
 function partAutoPick(opts) {
+  if (state.myDept) return adminPartAuto(opts);
   const f = state.form || {}; const subs = partSubs(); const multi = subs.some((sn) => subjPartsOf(sn));
   if (f.slotSubject && f.slotBatch === f.batch) { const one = subjSingleOf(f.slotSubject); if (one && opts.indexOf(one) >= 0) return one; }
   const singles = []; subs.forEach((sn) => { const one = subjSingleOf(sn); if (one && singles.indexOf(one) < 0) singles.push(one); });
@@ -6247,13 +6255,16 @@ function partAutoPick(opts) {
   return null;
 }
 function renderPartChips() {
-    const fld = document.getElementById('partField'); const box = document.getElementById('partChips'); if (!fld || !box || !state.form) return;
-    const opts = state.entryMode === 'class' ? partOptions() : [];
-    if (!opts.length) { fld.hidden = true; state.form.parts = []; return; }
-    state.form.parts = (state.form.parts || []).filter((x) => opts.indexOf(x) >= 0); fld.hidden = false;
-  { const key = `${state.form.batch || ''}|${state.form.slotSubject || ''}`; if (!state.editingId && !state.form.parts.length && state.form._autoKey !== key) { state.form._autoKey = key; const pk = partAutoPick(opts); if (pk) state.form.parts = [pk]; } }
-    box.innerHTML = opts.map((p) => `<button type="button" class="chip${state.form.parts.indexOf(p) >= 0 ? ' active' : ''}" data-part="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('');
+  const fld = document.getElementById('partField'); const box = document.getElementById('partChips'); if (!fld || !box || !state.form) return;
+  const key = `${state.form.batch || ''}|${state.form.slotSubject || ''}`; const keyChanged = state.form._autoKey !== key; if (keyChanged) { state.form._autoKey = key; state.form.partsAll = false; }
+  const opts = state.entryMode === 'class' ? partOptions() : [];
+  if (!opts.length) { fld.hidden = true; state.form.parts = []; return; }
+  state.form.parts = (state.form.parts || []).filter((x) => opts.indexOf(x) >= 0); fld.hidden = false;
+  if (keyChanged && !state.editingId && !state.form.parts.length) { const pk = partAutoPick(opts); if (pk) state.form.parts = [pk]; }
+  const more = (state.myDept && !state.form.partsAll && opts.length < (state.mySubjects || []).length) ? '<button type="button" class="chip" data-part-more>Other ▾</button>' : '';
+  box.innerHTML = opts.map((p) => `<button type="button" class="chip${state.form.parts.indexOf(p) >= 0 ? ' active' : ''}" data-part="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('') + more;
   }
+  document.addEventListener('click', (e) => { const mb = e.target && e.target.closest && e.target.closest('#partChips [data-part-more]'); if (mb && state.form) { state.form.partsAll = true; renderPartChips(); } });
   document.addEventListener('click', (e) => {
     const b = e.target && e.target.closest && e.target.closest('#partChips [data-part]'); if (!b || !state.form) return;
     const p = b.getAttribute('data-part'); const a = (state.form.parts || []).slice(); const i = a.indexOf(p); if (i >= 0) a.splice(i, 1); else a.push(p);
@@ -6460,8 +6471,13 @@ function renderPartChips() {
   }
 
   function renderSubject() {
-    document.getElementById('subjectName').textContent = state.teacherSubject || 'Not set — tap to set';
-  }
+  const nameEl = document.getElementById('subjectName'); const lab = document.querySelector('#subjectDisplay .dfield-label'); const btn = document.getElementById('subjectEditBtn'); const row = document.getElementById('subjectEditRow'); if (!nameEl) return;
+  if (state.myDept) {
+    if (lab) lab.textContent = 'Department'; if (btn) btn.style.display = 'none'; if (row) row.style.display = 'none'; document.getElementById('subjectDisplay').style.display = 'flex';
+    const sb = (state.mySubjects || []).filter(Boolean);
+    nameEl.innerHTML = `${escapeHtml(state.myDept)}${sb.length ? `<div class="sal-preview" style="margin:4px 0 0; white-space:normal;">Subjects: ${escapeHtml(sb.join(', '))}</div>` : ''}<div class="sal-preview" style="margin:4px 0 0; white-space:normal;">Set by the Admin</div>`;
+  } else { if (lab) lab.textContent = 'Subject'; if (btn) btn.style.display = ''; nameEl.textContent = state.teacherSubject || 'Not set — tap to set'; }
+}
 
   function renderAvatar() {
     const box = document.getElementById('avatarBox');
@@ -6508,7 +6524,7 @@ function renderPartChips() {
       snap.docs.forEach((d) => {
         const data = d.data() || {};
         list.push(d.id);
-        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data.salutation), sal: salNorm(data.salutation) || addrOf(d.id), wa: data.whatsapp || '', bd: data.birthMd || '', by: data.birthY || '' };
+        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data.salutation), sal: addrOf(d.id) || salNorm(data.salutation), wa: data.whatsapp || '', bd: data.birthMd || '', by: data.birthY || '' };
         resolvedAdminNameIds.add(d.id);
       });
       state.adminTeacherIds = list;
@@ -6586,13 +6602,19 @@ function renderPartChips() {
   async function addrSet(uid, v) {
     if (!uid || !salNorm(v) || !state.db) return;
     const pend = isPendingUid(uid);
-    if (!pend && state.adminNames[uid] && state.adminNames[uid].own) return;
+    
     const patch = pend ? { salutation: v } : { addr: v };
     try { await state.db.doc('team/' + uid).set(patch, { merge: true }); } catch (err) { flashOffline(err); return; }
     state.team = Object.assign({}, state.team, { [uid]: Object.assign({}, state.team[uid] || {}, patch) });
     if (pend) { try { if (state.staffInfoMem && state.staffInfoMem[uid]) state.staffInfoMem[uid].sal = v; mergePendingStaff(); } catch (e) { /* ignore */ } }
     refreshAdminSal(); showToast('Saved'); try { renderTeamPanel( ); } catch (e) { /* ignore */ }
   }
+  function teamGrouped(ids, fn) {
+  const closed = state.teamGrpClosed || (state.teamGrpClosed = {}); const wings = ['Pre-Foundation', 'Foundation']; let html = '';
+  wings.forEach((wg) => { const mem = ids.filter((u) => teamWings(u).indexOf(wg) !== -1); if (!mem.length) return; const shut = !!closed[wg]; html += `<div class="team-grp-h" data-team-grp="${wg}" role="button" tabindex="0" aria-expanded="${!shut}"><span>${wg} · ${mem.length}</span><span aria-hidden="true">${shut ? '›' : '⌄'}</span></div>` + (shut ? '' : mem.map(fn).join('')); });
+  const none = ids.filter((u) => !teamWings(u).some((x) => wings.indexOf(x) !== -1)); if (none.length) html += `<div class="team-grp-h"><span>No wing · ${none.length}</span></div>` + none.map(fn).join('');
+  return html;
+}
   function renderTeamPanel() {
     const el = document.getElementById('teamRows');
     if (!el) return;
@@ -6601,7 +6623,7 @@ function renderPartChips() {
     const removed = all.filter(isRemovedUid);
     const joined = ids.filter((u) => !isPendingUid(u)); const nDone = joined.filter(teamFilled).length; const nLack = joined.filter((u) => !teamFilled(u) && u !== state.teacherId).length; // the button counts the same people the reminder goes to (not yourself)
     if (!all.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">People appear here after they sign in to the app once.</div>'; return; }
-    el.innerHTML = `<div class="team-sum"><b>${nDone} of ${joined.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLack ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLack}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` + ids.map((uid) => {
+    el.innerHTML = `<div class="team-sum"><b>${nDone} of ${joined.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLack ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLack}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` + teamGrouped(ids, (uid) => {
       const name = ((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed') + (isPendingUid(uid) ? ' (not joined yet)' : '');
       const coord = isCoordUid(uid); const prin = isPrincipalUid(uid);
   const w = teamWings(uid);
@@ -6615,12 +6637,13 @@ function renderPartChips() {
         </div>
         ${open ? `<div class="team-body">
         <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}">${waNumber(uid) ? `<button type="button" class="tg-mini" data-team-wa="${uid}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:4px;"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Chat</button>` : ''}</div>
-        <div class="chips team-chips">
-          <button type="button" class="chip${(coord || prin) ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
+        ${(() => { const t = teamDeptOf(uid); return `<div class="team-phone"><span class="team-lbl">Department</span><input class="text-input" type="text" data-team-dept="${uid}" placeholder="e.g. Science, or Social Science and Reasoning" value="${escapeHtml(t.dept)}"></div><div class="chips team-chips"><span class="team-lbl">Subjects</span>${subjectsList().map((sj) => `<button type="button" class="chip${t.subjects.indexOf(sj) >= 0 ? ' active' : ''}" data-team-subj="${escapeHtml(sj)}" data-uid="${uid}">${escapeHtml(sj)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">Only you can set the Department and the subjects. Until you set them, the old Subject keeps working.</div>`; })()}
+  <div class="chips team-chips">
+  <button type="button" class="chip${(coord || prin) ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
   <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
   <button type="button" class="chip${prin ? ' active' : ''}" data-team-role="principal" data-uid="${uid}">Principal</button>
   </div>
-  ${(() => { const pend = isPendingUid(uid); const own = pend ? '' : ((state.adminNames[uid] && state.adminNames[uid].own) || ''); const ad = pend ? salNorm(state.team[uid] && state.team[uid].salutation) : addrOf(uid); return `<div class="chips team-chips"><span class="team-lbl">Address</span>${['sir', 'maam', 'ji'].map((v) => `<button type="button" class="chip${(own ? own : ad) === v ? ' active' : ''}" data-team-addr="${v}" data-uid="${uid}"${own ? ' disabled' : ''}>${salWord(v)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">${pend ? (ad ? 'Not joined yet. This is used until the teacher chooses his own in Profile.' : 'Not joined yet. Choose how to address this teacher.') : (own ? `The teacher chose ${salWord(own)} in Profile. That is used.` : (ad ? 'The teacher has not chosen. Your choice is used.' : 'The teacher has not chosen. Choose how to address this teacher.'))}</div>`; })()}
+  ${(() => { const pend = isPendingUid(uid); const own = pend ? '' : ((state.adminNames[uid] && state.adminNames[uid].own) || ''); const ad = pend ? salNorm(state.team[uid] && state.team[uid].salutation) : addrOf(uid); return `<div class="chips team-chips"><span class="team-lbl">Address</span>${['sir', 'maam', 'ji'].map((v) => `<button type="button" class="chip${(ad || own) === v ? ' active' : ''}" data-team-addr="${v}" data-uid="${uid}">${salWord(v)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">${ad ? 'Set by you. The teacher cannot change it.' : (own ? `The teacher chose ${salWord(own)} earlier. This is used until you choose.` : 'Choose how to address this teacher.')}</div>`; })()}
         <div class="chips team-chips">
           <span class="team-lbl">Wing</span>
           <button type="button" class="chip${w.indexOf('Pre-Foundation') !== -1 ? ' active' : ''}" data-team-wing="Pre-Foundation" data-uid="${uid}">Pre-Foundation</button>
@@ -6629,7 +6652,7 @@ function renderPartChips() {
         ${uid !== state.teacherId ? `<button type="button" class="team-remove" data-team-remove="${uid}">Remove access</button>` : ''}
         </div>` : ''}
       </div>`;
-    }).join('') + (removed.length ? `<div class="team-removed"><div class="team-lbl" style="margin:6px 0 4px;">Removed (${removed.length})</div>${removed.map((uid) => `<div class="team-rm-row"><span>${escapeHtml((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed')}</span><button type="button" class="hv-back" data-team-restore="${uid}" style="padding:0;">Restore</button></div>`).join('')}</div>` : '');
+    }) + (removed.length ? `<div class="team-removed"><div class="team-lbl" style="margin:6px 0 4px;">Removed (${removed.length})</div>${removed.map((uid) => `<div class="team-rm-row"><span>${escapeHtml((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed')}</span><button type="button" class="hv-back" data-team-restore="${uid}" style="padding:0;">Restore</button></div>`).join('')}</div>` : '');
     const save = async (uid, patch, msg) => {
       try { await state.db.doc('team/' + uid).set(patch, { merge: true }); showToast(msg); } catch (err) { flashOffline(err); }
     };
@@ -6642,6 +6665,9 @@ function renderPartChips() {
     el.querySelectorAll('[data-team-copy]').forEach((b) => b.addEventListener('click', teamCopyNumbers));
     el.querySelectorAll('[data-team-wa]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const n = waNumber(b.getAttribute('data-team-wa')); if (n) window.open('https://wa.me/' + n, '_blank'); }));
     el.querySelectorAll('[data-team-addr]').forEach((b) => b.addEventListener('click', () => addrSet(b.getAttribute('data-uid'), b.getAttribute('data-team-addr'))));
+  el.querySelectorAll('[data-team-dept]').forEach((inp) => inp.addEventListener('change', () => teamDeptPatch(inp.getAttribute('data-team-dept'), { dept: inp.value.trim() }, 'Department saved')));
+  el.querySelectorAll('[data-team-subj]').forEach((b) => b.addEventListener('click', () => { const u = b.getAttribute('data-uid'); const sj = b.getAttribute('data-team-subj'); const cur = teamDeptOf(u).subjects.slice(); const k = cur.indexOf(sj); if (k >= 0) cur.splice(k, 1); else cur.push(sj); teamDeptPatch(u, { subjects: cur }, 'Subjects saved'); }));
+  el.querySelectorAll('[data-team-grp]').forEach((h) => { const tg = () => { const wg = h.getAttribute('data-team-grp'); state.teamGrpClosed = state.teamGrpClosed || {}; state.teamGrpClosed[wg] = !state.teamGrpClosed[wg]; renderTeamPanel(); }; h.addEventListener('click', tg); h.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tg(); } }); });
   el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-uid'); const role = b.getAttribute('data-team-role');
   const cur = isPrincipalUid(uid) ? 'principal' : (isCoordUid(uid) ? 'coordinator' : 'teacher'); if (role === cur) return;
@@ -6743,7 +6769,9 @@ function renderPartChips() {
   <div class="chips team-chips"><span class="team-lbl">Address</span><button type="button" class="chip${f.sal === 'sir' ? ' active' : ''}" data-sid-sal="sir">Sir</button><button type="button" class="chip${f.sal === 'maam' ? ' active' : ''}" data-sid-sal="maam">Ma'am</button><button type="button" class="chip${f.sal === 'ji' ? ' active' : ''}" data-sid-sal="ji">Ji</button></div>
   <input class="text-input" id="sidWa" type="tel" inputmode="numeric" placeholder="WhatsApp number (optional)" value="${escapeHtml(f.wa || '')}">
   <div style="display:flex; gap:8px;"><select class="text-input" id="sidBdDay" aria-label="Birthday day"></select><select class="text-input" id="sidBdMon" aria-label="Birthday month"></select><select class="text-input" id="sidBdYear" aria-label="Birthday year"></select></div>
-  <div class="team-lbl">Subjects (optional: fills Teacher Mapping where nobody is set yet)</div>
+  <div class="team-lbl">Department</div>
+  <input class="text-input" id="sidDept" type="text" placeholder="e.g. Science, or Social Science and Reasoning" value="${escapeHtml(f.dept || '')}">
+  <div class="team-lbl">Subjects in this department (also fills Teacher Mapping where nobody is set yet)</div>
   <div class="chips">${subjectsList().map((sj) => `<button type="button" class="chip${(f.subjects || []).indexOf(sj) !== -1 ? ' active' : ''}" data-sid-subj="${escapeHtml(sj)}">${escapeHtml(sj)}</button>`).join('')}</div>
   <input class="text-input" id="sidNote" type="text" placeholder="For (optional), e.g. New Physics teacher" value="${escapeHtml(f.note || '')}">
         <div class="chips team-chips"><span class="team-lbl">Role</span>
@@ -6765,14 +6793,14 @@ function renderPartChips() {
     el.innerHTML = html;
     if (f && !state.lastStaffCode) { fillBdSelects('sidBdDay', 'sidBdMon', 'sidBdYear'); setBd('sidBdDay', 'sidBdMon', f.bd || '', 'sidBdYear', f.by || ''); }
     const on = (id, fn) => { const b = document.getElementById(id); if (b) b.addEventListener('click', fn); };
-    on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1), name: '', sal: '', wa: '', bd: '', by: '', subjects: [] }; renderStaffIdsBlock(); });
+    on('sidAdd', () => { state.staffForm = { note: '', role: 'teacher', wings: (state.coordWings || []).slice(0, 1), name: '', sal: '', wa: '', bd: '', by: '', subjects: [], dept: '' }; renderStaffIdsBlock(); });
     on('sidCancel', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidX', () => { state.staffForm = null; renderStaffIdsBlock(); });
     on('sidDone', () => { state.lastStaffCode = null; renderStaffIdsBlock(); });
     on('sidCopy', async () => { try { await navigator.clipboard.writeText(state.lastStaffCode); showToast('Staff ID copied'); } catch (e) { showToast(state.lastStaffCode); } });
     on('sidShare', () => window.open(staffWaUrl(state.lastStaffCode), '_blank'));
     const bindIn = (id, key) => { const e2 = document.getElementById(id); if (e2) e2.addEventListener('input', () => { state.staffForm[key] = e2.value; }); };
-    bindIn('sidName', 'name'); bindIn('sidWa', 'wa');
+    bindIn('sidName', 'name'); bindIn('sidWa', 'wa'); bindIn('sidDept', 'dept');
     ['sidBdDay', 'sidBdMon', 'sidBdYear'].forEach((id) => { const e3 = document.getElementById(id); if (e3) e3.addEventListener('change', () => { const r0 = readBd('sidBdDay', 'sidBdMon', 'sidBdYear'); state.staffForm.bd = r0.md || ''; state.staffForm.by = r0.y || ''; }); });
     el.querySelectorAll('[data-sid-sal]').forEach((b) => b.addEventListener('click', () => { state.staffForm.sal = b.getAttribute('data-sid-sal'); renderStaffIdsBlock(); }));
     el.querySelectorAll('[data-sid-subj]').forEach((b) => b.addEventListener('click', () => { const sj = b.getAttribute('data-sid-subj'); const a2 = state.staffForm.subjects || (state.staffForm.subjects = []); const k2 = a2.indexOf(sj); if (k2 === -1) a2.push(sj); else a2.splice(k2, 1); renderStaffIdsBlock(); }));
@@ -6787,7 +6815,7 @@ function renderPartChips() {
     on('sidGenerate', async () => {
       const ff = state.staffForm;
       if (!ff.wings.length) { showToast('Choose a wing', 'error'); return; }
-      const nm = (ff.name || '').trim(); let wa = ''; let bd = ''; let by = '';
+      const nm = (ff.name || '').trim(); const dpt = (ff.dept || '').trim(); let wa = ''; let bd = ''; let by = '';
       if (nm) {
         wa = waTen(ff.wa); if ((ff.wa || '').trim() && !wa) { showToast('Enter a 10-digit mobile number, or leave it empty', 'error'); return; }
         const b0 = readBd('sidBdDay', 'sidBdMon', 'sidBdYear'); if (b0.err) { showToast(b0.err, 'error'); return; } bd = b0.md || ''; by = b0.y || '';
@@ -6800,7 +6828,7 @@ function renderPartChips() {
           try {
             const batch = state.db.batch();
             batch.set(state.db.doc('staffIds/' + code), idDoc);
-            batch.set(state.db.doc('team/' + code), { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role === 'principal' ? 'coordinator' : ff.role, wings: ff.wings.slice(), status: 'active', staffId: code, createdAt: Date.now(), ...(ff.role === 'principal' ? { principal: true } : {}) });
+            batch.set(state.db.doc('team/' + code), { pending: true, name: nm, salutation: ff.sal || '', dept: dpt, subjects: (ff.subjects || []).slice(), deptFrom: dpt ? todayStr() : '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role === 'principal' ? 'coordinator' : ff.role, wings: ff.wings.slice(), status: 'active', staffId: code, createdAt: Date.now(), ...(ff.role === 'principal' ? { principal: true } : {}) });
             await batch.commit(); saved = true;
           } catch (err0) {
             if (err0 && err0.code === 'permission-denied') { await state.db.doc('staffIds/' + code).set(idDoc); showToast("The Staff ID is made, but the database did not allow saving the teacher's details. Ask for the rule to be changed.", 'error'); }
@@ -6808,7 +6836,7 @@ function renderPartChips() {
           }
         } else await state.db.doc('staffIds/' + code).set(idDoc);
         if (saved) {
-          state.team = Object.assign({}, state.team, { [code]: { pending: true, name: nm, salutation: ff.sal || '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code } });
+          state.team = Object.assign({}, state.team, { [code]: { pending: true, name: nm, salutation: ff.sal || '', dept: dpt, subjects: (ff.subjects || []).slice(), deptFrom: dpt ? todayStr() : '', whatsapp: wa, birthMd: bd, birthY: by, role: ff.role, wings: ff.wings.slice(), status: 'active', staffId: code } });
           try { mergePendingStaff(); syncTeacherData(); } catch (e) { /* ignore */ }
           // Teacher Mapping: only the subjects nobody is set for yet
           if ((ff.subjects || []).length) {
@@ -9715,17 +9743,20 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   state.mapSubj = null;
   function renderMappingPanel() {
-    const el = document.getElementById('mappingBody'); if (!el) return;
-    const subs = subjectsList();
-    if (!state.mapSubj || subs.indexOf(state.mapSubj) === -1) state.mapSubj = subs[0];
-    const s = state.mapSubj; const ids = ttTeacherIds(true); const m = state.teacherMap || {};
-    const bats = []; leadWings().forEach((w) => currentBatches(w).forEach((b) => { if (bats.indexOf(b) === -1) bats.push(b); }));
-    const opt = (sel, none) => `<option value="">${none}</option>` + ids.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('');
-    el.innerHTML = `<div class="chips tt-teachers">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
-      <div class="mp-row mp-all"><span>All batches</span><select class="text-input" data-mp-k="*|${escapeHtml(s)}">${opt(m[`*|${s}`] || '', '— No default —')}</select></div>
-      <div class="hv-note" style="text-align:left;">Change a batch only if it has a different ${escapeHtml(s)} teacher.</div>
-      ${bats.map((b) => `<div class="mp-row"><span>${escapeHtml(b)}</span><select class="text-input" data-mp-k="${escapeHtml(b)}|${escapeHtml(s)}">${opt(m[`${b}|${s}`] || '', 'Same as all batches')}</select></div>`).join('')}`;
-    el.querySelectorAll('[data-mp-s]').forEach((b) => b.addEventListener('click', () => { state.mapSubj = b.getAttribute('data-mp-s'); renderMappingPanel(); }));
+  const el = document.getElementById('mappingBody'); if (!el) return;
+  const subs = subjectsList();
+  if (!state.mapSubj || subs.indexOf(state.mapSubj) === -1) state.mapSubj = subs[0];
+  const s = state.mapSubj; const ids = ttTeacherIds(true); const m = state.teacherMap || {}; const wl = leadWings();
+  const opt = (sel, none) => `<option value="">${none}</option>` + ids.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('');
+  const chipRow = (list) => list.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('');
+  const subjHtml = wl.length > 1 ? wl.map((w) => { const l = subs.filter((x) => subjWings(x).indexOf(w) !== -1); return l.length ? `<div class="grp-h">${escapeHtml(w)}</div><div class="chips tt-teachers">${chipRow(l)}</div>` : ''; }).join('') : `<div class="chips tt-teachers">${chipRow(wl.length ? subs.filter((x) => subjWings(x).indexOf(wl[0]) !== -1) : subs)}</div>`;
+  const batRow = (b) => `<div class="mp-row"><span>${escapeHtml(b)}</span><select class="text-input" data-mp-k="${escapeHtml(b)}|${escapeHtml(s)}">${opt(m[`${b}|${s}`] || '', 'Same as all batches')}</select></div>`;
+  const batHtml = wl.map((w) => { const bl = currentBatches(w); return bl.length ? (wl.length > 1 ? `<div class="grp-h">${escapeHtml(w)} · ${bl.length}</div>` : '') + bl.map(batRow).join('') : ''; }).join('');
+  el.innerHTML = `${subjHtml}
+  <div class="mp-row mp-all"><span>All batches</span><select class="text-input" data-mp-k="*|${escapeHtml(s)}">${opt(m[`*|${s}`] || '', '— No default —')}</select></div>
+  <div class="hv-note" style="text-align:left;">Change a batch only if it has a different ${escapeHtml(s)} teacher.</div>
+  ${batHtml}`;
+  el.querySelectorAll('[data-mp-s]').forEach((b) => b.addEventListener('click', () => { state.mapSubj = b.getAttribute('data-mp-s'); renderMappingPanel(); }));
     el.querySelectorAll('[data-mp-k]').forEach((sel) => sel.addEventListener('change', async () => {
       const k = sel.getAttribute('data-mp-k'); const map = Object.assign({}, state.teacherMap);
       if (sel.value) map[k] = sel.value; else delete map[k];
@@ -10532,9 +10563,10 @@ Rules:
     q('#bfSave').addEventListener('click', async () => {
       const r = readBd('bfDay', 'bfMon', 'bfYear'); if (r.err) { showToast(r.err, 'error'); return; }
       keep(); if (!String(f.name || '').trim()) { showToast('Choose the teacher', 'error'); return; } if (!r.md) { showToast('Choose the day and month', 'error'); return; }
-      const rec = { id: f.id || calId(), uid: f.other ? '' : f.uid, name: String(f.name).trim().slice(0, 60), sal: f.other ? '' : (f.sal || ''), md: r.md };
+      { const a0 = (!f.other && f.uid) ? (state.adminNames[f.uid] || {}) : null; if (a0 && a0.bd && a0.bd !== r.md) { showToast(`${a0.name || 'The teacher'} has added a birthday in Profile, so that date is used`); r.md = a0.bd; } }
+  const rec = { id: f.id || calId(), uid: f.other ? '' : f.uid, name: String(f.name).trim().slice(0, 60), sal: f.other ? '' : (f.sal || ''), md: r.md };
       if (f.other && r.y) rec.y = r.y; // someone who is not a teacher: the year stays with the entry
-      if (await calSaveBd((state.birthdays || []).filter((x) => x.id !== rec.id).concat(rec))) {
+      if (await calSaveBd((state.birthdays || []).filter((x) => x.id !== rec.id && !(rec.uid && x.uid === rec.uid)).concat(rec))) {
         // a teacher: the year goes to his private team record, never into the calendar list everybody can read
         if (!f.other && f.uid && !f.ownY) { try { await state.db.doc('team/' + f.uid).set({ birthY: r.y || '' }, { merge: true }); state.team = Object.assign({}, state.team, { [f.uid]: Object.assign({}, state.team[f.uid] || {}, { birthY: r.y || '' }) }); } catch (e) { showToast('The day and month are saved, but the year could not be saved.', 'error'); } }
         showToast(f.id ? 'Birthday updated' : 'Birthday added'); c.mode = 'cal'; c.m = f.date.slice(0, 7); c.sel = f.date; calRender();
@@ -10914,6 +10946,7 @@ Rules:
   await state.db.doc('team/' + code).set({ joinedUid: uid, pending: false, linkedAt: Date.now() }, { merge: true });
     state.team = Object.assign({}, state.team, { [code]: Object.assign({}, pend, { joinedUid: uid, pending: false }) });
   { const pa = salNorm(pend.salutation); if (pa && !addrOf(uid)) { try { await state.db.doc('team/' + uid).set({ addr: pa }, { merge: true }); state.team = Object.assign({}, state.team, { [uid]: Object.assign({}, state.team[uid] || {}, { addr: pa }) }); refreshAdminSal(); } catch (e) { /* the Admin can set it later */ } } }
+  { const pd = String(pend.dept || '').trim(); if (pd && !String((state.team[uid] || {}).dept || '').trim()) { try { const dp = { dept: pd, subjects: Array.isArray(pend.subjects) ? pend.subjects.slice() : [], deptFrom: String(pend.deptFrom || '') || todayStr() }; await state.db.doc('team/' + uid).set(dp, { merge: true }); state.team = Object.assign({}, state.team, { [uid]: Object.assign({}, state.team[uid] || {}, dp) }); } catch (e) { /* the Admin can set it later */ } } }
     try { ttCacheStale(); await loadAdminTeachers(true); } catch (e) { /* ignore */ }
     showToast(`${pend.name || 'The teacher'} has joined · the classes are on the account now`);
   }
@@ -10935,7 +10968,12 @@ Rules:
           else if (list[i].fromProfile !== bd) { list[i] = Object.assign({}, list[i], { md: bd, name: a.name || list[i].name, sal: a.sal || list[i].sal || '', src: 'profile', fromProfile: bd }); changed = true; }
         } else if (i !== -1 && list[i].src === 'profile' && list[i].fromProfile) { list.splice(i, 1); changed = true; }
       });
-      if (changed) await calSaveBd(list, true);
+      { const nameU = {}; ids.forEach((u) => { const nn = normTxt((state.adminNames[u] || {}).name); if (nn) nameU[nn] = u; });
+  const order = list.map((x, i) => ({ x, i })).sort((p, q) => ((q.x.src === 'profile' ? 1 : 0) - (p.x.src === 'profile' ? 1 : 0)) || (p.i - q.i));
+  const seen = {}; const keepSet = new Set();
+  order.forEach(({ x }) => { const u = x.uid || nameU[normTxt(x.name)] || ''; const k = u ? `u:${u}` : `n:${normTxt(x.name)}|${x.md}`; if (seen[k]) return; seen[k] = 1; keepSet.add(x); });
+  if (keepSet.size !== list.length) { const kept = list.filter((x) => keepSet.has(x)); list.length = 0; kept.forEach((x) => list.push(x)); changed = true; } }
+  if (changed) await calSaveBd(list, true);
     } catch (err) { /* it is tried again the next time the list loads */ } finally { try { pushBdaySoon(); } catch (e) { /* ignore */ } syncBusy = false; try { if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ } }
   }
   const calWa = (b) => { if (!b.uid) return ''; const n = waNumber(b.uid); if (n) return n; const w = waTen((state.adminNames[b.uid] || {}).wa); return w ? '91' + w : ''; };
@@ -10963,7 +11001,8 @@ Rules:
   }
   function watchRole(db, uid) {
     unsubscribers.push(db.doc('team/' + uid).onSnapshot((snap) => {
-      const td = snap.data() || {}; { const ad = salNorm(td.addr); if (ad !== (state.myAddr || '')) { state.myAddr = ad; try { renderHello(); renderProfileSal(); } catch (e) { /* ignore */ } } } const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
+      const td = snap.data() || {}; { const ad = salNorm(td.addr); if (ad !== (state.myAddr || '')) { state.myAddr = ad; try { renderHello(); renderProfileSal(); } catch (e) { /* ignore */ } } }
+  { const dp = String(td.dept || '').trim(); const sb = Array.isArray(td.subjects) ? td.subjects.filter(Boolean) : []; const df = String(td.deptFrom || ''); const sig = `${dp}|${sb.join(',')}|${df}`; if (sig !== state.myDeptSig) { state.myDeptSig = sig; state.myDept = dp; state.mySubjects = sb; state.myDeptFrom = df; try { renderSubject(); renderProfileSal(); if (state.form) renderPartChips(); } catch (e) { /* ignore */ } } } const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
       if (td.status === 'removed' && !state.canAdmin) { if (!state.accessRemoved) { state.accessRemoved = true; try { firebase.auth().signOut(); } catch (e) { /* ignore */ } showAuthScreen(); showAuthError('Your access to CATJEE Teach Desk has been removed by the admin. Please contact the director if this is a mistake.'); } return; }
       const prin = co && (td.principal === true || !!state.principalViaId); const wasP = !!state.isPrincipal; const was = state.isCoordinator; const wings2 = (prin && !wings.length) ? ['Pre-Foundation', 'Foundation'] : wings; if (co === was && prin === wasP && JSON.stringify(wings2) === JSON.stringify(state.coordWings || [])) return;
   state.isCoordinator = co; state.isPrincipal = prin; state.coordWings = wings2; roleFollow(co !== was ? (co ? 'You are now a Coordinator' : 'Your role is now Teacher') : '');
@@ -11836,10 +11875,12 @@ Rules:
   async function saveList(key, list) {
     if (!state.db) return;
     const data = { list };
-    if (key === 'subjects') data.notTT = notTTList().filter((x) => list.indexOf(x) !== -1);
+    if (key === 'subjects') { data.notTT = notTTList().filter((x) => list.indexOf(x) !== -1); const wm = {}; list.forEach((x) => { const w = (state.subjectWings || {})[x]; if (Array.isArray(w) && w.length && w.length < 2) wm[x] = w; }); data.wings = wm; state.subjectWings = wm; }
     try { await state.db.doc('settings/' + key).set(data); } catch (err) { flashOffline(err); }
   }
   // Subjects that stay out of the timetable (umbrella subjects like Science / Social Science stay for exams and reports).
+  // the wings a subject belongs to (both, unless the Admin has made it one)
+  function subjWings(name) { const w = (state.subjectWings || {})[name]; return (Array.isArray(w) && w.length) ? w : ['Pre-Foundation', 'Foundation']; }
   function notTTList() { return state.subjectsNotTT || ['Science', 'Social Science']; }
   function ttSubjectsList() { const n = notTTList(); return subjectsList().filter((x) => n.indexOf(x) === -1); }
   async function toggleSubjectTT(name) {
@@ -11847,7 +11888,7 @@ Rules:
     if (k === -1) n.push(name); else n.splice(k, 1);
     state.subjectsNotTT = n;
     renderListManagers();
-    try { await state.db.doc('settings/subjects').set({ list: subjectsList(), notTT: n }); } catch (err) { flashOffline(err); }
+    try { await state.db.doc('settings/subjects').set({ list: subjectsList(), notTT: n, wings: state.subjectWings || {} }); } catch (err) { flashOffline(err); }
   }
   function renderListManagers() {
     Object.keys(LIST_CFG).forEach((key) => {
@@ -11855,16 +11896,19 @@ Rules:
       const el = document.getElementById(cfg.rows);
       if (!el) return;
       const list = cfg.get();
-      el.innerHTML = list.map((name, i) => {
-        const editing = state.listEditing && state.listEditing.key === key && state.listEditing.i === i;
+      const rowHtml = (name, i) => {
+  const editing = state.listEditing && state.listEditing.key === key && state.listEditing.i === i;
         return editing
           ? `<div class="activity-row" style="gap:6px;"><input class="text-input" data-list-edit value="${escapeHtml(name)}" style="flex:1; min-width:0; padding:8px 10px;"><button type="button" class="dedit-btn" data-list-save="${i}">Save</button><button type="button" class="del-btn" data-list-cancel aria-label="Cancel">✕</button></div>`
-          : `<div class="activity-row"><div class="activity-row-text"><span class="activity-row-title">${escapeHtml(name)}</span></div>
+          : `<div class="activity-row"><div class="activity-row-text"><span class="activity-row-title">${escapeHtml(name)}</span>
+  ${key === 'subjects' ? `<span class="wtags">${['Pre-Foundation', 'Foundation'].map((wg) => `<button type="button" class="wtag${subjWings(name).indexOf(wg) !== -1 ? ' on' : ''}" data-sw="${escapeHtml(name)}|${wg}" aria-label="${wg}">${wg === 'Pre-Foundation' ? 'Pre-F' : 'Found.'}</button>`).join('')}</span>` : ''}</div>
               ${key === 'subjects' ? `<button type="button" class="tt-tog${notTTList().indexOf(name) === -1 ? ' on' : ''}" data-tt-tog="${escapeHtml(name)}" aria-label="Show in timetable">${notTTList().indexOf(name) === -1 ? '✓ In timetable' : 'Not in timetable'}</button>` : ''}
               <button class="del-btn" data-list-edit-i="${i}" aria-label="Rename">${svgEdit()}</button>
               <button class="del-btn" data-list-del-i="${i}" aria-label="Remove">${svgTrash()}</button></div>`;
-      }).join('');
+  };
+  el.innerHTML = key === 'subjects' ? ['Pre-Foundation', 'Foundation'].map((wg) => { const idx = list.map((n, i) => i).filter((i) => subjWings(list[i]).indexOf(wg) !== -1); return idx.length ? `<div class="grp-h">${wg} · ${idx.length}</div>` + idx.map((i) => rowHtml(list[i], i)).join('') : ''; }).join('') : list.map(rowHtml).join('');
       el.querySelectorAll('[data-tt-tog]').forEach((b) => b.addEventListener('click', () => toggleSubjectTT(b.getAttribute('data-tt-tog'))));
+  el.querySelectorAll('[data-sw]').forEach((b) => b.addEventListener('click', async () => { const p = b.getAttribute('data-sw').split('|'); const nm = p[0]; const wg = p[1]; const cur = subjWings(nm).slice(); const k = cur.indexOf(wg); if (k >= 0) { if (cur.length < 2) { showToast('A subject needs at least one wing'); return; } cur.splice(k, 1); } else cur.push(wg); const wm = Object.assign({}, state.subjectWings || {}); if (cur.length === 2) delete wm[nm]; else wm[nm] = cur; state.subjectWings = wm; await saveList('subjects', list); renderListManagers(); }));
       el.querySelectorAll('[data-list-edit-i]').forEach((b) => b.addEventListener('click', () => { state.listEditing = { key, i: +b.getAttribute('data-list-edit-i') }; renderListManagers(); const inp = el.querySelector('[data-list-edit]'); if (inp) inp.focus(); }));
       el.querySelectorAll('[data-list-del-i]').forEach((b) => b.addEventListener('click', async () => {
         const i = +b.getAttribute('data-list-del-i');
@@ -11891,8 +11935,8 @@ Rules:
           if (key === 'subjects') {
             // Keep the subject's "Not in timetable" setting and its default teachers under the new name.
             const n = notTTList().map((x) => (x === oldName ? v : x));
-            state.subjectsNotTT = n;
-            const map = state.teacherMap || {};
+            state.subjectsNotTT = n; { const wm = Object.assign({}, state.subjectWings || {}); if (wm[oldName]) { wm[v] = wm[oldName]; delete wm[oldName]; state.subjectWings = wm; } }
+  const map = state.teacherMap || {};
             const moved = Object.keys(map).filter((k) => k.split('|')[1] === oldName);
             if (moved.length && state.db) {
               const nm = {};
@@ -13698,7 +13742,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const newNames = {};
       results.forEach(({ id, data }) => {
         resolvedAdminNameIds.add(id);
-        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data && data.salutation), sal: salNorm(data && data.salutation) || addrOf(id) };
+        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data && data.salutation), sal: addrOf(id) || salNorm(data && data.salutation) };
       });
       state.adminNames = Object.assign({}, state.adminNames, newNames);
       const listEl = document.getElementById('adminTeacherList');
@@ -15133,11 +15177,11 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
 
   function renderProfileSalLead() { renderReminderLead(); }
   function renderProfileSal() {
-  const own = salNorm(state.user && state.user.salutation); const eff = mySal();
-  document.querySelectorAll('#profileSalChips [data-psal]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-psal') === own));
-  const who = salutedName(state.user && state.user.name, eff);
-  const pv = document.getElementById('profileSalPreview');
-  if (pv) pv.textContent = (own && who) ? `You'll see: ${greetingWord()}, ${who}` : ((eff && who) ? `Set by the Admin: ${who}. Choose your own to change it.` : 'Not chosen yet. Your first name is shown for now.');
+  const chips = document.getElementById('profileSalChips'); const pv = document.getElementById('profileSalPreview'); const card = chips && chips.closest('.dcard'); const lab = card && card.querySelector('.dfield-label');
+  if (chips) chips.style.display = 'none'; if (lab) lab.textContent = 'Address';
+  const eff = mySal(); const who = salutedName(state.user && state.user.name, eff);
+  if (card) card.style.display = (who && eff) ? '' : 'none';
+  if (pv) { pv.style.margin = '0'; pv.textContent = (who && eff) ? `${greetingWord()}, ${who} (set by the Admin)` : ''; }
   }
   document.querySelectorAll('#profileSalChips [data-psal]').forEach((b) => b.addEventListener('click', async () => {
     const sal = b.getAttribute('data-psal');
@@ -16182,7 +16226,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     w.addSpace(2);
     w.bodyLine(`Faculty: ${teacherName}`, { bold: true, size: 11 });
     const subj = reportFor ? reportFor.subject : state.teacherSubject;
-    if (subj) w.bodyLine(`Subject: ${subj}`, { size: 11 });
+    { const ru = reportFor ? reportFor.tid : state.teacherId; const dl2 = (dates || []).slice().sort(); const di = ru ? deptInfo(ru, String(dl2[dl2.length - 1] || todayStr())) : null; if (di) { w.bodyLine(`Department: ${di.dept}`, { size: 11 }); if (di.mode === 'one') w.bodyLine(`Subject: ${di.one}`, { size: 11 }); } else if (subj) w.bodyLine(`Subject: ${subj}`, { size: 11 }); }
     w.bodyLine(periodLine, { size: 11 });
     if (f.label) w.bodyLine(`${f.label} (summary and records follow this filter)`, { bold: true, size: 10 });
     w.addSpace(4);
@@ -16218,7 +16262,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const L = [];
     L.push(`*${title}*`);
     L.push(`👤 *Faculty:* ${teacherName}`);
-    if (state.teacherSubject) L.push(`📘 *Subject:* ${state.teacherSubject}`);
+    { const dl = (dates || []).slice().sort(); deptTopLines(state.teacherId, String(dl[dl.length - 1] || todayStr()), state.teacherSubject).forEach((x) => L.push(x)); }
     L.push(`🗓 ${periodLine}`);
     if (f.label) L.push(`🔎 _${f.label}_`);
     L.push('');
@@ -16337,7 +16381,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const recs = reportDayRecords(allForDate).filter(f.match);
     const SEP = '──────────';
     const dateTxt = repDayFull(date); const head = ['*DAILY ACTIVITY REPORT*', '', `👤 *Faculty:* ${teacherName}`];
-    if (state.teacherSubject) head.push(`📘 *Subject:* ${state.teacherSubject}`);
+    deptTopLines(state.teacherId, date, state.teacherSubject).forEach((x) => head.push(x));
     head.push(`🗓️ *Date:* ${dateTxt}`);
     if (f.label) head.push(`🔎 _${f.label}_`);
     const sections = [];
@@ -16373,7 +16417,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         if (i) L.push('');
         L.push(`*${i + 1}. ${entryBatchLabel(c)}${c.test ? ' · Class Test' : ''}*${hvStartedOrPast(c) ? '' : ' _(upcoming)_'}`);
  if (c.startTimeStr && c.endTimeStr) L.push(`🕙 ${waRange(c.startTimeStr, c.endTimeStr)}`);
-  if (Array.isArray(c.parts) && c.parts.length) L.push(`📘 ${c.parts.join(' + ')}`);
+  if (Array.isArray(c.parts) && c.parts.length) L.push(`📘 *Subject:* ${c.parts.join(' + ')}`);
  if (c.test && c.invigText) L.push(`🚪 Invigilation: ${waClean(c.invigText)}`);
         if (c.chapter) { L.push(`🗒️ Chapter: ${waClean(c.chapter)}`); if (c.topic) L.push(`🎯 Topic: ${waClean(c.topic)}`); } else if (c.topic) L.push(`📌 Chapter / Topic: ${waClean(c.topic)}`);
       const KEMO = { 'Revision': '🔁', 'Doubt clearing': '❓', 'Quiz': '☑️', 'Test copies shown': '📋', 'Question paper discussion': '💬', 'Something else': '🏷️' };
@@ -18292,7 +18336,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       return;
     }
 
-    if (!state.teacherSubject && !state.form.test) {
+    if (!state.teacherSubject && !state.myDept && !state.form.test) {
       showFormMsg('Please set your subject first (tap "Subject" at the top).');
       return;
     }
@@ -18380,7 +18424,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
           entryType: 'class',
           teacherId: state.teacherId,
           date: entryDate,
-          subject: state.teacherSubject || '',
+          subject: state.teacherSubject || (state.myDept ? ((state.mySubjects || [])[0] || state.myDept) : ''),
           createdAt: Date.now()
         }, payload));
       // The entry is stored on the phone right away; don't keep the teacher waiting when the network is slow or offline.
@@ -18805,7 +18849,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     document.getElementById('authEmailLabel').textContent = mode === 'signup' ? 'Email' : 'Email or Staff ID';
     document.getElementById('authEmail').placeholder = mode === 'signup' ? 'you@example.com' : 'you@example.com or CTJ-7K4P9X';
     document.getElementById('authNameField').style.display = mode === 'signup' ? 'flex' : 'none';
-    document.getElementById('authSalField').style.display = mode === 'signup' ? 'flex' : 'none'; document.getElementById('authContactField').style.display = mode === 'signup' ? 'flex' : 'none';
+    document.getElementById('authSalField').style.display = 'none'; document.getElementById('authContactField').style.display = mode === 'signup' ? 'flex' : 'none';
     document.getElementById('authSubmitBtn').textContent = mode === 'signup' ? 'Create Account' : 'Sign In';
     document.getElementById('authError').style.display = 'none';
   }
@@ -18826,9 +18870,39 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   // ----- "Address me as" (Sir / Ma'am / Ji). The teacher's own choice wins; if he has not chosen, the Admin's choice is used -----
   const SAL_SET = ['sir', 'maam', 'ji'];
   function salNorm(v) { return SAL_SET.indexOf(v) !== -1 ? v : ''; }
-  function mySal() { return salNorm(state.user && state.user.salutation) || salNorm(state.myAddr); }
+  function mySal() { return salNorm(state.myAddr) || salNorm(state.user && state.user.salutation); }
   function addrOf(uid) { const t = state.team && state.team[uid]; return salNorm(t && t.addr); }
-  function refreshAdminSal() { const n = state.adminNames || {}; Object.keys(n).forEach((u) => { if (n[u] && n[u].own !== undefined) n[u].sal = n[u].own || addrOf(u); }); }
+  function refreshAdminSal() { const n = state.adminNames || {}; Object.keys(n).forEach((u) => { if (n[u] && n[u].own !== undefined) n[u].sal = addrOf(u) || n[u].own; }); }
+  function normTxt(x) { return String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+  function teamDeptOf(uid) { if (uid === state.teacherId) return { dept: state.myDept || '', subjects: state.mySubjects || [], from: state.myDeptFrom || '' }; const t = (state.team && state.team[uid]) || {}; return { dept: String(t.dept || '').trim(), subjects: Array.isArray(t.subjects) ? t.subjects.filter(Boolean) : [], from: String(t.deptFrom || '') }; }
+  // what the report says: only the Department / Department + one Subject / Department and the subject under each class
+  function deptInfo(uid, date) {
+    const t = teamDeptOf(uid); if (!t.dept) return null; if (date && t.from && String(date) < t.from) return null;
+    const dn = normTxt(t.dept); const subs = t.subjects; const diff = subs.filter((x) => normTxt(x) !== dn);
+    return { dept: t.dept, subs, mode: !diff.length ? 'dept' : (subs.length === 1 ? 'one' : 'many'), one: subs[0] || '' };
+  }
+  function deptTopLines(uid, date, legacy) { const di = deptInfo(uid, date); if (!di) return legacy ? [`📘 *Subject:* ${legacy}`] : []; const L = [`🎓 *Department:* ${di.dept}`]; if (di.mode === 'one') L.push(`📘 *Subject:* ${di.one}`); return L; }
+  // which of the teacher's subjects a timetable name ("His/Pol. Sc.", "Reasoning", "Maths") stands for
+  function subjMatch(label, subs) {
+    const toks = String(label || '').toLowerCase().split(/[^a-z]+/).filter((q) => q.length >= 3); if (!toks.length) return [];
+    return subs.filter((sj) => { const ws = String(sj).toLowerCase().split(/[^a-z]+/).filter((q) => q.length >= 3); return toks.some((t) => ws.some((w) => { let k = 0; while (k < t.length && k < w.length && t[k] === w[k]) k++; return k >= 3 && k >= Math.min(t.length, 4); })); });
+  }
+  function adminLabels() { const f = state.form || {}; const fromSlot = !!(f.slotSubject && f.slotBatch && f.slotBatch === f.batch); return fromSlot ? [f.slotSubject] : partSubs(); }
+  function adminMatched() { const subs = (state.mySubjects || []).filter(Boolean); const out = []; adminLabels().forEach((l) => subjMatch(l, subs).forEach((x) => { if (out.indexOf(x) < 0) out.push(x); })); return out; }
+  function adminPartOptions() {
+    const f = state.form || {}; const subs = (state.mySubjects || []).filter(Boolean); const dn = normTxt(state.myDept); let out = [];
+    if (subs.length >= 2 && subs.some((x) => normTxt(x) !== dn)) { const mt = adminMatched(); out = (f.partsAll || !mt.length) ? subs.slice() : mt; }
+    if (state.editingId) (f.parts || []).forEach((x) => { if (out.indexOf(x) < 0) out.push(x); });
+    return out;
+  }
+  function adminPartAuto(opts) { const mt = adminMatched(); return (mt.length === 1 && opts.indexOf(mt[0]) >= 0) ? mt[0] : null; }
+  async function teamDeptPatch(uid, patch, msg) {
+    if (!uid || !state.db) return; const t = teamDeptOf(uid); const p = Object.assign({}, patch);
+    if ('dept' in patch) p.deptFrom = patch.dept ? (t.from || todayStr()) : '';
+    try { await state.db.doc('team/' + uid).set(p, { merge: true }); } catch (err) { flashOffline(err); return; }
+    state.team = Object.assign({}, state.team, { [uid]: Object.assign({}, state.team[uid] || {}, p) });
+    showToast(msg || 'Saved'); try { renderTeamPanel(); } catch (e) { /* ignore */ }
+  }
   function salWord(v) { return v === 'sir' ? 'Sir' : v === 'maam' ? "Ma'am" : v === 'ji' ? 'Ji' : ''; }
   
   function salutedName(fullName, sal) {
@@ -18887,7 +18961,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         const code = normStaffId(document.getElementById('authStaffId').value);
         if (!looksLikeStaffId(code)) { showAuthError('Enter the Staff ID you received from the admin.'); btn.disabled = false; return; }
         if (!name) { showAuthError('Please enter your name.'); btn.disabled = false; return; }
-        if (!authSalutation) { showAuthError('Choose how we should address you.'); btn.disabled = false; return; }
+        
  const wa0 = waTen(document.getElementById('authWhatsapp').value); const bd0 = readBd('authBdDay', 'authBdMon', 'authBdYear');
  if (document.getElementById('authWhatsapp').value.trim() && !wa0) { showAuthError('Enter a 10-digit mobile number, or leave it empty.'); btn.disabled = false; return; }
  if (bd0.err) { showAuthError(bd0.err); btn.disabled = false; return; }
@@ -18909,7 +18983,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
             batch.set(fs.doc('team/' + uid), { staffId: code, role: idData.role || 'teacher', wings: idData.wings || [], status: 'active' });
             batch.set(fs.doc('staffLogin/' + code), { email: cred.user.email });
             await batch.commit();
-            await fs.doc('profile/' + uid).set({ name: name, subject: '', salutation: authSalutation, email: cred.user.email, whatsapp: wa0, birthMd: bd0.md, birthY: bd0.y || '' }, { merge: true });
+            await fs.doc('profile/' + uid).set({ name: name, subject: '', salutation: '', email: cred.user.email, whatsapp: wa0, birthMd: bd0.md, birthY: bd0.y || '' }, { merge: true });
           } catch (claimErr) {
             try { await cred.user.delete(); } catch (e) { /* ignore */ }
             throw new Error('This Staff ID could not be used (it may have just been used by someone else). Please ask the admin.');
@@ -19098,6 +19172,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     unsubscribers.push(db.doc('settings/subjects').onSnapshot((snap) => {
       state.subjects = (snap.exists && snap.data().list) || null;
       state.subjectsNotTT = (snap.exists && Array.isArray(snap.data().notTT)) ? snap.data().notTT : null;
+  state.subjectWings = (snap.exists && snap.data().wings && typeof snap.data().wings === 'object') ? snap.data().wings : {};
       renderListManagers();
       if (state.tab === 'add') renderInvig();
     }, () => {}));
