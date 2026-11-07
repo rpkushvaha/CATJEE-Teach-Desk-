@@ -3769,9 +3769,10 @@
         <div class="admin-sub" id="adminBatchListHint">Tap a wing above to see and manage its classes.</div>
         <div id="adminBatchListExpandedBox" class="wing-sec" style="display:none; flex-direction:column; gap:10px;">
   <div class="wing-sec-h" id="adminBatchHead"></div>
-          <div class="activity-rows" id="batchListRows"></div>
+          <div id="adminBatchShiftWrap"><div class="wing-lbl" style="margin-top:4px;">Shift</div><div class="chips sub-chips" id="adminBatchShiftChips"></div><div class="admin-sub" id="adminBatchShiftHint" style="margin:6px 0 0;">Tap a shift above to see its batches.</div></div>
+  <div id="adminBatchShiftBody" style="display:none; flex-direction:column; gap:10px;"><div class="activity-rows" id="batchListRows"></div>
           <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:15px; padding:13px 14px;">
-          <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button>
+          <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button></div>
         </div>
       </div>
   <div class="panel set-acc" id="adminPeriodsPanel" data-atab="settings">
@@ -4245,7 +4246,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.54 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.55 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9769,19 +9770,26 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function peDirty(pe) { const nz = (l) => JSON.stringify((l || []).map((p) => [p.start, p.end])); return nz(pe.list) !== nz(periodsFor(pe.key)); }
   function peSyncSave() { const b = document.getElementById('peSave'); if (b && state.perEdit) b.disabled = !peDirty(state.perEdit); }
   function renderPeriodsPanel() {
-    const el = document.getElementById('periodsBody'); if (!el) return;
-    const groups = ttGroups();
-    if (!state.perEdit || !groups.find((x) => x.key === state.perEdit.key)) {
-      const g = groups[0]; if (!g) { el.innerHTML = '<div class="hv-note">Add batches first.</div>'; return; }
-      state.perEdit = { key: g.key, list: periodsFor(g.key).map((p) => Object.assign({}, p)) };
-    }
-    const pe = state.perEdit;
-    el.innerHTML = `<div class="chips">${groups.map((x) => `<button type="button" class="chip${x.key === pe.key ? ' active' : ''}" data-pe-g="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>
-      ${pe.list.map((p, i) => `<div class="pe-row"><span class="team-lbl">P${i + 1}</span><input class="text-input" type="time" data-pe-s="${i}" value="${escapeHtml(p.start)}"><span>–</span><input class="text-input" type="time" data-pe-e="${i}" value="${escapeHtml(p.end)}"><button type="button" class="del-btn" data-pe-del="${i}" aria-label="Remove period">${svgTrash()}</button></div>`).join('')}
-      <div class="hv-note" style="text-align:left;">Gaps between periods are shown as breaks.</div>
-      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;"${peDirty(pe) ? '' : ' disabled'}>Save timings</button></div>`;
-    el.querySelectorAll('[data-pe-g]').forEach((b) => b.addEventListener('click', () => { const k = b.getAttribute('data-pe-g'); state.perEdit = { key: k, list: periodsFor(k).map((p) => Object.assign({}, p)) }; renderPeriodsPanel(); }));
-    el.querySelectorAll('[data-pe-s]').forEach((inp) => ['input', 'change'].forEach((ev) => inp.addEventListener(ev, () => { pe.list[+inp.getAttribute('data-pe-s')].start = inp.value; peSyncSave(); })));
+  const el = document.getElementById('periodsBody'); if (!el) return;
+  const groups = ttGroups(); const wl = leadWings();
+  if (!groups.length) { el.innerHTML = '<div class="hv-note">Add batches first.</div>'; return; }
+  const wing = (state.peWing && wl.indexOf(state.peWing) !== -1) ? state.peWing : null;
+  const wgroups = wing ? groups.filter((g) => g.wing === wing) : [];
+  if (state.perEdit && !wgroups.find((x) => x.key === state.perEdit.key)) state.perEdit = null;
+  const pe = state.perEdit;
+  const wingChips = `<div class="chips">${wl.map((w) => `<button type="button" class="chip${w === wing ? ' active' : ''}" data-pe-wing="${w}">${w}</button>`).join('')}</div>`;
+  let body = '<div class="admin-sub" style="margin:6px 0 0;">Tap a wing above to set its period times.</div>';
+  if (wing) {
+    body = `<div class="wing-sec"><div class="wing-sec-h">${wing} <small>· ${wgroups.length} ${wgroups.length === 1 ? 'shift' : 'shifts'}</small></div>${wgroups.length ? `<div class="wing-lbl">Shift</div><div class="chips sub-chips">${wgroups.map((x) => `<button type="button" class="chip${pe && x.key === pe.key ? ' active' : ''}" data-pe-g="${escapeHtml(x.key)}">${escapeHtml(SESS_LABEL[x.session])}</button>`).join('')}</div>` : '<div class="hv-note" style="text-align:left;">No batches in this wing yet.</div>'}${pe ? `
+  ${pe.list.map((p, i) => `<div class="pe-row"><span class="team-lbl">P${i + 1}</span><input class="text-input" type="time" data-pe-s="${i}" value="${escapeHtml(p.start)}"><span>–</span><input class="text-input" type="time" data-pe-e="${i}" value="${escapeHtml(p.end)}"><button type="button" class="del-btn" data-pe-del="${i}" aria-label="Remove period">${svgTrash()}</button></div>`).join('')}
+  <div class="hv-note" style="text-align:left;">Gaps between periods are shown as breaks.</div>
+  <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;"${peDirty(pe) ? '' : ' disabled'}>Save timings</button></div>` : (wgroups.length ? '<div class="admin-sub" style="margin:6px 0 4px;">Tap a shift above to see its periods.</div>' : '')}</div>`;
+  }
+  el.innerHTML = wingChips + body;
+  el.querySelectorAll('[data-pe-wing]').forEach((b) => b.addEventListener('click', () => { const w = b.getAttribute('data-pe-wing'); state.peWing = state.peWing === w ? null : w; state.perEdit = null; renderPeriodsPanel(); }));
+  el.querySelectorAll('[data-pe-g]').forEach((b) => b.addEventListener('click', () => { const k = b.getAttribute('data-pe-g'); state.perEdit = (state.perEdit && state.perEdit.key === k) ? null : { key: k, list: periodsFor(k).map((p) => Object.assign({}, p)) }; renderPeriodsPanel(); }));
+  if (pe) {
+  el.querySelectorAll('[data-pe-s]').forEach((inp) => ['input', 'change'].forEach((ev) => inp.addEventListener(ev, () => { pe.list[+inp.getAttribute('data-pe-s')].start = inp.value; peSyncSave(); })));
     el.querySelectorAll('[data-pe-e]').forEach((inp) => ['input', 'change'].forEach((ev) => inp.addEventListener(ev, () => { pe.list[+inp.getAttribute('data-pe-e')].end = inp.value; peSyncSave(); })));
     el.querySelectorAll('[data-pe-del]').forEach((b) => b.addEventListener('click', () => { pe.list.splice(+b.getAttribute('data-pe-del'), 1); renderPeriodsPanel(); }));
     document.getElementById('peAdd').addEventListener('click', () => { const last = pe.list[pe.list.length - 1]; pe.list.push({ start: last ? last.end : '09:00', end: last ? svMinToHHMM(hhmmToMin(last.end) + 40) : '09:40' }); renderPeriodsPanel(); });
@@ -9792,8 +9800,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const groupsObj = Object.assign({}, state.periodSets, { [pe.key]: sorted });
       try { await state.db.doc('settings/periods').set({ groups: groupsObj }); state.periodSets = groupsObj; pe.list = sorted.map((p) => Object.assign({}, p)); showToast('Timings saved'); renderPeriodsPanel(); } catch (err) { flashOffline(err); }
     });
+  
   }
-  state.mapSubj = null;
+}
+state.mapSubj = null;
   // who can be the usual teacher of a subject: in this wing, and the subject is set for him (Team), or it is his own subject, or he is already mapped to it
   function deptParts(d) { return String(d || '').split(/\band\b|&|,|\//i).map((x) => normTxt(x)).filter(Boolean); }
   // "Social Science" / "Science" in the Subjects list stand for a whole department (exams use them); a department is also any name that some teacher has as a Department with other subjects under it
@@ -9960,6 +9970,16 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     if (id === 'adminContactPanel') return (document.getElementById('directorPhoneInput').value || document.getElementById('directorEmailInput').value) ? 'Set' : 'Not set';
     return '';
   }
+  // a section always opens closed (only its wing chips show), so the page stays short
+  function settingsFreshOpen(id) {
+    try {
+      if (id === 'adminTeamPanel') { state.teamWingOpen = null; state.teamOpen = null; renderTeamPanel(); }
+      else if (id === 'adminMappingPanel') { state.mapWingOpen = null; renderMappingPanel(); }
+      else if (id === 'adminSubjectsPanel') { state.subjWingOpen = null; renderListManagers(); }
+      else if (id === 'adminBatchPanel') { state.adminBatchListExpanded = null; state.adminBatchShift = null; renderBatchList(); }
+      else if (id === 'adminPeriodsPanel') { state.peWing = null; state.perEdit = null; renderPeriodsPanel(); }
+    } catch (e) { /* ignore */ }
+  }
   function renderSettingsAccordion() {
     document.querySelectorAll('#view-admin .set-acc').forEach((p) => {
       const open = state.adminSetOpen === p.id;
@@ -9973,7 +9993,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
         head.appendChild(sum);
         head.setAttribute('role', 'button');
         head.setAttribute('tabindex', '0');
-        const toggle = () => { state.adminSetOpen = state.adminSetOpen === p.id ? null : p.id; renderSettingsAccordion(); };
+        const toggle = () => { const opening = state.adminSetOpen !== p.id; state.adminSetOpen = opening ? p.id : null; if (opening) settingsFreshOpen(p.id); renderSettingsAccordion(); };
         head.addEventListener('click', toggle);
         head.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
       }
@@ -13918,7 +13938,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     return bits.length ? `<div class="edit-stamp">${escapeHtml(bits.join(' · '))}</div>` : '';
   }
 
-  function renderBatchListInto(elId, wing) {
+  function renderBatchListInto(elId, wing, shift) {
     const el = document.getElementById(elId);
     if (!el) return;
     const list = currentBatches(wing);
@@ -13926,10 +13946,12 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       el.innerHTML = '<div class="admin-sub" style="margin:0;">No batches yet in this wing. Add one below.</div>';
       return;
     }
-    const editing = state.batchEditKey === elId + '|' + wing ? state.batchEditIdx : -1;
+    const vis = list.map((b, i) => i).filter((i) => !shift || batchSession(list[i]) === shift);
+  if (!vis.length) { el.innerHTML = '<div class="admin-sub" style="margin:0;">No batches in this shift yet. Add one below.</div>'; return; }
+  const editing = state.batchEditKey === elId + '|' + wing ? state.batchEditIdx : -1;
     const SESS_H = { morning: '<span class="ico i-sun" aria-hidden="true"></span> Morning', evening: '<span class="ico i-moon" aria-hidden="true"></span> Evening', special: '<span class="ico i-pin" aria-hidden="true"></span> Remedial / Special' };
     const headOf = (b, i) => (i === 0 || batchSession(list[i - 1]) !== batchSession(b)) ? `<div class="bl-head">${SESS_H[batchSession(b)]}</div>` : '';
-    el.innerHTML = list.map((b, i) => headOf(b, i) + (i === editing ? `
+    el.innerHTML = vis.map((i) => { const b = list[i]; return (shift ? '' : headOf(b, i)) + (i === editing ? `
       <div class="activity-row" style="gap:6px;">
         <input class="text-input" data-rename-input="${i}" value="${escapeHtml(b)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;">
         <button class="add-entry-btn" data-rename-save="${i}" style="white-space:nowrap;">Save</button>
@@ -13941,7 +13963,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         ${(state.canAdmin || state.isCoordinator) ? `<button type="button" class="sess-pill ${batchSession(b)}" data-sess-batch="${i}" aria-label="Change session">${escapeHtml({ morning: 'Morning', evening: 'Evening', special: 'Special' }[batchSession(b)])}</button>` : ''}
         ${(state.canAdmin || state.isCoordinator) ? `<button class="del-btn" data-rename-batch="${i}" aria-label="Rename batch">${svgEdit()}</button>` : ''}
         <button class="del-btn" data-del-batch="${i}" aria-label="Remove batch">${svgTrash()}</button>
-      </div>`)).join('');
+      </div>`); }).join('');
     el.querySelectorAll('[data-room-batch]').forEach((btn) => btn.addEventListener('click', () => openBatchRoomSheet(list[+btn.getAttribute('data-room-batch')])));
     // Tap the session pill to cycle Morning → Evening → Special.
     el.querySelectorAll('[data-sess-batch]').forEach((btn) => btn.addEventListener('click', async () => {
@@ -13952,22 +13974,22 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       try {
         await state.db.doc('settings/batches').set({ sessions }, { merge: true });
         state.batchSessions = sessions;
-        renderBatchListInto(elId, wing);
+        renderBatchListInto(elId, wing, shift);
         showToast(`${b}: ${{ morning: 'Morning', evening: 'Evening', special: 'Special' }[next]}`);
       } catch (err) { flashOffline(err); }
     }));
     el.querySelectorAll('[data-rename-batch]').forEach((btn) => btn.addEventListener('click', () => {
       state.batchEditKey = elId + '|' + wing; state.batchEditIdx = +btn.getAttribute('data-rename-batch');
-      renderBatchListInto(elId, wing);
+      renderBatchListInto(elId, wing, shift);
       const inp = el.querySelector('[data-rename-input]'); if (inp) inp.focus();
     }));
-    el.querySelectorAll('[data-rename-cancel]').forEach((btn) => btn.addEventListener('click', () => { state.batchEditKey = null; renderBatchListInto(elId, wing); }));
+    el.querySelectorAll('[data-rename-cancel]').forEach((btn) => btn.addEventListener('click', () => { state.batchEditKey = null; renderBatchListInto(elId, wing, shift); }));
     el.querySelectorAll('[data-rename-save]').forEach((btn) => btn.addEventListener('click', async () => {
       const i = +btn.getAttribute('data-rename-save');
       const v = el.querySelector('[data-rename-input]').value;
       state.batchEditKey = null;
       await renameBatchEverywhere(wing, i, v);
-      renderBatchListInto(elId, wing);
+      renderBatchListInto(elId, wing, shift);
     }));
     el.querySelectorAll('[data-del-batch]').forEach((btn) => {
       btn.addEventListener('click', async () => {
@@ -13982,14 +14004,25 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     });
   }
 
+  function batchShiftsOf(wing) { return ['morning', 'evening', 'special'].filter((ses) => currentBatches(wing).some((b) => batchSession(b) === ses)); }
   function renderBatchList() {
     document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-batch-wing') === state.adminBatchListExpanded);
     });
-    const expanded = !!state.adminBatchListExpanded;
-    document.getElementById('adminBatchListExpandedBox').style.display = expanded ? 'flex' : 'none';
-    document.getElementById('adminBatchListHint').style.display = expanded ? 'none' : 'block';
-    if (expanded) { renderBatchListInto('batchListRows', state.adminBatchWing); const bh = document.getElementById('adminBatchHead'); if (bh) { const nb = currentBatches(state.adminBatchWing).length; bh.innerHTML = `${state.adminBatchWing} <small>· ${nb} ${nb === 1 ? 'batch' : 'batches'}</small>`; } }
+    const wing = state.adminBatchListExpanded || null;
+    document.getElementById('adminBatchListExpandedBox').style.display = wing ? 'flex' : 'none';
+    document.getElementById('adminBatchListHint').style.display = wing ? 'none' : 'block';
+    if (wing) {
+      const shifts = batchShiftsOf(wing); if (state.adminBatchShift && shifts.indexOf(state.adminBatchShift) === -1) state.adminBatchShift = null;
+      const nb = currentBatches(wing).length; const bh = document.getElementById('adminBatchHead'); if (bh) bh.innerHTML = `${wing} <small>· ${nb} ${nb === 1 ? 'batch' : 'batches'}</small>`;
+      const none = !shifts.length;
+      document.getElementById('adminBatchShiftWrap').style.display = none ? 'none' : '';
+      document.getElementById('adminBatchShiftChips').innerHTML = shifts.map((ses) => `<button type="button" class="chip${state.adminBatchShift === ses ? ' active' : ''}" data-batch-shift="${ses}">${SESS_LABEL[ses]}</button>`).join('');
+      document.getElementById('adminBatchShiftHint').style.display = state.adminBatchShift ? 'none' : '';
+      const bodyOpen = !!state.adminBatchShift || none;
+      document.getElementById('adminBatchShiftBody').style.display = bodyOpen ? 'flex' : 'none';
+      if (bodyOpen) renderBatchListInto('batchListRows', wing, state.adminBatchShift || null);
+    }
     renderBatchListInto('inlineBatchListRows', state.formWing);
   }
 
@@ -18618,27 +18651,30 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const wing = btn.getAttribute('data-batch-wing');
-      if (state.adminBatchWing === wing && state.adminBatchListExpanded) {
-        state.adminBatchListExpanded = null;
-      } else {
-        state.adminBatchWing = wing;
-        state.adminBatchListExpanded = wing;
-      }
-      renderBatchList();
+      state.adminBatchShift = null;
+  if (state.adminBatchWing === wing && state.adminBatchListExpanded) {
+  state.adminBatchListExpanded = null;
+  } else {
+  state.adminBatchWing = wing;
+  state.adminBatchListExpanded = wing;
+  }
+  renderBatchList();
     });
   });
 
   [['#teamWingChips [data-team-wing]', 'data-team-wing', 'teamWingOpen', () => renderTeamPanel()], ['#mapWingChips [data-map-wing]', 'data-map-wing', 'mapWingOpen', () => renderMappingPanel()], ['#subjWingChips [data-subj-wing]', 'data-subj-wing', 'subjWingOpen', () => renderListManagers()]].forEach(([sel, attr, key, redraw]) => {
   document.querySelectorAll(sel).forEach((btn) => btn.addEventListener('click', () => { const w = btn.getAttribute(attr); state[key] = state[key] === w ? null : w; redraw(); }));
   });
+  document.getElementById('adminBatchShiftChips').addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-batch-shift]'); if (!b) return; const v = b.getAttribute('data-batch-shift'); state.adminBatchShift = state.adminBatchShift === v ? null : v; renderBatchList(); });
   document.getElementById('addBatchBtn').addEventListener('click', async () => {
     const input = document.getElementById('newBatchInput');
     const val = input.value.trim();
     if (!val) return;
     const list = currentBatches(state.adminBatchWing);
     if (list.includes(val)) { showToast('That batch already exists', 'error'); return; }
-    await saveBatchList(state.adminBatchWing, list.concat([val]));
-    input.value = '';
+    if (state.adminBatchShift && batchSession(val) !== state.adminBatchShift) state.batchSessions = Object.assign({}, state.batchSessions || {}, { [val]: state.adminBatchShift });
+  await saveBatchList(state.adminBatchWing, list.concat([val]));
+  input.value = '';
   });
 
   document.getElementById('inlineAddBatchBtn').addEventListener('click', async () => {
