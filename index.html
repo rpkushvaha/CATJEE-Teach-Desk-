@@ -2895,6 +2895,14 @@
   .wing-sec-h { font-weight: 600; }
   .wing-lbl { font-weight: 600; }
   #peSave:disabled { background: var(--line); color: var(--muted-2); opacity: 1; cursor: default; }
+  /* Settings: wing and shift chips are the same grey strip as Reports (Day / Week / Month) */
+  .chips.seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 3px; background: var(--neutral-soft); border-radius: 12px; width: 100%; box-sizing: border-box; }
+  .chips.seg .chip { background: transparent; border-radius: 12px; padding: 9px 6px; color: var(--muted-2); text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; border: 0; }
+  .chips.seg .chip.active { background: var(--card); color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 1px 2px rgba(23,23,23,.06); font-weight: 600; }
+  /* "+ Add": grey, and red like Save when something is typed */
+  .btn-secondary.add-ready { background: var(--gold); border-color: var(--gold) !important; color: #fff; }
+  /* the edit and delete icons in Settings carry the app's red */
+  #view-admin .del-btn, #view-admin .del-btn svg { color: var(--gold); }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -3735,7 +3743,7 @@
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team</div>
         <div class="admin-sub" style="margin:0;">Choose who is a coordinator and which wing each person belongs to. A coordinator manages their wing (dashboard, exams, reports, batch lists) and can force a check-out, but does not teach.</div>
         <div id="staffIdsBlock" class="sid-block"></div>
-  <div class="chips" id="teamWingChips">
+  <div class="chips seg" id="teamWingChips">
   <button class="chip" data-team-wing="Pre-Foundation">Pre-Foundation</button>
   <button class="chip" data-team-wing="Foundation">Foundation</button>
   </div>
@@ -3752,7 +3760,7 @@
   <div class="panel set-acc" id="adminMappingPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8l3 3-3 3"/></svg>Teacher Mapping</div>
         <div class="admin-sub" style="margin:0;">The usual teacher for each subject (and batch). The timetable fills the teacher in automatically.</div>
-        <div class="chips" id="mapWingChips">
+        <div class="chips seg" id="mapWingChips">
   <button class="chip" data-map-wing="Pre-Foundation">Pre-Foundation</button>
   <button class="chip" data-map-wing="Foundation">Foundation</button>
   </div>
@@ -3762,14 +3770,14 @@
   <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
-        <div class="chips" id="adminBatchWingChips">
+        <div class="chips seg" id="adminBatchWingChips">
           <button class="chip" data-batch-wing="Pre-Foundation">Pre-Foundation</button>
           <button class="chip" data-batch-wing="Foundation">Foundation</button>
         </div>
         <div class="admin-sub" id="adminBatchListHint">Tap a wing above to see and manage its classes.</div>
         <div id="adminBatchListExpandedBox" class="wing-sec" style="display:none; flex-direction:column; gap:10px;">
   <div class="wing-sec-h" id="adminBatchHead"></div>
-          <div id="adminBatchShiftWrap"><div class="wing-lbl" style="margin-top:4px;">Shift</div><div class="chips sub-chips" id="adminBatchShiftChips"></div><div class="admin-sub" id="adminBatchShiftHint" style="margin:6px 0 0;">Tap a shift above to see its batches.</div></div>
+          <div id="adminBatchShiftWrap"><div class="wing-lbl" style="margin-top:4px;">Shift</div><div class="chips seg" id="adminBatchShiftChips"></div><div class="admin-sub" id="adminBatchShiftHint" style="margin:6px 0 0;">Tap a shift above to see its batches.</div></div>
   <div id="adminBatchShiftBody" style="display:none; flex-direction:column; gap:10px;"><div class="activity-rows" id="batchListRows"></div>
           <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:15px; padding:13px 14px;">
           <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button></div>
@@ -3783,7 +3791,7 @@
   <div class="panel set-acc" id="adminSubjectsPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Subjects</div>
         <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
-        <div class="chips" id="subjWingChips">
+        <div class="chips seg" id="subjWingChips">
   <button class="chip" data-subj-wing="Pre-Foundation">Pre-Foundation</button>
   <button class="chip" data-subj-wing="Foundation">Foundation</button>
   </div>
@@ -4246,7 +4254,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.55 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.56 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9774,20 +9782,23 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   const groups = ttGroups(); const wl = leadWings();
   if (!groups.length) { el.innerHTML = '<div class="hv-note">Add batches first.</div>'; return; }
   const wing = (state.peWing && wl.indexOf(state.peWing) !== -1) ? state.peWing : null;
+  if (!wing) { state.peShift = null; state.perEdit = null; }
   const wgroups = wing ? groups.filter((g) => g.wing === wing) : [];
-  if (state.perEdit && !wgroups.find((x) => x.key === state.perEdit.key)) state.perEdit = null;
+  const grp = state.peShift ? wgroups.find((g) => g.session === state.peShift) : null;
+  if (state.perEdit && !(grp && state.perEdit.key === grp.key)) state.perEdit = null;
+  if (grp && !state.perEdit) state.perEdit = { key: grp.key, list: periodsFor(grp.key).map((p) => Object.assign({}, p)) };
   const pe = state.perEdit;
-  const wingChips = `<div class="chips">${wl.map((w) => `<button type="button" class="chip${w === wing ? ' active' : ''}" data-pe-wing="${w}">${w}</button>`).join('')}</div>`;
+  const wingChips = `<div class="chips seg">${wl.map((w) => `<button type="button" class="chip${w === wing ? ' active' : ''}" data-pe-wing="${w}">${w}</button>`).join('')}</div>`;
   let body = '<div class="admin-sub" style="margin:6px 0 0;">Tap a wing above to set its period times.</div>';
   if (wing) {
-    body = `<div class="wing-sec"><div class="wing-sec-h">${wing} <small>· ${wgroups.length} ${wgroups.length === 1 ? 'shift' : 'shifts'}</small></div>${wgroups.length ? `<div class="wing-lbl">Shift</div><div class="chips sub-chips">${wgroups.map((x) => `<button type="button" class="chip${pe && x.key === pe.key ? ' active' : ''}" data-pe-g="${escapeHtml(x.key)}">${escapeHtml(SESS_LABEL[x.session])}</button>`).join('')}</div>` : '<div class="hv-note" style="text-align:left;">No batches in this wing yet.</div>'}${pe ? `
+    body = `<div class="wing-sec"><div class="wing-sec-h">${wing}</div><div class="wing-lbl">Shift</div><div class="chips seg">${['morning', 'evening', 'special'].map((ses) => `<button type="button" class="chip${state.peShift === ses ? ' active' : ''}" data-pe-ses="${ses}">${SESS_LABEL[ses]}</button>`).join('')}</div>${pe ? `
   ${pe.list.map((p, i) => `<div class="pe-row"><span class="team-lbl">P${i + 1}</span><input class="text-input" type="time" data-pe-s="${i}" value="${escapeHtml(p.start)}"><span>–</span><input class="text-input" type="time" data-pe-e="${i}" value="${escapeHtml(p.end)}"><button type="button" class="del-btn" data-pe-del="${i}" aria-label="Remove period">${svgTrash()}</button></div>`).join('')}
   <div class="hv-note" style="text-align:left;">Gaps between periods are shown as breaks.</div>
-  <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;"${peDirty(pe) ? '' : ' disabled'}>Save timings</button></div>` : (wgroups.length ? '<div class="admin-sub" style="margin:6px 0 4px;">Tap a shift above to see its periods.</div>' : '')}</div>`;
+  <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;"${peDirty(pe) ? '' : ' disabled'}>Save timings</button></div>` : (state.peShift ? `<div class="admin-sub" style="margin:6px 0 4px;">No ${wing} ${SESS_LABEL[state.peShift]} batch yet. Add one in Class / Batch List first.</div>` : '<div class="admin-sub" style="margin:6px 0 4px;">Tap a shift above to see its periods.</div>')}</div>`;
   }
   el.innerHTML = wingChips + body;
-  el.querySelectorAll('[data-pe-wing]').forEach((b) => b.addEventListener('click', () => { const w = b.getAttribute('data-pe-wing'); state.peWing = state.peWing === w ? null : w; state.perEdit = null; renderPeriodsPanel(); }));
-  el.querySelectorAll('[data-pe-g]').forEach((b) => b.addEventListener('click', () => { const k = b.getAttribute('data-pe-g'); state.perEdit = (state.perEdit && state.perEdit.key === k) ? null : { key: k, list: periodsFor(k).map((p) => Object.assign({}, p)) }; renderPeriodsPanel(); }));
+  el.querySelectorAll('[data-pe-wing]').forEach((b) => b.addEventListener('click', () => { const w = b.getAttribute('data-pe-wing'); state.peWing = state.peWing === w ? null : w; state.peShift = null; state.perEdit = null; renderPeriodsPanel(); }));
+  el.querySelectorAll('[data-pe-ses]').forEach((b) => b.addEventListener('click', () => { const v = b.getAttribute('data-pe-ses'); state.peShift = state.peShift === v ? null : v; state.perEdit = null; renderPeriodsPanel(); }));
   if (pe) {
   el.querySelectorAll('[data-pe-s]').forEach((inp) => ['input', 'change'].forEach((ev) => inp.addEventListener(ev, () => { pe.list[+inp.getAttribute('data-pe-s')].start = inp.value; peSyncSave(); })));
     el.querySelectorAll('[data-pe-e]').forEach((inp) => ['input', 'change'].forEach((ev) => inp.addEventListener(ev, () => { pe.list[+inp.getAttribute('data-pe-e')].end = inp.value; peSyncSave(); })));
@@ -9800,6 +9811,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const groupsObj = Object.assign({}, state.periodSets, { [pe.key]: sorted });
       try { await state.db.doc('settings/periods').set({ groups: groupsObj }); state.periodSets = groupsObj; pe.list = sorted.map((p) => Object.assign({}, p)); showToast('Timings saved'); renderPeriodsPanel(); } catch (err) { flashOffline(err); }
     });
+  
   
   }
 }
@@ -9977,7 +9989,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       else if (id === 'adminMappingPanel') { state.mapWingOpen = null; renderMappingPanel(); }
       else if (id === 'adminSubjectsPanel') { state.subjWingOpen = null; renderListManagers(); }
       else if (id === 'adminBatchPanel') { state.adminBatchListExpanded = null; state.adminBatchShift = null; renderBatchList(); }
-      else if (id === 'adminPeriodsPanel') { state.peWing = null; state.perEdit = null; renderPeriodsPanel(); }
+      else if (id === 'adminPeriodsPanel') { state.peWing = null; state.peShift = null; state.perEdit = null; renderPeriodsPanel(); }
     } catch (e) { /* ignore */ }
   }
   function renderSettingsAccordion() {
@@ -11979,6 +11991,9 @@ Rules:
   }
   // Subjects that stay out of the timetable (umbrella subjects like Science / Social Science stay for exams and reports).
   // the wings a subject belongs to (both, unless the Admin has made it one)
+  const ADD_PAIRS = [['newBatchInput', 'addBatchBtn'], ['inlineNewBatchInput', 'inlineAddBatchBtn'], ['newSubjectInput', 'addSubjectBtn'], ['newRoomInput', 'addRoomBtn'], ['newTestTypeInput', 'addTestTypeBtn']];
+  function syncAddBtns() { ADD_PAIRS.forEach(([i, b]) => { const ie = document.getElementById(i); const be = document.getElementById(b); if (ie && be) be.classList.toggle('add-ready', !!ie.value.trim()); }); }
+  document.addEventListener('input', (e) => { if (e.target && ADD_PAIRS.some((p) => p[0] === e.target.id)) syncAddBtns(); });
   function syncSubjWingUI() {
   const wl = leadWings(); const wing = (state.subjWingOpen && wl.indexOf(state.subjWingOpen) !== -1) ? state.subjWingOpen : null; if (!wing) state.subjWingOpen = null;
   document.querySelectorAll('#subjWingChips [data-subj-wing]').forEach((b) => { const w = b.getAttribute('data-subj-wing'); b.style.display = wl.indexOf(w) === -1 ? 'none' : ''; b.classList.toggle('active', w === wing); });
@@ -12070,11 +12085,11 @@ Rules:
   if (key === 'subjects') {
     const wing = state.subjWingOpen; if (!wing) { showToast('Tap a wing first'); return; }
     const ex = list.find((x) => x.toLowerCase() === v.toLowerCase()); const wm = Object.assign({}, state.subjectWings || {});
-    if (ex) { const wgs = subjWings(ex); if (wgs.indexOf(wing) !== -1) { showToast(`Already in ${wing}`); return; } const nw = wgs.concat([wing]); if (nw.length >= 2) delete wm[ex]; else wm[ex] = nw; state.subjectWings = wm; inp.value = ''; await saveList(key, list); showToast(`Added "${ex}" to ${wing}`); renderListManagers(); return; }
-    wm[v] = [wing]; state.subjectWings = wm; inp.value = ''; await saveList(key, list.concat([v])); showToast(`Added "${v}" to ${wing}`); renderListManagers(); return;
+    if (ex) { const wgs = subjWings(ex); if (wgs.indexOf(wing) !== -1) { showToast(`Already in ${wing}`); return; } const nw = wgs.concat([wing]); if (nw.length >= 2) delete wm[ex]; else wm[ex] = nw; state.subjectWings = wm; inp.value = ''; syncAddBtns(); await saveList(key, list); showToast(`Added "${ex}" to ${wing}`); renderListManagers(); return; }
+    wm[v] = [wing]; state.subjectWings = wm; inp.value = ''; syncAddBtns(); await saveList(key, list.concat([v])); showToast(`Added "${v}" to ${wing}`); renderListManagers(); return;
   }
   if (list.some((x) => x.toLowerCase() === v.toLowerCase())) { showToast('Already in the list'); return; }
-      inp.value = '';
+      inp.value = ''; syncAddBtns();
       await saveList(key, list.concat([v]));
       showToast(`Added "${v}"`);
     });
@@ -13952,15 +13967,16 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const SESS_H = { morning: '<span class="ico i-sun" aria-hidden="true"></span> Morning', evening: '<span class="ico i-moon" aria-hidden="true"></span> Evening', special: '<span class="ico i-pin" aria-hidden="true"></span> Remedial / Special' };
     const headOf = (b, i) => (i === 0 || batchSession(list[i - 1]) !== batchSession(b)) ? `<div class="bl-head">${SESS_H[batchSession(b)]}</div>` : '';
     el.innerHTML = vis.map((i) => { const b = list[i]; return (shift ? '' : headOf(b, i)) + (i === editing ? `
-      <div class="activity-row" style="gap:6px;">
-        <input class="text-input" data-rename-input="${i}" value="${escapeHtml(b)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;">
+      <div class="activity-row" style="gap:6px; flex-wrap:wrap;">
+  <input class="text-input" data-rename-input="${i}" value="${escapeHtml(b)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;">
         <button class="add-entry-btn" data-rename-save="${i}" style="white-space:nowrap;">Save</button>
         <button class="del-btn" data-rename-cancel="${i}" aria-label="Cancel">✕</button>
+  ${(state.canAdmin || state.isCoordinator) ? `<div class="chips seg" style="flex-basis:100%; margin:4px 0 2px;">${['morning', 'evening', 'special'].map((ses) => `<button type="button" class="chip${(state.batchEditShift || batchSession(b)) === ses ? ' active' : ''}" data-edit-shift="${ses}">${SESS_LABEL[ses]}</button>`).join('')}</div>` : ''}
       </div>` : `
       <div class="activity-row">
         <div class="activity-row-text"><span class="activity-row-title">${escapeHtml(b)}</span></div>
         ${(state.canAdmin || state.isCoordinator) ? `<button type="button" class="sess-pill" data-room-batch="${i}" aria-label="Set room">${batchRoom(b) ? escapeHtml(batchRoom(b)) : '+ Room'}</button>` : ''}
-        ${(state.canAdmin || state.isCoordinator) ? `<button type="button" class="sess-pill ${batchSession(b)}" data-sess-batch="${i}" aria-label="Change session">${escapeHtml({ morning: 'Morning', evening: 'Evening', special: 'Special' }[batchSession(b)])}</button>` : ''}
+        ${(state.canAdmin || state.isCoordinator) && !shift ? `<button type="button" class="sess-pill ${batchSession(b)}" data-sess-batch="${i}" aria-label="Change session">${escapeHtml({ morning: 'Morning', evening: 'Evening', special: 'Special' }[batchSession(b)])}</button>` : ''}
         ${(state.canAdmin || state.isCoordinator) ? `<button class="del-btn" data-rename-batch="${i}" aria-label="Rename batch">${svgEdit()}</button>` : ''}
         <button class="del-btn" data-del-batch="${i}" aria-label="Remove batch">${svgTrash()}</button>
       </div>`); }).join('');
@@ -13979,16 +13995,18 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       } catch (err) { flashOffline(err); }
     }));
     el.querySelectorAll('[data-rename-batch]').forEach((btn) => btn.addEventListener('click', () => {
-      state.batchEditKey = elId + '|' + wing; state.batchEditIdx = +btn.getAttribute('data-rename-batch');
+      state.batchEditKey = elId + '|' + wing; state.batchEditIdx = +btn.getAttribute('data-rename-batch'); state.batchEditShift = batchSession(list[state.batchEditIdx]);
       renderBatchListInto(elId, wing, shift);
       const inp = el.querySelector('[data-rename-input]'); if (inp) inp.focus();
     }));
     el.querySelectorAll('[data-rename-cancel]').forEach((btn) => btn.addEventListener('click', () => { state.batchEditKey = null; renderBatchListInto(elId, wing, shift); }));
-    el.querySelectorAll('[data-rename-save]').forEach((btn) => btn.addEventListener('click', async () => {
+    el.querySelectorAll('[data-edit-shift]').forEach((c) => c.addEventListener('click', () => { state.batchEditShift = c.getAttribute('data-edit-shift'); el.querySelectorAll('[data-edit-shift]').forEach((x) => x.classList.toggle('active', x === c)); }));
+  el.querySelectorAll('[data-rename-save]').forEach((btn) => btn.addEventListener('click', async () => {
       const i = +btn.getAttribute('data-rename-save');
       const v = el.querySelector('[data-rename-input]').value;
-      state.batchEditKey = null;
-      await renameBatchEverywhere(wing, i, v);
+      const chosenShift = state.batchEditShift; state.batchEditKey = null;
+  await renameBatchEverywhere(wing, i, v);
+  { const nn = String(v || '').trim(); if (chosenShift && currentBatches(wing).indexOf(nn) !== -1 && batchSession(nn) !== chosenShift) { const ss = Object.assign({}, state.batchSessions || {}, { [nn]: chosenShift }); try { await state.db.doc('settings/batches').set({ sessions: ss }, { merge: true }); state.batchSessions = ss; showToast(`${nn}: ${SESS_LABEL[chosenShift]}`); } catch (err) { flashOffline(err); } } }
       renderBatchListInto(elId, wing, shift);
     }));
     el.querySelectorAll('[data-del-batch]').forEach((btn) => {
@@ -14004,7 +14022,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     });
   }
 
-  function batchShiftsOf(wing) { return ['morning', 'evening', 'special'].filter((ses) => currentBatches(wing).some((b) => batchSession(b) === ses)); }
+  function batchShiftsOf(wing) { return ['morning', 'evening', 'special']; }
   function renderBatchList() {
     document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-batch-wing') === state.adminBatchListExpanded);
@@ -14015,11 +14033,10 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (wing) {
       const shifts = batchShiftsOf(wing); if (state.adminBatchShift && shifts.indexOf(state.adminBatchShift) === -1) state.adminBatchShift = null;
       const nb = currentBatches(wing).length; const bh = document.getElementById('adminBatchHead'); if (bh) bh.innerHTML = `${wing} <small>· ${nb} ${nb === 1 ? 'batch' : 'batches'}</small>`;
-      const none = !shifts.length;
-      document.getElementById('adminBatchShiftWrap').style.display = none ? 'none' : '';
+      document.getElementById('adminBatchShiftWrap').style.display = '';
       document.getElementById('adminBatchShiftChips').innerHTML = shifts.map((ses) => `<button type="button" class="chip${state.adminBatchShift === ses ? ' active' : ''}" data-batch-shift="${ses}">${SESS_LABEL[ses]}</button>`).join('');
       document.getElementById('adminBatchShiftHint').style.display = state.adminBatchShift ? 'none' : '';
-      const bodyOpen = !!state.adminBatchShift || none;
+      const bodyOpen = !!state.adminBatchShift;
       document.getElementById('adminBatchShiftBody').style.display = bodyOpen ? 'flex' : 'none';
       if (bodyOpen) renderBatchListInto('batchListRows', wing, state.adminBatchShift || null);
     }
@@ -18674,7 +18691,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     if (list.includes(val)) { showToast('That batch already exists', 'error'); return; }
     if (state.adminBatchShift && batchSession(val) !== state.adminBatchShift) state.batchSessions = Object.assign({}, state.batchSessions || {}, { [val]: state.adminBatchShift });
   await saveBatchList(state.adminBatchWing, list.concat([val]));
-  input.value = '';
+  input.value = ''; syncAddBtns();
   });
 
   document.getElementById('inlineAddBatchBtn').addEventListener('click', async () => {
@@ -18684,7 +18701,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const list = currentBatches(state.formWing);
     if (list.includes(val)) { showToast('That batch already exists', 'error'); return; }
     await saveBatchList(state.formWing, list.concat([val]));
-    input.value = '';
+    input.value = ''; syncAddBtns();
   });
 
   document.getElementById('toggleManageBatchesBtn').addEventListener('click', () => {
