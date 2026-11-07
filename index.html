@@ -2886,6 +2886,15 @@
   .pe-row { grid-template-columns: auto minmax(0, 1fr) 8px minmax(0, 1fr) 34px; gap: 6px; }
   .pe-row .text-input { min-width: 0; padding: 9px 4px; font-size: 14px; text-align: center; letter-spacing: -.01em; }
   .team-sum { margin: 2px 0 10px; }
+  /* Settings sections: lighter and the same weights everywhere */
+  .team-sum { font-size: 13px; font-weight: 400; color: var(--muted-2); line-height: 1.45; }
+  .team-sum b { font-weight: 600; color: var(--ink); }
+  .team-sum-btns { margin-top: 10px; }
+  .tg-chat { min-height: 34px; padding: 6px 14px; font-size: 13px; }
+  .tg-chat svg { margin-right: 0 !important; vertical-align: 0 !important; }
+  .wing-sec-h { font-weight: 600; }
+  .wing-lbl { font-weight: 600; }
+  #peSave:disabled { background: var(--line); color: var(--muted-2); opacity: 1; cursor: default; }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -4236,7 +4245,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.53 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.54 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6654,7 +6663,7 @@ function renderPartChips() {
   if (!wg) return '';
   const mem = ids.filter((u) => inTeamWing(u, wg));
   const joinedW = mem.filter((u) => !isPendingUid(u)); const nDoneW = joinedW.filter(teamFilled).length; const nLackW = joinedW.filter((u) => !teamFilled(u) && u !== state.teacherId).length;
-  const sum = mem.length ? `<div class="team-sum"><b>${nDoneW} of ${joinedW.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLackW ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLackW}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` : '';
+  const sum = mem.length ? `<div class="team-sum"><span><b>${nDoneW} of ${joinedW.length}</b> have added their WhatsApp number and birthday</span><div class="team-sum-btns">${nLackW ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLackW}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` : '';
   return `<div class="wing-sec"><div class="wing-sec-h">${wg} <small>· ${mem.length} ${mem.length === 1 ? 'person' : 'people'}</small></div>${sum}${mem.length ? mem.map(fn).join('') : '<div class="hv-note" style="text-align:left;">No one in this wing yet.</div>'}</div>`;
 }
   function renderTeamPanel() {
@@ -6678,7 +6687,7 @@ function renderPartChips() {
           <span class="team-chev" aria-hidden="true">${chevSvg(false)}</span>
         </div>
         ${open ? `<div class="team-body">
-        <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}">${waNumber(uid) ? `<button type="button" class="tg-mini" data-team-wa="${uid}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:4px;"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Chat</button>` : ''}</div>
+        <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}">${waNumber(uid) ? `<button type="button" class="bs-wa tg-chat" data-team-wa="${uid}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:4px;"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Chat</button>` : ''}</div>
         ${(() => { const t = teamDeptOf(uid); return `<div class="team-phone"><span class="team-lbl">Department</span><input class="text-input" type="text" data-team-dept="${uid}" placeholder="e.g. Science, or Social Science and Reasoning" value="${escapeHtml(t.dept)}"></div><div class="chips team-chips"><span class="team-lbl">Subjects</span>${subjectsList().map((sj) => `<button type="button" class="chip${t.subjects.indexOf(sj) >= 0 ? ' active' : ''}" data-team-subj="${escapeHtml(sj)}" data-uid="${uid}">${escapeHtml(sj)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">Only you can set the Department and the subjects. Until you set them, the old Subject keeps working.</div>`; })()}
   <div class="chips team-chips">
   <button type="button" class="chip${(coord || prin) ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
@@ -9757,6 +9766,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
 
   // ---------- Settings: Periods & timings, Teacher mapping, Batch rooms ----------
   state.perEdit = null;
+  function peDirty(pe) { const nz = (l) => JSON.stringify((l || []).map((p) => [p.start, p.end])); return nz(pe.list) !== nz(periodsFor(pe.key)); }
+  function peSyncSave() { const b = document.getElementById('peSave'); if (b && state.perEdit) b.disabled = !peDirty(state.perEdit); }
   function renderPeriodsPanel() {
     const el = document.getElementById('periodsBody'); if (!el) return;
     const groups = ttGroups();
@@ -9768,10 +9779,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     el.innerHTML = `<div class="chips">${groups.map((x) => `<button type="button" class="chip${x.key === pe.key ? ' active' : ''}" data-pe-g="${escapeHtml(x.key)}">${escapeHtml(x.label)}</button>`).join('')}</div>
       ${pe.list.map((p, i) => `<div class="pe-row"><span class="team-lbl">P${i + 1}</span><input class="text-input" type="time" data-pe-s="${i}" value="${escapeHtml(p.start)}"><span>–</span><input class="text-input" type="time" data-pe-e="${i}" value="${escapeHtml(p.end)}"><button type="button" class="del-btn" data-pe-del="${i}" aria-label="Remove period">${svgTrash()}</button></div>`).join('')}
       <div class="hv-note" style="text-align:left;">Gaps between periods are shown as breaks.</div>
-      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;">Save timings</button></div>`;
+      <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;"${peDirty(pe) ? '' : ' disabled'}>Save timings</button></div>`;
     el.querySelectorAll('[data-pe-g]').forEach((b) => b.addEventListener('click', () => { const k = b.getAttribute('data-pe-g'); state.perEdit = { key: k, list: periodsFor(k).map((p) => Object.assign({}, p)) }; renderPeriodsPanel(); }));
-    el.querySelectorAll('[data-pe-s]').forEach((inp) => inp.addEventListener('change', () => { pe.list[+inp.getAttribute('data-pe-s')].start = inp.value; }));
-    el.querySelectorAll('[data-pe-e]').forEach((inp) => inp.addEventListener('change', () => { pe.list[+inp.getAttribute('data-pe-e')].end = inp.value; }));
+    el.querySelectorAll('[data-pe-s]').forEach((inp) => ['input', 'change'].forEach((ev) => inp.addEventListener(ev, () => { pe.list[+inp.getAttribute('data-pe-s')].start = inp.value; peSyncSave(); })));
+    el.querySelectorAll('[data-pe-e]').forEach((inp) => ['input', 'change'].forEach((ev) => inp.addEventListener(ev, () => { pe.list[+inp.getAttribute('data-pe-e')].end = inp.value; peSyncSave(); })));
     el.querySelectorAll('[data-pe-del]').forEach((b) => b.addEventListener('click', () => { pe.list.splice(+b.getAttribute('data-pe-del'), 1); renderPeriodsPanel(); }));
     document.getElementById('peAdd').addEventListener('click', () => { const last = pe.list[pe.list.length - 1]; pe.list.push({ start: last ? last.end : '09:00', end: last ? svMinToHHMM(hhmmToMin(last.end) + 40) : '09:40' }); renderPeriodsPanel(); });
     document.getElementById('peSave').addEventListener('click', async () => {
@@ -9779,21 +9790,29 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const sorted = pe.list.slice().sort((a, b) => a.start.localeCompare(b.start));
       for (let i = 1; i < sorted.length; i++) if (hhmmToMin(sorted[i].start) < hhmmToMin(sorted[i - 1].end)) { showToast('Two periods overlap', 'error'); return; }
       const groupsObj = Object.assign({}, state.periodSets, { [pe.key]: sorted });
-      try { await state.db.doc('settings/periods').set({ groups: groupsObj }); showToast('Timings saved'); } catch (err) { flashOffline(err); }
+      try { await state.db.doc('settings/periods').set({ groups: groupsObj }); state.periodSets = groupsObj; pe.list = sorted.map((p) => Object.assign({}, p)); showToast('Timings saved'); renderPeriodsPanel(); } catch (err) { flashOffline(err); }
     });
   }
   state.mapSubj = null;
   // who can be the usual teacher of a subject: in this wing, and the subject is set for him (Team), or it is his own subject, or he is already mapped to it
-  function mapTeachersFor(wing, subj) {
+  function deptParts(d) { return String(d || '').split(/\band\b|&|,|\//i).map((x) => normTxt(x)).filter(Boolean); }
+  // "Social Science" / "Science" in the Subjects list stand for a whole department (exams use them); a department is also any name that some teacher has as a Department with other subjects under it
+  function isDeptEntry(E) {
+    if (notTTList().indexOf(E) !== -1) return true; const en = normTxt(E);
+    return (state.adminTeacherIds || []).some((u) => { const t = teamDeptOf(u); return deptParts(t.dept).indexOf(en) !== -1 && t.subjects.some((x) => normTxt(x) !== en); });
+  }
+  function mapTeachersFor(wing, E) {
     const base = (state.adminTeacherIds || []).filter((u) => !isCoordUid(u) && !isRemovedUid(u) && inTeamWing(u, wing)).sort((a, b) => ttName(a).localeCompare(ttName(b)));
-    const m = state.teacherMap || {}; const sn = normTxt(subj);
+    const m = state.teacherMap || {}; const en = normTxt(E); const dept = isDeptEntry(E); const abbr = /[\/.]/.test(E);
     const has = (u) => {
-      if (teamDeptOf(u).subjects.some((x) => normTxt(x) === sn)) return true;
-      const own = (state.adminNames[u] || {}).subj; if (own && (normTxt(own) === sn || subjMatch(own, [subj]).length)) return true;
-      return Object.keys(m).some((k) => m[k] === u && normTxt(k.slice(k.indexOf('|') + 1)) === sn);
+      const t = teamDeptOf(u); const parts = deptParts(t.dept);
+      if (t.subjects.some((x) => normTxt(x) === en)) return true;                                   // the Admin chose this subject for him
+      if (dept && parts.indexOf(en) !== -1) return true;                                            // he belongs to this department
+      if (!dept && abbr && subjMatch(E, t.subjects).length) return true;                            // His/Pol. Sc., Geo/Eco
+      if (parts.length === 1 && parts[0] === en && (!t.subjects.length || t.subjects.every((x) => normTxt(x) === en))) return true; // department and subject are the same (Mathematics)
+      return Object.keys(m).some((k) => m[k] === u && normTxt(k.slice(k.indexOf('|') + 1)) === en); // already mapped to it
     };
-    const out = base.filter(has);
-    return out.length ? { list: out, fallback: false } : { list: base, fallback: base.length > 0 };
+    return { list: base.filter(has), fallback: false };
   }
   function renderMappingPanel() {
   const el = document.getElementById('mappingBody'); if (!el) return;
@@ -9812,7 +9831,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   <div class="chips tt-teachers sub-chips">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
   <div class="wing-lbl">Usual ${escapeHtml(s)} teacher</div>
   <div class="mp-row mp-all"><span>All batches</span><select class="text-input" data-mp-k="*|${escapeHtml(s)}">${opt(m[`*|${s}`] || '', '— No default —')}</select></div>
-  ${mt.fallback ? `<div class="hv-note" style="text-align:left;">No teacher has ${escapeHtml(s)} set yet, so all ${wing} teachers are shown. Set the subjects in Team.</div>` : ''}
+  ${!mt.list.length ? `<div class="hv-note" style="text-align:left;">No ${wing} teacher has ${escapeHtml(s)} yet. Set the Department and Subjects in Team.</div>` : ''}
   <div class="hv-note" style="text-align:left;">Change a batch only if it has a different ${escapeHtml(s)} teacher.</div>
   <div class="wing-lbl">${wing} batches</div>
   ${currentBatches(wing).map(batRow).join('')}</div>`;
