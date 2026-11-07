@@ -4293,7 +4293,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.61 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.62 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6163,7 +6163,7 @@
     return '\ufeff' + L.map((r) => r.map(q).join(',')).join('\n');
   }
   function selfSubPdfBlob(D, r) {
-    const w = createPdfWriter({ marginX: 48 }); const ws = [24, 70, 62, 104, 150, 89]; const xs = []; ws.reduce((a, v, i) => { xs[i] = a; return a + v; }, 0); const GREY = [0.95, 0.95, 0.95]; const hh = 20; const rh = 22;
+    const w = createPdfWriter({ marginX: 48 }); const ws = [24, 70, 62, 104, 150, 89]; const xs = []; ws.reduce((a, v, i) => { xs[i] = a; return a + v; }, 0); const GREY = [1, 0.945, 0.84]; const hh = 20; const rh = 22;
     w.heading('My Substitute Classes', 15); w.bodyLine(`${state.user && state.user.name ? state.user.name : ''}   ${r.mode === 'day' ? subDayDateText(r.from) : (r.mode === 'month' ? repMonthFull(r.from) : repRangeFull(r.from, r.to))}`, { size: 10.5, bold: true }); w.addSpace(6);
     const header = () => w.trow(['S.N', 'Date', 'Class', 'Time', 'In place of', 'Counted'].map((t, i) => ({ x: xs[i], w: ws[i], t, bold: true, size: 9, fill: GREY })), hh);
     header();
@@ -6187,21 +6187,21 @@
   function selfSubCanvas(D, r) {
     const rows = D.subList; const W = 760; const hT = 34; const hR = 30; const SC = 2; const H = hT * 2 + 30 + Math.max(rows.length, 1) * hR + 44;
     const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC; const x = cv.getContext('2d'); x.scale(SC, SC); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#B5B5B5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); };
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#E1E1E5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); };
     const tx = (t, ax, ay, size, bold, color, align, maxW) => { x.fillStyle = color || '#111'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; while (maxW && x.measureText(t).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(t, ax, ay); };
     let y = 1;
-    box(1, y, W - 2, hT, '#FFC000'); tx('My Substitute Classes', W / 2, y + hT / 2, 19, true, '#000', 'center'); y += hT;
-    box(1, y, W - 2, hT, '#E26B0A'); tx(`${(state.user && state.user.name) || ''}   ${r.mode === 'day' ? subDayDateText(r.from) : (r.mode === 'month' ? repMonthFull(r.from) : repRangeFull(r.from, r.to))}`, W / 2, y + hT / 2, 16, true, '#000', 'center'); y += hT;
+    box(1, y, W - 2, hT, '#fff'); tx('My Substitute Classes', W / 2, y + hT / 2, 19, true, '#171717', 'center'); x.fillStyle = '#F59E0B'; x.fillRect(1, y + hT - 3, W - 2, 3); y += hT;
+    box(1, y, W - 2, hT, '#FFF8E8'); tx(`${(state.user && state.user.name) || ''}   ${r.mode === 'day' ? subDayDateText(r.from) : (r.mode === 'month' ? repMonthFull(r.from) : repRangeFull(r.from, r.to))}`, W / 2, y + hT / 2, 16, true, '#6B5A3A', 'center'); y += hT;
     const X = [1, 120, 240, 420, 640]; const Wc = [119, 120, 180, 220, W - 2 - 640];
-    ['Date', 'Class', 'Time', 'In place of', 'Counted'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); }); y += 30;
+    ['Date', 'Class', 'Time', 'In place of', 'Counted'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFF1D6'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); }); y += 30;
     if (!rows.length) { box(1, y, W - 2, hR, '#fff'); tx('No substitute classes in this period', W / 2, y + hR / 2, 14, false, '#666', 'center'); y += hR; }
     rows.forEach((q, i) => {
-      const fill = i % 2 ? '#F4F7FB' : '#FFFFFF'; X.forEach((xx, k) => box(xx, y, Wc[k], hR, fill));
+      const fill = i % 2 ? '#FFFCF5' : '#FFFFFF'; X.forEach((xx, k) => box(xx, y, Wc[k], hR, fill));
       tx(selfDay(q.d), X[0] + Wc[0] / 2, y + hR / 2, 13, true, '#111', 'center'); tx(q.bs.map(subBatchLabel).join(' + '), X[1] + Wc[1] / 2, y + hR / 2, 13, true, '#111', 'center', Wc[1] - 8);
       tx(`${subTm(m2t(q.a))} - ${subTm(m2t(q.z))}`, X[2] + Wc[2] / 2, y + hR / 2, 13, false, '#111', 'center', Wc[2] - 8); tx(q.fn || '-', X[3] + 8, y + hR / 2, 13, false, '#111', 'left', Wc[3] - 14);
       tx(q.status === 'filled' ? trepFmt(q.units) : q.status === 'upcoming' ? 'to come' : 'not filled in', X[4] + Wc[4] / 2, y + hR / 2, 13, q.status === 'filled', q.status === 'filled' ? '#111' : q.status === 'upcoming' ? '#B26A00' : '#C1121F', 'center', Wc[4] - 6); y += hR;
     });
-    box(1, y, W - 2, 32, '#EEF2F7'); tx(`Counted (filled in): ${trepFmt(selfSubCounted(D)) || '0'}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
+    box(1, y, W - 2, 32, '#FFF8E8'); tx(`Counted (filled in): ${trepFmt(selfSubCounted(D)) || '0'}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
     const out = document.createElement('canvas'); out.width = W * SC; out.height = Math.ceil((y + 2) * SC); out.getContext('2d').drawImage(cv, 0, 0); return out;
   }
   async function hvSelfEnsure() {
@@ -13161,11 +13161,11 @@ Rules:
     const W = 1000; const hT = 118; const hH = 52; const hR = 84; const H = hT + hH + hR * Math.max(rows.length, 1) + 2;
     const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
     const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#000'; x.lineWidth = 1.5; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#E1E1E5'; x.lineWidth = 1.2; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
     const tx = (s, cx, cy, size, bold, align, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(s).width > maxW && f > 10) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(s, cx, cy); };
     const w1 = 560; const w2 = 190; const w3 = W - w1 - w2;
-    box(0, 0, W, hT, '#fff'); tx(`${SUB_SES[ses]} Batches · Substitute Class Report`, W / 2, 40, 34, true); tx(subDayDateText(d), W / 2, 84, 28, true);
-    let y = hT; box(0, y, w1, hH, '#F2F2F2'); tx('Faculty Name', w1 / 2, y + hH / 2, 24, true); box(w1, y, w2, hH, '#F2F2F2'); tx('Class', w1 + w2 / 2, y + hH / 2, 24, true); box(w1 + w2, y, w3, hH, '#F2F2F2'); tx('Class Time', w1 + w2 + w3 / 2, y + hH / 2, 24, true); y += hH;
+    box(0, 0, W, hT, '#fff'); x.fillStyle = '#FFF8E8'; x.fillRect(1, 62, W - 2, hT - 66); tx(`${SUB_SES[ses]} Batches · Substitute Class Report`, W / 2, 36, 34, true, 'center', 0, '#171717'); tx(subDayDateText(d), W / 2, 88, 28, true, 'center', 0, '#6B5A3A'); x.fillStyle = '#F59E0B'; x.fillRect(1, hT - 4, W - 2, 4);
+    let y = hT; box(0, y, w1, hH, '#FFF1D6'); tx('Faculty Name', w1 / 2, y + hH / 2, 24, true); box(w1, y, w2, hH, '#FFF1D6'); tx('Class', w1 + w2 / 2, y + hH / 2, 24, true); box(w1 + w2, y, w3, hH, '#FFF1D6'); tx('Class Time', w1 + w2 + w3 / 2, y + hH / 2, 24, true); y += hH;
     if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No substitute classes', W / 2, y + hR / 2, 26, false); return cv; }
     rows.forEach((r) => {
       box(0, y, w1, hR, '#fff'); tx(subName(r.t), w1 / 2, y + (r.f ? 28 : hR / 2), 27, true, 'center', w1 - 24); if (r.f) tx(`In place of ${subName(r.f)}`, w1 / 2, y + 58, 23, false, 'center', w1 - 24);
@@ -13198,7 +13198,7 @@ Rules:
   }
   function subDayPdfBlob(ses) {
     const rows = subDayRows(ses); const d = state.adminDate || todayStr(); const w = createPdfWriter({ marginX: 48 });
-    const w1 = 30; const w2 = 235; const w3 = 90; const w4 = 144; const full = w1 + w2 + w3 + w4; const GREY = [0.95, 0.95, 0.95]; const hh = 20; const rh = 32;
+    const w1 = 30; const w2 = 235; const w3 = 90; const w4 = 144; const full = w1 + w2 + w3 + w4; const GREY = [1, 0.945, 0.84]; const hh = 20; const rh = 32;
     w.heading(`${SUB_SES[ses]} Batches - Substitute Class Report`, 15); w.bodyLine(subDayDateText(d), { size: 11, bold: true }); w.addSpace(6);
     const header = () => w.trow([{ x: 0, w: w1, t: 'S.N', bold: true, size: 9, fill: GREY }, { x: w1, w: w2, t: 'Faculty Name', bold: true, size: 9, fill: GREY }, { x: w1 + w2, w: w3, t: 'Class', bold: true, size: 9, fill: GREY }, { x: w1 + w2 + w3, w: w4, t: 'Class Time', bold: true, size: 9, fill: GREY }], hh);
     header();
@@ -16761,19 +16761,19 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     H += 12;
     const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC;
     const x = cv.getContext('2d'); x.scale(SC, SC); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const box = (bx, by, bw, bh, fill, stroke) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); if (stroke !== false) { x.strokeStyle = '#8A8A8A'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); } };
+    const box = (bx, by, bw, bh, fill, stroke) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); if (stroke !== false) { x.strokeStyle = '#E1E1E5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); } };
     const tx = (t, tx0, ty, size, bold, color, align, maxW) => { x.fillStyle = color || '#111'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; while (maxW && x.measureText(t).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(t, tx0, ty); };
     let y = 1;
-    box(1, y, W - 2, hT, '#FFC000'); tx(m.view === 'teacher' ? 'Invigilation Duty · Teacher-wise' : 'Invigilation Duty Report', W / 2, y + hT / 2, 19, true, '#000', 'center'); y += hT;
-    box(1, y, W - 2, hT, '#E26B0A'); tx(`${m.sp.period.replace(/^(Date|Week|Month): /, '')} · ${m.wingLabel} · ${m.sessLabel}`, W / 2, y + hT / 2, 15, true, '#000', 'center', W - 20); y += hT + 12;
+    box(1, y, W - 2, hT, '#fff'); tx(m.view === 'teacher' ? 'Invigilation Duty · Teacher-wise' : 'Invigilation Duty Report', W / 2, y + hT / 2, 19, true, '#171717', 'center'); x.fillStyle = '#6366F1'; x.fillRect(1, y + hT - 3, W - 2, 3); y += hT;
+    box(1, y, W - 2, hT, '#F1F2FF'); tx(`${m.sp.period.replace(/^(Date|Week|Month): /, '')} · ${m.wingLabel} · ${m.sessLabel}`, W / 2, y + hT / 2, 15, true, '#4A4D7A', 'center', W - 20); y += hT + 12;
     if (m.view === 'sheet') {
       if (!m.days.length) { tx('No invigilation duty in this period.', W / 2, y + 22, 16, false, '#444', 'center'); return cv; }
       m.days.forEach((d) => {
-        box(1, y, W - 2, hD, '#FFF59D'); tx(reportDayLabel(d.date), 12, y + hD / 2, 16, true); y += hD + 8;
+        box(1, y, W - 2, hD, '#E8EAFF'); tx(reportDayLabel(d.date), 12, y + hD / 2, 16, true); y += hD + 8;
         d.exams.forEach((ex) => {
           tx(`${ex.title} · ${ex.cls} · ${dutyRng(ex.es, ex.ee)}`, 6, y + hE / 2, 14, true, '#111', 'left', W - 14); y += hE + 4;
           ex.rooms.forEach((rm) => {
-            box(1, y, W - 2, hR, '#F2F2F2'); tx(`${rm.room} ROOM`, 10, y + hR / 2, 14, true); tx('Duty Timing', W - 12, y + hR / 2, 14, true, '#111', 'right'); y += hR;
+            box(1, y, W - 2, hR, '#F4F5FF'); tx(`${rm.room} ROOM`, 10, y + hR / 2, 14, true); tx('Duty Timing', W - 12, y + hR / 2, 14, true, '#111', 'right'); y += hR;
             rm.lines.forEach((l) => { box(1, y, W - 2, hR, '#FFFFFF'); tx(trepName(l.uid), 10, y + hR / 2, 14, false, '#111', 'left', 400); tx(dutyRng(l.start, l.end), W - 12, y + hR / 2, 14, false, '#111', 'right'); y += hR; });
             y += 6;
           });
@@ -16781,7 +16781,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       });
     } else {
       const X = [1, 320, 400, 520, W - 1]; const head = ['Teacher', 'Duties', 'Time', 'Days'];
-      head.forEach((h, i) => { box(X[i], y, X[i + 1] - X[i], hR, '#F2F2F2'); tx(h, i === 0 || i === 3 ? X[i] + 10 : (X[i] + X[i + 1]) / 2, y + hR / 2, 14, true, '#111', i === 0 || i === 3 ? 'left' : 'center'); }); y += hR;
+      head.forEach((h, i) => { box(X[i], y, X[i + 1] - X[i], hR, '#E8EAFF'); tx(h, i === 0 || i === 3 ? X[i] + 10 : (X[i] + X[i + 1]) / 2, y + hR / 2, 14, true, '#111', i === 0 || i === 3 ? 'left' : 'center'); }); y += hR;
       const mx = m.people.reduce((a, p) => Math.max(a, p.n), 0);
       m.people.forEach((p) => {
         const hot = p.n && p.n === mx; const col = p.n ? '#111' : '#6B7280'; const fill = hot ? '#FDE7E7' : '#FFFFFF';
@@ -16843,7 +16843,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         } else { m.people.forEach((p) => L.push(`• *${trepName(p.u)}* — ${p.n} ${p.n === 1 ? 'duty' : 'duties'}${p.n ? ` · ${reportHm(p.min)} · ${Object.keys(p.days).sort().map(dutyDayShort).join(', ')}` : ''}`)); }
         await shareReportText(L.join('\n').trim(), msgEl); return;
       }
-      const w = createPdfWriter(); const HEAD = [0.93, 0.94, 0.96], ALT = [0.97, 0.975, 0.985], HOT = [0.99, 0.93, 0.93];
+      const w = createPdfWriter(); const HEAD = [0.91, 0.92, 1], ALT = [0.97, 0.975, 0.985], HOT = [0.99, 0.93, 0.93];
       w.heading(m.view === 'teacher' ? 'INVIGILATION DUTY · TEACHER-WISE' : 'INVIGILATION DUTY REPORT', 17); w.addSpace(2);
       w.bodyLine(m.sp.period, { size: 11 }); w.bodyLine(`${m.wingLabel} · ${m.sessLabel}`, { size: 11 });
       if (m.view === 'sheet') {
@@ -17014,13 +17014,13 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const hT = 118; const hH = 96; const hR = 84; const nRows = Math.max(rows.length, 1); const H = hT + hH + hR * nRows + 2;
     const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
     const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#000'; x.lineWidth = 1.5; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#E1E1E5'; x.lineWidth = 1.2; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
     const fnt = (size, bold) => `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`;
     const tx = (str, cx, cy, size, bold, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = fnt(f, bold); x.textAlign = 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(str).width > maxW && f > 10) { f -= 1; x.font = fnt(f, bold); } x.fillText(str, cx, cy); };
     const wrap = (str, maxW, size, bold) => { x.font = fnt(size, bold); const words = String(str).split(' '); const lines = []; let cur = ''; words.forEach((w2) => { const t = cur ? cur + ' ' + w2 : w2; if (x.measureText(t).width > maxW && cur) { lines.push(cur); cur = w2; } else cur = t; }); if (cur) lines.push(cur); return lines; };
-    box(0, 0, W, hT, '#fff'); tx(M.t1, W / 2, 40, 30, true, W - 40); tx(M.t2, W / 2, 84, 28, true, W - 40);
+    box(0, 0, W, hT, '#fff'); x.fillStyle = '#F5F0FF'; x.fillRect(1, 62, W - 2, hT - 66); tx(M.t1, W / 2, 36, 30, true, W - 40, '#171717'); tx(M.t2, W / 2, 88, 28, true, W - 40, '#4B3F72'); x.fillStyle = '#7C3AED'; x.fillRect(1, hT - 4, W - 2, 4);
     let y = hT;
-    cols.forEach((c) => { box(c.x, y, c.w, hH, '#fff'); const red = c.k === 'dl'; const L = wrap(c.t, c.w - 16, 24, true); const lh = 30; L.forEach((ln, i) => tx(ln, c.x + c.w / 2, y + hH / 2 + (i - (L.length - 1) / 2) * lh, 24, true, c.w - 12, red ? '#D40000' : '#000')); });
+    cols.forEach((c) => { box(c.x, y, c.w, hH, c.k === 'dl' ? '#FCE6E9' : '#F0EAFF'); const red = c.k === 'dl'; const L = wrap(c.t, c.w - 16, 24, true); const lh = 30; L.forEach((ln, i) => tx(ln, c.x + c.w / 2, y + hH / 2 + (i - (L.length - 1) / 2) * lh, 24, true, c.w - 12, red ? '#D40000' : '#000')); });
     y += hH;
     if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No delay recorded', W / 2, y + hR / 2, 26, true); return cv; }
     rows.forEach((r) => {
@@ -17067,7 +17067,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         }, 'image/png'));
         msgEl.textContent = ''; return;
       }
-      const w = createPdfWriter({ marginX: 48 }); const GREY = [0.95, 0.95, 0.95]; const RED = [0.83, 0, 0];
+      const w = createPdfWriter({ marginX: 48 }); const GREY = [0.94, 0.918, 1]; const RED = [0.83, 0, 0];
       w.heading(M.t1.replace(/:$/, ''), 15); w.bodyLine(M.t2, { size: 11, bold: true }); w.addSpace(6);
       const cs = M.multi ? [['S.N', 26], ['Date', 62], ['Faculty Name', 120], ['Class', 52], ['Starting', 52], ['Entry', 52], ['Type', 66], ['Delay', 69]] : [['S.N', 30], ['Faculty Name', 150], ['Class', 60], ['Starting', 62], ['Entry', 62], ['Type', 70], ['Delay', 65]];
       let ax = 0; const cells = cs.map((c) => { const o = { x: ax, w: c[1], t: c[0] }; ax += c[1]; return o; }); const full = ax; const hh = 20; const rh = 24;
@@ -17218,16 +17218,16 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const H = hT * 2 + (one ? 30 : 0) + 30 + lines * hR + 64 + 12;
     const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC;
     const x = cv.getContext('2d'); x.scale(SC, SC); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const box = (bx, by, bw, bh, fill, stroke) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); if (stroke !== false) { x.strokeStyle = '#B5B5B5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); } };
+    const box = (bx, by, bw, bh, fill, stroke) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); if (stroke !== false) { x.strokeStyle = '#E1E1E5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh); } };
     const tx = (t, tx0, ty, size, bold, color, align, maxW) => { x.fillStyle = color || '#111'; x.textAlign = align || 'left'; x.textBaseline = 'middle'; let f = size; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; while (maxW && x.measureText(t).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(t, tx0, ty); };
     let y = 1;
-    box(1, y, W - 2, hT, '#FFC000'); tx('Attendance Report', W / 2, y + hT / 2, 19, true, '#000', 'center'); y += hT;
-    box(1, y, W - 2, hT, '#E26B0A'); tx(period || '', W / 2, y + hT / 2, 16, true, '#000', 'center'); y += hT;
+    box(1, y, W - 2, hT, '#fff'); tx('Attendance Report', W / 2, y + hT / 2, 19, true, '#171717', 'center'); x.fillStyle = '#16A34A'; x.fillRect(1, y + hT - 3, W - 2, 3); y += hT;
+    box(1, y, W - 2, hT, '#F1FAF4'); tx(period || '', W / 2, y + hT / 2, 16, true, '#4B5A50', 'center'); y += hT;
     if (one) { box(1, y, W - 2, 30, '#FFFFFF'); tx(nameOfU(tid), 14, y + 15, 16, true); y += 30; }
     const RED = '#B91C1C', AMB = '#92400E', GRY = '#6B7280';
     if (one) {
       const X = [1, 110, 180, 560]; const Wc = [109, 70, 380, W - 2 - 560];
-      ['Date', 'Day', 'Check-in  –  Check-out', 'Time on campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
+      ['Date', 'Day', 'Check-in  –  Check-out', 'Time on campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, ['#F1F1F3', '#F1F1F3', '#E3F5EA', '#DDF3F0'][i]); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
       y += 30;
       r0.days.forEach((d, di) => {
         const dd = dateObj(d.dt); const dl = `${pad(dd.getDate())} ${dd.toLocaleDateString('en-GB', { month: 'short' })}`; const dw = WD[dd.getDay()];
@@ -17249,11 +17249,11 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         y += bh;
       });
       const t = attTotals(r0.days);
-      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Present: ${t.n.present} · Absent: ${t.n.absent} · Leave: ${t.n.leave} · Weekly off: ${t.n.off}${t.n.holiday ? ' · Holiday: ' + t.n.holiday : ''}${t.n.duty ? ' · Holiday duty: ' + t.n.duty : ''}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
-      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `   ·   Average: ${hmm(t.avg)} a day` : ''}`, W / 2, y + 16, 14, false, '#111', 'center'); y += 32;
+      box(1, y, W - 2, 32, '#F4FBF6'); tx(`Present: ${t.n.present} · Absent: ${t.n.absent} · Leave: ${t.n.leave} · Weekly off: ${t.n.off}${t.n.holiday ? ' · Holiday: ' + t.n.holiday : ''}${t.n.duty ? ' · Holiday duty: ' + t.n.duty : ''}`, W / 2, y + 16, 14, true, '#111', 'center'); y += 32;
+      box(1, y, W - 2, 32, '#F4FBF6'); tx(`Total time on campus: ${hmm(t.secs)}${t.n.present ? `   ·   Average: ${hmm(t.avg)} a day` : ''}`, W / 2, y + 16, 14, false, '#111', 'center'); y += 32;
     } else {
       const X = [1, 50, 270, 340, 410, 470, 525, 580, 640]; const Wc = [49, 220, 70, 70, 60, 55, 55, 60, W - 2 - 640];
-      ['S.N', 'Name of faculty', 'Present', 'Absent', 'Leave', 'Off', 'Holiday', 'Duty', 'On campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, '#FFFF00'); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
+      ['S.N', 'Name of faculty', 'Present', 'Absent', 'Leave', 'Off', 'Holiday', 'Duty', 'On campus'].forEach((h, i) => { box(X[i], y, Wc[i], 30, ['#F1F1F3', '#F1F1F3', '#E3F5EA', '#FCE6E9', '#FFF1DC', '#EFEFF2', '#E8F0FF', '#DDF3F0', '#EDE9FE'][i]); tx(h, X[i] + Wc[i] / 2, y + 15, 13, true, '#000', 'center'); });
       y += 30; let P = 0, A = 0, Lv = 0, S = 0;
       rows.forEach((r, ri) => {
         const t = attTotals(r.days); P += t.n.present; A += t.n.absent; Lv += t.n.leave; S += t.secs;
@@ -17265,7 +17265,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         tx(hmm(t.secs), X[8] + Wc[8] / 2, y + hR / 2, 13, true, '#111', 'center');
         y += hR;
       });
-      box(1, y, W - 2, 32, '#EEF2F7'); tx(`Teachers: ${rows.length}   ·   Present days: ${P}   ·   Absent days: ${A}   ·   Leave: ${Lv}   ·   Total on campus: ${hmm(S)}`, W / 2, y + 16, 13, true, '#111', 'center', W - 20); y += 32;
+      box(1, y, W - 2, 32, '#F4FBF6'); tx(`Teachers: ${rows.length}   ·   Present days: ${P}   ·   Absent days: ${A}   ·   Leave: ${Lv}   ·   Total on campus: ${hmm(S)}`, W / 2, y + 16, 13, true, '#111', 'center', W - 20); y += 32;
       tx('Day-by-day times for every teacher are in the PDF.', W / 2, y + 16, 12, false, GRY, 'center'); y += 32;
     }
     // trim to what was drawn
@@ -17351,7 +17351,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       }
       // PDF
       const w = createPdfWriter();
-      const HEAD = [0.93, 0.94, 0.96], ALT = [0.97, 0.975, 0.985], ABS = [0.99, 0.93, 0.93], LEAVE = [1, 0.965, 0.88], OFF = [0.94, 0.94, 0.94], TOT = [0.95, 0.96, 0.98];
+      const HEAD = [0.89, 0.96, 0.92], ALT = [0.97, 0.975, 0.985], ABS = [0.99, 0.93, 0.93], LEAVE = [1, 0.965, 0.88], OFF = [0.94, 0.94, 0.94], TOT = [0.95, 0.96, 0.98];
       const RED = [0.72, 0.11, 0.11], AMBER = [0.6, 0.38, 0.03], GRAY = [0.42, 0.45, 0.5];
       w.heading('ATTENDANCE REPORT', 17); w.addSpace(2);
       w.bodyLine(sp.period, { size: 11 });
