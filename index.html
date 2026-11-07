@@ -2903,6 +2903,34 @@
   .btn-secondary.add-ready { background: var(--gold); border-color: var(--gold) !important; color: #fff; }
   /* the edit and delete icons in Settings carry the app's red */
   #view-admin .del-btn, #view-admin .del-btn svg { color: var(--gold); }
+  /* Periods and Timings: one line for each period, and a wider box (less margin at the edges) so the whole time fits */
+  #periodsBody .wing-sec { margin-left: -8px; margin-right: -8px; padding: 12px 8px 4px; }
+  .pe-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) 10px minmax(0, 1fr) 30px; column-gap: 4px; align-items: center; padding: 6px 0; border-top: 0; }
+  .pe-row > .team-lbl { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .pe-row > .pe-d { text-align: center; color: var(--muted); }
+  .pe-row > .pe-l { display: none; }
+  .pe-row .text-input { min-width: 0; padding: 10px 4px !important; font-size: 14px; text-align: center; }
+  .pe-row .del-btn { padding: 5px; margin: 0; justify-self: end; }
+  /* only if the screen is very small or the text very large: three short lines, so the time is never cut */
+  #periodsBody { container-type: inline-size; }
+  @container (max-width: 279px) {
+    .pe-row { grid-template-columns: 46px minmax(0, 1fr); row-gap: 8px; padding: 10px 0 14px; border-top: 1px solid var(--line); }
+    .pe-row:first-of-type { border-top: 0; }
+    .pe-row > .team-lbl { grid-column: 1; grid-row: 1; }
+    .pe-row > .del-btn { grid-column: 2; grid-row: 1; }
+    .pe-row > .pe-d { display: none; }
+    .pe-row > .pe-l { display: block; grid-column: 1; font-size: 12px; font-weight: 600; color: var(--muted-2); }
+    .pe-row > input { grid-column: 2; padding: 11px 12px !important; font-size: 15px; text-align: left; }
+    .pe-row > input[data-pe-s] { grid-row: 2; }
+    .pe-row > input[data-pe-e] { grid-row: 3; }
+    .pe-row > .pe-l:nth-of-type(2) { grid-row: 2; }
+    .pe-row > .pe-l:nth-of-type(3) { grid-row: 3; }
+  }
+  /* every time box: slimmer side space and a little smaller text, so the whole time with AM / PM shows, even with large text */
+  input[type="time"] { font-size: 14.5px; padding-left: 11px !important; padding-right: 30px !important; background-position: right 8px center !important; background-size: 16px 16px !important; letter-spacing: 0; }
+  html.ts-large input[type="time"] { font-size: 13.5px; padding-right: 28px !important; }
+  /* a shift that cannot be removed yet */
+  .del-btn.is-off, .del-btn:disabled { opacity: .35; cursor: default; }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -3767,6 +3795,16 @@
   <div class="admin-sub" id="mapWingChipsHint">Tap a wing above to set the teachers of its subjects and batches.</div>
   <div id="mappingBody" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
+  <div class="panel set-acc admin-only" id="adminShiftsPanel" data-atab="settings">
+  <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Shifts</div>
+  <div class="admin-sub">The shifts of each wing. They show in Class / Batch List, Periods &amp; Timings, the timetable and exams.</div>
+  <div class="chips seg" id="shiftWingChips">
+  <button class="chip" data-shift-wing="Pre-Foundation">Pre-Foundation</button>
+  <button class="chip" data-shift-wing="Foundation">Foundation</button>
+  </div>
+  <div class="admin-sub" id="shiftWingChipsHint">Tap a wing above to manage its shifts.</div>
+  <div id="shiftsBody"></div>
+  </div>
   <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Class / Batch List</div>
         <div class="admin-sub">Edit the batches every teacher picks from when logging a class or setting up their weekly schedule.</div>
@@ -4254,7 +4292,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.56 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.58 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4371,7 +4409,7 @@
   }
   // Class 9 → 10 → 11 → 12; inside a class Batch 1, Batch 2… then Evening, then Remedial / Special.
   function sortBatches(list) {
-    const rank = (b) => { const t = String(b); const sess = typeof batchSession === 'function' ? batchSession(t) : (/remedial/i.test(t) ? 'special' : (/evening/i.test(t) ? 'evening' : 'morning')); return { morning: 0, evening: 1, special: 2 }[sess] || 0; };
+    const rank = (b) => { const t = String(b); const sess = typeof batchSession === 'function' ? batchSession(t) : (/remedial/i.test(t) ? 'special' : (/evening/i.test(t) ? 'evening' : 'morning')); const r0 = allShiftKeys().indexOf(sess); return r0 < 0 ? 0 : r0; };
     const num = (b) => { const m = String(b).match(/class\s*(\d+)/i); return m ? Number(m[1]) : 999; };
     return list.slice().sort((a, b) => (rank(a) - rank(b)) || (num(a) - num(b)) || String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }));
   }
@@ -7283,6 +7321,15 @@ function renderPartChips() {
   // Publishing writes each class into the teacher's own schedule (setBy), so Schedule, Today, reminders and logging all work as before.
   // =====================================================================
   const SESS_LABEL = { morning: 'Morning', evening: 'Evening', special: 'Special' };
+  // ---- shifts: Morning, Evening and Special are always there, and the Admin can add more for each wing. A new shift "works like" one of the three (reports, holidays and exams use that) ----
+  const SESS_BASE = ['morning', 'evening', 'special'];
+  function shiftLabel(k) { const d = (state.shiftDefs || {})[k]; return (d && d.label) || SESS_LABEL[k] || String(k).replace(/^x_/, '').replace(/_[a-z0-9]+$/, '').replace(/_/g, ' '); }
+  function sessType(k) { if (SESS_BASE.indexOf(k) !== -1) return k; const d = (state.shiftDefs || {})[k]; return (d && SESS_BASE.indexOf(d.type) !== -1) ? d.type : 'morning'; }
+  function shiftKeys(wing) { const a = state.shiftsByWing && state.shiftsByWing[wing]; return (Array.isArray(a) && a.length) ? a : SESS_BASE.slice(); }
+  function allShiftKeys() { const out = SESS_BASE.slice(); Object.keys(state.shiftsByWing || {}).forEach((w) => (state.shiftsByWing[w] || []).forEach((k) => { if (out.indexOf(k) === -1) out.push(k); })); return out; }
+  function shiftIco(k) { const t = sessType(k); return `<span class="ico ${t === 'evening' ? 'i-moon' : (t === 'special' ? 'i-pin' : 'i-sun')}" aria-hidden="true"></span>`; }
+  function shiftHead(k) { const lab = (k === 'special' && !((state.shiftDefs || {}).special || {}).label) ? 'Remedial / Special' : shiftLabel(k); return `${shiftIco(k)} ${escapeHtml(lab)}`; }
+  function sessionsList() { return allShiftKeys().map((k) => [k, `${shiftIco(k)} ${escapeHtml(shiftLabel(k))}`]); }
   const DEFAULT_PERIODS = [['09:00', '09:40'], ['09:40', '10:20'], ['10:30', '11:35'], ['11:55', '13:00'], ['13:10', '14:15']].map(([start, end]) => ({ start, end }));
   state.periodSets = state.periodSets || {};
   state.teacherMap = state.teacherMap || {};
@@ -7290,9 +7337,9 @@ function renderPartChips() {
   state.tg = state.tg || { mode: 'grid', group: null, day: null, paint: null, doc: null, docKey: '', others: [] };
   function ttGroups() {
     const out = [];
-    leadWings().forEach((w) => ['morning', 'evening', 'special'].forEach((ses) => {
+    leadWings().forEach((w) => shiftKeys(w).forEach((ses) => {
       const bats = currentBatches(w).filter((b) => batchSession(b) === ses);
-      if (bats.length) out.push({ key: `${w}|${ses}`, wing: w, session: ses, label: `${w} · ${SESS_LABEL[ses]}`, batches: bats });
+      if (bats.length) out.push({ key: `${w}|${ses}`, wing: w, session: ses, label: `${w} · ${shiftLabel(ses)}`, batches: bats });
     }));
     return out;
   }
@@ -7995,7 +8042,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const box = (bx, by, bw, bh, fill) => { if (fill) { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); } x.strokeStyle = '#222'; x.lineWidth = 1.2; x.strokeRect(bx, by, bw, bh); };
     const ws = state.tt.weekStart; const we = days[days.length - 1];
     box(20, 12, W - 40, 40, '#FFFF00');
-    txt(`${g.wing.toUpperCase()} (${SESS_LABEL[g.session].toUpperCase()} BATCH) TIME-TABLE (${daysLabel(days, true)})`, W / 2, 32, 22, true, '#000', W - 60);
+    txt(`${g.wing.toUpperCase()} (${shiftLabel(g.session).toUpperCase()} BATCH) TIME-TABLE (${daysLabel(days, true)})`, W / 2, 32, 22, true, '#000', W - 60);
     if (state.tg.imgStamp) { x.font = '700 13px Arial, sans-serif'; x.fillStyle = '#C00000'; x.textAlign = 'right'; x.textBaseline = 'middle'; x.fillText(state.tg.imgStamp, W - 24, 64); }
     if (one) {
       txt(one.toUpperCase(), W / 2, 78 + topX, 22, true, '#000', W - 60);
@@ -8135,7 +8182,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     });
     if (returnCanvas === true) return cv;
     cv.toBlob((blob) => {
-      const name = `Timetable-${g.wing}-${SESS_LABEL[g.session]}-${ws}.png`.replace(/\s+/g, '-');
+      const name = `Timetable-${g.wing}-${shiftLabel(g.session)}-${ws}.png`.replace(/\s+/g, '-');
       const file = new File([blob], name, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'Timetable' }).catch(() => saveFile(name, blob));
       else saveFile(name, blob);
@@ -9791,10 +9838,10 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   const wingChips = `<div class="chips seg">${wl.map((w) => `<button type="button" class="chip${w === wing ? ' active' : ''}" data-pe-wing="${w}">${w}</button>`).join('')}</div>`;
   let body = '<div class="admin-sub" style="margin:6px 0 0;">Tap a wing above to set its period times.</div>';
   if (wing) {
-    body = `<div class="wing-sec"><div class="wing-sec-h">${wing}</div><div class="wing-lbl">Shift</div><div class="chips seg">${['morning', 'evening', 'special'].map((ses) => `<button type="button" class="chip${state.peShift === ses ? ' active' : ''}" data-pe-ses="${ses}">${SESS_LABEL[ses]}</button>`).join('')}</div>${pe ? `
-  ${pe.list.map((p, i) => `<div class="pe-row"><span class="team-lbl">P${i + 1}</span><input class="text-input" type="time" data-pe-s="${i}" value="${escapeHtml(p.start)}"><span>–</span><input class="text-input" type="time" data-pe-e="${i}" value="${escapeHtml(p.end)}"><button type="button" class="del-btn" data-pe-del="${i}" aria-label="Remove period">${svgTrash()}</button></div>`).join('')}
+    body = `<div class="wing-sec"><div class="wing-sec-h">${wing}</div><div class="wing-lbl">Shift</div><div class="chips seg">${shiftKeys(wing).map((ses) => `<button type="button" class="chip${state.peShift === ses ? ' active' : ''}" data-pe-ses="${ses}">${escapeHtml(shiftLabel(ses))}</button>`).join('')}</div>${pe ? `
+  ${pe.list.map((p, i) => `<div class="pe-row"><span class="team-lbl">P${i + 1}</span><span class="pe-l">From</span><input class="text-input" type="time" data-pe-s="${i}" value="${escapeHtml(p.start)}"><span class="pe-d">–</span><span class="pe-l">To</span><input class="text-input" type="time" data-pe-e="${i}" value="${escapeHtml(p.end)}"><button type="button" class="del-btn" data-pe-del="${i}" aria-label="Remove period">${svgTrash()}</button></div>`).join('')}
   <div class="hv-note" style="text-align:left;">Gaps between periods are shown as breaks.</div>
-  <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;"${peDirty(pe) ? '' : ' disabled'}>Save timings</button></div>` : (state.peShift ? `<div class="admin-sub" style="margin:6px 0 4px;">No ${wing} ${SESS_LABEL[state.peShift]} batch yet. Add one in Class / Batch List first.</div>` : '<div class="admin-sub" style="margin:6px 0 4px;">Tap a shift above to see its periods.</div>')}</div>`;
+  <div class="sv-form-btns"><button type="button" class="btn-secondary" id="peAdd" style="border-color: var(--line);">+ Add period</button><button type="button" class="save-btn" id="peSave" style="margin:0;"${peDirty(pe) ? '' : ' disabled'}>Save timings</button></div>` : (state.peShift ? `<div class="admin-sub" style="margin:6px 0 4px;">No ${wing} ${shiftLabel(state.peShift)} batch yet. Add one in Class / Batch List first.</div>` : '<div class="admin-sub" style="margin:6px 0 4px;">Tap a shift above to see its periods.</div>')}</div>`;
   }
   el.innerHTML = wingChips + body;
   el.querySelectorAll('[data-pe-wing]').forEach((b) => b.addEventListener('click', () => { const w = b.getAttribute('data-pe-wing'); state.peWing = state.peWing === w ? null : w; state.peShift = null; state.perEdit = null; renderPeriodsPanel(); }));
@@ -9970,7 +10017,8 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   }));
   // Settings: each panel opens on tap, one at a time, with a short summary while closed.
   function settingsSummary(id) {
-    if (id === 'adminBatchPanel') { const n = allBatchesFlat().length; return `${n} batch${n === 1 ? '' : 'es'}`; }
+    if (id === 'adminShiftsPanel') { const n = leadWings().reduce((a, w) => a + shiftKeys(w).length, 0); return `${n} shift${n === 1 ? '' : 's'}`; }
+  if (id === 'adminBatchPanel') { const n = allBatchesFlat().length; return `${n} batch${n === 1 ? '' : 'es'}`; }
     if (id === 'adminTestTypesPanel') return String(testTypesList().length);
     if (id === 'adminSubjectsPanel') return String(subjectsList().length);
     if (id === 'adminRoomsPanel') return String(roomsList().length);
@@ -9989,6 +10037,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       else if (id === 'adminMappingPanel') { state.mapWingOpen = null; renderMappingPanel(); }
       else if (id === 'adminSubjectsPanel') { state.subjWingOpen = null; renderListManagers(); }
       else if (id === 'adminBatchPanel') { state.adminBatchListExpanded = null; state.adminBatchShift = null; renderBatchList(); }
+      else if (id === 'adminShiftsPanel') { state.shiftWing = null; state.shiftEdit = null; renderShiftsPanel(); }
       else if (id === 'adminPeriodsPanel') { state.peWing = null; state.peShift = null; state.perEdit = null; renderPeriodsPanel(); }
     } catch (e) { /* ignore */ }
   }
@@ -10892,7 +10941,7 @@ Rules:
   const holNoteText = (h) => (h.type === 'holiday' ? `Holiday (${h.name})` : `Evening classes off (${h.name})`);
   function tgHolInfo(days, session) {
     const hol = [], eve = [], work = []; const ws = state.tt.weekStart; const week7 = datesBetween(ws, shiftDateStr(ws, 6));
-    days.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'holiday') hol.push({ d, h }); else if ((h.type === 'special' || h.type === 'half') && h.evening === 'off' && session === 'evening') eve.push({ d, h }); }));
+    days.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'holiday') hol.push({ d, h }); else if ((h.type === 'special' || h.type === 'half') && h.evening === 'off' && sessType(session) === 'evening') eve.push({ d, h }); }));
     week7.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'working') work.push({ d, h }); }));
     return { hol, eve, work };
   }
@@ -11991,7 +12040,7 @@ Rules:
   }
   // Subjects that stay out of the timetable (umbrella subjects like Science / Social Science stay for exams and reports).
   // the wings a subject belongs to (both, unless the Admin has made it one)
-  const ADD_PAIRS = [['newBatchInput', 'addBatchBtn'], ['inlineNewBatchInput', 'inlineAddBatchBtn'], ['newSubjectInput', 'addSubjectBtn'], ['newRoomInput', 'addRoomBtn'], ['newTestTypeInput', 'addTestTypeBtn']];
+  const ADD_PAIRS = [['newShiftInput', 'addShiftBtn'], ['newBatchInput', 'addBatchBtn'], ['inlineNewBatchInput', 'inlineAddBatchBtn'], ['newSubjectInput', 'addSubjectBtn'], ['newRoomInput', 'addRoomBtn'], ['newTestTypeInput', 'addTestTypeBtn']];
   function syncAddBtns() { ADD_PAIRS.forEach(([i, b]) => { const ie = document.getElementById(i); const be = document.getElementById(b); if (ie && be) be.classList.toggle('add-ready', !!ie.value.trim()); }); }
   document.addEventListener('input', (e) => { if (e.target && ADD_PAIRS.some((p) => p[0] === e.target.id)) syncAddBtns(); });
   function syncSubjWingUI() {
@@ -12712,12 +12761,12 @@ Rules:
   function trepColumns() {
     const cols = []; const heads = [];
     // school batches, then the remedial class (it is a school class too), then coaching, then foundation
-    const rank = (g) => (/foundation/i.test(g.wing) && !/pre/i.test(g.wing) ? 3 : g.session === 'morning' ? 0 : g.session === 'special' ? 1 : 2);
+    const rank = (g) => (/foundation/i.test(g.wing) && !/pre/i.test(g.wing) ? 3 : sessType(g.session) === 'morning' ? 0 : sessType(g.session) === 'special' ? 1 : 2);
     trepGroups().map((g, i) => ({ g, i })).sort((x, y) => rank(x.g) - rank(y.g) || x.i - y.i).map((x) => x.g).forEach((g) => {
       const fnd = /foundation/i.test(g.wing) && !/pre/i.test(g.wing);
-      const head = fnd ? 'FOUNDATION' : (g.session === 'morning' ? 'SCHOOL' : g.session === 'evening' ? 'COACHING' : 'SCHOOL');
+      const head = fnd ? 'FOUNDATION' : (sessType(g.session) === 'morning' ? 'SCHOOL' : sessType(g.session) === 'evening' ? 'COACHING' : 'SCHOOL');
       const nth = (b) => { const n = classOfBatchNum(b); return n ? n + 'th' : ''; };
-      if (fnd || g.session === 'special') {
+      if (fnd || sessType(g.session) === 'special') {
         const nums = g.batches.map(nth).filter((v, i, a) => v && a.indexOf(v) === i);
         cols.push({ key: g.key, head, label: fnd ? (nums.join(' & ') || g.label) : 'REMEDIAL CLASS', batches: g.batches.slice() });
       } else {
@@ -13936,7 +13985,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const rooms0 = Object.assign({}, state.batchRooms || {});
       if (rooms0[oldName] && !rooms0[newName]) rooms0[newName] = rooms0[oldName];
       delete rooms0[oldName];
-      await state.db.doc('settings/batches').set({ wings, renames, sessions, rooms: rooms0 });
+      await state.db.doc('settings/batches').set({ wings, renames, sessions, rooms: rooms0, shifts: state.shiftsByWing || {}, shiftDefs: state.shiftDefs || {} });
       showToast(merging ? 'Batches merged' : 'Batch renamed everywhere');
     } catch (err) { flashOffline(err); }
   }
@@ -13965,13 +14014,13 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   if (!vis.length) { el.innerHTML = '<div class="admin-sub" style="margin:0;">No batches in this shift yet. Add one below.</div>'; return; }
   const editing = state.batchEditKey === elId + '|' + wing ? state.batchEditIdx : -1;
     const SESS_H = { morning: '<span class="ico i-sun" aria-hidden="true"></span> Morning', evening: '<span class="ico i-moon" aria-hidden="true"></span> Evening', special: '<span class="ico i-pin" aria-hidden="true"></span> Remedial / Special' };
-    const headOf = (b, i) => (i === 0 || batchSession(list[i - 1]) !== batchSession(b)) ? `<div class="bl-head">${SESS_H[batchSession(b)]}</div>` : '';
+    const headOf = (b, i) => (i === 0 || batchSession(list[i - 1]) !== batchSession(b)) ? `<div class="bl-head">${shiftHead(batchSession(b))}</div>` : '';
     el.innerHTML = vis.map((i) => { const b = list[i]; return (shift ? '' : headOf(b, i)) + (i === editing ? `
       <div class="activity-row" style="gap:6px; flex-wrap:wrap;">
   <input class="text-input" data-rename-input="${i}" value="${escapeHtml(b)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;">
         <button class="add-entry-btn" data-rename-save="${i}" style="white-space:nowrap;">Save</button>
         <button class="del-btn" data-rename-cancel="${i}" aria-label="Cancel">✕</button>
-  ${(state.canAdmin || state.isCoordinator) ? `<div class="chips seg" style="flex-basis:100%; margin:4px 0 2px;">${['morning', 'evening', 'special'].map((ses) => `<button type="button" class="chip${(state.batchEditShift || batchSession(b)) === ses ? ' active' : ''}" data-edit-shift="${ses}">${SESS_LABEL[ses]}</button>`).join('')}</div>` : ''}
+  ${(state.canAdmin || state.isCoordinator) ? `<div class="chips seg" style="flex-basis:100%; margin:4px 0 2px;">${shiftKeys(wing).map((ses) => `<button type="button" class="chip${(state.batchEditShift || batchSession(b)) === ses ? ' active' : ''}" data-edit-shift="${ses}">${escapeHtml(shiftLabel(ses))}</button>`).join('')}</div>` : ''}
       </div>` : `
       <div class="activity-row">
         <div class="activity-row-text"><span class="activity-row-title">${escapeHtml(b)}</span></div>
@@ -13984,14 +14033,14 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     // Tap the session pill to cycle Morning → Evening → Special.
     el.querySelectorAll('[data-sess-batch]').forEach((btn) => btn.addEventListener('click', async () => {
       const b = list[+btn.getAttribute('data-sess-batch')];
-      const order = ['morning', 'evening', 'special'];
-      const next = order[(order.indexOf(batchSession(b)) + 1) % 3];
+      const order = shiftKeys(wing);
+  const next = order[(Math.max(0, order.indexOf(batchSession(b))) + 1) % order.length];
       const sessions = Object.assign({}, state.batchSessions || {}, { [b]: next });
       try {
         await state.db.doc('settings/batches').set({ sessions }, { merge: true });
         state.batchSessions = sessions;
         renderBatchListInto(elId, wing, shift);
-        showToast(`${b}: ${{ morning: 'Morning', evening: 'Evening', special: 'Special' }[next]}`);
+        showToast(`${b}: ${shiftLabel(next)}`);
       } catch (err) { flashOffline(err); }
     }));
     el.querySelectorAll('[data-rename-batch]').forEach((btn) => btn.addEventListener('click', () => {
@@ -14006,7 +14055,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const v = el.querySelector('[data-rename-input]').value;
       const chosenShift = state.batchEditShift; state.batchEditKey = null;
   await renameBatchEverywhere(wing, i, v);
-  { const nn = String(v || '').trim(); if (chosenShift && currentBatches(wing).indexOf(nn) !== -1 && batchSession(nn) !== chosenShift) { const ss = Object.assign({}, state.batchSessions || {}, { [nn]: chosenShift }); try { await state.db.doc('settings/batches').set({ sessions: ss }, { merge: true }); state.batchSessions = ss; showToast(`${nn}: ${SESS_LABEL[chosenShift]}`); } catch (err) { flashOffline(err); } } }
+  { const nn = String(v || '').trim(); if (chosenShift && currentBatches(wing).indexOf(nn) !== -1 && batchSession(nn) !== chosenShift) { const ss = Object.assign({}, state.batchSessions || {}, { [nn]: chosenShift }); try { await state.db.doc('settings/batches').set({ sessions: ss }, { merge: true }); state.batchSessions = ss; showToast(`${nn}: ${shiftLabel(chosenShift)}`); } catch (err) { flashOffline(err); } } }
       renderBatchListInto(elId, wing, shift);
     }));
     el.querySelectorAll('[data-del-batch]').forEach((btn) => {
@@ -14022,7 +14071,48 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     });
   }
 
-  function batchShiftsOf(wing) { return ['morning', 'evening', 'special']; }
+  const SHIFT_TYPE_NAME = { morning: 'Day', evening: 'Evening', special: 'Special' };
+  function renderShiftsPanel() {
+    const el = document.getElementById('shiftsBody'); if (!el) return;
+    const wl = leadWings(); const wing = (state.shiftWing && wl.indexOf(state.shiftWing) !== -1) ? state.shiftWing : null;
+    document.querySelectorAll('#shiftWingChips [data-shift-wing]').forEach((b) => { const w = b.getAttribute('data-shift-wing'); b.style.display = wl.indexOf(w) === -1 ? 'none' : ''; b.classList.toggle('active', w === wing); });
+    const hint = document.getElementById('shiftWingChipsHint'); if (hint) hint.style.display = wing ? 'none' : '';
+    if (!wing) { el.innerHTML = ''; return; }
+    const keys = shiftKeys(wing); const cnt = (k) => currentBatches(wing).filter((b) => batchSession(b) === k).length;
+    const newType = state.shiftNewType || 'morning'; const draft = (document.getElementById('newShiftInput') || {}).value || '';
+    const rows = keys.map((k) => {
+      const n = cnt(k); const canDel = n === 0 && keys.length > 1; const t = sessType(k);
+      if (state.shiftEdit === k) return `<div class="activity-row" style="gap:6px;"><input class="text-input" data-shift-input="${k}" maxlength="24" value="${escapeHtml(shiftLabel(k))}" style="flex:1; min-width:0;"><button class="add-entry-btn" data-shift-save="${k}">Save</button><button class="del-btn" data-shift-cancel="${k}" aria-label="Cancel">✕</button></div>`;
+      return `<div class="activity-row"><div class="activity-row-text"><span class="activity-row-title">${escapeHtml(shiftLabel(k))}</span><div class="admin-sub" style="margin:2px 0 0;">${n} batch${n === 1 ? '' : 'es'} · works like ${SHIFT_TYPE_NAME[t]}${n ? ' · remove its batches first to remove it' : ''}</div></div><button class="del-btn" data-shift-ren="${k}" aria-label="Rename">${svgEdit()}</button><button class="del-btn${canDel ? '' : ' is-off'}" data-shift-del="${k}" aria-label="Remove"${canDel ? '' : ' disabled'}>${svgTrash()}</button></div>`;
+    }).join('');
+    el.innerHTML = `<div class="wing-sec"><div class="wing-sec-h">${wing} <small>· ${keys.length} shift${keys.length === 1 ? '' : 's'}</small></div>${rows}<div class="wing-lbl">New shift</div><input class="text-input" id="newShiftInput" maxlength="24" placeholder="e.g. Weekend" value="${escapeHtml(draft)}"><div class="wing-lbl">Works like</div><div class="chips seg" id="shiftTypeChips">${SESS_BASE.map((t) => `<button type="button" class="chip${newType === t ? ' active' : ''}" data-shift-type="${t}">${SHIFT_TYPE_NAME[t]}</button>`).join('')}</div><div class="admin-sub" style="margin:6px 0 10px;">Reports, holidays and exams treat the new shift like a ${SHIFT_TYPE_NAME[newType]} shift.</div><div style="display:flex; justify-content:flex-end; margin-bottom:10px;"><button class="btn-secondary" id="addShiftBtn" style="width:auto; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button></div></div>`;
+    syncAddBtns();
+    const save = async (patch, msg) => { const d = {}; if (patch.shifts) { state.shiftsByWing = patch.shifts; d.shifts = patch.shifts; } if (patch.defs) { state.shiftDefs = patch.defs; d.shiftDefs = patch.defs; } try { const wings = { 'Pre-Foundation': currentBatches('Pre-Foundation'), 'Foundation': currentBatches('Foundation') }; await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {}, sessions: state.batchSessions || {}, rooms: state.batchRooms || {}, shifts: state.shiftsByWing || {}, shiftDefs: state.shiftDefs || {} }); if (msg) showToast(msg); } catch (err) { flashOffline(err); } renderShiftsPanel(); try { renderBatchList(); renderPeriodsPanel(); } catch (e1) { /* ignore */ } };
+    const labelTaken = (lab, except) => keys.some((x) => x !== except && shiftLabel(x).toLowerCase() === lab.toLowerCase());
+    el.querySelectorAll('[data-shift-type]').forEach((b) => b.addEventListener('click', () => { state.shiftNewType = b.getAttribute('data-shift-type'); renderShiftsPanel(); }));
+    el.querySelector('#addShiftBtn').addEventListener('click', async () => {
+      const inp = document.getElementById('newShiftInput'); const lab = inp.value.replace(/\s+/g, ' ').trim(); if (!lab) { showToast('Write the name of the shift'); return; }
+      if (labelTaken(lab, null)) { showToast(`${wing} already has a shift named ${lab}`); return; }
+      const slug = lab.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 14) || 'shift'; const key = `x_${slug}_${Date.now().toString(36)}`;
+      const defs = Object.assign({}, state.shiftDefs || {}, { [key]: { label: lab, type: newType } }); const by = Object.assign({}, state.shiftsByWing || {}, { [wing]: keys.concat([key]) });
+      inp.value = ''; state.shiftNewType = 'morning'; await save({ shifts: by, defs }, `${lab} added to ${wing}`);
+    });
+    el.querySelectorAll('[data-shift-ren]').forEach((b) => b.addEventListener('click', () => { state.shiftEdit = b.getAttribute('data-shift-ren'); renderShiftsPanel(); }));
+    el.querySelectorAll('[data-shift-cancel]').forEach((b) => b.addEventListener('click', () => { state.shiftEdit = null; renderShiftsPanel(); }));
+    el.querySelectorAll('[data-shift-save]').forEach((b) => b.addEventListener('click', async () => {
+      const k = b.getAttribute('data-shift-save'); const lab = (el.querySelector(`[data-shift-input="${k}"]`).value || '').replace(/\s+/g, ' ').trim(); if (!lab) { showToast('Write the name of the shift'); return; }
+      if (labelTaken(lab, k)) { showToast(`${wing} already has a shift named ${lab}`); return; }
+      const defs = Object.assign({}, state.shiftDefs || {}, { [k]: { label: lab, type: sessType(k) } }); state.shiftEdit = null; await save({ defs }, 'Shift renamed');
+    }));
+    el.querySelectorAll('[data-shift-del]').forEach((b) => b.addEventListener('click', async () => {
+      const k = b.getAttribute('data-shift-del'); if (cnt(k) > 0 || keys.length <= 1) return;
+      const ok = await showConfirm(`${shiftLabel(k)} will be removed from ${wing}. It has no batches.`, 'Remove this shift?', 'Remove'); if (!ok) return;
+      const by = Object.assign({}, state.shiftsByWing || {}, { [wing]: keys.filter((x) => x !== k) }); const defs = Object.assign({}, state.shiftDefs || {}); if (SESS_BASE.indexOf(k) === -1 && !Object.keys(by).some((w) => (by[w] || []).indexOf(k) !== -1)) delete defs[k];
+      await save({ shifts: by, defs }, 'Shift removed');
+    }));
+  }
+  document.addEventListener('click', (e) => { const c = e.target && e.target.closest && e.target.closest('#shiftWingChips [data-shift-wing]'); if (!c) return; const w = c.getAttribute('data-shift-wing'); state.shiftWing = state.shiftWing === w ? null : w; state.shiftEdit = null; renderShiftsPanel(); });
+  function batchShiftsOf(wing) { return shiftKeys(wing); }
   function renderBatchList() {
     document.querySelectorAll('#adminBatchWingChips [data-batch-wing]').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-batch-wing') === state.adminBatchListExpanded);
@@ -14034,7 +14124,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const shifts = batchShiftsOf(wing); if (state.adminBatchShift && shifts.indexOf(state.adminBatchShift) === -1) state.adminBatchShift = null;
       const nb = currentBatches(wing).length; const bh = document.getElementById('adminBatchHead'); if (bh) bh.innerHTML = `${wing} <small>· ${nb} ${nb === 1 ? 'batch' : 'batches'}</small>`;
       document.getElementById('adminBatchShiftWrap').style.display = '';
-      document.getElementById('adminBatchShiftChips').innerHTML = shifts.map((ses) => `<button type="button" class="chip${state.adminBatchShift === ses ? ' active' : ''}" data-batch-shift="${ses}">${SESS_LABEL[ses]}</button>`).join('');
+      document.getElementById('adminBatchShiftChips').innerHTML = shifts.map((ses) => `<button type="button" class="chip${state.adminBatchShift === ses ? ' active' : ''}" data-batch-shift="${ses}">${escapeHtml(shiftLabel(ses))}</button>`).join('');
       document.getElementById('adminBatchShiftHint').style.display = state.adminBatchShift ? 'none' : '';
       const bodyOpen = !!state.adminBatchShift;
       document.getElementById('adminBatchShiftBody').style.display = bodyOpen ? 'flex' : 'none';
@@ -14051,7 +14141,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
         'Pre-Foundation': wing === 'Pre-Foundation' ? list : currentBatches('Pre-Foundation'),
         'Foundation': wing === 'Foundation' ? list : currentBatches('Foundation')
       };
-      await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {}, sessions: state.batchSessions || {}, rooms: state.batchRooms || {} });
+      await state.db.doc('settings/batches').set({ wings, renames: state.batchRenames || {}, sessions: state.batchSessions || {}, rooms: state.batchRooms || {}, shifts: state.shiftsByWing || {}, shiftDefs: state.shiftDefs || {} });
       showToast('Batch list updated');
     } catch (err) { flashOffline(err); }
   }
@@ -16626,7 +16716,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   // ---------- Reports page: one period, one teacher, one report type ----------
   // ---------- Invigilation duty report (Admin / Coordinator): the duties of one wing for a day, a week or a month ----------
   state.duty = { sess: 'all', view: 'sheet', key: '', exams: [], model: null };
-  function dutyExamSessions(e) { const set = {}; expandScope(e.scope || []).forEach((b) => { const x = batchSession(b); set[x === 'special' ? 'evening' : x] = 1; }); const k = Object.keys(set); return k.length ? k : ['morning']; }
+  function dutyExamSessions(e) { const set = {}; expandScope(e.scope || []).forEach((b) => { const x = sessType(batchSession(b)); set[x === 'special' ? 'evening' : x] = 1; }); const k = Object.keys(set); return k.length ? k : ['morning']; }
   function dutyExamWings(e) { const set = {}; expandScope(e.scope || []).forEach((b) => { set[wingOfBatch(b)] = 1; }); return Object.keys(set); }
   function dutyRows() {
     const wing = state.adminReportWing || 'all'; const sess = state.duty.sess; const rows = [];
@@ -16798,7 +16888,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       const tm = cellTimes(doc, c); if (!tm) return;
       let bs = [c.b];
       if (c.cb) { const ms = tgComboOf(doc.cells, c); const g0 = ttGroups().find((x) => x.key === doc.group); if (ms.length > 1 && g0) { const srt = ms.slice().sort((a, b) => g0.batches.indexOf(a.b) - g0.batches.indexOf(b.b)); if (srt[0].b !== c.b) return; bs = srt.map((x) => x.b); } }
-      out.push({ u: who, type: sub ? 'SUBSTITUTE' : 'SELF', f: sub ? (sub.for || c.t || '') : '', d, b: c.b, bs, ts: tm.start, te: tm.end, a: hhmmToMin(tm.start), ses: batchSession(c.b) === 'evening' ? 'evening' : 'morning', wing: w });
+      out.push({ u: who, type: sub ? 'SUBSTITUTE' : 'SELF', f: sub ? (sub.for || c.t || '') : '', d, b: c.b, bs, ts: tm.start, te: tm.end, a: hhmmToMin(tm.start), ses: sessType(batchSession(c.b)) === 'evening' ? 'evening' : 'morning', wing: w });
     }));
     out.forEach((r) => { r.id = entryId(r); });
     out.sort((x, y) => (x.ts + x.b).localeCompare(y.ts + y.b));
@@ -18110,7 +18200,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   const SESSIONS = [['morning', '<span class="ico i-sun" aria-hidden="true"></span> Morning'], ['evening', '<span class="ico i-moon" aria-hidden="true"></span> Evening'], ['special', '<span class="ico i-pin" aria-hidden="true"></span> Special']];
   function batchSession(b) {
     const set = state.batchSessions[b];
-    if (set === 'morning' || set === 'evening' || set === 'special') return set;
+    if (set && allShiftKeys().indexOf(set) !== -1) return set;
     if (/remedial|special/i.test(String(b || ''))) return 'special';
     if (/evening/i.test(String(b || ''))) return 'evening';
     return 'morning';
@@ -18134,7 +18224,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
         const chip = (tok, lab) => `<button type="button" class="chip${st.scope.indexOf(tok) !== -1 ? ' active' : ''}" data-pk-tok="${escapeHtml(tok)}">${escapeHtml(lab)}</button>`;
         html += '<div class="xc-open">';
-        SESSIONS.forEach(([key, lbl]) => { const list = bats.filter((b) => batchSession(b) === key); if (!list.length) return; const all = key === 'morning' && g !== 'Other' && list.length > 1 ? chip(g, 'All morning') : ''; html += `<div class="pk-sess">${lbl}</div><div class="chips">${all}${list.map((b) => chip(b, shortBatch(b))).join('')}</div>`; });
+        sessionsList().forEach(([key, lbl]) => { const list = bats.filter((b) => batchSession(b) === key); if (!list.length) return; const all = key === 'morning' && g !== 'Other' && list.length > 1 ? chip(g, 'All morning') : ''; html += `<div class="pk-sess">${lbl}</div><div class="chips">${all}${list.map((b) => chip(b, shortBatch(b))).join('')}</div>`; });
         html += '</div>';
       }
     });
@@ -18165,7 +18255,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
       const chip = (tok, label) => `<button type="button" class="chip${st.scope.indexOf(tok) !== -1 ? ' active' : ''}" data-pk-tok="${escapeHtml(tok)}">${st.scope.indexOf(tok) !== -1 ? '✓ ' : ''}${escapeHtml(label)}</button>`;
       html += `<div class="pk-group"><div class="pk-title">${escapeHtml(g)}</div>`;
-      SESSIONS.forEach(([key, label]) => {
+      sessionsList().forEach(([key, label]) => {
         const list = bats.filter((b) => batchSession(b) === key);
         if (!list.length) return;
         const all = key === 'morning' && g !== 'Other' && list.length > 1 ? chip(g, 'All morning') : '';
@@ -19265,7 +19355,10 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       const data = snap.data();
       state.batchSessions = (data && data.sessions && typeof data.sessions === 'object') ? data.sessions : {};
       state.batchRooms = (data && data.rooms && typeof data.rooms === 'object') ? data.rooms : {};
-      const rn = (data && data.renames && typeof data.renames === 'object') ? data.renames : {};
+  state.shiftsByWing = (data && data.shifts && typeof data.shifts === 'object') ? data.shifts : {};
+  state.shiftDefs = (data && data.shiftDefs && typeof data.shiftDefs === 'object') ? data.shiftDefs : {};
+  try { renderShiftsPanel(); } catch (e0) { /* ignore */ }
+  const rn = (data && data.renames && typeof data.renames === 'object') ? data.renames : {};
       if (JSON.stringify(rn) !== JSON.stringify(state.batchRenames || {})) {
         state.batchRenames = rn;
         recanonAll();
@@ -19876,7 +19969,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   // Admin Settings: the same rows, in four small groups
   (function organiseAdminSettings() {
-    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Timetable', ['adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Exams', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Timetable', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Exams', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
       const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
@@ -19938,6 +20031,10 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     o.querySelectorAll('[data-tpa]').forEach((b) => b.classList.toggle('sel', (b.getAttribute('data-tpa') === '1') === tpState.pm));
   }
   const TP_ROW = 44;
+  // the hour and minute lists are repeated, so the wheel never stops: after 12 comes 1, after 59 comes 00, and the other way too
+  const TP_HC = 21; const TP_MC = 7; const TP_HBASE = Math.floor(TP_HC / 2) * 12; const TP_MBASE = Math.floor(TP_MC / 2) * 60;
+  function tpNearest(col, n, vi) { const cur = Math.round(col.scrollTop / TP_ROW); let d = ((vi - (cur % n)) % n + n) % n; if (d > n / 2) d -= n; return cur + d; }
+  function tpRecenter(col, n, base) { const idx = Math.round(col.scrollTop / TP_ROW); const v = ((idx % n) + n) % n; if (Math.abs(idx - (base + v)) >= n) { col.style.scrollSnapType = 'none'; col.scrollTop = (base + v) * TP_ROW; setTimeout(() => { col.style.scrollSnapType = ''; }, 40); } }
   function tpOpen(inp) {
     if (!inp || tpState || inp.disabled) return;
     try { inp.blur(); } catch (e) { /* ignore */ }
@@ -19945,18 +20042,18 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     if (mm) { h24 = Number(mm[1]) % 24; m = Number(mm[2]) % 60; } else { const d = new Date(); h24 = d.getHours(); m = d.getMinutes(); }
     tpState = { inp, h: (h24 % 12) || 12, m, pm: h24 >= 12 };
     const lab = inp.parentElement && inp.parentElement.querySelector('label, .sv-tlbl, .micro-label, .xs-lbl'); let title = lab ? String(lab.textContent || '').replace(/\s+/g, ' ').trim() : ''; if (!title || title.length > 32) title = 'Set time';
-    const hours = Array.from({ length: 12 }, (_, i) => `<button type="button" data-tph="${i + 1}">${i + 1}</button>`).join('');
-    const mins = Array.from({ length: 60 }, (_, i) => `<button type="button" data-tpm="${i}">${tp2(i)}</button>`).join('');
+    const hours = Array.from({ length: 12 * TP_HC }, (_, i) => `<button type="button" data-tph="${(i % 12) + 1}">${(i % 12) + 1}</button>`).join('');
+    const mins = Array.from({ length: 60 * TP_MC }, (_, i) => `<button type="button" data-tpm="${i % 60}">${tp2(i % 60)}</button>`).join('');
     const o = document.createElement('div'); o.id = 'tpOverlay'; o.className = 'tp-ov';
     o.innerHTML = `<div class="tp-sheet" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="tp-title">${escapeHtml(title)}</div><div class="tp-big" id="tpBig"></div><button type="button" class="tp-now" id="tpNow">Set to now</button><div class="tp-heads"><span>Hour</span><span>Minute</span><span>AM / PM</span></div><div class="tp-cols"><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpH">${hours}</div></div><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpM">${mins}</div></div><div class="tp-ww"><div class="tp-band"></div><div class="tp-wheel" id="tpA"><button type="button" data-tpa="0">AM</button><button type="button" data-tpa="1">PM</button></div></div></div><div class="tp-hint">Scroll the hour and the minute. The number in the box is the time.</div><div class="tp-btns"><button type="button" class="btn-secondary" id="tpCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="btn-secondary" id="tpClear" style="border-color: var(--line);">Clear</button><button type="button" class="save-btn" id="tpSet">Set</button></div></div>`;
     const onWheel = (col, attr) => { const i = Math.max(0, Math.min(col.children.length - 1, Math.round(col.scrollTop / TP_ROW))); const v = Number(col.children[i].getAttribute(attr)); if (!tpState) return; if (attr === 'data-tph' ? v !== tpState.h : v !== tpState.m) { if (attr === 'data-tph') tpState.h = v; else tpState.m = v; tpDraw(); } };
-    ['tpH', 'tpM'].forEach((id) => { const col = o.querySelector('#' + id); const attr = id === 'tpH' ? 'data-tph' : 'data-tpm'; col.addEventListener('scroll', () => onWheel(col, attr)); });
+    ['tpH', 'tpM'].forEach((id) => { const col = o.querySelector('#' + id); const attr = id === 'tpH' ? 'data-tph' : 'data-tpm'; let idle = null; col.addEventListener('scroll', () => { onWheel(col, attr); clearTimeout(idle); idle = setTimeout(() => tpRecenter(col, id === 'tpH' ? 12 : 60, id === 'tpH' ? TP_HBASE : TP_MBASE), 160); }); });
     const colA = o.querySelector('#tpA'); colA.addEventListener('scroll', () => { const pm = Math.round(colA.scrollTop / TP_ROW) >= 1; if (tpState && pm !== tpState.pm) { tpState.pm = pm; tpDraw(); } });
-    const goTo = () => { const a = o.querySelector('#tpH'); const b2 = o.querySelector('#tpM'); const c3 = o.querySelector('#tpA'); const tryTo = (el, top) => { try { el.scrollTo({ top, behavior: 'smooth' }); } catch (e2) { el.scrollTop = top; } }; tryTo(a, (tpState.h - 1) * TP_ROW); tryTo(b2, tpState.m * TP_ROW); tryTo(c3, (tpState.pm ? 1 : 0) * TP_ROW); };
+    const goTo = () => { const a = o.querySelector('#tpH'); const b2 = o.querySelector('#tpM'); const c3 = o.querySelector('#tpA'); const tryTo = (el, top) => { try { el.scrollTo({ top, behavior: 'smooth' }); } catch (e2) { el.scrollTop = top; } }; tryTo(a, (TP_HBASE + tpState.h - 1) * TP_ROW); tryTo(b2, (TP_MBASE + tpState.m) * TP_ROW); tryTo(c3, (tpState.pm ? 1 : 0) * TP_ROW); };
     o.addEventListener('click', (e) => {
       const t = e.target; if (t === o) { tpClose(); return; } const b = t.closest && t.closest('button'); if (!b || !tpState) return;
-      if (b.hasAttribute('data-tph')) { tpState.h = Number(b.getAttribute('data-tph')); tpDraw(); const c1 = o.querySelector('#tpH'); try { c1.scrollTo({ top: (tpState.h - 1) * TP_ROW, behavior: 'smooth' }); } catch (e2) { c1.scrollTop = (tpState.h - 1) * TP_ROW; } return; }
-      if (b.hasAttribute('data-tpm')) { tpState.m = Number(b.getAttribute('data-tpm')); tpDraw(); const c2 = o.querySelector('#tpM'); try { c2.scrollTo({ top: tpState.m * TP_ROW, behavior: 'smooth' }); } catch (e2) { c2.scrollTop = tpState.m * TP_ROW; } return; }
+      if (b.hasAttribute('data-tph')) { tpState.h = Number(b.getAttribute('data-tph')); tpDraw(); const c1 = o.querySelector('#tpH'); const ti1 = tpNearest(c1, 12, tpState.h - 1) * TP_ROW; try { c1.scrollTo({ top: ti1, behavior: 'smooth' }); } catch (e2) { c1.scrollTop = ti1; } return; }
+      if (b.hasAttribute('data-tpm')) { tpState.m = Number(b.getAttribute('data-tpm')); tpDraw(); const c2 = o.querySelector('#tpM'); const ti2 = tpNearest(c2, 60, tpState.m) * TP_ROW; try { c2.scrollTo({ top: ti2, behavior: 'smooth' }); } catch (e2) { c2.scrollTop = ti2; } return; }
       if (b.hasAttribute('data-tpa')) { tpState.pm = b.getAttribute('data-tpa') === '1'; tpDraw(); const c4 = o.querySelector('#tpA'); try { c4.scrollTo({ top: (tpState.pm ? 1 : 0) * TP_ROW, behavior: 'smooth' }); } catch (e2) { c4.scrollTop = (tpState.pm ? 1 : 0) * TP_ROW; } return; }
       if (b.id === 'tpNow') { const d0 = new Date(); const hh = d0.getHours(); tpState.h = (hh % 12) || 12; tpState.m = d0.getMinutes(); tpState.pm = hh >= 12; tpDraw(); goTo(); return; }
       if (b.id === 'tpCancel') { tpClose(); return; }
@@ -19964,7 +20061,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       if (b.id === 'tpSet') { const i = tpState.inp; const h24 = (tpState.h % 12) + (tpState.pm ? 12 : 0); i.value = tp2(h24) + ':' + tp2(tpState.m); tpClose(); tpFire(i); }
     });
     document.body.appendChild(o); tpDraw();
-    o.querySelector('#tpH').scrollTop = (tpState.h - 1) * TP_ROW; o.querySelector('#tpM').scrollTop = tpState.m * TP_ROW; o.querySelector('#tpA').scrollTop = (tpState.pm ? 1 : 0) * TP_ROW;
+    o.querySelector('#tpH').scrollTop = (TP_HBASE + tpState.h - 1) * TP_ROW; o.querySelector('#tpM').scrollTop = (TP_MBASE + tpState.m) * TP_ROW; o.querySelector('#tpA').scrollTop = (tpState.pm ? 1 : 0) * TP_ROW;
   }
   document.addEventListener('keydown', (e) => { const t = e.target; if (t && t.tagName === 'INPUT' && t.type === 'time' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tpOpen(t); } });
   // a time box keeps the phone's own box away, and an empty running check-out says "Not yet"
