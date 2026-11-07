@@ -1048,16 +1048,17 @@
   .trep-nav #trepLabel { text-align: center; font-weight: 700; font-size: 15px; }
   .trep-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 12px; }
   .trep-t { border-collapse: collapse; font-size: 12px; min-width: 100%; }
-  .trep-t th, .trep-t td { border: 1px solid #9CA3AF; padding: 4px 6px; text-align: center; white-space: nowrap; color: #111; }
-  .trep-t thead th { background: #FFFF00; font-weight: 700; }
-  .trep-t thead tr.trep-h0 th { background: #FFC000; font-size: 13px; }
-  .trep-t thead tr.trep-h1 th { background: #E26B0A; color: #111; font-size: 13px; }
+  .trep-t th, .trep-t td { border: 1px solid #E1E1E5; padding: 4px 6px; text-align: center; white-space: nowrap; color: #111; }
+  .trep-t thead th { background: #F1F1F3; font-weight: 700; }
+  .trep-t thead tr.trep-h0 th { background: #fff; font-size: 13px; border-bottom: 3px solid #E63946; }
+  .trep-t thead tr.trep-h1 th { background: #FFF5F6; color: #5A5A60; font-size: 13px; }
   .trep-t td.trep-n { text-align: left; }
   .trep-t thead tr.trep-h0 th, .trep-t thead tr.trep-h1 th { text-align: left; }
   .trep-stick { position: sticky; left: 8px; display: inline-block; }
   .trep-nav #trepLabel { font-size: 15px; }
   .trep-t tbody tr { background: #fff; }
-  .trep-t tfoot td { background: #fff; font-weight: 700; }
+  .trep-t tfoot td { background: #FAFAFB; font-weight: 700; }
+  .trep-t td.trep-totc { background: #FEF7F8; }
   .trep-miss { font-size: 13px; color: var(--muted-2); border: 1px solid rgba(217,119,6,.35); background: rgba(217,119,6,.06); border-radius: 12px; padding: 10px 12px; }
   .trep-miss-h { display: flex; align-items: center; gap: 6px; color: #B45309; font-weight: 700; font-size: 13px; }
   .trep-miss-l { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -4292,7 +4293,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.60 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.61 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -12905,8 +12906,8 @@ Rules:
     let h = `<div class="trep-scroll"><table class="trep-t"><thead>
       <tr class="trep-h0"><th colspan="${nCols + 3 + ex}"><span class="trep-stick">${escapeHtml(ttl)}</span></th></tr>
       <tr class="trep-h1"><th colspan="${nCols + 3 + ex}"><span class="trep-stick">${per}: ${escapeHtml(trepTitle())}</span></th></tr>
-      <tr><th rowspan="2">S.N</th><th rowspan="2">NAME OF FACULTY</th>${T.heads.map((x) => `<th colspan="${x.end - x.start + 1}">${escapeHtml(x.head)}</th>`).join('')}${T.hasOther ? '<th>OTHER</th>' : ''}<th rowspan="2">TOTAL</th></tr>
-      <tr>${T.cols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('')}${T.hasOther ? '<th>Batches</th>' : ''}</tr></thead><tbody>`;
+      <tr><th rowspan="2">S.N</th><th rowspan="2">NAME OF FACULTY</th>${T.heads.map((x) => `<th colspan="${x.end - x.start + 1}" style="background:${trepTint(x.head, (T.cols[x.start] || {}).label)[0]}">${escapeHtml(x.head)}</th>`).join('')}${T.hasOther ? `<th style="background:${TREP_TINT.found[0]}">OTHER</th>` : ''}<th rowspan="2" style="background:${TREP_TINT.total[0]}">TOTAL</th></tr>
+      <tr>${T.cols.map((c) => `<th style="background:${trepTint(c.head, c.label)[1]}">${escapeHtml(c.label)}</th>`).join('')}${T.hasOther ? `<th style="background:${TREP_TINT.found[1]}">Batches</th>` : ''}</tr></thead><tbody>`;
     T.list.forEach((row, i) => {
       h += `<tr><td>${i + 1}</td><td class="trep-n" data-trep-u="${escapeHtml(row.u)}" role="button">${escapeHtml(row.name)}${trepTitleOf(row.u) ? '' : ' <span class="trep-tset">+ Mr./Ms.</span>'}</td>${trepRowCells(row, T.cols).map((c) => `<td${c.span > 1 ? ` colspan="${c.span}"` : ''}>${T.subOn ? trepCellHtml(c) : trepFmt(c.v)}</td>`).join('')}${T.hasOther ? `<td>${T.subOn ? trepCellHtml({ v: row.other, s: row.subOther }) : trepFmt(row.other)}</td>` : ''}<td class="trep-totc">${T.subOn ? trepTotHtml(row.total, row.sub) : `<b>${trepFmt(row.total) || ''}</b>`}</td></tr>`;
     });
@@ -12987,6 +12988,8 @@ Rules:
     const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
   }
   function trepEnsure() { state.trep.self = false; const r = trepRange(); if (state.trep.key !== state.trep.mode + '|' + r.from + '|' + (state.trep.basis || 'logged') || !state.trep.data) trepBuild(); else trepRender(); }
+  const TREP_TINT = { school: ['#E8F0FF', '#F4F8FF'], rem: ['#F0EAFF', '#F8F5FF'], coach: ['#E3F5EA', '#F1FAF4'], found: ['#FFF1DC', '#FFF8EC'], total: ['#FCE6E9', '#FEF3F4'], plain: ['#F1F1F3', '#F7F7F9'] };
+  function trepTint(head, label) { return head === 'COACHING' ? TREP_TINT.coach : (head === 'FOUNDATION' || head === 'OTHER') ? TREP_TINT.found : /remedial/i.test(label || '') ? TREP_TINT.rem : TREP_TINT.school; }
   function trepCanvas() {
     const T = trepTable(); if (!T) return null;
     const nC = T.cols.length + (T.hasOther ? 1 : 0);
@@ -12996,7 +12999,7 @@ Rules:
     const hT = 36, hH = 28, hR = 26; const H = hT * 2 + hH * 2 + hR * (T.list.length + 1) + 2;
     const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
     const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
-    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#7F7F7F'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw, bh); };
+    const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#E1E1E5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw, bh); };
     const tx = (s, cx, cy, size, bold, align, maxW, col) => { x.fillStyle = col || '#000'; x.font = `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`; x.textAlign = align || 'center'; x.textBaseline = 'middle'; let f = size; while (maxW && x.measureText(s).width > maxW && f > 8) { f -= 1; x.font = `${bold ? '700 ' : ''}${f}px Calibri, Arial, sans-serif`; } x.fillText(s, cx, cy); };
     // several pieces of text in one line, each with its own colour (the red substitute number)
     const txs = (pts, ax, cy, size, bold, maxW, align) => {
@@ -13009,16 +13012,16 @@ Rules:
     const cellPts = (c) => { const sub = c.s || 0; if (!sub) return [{ s: trepFmt(c.v) }]; const reg = trepHalf(c.v - sub); return [{ s: reg > 0 ? `${trepFmt(reg)} ` : '' }, { s: `+${reg > 0 ? ' ' : ''}${trepFmt(sub)}`, c: RED }]; };
     const totPts = (total, sub) => sub ? [{ s: `${trepFmt(trepHalf(total - sub)) || '0'} ` }, { s: `+ ${trepFmt(sub)}`, c: RED }, { s: ` = ${trepFmt(total)}` }] : [{ s: trepFmt(total) || '' }];
     let y = 1;
-    box(1, y, W - 2, hT, '#FFC000'); tx(trepTitleText(), W / 2, y + hT / 2, 20, true); y += hT;
-    box(1, y, W - 2, hT, '#E26B0A'); tx(`${trepPer()}: ${trepTitle()}`, W / 2, y + hT / 2, 18, true); y += hT;
-    const x0 = 1 + wSN + wName; const cx = (i) => x0 + wC * i;
-    box(1, y, wSN, hH * 2, '#FFFF00'); tx('S.N', 1 + wSN / 2, y + hH, 13, true);
-    box(1 + wSN, y, wName, hH * 2, '#FFFF00'); tx('NAME OF FACULTY', 1 + wSN + wName / 2, y + hH, 13, true);
-    T.heads.forEach((hd) => { box(cx(hd.start), y, wC * (hd.end - hd.start + 1), hH, '#FFFF00'); tx(hd.head, cx(hd.start) + wC * (hd.end - hd.start + 1) / 2, y + hH / 2, 13, true, 'center', wC * (hd.end - hd.start + 1) - 6); });
-    if (T.hasOther) { box(cx(T.cols.length), y, wC, hH, '#FFFF00'); tx('OTHER', cx(T.cols.length) + wC / 2, y + hH / 2, 13, true); }
-    T.cols.forEach((c, i) => { box(cx(i), y + hH, wC, hH, '#FFFF00'); tx(c.label, cx(i) + wC / 2, y + hH * 1.5, 13, true, 'center', wC - 6); });
-    if (T.hasOther) { box(cx(T.cols.length), y + hH, wC, hH, '#FFFF00'); tx('Batches', cx(T.cols.length) + wC / 2, y + hH * 1.5, 12, true); }
-    box(cx(nC), y, wTot, hH * 2, '#FFFF00'); tx('TOTAL', cx(nC) + wTot / 2, y + hH, 13, true);
+    box(1, y, W - 2, hT, '#fff'); tx(trepTitleText(), W / 2, y + hT / 2, 20, true, 'center', 0, '#171717'); x.fillStyle = '#E63946'; x.fillRect(1, y + hT - 3, W - 2, 3); y += hT;
+  box(1, y, W - 2, hT, '#FFF5F6'); tx(`${trepPer()}: ${trepTitle()}`, W / 2, y + hT / 2, 18, true, 'center', 0, '#5A5A60'); y += hT;
+  const x0 = 1 + wSN + wName; const cx = (i) => x0 + wC * i;
+  box(1, y, wSN, hH * 2, TREP_TINT.plain[0]); tx('S.N', 1 + wSN / 2, y + hH, 13, true);
+  box(1 + wSN, y, wName, hH * 2, TREP_TINT.plain[0]); tx('NAME OF FACULTY', 1 + wSN + wName / 2, y + hH, 13, true);
+  T.heads.forEach((hd) => { const tn = trepTint(hd.head, (T.cols[hd.start] || {}).label); box(cx(hd.start), y, wC * (hd.end - hd.start + 1), hH, tn[0]); tx(hd.head, cx(hd.start) + wC * (hd.end - hd.start + 1) / 2, y + hH / 2, 13, true, 'center', wC * (hd.end - hd.start + 1) - 6); });
+  if (T.hasOther) { box(cx(T.cols.length), y, wC, hH, TREP_TINT.found[0]); tx('OTHER', cx(T.cols.length) + wC / 2, y + hH / 2, 13, true); }
+  T.cols.forEach((c, i) => { box(cx(i), y + hH, wC, hH, trepTint(c.head, c.label)[1]); tx(c.label, cx(i) + wC / 2, y + hH * 1.5, 13, true, 'center', wC - 6); });
+  if (T.hasOther) { box(cx(T.cols.length), y + hH, wC, hH, TREP_TINT.found[1]); tx('Batches', cx(T.cols.length) + wC / 2, y + hH * 1.5, 12, true); }
+  box(cx(nC), y, wTot, hH * 2, TREP_TINT.total[0]); tx('TOTAL', cx(nC) + wTot / 2, y + hH, 13, true);
     
     y += hH * 2;
     T.list.forEach((row, ri) => {
@@ -13026,11 +13029,11 @@ Rules:
       box(1 + wSN, y, wName, hR, '#fff'); tx(row.name, 1 + wSN + 6, y + hR / 2, 13, false, 'left', wName - 10);
       let i = 0; trepRowCells(row, T.cols).forEach((c) => { box(cx(i), y, wC * c.span, hR, '#fff'); if (T.subOn && c.s) txs(cellPts(c), cx(i) + wC * c.span / 2, y + hR / 2, 13, false, wC * c.span - 6); else tx(trepFmt(c.v), cx(i) + wC * c.span / 2, y + hR / 2, 13); i += c.span; });
       if (T.hasOther) { box(cx(T.cols.length), y, wC, hR, '#fff'); if (T.subOn && row.subOther) txs(cellPts({ v: row.other, s: row.subOther }), cx(T.cols.length) + wC / 2, y + hR / 2, 13, false, wC - 6); else tx(trepFmt(row.other), cx(T.cols.length) + wC / 2, y + hR / 2, 13); }
-      box(cx(nC), y, wTot, hR, '#fff'); if (T.subOn && row.sub) txs(totPts(row.total, row.sub), cx(nC) + wTot / 2, y + hR / 2, 13, true, wTot - 8); else tx(trepFmt(row.total), cx(nC) + wTot / 2, y + hR / 2, 13, true);
+      box(cx(nC), y, wTot, hR, '#FEF7F8'); if (T.subOn && row.sub) txs(totPts(row.total, row.sub), cx(nC) + wTot / 2, y + hR / 2, 13, true, wTot - 8); else tx(trepFmt(row.total), cx(nC) + wTot / 2, y + hR / 2, 13, true);
       y += hR;
     });
     if (T.subOn && T.grandSub) { box(1, y, W - 2, hR, '#fff'); txs([{ s: 'Total:   ' }, ...totPts(T.grand, T.grandSub)], W - 12, y + hR / 2, 13, true, 0, 'right'); }
-    else { box(1, y, cx(nC) - 1, hR, '#fff'); tx('Total:', cx(nC) - 8, y + hR / 2, 13, true, 'right'); box(cx(nC), y, wTot, hR, '#fff'); tx(trepFmt(T.grand) || '0', cx(nC) + wTot / 2, y + hR / 2, 13, true); }
+    else { box(1, y, cx(nC) - 1, hR, '#FAFAFB'); tx('Total:', cx(nC) - 8, y + hR / 2, 13, true, 'right'); box(cx(nC), y, wTot, hR, '#FAFAFB'); tx(trepFmt(T.grand) || '0', cx(nC) + wTot / 2, y + hR / 2, 13, true); }
     return cv;
   }
   // ---------- PDF of the Class count report: the table of the picture, written as real text (like the Full and Attendance reports) ----------
@@ -13044,18 +13047,18 @@ Rules:
     const wSN = 24; const wName = 132; let wTot = 62;
     if (T.subOn) T.list.forEach((r) => { if (r.sub) wTot = Math.max(wTot, Math.ceil(pdfTextW(trepTotText(r.total, r.sub), 8.5, true)) + 12); });
     const wC = Math.min(74, (CW - wSN - wName - wTot) / Math.max(nC, 1)); const full = wSN + wName + wC * nC + wTot;
-    const xc = (i) => wSN + wName + wC * i; const YEL = [1, 1, 0]; const GOLD = [1, 0.753, 0]; const ORG = [0.886, 0.42, 0.04]; const hh = 16; const rh = 15;
+    const xc = (i) => wSN + wName + wC * i; const rgbOf = (h) => [1, 3, 5].map((i0) => parseInt(h.slice(i0, i0 + 2), 16) / 255); const GOLD = [1, 1, 1]; const ORG = rgbOf('#FFF5F6'); const trowL = (cells, hgt) => w.trow(cells.map((c) => Object.assign({ lg: 0.82 }, c)), hgt); const hh = 16; const rh = 15;
     const header = () => {
-      w.trow([{ x: 0, w: full, t: trepTitleText(), bold: true, size: 14, fill: GOLD }], 22);
-      w.trow([{ x: 0, w: full, t: `${trepPer()}: ${trepTitle()}`, bold: true, size: 12, fill: ORG }], 20);
-      const r1 = [{ x: 0, w: wSN, t: 'S.N', bold: true, size: 8.5, fill: YEL, rows: 2 }, { x: wSN, w: wName, t: 'NAME OF FACULTY', bold: true, size: 8.5, fill: YEL, rows: 2 }];
-      T.heads.forEach((hd) => r1.push({ x: xc(hd.start), w: wC * (hd.end - hd.start + 1), t: hd.head, bold: true, size: 8.5, fill: YEL }));
-      if (T.hasOther) r1.push({ x: xc(T.cols.length), w: wC, t: 'OTHER', bold: true, size: 8.5, fill: YEL });
-      r1.push({ x: xc(nC), w: wTot, t: 'TOTAL', bold: true, size: 8.5, fill: YEL, rows: 2 });
-      w.trow(r1, hh);
-      const r2 = T.cols.map((c, i) => ({ x: xc(i), w: wC, t: c.label, bold: true, size: 7.5, fill: YEL }));
-      if (T.hasOther) r2.push({ x: xc(T.cols.length), w: wC, t: 'Batches', bold: true, size: 7.5, fill: YEL });
-      w.trow(r2, hh);
+      trowL([{ x: 0, w: full, t: trepTitleText(), bold: true, size: 14, fill: GOLD, color: [0.09, 0.09, 0.09] }], 22);
+      trowL([{ x: 0, w: full, t: `${trepPer()}: ${trepTitle()}`, bold: true, size: 12, fill: ORG, color: [0.35, 0.35, 0.38] }], 20);
+      const r1 = [{ x: 0, w: wSN, t: 'S.N', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.plain[0]), rows: 2 }, { x: wSN, w: wName, t: 'NAME OF FACULTY', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.plain[0]), rows: 2 }];
+      T.heads.forEach((hd) => r1.push({ x: xc(hd.start), w: wC * (hd.end - hd.start + 1), t: hd.head, bold: true, size: 8.5, fill: rgbOf(trepTint(hd.head, (T.cols[hd.start] || {}).label)[0]) }));
+      if (T.hasOther) r1.push({ x: xc(T.cols.length), w: wC, t: 'OTHER', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.found[0]) });
+      r1.push({ x: xc(nC), w: wTot, t: 'TOTAL', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.total[0]), rows: 2 });
+      trowL(r1, hh);
+      const r2 = T.cols.map((c, i) => ({ x: xc(i), w: wC, t: c.label, bold: true, size: 7.5, fill: rgbOf(trepTint(c.head, c.label)[1]) }));
+      if (T.hasOther) r2.push({ x: xc(T.cols.length), w: wC, t: 'Batches', bold: true, size: 7.5, fill: rgbOf(TREP_TINT.found[1]) });
+      trowL(r2, hh);
     };
     header();
     T.list.forEach((row, ri) => {
@@ -13064,11 +13067,11 @@ Rules:
       let i = 0; trepRowCells(row, T.cols).forEach((c) => { cells.push({ x: xc(i), w: wC * c.span, parts: pdfCellParts(c, T.subOn), size: 8.5 }); i += c.span; });
       if (T.hasOther) cells.push({ x: xc(T.cols.length), w: wC, parts: pdfCellParts({ v: row.other, s: row.subOther }, T.subOn), size: 8.5 });
       cells.push({ x: xc(nC), w: wTot, parts: pdfTotParts(row.total, row.sub, T.subOn), size: 8.5, bold: true });
-      w.trow(cells, rh);
+      trowL(cells, rh);
     });
     if (!w.room(rh)) { w.page(); header(); }
-    if (T.subOn && T.grandSub) w.trow([{ x: 0, w: full, align: 'right', parts: [{ t: 'Total:   ', b: true }, ...pdfTotParts(T.grand, T.grandSub, true).map((q) => Object.assign({ b: true }, q))], size: 9 }], rh);
-    else w.trow([{ x: 0, w: xc(nC), t: 'Total:', align: 'right', bold: true, size: 9 }, { x: xc(nC), w: wTot, t: trepFmt(T.grand) || '0', bold: true, size: 9 }], rh);
+    if (T.subOn && T.grandSub) trowL([{ x: 0, w: full, align: 'right', parts: [{ t: 'Total:   ', b: true }, ...pdfTotParts(T.grand, T.grandSub, true).map((q) => Object.assign({ b: true }, q))], size: 9 }], rh);
+    else trowL([{ x: 0, w: xc(nC), t: 'Total:', align: 'right', bold: true, size: 9 }, { x: xc(nC), w: wTot, t: trepFmt(T.grand) || '0', bold: true, size: 9 }], rh);
     w.addSpace(8);
     w.bodyLine('1 class = up to 1 h 10 min; 1.5 = up to 1 h 45 min (e.g. 1 h 15 min); a class taken with two batches together counts once.' + (T.subOn ? ' In red: substitute classes (filled in by the teacher), they are part of the total.' : ''), { size: 8 });
     return w.finishBlob();
@@ -16269,7 +16272,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       cells.forEach((c) => {
         const ch = h * (c.rows || 1); const cb = top - ch; const X = marginX + c.x;
         if (c.fill) currentOps.push({ kind: 'rect', x: X, y: cb, w: c.w, h: ch, fill: c.fill });
-        [[X, top, X + c.w, top], [X, cb, X + c.w, cb], [X, cb, X, top], [X + c.w, cb, X + c.w, top]].forEach((q) => currentOps.push({ kind: 'line', x1: q[0], y1: q[1], x2: q[2], y2: q[3], gray: 0.55 }));
+        [[X, top, X + c.w, top], [X, cb, X + c.w, cb], [X, cb, X, top], [X + c.w, cb, X + c.w, top]].forEach((q) => currentOps.push({ kind: 'line', x1: q[0], y1: q[1], x2: q[2], y2: q[3], gray: c.lg != null ? c.lg : 0.55 }));
         const lines = c.lines || [c.parts || [{ t: c.t == null ? '' : String(c.t) }]]; let size = c.size || 9;
         const prep = (ln) => ln.map((p) => ({ t: keepAscii(p.t), c: p.c || c.color || null, b: p.b != null ? p.b : !!c.bold }));
         const L = lines.map(prep);
