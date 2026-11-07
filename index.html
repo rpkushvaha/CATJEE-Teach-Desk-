@@ -1370,8 +1370,9 @@
   .team-head .team-id { font-size: 13px; color: var(--muted-2); }
   .team-head .team-id b { font-weight: 600; color: var(--ink); letter-spacing: .02em; }
   .team-info { font-size: 12px; color: var(--muted); text-align: right; max-width: 42%; }
-  .team-chev { color: var(--muted); font-size: 20px; line-height: 1; transition: transform .18s ease; flex: none; }
-  .team-row.open .team-chev { transform: rotate(90deg); }
+  .team-chev { display: inline-flex; color: var(--muted); flex: none; }
+  .team-chev .x-chev { transition: transform .2s ease; }
+  .team-row.open .team-chev .x-chev { transform: rotate(180deg); }
   .team-body { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
   .rep-datenav { margin-top: 2px; }
   /* ---------- exam planner (4 steps) ---------- */
@@ -2861,6 +2862,19 @@
   @keyframes scFlap { from { transform: scaleY(1); } to { transform: scaleY(.4); } }
   @keyframes scFlyR { 0% { transform: translate(-16px, var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(250px, var(--y1)); transform: translate(calc(100cqw + 16px), var(--y1)); opacity: 0; } }
   @keyframes scFlyL { 0% { transform: translate(250px, var(--y0)); transform: translate(calc(100cqw + 16px), var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(-16px, var(--y1)); opacity: 0; } }
+  /* The wing block (Team, Teacher Mapping, Subjects, Class / Batch List): one frame, one heading, the same everywhere */
+  .wing-sec { border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px 4px; margin-top: 6px; background: var(--card); }
+  #adminBatchListExpandedBox.wing-sec { padding-bottom: 12px; }
+  .wing-sec-h { display: flex; align-items: baseline; gap: 6px; font-size: 15px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+  .wing-sec-h small { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .wing-lbl { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 8px; }
+  .wing-sec .sub-chips .chip { font-size: 13px; padding: 7px 13px; }
+  /* every arrow that opens or closes something: the same size, weight and colour */
+  .set-acc .set-chev, .sacc-chev, .x-chev, .ab-chev, .pv-row .chev svg { width: 18px; height: 18px; color: var(--muted); stroke: currentColor; stroke-width: 2.2; }
+  .sacc-chev { stroke: var(--muted); }
+  .xc-pick .x-chev, .chip .x-chev { width: 14px; height: 14px; vertical-align: -2px; }
+  .wing-sec .activity-row { gap: 6px; }
+  .wing-sec .tt-tog { padding: 5px 9px; font-size: 12px; }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -3733,7 +3747,8 @@
           <button class="chip" data-batch-wing="Foundation">Foundation</button>
         </div>
         <div class="admin-sub" id="adminBatchListHint">Tap a wing above to see and manage its classes.</div>
-        <div id="adminBatchListExpandedBox" style="display:none; flex-direction:column; gap:10px;">
+        <div id="adminBatchListExpandedBox" class="wing-sec" style="display:none; flex-direction:column; gap:10px;">
+  <div class="wing-sec-h" id="adminBatchHead"></div>
           <div class="activity-rows" id="batchListRows"></div>
           <input class="text-input" id="newBatchInput" type="text" placeholder="e.g. Class 11 - Batch 1" style="margin-top: 4px; font-size:15px; padding:13px 14px;">
           <button class="btn-secondary" id="addBatchBtn" style="width:auto; align-self:flex-end; border-color: var(--line); padding:9px 18px; font-size:13px;">+ Add</button>
@@ -3752,8 +3767,9 @@
   <button class="chip" data-subj-wing="Foundation">Foundation</button>
   </div>
   <div class="admin-sub" id="subjWingChipsHint">Tap a wing above to see and manage its subjects.</div>
+  <div class="wing-sec" id="subjWingBox" style="display:none;"><div class="wing-sec-h" id="subjWingHead"></div>
   <div class="activity-rows" id="subjectsRows"></div>
-  <div class="list-add" id="subjectsAddRow" style="display:none;"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
+  <div class="list-add" id="subjectsAddRow"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div></div>
       </div>
   <div class="panel set-acc" id="adminRoomsPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><circle cx="14.5" cy="12.5" r="1"/></svg>Rooms</div>
@@ -4209,7 +4225,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.51 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.52 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6270,7 +6286,7 @@ function renderPartChips() {
   if (!opts.length) { fld.hidden = true; state.form.parts = []; return; }
   state.form.parts = (state.form.parts || []).filter((x) => opts.indexOf(x) >= 0); fld.hidden = false;
   if (keyChanged && !state.editingId && !state.form.parts.length) { const pk = partAutoPick(opts); if (pk) state.form.parts = [pk]; }
-  const more = (state.myDept && !state.form.partsAll && opts.length < (state.mySubjects || []).length) ? '<button type="button" class="chip" data-part-more>Other ▾</button>' : '';
+  const more = (state.myDept && !state.form.partsAll && opts.length < (state.mySubjects || []).length) ? `<button type="button" class="chip" data-part-more>Other ${chevSvg(false, 14)}</button>` : '';
   box.innerHTML = opts.map((p) => `<button type="button" class="chip${state.form.parts.indexOf(p) >= 0 ? ' active' : ''}" data-part="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('') + more;
   }
   document.addEventListener('click', (e) => { const mb = e.target && e.target.closest && e.target.closest('#partChips [data-part-more]'); if (mb && state.form) { state.form.partsAll = true; renderPartChips(); } });
@@ -6618,13 +6634,14 @@ function renderPartChips() {
     if (pend) { try { if (state.staffInfoMem && state.staffInfoMem[uid]) state.staffInfoMem[uid].sal = v; mergePendingStaff(); } catch (e) { /* ignore */ } }
     refreshAdminSal(); showToast('Saved'); try { renderTeamPanel( ); } catch (e) { /* ignore */ }
   }
+  function chevSvg(up, size) { const z = size || 18; return `<svg class="x-chev" viewBox="0 0 24 24" width="${z}" height="${z}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="${up ? '6 15 12 9 18 15' : '6 9 12 15 18 9'}"></polyline></svg>`; }
   function teamGrouped(ids, fn) {
   const wg = state.teamWingOpen || null; const wings = ['Pre-Foundation', 'Foundation'];
   document.querySelectorAll('#teamWingChips [data-team-wing]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-team-wing') === wg));
   const hint = document.getElementById('teamWingChipsHint'); if (hint) hint.style.display = wg ? 'none' : '';
   if (!wg) return '';
   const mem = ids.filter((u) => { const w = teamWings(u).filter((x) => wings.indexOf(x) !== -1); return !w.length || w.indexOf(wg) !== -1; });
-  return mem.length ? mem.map(fn).join('') : '<div class="hv-note" style="text-align:left;">No one in this wing yet.</div>';
+  return `<div class="wing-sec"><div class="wing-sec-h">${wg} <small>· ${mem.length} ${mem.length === 1 ? 'person' : 'people'}</small></div>${mem.length ? mem.map(fn).join('') : '<div class="hv-note" style="text-align:left;">No one in this wing yet.</div>'}</div>`;
 }
   function renderTeamPanel() {
     const el = document.getElementById('teamRows');
@@ -6644,7 +6661,7 @@ function renderPartChips() {
         <div class="team-head" data-team-open="${uid}" role="button" tabindex="0" aria-expanded="${open}">
           <div class="team-txt"><div class="team-name">${escapeHtml(name)}${uid === state.teacherId ? ' <span class="team-you">(you)</span>' : ''}</div>
           <div class="team-id">${sid ? `Staff ID · <b>${escapeHtml(sid)}</b>` : `<button type="button" class="hv-back" data-team-mkid="${uid}" style="padding:0;">Generate Staff ID</button>`}</div><div class="team-info">${escapeHtml(teamMetaText(uid))}</div></div>
-          <span class="team-chev" aria-hidden="true">›</span>
+          <span class="team-chev" aria-hidden="true">${chevSvg(false)}</span>
         </div>
         ${open ? `<div class="team-body">
         <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}">${waNumber(uid) ? `<button type="button" class="tg-mini" data-team-wa="${uid}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:4px;"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Chat</button>` : ''}</div>
@@ -9764,10 +9781,14 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   const s = state.mapSubj; const ids = ttTeacherIds(true); const m = state.teacherMap || {};
   const opt = (sel, none) => `<option value="">${none}</option>` + ids.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('');
   const batRow = (b) => `<div class="mp-row"><span>${escapeHtml(b)}</span><select class="text-input" data-mp-k="${escapeHtml(b)}|${escapeHtml(s)}">${opt(m[`${b}|${s}`] || '', 'Same as all batches')}</select></div>`;
-  el.innerHTML = `<div class="chips tt-teachers">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
+  el.innerHTML = `<div class="wing-sec"><div class="wing-sec-h">${wing} <small>· ${subs.length} subjects</small></div>
+  <div class="wing-lbl">Subject</div>
+  <div class="chips tt-teachers sub-chips">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
+  <div class="wing-lbl">Usual ${escapeHtml(s)} teacher</div>
   <div class="mp-row mp-all"><span>All batches</span><select class="text-input" data-mp-k="*|${escapeHtml(s)}">${opt(m[`*|${s}`] || '', '— No default —')}</select></div>
   <div class="hv-note" style="text-align:left;">Change a batch only if it has a different ${escapeHtml(s)} teacher.</div>
-  ${currentBatches(wing).map(batRow).join('')}`;
+  <div class="wing-lbl">${wing} batches</div>
+  ${currentBatches(wing).map(batRow).join('')}</div>`;
   el.querySelectorAll('[data-mp-s]').forEach((b) => b.addEventListener('click', () => { state.mapSubj = b.getAttribute('data-mp-s'); renderMappingPanel(); }));
     el.querySelectorAll('[data-mp-k]').forEach((sel) => sel.addEventListener('change', async () => {
       const k = sel.getAttribute('data-mp-k'); const map = Object.assign({}, state.teacherMap);
@@ -11896,7 +11917,7 @@ Rules:
   const wl = leadWings(); const wing = (state.subjWingOpen && wl.indexOf(state.subjWingOpen) !== -1) ? state.subjWingOpen : null; if (!wing) state.subjWingOpen = null;
   document.querySelectorAll('#subjWingChips [data-subj-wing]').forEach((b) => { const w = b.getAttribute('data-subj-wing'); b.style.display = wl.indexOf(w) === -1 ? 'none' : ''; b.classList.toggle('active', w === wing); });
   const hint = document.getElementById('subjWingChipsHint'); if (hint) hint.style.display = wing ? 'none' : '';
-  const add = document.getElementById('subjectsAddRow'); if (add) add.style.display = wing ? '' : 'none';
+  const box = document.getElementById('subjWingBox'); if (box) box.style.display = wing ? '' : 'none'; const sh = document.getElementById('subjWingHead'); if (sh) { const cnt = wing ? subjectsList().filter((x) => subjWings(x).indexOf(wing) !== -1).length : 0; sh.innerHTML = wing ? `${wing} <small>· ${cnt} subjects</small>` : ''; }
   const inp = document.getElementById('newSubjectInput'); if (inp) inp.placeholder = wing ? `Add to ${wing}` : 'e.g. Physics';
 }
   function subjWings(name) { const w = (state.subjectWings || {})[name]; return (Array.isArray(w) && w.length) ? w : ['Pre-Foundation', 'Foundation']; }
@@ -13922,7 +13943,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     const expanded = !!state.adminBatchListExpanded;
     document.getElementById('adminBatchListExpandedBox').style.display = expanded ? 'flex' : 'none';
     document.getElementById('adminBatchListHint').style.display = expanded ? 'none' : 'block';
-    if (expanded) renderBatchListInto('batchListRows', state.adminBatchWing);
+    if (expanded) { renderBatchListInto('batchListRows', state.adminBatchWing); const bh = document.getElementById('adminBatchHead'); if (bh) { const nb = currentBatches(state.adminBatchWing).length; bh.innerHTML = `${state.adminBatchWing} <small>· ${nb} ${nb === 1 ? 'batch' : 'batches'}</small>`; } }
     renderBatchListInto('inlineBatchListRows', state.formWing);
   }
 
@@ -18012,7 +18033,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     let html = `<div class="chips">${groups.map((g) => `<button type="button" class="chip${tokOf(g).length ? ' active' : ''}" data-pk-cls="${escapeHtml(g)}">${escapeHtml(g)}</button>`).join('')}</div>`;
     groups.filter((g) => tokOf(g).length || st.open.indexOf(g) !== -1).forEach((g) => {
       const open = st.open.indexOf(g) !== -1;
-      html += `<div class="xc-row"><b>${escapeHtml(g)}</b><span class="xc-btns"><button type="button" class="xc-pick${open ? ' open' : ''}" data-pk-open="${escapeHtml(g)}">${escapeHtml(label(g))} <span aria-hidden="true">${open ? '▴' : '▾'}</span></button><button type="button" class="xc-rm" data-pk-rmc="${escapeHtml(g)}" aria-label="Remove ${escapeHtml(g)}">✕</button></span></div>`;
+      html += `<div class="xc-row"><b>${escapeHtml(g)}</b><span class="xc-btns"><button type="button" class="xc-pick${open ? ' open' : ''}" data-pk-open="${escapeHtml(g)}">${escapeHtml(label(g))} <span aria-hidden="true">${chevSvg(open, 14)}</span></button><button type="button" class="xc-rm" data-pk-rmc="${escapeHtml(g)}" aria-label="Remove ${escapeHtml(g)}">✕</button></span></div>`;
       if (open) {
         const bats = allBatchesFlat().filter((b) => batchGroupOf(b) === g);
         const chip = (tok, lab) => `<button type="button" class="chip${st.scope.indexOf(tok) !== -1 ? ' active' : ''}" data-pk-tok="${escapeHtml(tok)}">${escapeHtml(lab)}</button>`;
