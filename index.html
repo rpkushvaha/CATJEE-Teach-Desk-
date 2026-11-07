@@ -2875,6 +2875,17 @@
   .xc-pick .x-chev, .chip .x-chev { width: 14px; height: 14px; vertical-align: -2px; }
   .wing-sec .activity-row { gap: 6px; }
   .wing-sec .tt-tog { padding: 5px 9px; font-size: 12px; }
+  /* Subjects: the name on top, the buttons below, so nothing can overlap on a big-text phone */
+  #subjectsRows .activity-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "name edit del" "tog tog tog"; align-items: center; column-gap: 4px; row-gap: 9px; padding: 14px 0; }
+  #subjectsRows .activity-row:first-child { padding-top: 6px; }
+  #subjectsRows .activity-row-text { grid-area: name; }
+  #subjectsRows .activity-row .tt-tog { grid-area: tog; justify-self: start; padding: 6px 12px; }
+  #subjectsRows .activity-row [data-list-edit-i] { grid-area: edit; }
+  #subjectsRows .activity-row [data-list-del-i] { grid-area: del; }
+  /* Periods and Timings: the whole time (with AM / PM) fits in the box */
+  .pe-row { grid-template-columns: auto minmax(0, 1fr) 8px minmax(0, 1fr) 34px; gap: 6px; }
+  .pe-row .text-input { min-width: 0; padding: 9px 4px; font-size: 14px; text-align: center; letter-spacing: -.01em; }
+  .team-sum { margin: 2px 0 10px; }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -4225,7 +4236,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.52 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.53 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6549,7 +6560,7 @@ function renderPartChips() {
       snap.docs.forEach((d) => {
         const data = d.data() || {};
         list.push(d.id);
-        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data.salutation), sal: addrOf(d.id) || salNorm(data.salutation), wa: data.whatsapp || '', bd: data.birthMd || '', by: data.birthY || '' };
+        names[d.id] = { name: data.name ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data.salutation), sal: addrOf(d.id) || salNorm(data.salutation), wa: data.whatsapp || '', bd: data.birthMd || '', by: data.birthY || '', subj: data.subject || '' };
         resolvedAdminNameIds.add(d.id);
       });
       state.adminTeacherIds = list;
@@ -6635,13 +6646,16 @@ function renderPartChips() {
     refreshAdminSal(); showToast('Saved'); try { renderTeamPanel( ); } catch (e) { /* ignore */ }
   }
   function chevSvg(up, size) { const z = size || 18; return `<svg class="x-chev" viewBox="0 0 24 24" width="${z}" height="${z}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="${up ? '6 15 12 9 18 15' : '6 9 12 15 18 9'}"></polyline></svg>`; }
+  function inTeamWing(u, wg) { if (!wg) return true; const w = teamWings(u).filter((x) => x === 'Pre-Foundation' || x === 'Foundation'); return !w.length || w.indexOf(wg) !== -1; }
   function teamGrouped(ids, fn) {
-  const wg = state.teamWingOpen || null; const wings = ['Pre-Foundation', 'Foundation'];
+  const wg = state.teamWingOpen || null;
   document.querySelectorAll('#teamWingChips [data-team-wing]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-team-wing') === wg));
   const hint = document.getElementById('teamWingChipsHint'); if (hint) hint.style.display = wg ? 'none' : '';
   if (!wg) return '';
-  const mem = ids.filter((u) => { const w = teamWings(u).filter((x) => wings.indexOf(x) !== -1); return !w.length || w.indexOf(wg) !== -1; });
-  return `<div class="wing-sec"><div class="wing-sec-h">${wg} <small>· ${mem.length} ${mem.length === 1 ? 'person' : 'people'}</small></div>${mem.length ? mem.map(fn).join('') : '<div class="hv-note" style="text-align:left;">No one in this wing yet.</div>'}</div>`;
+  const mem = ids.filter((u) => inTeamWing(u, wg));
+  const joinedW = mem.filter((u) => !isPendingUid(u)); const nDoneW = joinedW.filter(teamFilled).length; const nLackW = joinedW.filter((u) => !teamFilled(u) && u !== state.teacherId).length;
+  const sum = mem.length ? `<div class="team-sum"><b>${nDoneW} of ${joinedW.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLackW ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLackW}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` : '';
+  return `<div class="wing-sec"><div class="wing-sec-h">${wg} <small>· ${mem.length} ${mem.length === 1 ? 'person' : 'people'}</small></div>${sum}${mem.length ? mem.map(fn).join('') : '<div class="hv-note" style="text-align:left;">No one in this wing yet.</div>'}</div>`;
 }
   function renderTeamPanel() {
     const el = document.getElementById('teamRows');
@@ -6651,7 +6665,7 @@ function renderPartChips() {
     const removed = all.filter(isRemovedUid);
     const joined = ids.filter((u) => !isPendingUid(u)); const nDone = joined.filter(teamFilled).length; const nLack = joined.filter((u) => !teamFilled(u) && u !== state.teacherId).length; // the button counts the same people the reminder goes to (not yourself)
     if (!all.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">People appear here after they sign in to the app once.</div>'; return; }
-    el.innerHTML = `<div class="team-sum"><b>${nDone} of ${joined.length} have added their WhatsApp number and birthday</b><div class="team-sum-btns">${nLack ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLack}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` + teamGrouped(ids, (uid) => {
+    el.innerHTML = teamGrouped(ids, (uid) => {
       const name = ((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed') + (isPendingUid(uid) ? ' (not joined yet)' : '');
       const coord = isCoordUid(uid); const prin = isPrincipalUid(uid);
   const w = teamWings(uid);
@@ -9769,6 +9783,18 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     });
   }
   state.mapSubj = null;
+  // who can be the usual teacher of a subject: in this wing, and the subject is set for him (Team), or it is his own subject, or he is already mapped to it
+  function mapTeachersFor(wing, subj) {
+    const base = (state.adminTeacherIds || []).filter((u) => !isCoordUid(u) && !isRemovedUid(u) && inTeamWing(u, wing)).sort((a, b) => ttName(a).localeCompare(ttName(b)));
+    const m = state.teacherMap || {}; const sn = normTxt(subj);
+    const has = (u) => {
+      if (teamDeptOf(u).subjects.some((x) => normTxt(x) === sn)) return true;
+      const own = (state.adminNames[u] || {}).subj; if (own && (normTxt(own) === sn || subjMatch(own, [subj]).length)) return true;
+      return Object.keys(m).some((k) => m[k] === u && normTxt(k.slice(k.indexOf('|') + 1)) === sn);
+    };
+    const out = base.filter(has);
+    return out.length ? { list: out, fallback: false } : { list: base, fallback: base.length > 0 };
+  }
   function renderMappingPanel() {
   const el = document.getElementById('mappingBody'); if (!el) return;
   const wl = leadWings(); const wing = (state.mapWingOpen && wl.indexOf(state.mapWingOpen) !== -1) ? state.mapWingOpen : null;
@@ -9778,14 +9804,15 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   const subs = subjectsList().filter((x) => subjWings(x).indexOf(wing) !== -1);
   if (!subs.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">No subjects in this wing yet. Add them in Subjects.</div>'; return; }
   if (!state.mapSubj || subs.indexOf(state.mapSubj) === -1) state.mapSubj = subs[0];
-  const s = state.mapSubj; const ids = ttTeacherIds(true); const m = state.teacherMap || {};
-  const opt = (sel, none) => `<option value="">${none}</option>` + ids.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('');
+  const s = state.mapSubj; const m = state.teacherMap || {}; const mt = mapTeachersFor(wing, s); const ids = mt.list;
+  const opt = (sel, none) => { const l = (sel && ids.indexOf(sel) === -1) ? ids.concat([sel]) : ids; return `<option value="">${none}</option>` + l.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join(''); };
   const batRow = (b) => `<div class="mp-row"><span>${escapeHtml(b)}</span><select class="text-input" data-mp-k="${escapeHtml(b)}|${escapeHtml(s)}">${opt(m[`${b}|${s}`] || '', 'Same as all batches')}</select></div>`;
   el.innerHTML = `<div class="wing-sec"><div class="wing-sec-h">${wing} <small>· ${subs.length} subjects</small></div>
   <div class="wing-lbl">Subject</div>
   <div class="chips tt-teachers sub-chips">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
   <div class="wing-lbl">Usual ${escapeHtml(s)} teacher</div>
   <div class="mp-row mp-all"><span>All batches</span><select class="text-input" data-mp-k="*|${escapeHtml(s)}">${opt(m[`*|${s}`] || '', '— No default —')}</select></div>
+  ${mt.fallback ? `<div class="hv-note" style="text-align:left;">No teacher has ${escapeHtml(s)} set yet, so all ${wing} teachers are shown. Set the subjects in Team.</div>` : ''}
   <div class="hv-note" style="text-align:left;">Change a batch only if it has a different ${escapeHtml(s)} teacher.</div>
   <div class="wing-lbl">${wing} batches</div>
   ${currentBatches(wing).map(batRow).join('')}</div>`;
@@ -11016,13 +11043,13 @@ Rules:
     return `${md ? '🎂 ' + (by ? fmtDob(md, by) : Number(md.slice(3)) + ' ' + MON_SHORT[Number(md.slice(0, 2)) - 1]) : 'No birthday'} · ${(waNumber(u) || waTen(a.wa)) ? 'WhatsApp ✓' : 'No WhatsApp'}`;
   }
   async function teamRemind() {
-    const lack = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u) && !teamFilled(u) && u !== state.teacherId); if (!lack.length) { showToast('Everyone has added their details'); return; }
+    const lack = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u) && !teamFilled(u) && u !== state.teacherId && inTeamWing(u, state.teamWingOpen)); if (!lack.length) { showToast('Everyone has added their details'); return; }
     if (!(await showConfirm(`${lack.length} teacher${lack.length === 1 ? '' : 's'} will be asked in the app and on their phone to add their WhatsApp number and birthday.`, 'Remind them?', 'Remind'))) return;
     lack.forEach((u) => notify(u, { type: 'profile', title: 'Add your details', body: 'Please add your WhatsApp number and birthday in Menu → Profile.', link: { tab: 'today' } }));
     showToast(`${lack.length} reminded`);
   }
   async function teamCopyNumbers() {
-    const lines = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && waNumber(u)).map((u) => `${(state.adminNames[u] || {}).name || 'Unnamed'} · ${waNumber(u).slice(2)}`);
+    const lines = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && waNumber(u) && inTeamWing(u, state.teamWingOpen)).map((u) => `${(state.adminNames[u] || {}).name || 'Unnamed'} · ${waNumber(u).slice(2)}`);
     if (!lines.length) { showToast('No numbers yet', 'error'); return; }
     try { await navigator.clipboard.writeText(lines.join('\n')); showToast(`${lines.length} number${lines.length === 1 ? '' : 's'} copied`); } catch (e) { showToast('Could not copy. Allow the clipboard for this app.', 'error'); }
   }
@@ -13787,7 +13814,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const newNames = {};
       results.forEach(({ id, data }) => {
         resolvedAdminNameIds.add(id);
-        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data && data.salutation), sal: addrOf(id) || salNorm(data && data.salutation) };
+        newNames[id] = { name: (data && data.name) ? titleCaseName(data.name) : 'Unnamed teacher', own: salNorm(data && data.salutation), sal: addrOf(id) || salNorm(data && data.salutation), subj: (data && data.subject) || '' };
       });
       state.adminNames = Object.assign({}, state.adminNames, newNames);
       const listEl = document.getElementById('adminTeacherList');
