@@ -2861,12 +2861,6 @@
   @keyframes scFlap { from { transform: scaleY(1); } to { transform: scaleY(.4); } }
   @keyframes scFlyR { 0% { transform: translate(-16px, var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(250px, var(--y1)); transform: translate(calc(100cqw + 16px), var(--y1)); opacity: 0; } }
   @keyframes scFlyL { 0% { transform: translate(250px, var(--y0)); transform: translate(calc(100cqw + 16px), var(--y0)); opacity: 0; } 10% { opacity: .9; } 90% { opacity: .9; } 100% { transform: translate(-16px, var(--y1)); opacity: 0; } }
-  /* Team, Teacher Mapping and Subjects: the two wings */
-  .team-grp-h, .grp-h { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; padding: 0 2px; }
-  .team-grp-h[data-team-grp] { cursor: pointer; }
-  .wtags { display: flex; gap: 4px; margin-top: 4px; }
-  .wtag { font: inherit; font-size: 10.5px; font-weight: 700; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--muted-2); padding: 2px 8px; cursor: pointer; line-height: 1.3; }
-  .wtag.on { background: #FDECEE; color: #C0222F; border-color: #F6C3C8; }
   /* The sessions sheet: Check-in and Check-out side by side with the whole width of the sheet */
   #sessSheet #sessionsList { flex-direction: column; gap: 0; }
   #sessSheet #sessionsList .class-card { padding: 12px 0 8px !important; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; background: transparent; }
@@ -3707,6 +3701,11 @@
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Team</div>
         <div class="admin-sub" style="margin:0;">Choose who is a coordinator and which wing each person belongs to. A coordinator manages their wing (dashboard, exams, reports, batch lists) and can force a check-out, but does not teach.</div>
         <div id="staffIdsBlock" class="sid-block"></div>
+  <div class="chips" id="teamWingChips">
+  <button class="chip" data-team-wing="Pre-Foundation">Pre-Foundation</button>
+  <button class="chip" data-team-wing="Foundation">Foundation</button>
+  </div>
+  <div class="admin-sub" id="teamWingChipsHint">Tap a wing above to see its teachers.</div>
         <div id="teamRows" style="display:flex; flex-direction:column; margin-top:6px;"></div>
       </div>
   <div class="panel set-acc" id="adminPushPanel" data-atab="settings" hidden>
@@ -3719,7 +3718,12 @@
   <div class="panel set-acc" id="adminMappingPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8l3 3-3 3"/></svg>Teacher Mapping</div>
         <div class="admin-sub" style="margin:0;">The usual teacher for each subject (and batch). The timetable fills the teacher in automatically.</div>
-        <div id="mappingBody" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+        <div class="chips" id="mapWingChips">
+  <button class="chip" data-map-wing="Pre-Foundation">Pre-Foundation</button>
+  <button class="chip" data-map-wing="Foundation">Foundation</button>
+  </div>
+  <div class="admin-sub" id="mapWingChipsHint">Tap a wing above to set the teachers of its subjects and batches.</div>
+  <div id="mappingBody" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
   <div class="panel set-acc" id="adminBatchPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Class / Batch List</div>
@@ -3743,8 +3747,13 @@
   <div class="panel set-acc" id="adminSubjectsPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Subjects</div>
         <div class="admin-sub" style="margin:0;">The subject list teachers and exams choose from.</div>
-        <div class="activity-rows" id="subjectsRows"></div>
-        <div class="list-add"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
+        <div class="chips" id="subjWingChips">
+  <button class="chip" data-subj-wing="Pre-Foundation">Pre-Foundation</button>
+  <button class="chip" data-subj-wing="Foundation">Foundation</button>
+  </div>
+  <div class="admin-sub" id="subjWingChipsHint">Tap a wing above to see and manage its subjects.</div>
+  <div class="activity-rows" id="subjectsRows"></div>
+  <div class="list-add" id="subjectsAddRow" style="display:none;"><input class="text-input" id="newSubjectInput" type="text" placeholder="e.g. Physics"><button class="btn-secondary" id="addSubjectBtn" style="border-color: var(--line);">+ Add</button></div>
       </div>
   <div class="panel set-acc" id="adminRoomsPanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><circle cx="14.5" cy="12.5" r="1"/></svg>Rooms</div>
@@ -4200,7 +4209,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.50 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.51 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6610,10 +6619,12 @@ function renderPartChips() {
     refreshAdminSal(); showToast('Saved'); try { renderTeamPanel( ); } catch (e) { /* ignore */ }
   }
   function teamGrouped(ids, fn) {
-  const closed = state.teamGrpClosed || (state.teamGrpClosed = {}); const wings = ['Pre-Foundation', 'Foundation']; let html = '';
-  wings.forEach((wg) => { const mem = ids.filter((u) => teamWings(u).indexOf(wg) !== -1); if (!mem.length) return; const shut = !!closed[wg]; html += `<div class="team-grp-h" data-team-grp="${wg}" role="button" tabindex="0" aria-expanded="${!shut}"><span>${wg} · ${mem.length}</span><span aria-hidden="true">${shut ? '›' : '⌄'}</span></div>` + (shut ? '' : mem.map(fn).join('')); });
-  const none = ids.filter((u) => !teamWings(u).some((x) => wings.indexOf(x) !== -1)); if (none.length) html += `<div class="team-grp-h"><span>No wing · ${none.length}</span></div>` + none.map(fn).join('');
-  return html;
+  const wg = state.teamWingOpen || null; const wings = ['Pre-Foundation', 'Foundation'];
+  document.querySelectorAll('#teamWingChips [data-team-wing]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-team-wing') === wg));
+  const hint = document.getElementById('teamWingChipsHint'); if (hint) hint.style.display = wg ? 'none' : '';
+  if (!wg) return '';
+  const mem = ids.filter((u) => { const w = teamWings(u).filter((x) => wings.indexOf(x) !== -1); return !w.length || w.indexOf(wg) !== -1; });
+  return mem.length ? mem.map(fn).join('') : '<div class="hv-note" style="text-align:left;">No one in this wing yet.</div>';
 }
   function renderTeamPanel() {
     const el = document.getElementById('teamRows');
@@ -6667,7 +6678,6 @@ function renderPartChips() {
     el.querySelectorAll('[data-team-addr]').forEach((b) => b.addEventListener('click', () => addrSet(b.getAttribute('data-uid'), b.getAttribute('data-team-addr'))));
   el.querySelectorAll('[data-team-dept]').forEach((inp) => inp.addEventListener('change', () => teamDeptPatch(inp.getAttribute('data-team-dept'), { dept: inp.value.trim() }, 'Department saved')));
   el.querySelectorAll('[data-team-subj]').forEach((b) => b.addEventListener('click', () => { const u = b.getAttribute('data-uid'); const sj = b.getAttribute('data-team-subj'); const cur = teamDeptOf(u).subjects.slice(); const k = cur.indexOf(sj); if (k >= 0) cur.splice(k, 1); else cur.push(sj); teamDeptPatch(u, { subjects: cur }, 'Subjects saved'); }));
-  el.querySelectorAll('[data-team-grp]').forEach((h) => { const tg = () => { const wg = h.getAttribute('data-team-grp'); state.teamGrpClosed = state.teamGrpClosed || {}; state.teamGrpClosed[wg] = !state.teamGrpClosed[wg]; renderTeamPanel(); }; h.addEventListener('click', tg); h.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tg(); } }); });
   el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-uid'); const role = b.getAttribute('data-team-role');
   const cur = isPrincipalUid(uid) ? 'principal' : (isCoordUid(uid) ? 'coordinator' : 'teacher'); if (role === cur) return;
@@ -9744,18 +9754,20 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   state.mapSubj = null;
   function renderMappingPanel() {
   const el = document.getElementById('mappingBody'); if (!el) return;
-  const subs = subjectsList();
+  const wl = leadWings(); const wing = (state.mapWingOpen && wl.indexOf(state.mapWingOpen) !== -1) ? state.mapWingOpen : null;
+  document.querySelectorAll('#mapWingChips [data-map-wing]').forEach((b) => { const w = b.getAttribute('data-map-wing'); b.style.display = wl.indexOf(w) === -1 ? 'none' : ''; b.classList.toggle('active', w === wing); });
+  const hint = document.getElementById('mapWingChipsHint'); if (hint) hint.style.display = wing ? 'none' : '';
+  if (!wing) { el.innerHTML = ''; return; }
+  const subs = subjectsList().filter((x) => subjWings(x).indexOf(wing) !== -1);
+  if (!subs.length) { el.innerHTML = '<div class="hv-note" style="text-align:left;">No subjects in this wing yet. Add them in Subjects.</div>'; return; }
   if (!state.mapSubj || subs.indexOf(state.mapSubj) === -1) state.mapSubj = subs[0];
-  const s = state.mapSubj; const ids = ttTeacherIds(true); const m = state.teacherMap || {}; const wl = leadWings();
+  const s = state.mapSubj; const ids = ttTeacherIds(true); const m = state.teacherMap || {};
   const opt = (sel, none) => `<option value="">${none}</option>` + ids.map((u) => `<option value="${u}"${sel === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('');
-  const chipRow = (list) => list.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('');
-  const subjHtml = wl.length > 1 ? wl.map((w) => { const l = subs.filter((x) => subjWings(x).indexOf(w) !== -1); return l.length ? `<div class="grp-h">${escapeHtml(w)}</div><div class="chips tt-teachers">${chipRow(l)}</div>` : ''; }).join('') : `<div class="chips tt-teachers">${chipRow(wl.length ? subs.filter((x) => subjWings(x).indexOf(wl[0]) !== -1) : subs)}</div>`;
   const batRow = (b) => `<div class="mp-row"><span>${escapeHtml(b)}</span><select class="text-input" data-mp-k="${escapeHtml(b)}|${escapeHtml(s)}">${opt(m[`${b}|${s}`] || '', 'Same as all batches')}</select></div>`;
-  const batHtml = wl.map((w) => { const bl = currentBatches(w); return bl.length ? (wl.length > 1 ? `<div class="grp-h">${escapeHtml(w)} · ${bl.length}</div>` : '') + bl.map(batRow).join('') : ''; }).join('');
-  el.innerHTML = `${subjHtml}
+  el.innerHTML = `<div class="chips tt-teachers">${subs.map((x) => `<button type="button" class="chip${x === s ? ' active' : ''}" data-mp-s="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
   <div class="mp-row mp-all"><span>All batches</span><select class="text-input" data-mp-k="*|${escapeHtml(s)}">${opt(m[`*|${s}`] || '', '— No default —')}</select></div>
   <div class="hv-note" style="text-align:left;">Change a batch only if it has a different ${escapeHtml(s)} teacher.</div>
-  ${batHtml}`;
+  ${currentBatches(wing).map(batRow).join('')}`;
   el.querySelectorAll('[data-mp-s]').forEach((b) => b.addEventListener('click', () => { state.mapSubj = b.getAttribute('data-mp-s'); renderMappingPanel(); }));
     el.querySelectorAll('[data-mp-k]').forEach((sel) => sel.addEventListener('change', async () => {
       const k = sel.getAttribute('data-mp-k'); const map = Object.assign({}, state.teacherMap);
@@ -11880,6 +11892,13 @@ Rules:
   }
   // Subjects that stay out of the timetable (umbrella subjects like Science / Social Science stay for exams and reports).
   // the wings a subject belongs to (both, unless the Admin has made it one)
+  function syncSubjWingUI() {
+  const wl = leadWings(); const wing = (state.subjWingOpen && wl.indexOf(state.subjWingOpen) !== -1) ? state.subjWingOpen : null; if (!wing) state.subjWingOpen = null;
+  document.querySelectorAll('#subjWingChips [data-subj-wing]').forEach((b) => { const w = b.getAttribute('data-subj-wing'); b.style.display = wl.indexOf(w) === -1 ? 'none' : ''; b.classList.toggle('active', w === wing); });
+  const hint = document.getElementById('subjWingChipsHint'); if (hint) hint.style.display = wing ? 'none' : '';
+  const add = document.getElementById('subjectsAddRow'); if (add) add.style.display = wing ? '' : 'none';
+  const inp = document.getElementById('newSubjectInput'); if (inp) inp.placeholder = wing ? `Add to ${wing}` : 'e.g. Physics';
+}
   function subjWings(name) { const w = (state.subjectWings || {})[name]; return (Array.isArray(w) && w.length) ? w : ['Pre-Foundation', 'Foundation']; }
   function notTTList() { return state.subjectsNotTT || ['Science', 'Social Science']; }
   function ttSubjectsList() { const n = notTTList(); return subjectsList().filter((x) => n.indexOf(x) === -1); }
@@ -11900,21 +11919,20 @@ Rules:
   const editing = state.listEditing && state.listEditing.key === key && state.listEditing.i === i;
         return editing
           ? `<div class="activity-row" style="gap:6px;"><input class="text-input" data-list-edit value="${escapeHtml(name)}" style="flex:1; min-width:0; padding:8px 10px;"><button type="button" class="dedit-btn" data-list-save="${i}">Save</button><button type="button" class="del-btn" data-list-cancel aria-label="Cancel">✕</button></div>`
-          : `<div class="activity-row"><div class="activity-row-text"><span class="activity-row-title">${escapeHtml(name)}</span>
-  ${key === 'subjects' ? `<span class="wtags">${['Pre-Foundation', 'Foundation'].map((wg) => `<button type="button" class="wtag${subjWings(name).indexOf(wg) !== -1 ? ' on' : ''}" data-sw="${escapeHtml(name)}|${wg}" aria-label="${wg}">${wg === 'Pre-Foundation' ? 'Pre-F' : 'Found.'}</button>`).join('')}</span>` : ''}</div>
+          : `<div class="activity-row"><div class="activity-row-text"><span class="activity-row-title">${escapeHtml(name)}</span></div>
               ${key === 'subjects' ? `<button type="button" class="tt-tog${notTTList().indexOf(name) === -1 ? ' on' : ''}" data-tt-tog="${escapeHtml(name)}" aria-label="Show in timetable">${notTTList().indexOf(name) === -1 ? '✓ In timetable' : 'Not in timetable'}</button>` : ''}
               <button class="del-btn" data-list-edit-i="${i}" aria-label="Rename">${svgEdit()}</button>
               <button class="del-btn" data-list-del-i="${i}" aria-label="Remove">${svgTrash()}</button></div>`;
   };
-  el.innerHTML = key === 'subjects' ? ['Pre-Foundation', 'Foundation'].map((wg) => { const idx = list.map((n, i) => i).filter((i) => subjWings(list[i]).indexOf(wg) !== -1); return idx.length ? `<div class="grp-h">${wg} · ${idx.length}</div>` + idx.map((i) => rowHtml(list[i], i)).join('') : ''; }).join('') : list.map(rowHtml).join('');
+  if (key === 'subjects') syncSubjWingUI(); el.innerHTML = key === 'subjects' ? (state.subjWingOpen ? list.map((n, i) => i).filter((i) => subjWings(list[i]).indexOf(state.subjWingOpen) !== -1).map((i) => rowHtml(list[i], i)).join('') : '') : list.map(rowHtml).join('');
       el.querySelectorAll('[data-tt-tog]').forEach((b) => b.addEventListener('click', () => toggleSubjectTT(b.getAttribute('data-tt-tog'))));
-  el.querySelectorAll('[data-sw]').forEach((b) => b.addEventListener('click', async () => { const p = b.getAttribute('data-sw').split('|'); const nm = p[0]; const wg = p[1]; const cur = subjWings(nm).slice(); const k = cur.indexOf(wg); if (k >= 0) { if (cur.length < 2) { showToast('A subject needs at least one wing'); return; } cur.splice(k, 1); } else cur.push(wg); const wm = Object.assign({}, state.subjectWings || {}); if (cur.length === 2) delete wm[nm]; else wm[nm] = cur; state.subjectWings = wm; await saveList('subjects', list); renderListManagers(); }));
-      el.querySelectorAll('[data-list-edit-i]').forEach((b) => b.addEventListener('click', () => { state.listEditing = { key, i: +b.getAttribute('data-list-edit-i') }; renderListManagers(); const inp = el.querySelector('[data-list-edit]'); if (inp) inp.focus(); }));
+        el.querySelectorAll('[data-list-edit-i]').forEach((b) => b.addEventListener('click', () => { state.listEditing = { key, i: +b.getAttribute('data-list-edit-i') }; renderListManagers(); const inp = el.querySelector('[data-list-edit]'); if (inp) inp.focus(); }));
       el.querySelectorAll('[data-list-del-i]').forEach((b) => b.addEventListener('click', async () => {
         const i = +b.getAttribute('data-list-del-i');
-        const next = list.slice(); const gone = next.splice(i, 1)[0];
-        await saveList(key, next);
-        showToast(`Removed "${gone}"`);
+  if (key === 'subjects' && state.subjWingOpen) { const nm0 = list[i]; const wgs0 = subjWings(nm0); if (wgs0.length > 1) { const wm0 = Object.assign({}, state.subjectWings || {}); wm0[nm0] = wgs0.filter((x) => x !== state.subjWingOpen); state.subjectWings = wm0; await saveList(key, list); showToast(`Removed "${nm0}" from ${state.subjWingOpen}`); renderListManagers(); return; } }
+  const next = list.slice(); const gone = next.splice(i, 1)[0];
+  await saveList(key, next);
+  showToast(`Removed "${gone}"`);
       }));
       const saveBtn = el.querySelector('[data-list-save]');
       const editInp = el.querySelector('[data-list-edit]');
@@ -11962,7 +11980,13 @@ Rules:
       const v = inp.value.trim();
       if (!v) return;
       const list = cfg.get();
-      if (list.some((x) => x.toLowerCase() === v.toLowerCase())) { showToast('Already in the list'); return; }
+  if (key === 'subjects') {
+    const wing = state.subjWingOpen; if (!wing) { showToast('Tap a wing first'); return; }
+    const ex = list.find((x) => x.toLowerCase() === v.toLowerCase()); const wm = Object.assign({}, state.subjectWings || {});
+    if (ex) { const wgs = subjWings(ex); if (wgs.indexOf(wing) !== -1) { showToast(`Already in ${wing}`); return; } const nw = wgs.concat([wing]); if (nw.length >= 2) delete wm[ex]; else wm[ex] = nw; state.subjectWings = wm; inp.value = ''; await saveList(key, list); showToast(`Added "${ex}" to ${wing}`); renderListManagers(); return; }
+    wm[v] = [wing]; state.subjectWings = wm; inp.value = ''; await saveList(key, list.concat([v])); showToast(`Added "${v}" to ${wing}`); renderListManagers(); return;
+  }
+  if (list.some((x) => x.toLowerCase() === v.toLowerCase())) { showToast('Already in the list'); return; }
       inp.value = '';
       await saveList(key, list.concat([v]));
       showToast(`Added "${v}"`);
@@ -18537,6 +18561,9 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     });
   });
 
+  [['#teamWingChips [data-team-wing]', 'data-team-wing', 'teamWingOpen', () => renderTeamPanel()], ['#mapWingChips [data-map-wing]', 'data-map-wing', 'mapWingOpen', () => renderMappingPanel()], ['#subjWingChips [data-subj-wing]', 'data-subj-wing', 'subjWingOpen', () => renderListManagers()]].forEach(([sel, attr, key, redraw]) => {
+  document.querySelectorAll(sel).forEach((btn) => btn.addEventListener('click', () => { const w = btn.getAttribute(attr); state[key] = state[key] === w ? null : w; redraw(); }));
+  });
   document.getElementById('addBatchBtn').addEventListener('click', async () => {
     const input = document.getElementById('newBatchInput');
     const val = input.value.trim();
