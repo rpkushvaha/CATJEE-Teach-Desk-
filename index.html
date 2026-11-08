@@ -4293,7 +4293,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.62 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.63 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8015,6 +8015,35 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     return `${ds.map((d) => D(d).getDate()).join(', ')} ${mon(ds[ds.length - 1])}${yr}`;
   }
   function filledDays(doc) { return ((doc && doc.cells) || []).map((c) => c.d).concat(Object.keys((doc && doc.dayTimes) || {}).filter((d) => dayNoteOf(doc, d))).filter((v, i, a) => a.indexOf(v) === i).sort(); }
+  const TT_SERIF = '"Times New Roman", Times, "Noto Serif", Georgia, serif';
+  function ttOrd(n) { const t = n % 100; if (t >= 11 && t <= 13) return 'th'; return ({ 1: 'st', 2: 'nd', 3: 'rd' })[n % 10] || 'th'; }
+  // the days of the title, written like the printed sheet: "2 – 7th Nov.’2026" (the "th" small and raised)
+  function titleDaysSegs(days) {
+    const ds = (days || []).slice().sort(); if (!ds.length) return []; const D = (d) => dateObj(d); const dd = (d) => D(d).getDate(); const mon = (d) => D(d).toLocaleDateString('en-GB', { month: 'short' });
+    const last = ds[ds.length - 1]; const yy = `.’${D(last).getFullYear()}`; const lastD = dd(last);
+    if (ds.length === 1) return [{ t: `${WD[D(last).getDay()]} ${lastD}` }, { t: ttOrd(lastD), sup: true }, { t: ` ${mon(last)}${yy}` }];
+    const consec = ds.every((d, i) => i === 0 || shiftDateStr(ds[i - 1], 1) === d);
+    if (consec) return [{ t: `${dd(ds[0])}${mon(ds[0]) === mon(last) ? '' : ' ' + mon(ds[0]) + '.'} – ${lastD}` }, { t: ttOrd(lastD), sup: true }, { t: ` ${mon(last)}${yy}` }];
+    return [{ t: `${ds.slice(0, -1).map((d) => dd(d)).join(', ')}, ${lastD}` }, { t: ttOrd(lastD), sup: true }, { t: ` ${mon(last)}${yy}` }];
+  }
+  // a line of text with room between the letters (it makes the letters smaller if it would not fit)
+  function ttSpacedLine(ctx, segs, cx, cy, size, spacing, color, family, maxW) {
+    const pa = ctx.textAlign, pb = ctx.textBaseline; let sz = size, sp = spacing;
+    const width = () => { let w = 0; segs.forEach((sg) => { ctx.font = `700 ${sg.sup ? sz * 0.58 : sz}px ${family}`; for (const ch of sg.t) w += ctx.measureText(ch).width + sp + (ch === ' ' ? sz * 0.14 : 0); }); return w - sp; };
+    while (maxW && width() > maxW && (sp > 0.4 || sz > 14)) { if (sp > 0.4) sp = Math.max(0.4, sp - 0.4); else sz -= 1; }
+    let x0 = cx - width() / 2; ctx.fillStyle = color; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    segs.forEach((sg) => { ctx.font = `700 ${sg.sup ? sz * 0.58 : sz}px ${family}`; for (const ch of sg.t) { ctx.fillText(ch, x0, cy + (sg.sup ? -sz * 0.3 : 0)); x0 += ctx.measureText(ch).width + sp + (ch === ' ' ? sz * 0.14 : 0); } });
+    ctx.textAlign = pa; ctx.textBaseline = pb;
+  }
+  // the room of each class, spread over the whole width (the first at the left edge, the last at the right edge)
+  function ttRooms(ctx, texts, xL, xR, cy, size, color) {
+    let sz = size; const wOf = (t) => { ctx.font = `700 ${sz}px ${TT_SERIF}`; return ctx.measureText(t).width; };
+    while (sz > 11 && texts.reduce((a, t) => a + wOf(t), 0) + (texts.length - 1) * 18 > xR - xL) sz -= 1;
+    const pa = ctx.textAlign, pb = ctx.textBaseline; ctx.fillStyle = color; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.font = `700 ${sz}px ${TT_SERIF}`; const n = texts.length;
+    texts.forEach((t, i) => { const w = ctx.measureText(t).width; const x0 = n === 1 ? (xL + xR) / 2 - w / 2 : i === 0 ? xL : i === n - 1 ? xR - w : xL + (xR - xL) * (i / (n - 1)) - w / 2; ctx.fillText(t, x0, cy); });
+    ctx.textAlign = pa; ctx.textBaseline = pb;
+  }
+  function ttRRect(ctx, x0, y0, w, h, r) { ctx.beginPath(); ctx.moveTo(x0 + r, y0); ctx.arcTo(x0 + w, y0, x0 + w, y0 + h, r); ctx.arcTo(x0 + w, y0 + h, x0, y0 + h, r); ctx.arcTo(x0, y0 + h, x0, y0, r); ctx.arcTo(x0, y0, x0 + w, y0, r); ctx.closePath(); }
   const TT_IMG_SCALE = 2; // the picture is drawn at twice the size so the small red times stay sharp when zoomed
   function tgImage(returnCanvas) {
     const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return null;
@@ -8032,36 +8061,40 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const used = days.some((d) => { const pd = periodsForDay(g.key, d); if (pd[i] && !pd[i].off && pd[i].start) return true; return pd.some((q, j) => j !== i && j < periodsFor(g.key).length && q && !q.off && q.start && hhmmToMin(q.start) < hhmmToMin(pp0.start) && hhmmToMin(q.end) > hhmmToMin(pp0.start)); });
       if (!used && perIdx.length > 1) perIdx.splice(k, 1);
     }
-    const colDate = 150, colClass = 120, colP = 150, colBr = 70, rowH = one ? 64 : 46, headH = one ? 196 : 150;
+    const colDate = 150, colClass = 120, colBr = 140, rowH = one ? 64 : 46, headH = one ? 240 : 196; let colP = 162;
     const cols = []; perIdx.forEach(([i, pp], k) => { if (k > 0 && hhmmToMin(pp.start) > hhmmToMin(perIdx[k - 1][1].end)) cols.push({ br: true, a: perIdx[k - 1][1].end, z: pp.start }); cols.push({ p: i, pp, n: cols.filter((q) => !q.br).length + 1 }); });
-    const W = colDate + colClass + cols.reduce((s, c) => s + (c.br ? colBr : colP), 0) + 40;
+    { const nP = cols.filter((c) => !c.br).length; const nB = cols.length - nP; if (nP) colP = Math.min(260, Math.max(162, Math.ceil((1120 - colDate - colClass - nB * colBr) / nP))); }
+  const W = colDate + colClass + cols.reduce((s, c) => s + (c.br ? colBr : colP), 0) + 40;
     const topX = state.tg.imgStamp ? 20 : 0;
+  // Evening batches of the Pre-Foundation have a soft look; the others keep the colours they had
+  const PAL = (sessType(g.session) === 'evening' && !/^foundation$/i.test(g.wing)) ? { pill: true, title: '#FFD34D', titleTxt: '#A31515', room: '#A31515', hdr: '#FFC4D2', hdrTxt: '#8A1033', ph: '#FFC4D2', phTxt: '#8A1033', time: '#FFD9E2', timeTxt: '#8A1033', timeBold: true, date: '#FFFBB8', cls: '#FDE9DC', alt: '#E3F1F7', brk: '#E3DCC0' } : { pill: false, title: '#FFFF00', titleTxt: '#000', room: '#C00000', hdr: '#F8CBAD', hdrTxt: '#111', ph: '#FFFF00', phTxt: '#111', time: '#F8CBAD', timeTxt: '#000', timeBold: false, date: '#E2EFDA', cls: '#FFFFFF', alt: '#DDEBF7', brk: '#D0CECE' };
     const H = headH + topX + days.length * bats.length * rowH + 40;
     const SC = TT_IMG_SCALE; const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC; const x = cv.getContext('2d'); x.scale(SC, SC);
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
     const txt = (t, cx, cy, size, bold, color, maxW) => { x.font = `${bold ? '700 ' : ''}${size}px Arial, sans-serif`; x.fillStyle = color || '#111'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(t), cx, cy, maxW); };
     const box = (bx, by, bw, bh, fill) => { if (fill) { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); } x.strokeStyle = '#222'; x.lineWidth = 1.2; x.strokeRect(bx, by, bw, bh); };
     const ws = state.tt.weekStart; const we = days[days.length - 1];
-    box(20, 12, W - 40, 40, '#FFFF00');
-    txt(`${g.wing.toUpperCase()} (${shiftLabel(g.session).toUpperCase()} BATCH) TIME-TABLE (${daysLabel(days, true)})`, W / 2, 32, 22, true, '#000', W - 60);
-    if (state.tg.imgStamp) { x.font = '700 13px Arial, sans-serif'; x.fillStyle = '#C00000'; x.textAlign = 'right'; x.textBaseline = 'middle'; x.fillText(state.tg.imgStamp, W - 24, 64); }
-    if (one) {
-      txt(one.toUpperCase(), W / 2, 78 + topX, 22, true, '#000', W - 60);
-      const rm = batchRoom(one); if (rm) txt(`${rm} ROOM`, W / 2, 110 + topX, 20, true, '#C00000', W - 60);
-    } else {
-      const rooms = bats.filter(batchRoom).map((b) => `${b}: ${batchRoom(b)} Room`).join('     ');
-      if (rooms) txt(rooms, W / 2, 68 + topX, 15, true, '#C00000', W - 60);
-    }
-    let cx = 20; const y0 = (one ? 132 : 86) + topX;
-    box(cx, y0, colDate, 64, '#F8CBAD'); txt('DATE', cx + colDate / 2, y0 + 32, 15, true); cx += colDate;
-    box(cx, y0, colClass, 64, '#F8CBAD'); txt('CLASS', cx + colClass / 2, y0 + 32, 15, true); cx += colClass;
-    cols.forEach((c) => {
-      const w = c.br ? colBr : colP;
-      box(cx, y0, w, 30, '#FFFF00'); txt(c.br ? 'BREAK' : `PERIOD ${c.n}`, cx + w / 2, y0 + 15, 13, true);
-      box(cx, y0 + 30, w, 34, '#F8CBAD'); const sh = (t) => formatTimeStr(t).replace(/\s?(AM|PM)$/i, ''); txt(c.br ? `${sh(c.a)}-${sh(c.z)}` : `${formatTimeStr(c.pp.start)} - ${formatTimeStr(c.pp.end)}`, cx + w / 2, y0 + 47, 12, false, '#000', w - 6);
-      cx += w;
-    });
-    // x position of each column
+    const TH = 50; const titleSegs = [{ t: `${g.wing.toUpperCase()} (${shiftLabel(g.session).toUpperCase()} BATCH) TIME-TABLE (` }].concat(titleDaysSegs(days)).concat([{ t: ')' }]);
+  if (PAL.pill) { x.fillStyle = PAL.title; ttRRect(x, 20, 12, W - 40, TH, TH / 2); x.fill(); x.strokeStyle = '#222'; x.lineWidth = 1.2; x.stroke(); } else box(20, 12, W - 40, TH, PAL.title);
+  ttSpacedLine(x, titleSegs, W / 2, 12 + TH / 2 + 1, 28, 2.2, PAL.titleTxt, TT_SERIF, W - 100);
+  if (state.tg.imgStamp) { x.font = '700 13px Arial, sans-serif'; x.fillStyle = '#C00000'; x.textAlign = 'right'; x.textBaseline = 'middle'; x.fillText(state.tg.imgStamp, W - 24, 80); }
+  if (one) {
+  txt(one.toUpperCase(), W / 2, 92 + topX, 22, true, '#000', W - 60);
+  const rm = batchRoom(one); if (rm) txt(`${rm} ROOM`, W / 2, 124 + topX, 20, true, PAL.room, W - 60);
+  } else {
+  const rl = bats.filter(batchRoom).map((b) => `${b}: ${batchRoom(b)} Room`);
+  if (rl.length) ttRooms(x, rl, 26, W - 26, 88 + topX, 17, PAL.room);
+  }
+  let cx = 20; const y0 = (one ? 148 : 108) + topX;
+    box(cx, y0, colDate, 92, PAL.hdr); txt('DATE', cx + colDate / 2, y0 + 46, 15, true, PAL.hdrTxt); cx += colDate;
+  box(cx, y0, colClass, 92, PAL.hdr); txt('CLASS', cx + colClass / 2, y0 + 46, 15, true, PAL.hdrTxt); cx += colClass;
+  cols.forEach((c) => {
+  const w = c.br ? colBr : colP;
+  box(cx, y0, w, 38, PAL.ph); txt(c.br ? 'BREAK' : `PERIOD ${c.n}`, cx + w / 2, y0 + 19, 14, true, PAL.phTxt);
+  box(cx, y0 + 38, w, 54, PAL.time); txt(c.br ? `${formatTimeStr(c.a)} – ${formatTimeStr(c.z)}` : `${formatTimeStr(c.pp.start)} – ${formatTimeStr(c.pp.end)}`, cx + w / 2, y0 + 65, 12.5, PAL.timeBold, PAL.timeTxt, w - 12);
+  cx += w;
+  });
+  // x position of each column
     const colX = []; { let xx = 20 + colDate + colClass; cols.forEach((c) => { colX.push({ x: xx, w: c.br ? colBr : colP, c }); xx += c.br ? colBr : colP; }); }
     const pX = (p) => colX.find((o) => !o.c.br && o.c.p === p);
     const fmtS = (t) => formatTimeStr(t).replace(/\s/g, '').toLowerCase();
@@ -8073,11 +8106,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
  days.forEach((d, di) => {
       const dh = bats.length * rowH;
       const perD = periodsForDay(g.key, d);
-      box(20, y, colDate, dh, '#E2EFDA');
+      box(20, y, colDate, dh, PAL.date);
       txt(dateObj(d).toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase(), 20 + colDate / 2, y + dh / 2 - 10, 14, true);
       txt(`(${String(dateObj(d).getDate()).padStart(2, '0')}.${String(dateObj(d).getMonth() + 1).padStart(2, '0')}.${dateObj(d).getFullYear()})`, 20 + colDate / 2, y + dh / 2 + 10, 13, true);
-      const shade = di % 2 ? '#DDEBF7' : '#FFFFFF';
-      const drawn = {};
+      const shade = di % 2 ? PAL.alt : '#FFFFFF';
+  const drawn = {};
       // A day with its own period times is laid out by the clock, like the printed sheet:
       // each period covers the header columns that start inside its time, and the break column stays grey.
       const liveD = perD.map((pp, i) => ({ pp, i })).filter((q) => q.pp && !q.pp.off && q.pp.start && q.pp.end);
@@ -8092,8 +8125,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const colsOf = (pp) => (timeMode && span[pp] ? [colX[span[pp][0]], colX[span[pp][1]]] : [pX(pp), pX(pp)]);
       bats.forEach((b, bi) => {
         const ry = y + bi * rowH;
-        box(20 + colDate, ry, colClass, rowH, '#FFFFFF'); txt(gridBatchLabel(b).replace(' · ', ' '), 20 + colDate + colClass / 2, ry + rowH / 2, 13, true, '#000', colClass - 8);
-        colX.forEach((o) => { if (o.c.br) box(o.x, ry, o.w, rowH, '#D0CECE'); });
+        box(20 + colDate, ry, colClass, rowH, PAL.cls); txt(gridBatchLabel(b).replace(' · ', ' '), 20 + colDate + colClass / 2, ry + rowH / 2, 13, true, '#000', colClass - 8);
+        colX.forEach((o) => { if (o.c.br) box(o.x, ry, o.w, rowH, PAL.brk); });
       });
       // exams: one merged box when the cells form a rectangle
       const exIds = (doc.cells || []).filter((c) => c.d === d && c.ex).map((c) => c.ex).filter((v, i, arr) => arr.indexOf(v) === i);
@@ -9176,18 +9209,18 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   function myWeekImage(ws) {
     const { days, times, slots } = myWeekGridData(ws);
-    const colDay = 150, colT = 160, rowH = 64, headH = 120;
+    const colDay = 150, colT = 160, rowH = 64, headH = 142;
     const W = colDay + times.length * colT + 40, H = headH + days.length * rowH + 30;
     const SC = TT_IMG_SCALE; const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC; const x = cv.getContext('2d'); x.scale(SC, SC);
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
     const txt = (t, cx, cy, size, bold, color, maxW) => { x.font = `${bold ? '700 ' : ''}${size}px Arial, sans-serif`; x.fillStyle = color || '#111'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(t), cx, cy, maxW); };
     const box = (bx, by, bw, bh, fill) => { if (fill) { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); } x.strokeStyle = '#222'; x.lineWidth = 1.2; x.strokeRect(bx, by, bw, bh); };
     const we = days[days.length - 1];
-    box(20, 12, W - 40, 40, '#FFFF00');
-    txt(`WEEKLY TIME-TABLE — ${((state.user && state.user.name) || '').toUpperCase()} (${dateObj(ws).getDate()} ${dateObj(ws).toLocaleDateString('en-GB', { month: 'short' })} – ${dateObj(we).getDate()} ${dateObj(we).toLocaleDateString('en-GB', { month: 'short' })} ${dateObj(we).getFullYear()})`, W / 2, 32, 20, true, '#000', W - 60);
-    box(20, 64, colDay, 44, '#F8CBAD'); txt('DAY', 20 + colDay / 2, 86, 15, true);
-    times.forEach((t, i) => { const cx = 20 + colDay + i * colT; box(cx, 64, colT, 44, '#F8CBAD'); txt(formatTimeStr(t), cx + colT / 2, 86, 14, true); });
-    days.forEach((d, di) => {
+    box(20, 12, W - 40, 50, '#FFFF00');
+  ttSpacedLine(x, [{ t: `WEEKLY TIME-TABLE — ${((state.user && state.user.name) || '').toUpperCase()} (` }].concat(titleDaysSegs(days)).concat([{ t: ')' }]), W / 2, 38, 28, 2.2, '#000', TT_SERIF, W - 100);
+  box(20, 76, colDay, 54, '#F8CBAD'); txt('DAY', 20 + colDay / 2, 103, 15, true);
+  times.forEach((t, i) => { const cx = 20 + colDay + i * colT; box(cx, 76, colT, 54, '#F8CBAD'); txt(formatTimeStr(t), cx + colT / 2, 103, 14, true); });
+  days.forEach((d, di) => {
       const ry = headH + di * rowH;
       box(20, ry, colDay, rowH, '#E2EFDA'); txt(dateObj(d).toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase(), 20 + colDay / 2, ry + rowH / 2 - 9, 14, true); txt(`${dateObj(d).getDate()}.${String(dateObj(d).getMonth() + 1).padStart(2, '0')}.${dateObj(d).getFullYear()}`, 20 + colDay / 2, ry + rowH / 2 + 11, 12, false);
       times.forEach((t, i) => {
@@ -9486,11 +9519,11 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (!rows.length) { showToast('No substitutions on this day'); return; }
     rows.sort((a, b) => a.ts.localeCompare(b.ts) || a.cls.localeCompare(b.cls));
     const cols = [['Time', 210], ['Class', 110], ['Subject', 150], ['Absent', 250], ['Taken by', 250], ['Room', 90]];
-    const tw = cols.reduce((n, c) => n + c[1], 0); const W = tw + 40, rowH = 46, hdrH = 44, titleH = 56, H = 20 + titleH + hdrH + rows.length * rowH + 56;
+    const tw = cols.reduce((n, c) => n + c[1], 0); const W = tw + 40, rowH = 46, hdrH = 54, titleH = 60, H = 20 + titleH + hdrH + rows.length * rowH + 56;
     const SC = TT_IMG_SCALE; const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC; const x = cv.getContext('2d'); x.scale(SC, SC);
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.lineWidth = 1.5; x.strokeStyle = '#444'; x.textBaseline = 'middle'; x.textAlign = 'center';
     const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeRect(bx, by, bw, bh); };
-    box(20, 20, tw, titleH, '#FFFF00'); x.fillStyle = '#000'; x.font = 'bold 24px Arial, sans-serif'; x.fillText(`ARRANGEMENT · ${dayHeading(date).toUpperCase()}`, 20 + tw / 2, 20 + titleH / 2);
+    box(20, 20, tw, titleH, '#FFFF00'); ttSpacedLine(x, [{ t: `ARRANGEMENT · ${dayHeading(date).toUpperCase()}` }], 20 + tw / 2, 20 + titleH / 2 + 1, 29, 2.2, '#000', TT_SERIF, tw - 60);
     let cx = 20; const hy = 20 + titleH;
     cols.forEach(([h, w]) => { box(cx, hy, w, hdrH, '#F8CBAD'); x.fillStyle = '#000'; x.font = 'bold 18px Arial, sans-serif'; x.fillText(h, cx + w / 2, hy + hdrH / 2); cx += w; });
     rows.forEach((r, i) => {
