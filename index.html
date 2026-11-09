@@ -4298,7 +4298,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.65 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.66 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -16507,7 +16507,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     w.addSpace(2);
     w.bodyLine(`Faculty: ${teacherName}`, { bold: true, size: 11 });
     const subj = reportFor ? reportFor.subject : state.teacherSubject;
-    { const ru = reportFor ? reportFor.tid : state.teacherId; const dl2 = (dates || []).slice().sort(); const di = ru ? deptInfo(ru, String(dl2[dl2.length - 1] || todayStr())) : null; if (di) { w.bodyLine(`Department: ${di.dept}`, { size: 11 }); if (di.mode === 'one') w.bodyLine(`Subject: ${di.one}`, { size: 11 }); } else if (subj) w.bodyLine(`Subject: ${subj}`, { size: 11 }); }
+    { const ru = reportFor ? reportFor.tid : state.teacherId; const dl2 = (dates || []).slice().sort(); const di = ru ? deptInfo(ru, String(dl2[dl2.length - 1] || todayStr())) : null; if (di) { w.bodyLine(`Department: ${di.dept}`, { size: 11 }); const sl = di.subs; if (sl.length) w.bodyLine(`${sl.length === 1 ? 'Subject' : 'Subjects'}: ${sl.join(', ')}`, { size: 11 }); } else if (subj) w.bodyLine(`Subject: ${subj}`, { size: 11 }); }
     w.bodyLine(periodLine, { size: 11 });
     if (f.label) w.bodyLine(`${f.label} (summary and records follow this filter)`, { bold: true, size: 10 });
     w.addSpace(4);
