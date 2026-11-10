@@ -2615,6 +2615,16 @@
   .xc-rm { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--muted-2); font-size: 15px; cursor: pointer; }
   .xc-open { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px 4px; margin-left: 8px; border-left: 2px solid var(--line); }
   body[data-hsub="ov"] [data-hsub]:not([data-hsub="ov"]), body[data-hsub="tc"] [data-hsub]:not([data-hsub="tc"]), body[data-hsub="cl"] [data-hsub]:not([data-hsub="cl"]) { display: none !important; }
+  .ht-badge { position: absolute; top: 8px; right: 8px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #E63946; color: #fff; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .ht-badge[hidden] { display: none; }
+  #homeSeg { display: none !important; }
+  #homeSubHead { display: none; margin-top: 6px; }
+  body[data-hsub="ov"][data-htile="grid"] [data-htile] { display: none !important; }
+  body[data-hsub="ov"][data-htile="today"] [data-htile]:not([data-htile="today"]), body[data-hsub="ov"][data-htile="oc"] [data-htile]:not([data-htile="oc"]), body[data-hsub="ov"][data-htile="alerts"] [data-htile]:not([data-htile="alerts"]), body[data-hsub="ov"][data-htile="notices"] [data-htile]:not([data-htile="notices"]) { display: none !important; }
+  body[data-hsub="ov"]:not([data-htile="grid"]) #homeTiles { display: none !important; }
+  body[data-hsub="ov"]:not([data-htile="grid"]) #homeSubHead, body[data-hsub="tc"] #homeSubHead, body[data-hsub="cl"] #homeSubHead { display: flex; }
+  body[data-hsub="ov"]:not([data-htile="grid"]) section[data-htile] > .tsec-head .tsec-title { display: none; }
+  #view-admin > #homeTiles, #view-admin > #homeSubHead { grid-column: 1 / -1; }
   .home-seg { display: flex; gap: 4px; padding: 4px; background: var(--neutral-soft); border-radius: 14px; }
   .home-seg button { flex: 1; padding: 9px 6px; border: 0; border-radius: 11px; background: transparent; color: var(--muted-2); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .home-seg button.active { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(16,24,40,.12); }
@@ -3569,8 +3579,11 @@
       
 
       <div class="home-seg" id="homeSeg" data-atab="dash"><button type="button" data-hsub-btn="ov" class="active">Overview</button><button type="button" data-hsub-btn="tc">Teachers - <span id="hsTc">0</span></button><button type="button" data-hsub-btn="cl">Classes - <span id="hsCl">0</span></button></div>
- <section class="tsec" data-atab="dash" data-hsub="ov">
-        <div class="tsec-head"><div class="tsec-title">Today</div><div class="tsec-meta" id="adLoggedMeta" hidden></div></div>
+<div id="homeTiles" data-atab="dash" data-hsub="ov"><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 4px;"><button type="button" class="qa-btn rt-tile" data-ht-go="today"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg><span class="qa-l">Today</span><span class="qa-s" data-ht-sub="today">Classes today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 5a3.5 3.5 0 0 1 0 7"/><path d="M19 14c2 1 3 3.5 3 7"/></svg><span class="qa-l">Teachers</span><span class="qa-s" data-ht-sub="tc">teachers</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="cl"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg><span class="qa-l">Classes</span><span class="qa-s" data-ht-sub="cl">today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="oc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 1 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="qa-l">On campus now</span><span class="qa-s" data-ht-sub="oc"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="alerts"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><line x1="12" y1="10" x2="12" y2="15"/><line x1="12" y1="18" x2="12" y2="18.1"/></svg><span class="qa-l">Needs attention</span><span class="qa-s" data-ht-sub="alerts"></span><span class="ht-badge" id="htBadgeAlerts" hidden></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="notices"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="qa-l">Notices</span><span class="qa-s" data-ht-sub="notices"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tt"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg><span class="qa-l">Timetable</span><span class="qa-s" data-ht-sub="tt">Week, grid, publish</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="exams"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><polyline points="9 14 11 16 15 11"/></svg><span class="qa-l">Exams</span><span class="qa-s" data-ht-sub="exams">Tests and duty</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="reports"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Reports</span><span class="qa-s" data-ht-sub="reports">Attendance, count and more</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="settings"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg><span class="qa-l">Settings</span><span class="qa-s" data-ht-sub="settings">People, timetable, tools</span></button></div></div>
+<div class="pg-title-row" id="homeSubHead" data-atab="dash"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title" id="homeSubTitle">Today</div></div>
+
+ <section class="tsec" data-atab="dash" data-hsub="ov" data-htile="today">
+<div class="tsec-head"><div class="tsec-title">Today</div><div class="tsec-meta" id="adLoggedMeta" hidden></div></div>
         <div class="sum-grid">
           <div class="sum-tile"><div class="sum-num" id="adScheduled">0</div><div class="sum-lbl">Scheduled</div></div>
           <div class="sum-tile"><div class="sum-num" id="adCompleted">0</div><div class="sum-lbl">Completed</div></div>
@@ -3585,11 +3598,11 @@
         </div>
  </section>
 
-      <section class="tsec" id="adminTTImgSec" data-atab="dash" data-hsub="ov" hidden>
+      <section class="tsec" id="adminTTImgSec" data-atab="dash" data-hsub="ov" data-htile="today" hidden>
         <div class="tsec-head"><div class="tsec-title">This Week's Timetable</div><div class="tsec-meta">tap to view</div></div>
         <div class="tti-row" id="adminTTImgs"></div>
       </section>
-      <div class="teacher-card ad-oncampus" id="onCampusNowCard" data-atab="dash" data-hsub="ov" style="display:none; cursor:pointer;">
+      <div class="teacher-card ad-oncampus" id="onCampusNowCard" data-atab="dash" data-hsub="ov" data-htile="oc" style="display:none; cursor:pointer;">
         <div class="teacher-top">
           <div class="teacher-name"><span class="live-dot"></span>On Campus Right Now</div>
           <div class="teacher-time num" id="onCampusNowCount">0</div>
@@ -3598,12 +3611,12 @@
         <div id="onCampusNowNames" style="display:none; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
 
-      <section class="tsec" data-atab="dash" data-hsub="ov">
- <div class="tsec-head"><div class="tsec-title">Needs attention</div></div>
+      <section class="tsec" data-atab="dash" data-hsub="ov" data-htile="alerts">
+<div class="tsec-head"><div class="tsec-title">Needs attention</div></div>
         <div id="adminAlerts"></div>
       </section>
 
-      <section class="tsec" data-atab="dash" data-hsub="ov" id="noticesSec">
+      <section class="tsec" data-atab="dash" data-hsub="ov" data-htile="notices" id="noticesSec">
         <div class="tsec-head"><div class="tsec-title">Notices</div><button type="button" class="hv-back" id="nbNewTop" hidden style="padding:0;">+ New</button></div>
         <div id="adminNotices"></div>
       </section>
@@ -4298,7 +4311,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.66 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.67 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11714,13 +11727,46 @@ Rules:
   // ---------- Admin Home: Overview / Teachers / Classes ----------
   state.homeSub = (function () { try { return localStorage.getItem('ctd_home_sub') || 'ov'; } catch (e) { return 'ov'; } })();
   if (['ov', 'tc', 'cl'].indexOf(state.homeSub) === -1) state.homeSub = 'ov';
+  state.homeSub = 'ov'; state.homeTile = 'grid'; // the Home always opens on the tiles
+  const HT_TITLES = { today: 'Today', oc: 'On campus now', alerts: 'Needs attention', notices: 'Notices', tc: 'Teachers', cl: 'Classes' };
   function applyHomeSub() {
-    document.body.setAttribute('data-hsub', state.homeSub);
+  document.body.setAttribute('data-hsub', state.homeSub); homeTileApply();
     document.querySelectorAll('#homeSeg [data-hsub-btn]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-hsub-btn') === state.homeSub));
     try { localStorage.setItem('ctd_home_sub', state.homeSub); } catch (e) { /* ignore */ }
   }
   document.querySelectorAll('#homeSeg [data-hsub-btn]').forEach((b) => b.addEventListener('click', () => { state.homeSub = b.getAttribute('data-hsub-btn'); applyHomeSub(); }));
   applyHomeSub();
+  // ---------- Admin Home as tiles: each tile opens the part it names; the parts themselves are the same as before ----------
+  function homeTileApply() {
+    document.body.setAttribute('data-htile', state.homeSub === 'ov' ? state.homeTile : 'grid');
+    const t = document.getElementById('homeSubTitle'); if (t) t.textContent = HT_TITLES[state.homeSub === 'ov' ? state.homeTile : state.homeSub] || '';
+  }
+  function homeOpen(k) {
+    if (k === 'oc' && !(Number((document.getElementById('onCampusNowCount') || {}).textContent) > 0)) { showToast('Nobody is on campus right now'); return; }
+    navPush({ tab: 'admin', sub: 'dash', tile: 'grid', hsub: 'ov' });
+    if (k === 'tc' || k === 'cl') { state.homeSub = k; state.homeTile = 'grid'; } else { state.homeSub = 'ov'; state.homeTile = k; }
+    applyHomeSub(); window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-ht-go]').forEach((b) => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-ht-go');
+    if (['tt', 'exams', 'reports', 'settings'].indexOf(k) >= 0) { const tb = document.querySelector('#adminTabs [data-atab-btn="' + k + '"]'); if (tb) tb.click(); return; }
+    homeOpen(k);
+  }));
+  { const hb = document.querySelector('#adminTabs [data-atab-btn="dash"]'); if (hb) hb.addEventListener('click', () => { state.homeSub = 'ov'; state.homeTile = 'grid'; applyHomeSub(); }); }
+  // the small texts and the red count on the tiles follow the numbers the page already has (no new reads)
+  let htTimer = null;
+  function homeTilesRefresh() {
+    const tx = (id) => { const e = document.getElementById(id); return e ? String(e.textContent || '').trim() : ''; };
+    const set = (k, v) => { const e = document.querySelector('[data-ht-sub="' + k + '"]'); if (e) e.textContent = v; };
+    set('today', (tx('adScheduled') || 0) + ' classes · ' + (tx('adNotLogged') || 0) + ' not logged');
+    set('tc', (tx('hsTc') || 0) + ' teachers'); set('cl', (tx('hsCl') || 0) + ' today');
+    const oc = Number(tx('onCampusNowCount')) || 0; set('oc', oc ? oc + (oc === 1 ? ' teacher' : ' teachers') : 'Nobody yet');
+    const al = document.querySelectorAll('#adminAlerts .ad-alert').length; set('alerts', al ? 'Tap to see' : 'All clear');
+    const bd = document.getElementById('htBadgeAlerts'); if (bd) { bd.hidden = !al; bd.textContent = al; }
+    const nn = document.querySelectorAll('#adminNotices > *:not(.empty-state)').length; set('notices', nn ? nn + ' recent' : 'None in 2 weeks');
+    document.querySelectorAll('[data-ht-go]').forEach((b) => { const k = b.getAttribute('data-ht-go'); if (['tt', 'exams', 'reports', 'settings'].indexOf(k) >= 0) { const tb = document.querySelector('#adminTabs [data-atab-btn="' + k + '"]'); b.hidden = !tb || getComputedStyle(tb).display === 'none'; } });
+  }
+  { const va = document.getElementById('view-admin'); if (va && window.MutationObserver) new MutationObserver(() => { clearTimeout(htTimer); htTimer = setTimeout(homeTilesRefresh, 60); }).observe(va, { childList: true, subtree: true, characterData: true }); homeTilesRefresh(); }
   // Teachers: search, filter chips (with the counts) and "Show all"; the rows themselves are drawn by renderAdmin
   state.adminTF = 'all'; state.adminTQ = ''; state.adminTAll = false;
   function tcGroup(k) { return (k === 'oncampus' || k === 'present') ? 'present' : (k === 'leave' ? 'leave' : (k === 'off' ? 'off' : 'notin')); }
@@ -15018,6 +15064,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     state.navBusy = true;
     try {
       if (target.tab === 'admin' && target.sub) state.adminTab = target.sub;
+  if (target.tab === 'admin' && target.tile) { state.homeTile = target.tile; state.homeSub = target.hsub || 'ov'; applyHomeSub(); }
       switchTab(target.tab);
       if (target.tab === 'admin') renderAdmin();
     } finally { state.navBusy = false; }
