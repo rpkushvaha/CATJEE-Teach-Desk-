@@ -2633,6 +2633,13 @@
   .ad-clsel .ad-wingsel select { max-width: none !important; width: 100%; height: 42px; font-size: 14px !important; }
   .ht-badge { position: absolute; top: 8px; right: 8px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #E63946; color: #fff; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
   .ht-badge[hidden] { display: none; }
+  #repSubHead { display: none; margin-bottom: 8px; }
+  #view-admin[data-atab-cur="reports"][data-repv="tiles"] .ad-bar, #view-admin[data-atab-cur="reports"][data-repv="tiles"] #adminReportsSec > :not(#adminRepKind) { display: none !important; }
+  #view-admin[data-atab-cur="reports"][data-repv="open"] #adminRepKind { display: none !important; }
+  #view-admin[data-atab-cur="reports"][data-repv="open"] #repSubHead { display: flex !important; }
+  #onCampusNowNote { display: none; margin-top: 6px; }
+  body[data-hsub="ov"][data-htile="oc"] #onCampusNowNote { display: block; }
+  body[data-hsub="ov"][data-htile="oc"] #onCampusNowHint { display: none; }
   #homeSeg { display: none !important; }
   #homeSubHead { display: none; margin-top: 6px; }
   body[data-hsub="ov"][data-htile="grid"] [data-htile] { display: none !important; }
@@ -3595,7 +3602,7 @@
       
 
       <div class="home-seg" id="homeSeg" data-atab="dash"><button type="button" data-hsub-btn="ov" class="active">Overview</button><button type="button" data-hsub-btn="tc">Teachers - <span id="hsTc">0</span></button><button type="button" data-hsub-btn="cl">Classes - <span id="hsCl">0</span></button></div>
-<div id="homeTiles" data-atab="dash" data-hsub="ov"><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 4px;"><button type="button" class="qa-btn rt-tile" data-ht-go="today"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg><span class="qa-l">Day summary</span><span class="qa-s" data-ht-sub="today">Classes today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 5a3.5 3.5 0 0 1 0 7"/><path d="M19 14c2 1 3 3.5 3 7"/></svg><span class="qa-l">Teachers</span><span class="qa-s" data-ht-sub="tc">teachers</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="cl"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg><span class="qa-l">Classes</span><span class="qa-s" data-ht-sub="cl">today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="oc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 1 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="qa-l">On campus now</span><span class="qa-s" data-ht-sub="oc"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="alerts"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><line x1="12" y1="10" x2="12" y2="15"/><line x1="12" y1="18" x2="12" y2="18.1"/></svg><span class="qa-l">Needs attention</span><span class="qa-s" data-ht-sub="alerts"></span><span class="ht-badge" id="htBadgeAlerts" hidden></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="notices"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="qa-l">Notices</span><span class="qa-s" data-ht-sub="notices"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tt"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg><span class="qa-l">Timetable</span><span class="qa-s" data-ht-sub="tt">Week, grid, publish</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="exams"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><polyline points="9 14 11 16 15 11"/></svg><span class="qa-l">Exams</span><span class="qa-s" data-ht-sub="exams">Tests and duty</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="reports"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Reports</span><span class="qa-s" data-ht-sub="reports">Attendance, count and more</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="settings"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg><span class="qa-l">Settings</span><span class="qa-s" data-ht-sub="settings">People, timetable, tools</span></button></div></div>
+<div id="homeTiles" data-atab="dash" data-hsub="ov"><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 4px;"><button type="button" class="qa-btn rt-tile" data-ht-go="today"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg><span class="qa-l">Day summary</span><span class="qa-s" data-ht-sub="today">Classes today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 5a3.5 3.5 0 0 1 0 7"/><path d="M19 14c2 1 3 3.5 3 7"/></svg><span class="qa-l">Teachers</span><span class="qa-s" data-ht-sub="tc">teachers</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="cl"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg><span class="qa-l">Classes</span><span class="qa-s" data-ht-sub="cl">today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="oc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 1 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="qa-l">On campus now</span><span class="qa-s" data-ht-sub="oc"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="alerts"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><line x1="12" y1="10" x2="12" y2="15"/><line x1="12" y1="18" x2="12" y2="18.1"/></svg><span class="qa-l">Needs attention</span><span class="qa-s" data-ht-sub="alerts"></span><span class="ht-badge" id="htBadgeAlerts" hidden></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="notices"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="qa-l">Notices</span><span class="qa-s" data-ht-sub="notices"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tt"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg><span class="qa-l">Timetable</span><span class="qa-s" data-ht-sub="tt">Week, grid, publish</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="exams"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><polyline points="9 14 11 16 15 11"/></svg><span class="qa-l">Exams</span><span class="qa-s" data-ht-sub="exams">Tests and duty</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="reports"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Reports</span><span class="qa-s" data-ht-sub="reports">Attendance, count and more</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="settings"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span class="qa-l">Settings</span><span class="qa-s" data-ht-sub="settings">People, timetable, tools</span></button></div></div>
 <div class="pg-title-row" id="homeSubHead" data-atab="dash"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title" id="homeSubTitle">Today</div></div>
 
  <section class="tsec" data-atab="dash" data-hsub="ov" data-htile="today">
@@ -3624,6 +3631,7 @@
           <div class="teacher-time num" id="onCampusNowCount">0</div>
         </div>
         <div class="day-card-hint" id="onCampusNowHint" style="color: var(--switch-on);">Tap to see names</div>
+<div class="day-card-hint" id="onCampusNowNote">Checked in and not yet checked out. If someone left without checking out, open Teachers and use Force check-out.</div>
         <div id="onCampusNowNames" style="display:none; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
 
@@ -3714,6 +3722,7 @@
       </section>
 
       <section class="tsec" id="adminReportsSec" data-atab="reports">
+<div class="pg-title-row" id="repSubHead"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title" id="repSubTitle">Report</div></div>
         <div class="rep-tagrow"><span class="current-period-tag" id="adminReportWingTag" style="display:none;"></span></div>
         <div class="rep-range-row"><div class="chips" id="adminReportRangeChips">
           <button class="chip active" data-report-range="day">Day</button>
@@ -4328,7 +4337,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.68 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.70 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11758,8 +11767,13 @@ Rules:
     document.body.setAttribute('data-htile', state.homeSub === 'ov' ? state.homeTile : 'grid');
     const t = document.getElementById('homeSubTitle'); if (t) t.textContent = HT_TITLES[state.homeSub === 'ov' ? state.homeTile : state.homeSub] || '';
   }
+  function ocNowIds() { const camp = state.adminCampus || {}; return state.adminDate === todayStr() ? Object.keys(camp).filter((t) => camp[t] && camp[t].checkedIn) : []; }
   function homeOpen(k) {
-    if (k === 'oc' && !(Number((document.getElementById('onCampusNowCount') || {}).textContent) > 0)) { showToast('Nobody is on campus right now'); return; }
+  if (k === 'oc') {
+    if (state.adminDate !== todayStr()) { showToast('On campus now is for today. Pick Today to see it.'); return; }
+    if (!ocNowIds().length) { showToast('Nobody is checked in right now'); return; }
+    state.adminOnCampusExpanded = true; // the names open at once, no second tap
+  }
     navPush({ tab: 'admin', sub: 'dash', tile: 'grid', hsub: 'ov' });
     if (k === 'tc' || k === 'cl') { state.homeSub = k; state.homeTile = 'grid'; } else { state.homeSub = 'ov'; state.homeTile = k; }
     applyHomeSub(); window.scrollTo(0, 0);
@@ -11778,13 +11792,23 @@ Rules:
     const set = (k, v) => { const e = document.querySelector('[data-ht-sub="' + k + '"]'); if (e) e.textContent = v; };
     set('today', (tx('adScheduled') || 0) + ' classes · ' + (tx('adNotLogged') || 0) + ' not logged');
     set('tc', (tx('hsTc') || 0) + ' teachers'); set('cl', (tx('hsCl') || 0) + ' today');
-    const oc = Number(tx('onCampusNowCount')) || 0; set('oc', oc ? oc + (oc === 1 ? ' teacher' : ' teachers') : 'Nobody yet');
+    const ocN = ocNowIds().length; set('oc', state.adminDate !== todayStr() ? 'Only for today' : (ocN ? ocN + (ocN === 1 ? ' teacher' : ' teachers') + ' checked in' : 'Nobody yet'));
+  if (state.homeSub === 'ov' && state.homeTile === 'oc' && !ocN) { state.homeTile = 'grid'; applyHomeSub(); } // the date was changed or the last teacher checked out
     const al = document.querySelectorAll('#adminAlerts .ad-alert').length; set('alerts', al ? 'Tap to see' : 'All clear');
     const bd = document.getElementById('htBadgeAlerts'); if (bd) { bd.hidden = !al; bd.textContent = al; }
     const nn = document.querySelectorAll('#adminNotices > *:not(.empty-state)').length; set('notices', nn ? nn + ' recent' : 'None in 2 weeks');
     document.querySelectorAll('[data-ht-go]').forEach((b) => { const k = b.getAttribute('data-ht-go'); if (['tt', 'exams', 'reports', 'settings'].indexOf(k) >= 0) { const tb = document.querySelector('#adminTabs [data-atab-btn="' + k + '"]'); b.hidden = !tb || getComputedStyle(tb).display === 'none'; } });
   }
   { const va = document.getElementById('view-admin'); if (va && window.MutationObserver) new MutationObserver(() => { clearTimeout(htTimer); htTimer = setTimeout(homeTilesRefresh, 60); }).observe(va, { childList: true, subtree: true, characterData: true }); homeTilesRefresh(); }
+    // ---------- Admin Reports: the report tiles first; the details of a report open when its tile is tapped ----------
+  const REP_NAMES = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty', entry: 'Class entry record' };
+  function repShowTiles() { const v = document.getElementById('view-admin'); if (!v) return; v.setAttribute('data-repv', 'tiles'); document.querySelectorAll('#adminRepKind .rt-tile.on').forEach((x) => x.classList.remove('on')); }
+  function repOpenView(kind) {
+    const v = document.getElementById('view-admin'); if (!v) return;
+    if (v.getAttribute('data-repv') !== 'open') navPush({ tab: 'admin', sub: 'reports', repv: 'tiles' });
+    v.setAttribute('data-repv', 'open'); const t = document.getElementById('repSubTitle'); if (t) t.textContent = REP_NAMES[kind] || 'Report'; window.scrollTo(0, 0);
+  }
+  { const v = document.getElementById('view-admin'); if (v) { repShowTiles(); let last = v.getAttribute('data-atab-cur'); new MutationObserver(() => { const cur = v.getAttribute('data-atab-cur'); if (cur !== last) { if (last === 'reports' || cur === 'reports') repShowTiles(); last = cur; } }).observe(v, { attributes: true, attributeFilter: ['data-atab-cur'] }); } }
   // Teachers: search, filter chips (with the counts) and "Show all"; the rows themselves are drawn by renderAdmin
   state.adminTF = 'all'; state.adminTQ = ''; state.adminTAll = false;
   function tcGroup(k) { return (k === 'oncampus' || k === 'present') ? 'present' : (k === 'leave' ? 'leave' : (k === 'off' ? 'off' : 'notin')); }
@@ -15085,6 +15109,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     state.navBusy = true;
     try {
       if (target.tab === 'admin' && target.sub) state.adminTab = target.sub;
+  if (target.tab === 'admin' && target.repv) repShowTiles();
   if (target.tab === 'admin' && target.tile) { state.homeTile = target.tile; state.homeSub = target.hsub || 'ov'; applyHomeSub(); }
       switchTab(target.tab);
       if (target.tab === 'admin') renderAdmin();
@@ -15189,8 +15214,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   });
   document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((b) => b.addEventListener('click', () => {
     state.adminRepKind = b.getAttribute('data-rep-kind');
-    
-    if (state.adminRepKind === 'count') state.trep.sub = 'all'; if (state.adminRepKind === 'sub') state.trep.sub = 'only';
+  repOpenView(state.adminRepKind);
+  if (state.adminRepKind === 'count') state.trep.sub = 'all'; if (state.adminRepKind === 'sub') state.trep.sub = 'only';
     renderRepControls();
   }));
   document.getElementById('repPrev').addEventListener('click', () => shiftRepPeriod(-1));
@@ -17212,6 +17237,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   const REP_NOTE = { entry: 'Classes that began more than 5 minutes late. Up to 5 minutes is not counted. Set the entry time of the teacher, then get the record as a picture, PDF or Excel.',  full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
   function renderRepControls() {
+  if (document.getElementById('view-admin').getAttribute('data-repv') === 'tiles') { document.querySelectorAll('#adminRepKind .rt-tile.on').forEach((x) => x.classList.remove('on')); return; } // only the tiles are showing: nothing to load
     try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
     const kind = state.adminRepKind || 'full'; let range = state.adminReportRange || 'day';
     
@@ -18850,7 +18876,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }));
   document.getElementById('onCampusNowCard').addEventListener('click', () => {
-    state.adminOnCampusExpanded = !state.adminOnCampusExpanded;
+  if (document.body.getAttribute('data-htile') === 'oc') return; // inside the tile the names stay open
+  state.adminOnCampusExpanded = !state.adminOnCampusExpanded;
     renderAdmin();
   });
   // the wing is chosen in one small dropdown; the chips stay in the page, hidden, as the single source of truth
@@ -19853,11 +19880,11 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     n: ['A break in a duty becomes separate slots. The picture goes to Google\'s Gemini only to be read. If it says the AI is not set up, the Admin must open Settings → AI.', 'Duty me break alag slot ban jata hai. Photo sirf padhne ke liye Google ke Gemini ko jati hai. Agar likha aaye ki AI set up nahi hai, to Admin ko Settings → AI kholna hoga.'],
     m: [['admin:exams', '#adminExamList'], ['', ''], ['', ''], ['', ''], ['', ''], ['', '']] },
 
-  { id: 'reports', t: ['Get a report (day, week, month)', 'Report nikalna (din, hafta, mahina)'], who: 'lead', k: 'report full attendance class count substitute pdf excel whatsapp invigilation duty report week month sheet teacher wise रिपोर्ट ड्यूटी रिपोर्ट',
-    s: [['Open **Admin**, then **Reports**.', 'Choose **Day**, **Week** or **Month** and the date.', 'Tap the report: **Full report**, **Attendance report**, **Class count report**, **Substitute report** or **Invigilation duty**.', 'Choose the wing and the teacher if you need. For **Invigilation duty** also choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Get it as **PDF**, **Excel** (CSV file) or on **WhatsApp**.'],
-        ['**Admin** kholo, phir **Reports**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Report dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report** ya **Invigilation duty**.', 'Chaho to wing aur teacher chuno. **Invigilation duty** me **Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) bhi chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo.']],
+  { id: 'reports', t: ['Get a report (day, week, month)', 'Report nikalna (din, hafta, mahina)'], who: 'lead', k: 'report full attendance class count substitute pdf excel whatsapp invigilation duty report week month sheet teacher wise tile रिपोर्ट ड्यूटी रिपोर्ट',
+    s: [['Open **Admin**, then **Reports**. You see one tile for each report.', 'Tap the report you want: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty** or **Class entry record**.', 'Choose **Day**, **Week** or **Month** and the date.', 'Choose the wing and the teacher if you need. For **Invigilation duty** also choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Get it as **PDF**, **Excel** (CSV file) or on **WhatsApp**. Tap the back arrow to see all the report tiles again.'],
+        ['**Admin** kholo, phir **Reports**. Har report ki ek tile dikhti hai.', 'Jo report chahiye us tile ko dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty** ya **Class entry record**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Chaho to wing aur teacher chuno. **Invigilation duty** me **Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) bhi chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo. Saari report ki tile phir se dekhne ke liye peeche ka teer dabao.']],
     n: ['In the Invigilation duty report, days without a duty do not appear, and teachers with zero duties show in the Teacher-wise view.', 'Invigilation duty report me jis din duty nahi wo din nahi aata, aur zero duty wale teacher Teacher-wise me dikhte hain.'],
-    m: [['admin:reports', '#adminTabs [data-atab-btn="reports"]'], ['admin:reports', '#adminReportRangeChips'], ['admin:reports', '#adminRepKind'], ['admin:reports', '#adminWingSel'], ['admin:reports', '#repStdTiles']] },
+    m: [['admin:reports', '#adminTabs [data-atab-btn="reports"]'], ['admin:reports', '#adminRepKind'], ['admin:reports:full', '#adminReportRangeChips'], ['admin:reports:full', '#adminWingSel'], ['admin:reports:full', '#repStdTiles']] },
   { id: 'entryrec', t: ['Record class entry delays', 'Class me entry ki deri ka record'], who: 'lead', k: 'class entry record delay late entry teacher entry time morning evening देरी',
   s: [['Open **Admin**, then **Reports**.', 'Tap **Class entry record**. Choose **Day**, the date, and **Morning** or **Evening**.', 'Tap the **Teacher** box and choose the teacher who was late. Only his classes are shown.', 'Tap the class and set the **Entry time**. Up to 5 minutes is not counted; above that tap **Add to the record**. For another class or another teacher, do the same again.', 'Get it as **PDF**, **Excel** or **WhatsApp** (picture). To remove a record, open it and tap **Delete**.'],
   ['**Admin** kholo, phir **Reports**.', '**Class entry record** dabao. **Day**, tareekh aur **Morning** ya **Evening** chuno.', '**Teacher** wala box dabao aur jo teacher late aaya use chuno. Sirf uski classes dikhti hain.', 'Class dabao aur **Entry time** bharo. 5 minute tak ginti me nahi; usse zyada ho to **Add to the record** dabao. Doosri class ya doosre teacher ke liye wahi dobara karo.', '**PDF**, **Excel** ya **WhatsApp** (tasveer) me lo. Record hatana ho to use kholkar **Delete** dabao.']],
@@ -19996,7 +20023,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         if (a === 'add') { const ch = document.querySelectorAll('#modeChips > *'); const want = ch[p[1] === 'activity' ? 1 : 0]; if (want && !want.classList.contains('active')) want.click(); if (p[2] === 'leave') setTimeout(() => { const lc = Array.from(document.querySelectorAll('#activityChips > *')).find((x) => /leave/i.test(x.innerText || '')); if (lc && !lc.classList.contains('active')) lc.click(); }, 150); }
       } else if (a === 'admin') {
         goAdmin(p[1] || 'dash')();
-        if (p[1] === 'reports' && p[2]) setTimeout(() => { const k = document.querySelector('#adminRepKind [data-rep-kind="' + p[2] + '"]'); if (k) k.click(); }, 150);
+  if (p[1] === 'reports' && !p[2]) repShowTiles();
+  if (p[1] === 'reports' && p[2]) setTimeout(() => { const k = document.querySelector('#adminRepKind [data-rep-kind="' + p[2] + '"]'); if (k) k.click(); }, 150);
         if (p[1] === 'settings' && p[2]) setTimeout(() => { const t = document.querySelector(p.slice(2).join(':') + ' .panel-title'); if (t && t.getAttribute('aria-expanded') !== 'true') t.click(); }, 200);
       } else if (a === 'menu') {
         if (!(history.state && history.state.catjeeMenu)) openMenu();
@@ -20092,7 +20120,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   // Admin Settings: the same rows, in four small groups
   (function organiseAdminSettings() {
-    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Timetable', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Exams', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
       const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
