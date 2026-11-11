@@ -2654,7 +2654,7 @@
   #adminPgHead { display: none !important; }
   #adminCrumbs { display: none; align-items: baseline; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; gap: 6px; margin: 6px 0 10px; }
   #adminCrumbs button { flex: none; border: 0; background: transparent; padding: 4px 0; color: var(--gold); font-weight: 700; font-size: 13px; font-family: inherit; cursor: pointer; }
-  #adminCrumbs .cur { flex: none; font-size: 18px; font-weight: 700; color: var(--ink); padding: 0; }
+  #adminCrumbs .cur { flex: none; font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 600; color: var(--ink); padding: 0; }
   #adminCrumbs i { flex: none; font-style: normal; font-size: 17px; font-weight: 700; line-height: 1; color: #8E8E96; }
   #view-admin[data-pghead="1"] #adminCrumbs { display: flex; }
   .set-oldtitle, .set-grp-lbl { display: none !important; }
@@ -4370,7 +4370,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.73 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.74 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11801,7 +11801,7 @@ Rules:
     if (t.textContent !== title) t.textContent = title; v.setAttribute('data-pghead', title ? '1' : '0');
     const html = path.map((p) => p[1] ? '<button type="button" data-crumb="' + p[1] + '">' + p[0] + '</button><i>›</i>' : '<span class="cur">' + p[0] + '</span>').join('');
     if (c.innerHTML !== html) c.innerHTML = html;
-    const cu = c.querySelector('.cur'); if (cu) { let fs = 18; cu.style.fontSize = fs + 'px'; while (c.scrollWidth > c.clientWidth + 1 && fs > 15) { fs--; cu.style.fontSize = fs + 'px'; } } // the name of the open page stays on the line, whole
+    const cu = c.querySelector('.cur'); if (cu) { let fs = 20; cu.style.fontSize = fs + 'px'; while (c.scrollWidth > c.clientWidth + 1 && fs > 16) { fs--; cu.style.fontSize = fs + 'px'; } } // the name of the open page stays on the line, whole
   }
   // back to the main tiles (the bottom Admin icon and the word Admin in the path do this)
   function adminGoRoot() {
