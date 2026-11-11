@@ -2645,19 +2645,27 @@
   
   #view-admin[data-atab-cur="reports"][data-repv="tiles"] .ad-bar, #view-admin[data-atab-cur="reports"][data-repv="tiles"] #adminReportsSec > :not(#adminRepKind) { display: none !important; }
   #view-admin[data-atab-cur="reports"][data-repv="open"] #adminRepKind { display: none !important; }
-    #view-admin[data-atab-cur="reports"][data-repv="open"] #adminPgHead { display: flex !important; }
+    
   #onCampusNowNote { display: none; margin-top: 6px; }
   body[data-hsub="ov"][data-htile="oc"] #onCampusNowNote { display: block; }
   body[data-hsub="ov"][data-htile="oc"] #onCampusNowHint { display: none; }
   #homeSeg { display: none !important; }
-    #adminPgHead { display: none; margin: 6px 0 4px; }
+      #adminTabs { display: none !important; }
+  #adminPgHead, #adminCrumbs { display: none; }
+  #adminCrumbs { align-items: center; flex-wrap: wrap; gap: 0 6px; margin: 6px 0 0; font-size: 13px; }
+  #adminCrumbs button { border: 0; background: transparent; padding: 5px 2px; color: var(--gold); font-weight: 700; font-size: 13px; font-family: inherit; cursor: pointer; }
+  #adminCrumbs .cur { color: var(--muted-2); font-weight: 700; padding: 5px 2px; }
+  #adminCrumbs i { font-style: normal; color: var(--muted-2); opacity: .6; }
+  #adminPgHead { margin: 0 0 4px; }
+  #view-admin[data-pghead="1"] #adminCrumbs { display: flex; }
+  #view-admin[data-pghead="1"] #adminPgHead { display: flex; }
   body[data-hsub="ov"][data-htile="grid"] [data-htile] { display: none !important; }
   body[data-hsub="ov"][data-htile="today"] [data-htile]:not([data-htile="today"]), body[data-hsub="ov"][data-htile="oc"] [data-htile]:not([data-htile="oc"]), body[data-hsub="ov"][data-htile="alerts"] [data-htile]:not([data-htile="alerts"]), body[data-hsub="ov"][data-htile="notices"] [data-htile]:not([data-htile="notices"]) { display: none !important; }
   body[data-hsub="ov"]:not([data-htile="grid"]) #homeTiles { display: none !important; }
-    #view-admin[data-atab-cur="dash"] #adminPgHead { display: none; }
-  body[data-hsub="ov"]:not([data-htile="grid"]) #view-admin[data-atab-cur="dash"] #adminPgHead, body[data-hsub="tc"] #view-admin[data-atab-cur="dash"] #adminPgHead, body[data-hsub="cl"] #view-admin[data-atab-cur="dash"] #adminPgHead { display: flex; }
+    
+  
   body[data-hsub="ov"]:not([data-htile="grid"]) section[data-htile] > .tsec-head .tsec-title { display: none; }
-    #view-admin > #homeTiles, #view-admin > #adminPgHead { grid-column: 1 / -1; }
+      #view-admin > #homeTiles, #view-admin > #adminPgHead, #view-admin > #adminCrumbs { grid-column: 1 / -1; }
   .home-seg { display: flex; gap: 4px; padding: 4px; background: var(--neutral-soft); border-radius: 14px; }
   .home-seg button { flex: 1; padding: 9px 6px; border: 0; border-radius: 11px; background: transparent; color: var(--muted-2); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .home-seg button.active { background: var(--card); color: var(--gold); box-shadow: 0 1px 3px rgba(16,24,40,.12); }
@@ -3595,7 +3603,8 @@
         <button type="button" class="ad-tab" data-atab-btn="reports" role="tab">Reports</button>
         <button type="button" class="ad-tab" data-atab-btn="settings" role="tab">Settings</button>
       </div>
-      <div class="pg-title-row" id="adminPgHead"><button type="button" class="back-btn" data-pg-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title" id="adminPgTitle"></div></div>
+      <nav id="adminCrumbs" aria-label="Path"></nav>
+<div class="pg-title-row" id="adminPgHead"><button type="button" class="back-btn" data-adm-back aria-label="Back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg></button><div class="hv-title" id="adminPgTitle"></div></div>
 <div class="ad-bar">
       <div class="hv-nav" id="adminDateNav" data-atab="dash exams">
         <button type="button" class="hv-arrow" id="adminDatePrev" aria-label="Previous day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -4346,7 +4355,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.71 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.72 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11765,7 +11774,23 @@ Rules:
   state.homeSub = 'ov'; state.homeTile = 'grid'; // the Home always opens on the tiles
   const HT_TITLES = { today: 'Day summary', oc: 'On campus now', alerts: 'Needs attention', notices: 'Notices', tc: 'Teachers', cl: 'Classes' };
   const REP_NAMES = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty', entry: 'Class entry record' };
-  function pgHeadSync() { const v = document.getElementById('view-admin'); const t = document.getElementById('adminPgTitle'); if (!v || !t) return; t.textContent = v.getAttribute('data-atab-cur') === 'reports' ? (REP_NAMES[state.adminRepKind || 'full'] || 'Report') : (HT_TITLES[state.homeSub === 'ov' ? state.homeTile : state.homeSub] || ''); }
+  // the path line and the heading of the page that is open (nothing on the main tiles)
+  function pgHeadSync() {
+    const v = document.getElementById('view-admin'); const t = document.getElementById('adminPgTitle'); const c = document.getElementById('adminCrumbs'); if (!v || !t || !c) return;
+    const cur = v.getAttribute('data-atab-cur'); const rv = v.getAttribute('data-repv'); let title = ''; let path = [];
+    if (cur === 'dash') { const k = state.homeSub === 'ov' ? state.homeTile : state.homeSub; if (k && k !== 'grid') { title = HT_TITLES[k] || ''; path = [['Admin', 'root'], [title]]; } }
+    else if (cur === 'reports') { if (rv === 'open') { title = REP_NAMES[state.adminRepKind || 'full'] || 'Report'; path = [['Admin', 'root'], ['Reports', 'reps'], [title]]; } else { title = 'Reports'; path = [['Admin', 'root'], ['Reports']]; } }
+    else { title = ({ tt: 'Timetable', exams: 'Exams', settings: 'Settings' })[cur] || ''; if (title) path = [['Admin', 'root'], [title]]; }
+    t.textContent = title; v.setAttribute('data-pghead', title ? '1' : '0');
+    c.innerHTML = path.map((p) => p[1] ? '<button type="button" data-crumb="' + p[1] + '">' + p[0] + '</button><i>›</i>' : '<span class="cur">' + p[0] + '</span>').join('');
+  }
+  // back to the main tiles (the bottom Admin icon and the word Admin in the path do this)
+  function adminGoRoot() {
+    state.adminTab = 'dash'; try { localStorage.setItem('ctd_admin_tab', 'dash'); } catch (e) { /* ignore */ }
+    state.homeSub = 'ov'; state.homeTile = 'grid'; repShowTiles(); applyAdminTab(); applyHomeSub(); renderAdmin(); window.scrollTo({ top: 0 });
+  }
+  { const hd = document.getElementById('adminPgHead'); const bk = hd && hd.querySelector('[data-adm-back]'); if (bk) bk.addEventListener('click', () => { if (state.navDepth > 0 && history.state && history.state.catjeeNav) history.back(); else adminGoRoot(); });
+    const cr = document.getElementById('adminCrumbs'); if (cr) cr.addEventListener('click', (ev) => { const b = ev.target.closest('[data-crumb]'); if (!b) return; if (b.getAttribute('data-crumb') === 'root') adminGoRoot(); else if (b.getAttribute('data-crumb') === 'reps') { repShowTiles(); window.scrollTo({ top: 0 }); } }); }
   function applyHomeSub() {
   document.body.setAttribute('data-hsub', state.homeSub); homeTileApply();
     document.querySelectorAll('#homeSeg [data-hsub-btn]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-hsub-btn') === state.homeSub));
@@ -11812,13 +11837,13 @@ Rules:
   }
   { const va = document.getElementById('view-admin'); if (va && window.MutationObserver) new MutationObserver(() => { clearTimeout(htTimer); htTimer = setTimeout(homeTilesRefresh, 60); }).observe(va, { childList: true, subtree: true, characterData: true }); homeTilesRefresh(); }
     // ---------- Admin Reports: the report tiles first; the details of a report open when its tile is tapped ----------
-    function repShowTiles() { const v = document.getElementById('view-admin'); if (!v) return; v.setAttribute('data-repv', 'tiles'); document.querySelectorAll('#adminRepKind .rt-tile.on').forEach((x) => x.classList.remove('on')); }
+    function repShowTiles() { const v = document.getElementById('view-admin'); if (!v) return; v.setAttribute('data-repv', 'tiles'); document.querySelectorAll('#adminRepKind .rt-tile.on').forEach((x) => x.classList.remove('on')); pgHeadSync(); }
   function repOpenView(kind) {
     const v = document.getElementById('view-admin'); if (!v) return;
     if (v.getAttribute('data-repv') !== 'open') navPush({ tab: 'admin', sub: 'reports', repv: 'tiles' });
     v.setAttribute('data-repv', 'open'); pgHeadSync(); window.scrollTo(0, 0);
   }
-  { const v = document.getElementById('view-admin'); if (v) { repShowTiles(); let last = v.getAttribute('data-atab-cur'); new MutationObserver(() => { const cur = v.getAttribute('data-atab-cur'); if (cur !== last) { if (last === 'reports' || cur === 'reports') repShowTiles(); last = cur; pgHeadSync(); } }).observe(v, { attributes: true, attributeFilter: ['data-atab-cur'] }); } }
+  { const v = document.getElementById('view-admin'); if (v) { repShowTiles(); let last = v.getAttribute('data-atab-cur'); new MutationObserver(() => { const cur = v.getAttribute('data-atab-cur'); if (cur !== last) { if (last === 'reports' || cur === 'reports') repShowTiles(); last = cur; } pgHeadSync(); }).observe(v, { attributes: true, attributeFilter: ['data-atab-cur', 'data-repv'] }); } }
   // Teachers: search, filter chips (with the counts) and "Show all"; the rows themselves are drawn by renderAdmin
   state.adminTF = 'all'; state.adminTQ = ''; state.adminTAll = false;
   function tcGroup(k) { return (k === 'oncampus' || k === 'present') ? 'present' : (k === 'leave' ? 'leave' : (k === 'off' ? 'off' : 'notin')); }
@@ -15204,7 +15229,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     switchTab('add');
   });
   document.getElementById('navHistory').addEventListener('click', () => switchTab('history'));
-  document.getElementById('navAdmin').addEventListener('click', () => switchTab('admin'));
+  document.getElementById('navAdmin').addEventListener('click', () => { if (state.tab === 'admin') { adminGoRoot(); } else { state.adminTab = 'dash'; try { localStorage.setItem('ctd_admin_tab', 'dash'); } catch (e) { /* ignore */ } state.homeSub = 'ov'; state.homeTile = 'grid'; repShowTiles(); switchTab('admin'); } });
   document.getElementById('navSchedule').addEventListener('click', () => switchTab('schedule'));
 document.getElementById('navReports').addEventListener('click', () => switchTab('reports'));
   document.getElementById('downloadCsvBtn').addEventListener('click', () => { if (hvSelfOn()) { hvSelfOut('csv'); return; } if (state.hvRepKind === 'att') { hvAtt('csv'); return; }
@@ -19834,7 +19859,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the wing, then the group (for example Pre-Foundation · Morning).', 'Tap **Edit timetable**.', 'In the **Paint** row tap a subject, for example Mathematics.', 'Tap the cells where that subject is taught. Tap **Off** in the Paint row to clear a cell.', 'When it looks right, tap **Publish**. You can publish the whole week or one day.'],
         ['**Admin** kholo, phir **Timetable**.', 'Hafta aur wing chuno, phir group (jaise Pre-Foundation · Morning).', '**Edit timetable** dabao.', '**Paint** row me subject dabao, jaise Mathematics.', 'Jin cell me wo subject padhta hai unhe dabao. Cell saaf karne ke liye Paint row me **Off** dabao.', 'Sahi lage to **Publish** dabao. Poora hafta ya ek din publish kar sakte ho.']],
     n: ['Changes stay as a draft until you publish. The red **Substitute** chip in the Paint row is for substitutes (see Substitute with Paint). On a class that is already published, a substitute or a swap reaches the teachers at once.', 'Publish karne tak badlav draft rehte hain. Paint row ka laal **Substitute** chip substitute ke liye hai (dekho Substitute lagana: Paint se). Jo class pehle se publish hai, usme substitute ya swap teachers tak turant pahunchta hai.'],
-    m: [['admin:tt', '#adminTabs [data-atab-btn="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-paint'], ['admin:tt+edit', '.tg-table'], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
+    m: [['admin', '[data-ht-go="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-paint'], ['admin:tt+edit', '.tg-table'], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'ttphoto', t: ['Make the timetable with AI (from a photo)', 'AI se timetable banana (photo se)'], who: 'lead', k: 'ai photo picture timetable fill from a photo gemini scan banana timetable photo se एआई फोटो टाइमटेबल',
     s: [['Open **Admin**, then **Timetable**. Choose the week, the wing and the group.', 'Tap **Edit timetable**. In the list of actions tap **Fill from a photo**.', 'Tap **Choose a picture of the timetable** and pick a clear, straight picture of the whole table.', 'Wait while the AI reads it (**Reading the picture…**).', 'Check what was read and correct any cell that is wrong.', 'Tap **Put in draft**. Nothing is saved or published until you do this.', 'Look at the timetable, and tap **Publish** when it is right.'],
         ['**Admin** kholo, phir **Timetable**. Hafta, wing aur group chuno.', '**Edit timetable** dabao. Kaam ki list me **Fill from a photo** dabao.', '**Choose a picture of the timetable** dabao aur poori table ki saaf, seedhi photo chuno.', 'AI padhta hai, thoda ruko (**Reading the picture…**).', 'Jo padha gaya use dekho aur galat cell theek karo.', '**Put in draft** dabao. Isse pehle kuch save ya publish nahi hota.', 'Timetable dekho, aur sahi lage to **Publish** dabao.']],
@@ -19848,12 +19873,12 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the group.', 'Tap **Edit timetable**.', 'In the **Paint** row tap the red **Substitute** chip. A bar says Paint Substitute is on.', 'Tap the class whose teacher is absent. It gets a red border. You can mark several classes. Tap a marked class again to un-mark it.', 'In the **Paint** row tap the **subject** the substitute will teach (for example Mathematics), then tap the marked class.', 'The usual teacher of that subject for that batch is filled in. If he is the absent teacher, or has a class at that time, the list **Who takes it?** opens: tap the teacher. A star means he teaches this subject, **free** means he has no class then. The class now shows the substitute. To take it back, tap the class and tap **Undo**.', 'Tap **Publish** to tell the teachers.'],
         ['**Admin** kholo, phir **Timetable**.', 'Hafta aur group chuno.', '**Edit timetable** dabao.', '**Paint** row me laal **Substitute** chip dabao. Ek patti likhti hai ki Paint Substitute on hai.', 'Jis class ka teacher nahi hai us par dabao. Us par laal kinara aa jata hai. Kai class mark kar sakte ho. Mark ki hui class par dobara dabao to nishan hat jata hai.', '**Paint** row me wo **subject** dabao jo substitute padhayega (jaise Mathematics), phir mark ki hui class dabao.', 'Us batch me us subject ka aam teacher apne aap bhar jata hai. Agar wo wahi absent teacher ho, ya us samay uski class ho, to **Who takes it?** ki list khulti hai: teacher dabao. Sitara matlab wo ye subject padhata hai, **free** matlab us samay uski class nahi. Class me ab substitute dikhta hai. Wapas lene ke liye class dabao aur **Undo** dabao.', 'Teachers ko batane ke liye **Publish** dabao.']],
     n: ['Marking alone changes nothing for the teachers: the substitute reaches them when you Publish. If a class is marked but no substitute is chosen, Publish warns you first, and that class stays with its teacher.', 'Sirf mark karne se teachers ko kuch nahi badalta: substitute Publish karne par pahunchta hai. Agar class mark hai par substitute nahi chuna, to Publish pehle chetavni deta hai, aur wo class apne teacher ke paas rehti hai.'],
-    m: [['admin:tt', '#adminTabs [data-atab-btn="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-subkey'], ['admin:tt+edit', '.tg-table'], ['admin:tt+edit', '.tg-paint'], ['', ''], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
+    m: [['admin', '[data-ht-go="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '#tgEdit'], ['admin:tt+edit', '.tg-subkey'], ['admin:tt+edit', '.tg-table'], ['admin:tt+edit', '.tg-paint'], ['', ''], ['admin:tt+edit', '#tgPublish', ['Publish shows when there is something new to send.', 'Publish tab dikhta hai jab bhejne ko kuch naya ho.']]] },
   { id: 'subpub', t: ['Substitute on a published class (goes live at once)', 'Published class me substitute (turant lagta hai)'], who: 'lead', k: 'substitute published live at once apply whatsapp share sub leave absent badle सब्स्टीट्यूट लगाना',
     s: [['Open **Admin**, then **Timetable**.', 'Choose the week and the group.', 'Do not tap Edit. Tap the class that needs a substitute.', 'Tap **Someone else takes this class (substitute)**.', 'Choose the teacher who will take it.', 'Tap **Apply substitute**.', 'To tell the teachers, tap **Share substitutions on WhatsApp**.'],
         ['**Admin** kholo, phir **Timetable**.', 'Hafta aur group chuno.', 'Edit mat dabao. Jis class me substitute chahiye, us par dabao.', '**Someone else takes this class (substitute)** dabao.', 'Wo teacher chuno jo class lega.', '**Apply substitute** dabao.', 'Teachers ko batane ke liye **Share substitutions on WhatsApp** dabao.']],
     n: ['This way works on a class that is already published, and the substitute reaches the teachers at once. You do not publish again.', 'Ye tareeka tab hai jab class pehle se publish ho chuki ho, aur substitute teachers tak turant pahunchta hai. Dobara publish nahi karna padta.'],
-    m: [['admin:tt', '#adminTabs [data-atab-btn="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '.tg-table'], ['', ''], ['', ''], ['', ''], ['', '']] },
+    m: [['admin', '[data-ht-go="tt"]'], ['admin:tt', '#ttGroupSel'], ['admin:tt', '.tg-table'], ['', ''], ['', ''], ['', ''], ['', '']] },
   { id: 'ttjoin', t: ['Two batches sit together (combined class)', 'Do batch ek saath baithte hain (combined class)'], who: 'lead', k: 'combine join sit together combined class do batch ek saath कंबाइन क्लास',
     s: [['Open **Admin**, then **Timetable**, and tap **Edit timetable**.', 'Tap the class cell and look for **Sit together** or **Combined class** to join the other batch.', 'A change of subject or teacher then applies to every batch in the combined class.', 'Tap **Publish**.'],
         ['**Admin** kholo, phir **Timetable**, aur **Edit timetable** dabao.', 'Class cell dabao aur doosre batch ko jodne ke liye **Sit together** ya **Combined class** dhundho.', 'Phir subject ya teacher ka badlav combined class ke har batch par lagta hai.', '**Publish** dabao.']],
@@ -19873,7 +19898,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     s: [['Open **Admin**, then **Exams**.', 'Tap **+ New Exam**.', 'Choose the **Test type** (for example Half-Yearly or Weekly Test) and the **Subject** from the menus, then the date and the time.', 'Choose the classes (batches) and save.', 'Then set the rooms and invigilators from the exam card.'],
         ['**Admin** kholo, phir **Exams**.', '**+ New Exam** dabao.', 'Menu se **Test type** (jaise Half-Yearly ya Weekly Test) aur **Subject** chuno, phir tareekh aur samay.', 'Classes (batch) chuno aur save karo.', 'Phir exam card se rooms aur invigilators lagao.']],
     n: ['Tests and exams are made in the same place. Only the Test type is different. The list of test types is in **Settings → Test Types**.', 'Test aur exam ek hi jagah bante hain. Sirf Test type alag hota hai. Test type ki list **Settings → Test Types** me hai.'],
-    m: [['admin:exams', '#adminTabs [data-atab-btn="exams"]'], ['admin:exams', '#adminNewExamBtn'], ['admin:exams+newexam', '#adminExamType'], ['admin:exams+newexam', '#adminExamScope'], ['admin:exams+newexam', '#xwBar']] },
+    m: [['admin', '[data-ht-go="exams"]'], ['admin:exams', '#adminNewExamBtn'], ['admin:exams+newexam', '#adminExamType'], ['admin:exams+newexam', '#adminExamScope'], ['admin:exams+newexam', '#xwBar']] },
   { id: 'classtest', t: ['Make a class test (in the Timetable)', 'Class test banana (Timetable me)'], who: 'lead', k: 'class test timetable exam test cell क्लास टेस्ट',
     s: [['Open **Admin**, then **Timetable**, and tap **Edit timetable**.', 'Tap the cell of the class.', 'Open **Exam / Test** and choose **Class Test** and the subject.', 'If each class has a different subject, choose **Yes** for **Different subject for each class?**', 'Tap **Publish**. The class test also shows in **Admin → Exams**, where you set the duty.'],
         ['**Admin** kholo, phir **Timetable**, aur **Edit timetable** dabao.', 'Class ka cell dabao.', '**Exam / Test** kholo aur **Class Test** aur subject chuno.', 'Har class ka subject alag ho to **Different subject for each class?** me **Yes** chuno.', '**Publish** dabao. Class test **Admin → Exams** me bhi dikhta hai, wahan duty lagao.']],
@@ -19894,12 +19919,12 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     s: [['Open **Admin**, then **Reports**. You see one tile for each report.', 'Tap the report you want: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty** or **Class entry record**.', 'Choose **Day**, **Week** or **Month** and the date.', 'Choose the wing and the teacher if you need. For **Invigilation duty** also choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Get it as **PDF**, **Excel** (CSV file) or on **WhatsApp**. Tap the back arrow to see all the report tiles again.'],
         ['**Admin** kholo, phir **Reports**. Har report ki ek tile dikhti hai.', 'Jo report chahiye us tile ko dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty** ya **Class entry record**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Chaho to wing aur teacher chuno. **Invigilation duty** me **Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) bhi chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo. Saari report ki tile phir se dekhne ke liye peeche ka teer dabao.']],
     n: ['In the Invigilation duty report, days without a duty do not appear, and teachers with zero duties show in the Teacher-wise view.', 'Invigilation duty report me jis din duty nahi wo din nahi aata, aur zero duty wale teacher Teacher-wise me dikhte hain.'],
-    m: [['admin:reports', '#adminTabs [data-atab-btn="reports"]'], ['admin:reports', '#adminRepKind'], ['admin:reports:full', '#adminReportRangeChips'], ['admin:reports:full', '#adminWingSel'], ['admin:reports:full', '#repStdTiles']] },
+    m: [['admin', '[data-ht-go="reports"]'], ['admin:reports', '#adminRepKind'], ['admin:reports:full', '#adminReportRangeChips'], ['admin:reports:full', '#adminWingSel'], ['admin:reports:full', '#repStdTiles']] },
   { id: 'entryrec', t: ['Record class entry delays', 'Class me entry ki deri ka record'], who: 'lead', k: 'class entry record delay late entry teacher entry time morning evening देरी',
   s: [['Open **Admin**, then **Reports**.', 'Tap **Class entry record**. Choose **Day**, the date, and **Morning** or **Evening**.', 'Tap the **Teacher** box and choose the teacher who was late. Only his classes are shown.', 'Tap the class and set the **Entry time**. Up to 5 minutes is not counted; above that tap **Add to the record**. For another class or another teacher, do the same again.', 'Get it as **PDF**, **Excel** or **WhatsApp** (picture). To remove a record, open it and tap **Delete**.'],
   ['**Admin** kholo, phir **Reports**.', '**Class entry record** dabao. **Day**, tareekh aur **Morning** ya **Evening** chuno.', '**Teacher** wala box dabao aur jo teacher late aaya use chuno. Sirf uski classes dikhti hain.', 'Class dabao aur **Entry time** bharo. 5 minute tak ginti me nahi; usse zyada ho to **Add to the record** dabao. Doosri class ya doosre teacher ke liye wahi dobara karo.', '**PDF**, **Excel** ya **WhatsApp** (tasveer) me lo. Record hatana ho to use kholkar **Delete** dabao.']],
   n: ['Only delays are kept. The record is saved in the cloud like other records; if the phone is offline it stays on the phone and is sent later.', 'Sirf deri ka record rakha jata hai. Ye baaki records ki tarah cloud me save hota hai; phone offline ho to phone me rehta hai aur baad me chala jata hai.'],
-  m: [['admin:reports', '#adminTabs [data-atab-btn="reports"]'], ['admin:reports:entry', '#entrySess'], ['admin:reports:entry', '#entryFill'], ['admin:reports:entry', '#entryFill'], ['admin:reports:entry', '#entryPrev']] },
+  m: [['admin', '[data-ht-go="reports"]'], ['admin:reports:entry', '#entrySess'], ['admin:reports:entry', '#entryFill'], ['admin:reports:entry', '#entryFill'], ['admin:reports:entry', '#entryPrev']] },
   { id: 'classcount', t: ['Class count report', 'Class count report'], who: 'lead', k: 'class count counted from timetable filled in by teachers ginti not using the app क्लास काउंट',
     s: [['Open **Admin**, then **Reports**, then **Class count report**.', 'Choose **Day**, **Week** or **Month**.', 'Under **Counted from** choose **Filled in by teachers** or **From the timetable**.', 'Get it as **PDF**, **Excel** or **WhatsApp**.'],
         ['**Admin** kholo, phir **Reports**, phir **Class count report**.', '**Day**, **Week** ya **Month** chuno.', '**Counted from** me **Filled in by teachers** ya **From the timetable** chuno.', '**PDF**, **Excel** ya **WhatsApp** me lo.']],
@@ -19939,7 +19964,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   { id: 'lists', t: ['Subjects, Rooms, Test Types and Weekly Off', 'Subjects, Rooms, Test Types aur Weekly Off'], who: 'lead', k: 'subjects add subject vishay rooms add room kamra test types class test weekly test unit test half yearly weekly off sunday holiday chhutti विषय सब्जेक्ट रूम कमरे टेस्ट टाइप साप्ताहिक छुट्टी',
     s: [['Open **Admin**, then **Settings**.', '**Subjects**: add the subjects you teach, or remove one you do not use.', '**Rooms**: add the rooms of the institute. They are used for classes and for the invigilation duty.', '**Test Types**: add the kinds of test and exam you hold, for example Weekly Test. These names appear in the **Test type** menu when you make an exam.', '**Weekly Off**: choose the day that is the weekly off (Sunday by default).'],
         ['**Admin** kholo, phir **Settings**.', '**Subjects**: jo subject padhate ho wo jodo, ya jo kaam ka nahi use hatao.', '**Rooms**: institute ke rooms jodo. Ye class aur invigilation duty dono me kaam aate hain.', '**Test Types**: jo test aur exam karwate ho unke naam jodo, jaise Weekly Test. Ye naam exam banate waqt **Test type** menu me aate hain.', '**Weekly Off**: saptahik chhutti ka din chuno (shuru me Sunday).']],
-    m: [['admin:settings', '#adminTabs [data-atab-btn="settings"]'], ['admin:settings:#adminSubjectsPanel', '#adminSubjectsPanel'], ['admin:settings:#adminRoomsPanel', '#adminRoomsPanel'], ['admin:settings:#adminTestTypesPanel', '#adminTestTypesPanel'], ['admin:settings:#adminWeeklyOffPanel', '#adminWeeklyOffPanel']] },
+    m: [['admin', '[data-ht-go="settings"]'], ['admin:settings:#adminSubjectsPanel', '#adminSubjectsPanel'], ['admin:settings:#adminRoomsPanel', '#adminRoomsPanel'], ['admin:settings:#adminTestTypesPanel', '#adminTestTypesPanel'], ['admin:settings:#adminWeeklyOffPanel', '#adminWeeklyOffPanel']] },
   { id: 'campus', t: ['Campus Location', 'Campus Location'], who: 'lead', k: 'campus location radius gps inside outside कैंपस लोकेशन',
     s: [['Open **Admin**, then **Settings**, then **Campus Location**.', 'Set the campus point and the radius (50 to 2000 metres), and save.'],
         ['**Admin** kholo, phir **Settings**, phir **Campus Location**.', 'Campus ka point aur radius (50 se 2000 meter) set karo aur save karo.']],
