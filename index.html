@@ -2651,14 +2651,29 @@
   body[data-hsub="ov"][data-htile="oc"] #onCampusNowHint { display: none; }
   #homeSeg { display: none !important; }
       #adminTabs { display: none !important; }
-  #adminPgHead, #adminCrumbs { display: none; }
-  #adminCrumbs { align-items: center; flex-wrap: wrap; gap: 0 6px; margin: 6px 0 0; font-size: 13px; }
-  #adminCrumbs button { border: 0; background: transparent; padding: 5px 2px; color: var(--gold); font-weight: 700; font-size: 13px; font-family: inherit; cursor: pointer; }
-  #adminCrumbs .cur { color: var(--muted-2); font-weight: 700; padding: 5px 2px; }
-  #adminCrumbs i { font-style: normal; color: var(--muted-2); opacity: .6; }
-  #adminPgHead { margin: 0 0 4px; }
+  #adminPgHead { display: none !important; }
+  #adminCrumbs { display: none; align-items: baseline; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; gap: 6px; margin: 6px 0 10px; }
+  #adminCrumbs button { flex: none; border: 0; background: transparent; padding: 4px 0; color: var(--gold); font-weight: 700; font-size: 13px; font-family: inherit; cursor: pointer; }
+  #adminCrumbs .cur { flex: none; font-size: 18px; font-weight: 700; color: var(--ink); padding: 0; }
+  #adminCrumbs i { flex: none; font-style: normal; font-size: 17px; font-weight: 700; line-height: 1; color: #8E8E96; }
   #view-admin[data-pghead="1"] #adminCrumbs { display: flex; }
-  #view-admin[data-pghead="1"] #adminPgHead { display: flex; }
+  .set-oldtitle, .set-grp-lbl { display: none !important; }
+  #setTiles { display: none; }
+  #view-admin[data-atab-cur="settings"][data-spage="0"] #setTiles { display: block; }
+  #view-admin[data-spage="0"] .set-acc { display: none !important; }
+  #view-admin[data-spage="1"] .set-acc:not(.open) { display: none !important; }
+  #view-admin[data-spage="1"] .set-acc.open > .panel-title, #view-admin[data-spage="1"] .set-acc.open > .pv-row { display: none; }
+  .st-lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); font-weight: 700; margin: 14px 2px 6px; }
+  .st-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .st-tile { position: relative; border: 1px solid; border-radius: 16px; padding: 12px 8px; text-align: center; cursor: pointer; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 86px; background: var(--card); }
+  .st-tile .qa-l { color: var(--ink); font-size: 13px; font-weight: 700; line-height: 1.25; }
+  .st-tile .qa-s { color: var(--muted-2); font-size: 12px; line-height: 1.25; }
+  .st-tile[hidden] { display: none; }
+  .st-g1 { color: #16A34A; border-color: rgba(22,163,74,.32); background: rgba(22,163,74,.07); }
+  .st-g2 { color: #2563EB; border-color: rgba(37,99,235,.32); background: rgba(37,99,235,.07); }
+  .st-g3 { color: #0D9488; border-color: rgba(13,148,136,.32); background: rgba(13,148,136,.07); }
+  .st-g4 { color: #7C3AED; border-color: rgba(124,58,237,.32); background: rgba(124,58,237,.07); }
+  .st-g5 { color: #475569; border-color: rgba(71,85,105,.32); background: rgba(71,85,105,.07); }
   body[data-hsub="ov"][data-htile="grid"] [data-htile] { display: none !important; }
   body[data-hsub="ov"][data-htile="today"] [data-htile]:not([data-htile="today"]), body[data-hsub="ov"][data-htile="oc"] [data-htile]:not([data-htile="oc"]), body[data-hsub="ov"][data-htile="alerts"] [data-htile]:not([data-htile="alerts"]), body[data-hsub="ov"][data-htile="notices"] [data-htile]:not([data-htile="notices"]) { display: none !important; }
   body[data-hsub="ov"]:not([data-htile="grid"]) #homeTiles { display: none !important; }
@@ -3999,8 +4014,8 @@
       <span>Reports</span>
     </button>
     <button class="nav-item" data-tab="admin" id="navAdmin" style="display:none;">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-      <span>Admin</span>
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+<span>Admin</span>
     </button>
   </div>
 
@@ -4355,7 +4370,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.72 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.73 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10165,7 +10180,8 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       }
       sum.innerHTML = `${escapeHtml(settingsSummary(p.id))}<svg class="ic set-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>`;
       head.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
+  });
+  setsViewSync();
   }
 
   // ===== AI helper (beta, Admin only) =====
@@ -11780,17 +11796,21 @@ Rules:
     const cur = v.getAttribute('data-atab-cur'); const rv = v.getAttribute('data-repv'); let title = ''; let path = [];
     if (cur === 'dash') { const k = state.homeSub === 'ov' ? state.homeTile : state.homeSub; if (k && k !== 'grid') { title = HT_TITLES[k] || ''; path = [['Admin', 'root'], [title]]; } }
     else if (cur === 'reports') { if (rv === 'open') { title = REP_NAMES[state.adminRepKind || 'full'] || 'Report'; path = [['Admin', 'root'], ['Reports', 'reps'], [title]]; } else { title = 'Reports'; path = [['Admin', 'root'], ['Reports']]; } }
-    else { title = ({ tt: 'Timetable', exams: 'Exams', settings: 'Settings' })[cur] || ''; if (title) path = [['Admin', 'root'], [title]]; }
-    t.textContent = title; v.setAttribute('data-pghead', title ? '1' : '0');
-    c.innerHTML = path.map((p) => p[1] ? '<button type="button" data-crumb="' + p[1] + '">' + p[0] + '</button><i>›</i>' : '<span class="cur">' + p[0] + '</span>').join('');
+    else if (cur === 'settings') { if (state.adminSetOpen) { title = setPanelLabel(state.adminSetOpen) || 'Setting'; path = [['Admin', 'root'], ['Settings', 'sets'], [title]]; } else { title = 'Settings'; path = [['Admin', 'root'], ['Settings']]; } }
+    else { title = ({ tt: 'Timetable', exams: 'Exams' })[cur] || ''; if (title) path = [['Admin', 'root'], [title]]; }
+    if (t.textContent !== title) t.textContent = title; v.setAttribute('data-pghead', title ? '1' : '0');
+    const html = path.map((p) => p[1] ? '<button type="button" data-crumb="' + p[1] + '">' + p[0] + '</button><i>›</i>' : '<span class="cur">' + p[0] + '</span>').join('');
+    if (c.innerHTML !== html) c.innerHTML = html;
+    const cu = c.querySelector('.cur'); if (cu) { let fs = 18; cu.style.fontSize = fs + 'px'; while (c.scrollWidth > c.clientWidth + 1 && fs > 15) { fs--; cu.style.fontSize = fs + 'px'; } } // the name of the open page stays on the line, whole
   }
   // back to the main tiles (the bottom Admin icon and the word Admin in the path do this)
   function adminGoRoot() {
     state.adminTab = 'dash'; try { localStorage.setItem('ctd_admin_tab', 'dash'); } catch (e) { /* ignore */ }
-    state.homeSub = 'ov'; state.homeTile = 'grid'; repShowTiles(); applyAdminTab(); applyHomeSub(); renderAdmin(); window.scrollTo({ top: 0 });
+    state.homeSub = 'ov'; state.homeTile = 'grid'; state.adminSetOpen = null; repShowTiles(); applyAdminTab(); applyHomeSub(); renderAdmin(); setsViewSync(); window.scrollTo({ top: 0 });
   }
   { const hd = document.getElementById('adminPgHead'); const bk = hd && hd.querySelector('[data-adm-back]'); if (bk) bk.addEventListener('click', () => { if (state.navDepth > 0 && history.state && history.state.catjeeNav) history.back(); else adminGoRoot(); });
-    const cr = document.getElementById('adminCrumbs'); if (cr) cr.addEventListener('click', (ev) => { const b = ev.target.closest('[data-crumb]'); if (!b) return; if (b.getAttribute('data-crumb') === 'root') adminGoRoot(); else if (b.getAttribute('data-crumb') === 'reps') { repShowTiles(); window.scrollTo({ top: 0 }); } }); }
+    const cr = document.getElementById('adminCrumbs'); if (cr) cr.addEventListener('click', (ev) => { const b = ev.target.closest('[data-crumb]'); if (!b) return; if (b.getAttribute('data-crumb') === 'root') adminGoRoot(); else if (b.getAttribute('data-crumb') === 'reps') { repShowTiles(); window.scrollTo({ top: 0 }); } else if (b.getAttribute('data-crumb') === 'sets') { setsShowTiles(); window.scrollTo({ top: 0 }); } }); }
+  window.addEventListener('resize', () => pgHeadSync());
   function applyHomeSub() {
   document.body.setAttribute('data-hsub', state.homeSub); homeTileApply();
     document.querySelectorAll('#homeSeg [data-hsub-btn]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-hsub-btn') === state.homeSub));
@@ -11825,15 +11845,16 @@ Rules:
   let htTimer = null;
   function homeTilesRefresh() {
     const tx = (id) => { const e = document.getElementById(id); return e ? String(e.textContent || '').trim() : ''; };
-    const set = (k, v) => { const e = document.querySelector('[data-ht-sub="' + k + '"]'); if (e) e.textContent = v; };
+    const set = (k, v) => { const e = document.querySelector('[data-ht-sub="' + k + '"]'); if (e && e.textContent !== v) e.textContent = v; };
     set('today', (tx('adScheduled') || 0) + ' classes · ' + (tx('adNotLogged') || 0) + ' not logged');
     set('tc', (tx('hsTc') || 0) + ' teachers'); set('cl', (tx('hsCl') || 0) + ' today');
     const ocN = ocNowIds().length; set('oc', state.adminDate !== todayStr() ? 'Only for today' : (ocN ? ocN + (ocN === 1 ? ' teacher' : ' teachers') + ' checked in' : 'Nobody yet'));
   if (state.homeSub === 'ov' && state.homeTile === 'oc' && !ocN) { state.homeTile = 'grid'; applyHomeSub(); } // the date was changed or the last teacher checked out
     const al = document.querySelectorAll('#adminAlerts .ad-alert').length; set('alerts', al ? 'Tap to see' : 'All clear');
-    const bd = document.getElementById('htBadgeAlerts'); if (bd) { bd.hidden = !al; bd.textContent = al; }
+    const bd = document.getElementById('htBadgeAlerts'); if (bd) { if (bd.hidden !== !al) bd.hidden = !al; if (bd.textContent !== String(al)) bd.textContent = al; }
     const nn = document.querySelectorAll('#adminNotices > *:not(.empty-state)').length; set('notices', nn ? nn + ' recent' : 'None in 2 weeks');
-    document.querySelectorAll('[data-ht-go]').forEach((b) => { const k = b.getAttribute('data-ht-go'); if (['tt', 'exams', 'reports', 'settings'].indexOf(k) >= 0) { const tb = document.querySelector('#adminTabs [data-atab-btn="' + k + '"]'); b.hidden = !tb || getComputedStyle(tb).display === 'none'; } });
+    document.querySelectorAll('[data-ht-go]').forEach((b) => { const k = b.getAttribute('data-ht-go'); if (['tt', 'exams', 'reports', 'settings'].indexOf(k) >= 0) { const tb = document.querySelector('#adminTabs [data-atab-btn="' + k + '"]'); const hid = !tb || getComputedStyle(tb).display === 'none'; if (b.hidden !== hid) b.hidden = hid; } });
+    try { setsTilesRefresh(); } catch (e) { /* ignore */ }
   }
   { const va = document.getElementById('view-admin'); if (va && window.MutationObserver) new MutationObserver(() => { clearTimeout(htTimer); htTimer = setTimeout(homeTilesRefresh, 60); }).observe(va, { childList: true, subtree: true, characterData: true }); homeTilesRefresh(); }
     // ---------- Admin Reports: the report tiles first; the details of a report open when its tile is tapped ----------
@@ -11843,7 +11864,7 @@ Rules:
     if (v.getAttribute('data-repv') !== 'open') navPush({ tab: 'admin', sub: 'reports', repv: 'tiles' });
     v.setAttribute('data-repv', 'open'); pgHeadSync(); window.scrollTo(0, 0);
   }
-  { const v = document.getElementById('view-admin'); if (v) { repShowTiles(); let last = v.getAttribute('data-atab-cur'); new MutationObserver(() => { const cur = v.getAttribute('data-atab-cur'); if (cur !== last) { if (last === 'reports' || cur === 'reports') repShowTiles(); last = cur; } pgHeadSync(); }).observe(v, { attributes: true, attributeFilter: ['data-atab-cur', 'data-repv'] }); } }
+  { const v = document.getElementById('view-admin'); if (v) { repShowTiles(); let last = v.getAttribute('data-atab-cur'); new MutationObserver(() => { const cur = v.getAttribute('data-atab-cur'); if (cur !== last) { if (last === 'reports' || cur === 'reports') repShowTiles(); last = cur; } pgHeadSync(); }).observe(v, { attributes: true, attributeFilter: ['data-atab-cur', 'data-repv', 'data-spage'] }); } }
   // Teachers: search, filter chips (with the counts) and "Show all"; the rows themselves are drawn by renderAdmin
   state.adminTF = 'all'; state.adminTQ = ''; state.adminTAll = false;
   function tcGroup(k) { return (k === 'oncampus' || k === 'present') ? 'present' : (k === 'leave' ? 'leave' : (k === 'off' ? 'off' : 'notin')); }
@@ -15145,6 +15166,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     try {
       if (target.tab === 'admin' && target.sub) state.adminTab = target.sub;
   if (target.tab === 'admin' && target.repv) repShowTiles();
+  if (target.tab === 'admin' && target.spage) { state.adminSetOpen = null; renderSettingsAccordion(); setsViewSync(); }
   if (target.tab === 'admin' && target.tile) { state.homeTile = target.tile; state.homeSub = target.hsub || 'ov'; applyHomeSub(); }
       switchTab(target.tab);
       if (target.tab === 'admin') renderAdmin();
@@ -20163,6 +20185,26 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     });
     let busy = false; const sync = () => { busy = false; labels.forEach(([lb, ids]) => { lb.hidden = !ids.some((id) => { const el = document.getElementById(id); return el && !el.hidden && el.style.display !== 'none'; }); }); };
     new MutationObserver(() => { if (!busy) { busy = true; requestAnimationFrame(sync); } }).observe(par, { attributes: true, subtree: true, attributeFilter: ['hidden', 'style'] }); sync();
+  })();
+    // Admin Settings as tiles: every setting is its own tile under its group; a tap opens that setting as a page
+  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+  function setPanelLabel(id) { const p = document.getElementById(id); const h = p && p.querySelector('.panel-title'); let t = ''; if (h) { const c = h.cloneNode(true); c.querySelectorAll('.set-sum, svg, .ico').forEach((x) => x.remove()); t = (c.textContent || '').replace(/\s+/g, ' ').trim(); } return t || ({ adminPreviewPanel: 'Preview as', adminAiPanel: 'AI (beta)', adminPushPanel: 'Phone notifications' })[id] || ''; }
+  function setPanelHidden(id) { const el = document.getElementById(id); return !el || el.hidden || el.style.display === 'none' || (document.body.classList.contains('coord-mode') && el.classList.contains('admin-only')); }
+  function setsViewSync() { const v = document.getElementById('view-admin'); if (!v) return; const w = state.adminSetOpen ? '1' : '0'; if (v.getAttribute('data-spage') !== w) v.setAttribute('data-spage', w); }
+  function setsShowTiles() { state.adminSetOpen = null; renderSettingsAccordion(); setsViewSync(); }
+  function setsTilesRefresh() {
+    document.querySelectorAll('#setTiles [data-st]').forEach((b) => { const id = b.getAttribute('data-st'); const hid = setPanelHidden(id); if (b.hidden !== hid) b.hidden = hid; const sm = b.querySelector('.qa-s'); let sv = ''; try { sv = settingsSummary(id) || ''; } catch (e) { sv = ''; } if (sm && sm.textContent !== sv) sm.textContent = sv; });
+    document.querySelectorAll('#setTiles [data-stl]').forEach((l) => { const ids = (l.getAttribute('data-stl') || '').split(','); const none = ids.every((i) => setPanelHidden(i)); if (l.hidden !== none) l.hidden = none; const g = l.nextElementSibling; if (g && g.hidden !== none) g.hidden = none; });
+  }
+  (function buildSettingsTiles() {
+    const first = document.querySelector('#view-admin .set-grp-lbl') || document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return;
+    const old = document.querySelector('#view-admin .tsec-head[data-atab="settings"]'); if (old) old.classList.add('set-oldtitle');
+    { const pv = document.getElementById('adminPreviewPanel'); if (pv) pv.classList.add('set-acc'); }
+    const box = document.createElement('div'); box.id = 'setTiles'; box.setAttribute('data-atab', 'settings');
+    box.innerHTML = SET_GROUPS.map(([t, cl, ids]) => '<div class="st-lbl" data-stl="' + ids.join(',') + '">' + t.replace('&', '&amp;') + '</div><div class="st-grid">' + ids.map((id) => { const p = document.getElementById(id); const ic = p && p.querySelector('.panel-title svg'); return '<button type="button" class="st-tile ' + cl + '" data-st="' + id + '">' + (ic ? ic.outerHTML.replace(/width="\d+"/, 'width="22"').replace(/height="\d+"/, 'height="22"').replace(/style="[^"]*"/, '') : '') + '<span class="qa-l">' + setPanelLabel(id).replace('&', '&amp;') + '</span><span class="qa-s"></span></button>'; }).join('') + '</div>').join('');
+    first.parentElement.insertBefore(box, first);
+    box.querySelectorAll('[data-st]').forEach((b) => b.addEventListener('click', () => { const id = b.getAttribute('data-st'); navPush({ tab: 'admin', sub: 'settings', spage: 'tiles' }); state.adminSetOpen = id; try { settingsFreshOpen(id); } catch (e) { /* ignore */ } renderSettingsAccordion(); setsViewSync(); window.scrollTo(0, 0); }));
+    setsTilesRefresh(); setsViewSync();
   })();
   function openHelp() { const st = history.state && history.state.catjeeMenu; if (st === 'helpc') return; if (!st) { openMenu(); setTimeout(() => openMenuPanel('helpc'), 260); } else openMenuPanel('helpc'); }
   function openHelpSheetOld() {
