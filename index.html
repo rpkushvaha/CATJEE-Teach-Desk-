@@ -4413,7 +4413,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.85 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.86 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5936,14 +5936,15 @@
     document.getElementById('hvBatchNote').hidden = !actKind;
     const searching = !!h.q.trim();
     const drill = !!state.historySelectedDate && h.range !== 'day';
-    const dayView = !!state.historySelectedDate || h.range === 'day';
-    document.getElementById('hvPeriodBlock').style.display = (searching || drill) ? 'none' : 'flex';
-    document.getElementById('hvSum').style.display = searching ? 'none' : 'grid';
-    document.getElementById('hvActions').style.display = (searching || dayView) ? 'none' : 'block';
-  { const mr = document.getElementById('hvMyRep'); if (mr) mr.style.display = (searching || dayView || reportsTabOn()) ? 'none' : 'flex'; }
+  const dayView = !!state.historySelectedDate || h.range === 'day';
+  const onRep = state.tab === 'reports'; // on the Reports page nothing of History's search or day view may hide the report
+  document.getElementById('hvPeriodBlock').style.display = (!onRep && (searching || drill)) ? 'none' : 'flex';
+  document.getElementById('hvSum').style.display = searching ? 'none' : 'grid';
+  document.getElementById('hvActions').style.display = (!onRep && (searching || dayView)) ? 'none' : 'block';
+  { const mr = document.getElementById('hvMyRep'); if (mr) mr.style.display = (searching || drill || reportsTabOn()) ? 'none' : 'flex'; }
   }
 
-  function renderHistory() { if (state.hvRepKind === 'cnt' || state.hvRepKind === 'sub' || state.hvRepKind === 'duty' || state.hvRepKind === 'entry') setTimeout(() => { try { if (window.__hvAttPreview) window.__hvAttPreview(); } catch (e) { /* ignore */ } }, 0);
+  function renderHistory() { if (state.hvRepKind && state.hvRepKind !== 'full') setTimeout(() => { try { if (window.__hvAttPreview) window.__hvAttPreview(); } catch (e) { /* ignore */ } }, 0);
     const el = document.getElementById('historyList');
     if (!el) return;
     const h = hvState();
@@ -6241,9 +6242,16 @@
     if (c.innerHTML !== html) c.innerHTML = html;
     const cu = c.querySelector('.cur'); if (cu) { let fs = 20; cu.style.fontSize = fs + 'px'; while (c.scrollWidth > c.clientWidth + 1 && fs > 16) { fs--; cu.style.fontSize = fs + 'px'; } }
   }
-  function trvShowTiles() { const v = document.getElementById('view-reports'); if (!v) return; v.setAttribute('data-trv', 'tiles'); document.querySelectorAll('[data-hv-rt].on').forEach((x) => x.classList.remove('on')); trvSync(); }
+    // go Back (through the app's own Back history) until the page asked for is reached; if it cannot be found, go there directly
+  function trvPopTo(pred, fallback) {
+    const st = state.navStack || []; let n = 0; let found = false;
+    for (let i = st.length - 1; i >= 0; i--) { n++; if (pred(st[i])) { found = true; break; } }
+    if (found && n > 0 && history.state && history.state.catjeeNav) { try { history.go(-n); return; } catch (e) { /* use the direct way */ } }
+    fallback();
+  }
+  function trvShowTiles() { const v = document.getElementById('view-reports'); if (!v) return; state.historySelectedDate = null; v.setAttribute('data-trv', 'tiles'); document.querySelectorAll('[data-hv-rt].on').forEach((x) => x.classList.remove('on')); trvSync(); }
   function trvOpen() { const v = document.getElementById('view-reports'); if (!v) return; if (v.getAttribute('data-trv') !== 'open') navPush({ tab: 'reports', trv: 'tiles' }); v.setAttribute('data-trv', 'open'); trvSync(); window.scrollTo(0, 0); }
-  { const v = document.getElementById('view-reports'); if (v) { const c = document.getElementById('repTCrumbs'); if (c) c.addEventListener('click', (ev) => { const tc = ev.target.closest('[data-tcrumb]'); if (!tc) return; if (tc.getAttribute('data-tcrumb') === 'history') { switchTab('history'); window.scrollTo({ top: 0 }); } else { trvShowTiles(); window.scrollTo({ top: 0 }); } });
+  { const v = document.getElementById('view-reports'); if (v) { const c = document.getElementById('repTCrumbs'); if (c) c.addEventListener('click', (ev) => { const tc = ev.target.closest('[data-tcrumb]'); if (!tc) return; if (tc.getAttribute('data-tcrumb') === 'history') { trvPopTo((e) => e.tab === 'history', () => switchTab('history')); } else { trvPopTo((e) => e.tab === 'reports' && e.trv, () => trvShowTiles()); } window.scrollTo({ top: 0 }); });
   { const mr = document.getElementById('hvMyRep'); if (mr) mr.addEventListener('click', () => { switchTab('reports'); window.scrollTo({ top: 0 }); }); } let was = v.classList.contains('active'); new MutationObserver(() => { const now = v.classList.contains('active'); if (now && !was) trvShowTiles(); was = now; }).observe(v, { attributes: true, attributeFilter: ['class'] }); window.addEventListener('resize', () => trvSync()); } }
   document.querySelectorAll('[data-hv-rt]').forEach((b) => b.addEventListener('click', () => {
   state.hvRepKind = b.getAttribute('data-hv-rt');
