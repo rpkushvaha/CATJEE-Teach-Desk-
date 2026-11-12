@@ -4543,7 +4543,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.92 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.93 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7106,7 +7106,7 @@ function renderPartChips() {
     el.querySelectorAll('[data-team-wa]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const n = waNumber(b.getAttribute('data-team-wa')); if (n) window.open('https://wa.me/' + n, '_blank'); }));
     el.querySelectorAll('[data-team-addr]').forEach((b) => b.addEventListener('click', () => addrSet(b.getAttribute('data-uid'), b.getAttribute('data-team-addr'))));
   el.querySelectorAll('[data-team-dept]').forEach((inp) => inp.addEventListener('change', () => teamDeptPatch(inp.getAttribute('data-team-dept'), { dept: inp.value.trim() }, 'Department saved')));
-  el.querySelectorAll('[data-team-subj]').forEach((b) => b.addEventListener('click', () => { const u = b.getAttribute('data-uid'); const sj = b.getAttribute('data-team-subj'); const cur = teamDeptOf(u).subjects.slice(); const k = cur.indexOf(sj); if (k >= 0) cur.splice(k, 1); else cur.push(sj); teamDeptPatch(u, { subjects: cur }, 'Subjects saved'); }));
+  el.querySelectorAll('[data-team-subj]').forEach((b) => b.addEventListener('click', () => { const u = b.getAttribute('data-uid'); const sj = b.getAttribute('data-team-subj'); const cur = teamDeptOf(u).subjects.filter((x) => subjectsList().indexOf(x) !== -1); const k = cur.indexOf(sj); if (k >= 0) cur.splice(k, 1); else cur.push(sj); teamDeptPatch(u, { subjects: cur }, 'Subjects saved'); }));
   el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-uid'); const role = b.getAttribute('data-team-role');
   const cur = isPrincipalUid(uid) ? 'principal' : (isCoordUid(uid) ? 'coordinator' : 'teacher'); if (role === cur) return;
@@ -11735,7 +11735,7 @@ Rules:
   function watchRole(db, uid) {
     unsubscribers.push(db.doc('team/' + uid).onSnapshot((snap) => {
       const td = snap.data() || {}; { const ad = salNorm(td.addr); if (ad !== (state.myAddr || '')) { state.myAddr = ad; try { renderHello(); renderProfileSal(); } catch (e) { /* ignore */ } } }
-  { const dp = String(td.dept || '').trim(); const sb = expandSubjects(td.subjects); const df = String(td.deptFrom || ''); const sig = `${dp}|${sb.join(',')}|${df}`; if (sig !== state.myDeptSig) { state.myDeptSig = sig; state.myDept = dp; state.mySubjects = sb; state.myDeptFrom = df; try { renderSubject(); renderProfileSal(); if (state.form) renderPartChips(); } catch (e) { /* ignore */ } } } const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
+  { const dp = String(td.dept || '').trim(); const sbRaw = Array.isArray(td.subjects) ? td.subjects.filter(Boolean) : []; const sb = expandSubjects(sbRaw); const df = String(td.deptFrom || ''); const sig = `${dp}|${sb.join(',')}|${df}`; if (sig !== state.myDeptSig) { state.myDeptSig = sig; state.myDept = dp; state.mySubjects = sb; state.mySubjectsRaw = sbRaw; state.myDeptFrom = df; try { renderSubject(); renderProfileSal(); if (state.form) renderPartChips(); } catch (e) { /* ignore */ } } } const co = td.role === 'coordinator'; const wings = Array.isArray(td.wings) ? td.wings : [];
       if (td.status === 'removed' && !state.canAdmin) { if (!state.accessRemoved) { state.accessRemoved = true; try { firebase.auth().signOut(); } catch (e) { /* ignore */ } showAuthScreen(); showAuthError('Your access to CATJEE Teach Desk has been removed by the admin. Please contact the director if this is a mistake.'); } return; }
       const prin = co && (td.principal === true || !!state.principalViaId); const wasP = !!state.isPrincipal; const was = state.isCoordinator; const wings2 = (prin && !wings.length) ? ['Pre-Foundation', 'Foundation'] : wings; if (co === was && prin === wasP && JSON.stringify(wings2) === JSON.stringify(state.coordWings || [])) return;
   state.isCoordinator = co; state.isPrincipal = prin; state.coordWings = wings2; roleFollow(co !== was ? (co ? 'You are now a Coordinator' : 'Your role is now Teacher') : '');
@@ -19785,11 +19785,11 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   function refreshAdminSal() { const n = state.adminNames || {}; Object.keys(n).forEach((u) => { if (n[u] && n[u].own !== undefined) n[u].sal = addrOf(u) || n[u].own; }); }
   function normTxt(x) { return String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ''); }
   function expandSubjects(list) { const out = []; (Array.isArray(list) ? list : []).filter(Boolean).forEach((x) => { const p = subjPartsOf(x); (p || [x]).forEach((y) => { if (out.indexOf(y) < 0) out.push(y); }); }); return out; }
-  function teamDeptOf(uid) { if (uid === state.teacherId) return { dept: state.myDept || '', subjects: state.mySubjects || [], from: state.myDeptFrom || '' }; const t = (state.team && state.team[uid]) || {}; return { dept: String(t.dept || '').trim(), subjects: expandSubjects(t.subjects), from: String(t.deptFrom || '') }; }
+  function teamDeptOf(uid) { if (uid === state.teacherId) return { dept: state.myDept || '', subjects: state.mySubjectsRaw || [], from: state.myDeptFrom || '' }; const t = (state.team && state.team[uid]) || {}; return { dept: String(t.dept || '').trim(), subjects: Array.isArray(t.subjects) ? t.subjects.filter(Boolean) : [], from: String(t.deptFrom || '') }; }
   // what the report says: only the Department / Department + one Subject / Department and the subject under each class
   function deptInfo(uid, date) {
     const t = teamDeptOf(uid); if (!t.dept) return null; if (date && t.from && String(date) < t.from) return null;
-    const dn = normTxt(t.dept); const subs = t.subjects; const diff = subs.filter((x) => normTxt(x) !== dn);
+    const dn = normTxt(t.dept); const subs = expandSubjects(t.subjects); const diff = subs.filter((x) => normTxt(x) !== dn);
     return { dept: t.dept, subs, mode: !diff.length ? 'dept' : (subs.length === 1 ? 'one' : 'many'), one: subs[0] || '' };
   }
   function deptTopLines(uid, date, legacy) { const di = deptInfo(uid, date); if (!di) return legacy ? [`📘 *Subject:* ${legacy}`] : []; const L = [`🎓 *Department:* ${di.dept}`]; if (di.mode === 'one') L.push(`📘 *Subject:* ${di.one}`); return L; }
