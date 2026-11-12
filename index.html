@@ -353,7 +353,7 @@
     --switch-on-soft: #E3F5E9;
     --amber: #FFFFFF;
     --amber-soft: #171717;
-    --neutral-soft: #F0F0F0;
+    --neutral-soft: #F7F8FA; --soft-line: #D9E0E6;
     --neutral-text: #8A8A8A;
     --ink: #171717;
   }
@@ -362,14 +362,14 @@
       --navy: #000000; --navy-2: #1E1E1E; --gold: #FF5C6C; --gold-soft: #3A1418;
       --paper: #121212; --card: #1C1C1C; --line: #2E2E2E; --muted: #9A9A9A;
       --muted-2: #C2C2C2; --green: #FF8A94; --green-soft: #3A1418; --amber: #000000;
-      --amber-soft: #FFFFFF; --neutral-soft: #262626; --neutral-text: #9A9A9A; --ink: #F2F2F2; --switch-on: #3FBE6C; --switch-on-soft: #12301C;
+      --amber-soft: #FFFFFF; --neutral-soft: #262626; --soft-line: rgba(255, 255, 255, .14); --neutral-text: #9A9A9A; --ink: #F2F2F2; --switch-on: #3FBE6C; --switch-on-soft: #12301C;
     }
   }
   :root[data-theme="dark"] {
     --navy: #000000; --navy-2: #1E1E1E; --gold: #FF5C6C; --gold-soft: #3A1418;
     --paper: #121212; --card: #1C1C1C; --line: #2E2E2E; --muted: #9A9A9A;
     --muted-2: #C2C2C2; --green: #FF8A94; --green-soft: #3A1418; --amber: #000000;
-    --amber-soft: #FFFFFF; --neutral-soft: #262626; --neutral-text: #9A9A9A; --ink: #F2F2F2; --switch-on: #3FBE6C; --switch-on-soft: #12301C;
+    --amber-soft: #FFFFFF; --neutral-soft: #262626; --soft-line: rgba(255, 255, 255, .14); --neutral-text: #9A9A9A; --ink: #F2F2F2; --switch-on: #3FBE6C; --switch-on-soft: #12301C;
   }
   * { box-sizing: border-box; }
   body {
@@ -2484,7 +2484,7 @@
   .cal-head { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: var(--muted-2); margin-bottom: 4px; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .cal-d { border: 0; border-radius: 10px; height: 38px; background: #FAFAFA; color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; }
-  .cal-d.cal-o { background: #F0F0F0; color: #999; }
+  .cal-d.cal-o { background: #F7F8FA; color: #999; }
   .cal-h { background: #FFE6CF !important; color: #9A4A00 !important; font-weight: 700; }
   .cal-w { background: #E3F4E8 !important; color: #1E7A3C !important; font-weight: 700; }
   .cal-f { background: #FFF6C9 !important; color: #7A6200 !important; font-weight: 700; }
@@ -2493,12 +2493,12 @@
   .cal-d.cal-today { box-shadow: inset 0 0 0 2px var(--ink); }
   .cal-d.cal-sel { box-shadow: inset 0 0 0 2px #E63946; }
   .cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 12px; color: var(--muted-2); }
-  .cal-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; background: #F0F0F0; }
+  .cal-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; background: #F7F8FA; }
   .cal-dot.cal-h { background: #FFE6CF !important; } .cal-dot.cal-w { background: #E3F4E8 !important; } .cal-dot.cal-f { background: #FFF6C9 !important; } .cal-dot.cal-v { background: #EAF0FA !important; }
   .cal-dot.cal-t { background: #fff; outline: 1.5px dashed #C2661A; outline-offset: -1px; }
   .cal-det { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-top: 10px; }
   .cal-dh { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .cal-ln { font-size: 13px; color: var(--muted-2); margin-top: 3px; }
-  .cal-pill { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 99px; padding: 2px 8px; background: #F0F0F0; }
+  .cal-pill { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 99px; padding: 2px 8px; background: #F7F8FA; }
   .cal-pill.cal-h, .cal-pill.cal-w, .cal-pill.cal-f, .cal-pill.cal-v { font-weight: 600; }
   .cal-row { display: flex; gap: 12px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 9px 0; font: inherit; font-size: 14px; cursor: pointer; align-items: flex-start; }
   .cal-rd { min-width: 78px; font-weight: 600; color: var(--muted-2); font-size: 13px; }
@@ -2680,6 +2680,54 @@
   #view-reports[data-trv="open"] .hv-head { display: none; }
   #view-reports[data-trv="tiles"] #hvPeriodBlock, #view-reports[data-trv="tiles"] #historyReportMsg, #view-reports[data-trv="tiles"] #hvActions > :not(.rt-row) { display: none !important; }
   #view-reports[data-trv="open"] #hvActions .rt-row { display: none !important; }
+    /* grey fills: very light cool grey with a fine line, like a Watch / Pin button */
+  .class-checklist-notes,
+  .del-btn,
+  .sum-grid,
+  .tl-pill.upcoming,
+  .tl-tag,
+  .hv-filters,
+  .sv-summary,
+  .inv-hint,
+  .tl-pill.cancelled,
+  .ad-alert.info,
+  .ad-pill,
+  .ex-st,
+  .ex-selbar,
+  .ad-grp,
+  .ad-detail,
+  .pk-selected,
+  .ad-tabs,
+  .tl-pill.tt-own,
+  .tg-b,
+  .tg-selbar,
+  .tp-how span,
+  .xd-tag,
+  .xw-stat,
+  .mchip,
+  .plan-slot,
+  .auth-tabs,
+  .chip:not(.active),
+  #modeChips,
+  #adminReportRangeChips,
+  .tg-mode,
+  .chips:has(> [data-hrange]),
+  .hv-arrow,
+  .date-pill,
+  .mic-lang,
+  .home-seg,
+  .rseg,
+  .tl-card.ct-none .ct-box,
+  .ct-pill-g,
+  .tl-log:disabled,
+  .ent-card.done,
+  .ent-type,
+  .chips.seg { outline: 1px solid var(--soft-line); outline-offset: -1px; }
+  .hv-rec:active .tl-card,
+  .sv-row:active,
+  .ad-trow:active,
+  .dicon-btn:active,
+  .drow:active { background: #ECEFF3; }
   .ht-badge[hidden] { display: none; }
     #homeTiles .qa-s { min-height: 1.3em; transition: opacity .25s ease; }
   #homeTiles .rt-tile[data-ht-go] { box-sizing: border-box; height: 98px; min-height: 98px; justify-content: flex-start; overflow: hidden; padding: 10px 6px 8px; gap: 3px; }
@@ -4413,7 +4461,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.87 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.88 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
