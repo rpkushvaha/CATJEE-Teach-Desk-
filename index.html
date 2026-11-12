@@ -2728,12 +2728,12 @@
   .ad-trow:active,
   .dicon-btn:active,
   .drow:active { background: #ECEFF3; }
-  #view-admin[data-atab-cur="mat"] .ad-bar { display: none !important; }
+  
   #homeTiles [data-ht-go="mat"] { color: #0891B2; border-color: rgba(8, 145, 178, .32); background: rgba(8, 145, 178, .07); }
-  #adminMatSec .mat-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-  #adminMatSec .mat-bar .chips.seg { flex: 1; }
-  #adminMatSec .mat-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
-  #adminMatSec .mat-filters select { margin: 0; }
+    .mat-addbox { display: block; width: 100%; box-sizing: border-box; border: 1.5px solid var(--gold); color: var(--gold); background: var(--card); border-radius: 14px; padding: 12px; font-weight: 700; font-size: 14px; font-family: inherit; margin: 10px 0; cursor: pointer; }
+  .mat-sug-h { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; background: #FFF9EC; padding-bottom: 6px; }
+  .mat-x { border: 0; background: transparent; font-size: 20px; line-height: 1; padding: 2px 6px; color: var(--muted-2); cursor: pointer; font-family: inherit; }
+
   .mat-grp { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 700; margin: 14px 0 6px; }
   .mat-grp span { font-weight: 500; color: var(--muted-2); font-size: 12px; }
   .mat-row { display: flex; gap: 8px; align-items: flex-start; background: var(--card); border: 1px solid var(--line); border-left: 3px solid rgb(var(--mcr)); border-radius: 12px; padding: 9px 10px; margin-bottom: 6px; font-size: 13px; }
@@ -3739,8 +3739,8 @@
         <div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="adminDateLabelText">Today</span></button><button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button></div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <div class="hv-nav rep-datenav" data-atab="reports"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button><button type="button" class="hv-back" id="repBackBtn" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span id="repBackText">Back to today</span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-      <div class="chips" id="adminWingChips" data-atab="dash tt reports">
+      <div class="hv-nav rep-datenav" data-atab="reports mat"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button><button type="button" class="hv-back" id="repBackBtn" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span id="repBackText">Back to today</span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+      <div class="chips" id="adminWingChips" data-atab="dash tt reports mat">
         <button class="chip active" data-admin-wing="all">All</button>
         <button class="chip" data-admin-wing="Pre-Foundation">Pre-Foundation</button>
         <button class="chip" data-admin-wing="Foundation">Foundation</button>
@@ -3868,10 +3868,18 @@
       </section>
 
       <section class="tsec" id="adminMatSec" data-atab="mat">
-  <div class="mat-bar"><div class="chips seg" id="matRange"><button type="button" class="chip active" data-mr="day">Day</button><button type="button" class="chip" data-mr="week">Week</button><button type="button" class="chip" data-mr="month">Month</button></div><button type="button" class="hv-back" id="matAddBtn" style="padding:0;">+ Add</button></div>
-  <div class="hv-nav" id="matNav"><button type="button" class="hv-arrow" id="matPrev" aria-label="Earlier"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label" id="matLabel"></div><button type="button" class="hv-arrow" id="matNext" aria-label="Later"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-  <div class="mat-filters"><select class="text-input" id="matBatchSel" aria-label="Class / Batch"></select><select class="text-input" id="matTeacherSel" aria-label="Teacher"></select></div>
-  <div class="chips" id="matTypeChips"></div>
+  <div class="rep-range-row"><div class="chips seg" id="matRange"><button type="button" class="chip active" data-mr="day">Day</button><button type="button" class="chip" data-mr="week">Week</button><button type="button" class="chip" data-mr="month">Month</button></div></div>
+  <div class="hv-note" style="text-align:left;">What was given to each batch: study material, notes, sheets and more, with the teacher and the chapter.</div>
+  <div class="rep-optcard" id="matOpt">
+    <label class="rep-lbl rep-lbl-s" for="matTeacherSel">Teacher</label>
+    <select class="text-input" id="matTeacherSel"></select>
+    <label class="rep-lbl rep-lbl-s" for="matBatchSel" style="margin-top:12px;">Class / Batch</label>
+    <select class="text-input" id="matBatchSel"></select>
+    <div class="rep-lbl rep-lbl-s" style="margin-top:12px;">Material</div>
+    <div class="chips" id="matTypeChips"></div>
+  </div>
+  <div id="matResHead"></div>
+  <button type="button" class="mat-addbox" id="matAddBtn">+ Add material</button>
   <div id="matSug"></div>
   <div id="matList"></div>
   <div class="qa-row" id="matOuts" hidden><button type="button" class="qa-btn qa-wa" id="matWaBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share picture</span></button><button type="button" class="qa-btn qa-pdf" id="matPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/></svg><span class="qa-l">PDF</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-xl" id="matCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button></div>
@@ -4495,7 +4503,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.89 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.90 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10321,20 +10329,16 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   }));
 
     // ---------- Materials: the coordinator's own record of the material given to each batch ----------
-  const MAT_TYPES = [['study', 'Study material', 'Study', '217,119,6'], ['olympiad', 'Olympiad sheet', 'Olympiad', '124,58,237'], ['dpp', 'DPP', 'DPP', '22,163,74'], ['worksheet', 'Worksheet', 'Worksheet', '37,99,235'], ['other', 'Other sheet', 'Other', '13,148,136']];
-  const matType = (k) => MAT_TYPES.find((t) => t[0] === k) || MAT_TYPES[4];
+  const MAT_TYPES = [['study', 'Study material', 'Study material', '217,119,6'], ['classnotes', 'Class notes', 'Class notes', '219,39,119'], ['olympiad', 'Olympiad sheet', 'Olympiad sheet', '124,58,237'], ['dpp', 'DPP', 'DPP', '22,163,74'], ['worksheet', 'Worksheet', 'Worksheet', '37,99,235'], ['pyq', 'PYQs', 'PYQs', '234,88,12'], ['other', 'Other sheet', 'Other sheet', '13,148,136']];
+  const matType = (k) => MAT_TYPES.find((t) => t[0] === k) || MAT_TYPES[MAT_TYPES.length - 1];
   const matYmd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  state.mat = { mode: 'week', anchor: todayStr(), batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', form: null, sug: null, sugBusy: false };
+  const matSet = (el, html) => { if (el && el.__h !== html) { el.innerHTML = html; el.__h = html; } }; // write only when the text really changed (no blinking)
+  state.mat = { batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', form: null, sug: null, sugBusy: false };
   function matCanEdit() { return !principalView(); }
-  function matBatches() { const lw = leadWings(); return allBatchesFlat().filter((b) => !wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1); }
-  function matTeachers() { const lw = leadWings(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w)))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
-  function matRange() {
-    const m = state.mat; const a = m.anchor; let from = a; let to = a; let nav = entryDateShort(a); let label = repDayFull(a); let tag = a;
-    if (m.mode === 'week') { from = mondayOf(a); const wd = dateObj(from); wd.setDate(wd.getDate() + 6); to = matYmd(wd); nav = entryDateShort(from) + ' – ' + entryDateShort(to); label = repRangeFull(from, to); tag = from + '_to_' + to; }
-    else if (m.mode === 'month') { const o = dateObj(a); from = matYmd(new Date(o.getFullYear(), o.getMonth(), 1)); to = matYmd(new Date(o.getFullYear(), o.getMonth() + 1, 0)); nav = repMonthFull(a); label = nav; tag = from.slice(0, 7); }
-    return { from, to, nav, label, tag };
-  }
-  function matShift(dir) { const m = state.mat; if (dir > 0 && matRange().to >= todayStr()) return; const o = dateObj(m.anchor); if (m.mode === 'day') o.setDate(o.getDate() + dir); else if (m.mode === 'week') o.setDate(o.getDate() + 7 * dir); else o.setMonth(o.getMonth() + dir, 1); m.anchor = matYmd(o); matRender(); }
+  function matWing() { return state.adminReportWing || 'all'; }
+  function matBatches() { const lw = leadWings(); const aw = matWing(); return allBatchesFlat().filter((b) => (!wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1) && (aw === 'all' || wingOfBatch(b) === aw)); }
+  function matTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
+  function matRange() { const r = adminReportRangeDates(); const d = r.dates; return { from: d[0], to: d[d.length - 1], nav: r.label, label: r.full, tag: r.fileTag }; }
   async function matLoad() {
     const m = state.mat; const r = matRange(); const key = r.from + '|' + r.to; m.key = key; m.loading = true; m.err = ''; m.sug = null; matRender();
     try {
@@ -10345,28 +10349,30 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   }
   function matReload() { state.mat.key = ''; matRender(); }
   function matFiltered() {
-    const m = state.mat; const lw = leadWings();
-    return m.rows.filter((r) => (state.canAdmin || lw.indexOf(r.wing || wingOfBatch(r.batch)) !== -1) && (m.batch === 'all' || r.batch === m.batch) && (m.teacher === 'all' || r.teacherId === m.teacher) && (m.type === 'all' || r.type === m.type))
+    const m = state.mat; const lw = leadWings(); const aw = matWing();
+    return m.rows.filter((r) => { const w = r.wing || wingOfBatch(r.batch); return (state.canAdmin || lw.indexOf(w) !== -1) && (aw === 'all' || w === aw) && (m.batch === 'all' || r.batch === m.batch) && (m.teacher === 'all' || r.teacherId === m.teacher) && (m.type === 'all' || r.type === m.type); })
       .sort((a, b) => (a.batch || '').localeCompare(b.batch || '') || b.date.localeCompare(a.date) || (a.teacherName || '').localeCompare(b.teacherName || ''));
   }
   const matName = (r) => r.teacherName || ttName(r.teacherId);
   function matRender() {
     const sec = document.getElementById('adminMatSec'); if (!sec) return;
-    const m = state.mat; const r = matRange();
-    sec.querySelectorAll('#matRange [data-mr]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-mr') === m.mode));
-    const lab = document.getElementById('matLabel'); if (lab.textContent !== r.nav) lab.textContent = r.nav;
-    document.getElementById('matNext').disabled = r.to >= todayStr();
+    const m = state.mat; const r = matRange(); const range = state.adminReportRange || 'day';
+    sec.querySelectorAll('#matRange [data-mr]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-mr') === range));
+    const lbl = document.getElementById('repLabel'); if (lbl && lbl.textContent !== r.nav) lbl.textContent = r.nav; try { syncRepBack(); } catch (e) { /* ignore */ }
     document.getElementById('matAddBtn').style.display = matCanEdit() ? '' : 'none';
+    const bs = matBatches(); if (m.batch !== 'all' && bs.indexOf(m.batch) === -1) m.batch = 'all'; const ts = matTeachers(); if (m.teacher !== 'all' && ts.indexOf(m.teacher) === -1) m.teacher = 'all';
     const bsel = document.getElementById('matBatchSel'); const tsel = document.getElementById('matTeacherSel');
-    const bh = '<option value="all">All batches</option>' + matBatches().map((b) => `<option value="${escapeHtml(b)}"${m.batch === b ? ' selected' : ''}>${escapeHtml(b)}</option>`).join(''); if (bsel.innerHTML !== bh) bsel.innerHTML = bh;
-    const th = '<option value="all">All teachers</option>' + matTeachers().map((u) => `<option value="${escapeHtml(u)}"${m.teacher === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join(''); if (tsel.innerHTML !== th) tsel.innerHTML = th;
-    const ch = ['<button type="button" class="chip' + (m.type === 'all' ? ' active' : '') + '" data-mtc="all">All</button>'].concat(MAT_TYPES.map((t) => `<button type="button" class="chip${m.type === t[0] ? ' active' : ''}" data-mtc="${t[0]}">${t[2]}</button>`)).join(''); const tc = document.getElementById('matTypeChips'); if (tc.innerHTML !== ch) tc.innerHTML = ch;
+    matSet(bsel, '<option value="all">All batches</option>' + bs.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')); if (bsel.value !== m.batch) bsel.value = m.batch;
+    matSet(tsel, '<option value="all">All teachers</option>' + ts.map((u) => `<option value="${escapeHtml(u)}">${escapeHtml(ttName(u))}</option>`).join('')); if (tsel.value !== m.teacher) tsel.value = m.teacher;
+    matSet(document.getElementById('matTypeChips'), ['<button type="button" class="chip' + (m.type === 'all' ? ' active' : '') + '" data-mtc="all">All</button>'].concat(MAT_TYPES.map((t) => `<button type="button" class="chip${m.type === t[0] ? ' active' : ''}" data-mtc="${t[0]}">${t[1]}</button>`)).join(''));
+    const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
+    matSet(document.getElementById('matResHead'), `<div class="tsec-title">Materials record · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml(r.label)} · ${escapeHtml(wt)}</div>`);
     const rows = matFiltered(); let html = '';
     if (m.loading) html = '<div class="skel short"></div>';
     else if (m.err) html = `<div class="hv-note" style="text-align:left;">${escapeHtml(m.err)}</div>`;
-    else if (!rows.length) html = `<div class="empty"><div class="empty-t">No material recorded in this period</div>${matCanEdit() ? '<div class="empty-s">Tap + Add to write what was given.</div>' : ''}</div>`;
+    else if (!rows.length) html = `<div class="empty"><div class="empty-t">No material recorded in this period</div>${matCanEdit() ? '<div class="empty-s">Tap + Add material to write what was given.</div>' : ''}</div>`;
     else { let cur = null; rows.forEach((x) => { if (x.batch !== cur) { cur = x.batch; const n = rows.filter((y) => y.batch === cur).length; html += `<div class="mat-grp">${escapeHtml(cur || 'Class')}<span>${n} entr${n === 1 ? 'y' : 'ies'}</span></div>`; } const t = matType(x.type); html += `<div class="mat-row" style="--mcr:${t[3]}"><div class="tx"><b>${escapeHtml(entryDateShort(x.date))} · ${escapeHtml(matName(x))}</b><span class="mat-tag">${escapeHtml(t[1])}</span>${escapeHtml(x.sheet || '')}${x.chapter ? ` · Ch: ${escapeHtml(x.chapter)}` : ''}${x.note ? `<small>${escapeHtml(x.note)}</small>` : ''}</div>${matCanEdit() ? `<button type="button" class="pen" data-mid="${escapeHtml(x.id)}" aria-label="Edit">✎</button>` : ''}</div>`; }); }
-    const ml = document.getElementById('matList'); if (ml.innerHTML !== html) ml.innerHTML = html;
+    matSet(document.getElementById('matList'), html);
     document.getElementById('matOuts').hidden = !rows.length;
     document.getElementById('matForm').hidden = !m.form;
     matSugRender();
@@ -10404,7 +10410,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       if (f.id) await waitForWrite(state.db.collection('materials').doc(f.id).update(Object.assign({ editedAt: Date.now(), editedBy: state.teacherId }, docs[0])));
       else await Promise.all(docs.map((d) => waitForWrite(state.db.collection('materials').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' }, d)))));
       showToast(f.id ? 'Saved' : `Saved ${docs.length} entr${docs.length === 1 ? 'y' : 'ies'}`);
-      const r = matRange(); if (f.date < r.from || f.date > r.to) m.anchor = f.date;
+      const r = matRange(); if (f.date < r.from || f.date > r.to) { state.adminDate = f.date; subscribeAdminDate(f.date); const tl = document.getElementById('adminDateLabelText'); if (tl) tl.textContent = formatStepperDateLabel(f.date); }
       if (more && !f.id) { m.form = Object.assign({}, f, { types: {}, note: '' }); matFormRender(); } else { m.form = null; }
       matReload(); if (more && !f.id) { const fb = document.getElementById('matForm'); if (fb) fb.scrollIntoView({ block: 'start' }); }
     } catch (e) { document.querySelectorAll('#matForm button').forEach((b) => { b.disabled = false; }); say('Could not save. Check the internet and try again.'); }
@@ -10414,15 +10420,16 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const ok = await showConfirm('This entry will be removed from the record.', 'Delete this entry?', 'Delete'); if (!ok) return;
     try { await waitForWrite(state.db.collection('materials').doc(f.id).delete()); showToast('Deleted'); m.form = null; matReload(); } catch (e) { const msg = document.getElementById('mfMsg'); if (msg) msg.textContent = 'Could not delete. Check the internet.'; }
   }
-  // ----- the helper: what teachers ticked in Add Class and is not in the record yet (read only when asked) -----
+  // ----- the helper: what teachers ticked in Add Class and is not in the record yet (read only when asked; it can be closed) -----
   function matSugRender() {
     const box = document.getElementById('matSug'); if (!box) return; const m = state.mat; let html = '';
-    if (!matCanEdit()) { if (box.innerHTML) box.innerHTML = ''; return; }
+    if (!matCanEdit()) { matSet(box, ''); return; }
+    const x = '<button type="button" class="mat-x" data-sugclose="1" aria-label="Close">✕</button>';
     if (m.sugBusy) html = '<div class="hv-note" style="text-align:left;">Checking what teachers ticked…</div>';
     else if (m.sug === null) html = '<button type="button" class="btn-secondary" id="matTicksBtn" style="margin:8px 0;">Check what teachers ticked in Add Class</button>';
-    else if (!m.sug.length) html = '<div class="mat-sug">Nothing new. Everything teachers ticked in this period is already in your record.</div>';
-    else html = `<div class="mat-sug"><b>${m.sug.length} material${m.sug.length === 1 ? '' : 's'} ticked by teachers, not in your record yet</b>${m.sug.slice(0, 30).map((x, i) => `<div class="r"><span><b>${escapeHtml(ttName(x.teacherId))} · ${escapeHtml(entryDateShort(x.date))}</b><br>${escapeHtml(matType(x.type)[1])}${x.sheet ? ' · ' + escapeHtml(x.sheet) : ''} · ${escapeHtml(x.batch)}${x.chapter ? ' · Ch: ' + escapeHtml(x.chapter) : ''}</span><button type="button" data-sugadd="${i}">Add</button></div>`).join('')}${m.sug.length > 1 ? `<div class="r" style="justify-content:flex-end;"><button type="button" data-sugall="1">Add all ${m.sug.length}</button></div>` : ''}</div>`;
-    if (box.innerHTML !== html) box.innerHTML = html;
+    else if (!m.sug.length) html = `<div class="mat-sug"><div class="mat-sug-h"><span>Nothing new. Everything teachers ticked in this period is already in your record.</span>${x}</div></div>`;
+    else html = `<div class="mat-sug"><div class="mat-sug-h"><b>${m.sug.length} material${m.sug.length === 1 ? '' : 's'} ticked by teachers, not in your record yet</b>${x}</div>${m.sug.slice(0, 30).map((y, i) => `<div class="r"><span><b>${escapeHtml(ttName(y.teacherId))} · ${escapeHtml(entryDateShort(y.date))}</b><br>${escapeHtml(matType(y.type)[1])}${y.sheet ? ' · ' + escapeHtml(y.sheet) : ''} · ${escapeHtml(y.batch)}${y.chapter ? ' · Ch: ' + escapeHtml(y.chapter) : ''}</span><button type="button" data-sugadd="${i}">Add</button></div>`).join('')}<div class="r" style="justify-content:space-between;"><button type="button" data-sugclose="1" style="border-color:#8A8A92;color:#444;">Close</button>${m.sug.length > 1 ? `<button type="button" data-sugall="1">Add all ${m.sug.length}</button>` : ''}</div></div>`;
+    matSet(box, html);
   }
   async function matCheckTicks() {
     const m = state.mat; const r = matRange(); m.sugBusy = true; matSugRender(); const lw = leadWings(); const items = []; const have = new Set(m.rows.map((x) => [x.date, x.teacherId, x.batch, x.type].join('|')));
@@ -10430,7 +10437,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       const sn = await state.db.collection('classes').where('date', '>=', r.from).where('date', '<=', r.to).get();
       sn.docs.forEach((d) => { const c = d.data() || {}; if (c.entryType && c.entryType !== 'class') return; const bs = (c.batches && c.batches.length) ? c.batches : (c.batch ? [c.batch] : []);
         [['worksheet', 'worksheetNote'], ['material', 'materialNote']].forEach((p) => { if (!c[p[0]]) return; const note = String(c[p[1]] || '').trim(); const type = p[0] === 'material' ? 'study' : (/dpp/i.test(note) ? 'dpp' : 'worksheet');
-          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; const key = [c.date, c.teacherId, b, type].join('|'); if (have.has(key)) return; have.add(key); items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id }); }); }); });
+          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; if (matWing() !== 'all' && w !== matWing()) return; const key = [c.date, c.teacherId, b, type].join('|'); if (have.has(key)) return; have.add(key); items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id }); }); }); });
       items.sort((a, b) => b.date.localeCompare(a.date)); m.sug = items;
     } catch (e) { m.sug = null; showToast('Could not check the classes. Check the internet.'); }
     m.sugBusy = false; matSugRender();
@@ -10439,11 +10446,10 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const m = state.mat; if (!list.length) return;
     try {
       await Promise.all(list.map((x) => waitForWrite(state.db.collection('materials').add({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', fromClass: x.cid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' }))));
-      m.sug = (m.sug || []).filter((y) => list.indexOf(y) === -1); showToast(`Added ${list.length}`);
-      m.key = ''; const keepSug = m.sug; matLoadKeep(keepSug);
+      const keep = (m.sug || []).filter((y) => list.indexOf(y) === -1); showToast(`Added ${list.length}`);
+      m.key = ''; await matLoad(); state.mat.sug = keep; matSugRender();
     } catch (e) { showToast('Could not add. Check the internet.'); }
   }
-  async function matLoadKeep(keepSug) { await matLoad(); state.mat.sug = keepSug; matSugRender(); }
   // ----- the picture, the PDF and the Excel file -----
   function matModel() { const r = matRange(); const m = state.mat; const rows = matFiltered(); const fl = []; if (m.batch !== 'all') fl.push(m.batch); if (m.teacher !== 'all') fl.push(ttName(m.teacher)); if (m.type !== 'all') fl.push(matType(m.type)[1]); return { rows, t1: 'Materials Record', t2: r.label + (fl.length ? ' · ' + fl.join(' · ') : ''), fileTag: r.tag + (fl.length ? '_filtered' : '') }; }
   function matCanvas(M) {
@@ -10490,12 +10496,12 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   { const sec = document.getElementById('adminMatSec'); if (sec) {
     sec.addEventListener('click', (ev) => {
       const t = ev.target; const q = (sel) => t.closest ? t.closest(sel) : null; const m = state.mat; let e;
-      if ((e = q('[data-mr]'))) { m.mode = e.getAttribute('data-mr'); m.anchor = m.mode === 'day' ? (todayStr() < m.anchor ? todayStr() : m.anchor) : m.anchor; matRender(); return; }
-      if (q('#matPrev')) { matShift(-1); return; } if (q('#matNext')) { matShift(1); return; }
+      if ((e = q('[data-mr]'))) { state.adminReportRange = e.getAttribute('data-mr'); renderRepControls(); return; }
       if ((e = q('[data-mtc]'))) { m.type = e.getAttribute('data-mtc'); matRender(); return; }
       if (q('#matAddBtn')) { matFormOpen(null); return; }
       if ((e = q('[data-mid]'))) { matFormOpen(e.getAttribute('data-mid')); return; }
       if (q('#matTicksBtn')) { matCheckTicks(); return; }
+      if (q('[data-sugclose]')) { m.sug = null; matSugRender(); return; }
       if ((e = q('[data-sugadd]'))) { const x = (m.sug || [])[+e.getAttribute('data-sugadd')]; if (x) matSugAdd([x]); return; }
       if (q('[data-sugall]')) { matSugAdd((m.sug || []).slice()); return; }
       if (q('#matWaBtn')) { matOut('wa'); return; } if (q('#matPdfBtn')) { matOut('pdf'); return; } if (q('#matCsvBtn')) { matOut('csv'); return; }
@@ -10509,7 +10515,6 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     sec.addEventListener('input', (ev) => { const m = state.mat; const f = m.form; const t = ev.target; if (!t || !f) return; if (t.id === 'mfChapter') f.chapter = t.value; else if (t.id === 'mfNote') f.note = t.value; else if (t.hasAttribute && t.hasAttribute('data-mfs')) f.types[t.getAttribute('data-mfs')] = t.value; });
     sec.addEventListener('change', (ev) => { const m = state.mat; const t = ev.target; if (!t) return; if (t.id === 'matBatchSel') { m.batch = t.value; matRender(); } else if (t.id === 'matTeacherSel') { m.teacher = t.value; matRender(); } else if (m.form && t.id === 'mfDate') m.form.date = t.value; else if (m.form && t.id === 'mfTeacher') m.form.teacher = t.value; });
   } }
-  
   // ---------- Admin tabs: Dashboard / Exams / Reports / Settings ----------
   state.adminTab = (() => { try { return localStorage.getItem('ctd_admin_tab') || 'dash'; } catch (e) { return 'dash'; } })();
   state.adminSetOpen = null;
@@ -17697,7 +17702,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const wsel = document.getElementById('adminWingSel'); if (wsel) wsel.addEventListener('change', () => setTimeout(() => { if ((state.adminRepKind || '') === 'entry') entryRender(true); }, 0));
   })();
   const REP_NOTE = { entry: 'Classes that began more than 5 minutes late. Up to 5 minutes is not counted. Set the entry time of the teacher, then get the record as a picture, PDF or Excel.',  full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
-  function renderRepControls() {
+  function renderRepControls() { if (state.adminTab === 'mat') { matRender(); return; } renderRepControlsReports(); }
+  function renderRepControlsReports() {
   if (document.getElementById('view-admin').getAttribute('data-repv') === 'tiles') { document.querySelectorAll('#adminRepKind .rt-tile.on').forEach((x) => x.classList.remove('on')); return; } // only the tiles are showing: nothing to load
     try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
     const kind = state.adminRepKind || 'full'; let range = state.adminReportRange || 'day';
@@ -19314,7 +19320,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     state.adminDate = dateStr; state.adminExpandedTeacher = null;
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(dateStr);
     subscribeAdminDate(dateStr);
-    if (state.adminTab === 'reports') { document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); }
+    if (state.adminTab === 'reports' || state.adminTab === 'mat') { document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); }
   });
   document.getElementById('adminStepCal').addEventListener('click', (e) => { e.stopPropagation(); pickAdminDate(); });
   document.getElementById('repCalBtn').addEventListener('click', pickAdminDate);
@@ -19357,7 +19363,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       state.adminReportWing = btn.getAttribute('data-admin-wing');
       state.adminExpandedTeacher = null;
       renderAdmin();
-      try { fillAdminRepTeachers(); if (state.adminTab === 'reports') renderRepControls(); } catch (e) { /* ignore */ }
+      try { fillAdminRepTeachers(); if (state.adminTab === 'reports' || state.adminTab === 'mat') renderRepControls(); } catch (e) { /* ignore */ }
     });
   });
 
