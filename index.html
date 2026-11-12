@@ -2730,7 +2730,8 @@
   .drow:active { background: #ECEFF3; }
   
   #homeTiles [data-ht-go="mat"] { color: #0891B2; border-color: rgba(8, 145, 178, .32); background: rgba(8, 145, 178, .07); }
-    .mat-addbox { display: block; width: 100%; box-sizing: border-box; border: 1.5px solid var(--gold); color: var(--gold); background: var(--card); border-radius: 14px; padding: 12px; font-weight: 700; font-size: 14px; font-family: inherit; margin: 10px 0; cursor: pointer; }
+    .mat-date-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; text-align: left; cursor: pointer; font-family: inherit; color: var(--ink); }
+  .mat-addbox { display: block; width: 100%; box-sizing: border-box; border: 1.5px solid var(--gold); color: var(--gold); background: var(--card); border-radius: 14px; padding: 12px; font-weight: 700; font-size: 14px; font-family: inherit; margin: 10px 0; cursor: pointer; }
   .mat-sug-h { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; background: #FFF9EC; padding-bottom: 6px; }
   .mat-x { border: 0; background: transparent; font-size: 20px; line-height: 1; padding: 2px 6px; color: var(--muted-2); cursor: pointer; font-family: inherit; }
 
@@ -4544,7 +4545,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.95 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.96 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10399,6 +10400,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       .sort((a, b) => (a.batch || '').localeCompare(b.batch || '') || b.date.localeCompare(a.date) || (a.teacherName || '').localeCompare(b.teacherName || ''));
   }
   const matName = (r) => r.teacherName || ttName(r.teacherId);
+  const matDmy = (d) => (d && d.length >= 10) ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(2, 4) : '';
   function matRender() {
     const sec = document.getElementById('adminMatSec'); if (!sec) return;
     const m = state.mat; const r = matRange(); const range = state.adminReportRange || 'day';
@@ -10434,7 +10436,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   function matFormRender() {
     const f = state.mat.form; const box = document.getElementById('matForm'); if (!f || !box) return; const edit = !!f.id; const recent = matRecent(f);
     box.innerHTML = `<div class="tsec-head"><div class="tsec-title">${edit ? 'Edit entry' : 'Add material'}</div></div>
-      <div class="field"><label for="mfDate">Date</label><input type="date" class="text-input" id="mfDate" value="${escapeHtml(f.date)}" max="${todayStr()}"></div>
+      <div class="field"><label for="mfDateBtn">Date</label><button type="button" class="text-input mat-date-btn" id="mfDateBtn"><span>${matDmy(f.date)}</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
       <div class="field"><label for="mfTeacher">Teacher</label><select class="text-input" id="mfTeacher"><option value="">Choose a teacher</option>${matTeachers().map((u) => `<option value="${escapeHtml(u)}"${f.teacher === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('')}</select></div>
       <div class="field"><label>Class / Batch${edit ? '' : ' <small>(one or more)</small>'}</label><div class="chips" id="mfBatches">${matBatches().map((b) => `<button type="button" class="chip${f.batches.indexOf(b) !== -1 ? ' active' : ''}" data-mfb="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
       <div class="field"><label>Material${edit ? '' : ' <small>(tap all that apply)</small>'}</label><div class="chips" id="mfTypes">${MAT_TYPES.map((t) => `<button type="button" class="chip${t[0] in f.types ? ' active' : ''}" data-mft="${t[0]}">${t[1]}</button>`).join('')}</div>${MAT_TYPES.filter((t) => t[0] in f.types).map((t) => `<input type="text" class="text-input" style="margin-top:8px;" data-mfs="${t[0]}" placeholder="${t[1]}: name or number (optional)" value="${escapeHtml(f.types[t[0]])}" maxlength="80">`).join('')}</div>
@@ -10551,6 +10553,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       if (q('[data-sugall]')) { matSugAdd((m.sug || []).slice()); return; }
       if (q('#matWaBtn')) { matOut('wa'); return; } if (q('#matPdfBtn')) { matOut('pdf'); return; } if (q('#matCsvBtn')) { matOut('csv'); return; }
       const f = m.form; if (!f) return;
+      if (q('#mfDateBtn')) { openCalendar(f.date || todayStr(), (d) => { const msg = document.getElementById('mfMsg'); if (d > todayStr()) { if (msg) msg.textContent = 'Choose today or an earlier date.'; return; } f.date = d; if (msg) msg.textContent = ''; const bt = document.getElementById('mfDateBtn'); if (bt && bt.firstElementChild) bt.firstElementChild.textContent = matDmy(d); }); return; }
       if ((e = q('[data-mfb]'))) { const b = e.getAttribute('data-mfb'); if (f.id) f.batches = [b]; else { const i = f.batches.indexOf(b); if (i === -1) f.batches.push(b); else f.batches.splice(i, 1); } matFormRender(); return; }
       if ((e = q('[data-mft]'))) { const k = e.getAttribute('data-mft'); if (f.id) f.types = { [k]: (f.types[k] || '') }; else if (k in f.types) delete f.types[k]; else f.types[k] = ''; matFormRender(); return; }
       if ((e = q('[data-mfc]'))) { f.chapter = e.getAttribute('data-mfc'); matFormRender(); return; }
