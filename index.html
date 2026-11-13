@@ -2747,6 +2747,7 @@
   .mat-sug { border: 1px dashed #D9B66A; background: #FFF9EC; border-radius: 14px; padding: 10px 12px; margin: 8px 0; font-size: 13px; }
   .mat-sug .r { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
   .mat-sug .r span { flex: 1; min-width: 0; font-size: 12px; }
+  .mat-tag.mat-sub { color: #5A5A60; background: rgba(90, 90, 96, .12); }
   .mat-sug .r2 { padding: 8px 0; border-top: 1px solid #F0E4C4; font-size: 12px; }
   .mat-sug .r2 small { display: block; color: var(--muted-2); font-size: 12px; line-height: 1.45; margin: 2px 0 6px; }
   .mat-sug .ac { display: flex; gap: 8px; }
@@ -4561,7 +4562,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.98 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.99 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10396,7 +10397,10 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   const matYmd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const matSet = (el, html) => { if (el && el.__h !== html) { el.innerHTML = html; el.__h = html; } }; // write only when the text really changed (no blinking)
   const matDmy = (d) => (d && d.length >= 10) ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(2, 4) : '';
-  const matBlank = () => ({ id: null, date: todayStr(), teacher: '', batches: [], types: {}, chapter: '', note: '' });
+  const matBlank = () => ({ id: null, date: todayStr(), teacher: '', subjects: [], batches: [], types: {}, chapter: '', note: '' });
+  // the subjects of a teacher: what the Admin set in Settings, Team (a combined name is split), else the profile subject; the choice is shown only when there are two or more
+  function matSubjectsOf(uid) { if (!uid) return []; const t = (state.team && state.team[uid]) || {}; let list = expandSubjects(t.subjects); if (!list.length) { const sj = (state.adminNames && state.adminNames[uid] && state.adminNames[uid].subj) || ''; if (sj) list = expandSubjects([sj]); } return list; }
+  const matSubTxt = (x) => (x && x.subjects && x.subjects.length) ? x.subjects.join(' + ') : (x && x.subject) || '';
   state.mat = { batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', addForm: null, editForm: null, sug: null, sugBusy: false, sugEdit: null, sugDraft: null, sugKey: '', addWing: null, done: '' };
   function matCanEdit() { return !principalView(); }
   function matWing() { return state.adminReportWing || 'all'; }
@@ -10434,7 +10438,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     if (m.loading) html = '<div class="skel short"></div>';
     else if (m.err) html = `<div class="hv-note" style="text-align:left;">${escapeHtml(m.err)}</div>`;
     else if (!rows.length) html = `<div class="empty"><div class="empty-t">No deliverable recorded in this period</div>${matCanEdit() ? '<div class="empty-s">Add them from Admin, Add deliverables.</div>' : ''}</div>`;
-    else { let cur = null; rows.forEach((x) => { if (x.batch !== cur) { cur = x.batch; const n = rows.filter((y) => y.batch === cur).length; html += `<div class="mat-grp">${escapeHtml(cur || 'Class')}<span>${n} entr${n === 1 ? 'y' : 'ies'}</span></div>`; } const t = matType(x.type); html += `<div class="mat-row" style="--mcr:${t[3]}"><div class="tx"><b>${escapeHtml(entryDateShort(x.date))} · ${escapeHtml(matName(x))}</b><span class="mat-tag">${escapeHtml(t[1])}</span>${escapeHtml(x.sheet || '')}${x.chapter ? ` · Ch: ${escapeHtml(x.chapter)}` : ''}${x.note ? `<small>${escapeHtml(x.note)}</small>` : ''}</div>${matCanEdit() ? `<button type="button" class="pen" data-mid="${escapeHtml(x.id)}" aria-label="Edit">✎</button>` : ''}</div>`; }); }
+    else { let cur = null; rows.forEach((x) => { if (x.batch !== cur) { cur = x.batch; const n = rows.filter((y) => y.batch === cur).length; html += `<div class="mat-grp">${escapeHtml(cur || 'Class')}<span>${n} entr${n === 1 ? 'y' : 'ies'}</span></div>`; } const t = matType(x.type); html += `<div class="mat-row" style="--mcr:${t[3]}"><div class="tx"><b>${escapeHtml(entryDateShort(x.date))} · ${escapeHtml(matName(x))}</b><span class="mat-tag">${escapeHtml(t[1])}</span>${matSubTxt(x) ? `<span class="mat-tag mat-sub">${escapeHtml(matSubTxt(x))}</span>` : ''}${escapeHtml(x.sheet || '')}${x.chapter ? ` · Ch: ${escapeHtml(x.chapter)}` : ''}${x.note ? `<small>${escapeHtml(x.note)}</small>` : ''}</div>${matCanEdit() ? `<button type="button" class="pen" data-mid="${escapeHtml(x.id)}" aria-label="Edit">✎</button>` : ''}</div>`; }); }
     matSet(document.getElementById('matList'), html);
     document.getElementById('matOuts').hidden = !rows.length;
     document.getElementById('delivForm').hidden = !m.editForm;
@@ -10442,7 +10446,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   }
   function matFormOpen(id) {
     const m = state.mat; const ex = m.rows.find((x) => x.id === id); if (!ex) return;
-    m.editForm = { id: ex.id, date: ex.date, teacher: ex.teacherId, batches: [ex.batch], types: { [ex.type]: ex.sheet || '' }, chapter: ex.chapter || '', note: ex.note || '' };
+    m.editForm = { id: ex.id, date: ex.date, teacher: ex.teacherId, subjects: (ex.subjects && ex.subjects.length) ? ex.subjects.slice() : (ex.subject ? ex.subject.split(' + ') : []), batches: [ex.batch], types: { [ex.type]: ex.sheet || '' }, chapter: ex.chapter || '', note: ex.note || '' };
     const host = document.getElementById('delivForm'); matFormDraw(host, m.editForm); host.hidden = false; host.scrollIntoView({ block: 'start' });
   }
   // ----- the form (the same form: new entries on the Add page, one entry in the record) -----
@@ -10452,6 +10456,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     return `<div class="tsec-head"><div class="tsec-title">${edit ? 'Edit entry' : 'Add deliverable'}</div></div>
       <div class="field"><label>Date</label><button type="button" class="text-input mat-date-btn" data-mf="date"><span>${matDmy(f.date)}</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
       <div class="field"><label>Teacher</label><select class="text-input" data-mf="teacher"><option value="">Choose a teacher</option>${matAddTeachers().map((u) => `<option value="${escapeHtml(u)}"${f.teacher === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('')}</select></div>
+      ${matSubjectsOf(f.teacher).length >= 2 ? `<div class="field"><label>Subject <small>(one or both)</small></label><div class="chips">${matSubjectsOf(f.teacher).map((sj) => `<button type="button" class="chip${f.subjects.indexOf(sj) !== -1 ? ' active' : ''}" data-mfsub="${escapeHtml(sj)}">${escapeHtml(sj)}</button>`).join('')}</div></div>` : ''}
       <div class="field"><label>Class / Batch${edit ? '' : ' <small>(one or more)</small>'}</label><div class="chips">${matAddBatches().map((b) => `<button type="button" class="chip${f.batches.indexOf(b) !== -1 ? ' active' : ''}" data-mfb="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
       <div class="field"><label>Deliverable${edit ? '' : ' <small>(tap all that apply)</small>'}</label><div class="chips">${MAT_TYPES.map((t) => `<button type="button" class="chip${t[0] in f.types ? ' active' : ''}" data-mft="${t[0]}">${t[1]}</button>`).join('')}</div>${MAT_TYPES.filter((t) => t[0] in f.types).map((t) => `<input type="text" class="text-input" style="margin-top:8px;" data-mfs="${t[0]}" placeholder="${t[1]}: name or number (optional)" value="${escapeHtml(f.types[t[0]])}" maxlength="80">`).join('')}</div>
       <div class="field"><label>Chapter <small>Required</small></label><input type="text" class="text-input" data-mf="chapter" value="${escapeHtml(f.chapter)}" maxlength="120" placeholder="Chapter" autocomplete="off">${recent.length ? `<div class="chips" style="margin-top:6px;">${recent.map((c) => `<button type="button" class="chip" data-mfc="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}</div>` : ''}</div>
@@ -10466,7 +10471,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   async function matFormSave(host, which) {
     const m = state.mat; const f = m[which]; if (!f) return; const msgEl = matQ(host, '.mf-msg'); const ch = (f.chapter || '').trim(); const say = (t) => { if (msgEl) msgEl.textContent = t; };
     if (!f.date) return say('Choose the date.'); if (!f.teacher) return say('Choose a teacher.'); if (!f.batches.length) return say('Choose at least one class / batch.'); if (!Object.keys(f.types).length) return say('Choose at least one deliverable.'); if (!ch) return say('Enter the chapter.');
-    const docs = []; f.batches.forEach((b) => Object.keys(f.types).forEach((k) => docs.push({ date: f.date, teacherId: f.teacher, teacherName: ttName(f.teacher), batch: b, wing: wingOfBatch(b) || '', type: k, typeLabel: matType(k)[1], sheet: String(f.types[k] || '').trim(), chapter: ch, note: (f.note || '').trim() })));
+    const docs = []; f.batches.forEach((b) => Object.keys(f.types).forEach((k) => docs.push({ date: f.date, teacherId: f.teacher, teacherName: ttName(f.teacher), batch: b, wing: wingOfBatch(b) || '', type: k, typeLabel: matType(k)[1], sheet: String(f.types[k] || '').trim(), chapter: ch, note: (f.note || '').trim(), subjects: (f.subjects || []).slice(), subject: (f.subjects || []).join(' + ') })));
     host.querySelectorAll('button').forEach((b) => { b.disabled = true; });
     try {
       if (f.id) await waitForWrite(state.db.collection('materials').doc(f.id).update(Object.assign({ editedAt: Date.now(), editedBy: state.teacherId }, docs[0])));
@@ -10495,6 +10500,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       if (q('[data-mf="date"]')) { openCalendar(f.date || todayStr(), (d) => { const msgEl = matQ(root, '.mf-msg'); if (d > todayStr()) { if (msgEl) msgEl.textContent = 'Choose today or an earlier date.'; return; } f.date = d; if (msgEl) msgEl.textContent = ''; const bt = matQ(root, '[data-mf="date"] span'); if (bt) bt.textContent = matDmy(d); }); return; }
       if ((e = q('[data-mfb]'))) { const b = e.getAttribute('data-mfb'); if (f.id) f.batches = [b]; else { const i = f.batches.indexOf(b); if (i === -1) f.batches.push(b); else f.batches.splice(i, 1); } matFormDraw(root, f); return; }
       if ((e = q('[data-mft]'))) { const k = e.getAttribute('data-mft'); if (f.id) f.types = { [k]: (f.types[k] || '') }; else if (k in f.types) delete f.types[k]; else f.types[k] = ''; matFormDraw(root, f); return; }
+      if ((e = q('[data-mfsub]'))) { const sj = e.getAttribute('data-mfsub'); const i = f.subjects.indexOf(sj); if (i === -1) f.subjects.push(sj); else f.subjects.splice(i, 1); matFormDraw(root, f); return; }
       if ((e = q('[data-mfc]'))) { f.chapter = e.getAttribute('data-mfc'); matFormDraw(root, f); return; }
       if (q('[data-mf="save"]')) { matFormSave(root, which); return; }
       if (q('[data-mf="del"]')) { matFormDelete(root); return; }
@@ -10503,7 +10509,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       if (q('[data-mf="view"]')) { matOpenRecord(f.date); return; }
     });
     root.addEventListener('input', (ev) => { const f = state.mat[which]; const t = ev.target; if (!t || !f || !t.getAttribute) return; if (t.getAttribute('data-mf') === 'chapter') f.chapter = t.value; else if (t.getAttribute('data-mf') === 'note') f.note = t.value; else if (t.hasAttribute('data-mfs')) f.types[t.getAttribute('data-mfs')] = t.value; });
-    root.addEventListener('change', (ev) => { const f = state.mat[which]; const t = ev.target; if (!t || !f || !t.getAttribute) return; if (t.getAttribute('data-mf') === 'teacher') f.teacher = t.value; });
+    root.addEventListener('change', (ev) => { const f = state.mat[which]; const t = ev.target; if (!t || !f || !t.getAttribute) return; if (t.getAttribute('data-mf') === 'teacher') { f.teacher = t.value; const ok = matSubjectsOf(f.teacher); f.subjects = f.subjects.filter((x) => ok.indexOf(x) !== -1); matFormDraw(root, f); } });
   }
   // ----- the Add page -----
   function matAddRender() {
@@ -10533,15 +10539,16 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     matSet(box, html);
   }
   function matSugEditHtml(d) {
-    const ts = matAddTeachers(); if (d.teacherId && ts.indexOf(d.teacherId) === -1) ts.push(d.teacherId); const bs = matAddBatches(); if (d.batch && bs.indexOf(d.batch) === -1) bs.push(d.batch);
+    const ts = matAddTeachers(); if (d.teacherId && ts.indexOf(d.teacherId) === -1) ts.push(d.teacherId); const bs = matAddBatches(); (d.batches || []).forEach((b) => { if (bs.indexOf(b) === -1) bs.push(b); }); const subs = matSubjectsOf(d.teacherId);
     return `<div class="ed"><div class="f">Date</div><button type="button" class="text-input mat-date-btn" data-sd="date"><span>${matDmy(d.date)}</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
       <div class="f">Teacher</div><select class="text-input" data-sd="teacher">${ts.map((u) => `<option value="${escapeHtml(u)}"${d.teacherId === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('')}</select>
-      <div class="f">Class / Batch</div><select class="text-input" data-sd="batch">${bs.map((b) => `<option value="${escapeHtml(b)}"${d.batch === b ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('')}</select>
+      ${subs.length >= 2 ? `<div class="f">Subject (one or both)</div><div class="chips">${subs.map((sj) => `<button type="button" class="chip${(d.subjects || []).indexOf(sj) !== -1 ? ' active' : ''}" data-sdsub="${escapeHtml(sj)}">${escapeHtml(sj)}</button>`).join('')}</div>` : ''}
+      <div class="f">Class / Batch (tick every batch it went to)</div><div class="chips">${bs.map((b) => `<button type="button" class="chip${(d.batches || []).indexOf(b) !== -1 ? ' active' : ''}" data-sdb="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div>
       <div class="f">Deliverable</div><select class="text-input" data-sd="type">${MAT_TYPES.map((t) => `<option value="${t[0]}"${d.type === t[0] ? ' selected' : ''}>${t[1]}</option>`).join('')}</select>
       <div class="f">Sheet / note</div><input type="text" class="text-input" data-sd="sheet" value="${escapeHtml(d.sheet || '')}" maxlength="80">
       <div class="f">Chapter</div><input type="text" class="text-input" data-sd="chapter" value="${escapeHtml(d.chapter || '')}" maxlength="120">
       <div class="admin-sub" data-sd="msg" style="color:#C81E32;"></div>
-      <div class="sv"><button type="button" data-sd="save">Save</button><button type="button" data-sd="cancel">Cancel</button></div></div>`;
+      <div class="sv"><button type="button" data-sd="save">${(d.batches || []).length > 1 ? `Save (${d.batches.length} entries)` : 'Save'}</button><button type="button" data-sd="cancel">Cancel</button></div></div>`;
   }
   const matTid = (cid, type, batch) => [cid, type, batch].join('|');
   async function matCheckTicks() {
@@ -10551,12 +10558,12 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       const have = new Set(); ms.docs.forEach((d) => { const x = d.data(); have.add([x.date, x.teacherId, x.batch, x.type].join('|')); if (x.fromTick) have.add(x.fromTick); });
       cs.docs.forEach((d) => { const c = d.data() || {}; if (c.entryType && c.entryType !== 'class') return; const bs = (c.batches && c.batches.length) ? c.batches : (c.batch ? [c.batch] : []);
         matGiven(c).forEach((g) => { const note = String(g.note || '').trim(); const type = ({ material: 'study', classnotes: 'classnotes', olympiad: 'olympiad', dpp: 'dpp', worksheet: (c.matv === 2 ? 'worksheet' : (/dpp/i.test(note) ? 'dpp' : 'worksheet')), pyq: 'pyq', othersheet: 'other' })[g.key] || 'other';
-          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; if (matWing() !== 'all' && w !== matWing()) return; const key = [c.date, c.teacherId, b, type].join('|'); const tid = matTid(d.id, type, b); if (have.has(key) || have.has(tid)) return; have.add(key); items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id, tid }); }); }); });
+          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; if (matWing() !== 'all' && w !== matWing()) return; const key = [c.date, c.teacherId, b, type].join('|'); const tid = matTid(d.id, type, b); if (have.has(key) || have.has(tid)) return; have.add(key); const opts = matSubjectsOf(c.teacherId); const subs = opts.length >= 2 ? expandSubjects(c.parts || []).filter((x) => opts.indexOf(x) !== -1) : []; items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id, tid, subjects: subs }); }); }); });
       items.sort((a, b) => b.date.localeCompare(a.date)); m.sug = items; m.sugEdit = null; m.sugDraft = null;
     } catch (e) { m.sug = null; showToast('Could not check the classes. Check the internet.'); }
     m.sugBusy = false; matSugRender();
   }
-  const matSugDoc = (x) => ({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', fromClass: x.cid, fromTick: x.tid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' });
+  const matSugDoc = (x) => ({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', subjects: (x.subjects || []).slice(), subject: (x.subjects || []).join(' + '), fromClass: x.cid, fromTick: x.tid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' });
   async function matSugAdd(list) {
     const m = state.mat; if (!list.length) return;
     try {
@@ -10571,11 +10578,12 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   }
   async function matSugSave() {
     const m = state.mat; const d = m.sugDraft; const i = m.sugEdit; if (!d || i === null) return; const msgEl = document.querySelector('#matSug [data-sd="msg"]'); const say = (t) => { if (msgEl) msgEl.textContent = t; };
-    if (!d.teacherId) return say('Choose a teacher.'); if (!d.batch) return say('Choose the class / batch.'); if (!(d.chapter || '').trim()) return say('Enter the chapter.'); if (!d.date || d.date > todayStr()) return say('Choose today or an earlier date.');
-    const orig = m.sug[i]; d.chapter = d.chapter.trim(); d.sheet = (d.sheet || '').trim(); d.tid = orig.tid; d.cid = orig.cid;
-    document.querySelectorAll('#matSug .ed button').forEach((b) => { b.disabled = true; });
-    try { await waitForWrite(state.db.collection('materials').add(matSugDoc(d))); m.sug = m.sug.filter((y, k) => k !== i); m.sugEdit = null; m.sugDraft = null; m.key = ''; showToast('Saved'); matSugRender(); }
-    catch (e) { document.querySelectorAll('#matSug .ed button').forEach((b) => { b.disabled = false; }); say('Could not save. Check the internet and try again.'); }
+    if (!d.teacherId) return say('Choose a teacher.'); if (!(d.batches || []).length) return say('Choose at least one class / batch.'); if (!(d.chapter || '').trim()) return say('Enter the chapter.'); if (!d.date || d.date > todayStr()) return say('Choose today or an earlier date.');
+    const orig = m.sug[i]; const chap = d.chapter.trim(); const sheet = (d.sheet || '').trim();
+    const docs = d.batches.map((b) => matSugDoc({ date: d.date, teacherId: d.teacherId, batch: b, type: d.type, sheet, chapter: chap, cid: orig.cid, tid: orig.tid, subjects: d.subjects || [] }));
+    document.querySelectorAll('#matSug .ed button').forEach((bt) => { bt.disabled = true; });
+    try { await Promise.all(docs.map((doc) => waitForWrite(state.db.collection('materials').add(doc)))); m.sug = m.sug.filter((y, k) => k !== i); m.sugEdit = null; m.sugDraft = null; m.key = ''; showToast(docs.length > 1 ? `Saved ${docs.length} entries` : 'Saved'); matSugRender(); }
+    catch (e) { document.querySelectorAll('#matSug .ed button').forEach((bt) => { bt.disabled = false; }); say('Could not save. Check the internet and try again.'); }
   }
   // ----- the picture, the PDF and the Excel file -----
   function matModel() { const r = matRange(); const m = state.mat; const rows = matFiltered(); const fl = []; if (m.batch !== 'all') fl.push(m.batch); if (m.teacher !== 'all') fl.push(ttName(m.teacher)); if (m.type !== 'all') fl.push(matType(m.type)[1]); return { rows, t1: 'Deliverables Record', t2: r.label + (fl.length ? ' · ' + fl.join(' · ') : ''), fileTag: r.tag + (fl.length ? '_filtered' : '') }; }
@@ -10600,7 +10608,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     try {
       const M = matModel(); const base = `CATJEE-Deliverables-${M.fileTag}`;
       if (kind === 'csv') {
-        const L = [['Date', 'Day', 'Teacher', 'Class', 'Deliverable', 'Sheet', 'Chapter', 'Note', 'Entered from']]; M.rows.forEach((r) => L.push([r.date, WD[dateObj(r.date).getDay()], matName(r), r.batch, matType(r.type)[1], r.sheet || '', r.chapter || '', r.note || '', r.fromClass ? 'Teacher tick' : 'Coordinator']));
+        const L = [['Date', 'Day', 'Teacher', 'Subject', 'Class', 'Deliverable', 'Sheet', 'Chapter', 'Note', 'Entered from']]; M.rows.forEach((r) => L.push([r.date, WD[dateObj(r.date).getDay()], matName(r), matSubTxt(r), r.batch, matType(r.type)[1], r.sheet || '', r.chapter || '', r.note || '', r.fromClass ? 'Teacher tick' : 'Coordinator']));
         saveFile(base + '.csv', '\ufeff' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = 'Saved.'; showToast('Excel file saved'); return;
       }
       if (kind === 'wa') {
@@ -10630,13 +10638,15 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
         if (q('[data-sugclose]')) { m.sug = null; m.sugEdit = null; m.sugDraft = null; matSugRender(); return; }
         if ((e = q('[data-sugadd]'))) { const x = (m.sug || [])[+e.getAttribute('data-sugadd')]; if (x) matSugAdd([x]); return; }
         if (q('[data-sugall]')) { matSugAddAll(); return; }
-        if ((e = q('[data-sugedit]'))) { const i = +e.getAttribute('data-sugedit'); if (m.sug && m.sug[i]) { m.sugEdit = i; m.sugDraft = Object.assign({}, m.sug[i]); matSugRender(); } return; }
+        if ((e = q('[data-sugedit]'))) { const i = +e.getAttribute('data-sugedit'); if (m.sug && m.sug[i]) { m.sugEdit = i; const o = m.sug[i]; m.sugDraft = Object.assign({}, o, { batches: [o.batch], subjects: (o.subjects || []).slice() }); matSugRender(); } return; }
+        if ((e = q('[data-sdsub]')) && m.sugDraft) { const sj = e.getAttribute('data-sdsub'); const d = m.sugDraft; const i = d.subjects.indexOf(sj); if (i === -1) d.subjects.push(sj); else d.subjects.splice(i, 1); matSugRender(); return; }
+        if ((e = q('[data-sdb]')) && m.sugDraft) { const b = e.getAttribute('data-sdb'); const d = m.sugDraft; const i = d.batches.indexOf(b); if (i === -1) d.batches.push(b); else d.batches.splice(i, 1); matSugRender(); return; }
         if (q('[data-sd="cancel"]')) { m.sugEdit = null; m.sugDraft = null; matSugRender(); return; }
         if (q('[data-sd="save"]')) { matSugSave(); return; }
         if (q('[data-sd="date"]') && m.sugDraft) { const d = m.sugDraft; openCalendar(d.date || todayStr(), (v) => { const msgEl = document.querySelector('#matSug [data-sd="msg"]'); if (v > todayStr()) { if (msgEl) msgEl.textContent = 'Choose today or an earlier date.'; return; } d.date = v; if (msgEl) msgEl.textContent = ''; const bt = document.querySelector('#matSug [data-sd="date"] span'); if (bt) bt.textContent = matDmy(v); }); return; }
       });
       add.addEventListener('input', (ev) => { const d = state.mat.sugDraft; const t = ev.target; if (!d || !t || !t.getAttribute) return; const k = t.getAttribute('data-sd'); if (k === 'sheet') d.sheet = t.value; else if (k === 'chapter') d.chapter = t.value; });
-      add.addEventListener('change', (ev) => { const d = state.mat.sugDraft; const t = ev.target; if (!d || !t || !t.getAttribute) return; const k = t.getAttribute('data-sd'); if (k === 'teacher') d.teacherId = t.value; else if (k === 'batch') d.batch = t.value; else if (k === 'type') d.type = t.value; });
+      add.addEventListener('change', (ev) => { const d = state.mat.sugDraft; const t = ev.target; if (!d || !t || !t.getAttribute) return; const k = t.getAttribute('data-sd'); if (k === 'teacher') { d.teacherId = t.value; const ok = matSubjectsOf(d.teacherId); d.subjects = (d.subjects || []).filter((x) => ok.indexOf(x) !== -1); matSugRender(); } else if (k === 'type') d.type = t.value; });
     }
     if (rec) {
       rec.addEventListener('click', (ev) => {
@@ -15737,11 +15747,22 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     if (panelX) return () => panelX.click();
     return null;
   }
+  // the phone's keyboard-close key sends a Back to the page; that must not take the person away from the page
+  const kbG = { maxH: 0, last: 0, open: false };
+  const kbTextEl = (el) => !!(el && el.tagName && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|range|file|color|date|image|reset)$/i.test(el.type || 'text'))));
+  function kbH() { return window.visualViewport ? window.visualViewport.height : window.innerHeight; }
+  function kbTrack() { const h = kbH(); kbG.maxH = Math.max(kbG.maxH, h); const was = kbG.open; kbG.open = h < kbG.maxH - 120; if (kbG.open || was) kbG.last = Date.now(); }
+  kbG.maxH = kbH();
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', kbTrack);
+  window.addEventListener('resize', kbTrack); window.addEventListener('orientationchange', () => { kbG.maxH = 0; setTimeout(kbTrack, 400); });
+  document.addEventListener('focusin', (ev) => { if (kbTextEl(ev.target)) kbG.last = Date.now(); }); document.addEventListener('focusout', (ev) => { if (kbTextEl(ev.target)) kbG.last = Date.now(); });
+  function kbGuardHit() { kbTrack(); return kbG.open || kbTextEl(document.activeElement) || (Date.now() - kbG.last < 700); }
   window.addEventListener('popstate', () => {
-    const d = (history.state && history.state.catjeeNav) || 0;
+  const d = (history.state && history.state.catjeeNav) || 0;
     if (history.state && (history.state.catjeeMenu || history.state.svForm)) return; // menu / form handle themselves
     if (d >= state.navDepth) { state.navDepth = d; return; }
-    const closeIt = anyOverlayOpen();
+  if (kbGuardHit()) { try { history.pushState({ catjeeNav: state.navDepth }, ''); } catch (e) { /* ignore */ } try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (e) { /* ignore */ } return; }
+  const closeIt = anyOverlayOpen();
     if (closeIt) { closeIt(); try { history.pushState({ catjeeNav: state.navDepth }, ''); } catch (e) { /* ignore */ } return; }
     let target = null;
     while (state.navDepth > d && state.navStack.length) { target = state.navStack.pop(); state.navDepth -= 1; }
