@@ -4562,7 +4562,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.00 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 15.01 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10400,7 +10400,9 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   const matBlank = () => ({ id: null, date: todayStr(), teacher: '', subjects: [], batches: [], types: {}, chapter: '', note: '' });
   // the subjects of a teacher: what the Admin set in Settings, Team (a combined name is split), else the profile subject; the choice is shown only when there are two or more
   function matSubjectsOf(uid) { if (!uid) return []; const t = (state.team && state.team[uid]) || {}; let list = expandSubjects(t.subjects); if (!list.length) { const sj = (state.adminNames && state.adminNames[uid] && state.adminNames[uid].subj) || ''; if (sj) list = expandSubjects([sj]); } return list; }
-  const matSubTxt = (x) => (x && x.subjects && x.subjects.length) ? x.subjects.join(' + ') : (x && x.subject) || '';
+  const matSubList = (x) => { if (!x) return []; if (x.subjects && x.subjects.length) return x.subjects; if (x.subject) return String(x.subject).split(' + '); const o = matSubjectsOf(x.teacherId); return o.length === 1 ? o : []; };
+  const matSubTxt = (x) => matSubList(x).join(' + ');
+  const matSubFor = (uid, chosen) => { if (chosen && chosen.length) return chosen.slice(); const o = matSubjectsOf(uid); return o.length === 1 ? o.slice() : []; };
   state.mat = { batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', addForm: null, editForm: null, sug: null, sugBusy: false, sugEdit: null, sugDraft: null, sugKey: '', addWing: null, done: '' };
   function matCanEdit() { return !principalView(); }
   function matWing() { return state.adminReportWing || 'all'; }
@@ -10450,7 +10452,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const host = document.getElementById('delivForm'); matFormDraw(host, m.editForm); host.hidden = false; host.scrollIntoView({ block: 'start' });
   }
   // ----- the form (the same form: new entries on the Add page, one entry in the record) -----
-  function matRecent(f) { const set = []; state.mat.rows.filter((x) => x.chapter && (!f.batches.length || f.batches.indexOf(x.batch) !== -1)).sort((a, b) => b.date.localeCompare(a.date)).forEach((x) => { if (set.indexOf(x.chapter) === -1) set.push(x.chapter); }); return set.slice(0, 6); }
+  function matRecent(f) { const want = (f.subjects && f.subjects.length) ? f.subjects : (matSubjectsOf(f.teacher).length === 1 ? matSubjectsOf(f.teacher) : []); if (!want.length) return []; const set = []; state.mat.rows.filter((x) => x.chapter && (!f.batches.length || f.batches.indexOf(x.batch) !== -1) && matSubList(x).some((sj) => want.indexOf(sj) !== -1)).sort((a, b) => b.date.localeCompare(a.date)).forEach((x) => { if (set.indexOf(x.chapter) === -1) set.push(x.chapter); }); return set.slice(0, 6); }
   function matFormHtml(f) {
     const edit = !!f.id; const recent = matRecent(f); const m = state.mat;
     return `<div class="tsec-head"><div class="tsec-title">${edit ? 'Edit entry' : 'Add deliverable'}</div></div>
@@ -10471,7 +10473,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   async function matFormSave(host, which) {
     const m = state.mat; const f = m[which]; if (!f) return; const msgEl = matQ(host, '.mf-msg'); const ch = (f.chapter || '').trim(); const say = (t) => { if (msgEl) msgEl.textContent = t; };
     if (!f.date) return say('Choose the date.'); if (!f.teacher) return say('Choose a teacher.'); if (!f.batches.length) return say('Choose at least one class / batch.'); if (!Object.keys(f.types).length) return say('Choose at least one deliverable.');
-    const docs = []; f.batches.forEach((b) => Object.keys(f.types).forEach((k) => docs.push({ date: f.date, teacherId: f.teacher, teacherName: ttName(f.teacher), batch: b, wing: wingOfBatch(b) || '', type: k, typeLabel: matType(k)[1], sheet: String(f.types[k] || '').trim(), chapter: ch, note: (f.note || '').trim(), subjects: (f.subjects || []).slice(), subject: (f.subjects || []).join(' + ') })));
+    const docs = []; f.batches.forEach((b) => Object.keys(f.types).forEach((k) => docs.push({ date: f.date, teacherId: f.teacher, teacherName: ttName(f.teacher), batch: b, wing: wingOfBatch(b) || '', type: k, typeLabel: matType(k)[1], sheet: String(f.types[k] || '').trim(), chapter: ch, note: (f.note || '').trim(), subjects: matSubFor(f.teacher, f.subjects), subject: matSubFor(f.teacher, f.subjects).join(' + ') })));
     host.querySelectorAll('button').forEach((b) => { b.disabled = true; });
     try {
       if (f.id) await waitForWrite(state.db.collection('materials').doc(f.id).update(Object.assign({ editedAt: Date.now(), editedBy: state.teacherId }, docs[0])));
@@ -10564,7 +10566,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     } catch (e) { m.sug = null; showToast('Could not check the classes. Check the internet.'); }
     m.sugBusy = false; matSugRender();
   }
-  const matSugDoc = (x) => ({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', subjects: (x.subjects || []).slice(), subject: (x.subjects || []).join(' + '), fromClass: x.cid, fromTick: x.tid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' });
+  const matSugDoc = (x) => ({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', subjects: matSubFor(x.teacherId, x.subjects), subject: matSubFor(x.teacherId, x.subjects).join(' + '), fromClass: x.cid, fromTick: x.tid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' });
   async function matSugAdd(list) {
     const m = state.mat; if (!list.length) return;
     try {
@@ -10589,19 +10591,23 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   // ----- the picture, the PDF and the Excel file -----
   function matModel() { const r = matRange(); const m = state.mat; const rows = matFiltered(); const fl = []; if (m.batch !== 'all') fl.push(m.batch); if (m.teacher !== 'all') fl.push(ttName(m.teacher)); if (m.type !== 'all') fl.push(matType(m.type)[1]); return { rows, t1: 'Deliverables Record', t2: r.label + (fl.length ? ' · ' + fl.join(' · ') : ''), fileTag: r.tag + (fl.length ? '_filtered' : '') }; }
   function matCanvas(M) {
-    const rows = M.rows; const W = 1100; const cols = [{ k: 'dt', t: 'Date', f: 0.13 }, { k: 'nm', t: 'Teacher', f: 0.21 }, { k: 'cl', t: 'Class', f: 0.14 }, { k: 'mt', t: 'Deliverable', f: 0.15 }, { k: 'sh', t: 'Sheet', f: 0.17 }, { k: 'ch', t: 'Chapter', f: 0.20 }];
+    const rows = M.rows; const W = 1200; const cols = [{ k: 'dt', t: 'Date', f: 0.105 }, { k: 'nm', t: 'Teacher', f: 0.175 }, { k: 'sb', t: 'Subject', f: 0.115 }, { k: 'cl', t: 'Class', f: 0.12 }, { k: 'mt', t: 'Deliverable', f: 0.12 }, { k: 'sh', t: 'Sheet', f: 0.215 }, { k: 'ch', t: 'Chapter', f: 0.15 }];
     const tot = cols.reduce((a, c) => a + c.f, 0); let xx = 0; cols.forEach((c) => { c.w = Math.round(W * c.f / tot); c.x = xx; xx += c.w; }); cols[cols.length - 1].w = W - cols[cols.length - 1].x;
-    const hT = 118; const hH = 84; const hR = 78; const nRows = Math.max(rows.length, 1); const H = hT + hH + hR * nRows + 2;
+    const fnt = (size, bold) => `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`;
+    const mc = document.createElement('canvas').getContext('2d');
+    // a text goes on at most two lines; if it still does not fit, the letters get a little smaller (never below 20 px), then it is cut with ...
+    const fit = (str, maxW, size, bold, minSize) => { str = String(str == null || str === '' ? '–' : str); let z = size; for (;;) { mc.font = fnt(z, bold); const words = str.split(/\s+/); const lines = []; let cur = ''; words.forEach((wd) => { const t = cur ? cur + ' ' + wd : wd; if (mc.measureText(t).width <= maxW || !cur) cur = t; else { lines.push(cur); cur = wd; } }); lines.push(cur); if (lines.length <= 2 && lines.every((l) => mc.measureText(l).width <= maxW)) return { lines, size: z }; if (z <= minSize) { let l1 = lines[0]; let l2 = lines.slice(1).join(' '); while (l2.length > 1 && mc.measureText(l2 + '…').width > maxW) l2 = l2.slice(0, -1); if (lines.length === 1) { while (l1.length > 1 && mc.measureText(l1 + '…').width > maxW) l1 = l1.slice(0, -1); return { lines: [l1 + '…'], size: z }; } while (l1.length > 1 && mc.measureText(l1).width > maxW) l1 = l1.slice(0, -1); return { lines: [l1, l2 + (l2.length < lines.slice(1).join(' ').length ? '…' : '')], size: z }; } z -= 1; } };
+    const cell = (r, c) => { const t = matType(r.type); const mw = c.w - 16; if (c.k === 'dt') return fit(entryDateShort(r.date), mw, 24, true, 20); if (c.k === 'nm') return fit(matName(r), mw, 25, true, 21); if (c.k === 'sb') return fit(matSubTxt(r) || '–', mw, 24, true, 20); if (c.k === 'cl') return fit(r.batch || '', mw, 24, true, 20); if (c.k === 'mt') return Object.assign(fit(t[1], mw, 24, true, 20), { col: 'rgb(' + t[3] + ')' }); if (c.k === 'sh') return fit(r.sheet || '–', mw, 24, false, 20); return fit(r.chapter || '–', mw, 24, true, 20); };
+    const hT = 118; const hH = 84; const one = 72; const two = 112;
+    const laid = rows.map((r) => { const cs = cols.map((c) => cell(r, c)); return { r, cs, h: cs.some((q) => q.lines.length > 1) ? two : one }; });
+    const bodyH = laid.length ? laid.reduce((a, q) => a + q.h, 0) : one; const H = hT + hH + bodyH + 2;
     const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc; const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
     const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#E1E1E5'; x.lineWidth = 1.2; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
-    const fnt = (size, bold) => `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`;
     const tx = (str, cx, cy, size, bold, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = fnt(f, bold); x.textAlign = 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(str).width > maxW && f > 10) { f -= 1; x.font = fnt(f, bold); } x.fillText(str, cx, cy); };
-    box(0, 0, W, hT, '#fff'); x.fillStyle = '#EEF5DF'; x.fillRect(1, 62, W - 2, hT - 66); tx(M.t1, W / 2, 36, 30, true, W - 40, '#171717'); tx(M.t2, W / 2, 88, 26, true, W - 40, '#3F6212'); x.fillStyle = '#65A30D'; x.fillRect(1, hT - 4, W - 2, 4);
-    let y = hT; cols.forEach((c) => { box(c.x, y, c.w, hH, '#E3EFC9'); tx(c.t, c.x + c.w / 2, y + hH / 2, 24, true, c.w - 12, '#000'); }); y += hH;
-    if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No deliverable recorded', W / 2, y + hR / 2, 26, true); return cv; }
-    rows.forEach((r) => { cols.forEach((c) => { box(c.x, y, c.w, hR, '#fff'); const cx = c.x + c.w / 2; const cy = y + hR / 2; const mw = c.w - 14; const t = matType(r.type);
-      if (c.k === 'dt') tx(entryDateShort(r.date), cx, cy, 22, true, mw); else if (c.k === 'nm') tx(matName(r), cx, cy, 24, true, mw); else if (c.k === 'cl') tx(r.batch || '', cx, cy, 23, true, mw);
-      else if (c.k === 'mt') tx(t[1], cx, cy, 23, true, mw, 'rgb(' + t[3] + ')'); else if (c.k === 'sh') tx(r.sheet || '–', cx, cy, 23, false, mw); else tx(r.chapter || '–', cx, cy, 23, true, mw); }); y += hR; });
+    box(0, 0, W, hT, '#fff'); x.fillStyle = '#EEF5DF'; x.fillRect(1, 62, W - 2, hT - 66); tx(M.t1, W / 2, 36, 32, true, W - 40, '#171717'); tx(M.t2, W / 2, 88, 27, true, W - 40, '#3F6212'); x.fillStyle = '#65A30D'; x.fillRect(1, hT - 4, W - 2, 4);
+    let y = hT; cols.forEach((c) => { box(c.x, y, c.w, hH, '#E3EFC9'); tx(c.t, c.x + c.w / 2, y + hH / 2, 26, true, c.w - 12, '#000'); }); y += hH;
+    if (!laid.length) { box(0, y, W, one, '#fff'); tx('No deliverable recorded', W / 2, y + one / 2, 27, true); return cv; }
+    laid.forEach((q) => { cols.forEach((c, i) => { box(c.x, y, c.w, q.h, '#fff'); const cx = c.x + c.w / 2; const g = q.cs[i]; const n = g.lines.length; const lh = g.size * 1.25; g.lines.forEach((ln, k) => { tx(ln, cx, y + q.h / 2 + (k - (n - 1) / 2) * lh, g.size, c.k !== 'sh', 0, g.col); }); }); y += q.h; });
     return cv;
   }
   async function matOut(kind) {
@@ -10619,13 +10625,20 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
           catch (e) { if (!(e && e.name === 'AbortError')) { try { saveFile(name, blob); showToast('Could not share. The picture is saved on your phone.'); } catch (e2) { /* ignore */ } } } res(); }, 'image/png'));
         msgEl.textContent = ''; return;
       }
-      const w = createPdfWriter({ marginX: 48 }); const GREY = [0.890, 0.937, 0.788];
-      w.heading(M.t1, 15); w.bodyLine(M.t2, { size: 11, bold: true }); w.addSpace(6);
-      const cs = [['S.N', 24], ['Date', 56], ['Teacher', 96], ['Class', 62], ['Deliverable', 70], ['Sheet', 78], ['Chapter', 108]]; let ax = 0; const cells = cs.map((c) => { const o = { x: ax, w: c[1], t: c[0] }; ax += c[1]; return o; }); const full = ax; const hh = 20; const rh = 24;
-      const header = () => w.trow(cells.map((c) => ({ x: c.x, w: c.w, t: c.t, bold: true, size: 9, fill: GREY })), hh); header();
-      if (!M.rows.length) w.trow([{ x: 0, w: full, t: 'No deliverable recorded', size: 10 }], rh);
-      M.rows.forEach((r, i) => { if (!w.room(rh)) { w.page(); header(); } const v = [String(i + 1), entryDateShort(r.date), matName(r), r.batch || '', matType(r.type)[1], r.sheet || '-', r.chapter || '-']; w.trow(cells.map((c, k) => ({ x: c.x, w: c.w, t: v[k], size: 9, bold: k === 2 })), rh); });
-      w.addSpace(8); const tt = {}; M.rows.forEach((r) => { tt[matType(r.type)[1]] = (tt[matType(r.type)[1]] || 0) + 1; }); w.bodyLine(`${M.rows.length} entr${M.rows.length === 1 ? 'y' : 'ies'}: ` + (Object.keys(tt).map((k) => `${k} ${tt[k]}`).join(', ') || 'none'), { size: 9 });
+      const w = createPdfWriter({ marginX: 48, landscape: true }); const GREY = [0.890, 0.937, 0.788];
+      w.heading(M.t1, 16); w.bodyLine(M.t2, { size: 12, bold: true }); w.addSpace(6);
+      const cs = [['S.N', 26], ['Date', 62], ['Teacher', 112], ['Subject', 84], ['Class', 106], ['Deliverable', 84], ['Sheet', 150], ['Chapter', 122]]; let ax = 0; const cells = cs.map((c) => { const o = { x: ax, w: c[1], t: c[0] }; ax += c[1]; return o; }); const full = ax;
+      // a text goes on at most two lines; the letters shrink only a little (never below 8 pt)
+      const wrap2 = (txt, width, size, bold) => { const str = keepAscii(String(txt == null || txt === '' ? '-' : txt)); let z = size; for (;;) { const words = str.split(/\s+/); const lines = []; let cur = ''; words.forEach((wd) => { const t = cur ? cur + ' ' + wd : wd; if (pdfTextW(t, z, bold) <= width - 8 || !cur) cur = t; else { lines.push(cur); cur = wd; } }); lines.push(cur); if (lines.length <= 2 && lines.every((l) => pdfTextW(l, z, bold) <= width - 8)) return { lines, size: z }; if (z <= 8) return { lines: lines.slice(0, 2), size: z }; z -= 0.5; } };
+      const hh = 24; const header = () => w.trow(cells.map((c) => ({ x: c.x, w: c.w, t: c.t, bold: true, size: 10.5, fill: GREY })), hh); header();
+      if (!M.rows.length) w.trow([{ x: 0, w: full, t: 'No deliverable recorded', size: 11 }], 26);
+      M.rows.forEach((r, i) => {
+        const vals = [String(i + 1), entryDateShort(r.date), matName(r), matSubTxt(r) || '-', r.batch || '', matType(r.type)[1], r.sheet || '-', r.chapter || '-']; const bolds = [false, false, true, true, false, false, false, true];
+        const g = vals.map((v, k) => wrap2(v, cs[k][1], 10.5, bolds[k])); const rh = g.some((q) => q.lines.length > 1) ? 36 : 24;
+        if (!w.room(rh)) { w.page(); header(); }
+        w.trow(cells.map((c, k) => ({ x: c.x, w: c.w, lines: g[k].lines.map((l) => [{ t: l }]), size: g[k].size, bold: bolds[k] })), rh);
+      });
+      w.addSpace(8); const tt = {}; M.rows.forEach((r) => { tt[matType(r.type)[1]] = (tt[matType(r.type)[1]] || 0) + 1; }); w.bodyLine(`${M.rows.length} entr${M.rows.length === 1 ? 'y' : 'ies'}: ` + (Object.keys(tt).map((k) => `${k} ${tt[k]}`).join(', ') || 'none'), { size: 10 });
       saveFile(base + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('PDF saved');
     } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
   }
