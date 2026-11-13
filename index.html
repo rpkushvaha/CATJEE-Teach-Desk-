@@ -2637,6 +2637,8 @@
   #adminRepKind .rt-tile[data-rep-kind="count"] { color: #E63946; border-color: rgba(230, 57, 70, .32); background: rgba(230, 57, 70, .07); }
   #adminRepKind .rt-tile[data-rep-kind="sub"] { color: #D97706; border-color: rgba(217, 119, 6, .32); background: rgba(217, 119, 6, .07); }
   #adminRepKind .rt-tile[data-rep-kind="duty"] { color: #4F46E5; border-color: rgba(79, 70, 229, .32); background: rgba(79, 70, 229, .07); }
+  #adminRepKind .rt-tile[data-rep-kind="deliv"] { color: #0891B2; border-color: rgba(8, 145, 178, .32); background: rgba(8, 145, 178, .07); }
+  #view-admin[data-atab-cur="mat"] .ad-bar { display: none !important; }
   #adminRepKind .rt-tile[data-rep-kind="entry"] { color: #9333EA; border-color: rgba(147, 51, 234, .32); background: rgba(147, 51, 234, .07); }
   #adminRepKind .rt-tile[data-rep-kind] .qa-l { color: var(--ink); }
   #adminRepKind .rt-tile[data-rep-kind] .qa-s { color: var(--muted-2); }
@@ -2953,7 +2955,7 @@
   .sum-grid.stack .sum-tile { align-items: center; }
   .sum-grid.stack .sum-tile::before { margin: 0 4px 0 0 !important; flex: none; }
   /* the Principal's screens: the buttons that change things are not shown */
-  body.principal-mode #adminTabs [data-atab-btn="settings"], body.principal-mode #tgEdit, body.principal-mode #tgPublish, body.principal-mode #tgPublishDay, body.principal-mode #tgMoreList, body.principal-mode #tgDiscard, body.principal-mode #adminNewExamBtn, body.principal-mode .ex-edit-main, body.principal-mode [data-force-checkout], body.principal-mode [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
+  body.principal-mode #adminTabs [data-atab-btn="settings"], body.principal-mode #adminTabs [data-atab-btn="mat"], body.principal-mode #tgEdit, body.principal-mode #tgPublish, body.principal-mode #tgPublishDay, body.principal-mode #tgMoreList, body.principal-mode #tgDiscard, body.principal-mode #adminNewExamBtn, body.principal-mode .ex-edit-main, body.principal-mode [data-force-checkout], body.principal-mode [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
   /* Class entry record */
   .ent-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
   .ent-card.done { background: var(--neutral-soft); }
@@ -3781,8 +3783,8 @@
         <div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="adminDateLabelText">Today</span></button><button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button></div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <div class="hv-nav rep-datenav" data-atab="reports mat"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button><button type="button" class="hv-back" id="repBackBtn" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span id="repBackText">Back to today</span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-      <div class="chips" id="adminWingChips" data-atab="dash tt reports mat">
+      <div class="hv-nav rep-datenav" data-atab="reports"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button><button type="button" class="hv-back" id="repBackBtn" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span id="repBackText">Back to today</span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+      <div class="chips" id="adminWingChips" data-atab="dash tt reports">
         <button class="chip active" data-admin-wing="all">All</button>
         <button class="chip" data-admin-wing="Pre-Foundation">Pre-Foundation</button>
         <button class="chip" data-admin-wing="Foundation">Foundation</button>
@@ -3792,7 +3794,7 @@
       
 
       <div class="home-seg" id="homeSeg" data-atab="dash"><button type="button" data-hsub-btn="ov" class="active">Overview</button><button type="button" data-hsub-btn="tc">Teachers - <span id="hsTc">0</span></button><button type="button" data-hsub-btn="cl">Classes - <span id="hsCl">0</span></button></div>
-<div id="homeTiles" class="ht-wait" data-atab="dash" data-hsub="ov"><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 4px;"><button type="button" class="qa-btn rt-tile" data-ht-go="today"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg><span class="qa-l">Day summary</span><span class="qa-s" data-ht-sub="today">Classes today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 5a3.5 3.5 0 0 1 0 7"/><path d="M19 14c2 1 3 3.5 3 7"/></svg><span class="qa-l">Teachers</span><span class="qa-s" data-ht-sub="tc">teachers</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="cl"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg><span class="qa-l">Classes</span><span class="qa-s" data-ht-sub="cl">today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="oc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 1 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="qa-l">On campus now</span><span class="qa-s" data-ht-sub="oc"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="alerts"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><line x1="12" y1="10" x2="12" y2="15"/><line x1="12" y1="18" x2="12" y2="18.1"/></svg><span class="qa-l">Needs attention</span><span class="qa-s" data-ht-sub="alerts"></span><span class="ht-badge" id="htBadgeAlerts" hidden></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="notices"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="qa-l">Notices</span><span class="qa-s" data-ht-sub="notices"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tt"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg><span class="qa-l">Timetable</span><span class="qa-s" data-ht-sub="tt">Week, grid, publish</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="exams"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><polyline points="9 14 11 16 15 11"/></svg><span class="qa-l">Exams</span><span class="qa-s" data-ht-sub="exams">Tests and duty</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="mat"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span class="qa-l">Materials</span><span class="qa-s" data-ht-sub="mat">Who gave what</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="reports"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Reports</span><span class="qa-s" data-ht-sub="reports">Attendance, count and more</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="settings"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span class="qa-l">Settings</span><span class="qa-s" data-ht-sub="settings">People, timetable, tools</span></button></div></div>
+<div id="homeTiles" class="ht-wait" data-atab="dash" data-hsub="ov"><div class="qa-row rt-row" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 4px;"><button type="button" class="qa-btn rt-tile" data-ht-go="today"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg><span class="qa-l">Day summary</span><span class="qa-s" data-ht-sub="today">Classes today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M17 5a3.5 3.5 0 0 1 0 7"/><path d="M19 14c2 1 3 3.5 3 7"/></svg><span class="qa-l">Teachers</span><span class="qa-s" data-ht-sub="tc">teachers</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="cl"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg><span class="qa-l">Classes</span><span class="qa-s" data-ht-sub="cl">today</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="oc"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6-7-11a7 7 0 1 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="qa-l">On campus now</span><span class="qa-s" data-ht-sub="oc"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="alerts"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><line x1="12" y1="10" x2="12" y2="15"/><line x1="12" y1="18" x2="12" y2="18.1"/></svg><span class="qa-l">Needs attention</span><span class="qa-s" data-ht-sub="alerts"></span><span class="ht-badge" id="htBadgeAlerts" hidden></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="notices"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="qa-l">Notices</span><span class="qa-s" data-ht-sub="notices"></span></button><button type="button" class="qa-btn rt-tile" data-ht-go="tt"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg><span class="qa-l">Timetable</span><span class="qa-s" data-ht-sub="tt">Week, grid, publish</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="exams"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><polyline points="9 14 11 16 15 11"/></svg><span class="qa-l">Exams</span><span class="qa-s" data-ht-sub="exams">Tests and duty</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="mat"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span class="qa-l">Add deliverables</span><span class="qa-s" data-ht-sub="mat">Write what was given</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="reports"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Reports</span><span class="qa-s" data-ht-sub="reports">Attendance, count and more</span></button><button type="button" class="qa-btn rt-tile" data-ht-go="settings"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span class="qa-l">Settings</span><span class="qa-s" data-ht-sub="settings">People, timetable, tools</span></button></div></div>
  <section class="tsec" data-atab="dash" data-hsub="ov" data-htile="today">
 <div class="tsec-head"><div class="tsec-title">Today</div><div class="tsec-meta" id="adLoggedMeta" hidden></div></div>
         <div class="sum-grid">
@@ -3910,23 +3912,9 @@
       </section>
 
       <section class="tsec" id="adminMatSec" data-atab="mat">
-  <div class="rep-range-row"><div class="chips seg" id="matRange"><button type="button" class="chip active" data-mr="day">Day</button><button type="button" class="chip" data-mr="week">Week</button><button type="button" class="chip" data-mr="month">Month</button></div></div>
-  <div class="hv-note" style="text-align:left;">What was given to each batch: study material, notes, sheets and more, with the teacher and the chapter.</div>
-  <div class="rep-optcard" id="matOpt">
-    <label class="rep-lbl rep-lbl-s" for="matTeacherSel">Teacher</label>
-    <select class="text-input" id="matTeacherSel"></select>
-    <label class="rep-lbl rep-lbl-s" for="matBatchSel" style="margin-top:12px;">Class / Batch</label>
-    <select class="text-input" id="matBatchSel"></select>
-    <div class="rep-lbl rep-lbl-s" style="margin-top:12px;">Material</div>
-    <div class="chips" id="matTypeChips"></div>
-  </div>
-  <div id="matResHead"></div>
-  <button type="button" class="mat-addbox" id="matAddBtn">+ Add material</button>
+  <div class="hv-note" style="text-align:left;">Write what was given to each batch. You will find and edit it in <b>Reports → Deliverables record</b>.</div>
   <div id="matSug"></div>
-  <div id="matList"></div>
-  <div class="qa-row" id="matOuts" hidden><button type="button" class="qa-btn qa-wa" id="matWaBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share picture</span></button><button type="button" class="qa-btn qa-pdf" id="matPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/></svg><span class="qa-l">PDF</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-xl" id="matCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button></div>
-  <div class="admin-sub" id="matMsg" style="text-align:center;"></div>
-  <div class="panel" id="matForm" hidden></div>
+  <div class="panel" id="matForm"></div>
 </section>
 
 <section class="tsec" id="adminReportsSec" data-atab="reports">
@@ -3937,7 +3925,7 @@
           <button class="chip" data-report-range="week">Week</button>
           <button class="chip" data-report-range="month">Month</button>
         </div></div>
-        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Classes, Tests, Work</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · Check-out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Where · When · Whose</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="duty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 13l2 2 4-4"/></svg><span class="qa-l">Invigilation duty</span><span class="qa-s">Rooms and Timings</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="entry"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span class="qa-l">Class entry record</span><span class="qa-s">Late entries</span></button></div>
+        <div class="qa-row rt-row" id="adminRepKind" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn rt-tile on" data-rep-kind="full"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg><span class="qa-l">Full report</span><span class="qa-s">Classes, Tests, Work</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="att"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="qa-l">Attendance report</span><span class="qa-s">Check-in · Check-out</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="count"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg><span class="qa-l">Class count report</span><span class="qa-s">Batch-wise</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="sub"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l-4 4 4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg><span class="qa-l">Substitute report</span><span class="qa-s">Where · When · Whose</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="duty"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 13l2 2 4-4"/></svg><span class="qa-l">Invigilation duty</span><span class="qa-s">Rooms and Timings</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="entry"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span class="qa-l">Class entry record</span><span class="qa-s">Late entries</span></button><button type="button" class="qa-btn rt-tile" data-rep-kind="deliv"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span class="qa-l">Deliverables record</span><span class="qa-s">Batch, chapter, type</span></button></div>
         <div class="hv-note" id="repKindNote" style="text-align:left;"></div>
  <div class="rep-optcard" id="repTeacherWrap">
  <label class="rep-lbl rep-lbl-s" for="adminRepTeacher">Teacher</label>
@@ -3989,7 +3977,23 @@
   </div>
   <div class="admin-sub" id="entryMsg" style="text-align:center;"></div>
   </div>
- <div id="repCount" hidden>
+ <div id="repDeliv" hidden>
+  <div class="rep-optcard" id="matOpt">
+    <label class="rep-lbl rep-lbl-s" for="matTeacherSel">Teacher</label>
+    <select class="text-input" id="matTeacherSel"></select>
+    <label class="rep-lbl rep-lbl-s" for="matBatchSel" style="margin-top:12px;">Class / Batch</label>
+    <select class="text-input" id="matBatchSel"></select>
+    <div class="rep-lbl rep-lbl-s" style="margin-top:12px;">Deliverable</div>
+    <div class="chips" id="matTypeChips"></div>
+  </div>
+  <div id="repResHeadD"></div>
+  <div id="matList"></div>
+  <div class="rep-lbl">Get it as</div>
+  <div class="qa-row" id="matOuts" style="grid-template-columns: repeat(3, minmax(0, 1fr));" hidden><button type="button" class="qa-btn qa-wa" id="matWaBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg><span class="qa-l">WhatsApp</span><span class="qa-s">Share picture</span></button><button type="button" class="qa-btn qa-pdf" id="matPdfBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/></svg><span class="qa-l">PDF</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-xl" id="matCsvBtn"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button></div>
+  <div class="admin-sub" id="matMsg" style="text-align:center;"></div>
+  <div class="panel" id="delivForm" hidden></div>
+  </div>
+  <div id="repCount" hidden>
       <div class="rep-optcard">
  <div class="rep-lbl rep-lbl-s">Counted from</div>
  <div class="rseg" id="trepBasis"><button type="button" class="chip active" data-trep-basis="logged">Filled in by teachers</button><button type="button" class="chip" data-trep-basis="tt">From the timetable</button></div>
@@ -4545,7 +4549,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.96 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.97 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10374,117 +10378,150 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     startCoordPreview(w === 'both' ? ['Pre-Foundation', 'Foundation'] : [w]);
   }));
 
-    // ---------- Materials: the coordinator's own record of the material given to each batch ----------
+    // ---------- Deliverables: what the coordinator writes down (Admin, Add deliverables) and the record of it (Reports, Deliverables record) ----------
   const MAT_TYPES = [['study', 'Study material', 'Study material', '217,119,6'], ['classnotes', 'Class notes', 'Class notes', '219,39,119'], ['olympiad', 'Olympiad sheet', 'Olympiad sheet', '124,58,237'], ['dpp', 'DPP', 'DPP', '22,163,74'], ['worksheet', 'Worksheet', 'Worksheet', '37,99,235'], ['pyq', 'PYQs', 'PYQs', '234,88,12'], ['other', 'Other sheet', 'Other sheet', '13,148,136']];
   const matType = (k) => MAT_TYPES.find((t) => t[0] === k) || MAT_TYPES[MAT_TYPES.length - 1];
   const matYmd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const matSet = (el, html) => { if (el && el.__h !== html) { el.innerHTML = html; el.__h = html; } }; // write only when the text really changed (no blinking)
-  state.mat = { batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', form: null, sug: null, sugBusy: false };
+  const matDmy = (d) => (d && d.length >= 10) ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(2, 4) : '';
+  const matBlank = () => ({ id: null, date: todayStr(), teacher: '', batches: [], types: {}, chapter: '', note: '' });
+  state.mat = { batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', addForm: null, editForm: null, sug: null, sugBusy: false, sugRange: 'week', done: '' };
   function matCanEdit() { return !principalView(); }
   function matWing() { return state.adminReportWing || 'all'; }
   function matBatches() { const lw = leadWings(); const aw = matWing(); return allBatchesFlat().filter((b) => (!wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1) && (aw === 'all' || wingOfBatch(b) === aw)); }
   function matTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
+  function matAddBatches() { const lw = leadWings(); return allBatchesFlat().filter((b) => !wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1); }
+  function matAddTeachers() { const lw = leadWings(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w)))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
+  // the record uses the period and the wing of the Reports page
   function matRange() { const r = adminReportRangeDates(); const d = r.dates; return { from: d[0], to: d[d.length - 1], nav: r.label, label: r.full, tag: r.fileTag }; }
   async function matLoad() {
-    const m = state.mat; const r = matRange(); const key = r.from + '|' + r.to; m.key = key; m.loading = true; m.err = ''; m.sug = null; matRender();
+    const m = state.mat; const r = matRange(); const key = r.from + '|' + r.to; m.key = key; m.loading = true; m.err = ''; delivRender();
     try {
       const sn = await state.db.collection('materials').where('date', '>=', r.from).where('date', '<=', r.to).get();
       if (m.key !== key) return; m.rows = sn.docs.map((d) => Object.assign({ id: d.id }, d.data()));
     } catch (e) { if (m.key !== key) return; m.rows = []; m.err = 'Could not read the record. Check the internet, and that the Firebase rules include the materials record.'; }
-    m.loading = false; matRender();
+    m.loading = false; delivRender();
   }
-  function matReload() { state.mat.key = ''; matRender(); }
+  function matReload() { state.mat.key = ''; delivRender(); }
   function matFiltered() {
     const m = state.mat; const lw = leadWings(); const aw = matWing();
     return m.rows.filter((r) => { const w = r.wing || wingOfBatch(r.batch); return (state.canAdmin || lw.indexOf(w) !== -1) && (aw === 'all' || w === aw) && (m.batch === 'all' || r.batch === m.batch) && (m.teacher === 'all' || r.teacherId === m.teacher) && (m.type === 'all' || r.type === m.type); })
       .sort((a, b) => (a.batch || '').localeCompare(b.batch || '') || b.date.localeCompare(a.date) || (a.teacherName || '').localeCompare(b.teacherName || ''));
   }
   const matName = (r) => r.teacherName || ttName(r.teacherId);
-  const matDmy = (d) => (d && d.length >= 10) ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(2, 4) : '';
-  function matRender() {
-    const sec = document.getElementById('adminMatSec'); if (!sec) return;
-    const m = state.mat; const r = matRange(); const range = state.adminReportRange || 'day';
-    sec.querySelectorAll('#matRange [data-mr]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-mr') === range));
-    const lbl = document.getElementById('repLabel'); if (lbl && lbl.textContent !== r.nav) lbl.textContent = r.nav; try { syncRepBack(); } catch (e) { /* ignore */ }
-    document.getElementById('matAddBtn').style.display = matCanEdit() ? '' : 'none';
+  // ----- the record (a report in Reports) -----
+  function delivRender() {
+    const blk = document.getElementById('repDeliv'); if (!blk || blk.hidden) return;
+    const m = state.mat; const r = matRange();
     const bs = matBatches(); if (m.batch !== 'all' && bs.indexOf(m.batch) === -1) m.batch = 'all'; const ts = matTeachers(); if (m.teacher !== 'all' && ts.indexOf(m.teacher) === -1) m.teacher = 'all';
     const bsel = document.getElementById('matBatchSel'); const tsel = document.getElementById('matTeacherSel');
     matSet(bsel, '<option value="all">All batches</option>' + bs.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')); if (bsel.value !== m.batch) bsel.value = m.batch;
     matSet(tsel, '<option value="all">All teachers</option>' + ts.map((u) => `<option value="${escapeHtml(u)}">${escapeHtml(ttName(u))}</option>`).join('')); if (tsel.value !== m.teacher) tsel.value = m.teacher;
     matSet(document.getElementById('matTypeChips'), ['<button type="button" class="chip' + (m.type === 'all' ? ' active' : '') + '" data-mtc="all">All</button>'].concat(MAT_TYPES.map((t) => `<button type="button" class="chip${m.type === t[0] ? ' active' : ''}" data-mtc="${t[0]}">${t[1]}</button>`)).join(''));
-    const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
-    matSet(document.getElementById('matResHead'), `<div class="tsec-title">Materials record · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml(r.label)} · ${escapeHtml(wt)}</div>`);
     const rows = matFiltered(); let html = '';
     if (m.loading) html = '<div class="skel short"></div>';
     else if (m.err) html = `<div class="hv-note" style="text-align:left;">${escapeHtml(m.err)}</div>`;
-    else if (!rows.length) html = `<div class="empty"><div class="empty-t">No material recorded in this period</div>${matCanEdit() ? '<div class="empty-s">Tap + Add material to write what was given.</div>' : ''}</div>`;
+    else if (!rows.length) html = `<div class="empty"><div class="empty-t">No deliverable recorded in this period</div>${matCanEdit() ? '<div class="empty-s">Add them from Admin, Add deliverables.</div>' : ''}</div>`;
     else { let cur = null; rows.forEach((x) => { if (x.batch !== cur) { cur = x.batch; const n = rows.filter((y) => y.batch === cur).length; html += `<div class="mat-grp">${escapeHtml(cur || 'Class')}<span>${n} entr${n === 1 ? 'y' : 'ies'}</span></div>`; } const t = matType(x.type); html += `<div class="mat-row" style="--mcr:${t[3]}"><div class="tx"><b>${escapeHtml(entryDateShort(x.date))} · ${escapeHtml(matName(x))}</b><span class="mat-tag">${escapeHtml(t[1])}</span>${escapeHtml(x.sheet || '')}${x.chapter ? ` · Ch: ${escapeHtml(x.chapter)}` : ''}${x.note ? `<small>${escapeHtml(x.note)}</small>` : ''}</div>${matCanEdit() ? `<button type="button" class="pen" data-mid="${escapeHtml(x.id)}" aria-label="Edit">✎</button>` : ''}</div>`; }); }
     matSet(document.getElementById('matList'), html);
     document.getElementById('matOuts').hidden = !rows.length;
-    document.getElementById('matForm').hidden = !m.form;
-    matSugRender();
+    document.getElementById('delivForm').hidden = !m.editForm;
     if (m.key !== r.from + '|' + r.to) matLoad();
   }
-  // ----- the form (add one or many entries at once, or edit one) -----
-  function matRecent(f) { const set = []; state.mat.rows.filter((x) => x.chapter && (!f.batches.length || f.batches.indexOf(x.batch) !== -1)).sort((a, b) => b.date.localeCompare(a.date)).forEach((x) => { if (set.indexOf(x.chapter) === -1) set.push(x.chapter); }); return set.slice(0, 6); }
   function matFormOpen(id) {
-    const m = state.mat; const ex = id ? m.rows.find((x) => x.id === id) : null;
-    m.form = ex ? { id: ex.id, date: ex.date, teacher: ex.teacherId, batches: [ex.batch], types: { [ex.type]: ex.sheet || '' }, chapter: ex.chapter || '', note: ex.note || '' }
-      : { id: null, date: todayStr(), teacher: m.teacher !== 'all' ? m.teacher : '', batches: m.batch !== 'all' ? [m.batch] : [], types: {}, chapter: '', note: '' };
-    matFormRender(); matRender(); const f = document.getElementById('matForm'); if (f) f.scrollIntoView({ block: 'start' });
+    const m = state.mat; const ex = m.rows.find((x) => x.id === id); if (!ex) return;
+    m.editForm = { id: ex.id, date: ex.date, teacher: ex.teacherId, batches: [ex.batch], types: { [ex.type]: ex.sheet || '' }, chapter: ex.chapter || '', note: ex.note || '' };
+    const host = document.getElementById('delivForm'); matFormDraw(host, m.editForm); host.hidden = false; host.scrollIntoView({ block: 'start' });
   }
-  function matFormRender() {
-    const f = state.mat.form; const box = document.getElementById('matForm'); if (!f || !box) return; const edit = !!f.id; const recent = matRecent(f);
-    box.innerHTML = `<div class="tsec-head"><div class="tsec-title">${edit ? 'Edit entry' : 'Add material'}</div></div>
-      <div class="field"><label for="mfDateBtn">Date</label><button type="button" class="text-input mat-date-btn" id="mfDateBtn"><span>${matDmy(f.date)}</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
-      <div class="field"><label for="mfTeacher">Teacher</label><select class="text-input" id="mfTeacher"><option value="">Choose a teacher</option>${matTeachers().map((u) => `<option value="${escapeHtml(u)}"${f.teacher === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('')}</select></div>
-      <div class="field"><label>Class / Batch${edit ? '' : ' <small>(one or more)</small>'}</label><div class="chips" id="mfBatches">${matBatches().map((b) => `<button type="button" class="chip${f.batches.indexOf(b) !== -1 ? ' active' : ''}" data-mfb="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
-      <div class="field"><label>Material${edit ? '' : ' <small>(tap all that apply)</small>'}</label><div class="chips" id="mfTypes">${MAT_TYPES.map((t) => `<button type="button" class="chip${t[0] in f.types ? ' active' : ''}" data-mft="${t[0]}">${t[1]}</button>`).join('')}</div>${MAT_TYPES.filter((t) => t[0] in f.types).map((t) => `<input type="text" class="text-input" style="margin-top:8px;" data-mfs="${t[0]}" placeholder="${t[1]}: name or number (optional)" value="${escapeHtml(f.types[t[0]])}" maxlength="80">`).join('')}</div>
-      <div class="field"><label for="mfChapter">Chapter <small>Required</small></label><input type="text" class="text-input" id="mfChapter" value="${escapeHtml(f.chapter)}" maxlength="120" placeholder="Chapter" autocomplete="off">${recent.length ? `<div class="chips" style="margin-top:6px;">${recent.map((c) => `<button type="button" class="chip" data-mfc="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}</div>` : ''}</div>
-      <div class="field"><label for="mfNote">Note <small>Optional</small></label><input type="text" class="text-input" id="mfNote" value="${escapeHtml(f.note)}" maxlength="160" placeholder="e.g. given in the last 10 minutes"></div>
-      <div class="admin-sub" id="mfMsg" style="color:#C81E32;"></div>
-      <button type="button" class="save-btn" id="mfSave">${edit ? 'Save changes' : 'Save'}</button>
-      ${edit ? '' : '<button type="button" class="btn-secondary" id="mfSaveMore" style="margin-top:8px;">Save and add another</button>'}
-      ${edit ? '<button type="button" class="btn-secondary" id="mfDelete" style="margin-top:8px; color:#C81E32;">Delete this entry</button>' : ''}
-      <button type="button" class="btn-secondary" id="mfCancel" style="margin-top:8px;">Cancel</button>`;
+  // ----- the form (the same form: new entries on the Add page, one entry in the record) -----
+  function matRecent(f) { const set = []; state.mat.rows.filter((x) => x.chapter && (!f.batches.length || f.batches.indexOf(x.batch) !== -1)).sort((a, b) => b.date.localeCompare(a.date)).forEach((x) => { if (set.indexOf(x.chapter) === -1) set.push(x.chapter); }); return set.slice(0, 6); }
+  function matFormHtml(f) {
+    const edit = !!f.id; const recent = matRecent(f); const m = state.mat;
+    return `<div class="tsec-head"><div class="tsec-title">${edit ? 'Edit entry' : 'Add deliverable'}</div></div>
+      <div class="field"><label>Date</label><button type="button" class="text-input mat-date-btn" data-mf="date"><span>${matDmy(f.date)}</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button></div>
+      <div class="field"><label>Teacher</label><select class="text-input" data-mf="teacher"><option value="">Choose a teacher</option>${matAddTeachers().map((u) => `<option value="${escapeHtml(u)}"${f.teacher === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('')}</select></div>
+      <div class="field"><label>Class / Batch${edit ? '' : ' <small>(one or more)</small>'}</label><div class="chips">${matAddBatches().map((b) => `<button type="button" class="chip${f.batches.indexOf(b) !== -1 ? ' active' : ''}" data-mfb="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('')}</div></div>
+      <div class="field"><label>Deliverable${edit ? '' : ' <small>(tap all that apply)</small>'}</label><div class="chips">${MAT_TYPES.map((t) => `<button type="button" class="chip${t[0] in f.types ? ' active' : ''}" data-mft="${t[0]}">${t[1]}</button>`).join('')}</div>${MAT_TYPES.filter((t) => t[0] in f.types).map((t) => `<input type="text" class="text-input" style="margin-top:8px;" data-mfs="${t[0]}" placeholder="${t[1]}: name or number (optional)" value="${escapeHtml(f.types[t[0]])}" maxlength="80">`).join('')}</div>
+      <div class="field"><label>Chapter <small>Required</small></label><input type="text" class="text-input" data-mf="chapter" value="${escapeHtml(f.chapter)}" maxlength="120" placeholder="Chapter" autocomplete="off">${recent.length ? `<div class="chips" style="margin-top:6px;">${recent.map((c) => `<button type="button" class="chip" data-mfc="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}</div>` : ''}</div>
+      <div class="field"><label>Note <small>Optional</small></label><input type="text" class="text-input" data-mf="note" value="${escapeHtml(f.note)}" maxlength="160" placeholder="e.g. given in the last 10 minutes"></div>
+      <div class="admin-sub mf-msg" style="color:#C81E32;"></div>
+      <button type="button" class="save-btn" data-mf="save">${edit ? 'Save changes' : 'Save'}</button>
+      ${edit ? '<button type="button" class="btn-secondary" data-mf="del" style="margin-top:8px; color:#C81E32;">Delete this entry</button><button type="button" class="btn-secondary" data-mf="cancel" style="margin-top:8px;">Cancel</button>' : '<button type="button" class="btn-secondary" data-mf="clear" style="margin-top:8px;">Clear the form</button>'}
+      ${(!edit && m.done) ? `<div class="mf-done" style="margin-top:12px; text-align:center;"><div class="admin-sub" style="color:#16A34A; font-weight:700;">${escapeHtml(m.done)}</div><button type="button" class="btn-secondary" data-mf="view" style="margin-top:8px;">View in Deliverables record</button></div>` : ''}`;
   }
-  async function matSave(more) {
-    const m = state.mat; const f = m.form; if (!f) return; const msg = document.getElementById('mfMsg'); const ch = (f.chapter || '').trim(); const say = (t) => { if (msg) msg.textContent = t; };
-    if (!f.date) return say('Choose the date.'); if (!f.teacher) return say('Choose a teacher.'); if (!f.batches.length) return say('Choose at least one class / batch.'); if (!Object.keys(f.types).length) return say('Choose at least one material.'); if (!ch) return say('Enter the chapter.');
+  function matFormDraw(host, f) { if (host && f) { host.innerHTML = matFormHtml(f); host.__h = null; } }
+  const matQ = (host, sel) => host.querySelector(sel);
+  async function matFormSave(host, which) {
+    const m = state.mat; const f = m[which]; if (!f) return; const msgEl = matQ(host, '.mf-msg'); const ch = (f.chapter || '').trim(); const say = (t) => { if (msgEl) msgEl.textContent = t; };
+    if (!f.date) return say('Choose the date.'); if (!f.teacher) return say('Choose a teacher.'); if (!f.batches.length) return say('Choose at least one class / batch.'); if (!Object.keys(f.types).length) return say('Choose at least one deliverable.'); if (!ch) return say('Enter the chapter.');
     const docs = []; f.batches.forEach((b) => Object.keys(f.types).forEach((k) => docs.push({ date: f.date, teacherId: f.teacher, teacherName: ttName(f.teacher), batch: b, wing: wingOfBatch(b) || '', type: k, typeLabel: matType(k)[1], sheet: String(f.types[k] || '').trim(), chapter: ch, note: (f.note || '').trim() })));
-    document.querySelectorAll('#matForm button').forEach((b) => { b.disabled = true; });
+    host.querySelectorAll('button').forEach((b) => { b.disabled = true; });
     try {
       if (f.id) await waitForWrite(state.db.collection('materials').doc(f.id).update(Object.assign({ editedAt: Date.now(), editedBy: state.teacherId }, docs[0])));
       else await Promise.all(docs.map((d) => waitForWrite(state.db.collection('materials').add(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' }, d)))));
-      showToast(f.id ? 'Saved' : `Saved ${docs.length} entr${docs.length === 1 ? 'y' : 'ies'}`);
-      const r = matRange(); if (f.date < r.from || f.date > r.to) { state.adminDate = f.date; subscribeAdminDate(f.date); const tl = document.getElementById('adminDateLabelText'); if (tl) tl.textContent = formatStepperDateLabel(f.date); }
-      if (more && !f.id) { m.form = Object.assign({}, f, { types: {}, note: '' }); matFormRender(); } else { m.form = null; }
-      matReload(); if (more && !f.id) { const fb = document.getElementById('matForm'); if (fb) fb.scrollIntoView({ block: 'start' }); }
-    } catch (e) { document.querySelectorAll('#matForm button').forEach((b) => { b.disabled = false; }); say('Could not save. Check the internet and try again.'); }
+      showToast(f.id ? 'Saved' : `Saved ${docs.length} entr${docs.length === 1 ? 'y' : 'ies'}`); m.key = '';
+      if (f.id) { m.editForm = null; host.hidden = true; matReload(); }
+      else { m.done = `Saved ${docs.length} entr${docs.length === 1 ? 'y' : 'ies'}`; m.addForm = Object.assign({}, f, { types: {}, chapter: '', note: '' }); matFormDraw(host, m.addForm); }
+    } catch (e) { host.querySelectorAll('button').forEach((b) => { b.disabled = false; }); say('Could not save. Check the internet and try again.'); }
   }
-  async function matDelete() {
-    const m = state.mat; const f = m.form; if (!f || !f.id) return;
+  async function matFormDelete(host) {
+    const m = state.mat; const f = m.editForm; if (!f || !f.id) return;
     const ok = await showConfirm('This entry will be removed from the record.', 'Delete this entry?', 'Delete'); if (!ok) return;
-    try { await waitForWrite(state.db.collection('materials').doc(f.id).delete()); showToast('Deleted'); m.form = null; matReload(); } catch (e) { const msg = document.getElementById('mfMsg'); if (msg) msg.textContent = 'Could not delete. Check the internet.'; }
+    try { await waitForWrite(state.db.collection('materials').doc(f.id).delete()); showToast('Deleted'); m.editForm = null; host.hidden = true; matReload(); } catch (e) { const msgEl = matQ(host, '.mf-msg'); if (msgEl) msgEl.textContent = 'Could not delete. Check the internet.'; }
+  }
+  // open the record (Reports) at the day of the last saved entry
+  function matOpenRecord(date) {
+    const m = state.mat; state.adminDate = date || todayStr(); subscribeAdminDate(state.adminDate); state.adminReportRange = 'day'; state.adminRepKind = 'deliv'; m.key = '';
+    const tl = document.getElementById('adminDateLabelText'); if (tl) tl.textContent = formatStepperDateLabel(state.adminDate);
+    const tb = document.querySelector('#adminTabs [data-atab-btn="reports"]'); if (tb) tb.click();
+    setTimeout(() => { const tile = document.querySelector('#adminRepKind [data-rep-kind="deliv"]'); if (tile) tile.click(); }, 80); // after the Reports page has shown its tiles
+  }
+  function matBindForm(root, which) {
+    if (!root) return;
+    root.addEventListener('click', (ev) => {
+      const t = ev.target; const q = (sel) => t.closest ? t.closest(sel) : null; const m = state.mat; const f = m[which]; if (!f) return; let e;
+      if (q('[data-mf="date"]')) { openCalendar(f.date || todayStr(), (d) => { const msgEl = matQ(root, '.mf-msg'); if (d > todayStr()) { if (msgEl) msgEl.textContent = 'Choose today or an earlier date.'; return; } f.date = d; if (msgEl) msgEl.textContent = ''; const bt = matQ(root, '[data-mf="date"] span'); if (bt) bt.textContent = matDmy(d); }); return; }
+      if ((e = q('[data-mfb]'))) { const b = e.getAttribute('data-mfb'); if (f.id) f.batches = [b]; else { const i = f.batches.indexOf(b); if (i === -1) f.batches.push(b); else f.batches.splice(i, 1); } matFormDraw(root, f); return; }
+      if ((e = q('[data-mft]'))) { const k = e.getAttribute('data-mft'); if (f.id) f.types = { [k]: (f.types[k] || '') }; else if (k in f.types) delete f.types[k]; else f.types[k] = ''; matFormDraw(root, f); return; }
+      if ((e = q('[data-mfc]'))) { f.chapter = e.getAttribute('data-mfc'); matFormDraw(root, f); return; }
+      if (q('[data-mf="save"]')) { matFormSave(root, which); return; }
+      if (q('[data-mf="del"]')) { matFormDelete(root); return; }
+      if (q('[data-mf="cancel"]')) { m.editForm = null; root.hidden = true; return; }
+      if (q('[data-mf="clear"]')) { m.addForm = matBlank(); m.done = ''; matFormDraw(root, m.addForm); return; }
+      if (q('[data-mf="view"]')) { matOpenRecord(f.date); return; }
+    });
+    root.addEventListener('input', (ev) => { const f = state.mat[which]; const t = ev.target; if (!t || !f || !t.getAttribute) return; if (t.getAttribute('data-mf') === 'chapter') f.chapter = t.value; else if (t.getAttribute('data-mf') === 'note') f.note = t.value; else if (t.hasAttribute('data-mfs')) f.types[t.getAttribute('data-mfs')] = t.value; });
+    root.addEventListener('change', (ev) => { const f = state.mat[which]; const t = ev.target; if (!t || !f || !t.getAttribute) return; if (t.getAttribute('data-mf') === 'teacher') f.teacher = t.value; });
+  }
+  // ----- the Add page -----
+  function matAddRender() {
+    const host = document.getElementById('matForm'); const m = state.mat; if (!host) return;
+    if (principalView()) { matSet(host, '<div class="hv-note" style="text-align:left;">Only the Admin and the Coordinators add deliverables. You can see them in Reports, Deliverables record.</div>'); host.__h = null; return; }
+    if (!m.addForm) m.addForm = matBlank();
+    if (!host.querySelector('[data-mf="save"]')) matFormDraw(host, m.addForm);
+    matSugRender();
   }
   // ----- the helper: what teachers ticked in Add Class and is not in the record yet (read only when asked; it can be closed) -----
+  function matSugDates() { const t = todayStr(); if (state.mat.sugRange === 'day') return { from: t, to: t, label: 'Today' }; if (state.mat.sugRange === 'month') { const o = dateObj(t); return { from: matYmd(new Date(o.getFullYear(), o.getMonth(), 1)), to: t, label: 'This month' }; } const o = dateObj(t); o.setDate(o.getDate() - 6); return { from: matYmd(o), to: t, label: 'Last 7 days' }; }
   function matSugRender() {
     const box = document.getElementById('matSug'); if (!box) return; const m = state.mat; let html = '';
     if (!matCanEdit()) { matSet(box, ''); return; }
     const x = '<button type="button" class="mat-x" data-sugclose="1" aria-label="Close">✕</button>';
+    const chips = '<div class="chips" style="margin:8px 0 6px;">' + [['day', 'Today'], ['week', 'Last 7 days'], ['month', 'This month']].map((c) => `<button type="button" class="chip${m.sugRange === c[0] ? ' active' : ''}" data-sugr="${c[0]}">${c[1]}</button>`).join('') + '</div>';
     if (m.sugBusy) html = '<div class="hv-note" style="text-align:left;">Checking what teachers ticked…</div>';
-    else if (m.sug === null) html = '<button type="button" class="btn-secondary" id="matTicksBtn" style="margin:8px 0;">Check what teachers ticked in Add Class</button>';
-    else if (!m.sug.length) html = `<div class="mat-sug"><div class="mat-sug-h"><span>Nothing new. Everything teachers ticked in this period is already in your record.</span>${x}</div></div>`;
-    else html = `<div class="mat-sug"><div class="mat-sug-h"><b>${m.sug.length} material${m.sug.length === 1 ? '' : 's'} ticked by teachers, not in your record yet</b>${x}</div>${m.sug.slice(0, 30).map((y, i) => `<div class="r"><span><b>${escapeHtml(ttName(y.teacherId))} · ${escapeHtml(entryDateShort(y.date))}</b><br>${escapeHtml(matType(y.type)[1])}${y.sheet ? ' · ' + escapeHtml(y.sheet) : ''} · ${escapeHtml(y.batch)}${y.chapter ? ' · Ch: ' + escapeHtml(y.chapter) : ''}</span><button type="button" data-sugadd="${i}">Add</button></div>`).join('')}<div class="r" style="justify-content:space-between;"><button type="button" data-sugclose="1" style="border-color:#8A8A92;color:#444;">Close</button>${m.sug.length > 1 ? `<button type="button" data-sugall="1">Add all ${m.sug.length}</button>` : ''}</div></div>`;
+    else if (m.sug === null) html = chips + '<button type="button" class="btn-secondary" id="matTicksBtn" style="margin:0 0 8px;">Check what teachers ticked in Add Class</button>';
+    else if (!m.sug.length) html = `<div class="mat-sug"><div class="mat-sug-h"><span>Nothing new. Everything teachers ticked (${escapeHtml(matSugDates().label)}) is already in your record.</span>${x}</div></div>`;
+    else html = `<div class="mat-sug"><div class="mat-sug-h"><b>${m.sug.length} deliverable${m.sug.length === 1 ? '' : 's'} ticked by teachers, not in your record yet</b>${x}</div>${m.sug.slice(0, 30).map((y, i) => `<div class="r"><span><b>${escapeHtml(ttName(y.teacherId))} · ${escapeHtml(entryDateShort(y.date))}</b><br>${escapeHtml(matType(y.type)[1])}${y.sheet ? ' · ' + escapeHtml(y.sheet) : ''} · ${escapeHtml(y.batch)}${y.chapter ? ' · Ch: ' + escapeHtml(y.chapter) : ''}</span><button type="button" data-sugadd="${i}">Add</button></div>`).join('')}<div class="r" style="justify-content:space-between;"><button type="button" data-sugclose="1" style="border-color:#8A8A92;color:#444;">Close</button>${m.sug.length > 1 ? `<button type="button" data-sugall="1">Add all ${m.sug.length}</button>` : ''}</div></div>`;
     matSet(box, html);
   }
   async function matCheckTicks() {
-    const m = state.mat; const r = matRange(); m.sugBusy = true; matSugRender(); const lw = leadWings(); const items = []; const have = new Set(m.rows.map((x) => [x.date, x.teacherId, x.batch, x.type].join('|')));
+    const m = state.mat; const r = matSugDates(); m.sugBusy = true; matSugRender(); const lw = leadWings(); const items = [];
     try {
-      const sn = await state.db.collection('classes').where('date', '>=', r.from).where('date', '<=', r.to).get();
-      sn.docs.forEach((d) => { const c = d.data() || {}; if (c.entryType && c.entryType !== 'class') return; const bs = (c.batches && c.batches.length) ? c.batches : (c.batch ? [c.batch] : []);
+      const [cs, ms] = await Promise.all([state.db.collection('classes').where('date', '>=', r.from).where('date', '<=', r.to).get(), state.db.collection('materials').where('date', '>=', r.from).where('date', '<=', r.to).get()]);
+      const have = new Set(ms.docs.map((d) => { const x = d.data(); return [x.date, x.teacherId, x.batch, x.type].join('|'); }));
+      cs.docs.forEach((d) => { const c = d.data() || {}; if (c.entryType && c.entryType !== 'class') return; const bs = (c.batches && c.batches.length) ? c.batches : (c.batch ? [c.batch] : []);
         matGiven(c).forEach((g) => { const note = String(g.note || '').trim(); const type = ({ material: 'study', classnotes: 'classnotes', olympiad: 'olympiad', dpp: 'dpp', worksheet: (c.matv === 2 ? 'worksheet' : (/dpp/i.test(note) ? 'dpp' : 'worksheet')), pyq: 'pyq', othersheet: 'other' })[g.key] || 'other';
-          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; if (matWing() !== 'all' && w !== matWing()) return; const key = [c.date, c.teacherId, b, type].join('|'); if (have.has(key)) return; have.add(key); items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id }); }); }); });
+          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; const key = [c.date, c.teacherId, b, type].join('|'); if (have.has(key)) return; have.add(key); items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id }); }); }); });
       items.sort((a, b) => b.date.localeCompare(a.date)); m.sug = items;
     } catch (e) { m.sug = null; showToast('Could not check the classes. Check the internet.'); }
     m.sugBusy = false; matSugRender();
@@ -10493,14 +10530,13 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const m = state.mat; if (!list.length) return;
     try {
       await Promise.all(list.map((x) => waitForWrite(state.db.collection('materials').add({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', fromClass: x.cid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' }))));
-      const keep = (m.sug || []).filter((y) => list.indexOf(y) === -1); showToast(`Added ${list.length}`);
-      m.key = ''; await matLoad(); state.mat.sug = keep; matSugRender();
+      m.sug = (m.sug || []).filter((y) => list.indexOf(y) === -1); m.key = ''; showToast(`Added ${list.length}`); matSugRender();
     } catch (e) { showToast('Could not add. Check the internet.'); }
   }
   // ----- the picture, the PDF and the Excel file -----
-  function matModel() { const r = matRange(); const m = state.mat; const rows = matFiltered(); const fl = []; if (m.batch !== 'all') fl.push(m.batch); if (m.teacher !== 'all') fl.push(ttName(m.teacher)); if (m.type !== 'all') fl.push(matType(m.type)[1]); return { rows, t1: 'Materials Record', t2: r.label + (fl.length ? ' · ' + fl.join(' · ') : ''), fileTag: r.tag + (fl.length ? '_filtered' : '') }; }
+  function matModel() { const r = matRange(); const m = state.mat; const rows = matFiltered(); const fl = []; if (m.batch !== 'all') fl.push(m.batch); if (m.teacher !== 'all') fl.push(ttName(m.teacher)); if (m.type !== 'all') fl.push(matType(m.type)[1]); return { rows, t1: 'Deliverables Record', t2: r.label + (fl.length ? ' · ' + fl.join(' · ') : ''), fileTag: r.tag + (fl.length ? '_filtered' : '') }; }
   function matCanvas(M) {
-    const rows = M.rows; const W = 1100; const cols = [{ k: 'dt', t: 'Date', f: 0.13 }, { k: 'nm', t: 'Teacher', f: 0.21 }, { k: 'cl', t: 'Class', f: 0.14 }, { k: 'mt', t: 'Material', f: 0.15 }, { k: 'sh', t: 'Sheet', f: 0.17 }, { k: 'ch', t: 'Chapter', f: 0.20 }];
+    const rows = M.rows; const W = 1100; const cols = [{ k: 'dt', t: 'Date', f: 0.13 }, { k: 'nm', t: 'Teacher', f: 0.21 }, { k: 'cl', t: 'Class', f: 0.14 }, { k: 'mt', t: 'Deliverable', f: 0.15 }, { k: 'sh', t: 'Sheet', f: 0.17 }, { k: 'ch', t: 'Chapter', f: 0.20 }];
     const tot = cols.reduce((a, c) => a + c.f, 0); let xx = 0; cols.forEach((c) => { c.w = Math.round(W * c.f / tot); c.x = xx; xx += c.w; }); cols[cols.length - 1].w = W - cols[cols.length - 1].x;
     const hT = 118; const hH = 84; const hR = 78; const nRows = Math.max(rows.length, 1); const H = hT + hH + hR * nRows + 2;
     const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc; const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
@@ -10509,7 +10545,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const tx = (str, cx, cy, size, bold, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = fnt(f, bold); x.textAlign = 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(str).width > maxW && f > 10) { f -= 1; x.font = fnt(f, bold); } x.fillText(str, cx, cy); };
     box(0, 0, W, hT, '#fff'); x.fillStyle = '#E8F6FA'; x.fillRect(1, 62, W - 2, hT - 66); tx(M.t1, W / 2, 36, 30, true, W - 40, '#171717'); tx(M.t2, W / 2, 88, 26, true, W - 40, '#0E6A80'); x.fillStyle = '#0891B2'; x.fillRect(1, hT - 4, W - 2, 4);
     let y = hT; cols.forEach((c) => { box(c.x, y, c.w, hH, '#DDF1F6'); tx(c.t, c.x + c.w / 2, y + hH / 2, 24, true, c.w - 12, '#000'); }); y += hH;
-    if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No material recorded', W / 2, y + hR / 2, 26, true); return cv; }
+    if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No deliverable recorded', W / 2, y + hR / 2, 26, true); return cv; }
     rows.forEach((r) => { cols.forEach((c) => { box(c.x, y, c.w, hR, '#fff'); const cx = c.x + c.w / 2; const cy = y + hR / 2; const mw = c.w - 14; const t = matType(r.type);
       if (c.k === 'dt') tx(entryDateShort(r.date), cx, cy, 22, true, mw); else if (c.k === 'nm') tx(matName(r), cx, cy, 24, true, mw); else if (c.k === 'cl') tx(r.batch || '', cx, cy, 23, true, mw);
       else if (c.k === 'mt') tx(t[1], cx, cy, 23, true, mw, 'rgb(' + t[3] + ')'); else if (c.k === 'sh') tx(r.sheet || '–', cx, cy, 23, false, mw); else tx(r.chapter || '–', cx, cy, 23, true, mw); }); y += hR; });
@@ -10518,52 +10554,50 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   async function matOut(kind) {
     const msgEl = document.getElementById('matMsg'); msgEl.textContent = 'Preparing…';
     try {
-      const M = matModel(); const base = `CATJEE-Materials-${M.fileTag}`;
+      const M = matModel(); const base = `CATJEE-Deliverables-${M.fileTag}`;
       if (kind === 'csv') {
-        const L = [['Date', 'Day', 'Teacher', 'Class', 'Material', 'Sheet', 'Chapter', 'Note', 'Entered from']]; M.rows.forEach((r) => L.push([r.date, WD[dateObj(r.date).getDay()], matName(r), r.batch, matType(r.type)[1], r.sheet || '', r.chapter || '', r.note || '', r.fromClass ? 'Teacher tick' : 'Coordinator']));
+        const L = [['Date', 'Day', 'Teacher', 'Class', 'Deliverable', 'Sheet', 'Chapter', 'Note', 'Entered from']]; M.rows.forEach((r) => L.push([r.date, WD[dateObj(r.date).getDay()], matName(r), r.batch, matType(r.type)[1], r.sheet || '', r.chapter || '', r.note || '', r.fromClass ? 'Teacher tick' : 'Coordinator']));
         saveFile(base + '.csv', '\ufeff' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = 'Saved.'; showToast('Excel file saved'); return;
       }
       if (kind === 'wa') {
         const cv = matCanvas(M);
         await new Promise((res) => cv.toBlob(async (blob) => { const name = base + '.png'; const file = new File([blob], name, { type: 'image/png' });
-          try { if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Materials Record' }); else { saveFile(name, blob); showToast('Picture saved. Share it from your gallery.'); } }
+          try { if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Deliverables Record' }); else { saveFile(name, blob); showToast('Picture saved. Share it from your gallery.'); } }
           catch (e) { if (!(e && e.name === 'AbortError')) { try { saveFile(name, blob); showToast('Could not share. The picture is saved on your phone.'); } catch (e2) { /* ignore */ } } } res(); }, 'image/png'));
         msgEl.textContent = ''; return;
       }
       const w = createPdfWriter({ marginX: 48 }); const GREY = [0.867, 0.945, 0.965];
       w.heading(M.t1, 15); w.bodyLine(M.t2, { size: 11, bold: true }); w.addSpace(6);
-      const cs = [['S.N', 24], ['Date', 56], ['Teacher', 96], ['Class', 62], ['Material', 70], ['Sheet', 78], ['Chapter', 108]]; let ax = 0; const cells = cs.map((c) => { const o = { x: ax, w: c[1], t: c[0] }; ax += c[1]; return o; }); const full = ax; const hh = 20; const rh = 24;
+      const cs = [['S.N', 24], ['Date', 56], ['Teacher', 96], ['Class', 62], ['Deliverable', 70], ['Sheet', 78], ['Chapter', 108]]; let ax = 0; const cells = cs.map((c) => { const o = { x: ax, w: c[1], t: c[0] }; ax += c[1]; return o; }); const full = ax; const hh = 20; const rh = 24;
       const header = () => w.trow(cells.map((c) => ({ x: c.x, w: c.w, t: c.t, bold: true, size: 9, fill: GREY })), hh); header();
-      if (!M.rows.length) w.trow([{ x: 0, w: full, t: 'No material recorded', size: 10 }], rh);
+      if (!M.rows.length) w.trow([{ x: 0, w: full, t: 'No deliverable recorded', size: 10 }], rh);
       M.rows.forEach((r, i) => { if (!w.room(rh)) { w.page(); header(); } const v = [String(i + 1), entryDateShort(r.date), matName(r), r.batch || '', matType(r.type)[1], r.sheet || '-', r.chapter || '-']; w.trow(cells.map((c, k) => ({ x: c.x, w: c.w, t: v[k], size: 9, bold: k === 2 })), rh); });
       w.addSpace(8); const tt = {}; M.rows.forEach((r) => { tt[matType(r.type)[1]] = (tt[matType(r.type)[1]] || 0) + 1; }); w.bodyLine(`${M.rows.length} entr${M.rows.length === 1 ? 'y' : 'ies'}: ` + (Object.keys(tt).map((k) => `${k} ${tt[k]}`).join(', ') || 'none'), { size: 9 });
       saveFile(base + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('PDF saved');
     } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
   }
-  { const sec = document.getElementById('adminMatSec'); if (sec) {
-    sec.addEventListener('click', (ev) => {
+  { const add = document.getElementById('adminMatSec'); const rec = document.getElementById('repDeliv');
+    matBindForm(document.getElementById('matForm'), 'addForm'); matBindForm(document.getElementById('delivForm'), 'editForm');
+    if (add) add.addEventListener('click', (ev) => {
       const t = ev.target; const q = (sel) => t.closest ? t.closest(sel) : null; const m = state.mat; let e;
-      if ((e = q('[data-mr]'))) { state.adminReportRange = e.getAttribute('data-mr'); renderRepControls(); return; }
-      if ((e = q('[data-mtc]'))) { m.type = e.getAttribute('data-mtc'); matRender(); return; }
-      if (q('#matAddBtn')) { matFormOpen(null); return; }
-      if ((e = q('[data-mid]'))) { matFormOpen(e.getAttribute('data-mid')); return; }
+      if ((e = q('[data-sugr]'))) { m.sugRange = e.getAttribute('data-sugr'); m.sug = null; matSugRender(); return; }
       if (q('#matTicksBtn')) { matCheckTicks(); return; }
       if (q('[data-sugclose]')) { m.sug = null; matSugRender(); return; }
       if ((e = q('[data-sugadd]'))) { const x = (m.sug || [])[+e.getAttribute('data-sugadd')]; if (x) matSugAdd([x]); return; }
       if (q('[data-sugall]')) { matSugAdd((m.sug || []).slice()); return; }
-      if (q('#matWaBtn')) { matOut('wa'); return; } if (q('#matPdfBtn')) { matOut('pdf'); return; } if (q('#matCsvBtn')) { matOut('csv'); return; }
-      const f = m.form; if (!f) return;
-      if (q('#mfDateBtn')) { openCalendar(f.date || todayStr(), (d) => { const msg = document.getElementById('mfMsg'); if (d > todayStr()) { if (msg) msg.textContent = 'Choose today or an earlier date.'; return; } f.date = d; if (msg) msg.textContent = ''; const bt = document.getElementById('mfDateBtn'); if (bt && bt.firstElementChild) bt.firstElementChild.textContent = matDmy(d); }); return; }
-      if ((e = q('[data-mfb]'))) { const b = e.getAttribute('data-mfb'); if (f.id) f.batches = [b]; else { const i = f.batches.indexOf(b); if (i === -1) f.batches.push(b); else f.batches.splice(i, 1); } matFormRender(); return; }
-      if ((e = q('[data-mft]'))) { const k = e.getAttribute('data-mft'); if (f.id) f.types = { [k]: (f.types[k] || '') }; else if (k in f.types) delete f.types[k]; else f.types[k] = ''; matFormRender(); return; }
-      if ((e = q('[data-mfc]'))) { f.chapter = e.getAttribute('data-mfc'); matFormRender(); return; }
-      if (q('#mfSave')) { matSave(false); return; } if (q('#mfSaveMore')) { matSave(true); return; } if (q('#mfDelete')) { matDelete(); return; }
-      if (q('#mfCancel')) { m.form = null; matRender(); return; }
     });
-    sec.addEventListener('input', (ev) => { const m = state.mat; const f = m.form; const t = ev.target; if (!t || !f) return; if (t.id === 'mfChapter') f.chapter = t.value; else if (t.id === 'mfNote') f.note = t.value; else if (t.hasAttribute && t.hasAttribute('data-mfs')) f.types[t.getAttribute('data-mfs')] = t.value; });
-    sec.addEventListener('change', (ev) => { const m = state.mat; const t = ev.target; if (!t) return; if (t.id === 'matBatchSel') { m.batch = t.value; matRender(); } else if (t.id === 'matTeacherSel') { m.teacher = t.value; matRender(); } else if (m.form && t.id === 'mfDate') m.form.date = t.value; else if (m.form && t.id === 'mfTeacher') m.form.teacher = t.value; });
-  } }
-  // ---------- Admin tabs: Dashboard / Exams / Reports / Settings ----------
+    if (rec) {
+      rec.addEventListener('click', (ev) => {
+        const t = ev.target; const q = (sel) => t.closest ? t.closest(sel) : null; const m = state.mat; let e;
+        if ((e = q('[data-mtc]'))) { m.type = e.getAttribute('data-mtc'); delivRender(); return; }
+        if ((e = q('[data-mid]'))) { matFormOpen(e.getAttribute('data-mid')); return; }
+        if (q('#matWaBtn')) { matOut('wa'); return; } if (q('#matPdfBtn')) { matOut('pdf'); return; } if (q('#matCsvBtn')) { matOut('csv'); return; }
+      });
+      rec.addEventListener('change', (ev) => { const m = state.mat; const t = ev.target; if (!t) return; if (t.id === 'matBatchSel') { m.batch = t.value; delivRender(); } else if (t.id === 'matTeacherSel') { m.teacher = t.value; delivRender(); } });
+    }
+  }
+  
+// ---------- Admin tabs: Dashboard / Exams / Reports / Settings ----------
   state.adminTab = (() => { try { return localStorage.getItem('ctd_admin_tab') || 'dash'; } catch (e) { return 'dash'; } })();
   state.adminSetOpen = null;
   function applyAdminTab() { const t = state.adminTab; const av = document.getElementById('view-admin'); if (av) av.setAttribute('data-atab-cur', t);
@@ -10576,7 +10610,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       el.classList.toggle('atab-off', el.getAttribute('data-atab').split(' ').indexOf(t) === -1);
     });
     if (t === 'reports' && typeof renderRepControls === 'function') renderRepControls();
-  if (t === 'mat' && typeof matRender === 'function') matRender();
+  if (t === 'mat' && typeof matAddRender === 'function') matAddRender();
     if (t === 'tt' && state.ttLeaves) { state.ttLeaves.ws = ''; state.ttLeaves.loading = ''; } // read leaves again each time the timetable opens
     const dated = t !== 'settings' && t !== 'tt' && t !== 'mat';
     document.getElementById('adminDateSub').classList.toggle('atab-off', !dated);
@@ -12245,7 +12279,7 @@ Rules:
   if (['ov', 'tc', 'cl'].indexOf(state.homeSub) === -1) state.homeSub = 'ov';
   state.homeSub = 'ov'; state.homeTile = 'grid'; // the Home always opens on the tiles
   const HT_TITLES = { today: 'Day summary', oc: 'On campus now', alerts: 'Needs attention', notices: 'Notices', tc: 'Teachers', cl: 'Classes' };
-  const REP_NAMES = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty', entry: 'Class entry record' };
+  const REP_NAMES = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty', entry: 'Class entry record', deliv: 'Deliverables record' };
   // the path line and the heading of the page that is open (nothing on the main tiles)
   function pgHeadSync() {
     const v = document.getElementById('view-admin'); const t = document.getElementById('adminPgTitle'); const c = document.getElementById('adminCrumbs'); if (!v || !t || !c) return;
@@ -12253,7 +12287,7 @@ Rules:
     if (cur === 'dash') { const k = state.homeSub === 'ov' ? state.homeTile : state.homeSub; if (k && k !== 'grid') { title = HT_TITLES[k] || ''; path = [['Admin', 'root'], [title]]; } }
     else if (cur === 'reports') { if (rv === 'open') { title = REP_NAMES[state.adminRepKind || 'full'] || 'Report'; path = [['Admin', 'root'], ['Reports', 'reps'], [title]]; } else { title = 'Reports'; path = [['Admin', 'root'], ['Reports']]; } }
     else if (cur === 'settings') { if (state.adminSetOpen) { title = setPanelLabel(state.adminSetOpen) || 'Setting'; path = [['Admin', 'root'], ['Settings', 'sets'], [title]]; } else { title = 'Settings'; path = [['Admin', 'root'], ['Settings']]; } }
-    else { title = ({ tt: 'Timetable', exams: 'Exams', mat: 'Materials' })[cur] || ''; if (title) path = [['Admin', 'root'], [title]]; }
+    else { title = ({ tt: 'Timetable', exams: 'Exams', mat: 'Add deliverables' })[cur] || ''; if (title) path = [['Admin', 'root'], [title]]; }
     if (t.textContent !== title) t.textContent = title; v.setAttribute('data-pghead', title ? '1' : '0');
     const html = path.map((p) => p[1] ? '<button type="button" data-crumb="' + p[1] + '">' + p[0] + '</button><i>›</i>' : '<span class="cur">' + p[0] + '</span>').join('');
     if (c.innerHTML !== html) c.innerHTML = html;
@@ -17742,8 +17776,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const tsel = document.getElementById('entryTeacher'); if (tsel) tsel.addEventListener('change', () => { state.entry.teacher = tsel.value; state.entry.sig = ''; entryDrawFill(); });
     const wsel = document.getElementById('adminWingSel'); if (wsel) wsel.addEventListener('change', () => setTimeout(() => { if ((state.adminRepKind || '') === 'entry') entryRender(true); }, 0));
   })();
-  const REP_NOTE = { entry: 'Classes that began more than 5 minutes late. Up to 5 minutes is not counted. Set the entry time of the teacher, then get the record as a picture, PDF or Excel.',  full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
-  function renderRepControls() { if (state.adminTab === 'mat') { matRender(); return; } renderRepControlsReports(); }
+  const REP_NOTE = { deliv: 'What was given to each batch: the type, the teacher and the chapter. Get it as a picture, PDF or Excel. Entries are added from Admin, Add deliverables, and edited here with the pencil.', entry: 'Classes that began more than 5 minutes late. Up to 5 minutes is not counted. Set the entry time of the teacher, then get the record as a picture, PDF or Excel.',  full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
+  function renderRepControls() { renderRepControlsReports(); }
   function renderRepControlsReports() {
   if (document.getElementById('view-admin').getAttribute('data-repv') === 'tiles') { document.querySelectorAll('#adminRepKind .rt-tile.on').forEach((x) => x.classList.remove('on')); return; } // only the tiles are showing: nothing to load
     try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
@@ -17754,19 +17788,20 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     document.querySelectorAll('#adminRepKind [data-rep-kind]').forEach((x) => x.classList.toggle('on', x.getAttribute('data-rep-kind') === kind));
     const { label, full, dates: rdates } = adminReportRangeDates();
     const lbl = document.getElementById('repLabel'); if (lbl) lbl.textContent = label; syncRepBack();
-    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub' || kind === 'duty' || kind === 'entry';
+    const tw = document.getElementById('repTeacherWrap'); if (tw) tw.hidden = kind === 'count' || kind === 'sub' || kind === 'duty' || kind === 'entry' || kind === 'deliv';
     const note = document.getElementById('repKindNote'); if (note) note.textContent = REP_NOTE[kind];
-    { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty', entry: 'Class entry record' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
+    { const kn = { full: 'Full report', att: 'Attendance report', count: 'Class count report', sub: 'Substitute report', duty: 'Invigilation duty', entry: 'Class entry record', deliv: 'Deliverables record' }[kind] || ''; const rn = { day: 'Day', week: 'Week', month: 'Month' }[range] || ''; const ws = document.getElementById('adminWingSel'); const wt = ws && ws.selectedOptions && ws.selectedOptions[0] ? ws.selectedOptions[0].text : 'All wings';
       const hh = `<div class="tsec-title">${escapeHtml(kn)} · ${escapeHtml(rn)}</div><div class="hv-note" style="text-align:left; margin:2px 0 8px;">${escapeHtml((range === 'week' && (kind === 'count' || kind === 'sub') && rdates && rdates[0]) ? repRangeFull(rdates[0], shiftDateStr(rdates[0], 5)) : full)} · ${escapeHtml(wt)}</div>`;
-      ['repResHead', 'repResHeadC', 'repResHeadS'].forEach((id) => { const e2 = document.getElementById(id); if (e2) e2.innerHTML = hh; }); }
-    document.getElementById('repStd').hidden = showCount || subDay || kind === 'duty' || kind === 'entry';
+      ['repResHead', 'repResHeadC', 'repResHeadS', 'repResHeadD'].forEach((id) => { const e2 = document.getElementById(id); if (e2 && id === 'repResHeadD') { if (e2.__h !== hh) { e2.innerHTML = hh; e2.__h = hh; } } else if (e2) e2.innerHTML = hh; }); }
+    document.getElementById('repStd').hidden = showCount || subDay || kind === 'duty' || kind === 'entry' || kind === 'deliv';
     const shareT = document.getElementById('repAttShare'); if (shareT) shareT.hidden = kind !== 'att';
     const tiles = document.getElementById('repStdTiles'); if (tiles) tiles.style.gridTemplateColumns = kind === 'att' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
     const ap = document.getElementById('repAttPrev');
     if (ap) { if (kind === 'att') { const sp = adminRepSpec(); showAttPreview('repAttPrev', document.getElementById('adminRepTeacher').value || null, null, null); void sp; } else { ap.hidden = true; ap.innerHTML = ''; } }
     { const dp = document.getElementById('repDuty'); if (dp) dp.hidden = kind !== 'duty'; if (kind === 'duty') dutyRender(); }
   { const ep = document.getElementById('repEntry'); if (ep) ep.hidden = kind !== 'entry'; if (kind === 'entry') { entryRender(!state.entry.shown); state.entry.shown = true; } else state.entry.shown = false; }
- document.getElementById('repCount').hidden = !showCount; const sdv = document.getElementById('repSubDay'); if (sdv) sdv.hidden = !subDay;
+ { const dv = document.getElementById('repDeliv'); if (dv) dv.hidden = kind !== 'deliv'; if (kind === 'deliv') delivRender(); }
+  document.getElementById('repCount').hidden = !showCount; const sdv = document.getElementById('repSubDay'); if (sdv) sdv.hidden = !subDay;
     if (showCount && typeof trepEnsure === 'function') trepEnsure();
     if (subDay) subDayEnsure();
   }
@@ -19381,7 +19416,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     state.adminDate = dateStr; state.adminExpandedTeacher = null;
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(dateStr);
     subscribeAdminDate(dateStr);
-    if (state.adminTab === 'reports' || state.adminTab === 'mat') { document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); }
+    if (state.adminTab === 'reports') { document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); }
   });
   document.getElementById('adminStepCal').addEventListener('click', (e) => { e.stopPropagation(); pickAdminDate(); });
   document.getElementById('repCalBtn').addEventListener('click', pickAdminDate);
@@ -19424,7 +19459,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       state.adminReportWing = btn.getAttribute('data-admin-wing');
       state.adminExpandedTeacher = null;
       renderAdmin();
-      try { fillAdminRepTeachers(); if (state.adminTab === 'reports' || state.adminTab === 'mat') renderRepControls(); } catch (e) { /* ignore */ }
+      try { fillAdminRepTeachers(); if (state.adminTab === 'reports') renderRepControls(); } catch (e) { /* ignore */ }
     });
   });
 
@@ -20414,8 +20449,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     m: [['admin:exams', '#adminExamList'], ['', ''], ['', ''], ['', ''], ['', ''], ['', '']] },
 
   { id: 'reports', t: ['Get a report (day, week, month)', 'Report nikalna (din, hafta, mahina)'], who: 'lead', k: 'report full attendance class count substitute pdf excel whatsapp invigilation duty report week month sheet teacher wise tile रिपोर्ट ड्यूटी रिपोर्ट',
-    s: [['Open **Admin**, then **Reports**. You see one tile for each report.', 'Tap the report you want: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty** or **Class entry record**.', 'Choose **Day**, **Week** or **Month** and the date.', 'Choose the wing and the teacher if you need. For **Invigilation duty** also choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Get it as **PDF**, **Excel** (CSV file) or on **WhatsApp**. Tap the back arrow to see all the report tiles again.'],
-        ['**Admin** kholo, phir **Reports**. Har report ki ek tile dikhti hai.', 'Jo report chahiye us tile ko dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty** ya **Class entry record**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Chaho to wing aur teacher chuno. **Invigilation duty** me **Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) bhi chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo. Saari report ki tile phir se dekhne ke liye peeche ka teer dabao.']],
+    s: [['Open **Admin**, then **Reports**. You see one tile for each report.', 'Tap the report you want: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty**, **Class entry record** or **Deliverables record**.', 'Choose **Day**, **Week** or **Month** and the date.', 'Choose the wing and the teacher if you need. For **Invigilation duty** also choose **Sessions** (Morning + Evening, or one) and **Show** (Duty sheet or Teacher-wise).', 'Get it as **PDF**, **Excel** (CSV file) or on **WhatsApp**. Tap the back arrow to see all the report tiles again.'],
+        ['**Admin** kholo, phir **Reports**. Har report ki ek tile dikhti hai.', 'Jo report chahiye us tile ko dabao: **Full report**, **Attendance report**, **Class count report**, **Substitute report**, **Invigilation duty**, **Class entry record** ya **Deliverables record**.', '**Day**, **Week** ya **Month** aur tareekh chuno.', 'Chaho to wing aur teacher chuno. **Invigilation duty** me **Sessions** (Morning + Evening, ya ek) aur **Show** (Duty sheet ya Teacher-wise) bhi chuno.', '**PDF**, **Excel** (CSV file) ya **WhatsApp** me lo. Saari report ki tile phir se dekhne ke liye peeche ka teer dabao.']],
     n: ['In the Invigilation duty report, days without a duty do not appear, and teachers with zero duties show in the Teacher-wise view.', 'Invigilation duty report me jis din duty nahi wo din nahi aata, aur zero duty wale teacher Teacher-wise me dikhte hain.'],
     m: [['admin', '[data-ht-go="reports"]'], ['admin:reports', '#adminRepKind'], ['admin:reports:full', '#adminReportRangeChips'], ['admin:reports:full', '#adminWingSel'], ['admin:reports:full', '#repStdTiles']] },
   { id: 'entryrec', t: ['Record class entry delays', 'Class me entry ki deri ka record'], who: 'lead', k: 'class entry record delay late entry teacher entry time morning evening देरी',
