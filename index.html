@@ -2637,8 +2637,7 @@
   #adminRepKind .rt-tile[data-rep-kind="count"] { color: #E63946; border-color: rgba(230, 57, 70, .32); background: rgba(230, 57, 70, .07); }
   #adminRepKind .rt-tile[data-rep-kind="sub"] { color: #D97706; border-color: rgba(217, 119, 6, .32); background: rgba(217, 119, 6, .07); }
   #adminRepKind .rt-tile[data-rep-kind="duty"] { color: #4F46E5; border-color: rgba(79, 70, 229, .32); background: rgba(79, 70, 229, .07); }
-  #adminRepKind .rt-tile[data-rep-kind="deliv"] { color: #0891B2; border-color: rgba(8, 145, 178, .32); background: rgba(8, 145, 178, .07); }
-  #view-admin[data-atab-cur="mat"] .ad-bar { display: none !important; }
+  #adminRepKind .rt-tile[data-rep-kind="deliv"] { color: #65A30D; border-color: rgba(101, 163, 13, .32); background: rgba(101, 163, 13, .07); }
   #adminRepKind .rt-tile[data-rep-kind="entry"] { color: #9333EA; border-color: rgba(147, 51, 234, .32); background: rgba(147, 51, 234, .07); }
   #adminRepKind .rt-tile[data-rep-kind] .qa-l { color: var(--ink); }
   #adminRepKind .rt-tile[data-rep-kind] .qa-s { color: var(--muted-2); }
@@ -2731,7 +2730,7 @@
   .dicon-btn:active,
   .drow:active { background: #ECEFF3; }
   
-  #homeTiles [data-ht-go="mat"] { color: #0891B2; border-color: rgba(8, 145, 178, .32); background: rgba(8, 145, 178, .07); }
+  #homeTiles [data-ht-go="mat"] { color: #65A30D; border-color: rgba(101, 163, 13, .32); background: rgba(101, 163, 13, .07); }
     .mat-date-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; text-align: left; cursor: pointer; font-family: inherit; color: var(--ink); }
   .mat-addbox { display: block; width: 100%; box-sizing: border-box; border: 1.5px solid var(--gold); color: var(--gold); background: var(--card); border-radius: 14px; padding: 12px; font-weight: 700; font-size: 14px; font-family: inherit; margin: 10px 0; cursor: pointer; }
   .mat-sug-h { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; background: #FFF9EC; padding-bottom: 6px; }
@@ -2748,6 +2747,18 @@
   .mat-sug { border: 1px dashed #D9B66A; background: #FFF9EC; border-radius: 14px; padding: 10px 12px; margin: 8px 0; font-size: 13px; }
   .mat-sug .r { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
   .mat-sug .r span { flex: 1; min-width: 0; font-size: 12px; }
+  .mat-sug .r2 { padding: 8px 0; border-top: 1px solid #F0E4C4; font-size: 12px; }
+  .mat-sug .r2 small { display: block; color: var(--muted-2); font-size: 12px; line-height: 1.45; margin: 2px 0 6px; }
+  .mat-sug .ac { display: flex; gap: 8px; }
+  .mat-sug .ac button, .mat-sug .sv button { border: 1.5px solid #16A34A; color: #16A34A; background: #fff; font-weight: 700; border-radius: 999px; padding: 4px 16px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .mat-sug .ac button[data-sugedit] { border-color: #2563EB; color: #2563EB; }
+  .mat-sug .r2.gone { opacity: .5; }
+  .mat-sug .ed { background: #fff; border: 1.5px solid #2563EB; border-radius: 12px; padding: 10px; margin-top: 6px; }
+  .mat-sug .ed .f { font-size: 11.5px; font-weight: 700; color: var(--muted-2); margin: 8px 0 3px; }
+  .mat-sug .ed .text-input { margin: 0; }
+  .mat-sug .sv { display: flex; gap: 8px; margin-top: 10px; }
+  .mat-sug .sv button[data-sd="save"] { background: #E63946; border-color: #E63946; color: #fff; }
+  .mat-sug .sv button[data-sd="cancel"] { border-color: #E63946; color: #E63946; }
   .mat-sug .r button { border: 1.5px solid #16A34A; color: #16A34A; background: #fff; font-weight: 700; border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
   #matForm .field { margin-bottom: 12px; }
   #matForm .field > label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
@@ -3783,8 +3794,8 @@
         <div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="adminStepCal" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="adminDateLabelText">Today</span></button><button type="button" class="hv-back" id="adminDateClearBtn" data-atab="dash exams" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to today</button></div>
         <button type="button" class="hv-arrow" id="adminDateNext" aria-label="Next day"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <div class="hv-nav rep-datenav" data-atab="reports"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button><button type="button" class="hv-back" id="repBackBtn" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span id="repBackText">Back to today</span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
-      <div class="chips" id="adminWingChips" data-atab="dash tt reports">
+      <div class="hv-nav rep-datenav" data-atab="reports mat"><button type="button" class="hv-arrow" id="repPrev" aria-label="Previous"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button><div class="hv-label ad-datelbl"><button type="button" class="date-pill" id="repCalBtn" aria-label="Choose a date"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="repLabel"></span></button><button type="button" class="hv-back" id="repBackBtn" hidden><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span id="repBackText">Back to today</span></button></div><button type="button" class="hv-arrow" id="repNext" aria-label="Next"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+      <div class="chips" id="adminWingChips" data-atab="dash tt reports mat">
         <button class="chip active" data-admin-wing="all">All</button>
         <button class="chip" data-admin-wing="Pre-Foundation">Pre-Foundation</button>
         <button class="chip" data-admin-wing="Foundation">Foundation</button>
@@ -3912,7 +3923,8 @@
       </section>
 
       <section class="tsec" id="adminMatSec" data-atab="mat">
-  <div class="hv-note" style="text-align:left;">Write what was given to each batch. You will find and edit it in <b>Reports → Deliverables record</b>.</div>
+  <div class="rep-range-row"><div class="chips seg" id="matAddRange"><button type="button" class="chip active" data-mr="day">Day</button><button type="button" class="chip" data-mr="week">Week</button><button type="button" class="chip" data-mr="month">Month</button></div></div>
+  <div class="hv-note" style="text-align:left;">Choose the day, week or month and the wing. Then check what teachers ticked in Add Class, or write an entry yourself. You will find and edit it in <b>Reports → Deliverables record</b>.</div>
   <div id="matSug"></div>
   <div class="panel" id="matForm"></div>
 </section>
@@ -4549,7 +4561,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 14.97 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 14.98 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10385,13 +10397,13 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   const matSet = (el, html) => { if (el && el.__h !== html) { el.innerHTML = html; el.__h = html; } }; // write only when the text really changed (no blinking)
   const matDmy = (d) => (d && d.length >= 10) ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(2, 4) : '';
   const matBlank = () => ({ id: null, date: todayStr(), teacher: '', batches: [], types: {}, chapter: '', note: '' });
-  state.mat = { batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', addForm: null, editForm: null, sug: null, sugBusy: false, sugRange: 'week', done: '' };
+  state.mat = { batch: 'all', teacher: 'all', type: 'all', rows: [], key: '', loading: false, err: '', addForm: null, editForm: null, sug: null, sugBusy: false, sugEdit: null, sugDraft: null, sugKey: '', addWing: null, done: '' };
   function matCanEdit() { return !principalView(); }
   function matWing() { return state.adminReportWing || 'all'; }
   function matBatches() { const lw = leadWings(); const aw = matWing(); return allBatchesFlat().filter((b) => (!wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1) && (aw === 'all' || wingOfBatch(b) === aw)); }
   function matTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
-  function matAddBatches() { const lw = leadWings(); return allBatchesFlat().filter((b) => !wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1); }
-  function matAddTeachers() { const lw = leadWings(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w)))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
+  function matAddBatches() { const lw = leadWings(); const aw = matWing(); return allBatchesFlat().filter((b) => (!wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1) && (aw === 'all' || wingOfBatch(b) === aw)); }
+  function matAddTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
   // the record uses the period and the wing of the Reports page
   function matRange() { const r = adminReportRangeDates(); const d = r.dates; return { from: d[0], to: d[d.length - 1], nav: r.label, label: r.full, tag: r.fileTag }; }
   async function matLoad() {
@@ -10496,42 +10508,74 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   // ----- the Add page -----
   function matAddRender() {
     const host = document.getElementById('matForm'); const m = state.mat; if (!host) return;
+    const range = state.adminReportRange || 'day'; document.querySelectorAll('#matAddRange [data-mr]').forEach((b) => b.classList.toggle('active', b.getAttribute('data-mr') === range));
+    const r = matRange(); const lbl = document.getElementById('repLabel'); if (lbl && lbl.textContent !== r.nav) lbl.textContent = r.nav; try { syncRepBack(); } catch (e) { /* ignore */ }
     if (principalView()) { matSet(host, '<div class="hv-note" style="text-align:left;">Only the Admin and the Coordinators add deliverables. You can see them in Reports, Deliverables record.</div>'); host.__h = null; return; }
     if (!m.addForm) m.addForm = matBlank();
-    if (!host.querySelector('[data-mf="save"]')) matFormDraw(host, m.addForm);
+    const wkey = matWing(); const pkey = r.from + '|' + r.to + '|' + wkey;
+    if (m.sugKey !== pkey) { m.sugKey = pkey; m.sug = null; m.sugEdit = null; m.sugDraft = null; }
+    let redraw = !host.querySelector('[data-mf="save"]');
+    if (m.addWing !== wkey) { m.addWing = wkey; const ok = matAddBatches(); m.addForm.batches = m.addForm.batches.filter((b) => ok.indexOf(b) !== -1); if (m.addForm.teacher && matAddTeachers().indexOf(m.addForm.teacher) === -1) m.addForm.teacher = ''; redraw = true; }
+    if (range === 'day' && !m.addForm.teacher && !m.addForm.batches.length && !Object.keys(m.addForm.types).length && !m.addForm.chapter && m.addForm.date !== state.adminDate && state.adminDate <= todayStr()) { m.addForm.date = state.adminDate; redraw = true; }
+    if (redraw) matFormDraw(host, m.addForm);
     matSugRender();
   }
-  // ----- the helper: what teachers ticked in Add Class and is not in the record yet (read only when asked; it can be closed) -----
-  function matSugDates() { const t = todayStr(); if (state.mat.sugRange === 'day') return { from: t, to: t, label: 'Today' }; if (state.mat.sugRange === 'month') { const o = dateObj(t); return { from: matYmd(new Date(o.getFullYear(), o.getMonth(), 1)), to: t, label: 'This month' }; } const o = dateObj(t); o.setDate(o.getDate() - 6); return { from: matYmd(o), to: t, label: 'Last 7 days' }; }
+  // ----- the helper: what teachers ticked in Add Class and is not in the record yet (read only when asked); each row can be added as it is, or edited and then saved -----
+  function matSugDates() { const r = matRange(); return { from: r.from, to: r.to, label: r.nav }; }
   function matSugRender() {
     const box = document.getElementById('matSug'); if (!box) return; const m = state.mat; let html = '';
     if (!matCanEdit()) { matSet(box, ''); return; }
     const x = '<button type="button" class="mat-x" data-sugclose="1" aria-label="Close">✕</button>';
-    const chips = '<div class="chips" style="margin:8px 0 6px;">' + [['day', 'Today'], ['week', 'Last 7 days'], ['month', 'This month']].map((c) => `<button type="button" class="chip${m.sugRange === c[0] ? ' active' : ''}" data-sugr="${c[0]}">${c[1]}</button>`).join('') + '</div>';
     if (m.sugBusy) html = '<div class="hv-note" style="text-align:left;">Checking what teachers ticked…</div>';
-    else if (m.sug === null) html = chips + '<button type="button" class="btn-secondary" id="matTicksBtn" style="margin:0 0 8px;">Check what teachers ticked in Add Class</button>';
-    else if (!m.sug.length) html = `<div class="mat-sug"><div class="mat-sug-h"><span>Nothing new. Everything teachers ticked (${escapeHtml(matSugDates().label)}) is already in your record.</span>${x}</div></div>`;
-    else html = `<div class="mat-sug"><div class="mat-sug-h"><b>${m.sug.length} deliverable${m.sug.length === 1 ? '' : 's'} ticked by teachers, not in your record yet</b>${x}</div>${m.sug.slice(0, 30).map((y, i) => `<div class="r"><span><b>${escapeHtml(ttName(y.teacherId))} · ${escapeHtml(entryDateShort(y.date))}</b><br>${escapeHtml(matType(y.type)[1])}${y.sheet ? ' · ' + escapeHtml(y.sheet) : ''} · ${escapeHtml(y.batch)}${y.chapter ? ' · Ch: ' + escapeHtml(y.chapter) : ''}</span><button type="button" data-sugadd="${i}">Add</button></div>`).join('')}<div class="r" style="justify-content:space-between;"><button type="button" data-sugclose="1" style="border-color:#8A8A92;color:#444;">Close</button>${m.sug.length > 1 ? `<button type="button" data-sugall="1">Add all ${m.sug.length}</button>` : ''}</div></div>`;
+    else if (m.sug === null) html = '<button type="button" class="btn-secondary" id="matTicksBtn" style="margin:8px 0;">Check what teachers ticked in Add Class</button>';
+    else if (!m.sug.length) html = `<div class="mat-sug"><div class="mat-sug-h"><span>Nothing new for ${escapeHtml(matSugDates().label)}. Everything teachers ticked is already in your record.</span>${x}</div></div>`;
+    else html = `<div class="mat-sug"><div class="mat-sug-h"><b>${m.sug.length} deliverable${m.sug.length === 1 ? '' : 's'} ticked by teachers, not in your record yet</b>${x}</div>${m.sug.slice(0, 40).map((y, i) => (m.sugEdit === i && m.sugDraft) ? matSugEditHtml(m.sugDraft) : `<div class="r2"><b>${escapeHtml(ttName(y.teacherId))} · ${escapeHtml(entryDateShort(y.date))}</b><small>${escapeHtml(matType(y.type)[1])}${y.sheet ? ' · ' + escapeHtml(y.sheet) : ''} · ${escapeHtml(y.batch)}${y.chapter ? ' · Ch: ' + escapeHtml(y.chapter) : ''}</small><div class="ac"><button type="button" data-sugedit="${i}">Edit</button><button type="button" data-sugadd="${i}">Add</button></div></div>`).join('')}<div class="r" style="justify-content:space-between;"><button type="button" data-sugclose="1" style="border-color:#8A8A92;color:#444;">Close</button>${m.sug.length > 1 ? `<button type="button" data-sugall="1">Add all ${m.sug.length}</button>` : ''}</div></div>`;
     matSet(box, html);
   }
+  function matSugEditHtml(d) {
+    const ts = matAddTeachers(); if (d.teacherId && ts.indexOf(d.teacherId) === -1) ts.push(d.teacherId); const bs = matAddBatches(); if (d.batch && bs.indexOf(d.batch) === -1) bs.push(d.batch);
+    return `<div class="ed"><div class="f">Date</div><button type="button" class="text-input mat-date-btn" data-sd="date"><span>${matDmy(d.date)}</span><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+      <div class="f">Teacher</div><select class="text-input" data-sd="teacher">${ts.map((u) => `<option value="${escapeHtml(u)}"${d.teacherId === u ? ' selected' : ''}>${escapeHtml(ttName(u))}</option>`).join('')}</select>
+      <div class="f">Class / Batch</div><select class="text-input" data-sd="batch">${bs.map((b) => `<option value="${escapeHtml(b)}"${d.batch === b ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('')}</select>
+      <div class="f">Deliverable</div><select class="text-input" data-sd="type">${MAT_TYPES.map((t) => `<option value="${t[0]}"${d.type === t[0] ? ' selected' : ''}>${t[1]}</option>`).join('')}</select>
+      <div class="f">Sheet / note</div><input type="text" class="text-input" data-sd="sheet" value="${escapeHtml(d.sheet || '')}" maxlength="80">
+      <div class="f">Chapter</div><input type="text" class="text-input" data-sd="chapter" value="${escapeHtml(d.chapter || '')}" maxlength="120">
+      <div class="admin-sub" data-sd="msg" style="color:#C81E32;"></div>
+      <div class="sv"><button type="button" data-sd="save">Save</button><button type="button" data-sd="cancel">Cancel</button></div></div>`;
+  }
+  const matTid = (cid, type, batch) => [cid, type, batch].join('|');
   async function matCheckTicks() {
     const m = state.mat; const r = matSugDates(); m.sugBusy = true; matSugRender(); const lw = leadWings(); const items = [];
     try {
       const [cs, ms] = await Promise.all([state.db.collection('classes').where('date', '>=', r.from).where('date', '<=', r.to).get(), state.db.collection('materials').where('date', '>=', r.from).where('date', '<=', r.to).get()]);
-      const have = new Set(ms.docs.map((d) => { const x = d.data(); return [x.date, x.teacherId, x.batch, x.type].join('|'); }));
+      const have = new Set(); ms.docs.forEach((d) => { const x = d.data(); have.add([x.date, x.teacherId, x.batch, x.type].join('|')); if (x.fromTick) have.add(x.fromTick); });
       cs.docs.forEach((d) => { const c = d.data() || {}; if (c.entryType && c.entryType !== 'class') return; const bs = (c.batches && c.batches.length) ? c.batches : (c.batch ? [c.batch] : []);
         matGiven(c).forEach((g) => { const note = String(g.note || '').trim(); const type = ({ material: 'study', classnotes: 'classnotes', olympiad: 'olympiad', dpp: 'dpp', worksheet: (c.matv === 2 ? 'worksheet' : (/dpp/i.test(note) ? 'dpp' : 'worksheet')), pyq: 'pyq', othersheet: 'other' })[g.key] || 'other';
-          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; const key = [c.date, c.teacherId, b, type].join('|'); if (have.has(key)) return; have.add(key); items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id }); }); }); });
-      items.sort((a, b) => b.date.localeCompare(a.date)); m.sug = items;
+          bs.forEach((b) => { const w = wingOfBatch(b); if (!state.canAdmin && w && lw.indexOf(w) === -1) return; if (matWing() !== 'all' && w !== matWing()) return; const key = [c.date, c.teacherId, b, type].join('|'); const tid = matTid(d.id, type, b); if (have.has(key) || have.has(tid)) return; have.add(key); items.push({ date: c.date, teacherId: c.teacherId, batch: b, type, sheet: note, chapter: c.chapter || '', cid: d.id, tid }); }); }); });
+      items.sort((a, b) => b.date.localeCompare(a.date)); m.sug = items; m.sugEdit = null; m.sugDraft = null;
     } catch (e) { m.sug = null; showToast('Could not check the classes. Check the internet.'); }
     m.sugBusy = false; matSugRender();
   }
+  const matSugDoc = (x) => ({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', fromClass: x.cid, fromTick: x.tid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' });
   async function matSugAdd(list) {
     const m = state.mat; if (!list.length) return;
     try {
-      await Promise.all(list.map((x) => waitForWrite(state.db.collection('materials').add({ date: x.date, teacherId: x.teacherId, teacherName: ttName(x.teacherId), batch: x.batch, wing: wingOfBatch(x.batch) || '', type: x.type, typeLabel: matType(x.type)[1], sheet: x.sheet || '', chapter: x.chapter || '', note: '', fromClass: x.cid, createdAt: Date.now(), createdBy: state.teacherId, createdByName: (state.user && state.user.name) || '' }))));
-      m.sug = (m.sug || []).filter((y) => list.indexOf(y) === -1); m.key = ''; showToast(`Added ${list.length}`); matSugRender();
+      await Promise.all(list.map((x) => waitForWrite(state.db.collection('materials').add(matSugDoc(x)))));
+      m.sug = (m.sug || []).filter((y) => list.indexOf(y) === -1); m.sugEdit = null; m.sugDraft = null; m.key = ''; showToast(`Added ${list.length}`); matSugRender();
     } catch (e) { showToast('Could not add. Check the internet.'); }
+  }
+  async function matSugAddAll() {
+    const m = state.mat; const list = (m.sug || []).slice(); if (!list.length) return;
+    const ok = await showConfirm(`${list.length} deliverable${list.length === 1 ? '' : 's'} will go into the record as the teachers wrote them, without any change.`, 'Add all?', 'Add all'); if (!ok) return;
+    matSugAdd(list);
+  }
+  async function matSugSave() {
+    const m = state.mat; const d = m.sugDraft; const i = m.sugEdit; if (!d || i === null) return; const msgEl = document.querySelector('#matSug [data-sd="msg"]'); const say = (t) => { if (msgEl) msgEl.textContent = t; };
+    if (!d.teacherId) return say('Choose a teacher.'); if (!d.batch) return say('Choose the class / batch.'); if (!(d.chapter || '').trim()) return say('Enter the chapter.'); if (!d.date || d.date > todayStr()) return say('Choose today or an earlier date.');
+    const orig = m.sug[i]; d.chapter = d.chapter.trim(); d.sheet = (d.sheet || '').trim(); d.tid = orig.tid; d.cid = orig.cid;
+    document.querySelectorAll('#matSug .ed button').forEach((b) => { b.disabled = true; });
+    try { await waitForWrite(state.db.collection('materials').add(matSugDoc(d))); m.sug = m.sug.filter((y, k) => k !== i); m.sugEdit = null; m.sugDraft = null; m.key = ''; showToast('Saved'); matSugRender(); }
+    catch (e) { document.querySelectorAll('#matSug .ed button').forEach((b) => { b.disabled = false; }); say('Could not save. Check the internet and try again.'); }
   }
   // ----- the picture, the PDF and the Excel file -----
   function matModel() { const r = matRange(); const m = state.mat; const rows = matFiltered(); const fl = []; if (m.batch !== 'all') fl.push(m.batch); if (m.teacher !== 'all') fl.push(ttName(m.teacher)); if (m.type !== 'all') fl.push(matType(m.type)[1]); return { rows, t1: 'Deliverables Record', t2: r.label + (fl.length ? ' · ' + fl.join(' · ') : ''), fileTag: r.tag + (fl.length ? '_filtered' : '') }; }
@@ -10543,8 +10587,8 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#E1E1E5'; x.lineWidth = 1.2; x.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5); };
     const fnt = (size, bold) => `${bold ? '700 ' : ''}${size}px Calibri, Arial, sans-serif`;
     const tx = (str, cx, cy, size, bold, maxW, col) => { x.fillStyle = col || '#000'; let f = size; x.font = fnt(f, bold); x.textAlign = 'center'; x.textBaseline = 'middle'; while (maxW && x.measureText(str).width > maxW && f > 10) { f -= 1; x.font = fnt(f, bold); } x.fillText(str, cx, cy); };
-    box(0, 0, W, hT, '#fff'); x.fillStyle = '#E8F6FA'; x.fillRect(1, 62, W - 2, hT - 66); tx(M.t1, W / 2, 36, 30, true, W - 40, '#171717'); tx(M.t2, W / 2, 88, 26, true, W - 40, '#0E6A80'); x.fillStyle = '#0891B2'; x.fillRect(1, hT - 4, W - 2, 4);
-    let y = hT; cols.forEach((c) => { box(c.x, y, c.w, hH, '#DDF1F6'); tx(c.t, c.x + c.w / 2, y + hH / 2, 24, true, c.w - 12, '#000'); }); y += hH;
+    box(0, 0, W, hT, '#fff'); x.fillStyle = '#EEF5DF'; x.fillRect(1, 62, W - 2, hT - 66); tx(M.t1, W / 2, 36, 30, true, W - 40, '#171717'); tx(M.t2, W / 2, 88, 26, true, W - 40, '#3F6212'); x.fillStyle = '#65A30D'; x.fillRect(1, hT - 4, W - 2, 4);
+    let y = hT; cols.forEach((c) => { box(c.x, y, c.w, hH, '#E3EFC9'); tx(c.t, c.x + c.w / 2, y + hH / 2, 24, true, c.w - 12, '#000'); }); y += hH;
     if (!rows.length) { box(0, y, W, hR, '#fff'); tx('No deliverable recorded', W / 2, y + hR / 2, 26, true); return cv; }
     rows.forEach((r) => { cols.forEach((c) => { box(c.x, y, c.w, hR, '#fff'); const cx = c.x + c.w / 2; const cy = y + hR / 2; const mw = c.w - 14; const t = matType(r.type);
       if (c.k === 'dt') tx(entryDateShort(r.date), cx, cy, 22, true, mw); else if (c.k === 'nm') tx(matName(r), cx, cy, 24, true, mw); else if (c.k === 'cl') tx(r.batch || '', cx, cy, 23, true, mw);
@@ -10566,7 +10610,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
           catch (e) { if (!(e && e.name === 'AbortError')) { try { saveFile(name, blob); showToast('Could not share. The picture is saved on your phone.'); } catch (e2) { /* ignore */ } } } res(); }, 'image/png'));
         msgEl.textContent = ''; return;
       }
-      const w = createPdfWriter({ marginX: 48 }); const GREY = [0.867, 0.945, 0.965];
+      const w = createPdfWriter({ marginX: 48 }); const GREY = [0.890, 0.937, 0.788];
       w.heading(M.t1, 15); w.bodyLine(M.t2, { size: 11, bold: true }); w.addSpace(6);
       const cs = [['S.N', 24], ['Date', 56], ['Teacher', 96], ['Class', 62], ['Deliverable', 70], ['Sheet', 78], ['Chapter', 108]]; let ax = 0; const cells = cs.map((c) => { const o = { x: ax, w: c[1], t: c[0] }; ax += c[1]; return o; }); const full = ax; const hh = 20; const rh = 24;
       const header = () => w.trow(cells.map((c) => ({ x: c.x, w: c.w, t: c.t, bold: true, size: 9, fill: GREY })), hh); header();
@@ -10578,14 +10622,22 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   }
   { const add = document.getElementById('adminMatSec'); const rec = document.getElementById('repDeliv');
     matBindForm(document.getElementById('matForm'), 'addForm'); matBindForm(document.getElementById('delivForm'), 'editForm');
-    if (add) add.addEventListener('click', (ev) => {
-      const t = ev.target; const q = (sel) => t.closest ? t.closest(sel) : null; const m = state.mat; let e;
-      if ((e = q('[data-sugr]'))) { m.sugRange = e.getAttribute('data-sugr'); m.sug = null; matSugRender(); return; }
-      if (q('#matTicksBtn')) { matCheckTicks(); return; }
-      if (q('[data-sugclose]')) { m.sug = null; matSugRender(); return; }
-      if ((e = q('[data-sugadd]'))) { const x = (m.sug || [])[+e.getAttribute('data-sugadd')]; if (x) matSugAdd([x]); return; }
-      if (q('[data-sugall]')) { matSugAdd((m.sug || []).slice()); return; }
-    });
+    if (add) {
+      add.addEventListener('click', (ev) => {
+        const t = ev.target; const q = (sel) => t.closest ? t.closest(sel) : null; const m = state.mat; let e;
+        if ((e = q('#matAddRange [data-mr]'))) { state.adminReportRange = e.getAttribute('data-mr'); renderRepControls(); return; }
+        if (q('#matTicksBtn')) { matCheckTicks(); return; }
+        if (q('[data-sugclose]')) { m.sug = null; m.sugEdit = null; m.sugDraft = null; matSugRender(); return; }
+        if ((e = q('[data-sugadd]'))) { const x = (m.sug || [])[+e.getAttribute('data-sugadd')]; if (x) matSugAdd([x]); return; }
+        if (q('[data-sugall]')) { matSugAddAll(); return; }
+        if ((e = q('[data-sugedit]'))) { const i = +e.getAttribute('data-sugedit'); if (m.sug && m.sug[i]) { m.sugEdit = i; m.sugDraft = Object.assign({}, m.sug[i]); matSugRender(); } return; }
+        if (q('[data-sd="cancel"]')) { m.sugEdit = null; m.sugDraft = null; matSugRender(); return; }
+        if (q('[data-sd="save"]')) { matSugSave(); return; }
+        if (q('[data-sd="date"]') && m.sugDraft) { const d = m.sugDraft; openCalendar(d.date || todayStr(), (v) => { const msgEl = document.querySelector('#matSug [data-sd="msg"]'); if (v > todayStr()) { if (msgEl) msgEl.textContent = 'Choose today or an earlier date.'; return; } d.date = v; if (msgEl) msgEl.textContent = ''; const bt = document.querySelector('#matSug [data-sd="date"] span'); if (bt) bt.textContent = matDmy(v); }); return; }
+      });
+      add.addEventListener('input', (ev) => { const d = state.mat.sugDraft; const t = ev.target; if (!d || !t || !t.getAttribute) return; const k = t.getAttribute('data-sd'); if (k === 'sheet') d.sheet = t.value; else if (k === 'chapter') d.chapter = t.value; });
+      add.addEventListener('change', (ev) => { const d = state.mat.sugDraft; const t = ev.target; if (!d || !t || !t.getAttribute) return; const k = t.getAttribute('data-sd'); if (k === 'teacher') d.teacherId = t.value; else if (k === 'batch') d.batch = t.value; else if (k === 'type') d.type = t.value; });
+    }
     if (rec) {
       rec.addEventListener('click', (ev) => {
         const t = ev.target; const q = (sel) => t.closest ? t.closest(sel) : null; const m = state.mat; let e;
@@ -17777,7 +17829,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const wsel = document.getElementById('adminWingSel'); if (wsel) wsel.addEventListener('change', () => setTimeout(() => { if ((state.adminRepKind || '') === 'entry') entryRender(true); }, 0));
   })();
   const REP_NOTE = { deliv: 'What was given to each batch: the type, the teacher and the chapter. Get it as a picture, PDF or Excel. Entries are added from Admin, Add deliverables, and edited here with the pencil.', entry: 'Classes that began more than 5 minutes late. Up to 5 minutes is not counted. Set the entry time of the teacher, then get the record as a picture, PDF or Excel.',  full: 'Everything: classes with topics, tests, attendance, invigilation and other work.', att: 'Only check-in and check-out, day by day, with present / absent / leave totals.', count: 'Number of classes of every teacher, batch-wise, for a day, a week or a month. Substitute classes are in red.', sub: 'Substitute classes: who took a class in whose place. For a day (Morning and Evening apart), a week or a month.', duty: 'Invigilation duty of one wing, Morning and Evening together. Only the days that have a duty are shown.' };
-  function renderRepControls() { renderRepControlsReports(); }
+  function renderRepControls() { if (state.adminTab === 'mat') { matAddRender(); return; } renderRepControlsReports(); }
   function renderRepControlsReports() {
   if (document.getElementById('view-admin').getAttribute('data-repv') === 'tiles') { document.querySelectorAll('#adminRepKind .rt-tile.on').forEach((x) => x.classList.remove('on')); return; } // only the tiles are showing: nothing to load
     try { fillAdminRepTeachers(); } catch (e) { /* ignore */ }
@@ -19416,7 +19468,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     state.adminDate = dateStr; state.adminExpandedTeacher = null;
     document.getElementById('adminDateLabelText').textContent = formatStepperDateLabel(dateStr);
     subscribeAdminDate(dateStr);
-    if (state.adminTab === 'reports') { document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); }
+    if (state.adminTab === 'reports' || state.adminTab === 'mat') { document.getElementById('adminReportMsg').textContent = ''; renderRepControls(); }
   });
   document.getElementById('adminStepCal').addEventListener('click', (e) => { e.stopPropagation(); pickAdminDate(); });
   document.getElementById('repCalBtn').addEventListener('click', pickAdminDate);
@@ -19459,7 +19511,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       state.adminReportWing = btn.getAttribute('data-admin-wing');
       state.adminExpandedTeacher = null;
       renderAdmin();
-      try { fillAdminRepTeachers(); if (state.adminTab === 'reports') renderRepControls(); } catch (e) { /* ignore */ }
+      try { fillAdminRepTeachers(); if (state.adminTab === 'reports' || state.adminTab === 'mat') renderRepControls(); } catch (e) { /* ignore */ }
     });
   });
 
