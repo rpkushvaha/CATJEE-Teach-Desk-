@@ -3833,7 +3833,7 @@
           <div class="teacher-time num" id="onCampusNowCount">0</div>
         </div>
         <div class="day-card-hint" id="onCampusNowHint" style="color: var(--switch-on);">Tap to see names</div>
-<div class="day-card-hint" id="onCampusNowNote">Checked in and not yet checked out. If someone left without checking out, open Teachers and use Force check-out.</div>
+<div class="day-card-hint" id="onCampusNowNote">Checked in and not yet checked out. If someone left without checking out, tap Force check-out next to the name.</div>
         <div id="onCampusNowNames" style="display:none; flex-direction:column; gap:8px; margin-top:8px;"></div>
       </div>
 
@@ -4562,7 +4562,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.01 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 15.03 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10407,9 +10407,9 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   function matCanEdit() { return !principalView(); }
   function matWing() { return state.adminReportWing || 'all'; }
   function matBatches() { const lw = leadWings(); const aw = matWing(); return allBatchesFlat().filter((b) => (!wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1) && (aw === 'all' || wingOfBatch(b) === aw)); }
-  function matTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
+  function matTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isCoordUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
   function matAddBatches() { const lw = leadWings(); const aw = matWing(); return allBatchesFlat().filter((b) => (!wingOfBatch(b) || lw.indexOf(wingOfBatch(b)) !== -1) && (aw === 'all' || wingOfBatch(b) === aw)); }
-  function matAddTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
+  function matAddTeachers() { const lw = leadWings(); const aw = matWing(); return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isCoordUid(u) && (state.canAdmin || lw.some((w) => inTeamWing(u, w))) && (aw === 'all' || inTeamWing(u, aw))).sort((a, b) => ttName(a).localeCompare(ttName(b))); }
   // the record uses the period and the wing of the Reports page
   function matRange() { const r = adminReportRangeDates(); const d = r.dates; return { from: d[0], to: d[d.length - 1], nav: r.label, label: r.full, tag: r.fileTag }; }
   async function matLoad() {
@@ -10616,7 +10616,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       const M = matModel(); const base = `CATJEE-Deliverables-${M.fileTag}`;
       if (kind === 'csv') {
         const L = [['Date', 'Day', 'Teacher', 'Subject', 'Class', 'Deliverable', 'Sheet', 'Chapter', 'Note', 'Entered from']]; M.rows.forEach((r) => L.push([r.date, WD[dateObj(r.date).getDay()], matName(r), matSubTxt(r), r.batch, matType(r.type)[1], r.sheet || '', r.chapter || '', r.note || '', r.fromClass ? 'Teacher tick' : 'Coordinator']));
-        saveFile(base + '.csv', '\ufeff' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = 'Saved.'; showToast('Excel file saved'); return;
+        saveFile(base + '.csv', '\ufeff' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = ''; showToast('Excel file saved'); return;
       }
       if (kind === 'wa') {
         const cv = matCanvas(M);
@@ -10639,7 +10639,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
         w.trow(cells.map((c, k) => ({ x: c.x, w: c.w, lines: g[k].lines.map((l) => [{ t: l }]), size: g[k].size, bold: bolds[k] })), rh);
       });
       w.addSpace(8); const tt = {}; M.rows.forEach((r) => { tt[matType(r.type)[1]] = (tt[matType(r.type)[1]] || 0) + 1; }); w.bodyLine(`${M.rows.length} entr${M.rows.length === 1 ? 'y' : 'ies'}: ` + (Object.keys(tt).map((k) => `${k} ${tt[k]}`).join(', ') || 'none'), { size: 10 });
-      saveFile(base + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('PDF saved');
+      saveFile(base + '.pdf', w.finishBlob()); msgEl.textContent = ''; showToast('PDF saved');
     } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
   }
   { const add = document.getElementById('adminMatSec'); const rec = document.getElementById('repDeliv');
@@ -12558,8 +12558,10 @@ Rules:
       if (state.adminOnCampusExpanded) {
         namesEl.innerHTML = checkedInIds.map((tid) => {
           const since = state.adminCampus[tid].checkInAt ? formatTimeStr(toHHMM(state.adminCampus[tid].checkInAt)) : '';
-          return `<div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600;"><span>${escapeHtml(nameOf(tid))}</span><span style="color:var(--muted);">${since ? 'Since ' + since : ''}</span></div>`;
+          const canForce = !principalView() && (state.canAdmin || !isCoordUid(tid));
+          return `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:13px; font-weight:600;"><span>${escapeHtml(nameOf(tid))}</span><span style="display:flex; align-items:center; gap:8px; color:var(--muted);">${since ? 'Since ' + since : ''}${canForce ? `<button type="button" class="action-btn" data-oc-force="${escapeHtml(tid)}" style="color:#B91C1C; border-color:#B91C1C; padding:4px 10px; font-size:12px;">Force check-out</button>` : ''}</span></div>`;
         }).join('');
+        namesEl.querySelectorAll('[data-oc-force]').forEach((b) => b.addEventListener('click', async (e) => { e.stopPropagation(); await adminForceCheckout(b.getAttribute('data-oc-force'), state.adminDate); }));
       }
     }
 
@@ -13618,7 +13620,7 @@ Rules:
       if (idx.length > 1 && idx[idx.length - 1] - idx[0] === idx.length - 1) { (sSpans[l.t] = sSpans[l.t] || []).push({ a: idx[0], z: idx[idx.length - 1], v }); return; }
       sRows[l.t] = sRows[l.t] || {}; sRows[l.t][idx[0]] = (sRows[l.t][idx[0]] || 0) + v;
     });
-    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds(true).slice(); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u)) ids.push(u); });
+    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds(true).slice(); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u) && !isCoordUid(u)) ids.push(u); });
     ids.sort(repCmp);
     const hasOther = Object.keys(other).length > 0;
     const list = ids.map((u) => {
@@ -13678,7 +13680,7 @@ Rules:
       h += `<tr><td>${i + 1}</td><td class="trep-n" data-trep-u="${escapeHtml(row.u)}" role="button">${escapeHtml(row.name)}${trepTitleOf(row.u) ? '' : ' <span class="trep-tset">+ Mr./Ms.</span>'}</td>${trepRowCells(row, T.cols).map((c) => `<td${c.span > 1 ? ` colspan="${c.span}"` : ''}>${T.subOn ? trepCellHtml(c) : trepFmt(c.v)}</td>`).join('')}${T.hasOther ? `<td>${T.subOn ? trepCellHtml({ v: row.other, s: row.subOther }) : trepFmt(row.other)}</td>` : ''}<td class="trep-totc">${T.subOn ? trepTotHtml(row.total, row.sub) : `<b>${trepFmt(row.total) || ''}</b>`}</td></tr>`;
     });
     h += T.subOn && T.grandSub ? `</tbody><tfoot><tr><td colspan="${nCols + 3}" style="text-align:right;" class="trep-totc">Total: ${trepTotHtml(T.grand, T.grandSub)}</td></tr></tfoot></table></div>` : `</tbody><tfoot><tr><td colspan="${nCols + 2}" style="text-align:right;">Total:</td><td>${trepFmt(T.grand) || '0'}</td></tr></tfoot></table></div>`;
-    const miss = (t.data.missing || []).filter((x) => !T.only || x.sub);
+    const miss = (t.data.missing || []).filter((x) => (!T.only || x.sub) && !isCoordUid(x.t));
     if (miss.length) {
       const by = {}; miss.forEach((x) => { (by[x.t] = by[x.t] || []).push(x); });
       h += `<div class="trep-miss"><div class="trep-miss-h"><span class="ico i-alert" aria-hidden="true"></span> ${miss.some((x) => x.ct) ? 'Not counted' : 'Not filled in'} (${miss.length}) · not counted${miss.some((x) => x.ct) ? ' · a class test where the class teacher is not on duty, or a class not filled in' : ''}</div>
@@ -17588,7 +17590,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         const L = m.view === 'sheet' ? [['Date', 'Day', 'Exam', 'Classes', 'Exam time', 'Room', 'Teacher', 'Duty from', 'Duty to', 'Minutes']] : [['Teacher', 'Duties', 'Time (min)', 'Days']];
         if (m.view === 'sheet') m.days.forEach((d) => d.exams.forEach((ex) => ex.rooms.forEach((rm) => rm.lines.forEach((l) => L.push([d.date, WD[dateObj(d.date).getDay()], ex.title, ex.cls, dutyRng(ex.es, ex.ee), rm.room, trepName(l.uid), formatTimeStr(l.start), formatTimeStr(l.end), dutyMin(l)])))));
         else m.people.forEach((p) => L.push([trepName(p.u), p.n, p.min, Object.keys(p.days).sort().map(dutyDayShort).join(' · ')]));
-        saveFile(fileBase + '.csv', '\ufeff' + L.map((x) => x.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = 'Saved.'; showToast('Duty report saved'); return;
+        saveFile(fileBase + '.csv', '\ufeff' + L.map((x) => x.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = ''; showToast('Duty report saved'); return;
       }
       if (kind === 'wa') {
         // the picture itself goes to WhatsApp (if the phone cannot share a picture, it is saved to the phone)
@@ -17621,7 +17623,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         w.addSpace(8); const X = [0, 190, 240, 300]; w.row(['Teacher', 'Duties', 'Time', 'Days'], X, { bold: true, size: 9.5, fill: HEAD }); const mx = m.people.reduce((a, p) => Math.max(a, p.n), 0);
         m.people.forEach((p, i) => { let dd = Object.keys(p.days).sort().map(dutyDayShort).join(' · ') || '-'; if (dd.length > 44) dd = dd.slice(0, 41) + '...'; w.row([trepName(p.u), p.n, reportHm(p.min), dd], X, { size: 9.5, fill: p.n && p.n === mx ? HOT : (i % 2 ? ALT : null) }); });
       }
-      saveFile(fileBase + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('Duty report saved');
+      saveFile(fileBase + '.pdf', w.finishBlob()); msgEl.textContent = ''; showToast('Duty report saved');
     } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
   }
   // ---------- Class entry record: classes that began more than 5 minutes late ----------
@@ -17697,7 +17699,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   // a sheet of its own for choosing the teacher and for the entry form (new data never redraws it)
   function enOpen(html) { const r = document.getElementById('enSheet'); if (!r) return; document.getElementById('enSheetBody').innerHTML = html; r.classList.add('open'); r.setAttribute('aria-hidden', 'false'); }
   function enClose() { const r = document.getElementById('enSheet'); if (!r) return; r.classList.remove('open'); r.setAttribute('aria-hidden', 'true'); state.entry.formRow = null; }
-  function entryTeachers() { const E = state.entry; const map = {}; (E.cls || []).filter((r) => r.ses === E.ses).forEach((r) => { map[r.u] = (map[r.u] || 0) + 1; }); return Object.keys(map).map((u) => ({ u, name: entryName(u), n: map[u] })).sort((x, y) => ttName(x.u).localeCompare(ttName(y.u))); }
+  function entryTeachers() { const E = state.entry; const map = {}; (E.cls || []).filter((r) => r.ses === E.ses && !isCoordUid(r.u)).forEach((r) => { map[r.u] = (map[r.u] || 0) + 1; }); return Object.keys(map).map((u) => ({ u, name: entryName(u), n: map[u] })).sort((x, y) => ttName(x.u).localeCompare(ttName(y.u))); }
   function entryTypeChip(r) { return r.type === 'SUBSTITUTE' ? '<span class="ent-type sub">SUBSTITUTE</span>' : '<span class="ent-type">SELF</span>'; }
   function entrySyncTeacherSelect(show) {
     const wrap = document.getElementById('entryTeacherWrap'); const sel = document.getElementById('entryTeacher'); if (!wrap || !sel) return; const E = state.entry;
@@ -17821,7 +17823,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       if (kind === 'csv') {
         const L = [['Date', 'Day', 'Session', 'Faculty', 'Class', 'Class starting time', 'Teacher entry time', 'Class type', 'Delay (minutes)']];
         M.rows.forEach((r) => L.push([r.date, WD[dateObj(r.date).getDay()], r.session === 'evening' ? 'Evening' : 'Morning', entryRecName(r), r.batch, entryTm(r.startTimeStr), entryTm(r.entryTimeStr), r.classType, r.delayMin]));
-        saveFile(base + '.csv', '\ufeff' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = 'Saved.'; showToast('Excel file saved'); return;
+        saveFile(base + '.csv', '\ufeff' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); msgEl.textContent = ''; showToast('Excel file saved'); return;
       }
       if (kind === 'wa') {
         const cv = entryCanvas(M);
@@ -17849,7 +17851,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       });
       w.addSpace(8); w.bodyLine(`${M.rows.length} late entr${M.rows.length === 1 ? 'y' : 'ies'}. Up to ${ENTRY_GRACE} minutes is not counted.`, { size: 8.5 });
       if (M.multi && M.rows.length) { const tw = {}; M.rows.forEach((r) => { const nmx = entryRecName(r); const t = tw[nmx] = tw[nmx] || { n: 0, m: 0 }; t.n += 1; t.m += r.delayMin; }); w.addSpace(6); w.bodyLine('Teacher-wise', { bold: true, size: 10 }); Object.keys(tw).sort().forEach((k) => w.bodyLine(`${k}: ${tw[k].n} late ${tw[k].n === 1 ? 'entry' : 'entries'}, ${tw[k].m} minutes in all`, { size: 9 })); }
-      saveFile(base + '.pdf', w.finishBlob()); msgEl.textContent = 'Saved.'; showToast('PDF saved');
+      saveFile(base + '.pdf', w.finishBlob()); msgEl.textContent = ''; showToast('PDF saved');
     } catch (err) { msgEl.textContent = 'Could not make the report. Please try again.'; }
   }
   (function bindEntry() {
@@ -17916,8 +17918,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     const key = (state.adminTeacherIds || []).length + '|' + (state.adminReportWing || 'all');
     const sel = document.getElementById('adminRepTeacher'); if (!sel || sel._filled === key) return;
     const wing = state.adminReportWing || 'all';
-    const coords = (state.adminTeacherIds || []).filter((u) => isCoordUid(u) && (wing === 'all' || !teamWings(u).length || teamWings(u).indexOf(wing) !== -1));
-    const cur = sel.value; const ids = ttTeacherIds().concat(coords).filter((u, i, a) => a.indexOf(u) === i).sort(repCmp);
+    const cur = sel.value; const ids = ttTeacherIds().filter((u, i, a) => a.indexOf(u) === i).sort(repCmp);
     sel.innerHTML = '<option value="">All teachers</option>' + ids.map((u) => `<option value="${escapeHtml(u)}">${escapeHtml(ttName(u))}</option>`).join('');
     // a teacher from another wing is not kept: back to "All teachers"
     sel.value = ids.indexOf(cur) !== -1 ? cur : ''; sel._filled = key;
@@ -18109,7 +18110,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
           d.ss.forEach((s, i) => L.push([nameOfU(r.u), d.dt, WD[dateObj(d.dt).getDay()], 'Present', formatTimeStr(toHHMM(s.in)), s.out != null ? formatTimeStr(toHHMM(s.out)) : 'In progress', i === 0 ? Math.round(d.secs / 60) : '', i === 0 && d.edited && forAdmin ? 'Edited by admin' : '']));
         }));
         saveFile(fileBase + '.csv', '\ufeff' + L.map((x) => x.map(csvEscape).join(',')).join('\n'), 'text/csv');
-        msgEl.textContent = 'Saved.'; showToast('Attendance saved'); return;
+        msgEl.textContent = ''; showToast('Attendance saved'); return;
       }
       if (kind === 'wa') {
         const r = rows[0]; const t = attTotals(r.days);
@@ -18161,7 +18162,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         w.addSpace(4);
       });
       saveFile(fileBase + '.pdf', w.finishBlob());
-      msgEl.textContent = 'Saved.'; showToast('Attendance report saved');
+      msgEl.textContent = ''; showToast('Attendance report saved');
     } catch (err) { msgEl.textContent = 'Could not make the attendance report. Please try again.'; }
   }
   async function downloadRangeReport(dates, title, periodLine, summaryTitle, filename, msgEl, useFilter) {
@@ -20561,8 +20562,8 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     n: ['Nobody except the teacher creates a password.', 'Password sirf teacher khud banata hai.'],
     m: [['admin:settings:#adminTeamPanel', '#adminTeamPanel'], ['admin:settings:#adminTeamPanel', '#staffIdsBlock'], ['', ''], ['', '']] },
   { id: 'admincheck', t: ['Correct, add or force a teacher\'s check-in times', 'Teacher ka check-in samay theek karna, jodna ya force check-out'], who: 'lead', k: 'edit check in check out teacher force checkout correct add times galat चेक इन समय',
-    s: [['Open **Admin**, then **Home**, then the **Teachers** list.', 'Tap the teacher\'s name to open the row.', 'Tap **Correct check-in times** (or **Add check-in times** if there are none).', 'If a teacher forgot to check out, tap **Force check-out**.'],
-        ['**Admin** kholo, phir **Home**, phir **Teachers** list.', 'Teacher ke naam par dabao.', '**Correct check-in times** dabao (agar kuch nahi hai to **Add check-in times**).', 'Teacher check-out bhool gaya ho to **Force check-out** dabao.']],
+    s: [['Open **Admin**, then **Home**, then the **Teachers** list.', 'Tap the teacher\'s name to open the row.', 'Tap **Correct check-in times** (or **Add check-in times** if there are none).', 'If a teacher forgot to check out, tap **Force check-out**. It is also next to the name in **On campus now**.'],
+        ['**Admin** kholo, phir **Home**, phir **Teachers** list.', 'Teacher ke naam par dabao.', '**Correct check-in times** dabao (agar kuch nahi hai to **Add check-in times**).', 'Teacher check-out bhool gaya ho to **Force check-out** dabao. **On campus now** me naam ke saamne bhi yahi button hai.']],
     n: ['For a day older than yesterday, the report shows "edited" once.', 'Kal se purane din ke liye report me ek baar "edited" likha aata hai.'],
     m: [['admin:dash', '#homeSeg'], ['admin:dash+teachers', '#adminTeacherList'], ['', ''], ['', '']] },
 
