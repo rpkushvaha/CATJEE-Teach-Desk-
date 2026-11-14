@@ -50,6 +50,9 @@
 (function () {
   var q = location.search || '';
   if (!/[?&]demo(=|&|$)/.test(q)) return;
+  // the open demo and walkthrough links are closed. Only the in-app Practice (opened from Help, which leaves a flag in this tab) still works; every other ?demo address opens the normal app.
+  var pracOk = /[?&]practice(=|&|$)/.test(q); if (pracOk) { try { pracOk = sessionStorage.getItem('cj_prac') === '1'; } catch (e) { pracOk = true; } }
+  if (!pracOk) { window.__CLOSED = true; try { document.open(); document.write('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#ffffff"><title>CATJEE Teach Desk</title><style>html,body{margin:0!important;height:100%!important;background:#fff!important;overflow:hidden!important}body>*:not(#cjClosed){display:none!important}#cjClosed{position:fixed;inset:0;display:flex!important;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 28px;box-sizing:border-box;background:#fff;font-family:Roboto,Arial,sans-serif;color:#1E2A38}#cjClosed h1{font-size:26px;color:#E63946;margin:0 0 14px}#cjClosed p{font-size:18px;line-height:1.5;margin:0;color:#4A5568}</style></head><body><div id="cjClosed"><h1>CATJEE Teach Desk</h1><p>This link is now closed.<br>Please open the CATJEE Teach Desk app.</p></div></body></html>'); document.close(); } catch (e) { /* ignore */ } return; }
   var role = ((q.match(/[?&]demo=([a-z]+)/) || [])[1] || '');
   window.__DEMO = true; window.__DEMO_ROLE = role;
   var qs = new URLSearchParams(location.search); window.__DEMO_PRACTICE = qs.has('practice'); window.__DEMO_LEAD = qs.has('lead'); window.__DEMO_TOUR = qs.get('tour') || ''; window.__DEMO_WALK = qs.has('walk'); var DEMO_HL = qs.get('hl') || '';
@@ -329,9 +332,9 @@
     messagingSenderId: "560871190788",
     appId: "1:560871190788:web:7f22e80ef654d75ecf2051"
   };
-  firebase.initializeApp(firebaseConfig);
+  if (!window.__CLOSED) firebase.initializeApp(firebaseConfig);
   try {
-    firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(function (err) {
+    if (!window.__CLOSED) firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(function (err) {
       console.warn('Firestore offline persistence not enabled:', err && err.code);
     });
   } catch (err) { /* ignore — unsupported browser, falls back to online-only */ }
@@ -4567,7 +4570,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.06 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 15.08 · updated 26 Oct 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4606,6 +4609,7 @@
 
 <script>
 (function () {
+  if (window.__CLOSED) return;
   const WINGS = ['Pre-Foundation', 'Foundation'];
   const DEFAULT_BATCHES_BY_WING = {
     'Pre-Foundation': ['Class 9 - Batch 1', 'Class 9 - Batch 2', 'Class 10 - Batch 1', 'Class 10 - Batch 2', 'Remedial - Class 9', 'Remedial - Class 10', 'Extra Class'],
@@ -20732,7 +20736,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   function helpShowMe(id) {
     const g = HELP_GUIDES.find((x) => x.id === id); if (!g) return; const li = helpLangIdx();
     // in the real app the guide is shown on the sample data: the practice page opens, and the tour starts there
-    if (!window.__DEMO) { location.href = location.pathname + '?demo=' + (g.who === 'lead' ? 'admin' : 'teacher') + '&practice=1' + (isLeadUser() ? '&lead=1' : '') + '&tour=' + id + '&hl=' + (li === 0 ? 'en' : 'hi'); return; }
+    if (!window.__DEMO) { try { sessionStorage.setItem('cj_prac', '1'); } catch (e) { /* ignore */ } location.href = location.pathname + '?demo=' + (g.who === 'lead' ? 'admin' : 'teacher') + '&practice=1' + (isLeadUser() ? '&lead=1' : '') + '&tour=' + id + '&hl=' + (li === 0 ? 'en' : 'hi'); return; }
     const key = helpBuildTour(id); if (key) helpStartTour(key);
   }
   // ---------- the walkthrough (sample data only): the guides, one after the other ----------
@@ -20768,7 +20772,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       if (t.hasAttribute('data-hccat')) { HC.v = 'cat'; HC.cat = t.getAttribute('data-hccat'); helpcRender(); return; }
       if (t.hasAttribute('data-guide')) { HC.from = (HC.v === 'cat') ? 'cat' : 'home'; HC.v = 'guide'; HC.id = t.getAttribute('data-guide'); helpcRender(); return; }
       if (t.hasAttribute('data-hcback')) { const to = t.getAttribute('data-hcback'); HC.v = to === 'cat' ? 'cat' : 'home'; helpcRender(); return; }
-      if (t.id === 'hcPractice') { location.href = location.pathname + '?demo=' + (isLeadUser() ? 'admin&lead=1' : 'teacher') + '&practice=1'; return; }
+      if (t.id === 'hcPractice') { try { sessionStorage.setItem('cj_prac', '1'); } catch (e) { /* ignore */ } location.href = location.pathname + '?demo=' + (isLeadUser() ? 'admin&lead=1' : 'teacher') + '&practice=1'; return; }
       if (t.id === 'hcQuick') { helpStartTour(helpBasicsKey()); return; }
       if (t.id === 'hcWalk') { try { closeMenu(); } catch (e) { /* ignore */ } setTimeout(() => helpWalk(window.__DEMO_ROLE === 'admin' ? 'admin' : 'teacher', 0), 450); return; }
       if (t.id === 'hcWritten') { openMenuPanel('help'); return; }
