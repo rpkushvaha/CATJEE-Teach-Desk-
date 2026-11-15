@@ -4621,7 +4621,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.11 · updated 15 Nov 2026</div>
+          <div class="dnote">Version 15.12 · updated 15 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -9227,6 +9227,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       body.querySelectorAll('[data-exd]').forEach((x) => x.addEventListener('click', () => { keepTimes(); f.diff = x.getAttribute('data-exd') === '1'; draw(); }));
  body.querySelectorAll('[data-exsub]').forEach((x) => x.addEventListener('change', () => { f.subs[x.getAttribute('data-exsub')] = x.value; }));
  document.getElementById('exCancel').addEventListener('click', closeHvSheet);
+ if (f.type || f.name || f.subject || f.diff) sdReady('exOk'); // the Save button turns red as soon as something is chosen, even if an earlier form left its old state behind
       document.getElementById('exOk').addEventListener('click', async () => {
         keepTimes();
         if (!f.type && !f.name) { showToast('Choose the test type or type a name', 'error'); return; }
