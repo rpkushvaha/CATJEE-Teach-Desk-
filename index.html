@@ -4621,7 +4621,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.10 · updated 26 Oct 2026</div>
+          <div class="dnote">Version 15.11 · updated 15 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5597,7 +5597,7 @@
     set('sumClasses', fmtUnits(classes.reduce((sum, c) => sum + classUnits(c), 0)));
     set('sumHours', fmtTeaching(classes.reduce((sum, c) => sum + classDuration(c), 0)));
     set('sumWorksheets', classes.filter((c) => hasWs(c)).length);
-    set('sumTests', classes.reduce((s, c) => s + testCount(c), 0) + coveredTestsFor(todayStr(), state.classesToday).count);
+    set('sumTests', classes.reduce((s, c) => s + testCountT(c), 0) + coveredTestsFor(todayStr(), state.classesToday).count);
     fitSummaryTiles(true);
   }
   function renderTodayList() {
@@ -5665,7 +5665,8 @@
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-cancel-leave]'); if (b) { e.preventDefault(); e.stopPropagation(); cancelLeave(b.getAttribute('data-cancel-leave')); } }, true);
   function entryBatches(c) { return (c && c.batches && c.batches.length) ? c.batches : (c && c.batch ? [c.batch] : []); }
   function entryBatchLabel(c) { const b = entryBatches(c); return b.length > 1 ? b.join(' + ') : (b[0] || 'Class'); }
-  function testCount(c) { return c && c.test ? Math.max(1, entryBatches(c).length) : 0; }
+  function testCount(c) { return c && c.test ? Math.max(1, entryBatches(c).length) : 0; } // per batch (admin totals)
+  function testCountT(c) { return c && c.test ? 1 : 0; } // per teacher: one test is one test, even for combined batches
   // Remedial and Evening batches are separate groups: they are never included when a whole class (e.g. "Class 10") is chosen.
   // A whole class ("Class 10") means its Morning batches; Evening and Special (e.g. Remedial) batches are separate.
   function classOfBatch(b) { if (typeof batchSession === 'function' && batchSession(b) !== 'morning') return null; if (/remedial|evening/i.test(String(b || ''))) return null; const m = String(b || '').match(/class\s*(\d+)/i); return m ? `Class ${m[1]}` : null; }
@@ -6111,7 +6112,7 @@
         if (!hvMatchesFilters(c)) return;
         classes += classUnits(c); mins += classDuration(c);
         if (hasWs(c)) ws++;
-        tests += testCount(c);
+        tests += testCountT(c);
         if (c.homework) hw++;
       });
     });
@@ -8032,7 +8033,7 @@ function renderPartChips() {
         const exHere = examAt(b, d, pp.start, pp.end);
         if (exHere && !c) { html += `<td class="tg-c tg-exhint${isSel ? ' tg-sel' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}" data-tg-cell="${escapeHtml(k)}"><small><span class="ico i-note" aria-hidden="true"></span> ${escapeHtml(exHere.type || 'Exam')}</small></td>`; return; }
         const cl = c ? ((clash[k] ? ' tg-clash' : (c.sub ? ' tg-full tg-subc' : ' tg-full')) + (c.subWait ? ' tg-wait' : '')) : '';
-        html += `<td class="tg-c${cl}${isCt(c) ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${isSw ? ' tg-swapsrc' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${isCt(c) ? '<i>Test</i>' : ''}<small${effT(c) ? '' : ' class="tg-nt"'}>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '–'}</small>${c.sub ? '<i>Sub</i>' : ''}${c.subWait ? '<i class="tg-waitlbl">Substitute</i>' : ''}${ttLeaveOf(effT(c), d) ? '<i class="tg-lvtag">⚠ On leave</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
+        html += `<td class="tg-c${cl}${isCt(c) ? ' tg-test' : ''}${c && c.cb ? ' tg-combo' : ''}${isSel ? ' tg-sel' : ''}${isSw ? ' tg-swapsrc' : ''}${exHere ? ' tg-exwarn' : ''}${chg && chg.keys[k] ? ' tg-chgd' : ''}"${rspan > 1 ? ` rowspan="${rspan}"` : ''} data-tg-cell="${escapeHtml(k)}">${c ? `${c.cb ? `<i class="tg-cbtag"><span class="ico i-link" aria-hidden="true"></span> Combined${(() => { const r = isCt(c) ? '' : comboRoom(doc.cells, c, d, doc); return r ? ' · ' + escapeHtml(r) : ''; })()}</i>` : ''}<b title="${escapeHtml(effS(c))}">${escapeHtml(shortSubj(effS(c)))}</b>${isCt(c) ? '<i>Test</i>' : ''}<small${effT(c) ? '' : ' class="tg-nt"'}>${effT(c) ? escapeHtml(initials(ttName(effT(c)))) : '–'}</small>${c.sub ? '<i>Sub</i>' : ''}${c.subWait ? '<i class="tg-waitlbl">Substitute</i>' : ''}${ttLeaveOf(effT(c), d) ? '<i class="tg-lvtag">⚠ On leave</i>' : ''}${clash[k] ? '<em>⚠️</em>' : ''}${exHere ? '<em><span class="ico i-note" aria-hidden="true"></span></em>' : ''}` : '<span>+</span>'}</td>`;
       });
       html += '</tr>';
     });
@@ -8300,6 +8301,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   }
   // Publish: write / update / remove the classes in each teacher's schedule.
   async function tgPublish(dayOnly) { if (state.subDay) state.subDay.key = ''; if (state.trep) state.trep.key = ''; const g = tgGroup(); const doc = state.tg.doc; if (!doc) return;
+    { const mg = await ctMergeEmpty(doc); tgAutoCombineCt(doc); if (mg.skipped) showToast(`${mg.skipped} class test${mg.skipped === 1 ? '' : 's'} of one teacher in the same period have separate plans, so they stay separate classes`); }
     { const waiting = (doc.cells || []).filter((c) => c.subWait && !c.ex).length; if (waiting) { const okw = await showConfirm(`${waiting} class${waiting === 1 ? ' is' : 'es are'} marked Substitute, but no substitute is set yet. They stay with the teacher they had.`, '⚠️ Substitute not set', 'Publish anyway'); if (!okw) return; } }
     if (dayOnly && !doc.pubSnap) doc.pubSnap = { cells: {}, dayTimes: '{}', dayRooms: '{}' }; // first publish can be a single day
     const per = periodsFor(g.key);
@@ -8319,7 +8321,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const pp = periodsForDay(g.key, c.d)[c.p]; const id = slotIdFor(docId, c);
       const T = effT(c);
       newIds[T + '/' + id] = 1;
-      ops.push(['set', `schedule/${T}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, batches: combo.length > 1 ? combo : null, room: combo.length > 1 ? comboRoom(doc.cells, c, c.d, doc) : batchRoomOn(c.b, c.d), subject: effS(c), test: isCt(c), setBy: state.teacherId, setByName: me, ttId: docId, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() }]);
+      ops.push(['set', `schedule/${T}/slots/${id}`, { day: WD[dateObj(c.d).getDay()], date: c.d, time: pp.start, duration: Math.max(5, hhmmToMin(pp.end) - hhmmToMin(pp.start)), label: c.b, batches: combo.length > 1 ? combo : null, room: tgSlotRoom(doc, c, combo), subject: effS(c), test: isCt(c), setBy: state.teacherId, setByName: me, ttId: docId, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() }]);
     });
     // classes that were published before (whole week, or only that day) and are no longer there
     let oldKeys = doc.published || [];
@@ -8604,7 +8606,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           const chg = perD[p] && perD[p].changed && (perD[p].start !== o.c.pp.start || perD[p].end !== o.c.pp.end);
           const lines = [[effS(cell), cell.sub ? '#C00000' : '#000', 15], ...(cell.sub ? [['(Sub)', '#C00000', 11]] : []), ...(isCt(cell) ? [['(Class Test)', '#000', 12]] : []), ...(one && cell.cb ? [[`(with ${tgComboOf(doc.cells, cell).filter((m) => m.b !== b).map((m) => gridBatchLabel(m.b).replace(' · ', ' ')).join(', ')})`, '#1F4E79', 11]] : []), ...(chg ? [[`(${fmtS(perD[p].start)} – ${fmtS(perD[p].end)})`, '#C00000', 11]] : [])];
           const rDay = doc.dayRooms && doc.dayRooms[d] && doc.dayRooms[d][b];
-          if (cell.cb && tgComboOf(doc.cells, cell).length > 1) { const cr = comboRoom(doc.cells, cell, d, doc); if (cr) lines.push([`(Room ${cr})`, '#C00000', 11]); }
+          if (isCt(cell)) { /* a class test: the rooms are in its plan */ } else if (cell.cb && tgComboOf(doc.cells, cell).length > 1) { const cr = comboRoom(doc.cells, cell, d, doc); if (cr) lines.push([`(Room ${cr})`, '#C00000', 11]); }
           else if (rDay) lines.push([`(Room ${rDay})`, '#C00000', 11]);
           fitLines(x, lines, o.x + o.w / 2, ry, o.w, rH);
       };
@@ -8819,6 +8821,57 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if ((state.classesToday || []).some((c) => c.ctExamId === exam.id)) return true;
     return (state.scheduleSlots || []).some((sl) => sl && sl.test && slotDate(sl) === exam.date && (ctSlotExam(sl) || {}).id === exam.id);
   }
+  // ---- one class test for several batches of one teacher = one class ----
+  // cells of one test (same plan), same day and period, same teacher and subject become one combined class
+  function tgAutoCombineCt(doc) {
+    const by = {}; let n = 0;
+    ((doc && doc.cells) || []).forEach((c) => { if (!isCt(c) || c.ex || c.cb) return; const T = effT(c); if (!T) return; const k = [c.d, c.p, c.ctId, T, c.s].join('|'); (by[k] = by[k] || []).push(c); });
+    Object.keys(by).forEach((k) => { const L = by[k]; if (L.length < 2) return; const id = 'cb' + Date.now().toString(36) + (n++); L.forEach((c) => { c.cb = id; delete c.cbRoom; }); });
+    return n;
+  }
+  // two class tests of the same teacher in the same period (made one by one): when the later ones have no rooms or duty yet, they are joined into the first
+  async function ctMergeEmpty(doc) {
+    const by = {}; let skipped = 0, merged = 0;
+    ((doc && doc.cells) || []).forEach((c) => { if (!isCt(c) || c.ex) return; const T = effT(c); if (!T) return; const k = [c.d, c.p, T, c.s].join('|'); (by[k] = by[k] || []).push(c); });
+    for (const k of Object.keys(by)) {
+      const L = by[k]; const ids = L.map((c) => c.ctId).filter((v, i, a) => a.indexOf(v) === i); if (ids.length < 2) continue;
+      const base = ids[0]; const others = ids.slice(1); const docs = {};
+      try {
+        for (const id of ids) { const sn = await state.db.collection('exams').doc(id).get(); if (sn.exists) docs[id] = sn.data(); }
+        if (!docs[base] || others.some((id) => !docs[id] || planOf(docs[id]).length || (docs[id].invigilators || []).length)) { skipped++; continue; }
+        const sc = (docs[base].scope || []).slice(); others.forEach((id) => (docs[id].scope || []).forEach((b) => { if (sc.indexOf(b) === -1) sc.push(b); }));
+        await waitForWrite(state.db.collection('exams').doc(base).set({ scope: sc }, { merge: true }));
+        const eb = (state.adminExams || []).find((z) => z.id === base); if (eb) eb.scope = sc;
+        L.forEach((c) => { c.ctId = base; });
+        for (const id of others) { try { await state.db.collection('exams').doc(id).delete(); } catch (e) { /* already gone */ } state.adminExams = (state.adminExams || []).filter((z) => z.id !== id); }
+        merged++;
+      } catch (err) { skipped++; }
+    }
+    return { merged, skipped };
+  }
+  // a class test has no room in the grid or in the schedule: the rooms are in its plan and show on the duty card
+  function tgSlotRoom(doc, c, combo) { if (isCt(c)) return ''; return combo && combo.length > 1 ? comboRoom(doc.cells, c, c.d, doc) : batchRoomOn(c.b, c.d, doc); }
+  // new class test cells: join the plan of the same teacher's test in the same period, otherwise make a new plan
+  async function ctPlanOrJoin(list, opt) {
+    const doc = state.tg.doc; const rest = []; const joined = {};
+    list.forEach((x) => {
+      const T = effT(x.c);
+      const other = T ? (doc.cells || []).find((m) => m !== x.c && m.d === x.d && m.p === x.p && m.b !== x.b && !m.ex && isCt(m) && effT(m) === T && m.s === x.c.s) : null;
+      if (other) { x.c.ctId = other.ctId; (joined[other.ctId] = joined[other.ctId] || []).push(x.b); } else rest.push(x);
+    });
+    const ids = Object.keys(joined);
+    if (ids.length) {
+      for (const id of ids) {
+        try {
+          const sn = await state.db.collection('exams').doc(id).get();
+          if (sn.exists) { const sc = (sn.data().scope || []).slice(); joined[id].forEach((b) => { if (sc.indexOf(b) === -1) sc.push(b); }); await waitForWrite(state.db.collection('exams').doc(id).set({ scope: sc }, { merge: true })); const e = (state.adminExams || []).find((z) => z.id === id); if (e) e.scope = sc; }
+        } catch (err) { flashOffline(err); }
+      }
+      tgAutoCombineCt(doc); tgSave(); renderTgGrid();
+      showToast('Same teacher, same period: joined the same class test · counts as one class');
+    }
+    if (rest.length) await ctCreatePlan(rest, opt);
+  }
   async function ctCreatePlan(list, opt) {
     opt = opt || {};
     const d = list[0].d; const g = tgGroup(); const per = periodsForDay(g.key, d);
@@ -8830,7 +8883,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       const ref = state.db.collection('exams').doc();
       const base = { type: 'Class Test', subject: subs.length === 1 ? subs[0] : '', name: opt.name || '', date: d, start, end, room: '', scope: bats, invigilators: [], plan: { rooms: [] }, ct: true };
       await waitForWrite(ref.set(Object.assign({ createdAt: Date.now(), createdBy: state.teacherId, fromTimetable: state.tg.docKey }, base)));
-      same.forEach((x) => { const cc = tgCell(x.d, x.p, x.b); if (cc) cc.ctId = ref.id; }); tgSave(); renderTgGrid();
+      same.forEach((x) => { const cc = tgCell(x.d, x.p, x.b); if (cc) cc.ctId = ref.id; }); tgAutoCombineCt(state.tg.doc); tgSave(); renderTgGrid();
       const exam = Object.assign({ id: ref.id }, base);
       state.adminExams = (state.adminExams || []).concat([exam]);
       xwSetDate(d); goAdmin('exams')(); setTimeout(() => openAdminExamForm(exam, 2), 450);
@@ -8850,7 +8903,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       let fixed = false; list.forEach((x) => { if (x.c.ctId && alive[x.c.ctId] === false) { delete x.c.ctId; fixed = true; } }); if (fixed) tgSave(); }
     if (list.every((x) => x.c.ctId)) { showToast('This class test already has its plan · see the Exams tab'); return; }
     const ok = await showConfirm('Add the rooms and invigilators of this class test now? It works like an exam: rooms, who is on duty, and the duty goes to the teachers. If you skip it, the class counts as before.', 'Plan rooms and duty?', 'Plan now');
-    if (ok) ctCreatePlan(list.filter((x) => !x.c.ctId));
+    if (ok) ctPlanOrJoin(list.filter((x) => !x.c.ctId));
   }
   // combine: the selected cells are one period of one day, in different batches, with no exam
   function tgCanCombine(selCells) {
@@ -8864,31 +8917,38 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   function openCombineSheet() {
     const ks = tgSelCells(); if (ks.length < 2) return;
     const first = (ks.find((x) => x.c && x.c.s) || {}).c || {};
-    const f = { s: first.s || '', t: first.t || '', r: (ks.map((x) => x.c && x.c.cbRoom).find(Boolean)) || batchRoomOn(ks[0].b, ks[0].d) || '' };
+    const f = { s: first.s || '', t: first.t || '', r: (ks.map((x) => x.c && x.c.cbRoom).find(Boolean)) || batchRoomOn(ks[0].b, ks[0].d) || '', ct: ks.some((x) => x.c && x.c.test) };
     const subs = subjectsList(); const ids = ttTeacherIds(true);
     const body = document.getElementById('hvSheetBody');
     const draw = () => {
       body.innerHTML = `<div class="hv-d-title"><span class="ico i-link" aria-hidden="true"></span> Combined class</div><div class="hv-d-wing">${escapeHtml(dayHeading(ks[0].d))} · P${ks[0].p + 1} · ${escapeHtml(ks.map((x) => gridBatchLabel(x.b)).join(' + '))}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div><div class="chips">${subs.map((x) => `<button type="button" class="chip${f.s === x ? ' active' : ''}" data-cbs="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">Teacher</div><div class="chips">${ids.map((u) => `<button type="button" class="chip${f.t === u ? ' active' : ''}" data-cbt="${escapeHtml(u)}">${escapeHtml(ttName(u))}</button>`).join('')}</div>
-        <div class="sv-tlbl" style="margin:12px 0 6px;">Room for this class</div>${comboRoomChipsHtml(ks.map((x) => x.b), ks[0].d, f.r)}
-        <div class="hv-note" style="text-align:left; margin-top:8px;">One class for all these batches in one room: it shows as one cell, goes to the teacher's schedule once and counts once in the Teaching Report.</div>
+        <div class="sv-tlbl" style="margin:12px 0 6px;">Class test?</div><div class="xw-yn"><button type="button" class="xw-ynb${f.ct ? ' active' : ''}" data-cbct="1">Yes</button><button type="button" class="xw-ynb${!f.ct ? ' active' : ''}" data-cbct="0">No</button></div>
+        ${f.ct ? '' : `<div class="sv-tlbl" style="margin:12px 0 6px;">Room for this class</div>${comboRoomChipsHtml(ks.map((x) => x.b), ks[0].d, f.r)}`}
+        <div class="hv-note" style="text-align:left; margin-top:8px;">${f.ct ? 'One class test for all these batches. The rooms are decided in its plan (Admin, Exams) and show on the duty card, not here. It goes to the teacher once and counts as one class.' : "One class for all these batches in one room: it shows as one cell, goes to the teacher's schedule once and counts once in the Teaching Report."}</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="cbCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="cbSave" style="margin:0;">Combine</button></div>`;
       body.querySelectorAll('[data-cbs]').forEach((b) => b.addEventListener('click', () => { f.s = b.getAttribute('data-cbs'); draw(); }));
       body.querySelectorAll('[data-cbt]').forEach((b) => b.addEventListener('click', () => { f.t = f.t === b.getAttribute('data-cbt') ? '' : b.getAttribute('data-cbt'); draw(); }));
+      body.querySelectorAll('[data-cbct]').forEach((b) => b.addEventListener('click', () => { f.ct = b.getAttribute('data-cbct') === '1'; draw(); }));
       bindComboRoomChips(body, () => f.r, (v) => { f.r = v; }, draw);
       document.getElementById('cbCancel').addEventListener('click', closeHvSheet);
-      document.getElementById('cbSave').addEventListener('click', () => {
+      document.getElementById('cbSave').addEventListener('click', async () => {
         if (!f.s) { showToast('Choose the subject', 'error'); return; }
+        const ctIds = ks.map((x) => x.c && x.c.ctId).filter((v, i, a) => v && a.indexOf(v) === i);
+        if (f.ct && ctIds.length > 1) { showToast('These batches already have separate class tests. Remove one first.', 'error'); return; }
         tgRemember();
         const doc = state.tg.doc; const id = 'cb' + Date.now().toString(36);
-        const keep = {}; ks.forEach((x) => { if (x.c && x.c.test) keep.test = true; });
         ks.forEach((x) => {
           doc.cells = (doc.cells || []).filter((c) => !(c.d === x.d && c.p === x.p && c.b === x.b));
-          const nc = { d: x.d, p: x.p, b: x.b, s: f.s, t: f.t, cb: id }; if (keep.test) nc.test = true; if (f.r) nc.cbRoom = f.r; doc.cells.push(nc);
+          const nc = { d: x.d, p: x.p, b: x.b, s: f.s, t: f.t, cb: id };
+          if (f.ct) { nc.test = true; if (ctIds[0]) nc.ctId = ctIds[0]; } else if (f.r) nc.cbRoom = f.r;
+          doc.cells.push(nc);
         });
         state.tg.sel = null; tgSave(); closeHvSheet(); renderTgGrid();
         showToast(`${ks.length} batches combined into one class`);
+        if (f.ct) { const list = ks.map((x) => ({ d: x.d, p: x.p, b: x.b, c: tgCell(x.d, x.p, x.b) })).filter((x) => x.c && !x.c.ctId); if (list.length) await ctPlanOrJoin(list, {}); }
+        else if (ctIds.length) ctDropPlans(ctIds);
       });
     };
     draw();
@@ -9071,7 +9131,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       batch.delete(state.db.doc(`schedule/${before}/slots/${id}`));
       pub = pub.filter((k) => k !== before + '/' + id);
       if (after && tm) {
-        batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: batchRoomOn(c.b, c.d, doc), subject: effS(c), test: isCt(c), setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
+        batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: tgSlotRoom(doc, c, null), subject: effS(c), test: isCt(c), setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
         pub.push(after + '/' + id);
       }
       if (doc.pubSnap && doc.pubSnap.cells) { doc.pubSnap.cells[cellKey(c)] = cellSig(c); if (doc.pubSnap.full) doc.pubSnap.full[cellKey(c)] = JSON.stringify(c); }
@@ -9143,7 +9203,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     state.tg.sel = null; tgSave(); closeHvSheet(); renderTgGrid();
     const list = parsed.map((x) => ({ d: x.d, p: x.p, b: x.b, c: cellOf(x) })).filter((x) => x.c && !x.c.ctId);
     if (!list.length) { showToast('This class test already has its plan · see the Exams tab'); return; }
-    await ctCreatePlan(list, { start: f.start, end: f.end, name: f.name });
+    await ctPlanOrJoin(list, { start: f.start, end: f.end, name: f.name });
   }
   function openExamCellsSheet() {
     const sel = state.tg.sel; if (!sel || !sel.cells.length) { showToast('Tap the cells of the exam first', 'error'); return; }
@@ -9160,7 +9220,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
  ${(f.diff && bats.length >= 2 && f.type !== 'Class Test') ? bats.map((b) => `<div class="xw-prow"><span>${escapeHtml(gridBatchLabel(b))}</span><select class="text-input" data-exsub="${escapeHtml(b)}"><option value="">Subject</option>${subjectsList().map((t) => `<option value="${escapeHtml(t)}"${f.subs[b] === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select></div>`).join('') : `<div class="sv-tlbl" style="margin:12px 0 6px;">Subject</div><div class="chips">${subjectsList().map((t) => `<button type="button" class="chip${f.subject === t ? ' active' : ''}" data-exs="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>`}
         <div class="sv-tlbl" style="margin:12px 0 6px;">Exam Time</div>
         <div class="sv-times"><div><div class="sv-tlbl">From</div><input class="text-input" type="time" id="exS" value="${escapeHtml(f.start)}"></div><div><div class="sv-tlbl">To</div><input class="text-input" type="time" id="exE" value="${escapeHtml(f.end)}"></div></div>
-        <div class="hv-note" style="text-align:left; margin-top:8px;">${f.type === 'Class Test' ? 'A class test: the classes stay in the timetable and the teacher takes the class. It also goes to the Exams tab for rooms and invigilators. The class counts for a teacher only when he is on the duty list and logs the class.' : 'The exam takes the place of these classes (they come back if you remove the exam). It also appears in the Exams tab for rooms and invigilators.'}</div>
+        <div class="hv-note" style="text-align:left; margin-top:8px;">${f.type === 'Class Test' ? 'A class test: the classes stay in the timetable and the teacher takes the class. It also goes to the Exams tab for rooms and invigilators. The class counts for a teacher only when he is on the duty list and logs the class. If one teacher takes the test of several batches in the same period, they become one combined class.' : 'The exam takes the place of these classes (they come back if you remove the exam). It also appears in the Exams tab for rooms and invigilators.'}</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="exCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="exOk" style="margin:0;">Save</button></div>`;
       body.querySelectorAll('[data-ext]').forEach((x) => x.addEventListener('click', () => { f.type = f.type === x.getAttribute('data-ext') ? '' : x.getAttribute('data-ext'); keepTimes(); draw(); }));
       body.querySelectorAll('[data-exs]').forEach((x) => x.addEventListener('click', () => { f.subject = f.subject === x.getAttribute('data-exs') ? '' : x.getAttribute('data-exs'); keepTimes(); draw(); }));
@@ -9380,7 +9440,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     if (wasPub && before !== after) {
       const tm = cellTimes(doc, c);
       batch.delete(state.db.doc(`schedule/${before}/slots/${id}`));
-      if (after && tm) batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: batchRoomOn(c.b, c.d, doc), subject: effS(c), test: isCt(c), setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
+      if (after && tm) batch.set(state.db.doc(`schedule/${after}/slots/${id}`), { day: WD[dateObj(c.d).getDay()], date: c.d, time: tm.start, duration: Math.max(5, hhmmToMin(tm.end) - hhmmToMin(tm.start)), label: c.b, room: tgSlotRoom(doc, c, null), subject: effS(c), test: isCt(c), setBy: state.teacherId, setByName: (state.user && state.user.name) || 'Coordinator', ttId: doc._id, subFor: c.sub ? c.sub.for : null, subForName: c.sub ? ttName(c.sub.for) : null, createdAt: Date.now() });
       doc.published = pub.filter((k) => k !== before + '/' + id).concat(after ? [after + '/' + id] : []);
     }
     // A substitute on a published class goes live at once, so it is part of the published copy too
@@ -17601,7 +17661,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         const m = classDuration(c); const u = classUnits(c);
         t.classes += u; t.mins += m;
         if (hasWs(c)) t.ws++;
-        t.tests += testCount(c);
+        t.tests += testCountT(c);
         if (hasMat(c)) t.mat = (t.mat || 0) + 1;
         if (c.homework) t.hw++;
         const b = entryBatchLabel(c);
