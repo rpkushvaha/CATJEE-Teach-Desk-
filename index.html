@@ -4627,7 +4627,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.14 · updated 16 Nov 2026</div>
+          <div class="dnote">Version 15.15 · updated 16 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10938,12 +10938,12 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const D = state.dbt; let h = `<div class="dbt-zc"><div class="dbt-zh">Confirm · ${dbtDmy(D.date)}</div>`; let open = 0;
     ['9', '10'].forEach((cls) => DBT_GRP.forEach((gp) => {
       const n = dbtAskedOf(cls, gp); const z = D.zero[dbtZid(D.date, cls, gp)]; let st = ''; let btn = '';
-      if (n > 0) st = `<span class="dbt-zs">Doubts hue (${n})</span>`;
+      if (n > 0) st = `<span class="dbt-zs">Doubts asked (${n})</span>`;
       else if (z) { st = `<span class="dbt-zs">Zero confirmed<br><small>${escapeHtml(z.byName || '')}${z.at ? ' · ' + escapeHtml(dbtClock(z.at)) : ''}</small></span>`; if (!ro) btn = `<button type="button" class="chip" data-dbt-zu="${cls}|${gp}">Undo</button>`; }
-      else { open += 1; st = '<span class="dbt-zs dim">Confirm nahi hua</span>'; if (!ro) btn = `<button type="button" class="chip" data-dbt-zc="${cls}|${gp}">Confirm zero</button>`; }
+      else { open += 1; st = '<span class="dbt-zs dim">Not confirmed</span>'; if (!ro) btn = `<button type="button" class="chip" data-dbt-zc="${cls}|${gp}">Confirm zero</button>`; }
       h += `<div class="dbt-zr"><b>Class ${cls} ${gp}</b>${st}${btn}</div>`;
     }));
-    if (!ro && open > 1) h += '<button type="button" class="chip" data-dbt-zall="1" style="width:100%;margin-top:6px;">Sab zero confirm karo</button>';
+    if (!ro && open > 1) h += '<button type="button" class="chip" data-dbt-zall="1" style="width:100%;margin-top:6px;">Confirm all as zero</button>';
     return h + '</div>';
   }
   async function dbtZeroSet(items) {
