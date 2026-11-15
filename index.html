@@ -2758,6 +2758,12 @@
   .dbt-dbtn { flex: 1; }
   .dbt-opt { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
   .dbt-sel { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+  .dbt-zc { border: 1px solid var(--line, #E2E5EA); border-radius: 12px; padding: 8px 12px; margin: 8px 0; }
+  .dbt-zh { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .dbt-zr { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; }
+  .dbt-zr b { flex: 0 0 112px; font-weight: 600; }
+  .dbt-zs { flex: 1; } .dbt-zs.dim { color: #6F6F6F; } .dbt-zs small { color: #6F6F6F; }
+  .dbt-zr .chip { padding: 5px 10px; font-size: 12px; min-height: 0; }
   .dbt-sub { display: flex; justify-content: space-between; align-items: baseline; border-radius: 12px; padding: 9px 12px; margin: 12px 0 4px; font-size: 14px; }
   .dbt-sub span { font-size: 12px; font-weight: 600; color: var(--muted-2); }
   .dbt-row, .dbt-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px; margin-bottom: 6px; }
@@ -4621,7 +4627,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.13 · updated 15 Nov 2026</div>
+          <div class="dnote">Version 15.14 · updated 16 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10830,7 +10836,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   const DBT_GRP = ['Boys', 'Girls'];
   const DBT_SUBTXT = { Maths: 'Math', Science: 'Science', Humanities: 'Humanities', Reasoning: 'Reasoning', General: 'General' };
   const DBT_LOGO = (() => { try { const im = document.querySelector('#logoSplash .sp2'); return im ? im.src : ''; } catch (e) { return ''; } })();
-  state.dbt = { open: false, tab: 'entry', date: '', cls: '9', grp: 'Boys', rows: {}, rowsKey: '', loading: false, err: '', cfg: { fac: [], map: {} }, cfgLoaded: false, draft: {}, noteOpen: {}, addFor: '', pend: [], pendLoaded: false, pendLoading: false, pendCls: 'all', panel: null, rep: { from: '', to: '', quick: 'd2', cls: 'all', grp: 'all', sub: 'all', fac: 'all', status: 'all' }, repRows: [], repKey: '', repLoading: false, pushed: false, msg: '' };
+  state.dbt = { open: false, tab: 'entry', date: '', cls: '9', grp: 'Boys', rows: {}, rowsKey: '', loading: false, err: '', cfg: { fac: [], map: {} }, cfgLoaded: false, draft: {}, noteOpen: {}, addFor: '', pend: [], pendLoaded: false, pendLoading: false, pendCls: 'all', panel: null, rep: { from: '', to: '', quick: 'd2', cls: 'all', grp: 'all', sub: 'all', fac: 'all', status: 'all' }, repRows: [], repKey: '', repLoading: false, pushed: false, msg: '', zero: {}, repZero: [] };
   const dbtN = (v) => { const n = parseInt(v, 10); return isFinite(n) && n > 0 ? Math.min(n, 9999) : 0; };
   const dbtP2 = (n) => String(n).padStart(2, '0');
   const dbtSlug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30) || 'x';
@@ -10875,7 +10881,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const D = state.dbt; const key = D.date; if (D.rowsKey === key && !D.loading) return; D.loading = true; D.err = ''; dbtRender();
     try {
       const sn = await dbtDb().collection('doubts').where('date', '==', key).get();
-      if (D.date !== key) return; D.rows = {}; sn.docs.forEach((d) => { D.rows[d.id] = Object.assign({ id: d.id }, d.data()); }); D.rowsKey = key; D.draft = {};
+      if (D.date !== key) return; D.rows = {}; D.zero = {}; sn.docs.forEach((d) => { const x = Object.assign({ id: d.id }, d.data()); if (x.zero === true) D.zero[d.id] = x; else D.rows[d.id] = x; }); D.rowsKey = key; D.draft = {};
     } catch (e) { D.err = 'Could not read the doubts. Check the internet, and that the Firebase rules include the doubts record.'; D.rowsKey = ''; }
     D.loading = false; dbtRender();
   }
@@ -10897,7 +10903,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const D = state.dbt; const g = dbtRepRange(); const key = g.from + '|' + g.to; if (!force && D.repKey === key) return; if (D.repLoading) return; D.repLoading = true; D.err = ''; dbtRender();
     try {
       const sn = await dbtDb().collection('doubts').where('date', '>=', g.from).where('date', '<=', g.to).get();
-      D.repRows = sn.docs.map((d) => Object.assign({ id: d.id }, d.data())); D.repKey = key;
+      const all = sn.docs.map((d) => Object.assign({ id: d.id }, d.data())); D.repRows = all.filter((r) => r.zero !== true); D.repZero = all.filter((r) => r.zero === true); D.repKey = key;
     } catch (e) { D.err = 'Could not read the report. Check the internet.'; D.repKey = ''; }
     D.repLoading = false; dbtRender();
   }
@@ -10916,13 +10922,52 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       const lines = Object.keys(map).map((k) => map[k]).sort((a, b) => DBT_SUBJ.indexOf(a.sub) - DBT_SUBJ.indexOf(b.sub) || DBT_GRP.indexOf(a.grp) - DBT_GRP.indexOf(b.grp) || a.fac.localeCompare(b.fac));
       const lateL = []; rr.forEach((r) => dbtLate(r).forEach((x) => lateL.push({ date: r.date, grp: r.grp, sub: r.sub, fac: r.fac, n: dbtN(x.n), on: x.on }))); lateL.sort((a, b) => a.date.localeCompare(b.date) || a.on.localeCompare(b.on));
       const tot = lines.reduce((a, l) => ({ asked: a.asked + l.asked, c24: a.c24 + l.c24, later: a.later + l.later, pend: a.pend + l.pend }), { asked: 0, c24: 0, later: 0, pend: 0 });
-      return { cls, lines, lateL, tot, rows: rr };
-    }).filter((s) => s.rows.length || R.cls !== 'all');
+      const sec = { cls, lines, lateL, tot, rows: rr }; sec.zeros = dbtZeroLines(sec, g); return sec;
+    }).filter((s) => s.rows.length || s.zeros.length || R.cls !== 'all');
     const sess = dbtSess(g.to);
     return { g, secs, sess, today: t, rows };
   }
   const dbtRangeTxt = (g, long) => g.from === g.to ? dbtDmyLong(g.from) : dbtDmyLong(g.from) + ' to ' + dbtDmyLong(g.to);
   const dbtSubLbl = (s) => s.sub + ' (' + s.grp + ') · ' + s.fac;
+
+  // ----- zero-doubt confirmation (one small record per day, class and group) -----
+  const dbtZid = (date, cls, grp) => 'zero_' + date + '_' + cls + '_' + grp;
+  const dbtAskedOf = (cls, grp) => { const D = state.dbt; return Object.keys(D.rows).reduce((a, id) => { const r = D.rows[id]; return a + (r.date === D.date && String(r.cls) === cls && r.grp === grp ? dbtN(r.asked) : 0); }, 0); };
+  const dbtClock = (ms) => { try { return new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }); } catch (e) { return ''; } };
+  function dbtZeroHtml(ro) {
+    const D = state.dbt; let h = `<div class="dbt-zc"><div class="dbt-zh">Confirm · ${dbtDmy(D.date)}</div>`; let open = 0;
+    ['9', '10'].forEach((cls) => DBT_GRP.forEach((gp) => {
+      const n = dbtAskedOf(cls, gp); const z = D.zero[dbtZid(D.date, cls, gp)]; let st = ''; let btn = '';
+      if (n > 0) st = `<span class="dbt-zs">Doubts hue (${n})</span>`;
+      else if (z) { st = `<span class="dbt-zs">Zero confirmed<br><small>${escapeHtml(z.byName || '')}${z.at ? ' · ' + escapeHtml(dbtClock(z.at)) : ''}</small></span>`; if (!ro) btn = `<button type="button" class="chip" data-dbt-zu="${cls}|${gp}">Undo</button>`; }
+      else { open += 1; st = '<span class="dbt-zs dim">Confirm nahi hua</span>'; if (!ro) btn = `<button type="button" class="chip" data-dbt-zc="${cls}|${gp}">Confirm zero</button>`; }
+      h += `<div class="dbt-zr"><b>Class ${cls} ${gp}</b>${st}${btn}</div>`;
+    }));
+    if (!ro && open > 1) h += '<button type="button" class="chip" data-dbt-zall="1" style="width:100%;margin-top:6px;">Sab zero confirm karo</button>';
+    return h + '</div>';
+  }
+  async function dbtZeroSet(items) {
+    const D = state.dbt; if (!dbtCanEdit()) return; const nm = (state.user && state.user.name) || ttName(state.teacherId); let ok = 0;
+    try {
+      for (const it of items) {
+        const id = dbtZid(D.date, it[0], it[1]); if (D.zero[id] || dbtAskedOf(it[0], it[1]) > 0) continue; const ref = dbtDb().doc('doubts/' + id);
+        const sn = await ref.get(); if (sn.exists) { D.zero[id] = Object.assign({ id }, sn.data()); continue; }
+        const o = { zero: true, date: D.date, cls: it[0], grp: it[1], by: state.teacherId, byName: nm, at: Date.now() }; await ref.set(o); D.zero[id] = Object.assign({ id }, o); ok += 1;
+      }
+      D.repKey = ''; dbtRender(); if (ok) showToast(ok + ' confirmed');
+    } catch (e) { showToast('Could not save. Check the internet and try again.', 'error'); dbtRender(); }
+  }
+  async function dbtZeroUndo(cls, gp) {
+    const D = state.dbt; if (!dbtCanEdit()) return; const id = dbtZid(D.date, cls, gp);
+    try { await dbtDb().doc('doubts/' + id).delete(); delete D.zero[id]; D.repKey = ''; dbtRender(); showToast('Confirmation removed'); } catch (e) { showToast('Could not remove. Try again.', 'error'); }
+  }
+  // zero-doubt lines for the report (only groups with no doubts on that day)
+  function dbtZeroLines(s, g) {
+    const R = state.dbt.rep; if (R.sub !== 'all' || R.fac !== 'all') return [];
+    return state.dbt.repZero.filter((z) => z.date >= g.from && z.date <= g.to && String(z.cls) === s.cls && (R.grp === 'all' || z.grp === R.grp) && !s.rows.some((r) => r.date === z.date && r.grp === z.grp))
+      .sort((a, b) => a.date.localeCompare(b.date) || DBT_GRP.indexOf(a.grp) - DBT_GRP.indexOf(b.grp))
+      .map((z) => (g.from === g.to ? `${z.grp}: Doubts asked 0. No doubt came this day.` : `${dbtDmy(z.date)} ${z.grp}: Doubts asked 0. No doubt came.`));
+  }
   // ----- the entry screen -----
   function dbtStepper(rid, f, v, ro) {
     if (ro) return `<span class="dbt-v">${v}</span>`;
@@ -10944,6 +10989,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     if (D.date >= shiftDateStr(t, -1)) h += `<div class="hv-note" style="text-align:left;">The 24-hour window for ${dbtDmy(D.date)} is still running. Pending becomes final after ${dbtDmy(shiftDateStr(D.date, 1))}.</div>`;
     if (D.err) h += `<div class="hv-note" style="text-align:left;">${escapeHtml(D.err)}</div>`;
     if (D.loading) return h + '<div class="skel short"></div>';
+    h += dbtZeroHtml(ro);
     DBT_SUBJ.forEach((sub, i) => {
       const facs = dbtFacsFor(D.cls, D.grp, sub); const tot = facs.reduce((a, f) => a + dbtVals(dbtId(D.date, D.cls, D.grp, sub, f)).asked, 0);
       h += `<div class="dbt-sub" style="background:rgba(${MAT_SUBCOL[i % 5]},.12);"><b>${escapeHtml(sub === 'General' ? 'General (other queries)' : sub)}</b><span data-dbt-subtot="${sub}">${tot} asked</span></div>`;
@@ -11035,10 +11081,11 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const M = dbtModel(); h += `<div class="dbt-rh">DOUBT CLEARING REPORT</div><div class="hv-note" style="text-align:center;">Session ${M.sess} · Doubts asked ${escapeHtml(dbtRangeTxt(M.g))}</div>`;
     let any = false;
     M.secs.forEach((s) => {
-      any = any || s.lines.length; h += `<div class="dbt-sub" style="background:rgba(${MAT_SUBCOL[s.cls === '9' ? 1 : 2]},.12);"><b>Class ${s.cls}</b><span>${s.tot.asked} asked</span></div>`;
-      if (!s.lines.length) { h += '<div class="hv-note" style="text-align:left;">No doubts recorded.</div>'; return; }
+      any = any || s.lines.length || s.zeros.length; h += `<div class="dbt-sub" style="background:rgba(${MAT_SUBCOL[s.cls === '9' ? 1 : 2]},.12);"><b>Class ${s.cls}</b><span>${s.tot.asked} asked</span></div>`;
+      if (!s.lines.length) { h += s.zeros.length ? s.zeros.map((z) => `<div class="hv-note" style="text-align:left;">${escapeHtml(z)}</div>`).join('') : '<div class="hv-note" style="text-align:left;">No doubts recorded.</div>'; return; }
       h += '<table class="dbt-tb"><tr><th>Subject / Faculty</th><th>Asked</th><th>Cleared 24h</th><th>Pending</th></tr>' + s.lines.map((l) => `<tr><td>${escapeHtml(l.sub)} (${escapeHtml(l.grp)})<br><small>${escapeHtml(l.fac)}</small></td><td>${l.asked}</td><td>${l.c24}</td><td>${l.pend}</td></tr>`).join('') + `<tr class="tot"><td>Total</td><td>${s.tot.asked}</td><td>${s.tot.c24}</td><td>${s.tot.pend}</td></tr></table>`;
       if (s.lateL.length) h += '<div class="dbt-lt">Answered later</div><table class="dbt-tb"><tr><th>Asked on</th><th>Subject / Faculty</th><th>No.</th><th>Answered on</th></tr>' + s.lateL.map((l) => `<tr><td>${dbtDmy(l.date)}</td><td>${escapeHtml(l.sub)} (${escapeHtml(l.grp)})<br><small>${escapeHtml(l.fac)}</small></td><td>${l.n}</td><td>${dbtDmy(l.on)}</td></tr>`).join('') + '</table>';
+      s.zeros.forEach((z) => { h += `<div class="hv-note" style="text-align:left;">${escapeHtml(z)}</div>`; });
       h += `<div class="hv-note" style="text-align:left;">Asked ${s.tot.asked} · Cleared within 24h ${s.tot.c24} · Pending ${s.tot.pend} · Answered later ${s.tot.later}</div>`;
     });
     if (any) h += `<div class="rep-lbl">Get it as</div><div class="qa-row" id="dbtOuts" style="grid-template-columns: repeat(2, minmax(0, 1fr));"><button type="button" class="qa-btn qa-wa" id="dbtWaTxt"><span class="qa-l">WhatsApp text</span><span class="qa-s">Share as message</span></button><button type="button" class="qa-btn qa-wa" id="dbtWaPic"><span class="qa-l">WhatsApp picture</span><span class="qa-s">Share picture</span></button><button type="button" class="qa-btn qa-pdf" id="dbtPdf"><span class="qa-l">PDF</span><span class="qa-s">Download</span></button><button type="button" class="qa-btn qa-xl" id="dbtCsv"><span class="qa-l">Excel</span><span class="qa-s">CSV file</span></button></div><div class="admin-sub" id="dbtOutMsg" style="text-align:center;"></div>`;
@@ -11071,7 +11118,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     const blocks = []; // { kind, ... }
     M.secs.forEach((s) => {
       blocks.push({ k: 'sec', t: `Class ${s.cls}  ·  Session ${M.sess}` });
-      if (!s.lines.length) { blocks.push({ k: 'none' }); return; }
+      if (!s.lines.length) { if (s.zeros.length) s.zeros.forEach((z) => blocks.push({ k: 'none', t: z })); else blocks.push({ k: 'none' }); return; }
       blocks.push({ k: 'hd', c: ['Subject / Faculty', 'Total Asked', 'Cleared Within 24h', 'Pending'] });
       s.lines.forEach((l) => blocks.push({ k: 'row', c: [`${l.sub} (${l.grp}) - ${l.fac}`, l.asked, l.c24, l.pend] }));
       blocks.push({ k: 'tot', c: ['Total', s.tot.asked, s.tot.c24, s.tot.pend] });
@@ -11088,7 +11135,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     x.fillStyle = '#E63946'; x.fillRect(pad, hHead - 14, iw, 4); let y = hHead + 6;
     blocks.forEach((b) => {
       if (b.k === 'sec') { x.fillStyle = '#F1F3F6'; x.fillRect(pad, y + 6, iw, 52); tx(b.t, pad + 16, y + 32, 28, true, iw - 32, '#171717', 'left'); y += 64; return; }
-      if (b.k === 'none') { tx('No doubts recorded', W / 2, y + 30, 24, false, iw, '#6F6F6F'); y += 60; return; }
+      if (b.k === 'none') { tx(b.t || 'No doubts recorded', W / 2, y + 30, 24, false, iw, '#6F6F6F'); y += 60; return; }
       if (b.k === 'lt') { tx(b.t, pad + 4, y + 30, 26, true, iw, '#171717', 'left'); y += 54; return; }
       if (b.k === 'sum') { box(pad, y + 8, iw, 58, '#FFF4E0'); tx(b.t, W / 2, y + 37, 24, true, iw - 24, '#171717'); y += 76; return; }
       const cwx = (b.k === 'hd2' || b.k === 'row2') ? cw2 : cw1; const hd = b.k === 'hd' || b.k === 'hd2'; const h = hd ? 60 : rowH; let cx = pad;
@@ -11137,7 +11184,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       };
       M.secs.forEach((s) => {
         w.addSpace(6); w.bodyLine(`Class ${s.cls}`, { size: 12, bold: true });
-        if (!s.lines.length) { w.bodyLine('No doubts recorded.', { size: 10 }); return; }
+        if (!s.lines.length) { if (s.zeros.length) s.zeros.forEach((z) => w.bodyLine(z, { size: 10 })); else w.bodyLine('No doubts recorded.', { size: 10 }); return; }
         tbl([235, 80, 100, 84], ['Subject / Faculty', 'Total Asked', 'Cleared Within 24h', 'Pending'], s.lines.map((l) => [`${l.sub} (${l.grp}) - ${l.fac}`, String(l.asked), String(l.c24), String(l.pend)]).concat([Object.assign(['Total', String(s.tot.asked), String(s.tot.c24), String(s.tot.pend)], { tot: true })]), true);
         if (s.lateL.length) { w.addSpace(6); w.bodyLine('Answered later', { size: 11, bold: true }); tbl([100, 225, 74, 100], ['Original Date Asked', 'Subject / Faculty', 'No. Answered Later', 'Answered On'], s.lateL.map((l) => [dbtDmyLong(l.date), `${l.sub} (${l.grp}) - ${l.fac}`, `${l.n} Doubt${l.n === 1 ? '' : 's'}`, dbtDmyLong(l.on)]), false); }
         w.addSpace(6); w.bodyLine(`Total Doubts Asked ${s.tot.asked}   Cleared Within 24 Hours ${s.tot.c24}   Total Pending ${s.tot.pend}   Total Answered Later ${s.tot.later}`, { size: 10, bold: true });
@@ -11176,6 +11223,9 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
         if ((e = q('[data-dbt-date]'))) { const a = e.getAttribute('data-dbt-date'); if (a === 'pick') { openCalendar(D.date, (v) => { if (v > todayStr()) { showToast('Choose today or an earlier date.', 'error'); return; } D.date = v; D.draft = {}; D.rowsKey = ''; dbtGo(); }); return; } const nd = shiftDateStr(D.date, +a); if (nd > todayStr()) return; D.date = nd; D.draft = {}; D.rowsKey = ''; dbtGo(); return; }
         if ((e = q('[data-dbt-cls]'))) { D.cls = e.getAttribute('data-dbt-cls'); D.addFor = ''; dbtRender(); return; }
         if ((e = q('[data-dbt-grp]'))) { D.grp = e.getAttribute('data-dbt-grp'); D.addFor = ''; dbtRender(); return; }
+        if ((e = q('[data-dbt-zc]'))) { const a = e.getAttribute('data-dbt-zc').split('|'); dbtZeroSet([a]); return; }
+        if ((e = q('[data-dbt-zu]'))) { const a = e.getAttribute('data-dbt-zu').split('|'); dbtZeroUndo(a[0], a[1]); return; }
+        if ((e = q('[data-dbt-zall]'))) { const L = []; ['9', '10'].forEach((c) => DBT_GRP.forEach((gp) => L.push([c, gp]))); dbtZeroSet(L); return; }
         if ((e = q('[data-dbt-st]'))) { const rid = e.getAttribute('data-dbt-st'); const f = e.getAttribute('data-f'); const dd = +e.getAttribute('data-d');
           if (rid === 'panel') { const P = D.panel; if (!P) return; const row = D.pend.find((x) => x.id === P.id); const mx = row ? dbtN(row.pend) : 9999; P.n = Math.max(0, Math.min(mx, dbtN(P.n) + dd)); const inp = pg.querySelector('[data-dbt-in="panel"]'); if (inp) inp.value = P.n; return; }
           const row = q('.dbt-row'); const v = dbtVals(rid); const cur = f === 'asked' ? v.asked : v.c24; const nv = Math.max(0, cur + dd); const meta = dbtMetaOf(rid); dbtDraft(rid, f, nv, meta); const inp = pg.querySelector(`[data-dbt-in="${CSS.escape(rid)}"][data-f="${f}"]`); if (inp) inp.value = nv; dbtPendCell(rid); return; }
