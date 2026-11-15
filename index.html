@@ -4621,7 +4621,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.12 · updated 15 Nov 2026</div>
+          <div class="dnote">Version 15.13 · updated 15 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8796,6 +8796,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       try { await state.db.collection('exams').doc(id).delete(); } catch (err) { /* already gone */ }
       state.adminExams = (state.adminExams || []).filter((x) => x.id !== id);
     }
+    if (state.tgExams) { state.tgExams.list = (state.tgExams.list || []).filter((x) => ids.indexOf(x.id) === -1); state.tgExams.at = 0; }
+    if (state.tab === 'admin' && state.adminTab === 'tt') renderTgGrid();
   }
   const isCt = (c) => !!(c && c.test && c.ctId);
   // ---- one card for a class test (the duty is inside the card) ----
@@ -8987,6 +8989,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
   async function tgMultiClear() {
     const list = tgSelCells().filter((x) => x.c); if (!list.length) { state.tg.sel = null; renderTgGrid(); return; }
     const exIds = list.map((x) => x.c.ex).filter((e, i, a) => e && a.indexOf(e) === i);
+    const ctIds = list.map((x) => x.c.ctId).filter((e, i, a) => e && a.indexOf(e) === i);
     const ok = await showConfirm(`${list.length} cell${list.length === 1 ? '' : 's'} will be emptied.${exIds.length ? `\n${exIds.length} exam${exIds.length === 1 ? '' : 's'} will be removed everywhere (Exams tab and duties too).` : ''}`, 'Clear these cells?', 'Clear');
     if (!ok) return;
     tgRemember();
@@ -8994,6 +8997,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const keys = list.map((x) => x.k);
     state.tg.doc.cells = (state.tg.doc.cells || []).filter((c) => keys.indexOf(cellKey(c)) === -1 && !(c.ex && exIds.indexOf(c.ex) !== -1));
     state.tg.sel = null; tgSave(); renderTgGrid(); showToast('Cells cleared');
+    if (ctIds.length) await ctDropPlans(ctIds);
   }
   async function tgMultiRemoveExam() {
     const exIds = tgSelCells().map((x) => x.c && x.c.ex).filter((e, i, a) => e && a.indexOf(e) === i); if (!exIds.length) return;
