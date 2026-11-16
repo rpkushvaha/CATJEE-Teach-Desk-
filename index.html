@@ -1962,7 +1962,7 @@
   .tm-sw.on i { background: var(--switch-on); } .tm-sw.on i:after { left: 19px; }
   .tm-two { display: flex; gap: 8px; margin-top: 10px; } .tm-dt { flex: 1; min-width: 0; } .tm-dt .tm-lb { margin-top: 0; }
   .tm-dbox { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); font-size: 14.5px; font-weight: 500; color: var(--ink); white-space: nowrap; }
-  .tm-dbox.empty span { color: var(--muted); font-weight: 400; } .tm-dbox svg { flex-shrink: 0; color: var(--gold); }
+  .tm-dbox > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .tm-dbox.empty span { color: var(--muted); font-weight: 400; } .tm-dbox svg { flex-shrink: 0; color: var(--gold); }
   .tm-dbox input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
   .tm-last { padding-bottom: 2px; } .tm-last .team-remove { align-self: auto; width: 100%; text-align: center; padding: 6px 0; font-size: 14px; }
   .team-remove { align-self: flex-start; border: none; background: none; padding: 2px 0; font: inherit; font-size: 13px; font-weight: 600; color: #B91C1C; cursor: pointer; }
@@ -4658,7 +4658,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.26 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 15.27 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7209,7 +7209,7 @@ function renderPartChips() {
         ${(() => { const tm = state.team[uid] || {}; const hid = !!tm.repHideFrom; const dOn = state.team[uid] && state.team[uid].doubts === true; return `<div class="tm-sec"><div class="tm-st">Permissions</div>
         <button type="button" class="tm-sw${dOn ? ' on' : ''}" data-team-doubt="${uid}" role="switch" aria-checked="${dOn}"><span>Can handle doubts</span><i></i></button>
         <div class="tm-lb">Show in reports</div><div class="tm-seg"><button type="button" class="${hid ? '' : 'on'}" data-team-rep="all" data-uid="${uid}">Always</button><button type="button" class="${hid ? 'on' : ''}" data-team-rep="hide" data-uid="${uid}">Hidden for a period</button></div>
-        ${hid ? `<div class="tm-two">${[['repHideFrom', 'Hidden from', 'dd/mm/yyyy'], ['repShowFrom', 'Show again from', 'Optional']].map((x) => { const v = tm[x[0]] || ''; return `<div class="tm-dt"><span class="tm-lb">${x[1]}</span><div class="tm-dbox${v ? '' : ' empty'}"><span>${v ? v.slice(8, 10) + '/' + v.slice(5, 7) + '/' + v.slice(0, 4) : x[2]}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg><input type="date" data-team-repd="${x[0]}" data-uid="${uid}" value="${escapeHtml(v)}" aria-label="${x[1]}"></div></div>`; }).join('')}</div><div class="tm-hint">Show again is optional. Leave it empty to stay hidden until you choose Always.</div>` : ''}</div>`; })()}
+        ${hid ? `<div class="tm-two">${[['repHideFrom', 'Hidden from', 'dd/mm/yyyy'], ['repShowFrom', 'Show again from', 'Optional']].map((x) => { const v = tm[x[0]] || ''; return `<div class="tm-dt"><span class="tm-lb">${x[1]}</span><div class="tm-dbox${v ? '' : ' empty'}" data-ph="${x[2]}"><span>${v ? v.slice(8, 10) + '/' + v.slice(5, 7) + '/' + v.slice(0, 4) : x[2]}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg><input type="date" data-team-repd="${x[0]}" data-uid="${uid}" value="${escapeHtml(v)}" aria-label="${x[1]}"></div></div>`; }).join('')}</div><div class="tm-hint">Show again is optional. Leave it empty to stay hidden until you choose Always.</div>` : ''}</div>`; })()}
         ${uid !== state.teacherId ? `<div class="tm-sec tm-last"><button type="button" class="team-remove" data-team-remove="${uid}">Remove access</button></div>` : ''}
         </div>` : ''}
       </div>`;
@@ -7244,7 +7244,9 @@ function renderPartChips() {
   save(uid, { role, principal: false }, role === 'coordinator' ? `${name} is now a coordinator` : `${name} is now a teacher`);
     }));
     el.querySelectorAll('[data-team-rep]').forEach((b) => b.addEventListener('click', () => { const uid = b.getAttribute('data-uid'); const hide = b.getAttribute('data-team-rep') === 'hide'; const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person'; if (hide) { if (state.team[uid] && state.team[uid].repHideFrom) return; save(uid, { repHideFrom: todayStr(), repShowFrom: '' }, `${name} is hidden in reports from today. Change the dates below.`); } else save(uid, { repHideFrom: '', repShowFrom: '' }, `${name} is shown in reports again`); }));
-    el.querySelectorAll('[data-team-repd]').forEach((inp) => inp.addEventListener('change', () => { const uid = inp.getAttribute('data-uid'); const k = inp.getAttribute('data-team-repd'); const v = inp.value || ''; const other = state.team[uid] || {}; if (k === 'repHideFrom' && !v) { showToast('Choose the date it is hidden from'); return; } if (k === 'repShowFrom' && v && other.repHideFrom && v <= other.repHideFrom) { showToast('"Show again from" must be after "Hidden from"'); inp.value = other.repShowFrom || ''; return; } save(uid, { [k]: v }, 'Saved'); }));
+    el.querySelectorAll('[data-team-repd]').forEach((inp) => inp.addEventListener('change', () => { const uid = inp.getAttribute('data-uid'); const k = inp.getAttribute('data-team-repd'); const v = inp.value || ''; const other = state.team[uid] || {}; if (k === 'repHideFrom' && !v) { showToast('Choose the date it is hidden from'); inp.value = other.repHideFrom || ''; return; } const box = inp.closest('.tm-dbox'); const shownTxt = (x) => { if (!box) return; const sp = box.querySelector('span'); if (sp) sp.textContent = x ? x.slice(8, 10) + '/' + x.slice(5, 7) + '/' + x.slice(0, 4) : (box.getAttribute('data-ph') || ''); box.classList.toggle('empty', !x); };
+      if (k === 'repShowFrom' && v && other.repHideFrom && v <= other.repHideFrom) { showToast('"Show again from" must be after "Hidden from"'); inp.value = other.repShowFrom || ''; shownTxt(other.repShowFrom || ''); return; }
+      shownTxt(v); if (state.team[uid]) state.team[uid][k] = v; save(uid, { [k]: v }, 'Saved'); }));
     el.querySelectorAll('[data-team-doubt]').forEach((b) => b.addEventListener('click', () => { const uid = b.getAttribute('data-team-doubt'); const on = !(state.team[uid] && state.team[uid].doubts === true); const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person'; save(uid, { doubts: on }, on ? `${name} can now handle doubts` : `${name} can no longer handle doubts`); }));
     el.querySelectorAll('[data-team-mkid]').forEach((b) => b.addEventListener('click', () => createIdForExisting(b.getAttribute('data-team-mkid'))));
     el.querySelectorAll('[data-team-remove]').forEach((b) => b.addEventListener('click', async () => {
