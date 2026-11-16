@@ -2759,6 +2759,8 @@
   .dbt-dbtn { flex: 1; }
   .dbt-opt { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
   .dbt-sel { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+  .team-rep { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 8px; }
+  .team-rep label { flex: 1 1 140px; font-size: 12px; color: var(--muted, #6F6F6F); display: flex; flex-direction: column; gap: 4px; }
   .dbt-zc { border: 1px solid var(--line, #E2E5EA); border-radius: 12px; padding: 8px 12px; margin: 8px 0; }
   .dbt-zh { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
   .dbt-zr { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; }
@@ -4628,7 +4630,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.22 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 15.23 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7092,6 +7094,11 @@ function renderPartChips() {
   state.team = state.team || {};
   function isCoordUid(uid) { return !!(state.team[uid] && state.team[uid].role === 'coordinator' && state.team[uid].principal !== true && state.team[uid].status !== 'removed'); }
   function isPrincipalUid(uid) { return !!(state.team[uid] && state.team[uid].role === 'coordinator' && state.team[uid].principal === true && state.team[uid].status !== 'removed'); }
+  // "Show in reports": a teacher can be hidden from the reports for a period (e.g. a long break). A report is hidden only when its WHOLE period falls inside it.
+  function repHiddenFor(uid, from, to) {
+    const t = state.team && state.team[uid]; const hf = t && t.repHideFrom; if (!hf || !from) return false; const sf = t.repShowFrom || '';
+    return from >= hf && (!sf || (to || from) < sf);
+  }
   function isRemovedUid(uid) { return !!(state.team[uid] && state.team[uid].status === 'removed'); }
   // A teacher added by the Admin before he has an account: team/<Staff ID> = { pending: true, name, salutation, whatsapp, birthMd, ... }. When he joins with that Staff ID he is linked (linkPendingStaff).
   function isPendingUid(u) { const t = state.team && state.team[u]; return !!(t && t.pending === true && !t.joinedUid && t.status !== 'removed'); }
@@ -7170,6 +7177,7 @@ function renderPartChips() {
   <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
   <button type="button" class="chip${prin ? ' active' : ''}" data-team-role="principal" data-uid="${uid}">Principal</button>
   </div>
+  ${(() => { const tm = state.team[uid] || {}; const hid = !!tm.repHideFrom; return `<div class="chips team-chips"><span class="team-lbl">Reports</span><button type="button" class="chip${hid ? '' : ' active'}" data-team-rep="all" data-uid="${uid}">Always shown</button><button type="button" class="chip${hid ? ' active' : ''}" data-team-rep="hide" data-uid="${uid}">Hidden for a period</button></div>${hid ? `<div class="team-rep"><label>Hidden from<input type="date" class="text-input" data-team-repd="repHideFrom" data-uid="${uid}" value="${escapeHtml(tm.repHideFrom || '')}"></label><label>Show again from (optional)<input type="date" class="text-input" data-team-repd="repShowFrom" data-uid="${uid}" value="${escapeHtml(tm.repShowFrom || '')}"></label></div>` : ''}`; })()}
   <div class="chips team-chips"><span class="team-lbl">Doubts</span><button type="button" class="chip${(state.team[uid] && state.team[uid].doubts === true) ? ' active' : ''}" data-team-doubt="${uid}">Can handle doubts</button></div>
   ${(() => { const pend = isPendingUid(uid); const own = pend ? '' : ((state.adminNames[uid] && state.adminNames[uid].own) || ''); const ad = pend ? salNorm(state.team[uid] && state.team[uid].salutation) : addrOf(uid); return `<div class="chips team-chips"><span class="team-lbl">Address</span>${['sir', 'maam', 'ji'].map((v) => `<button type="button" class="chip${(ad || own) === v ? ' active' : ''}" data-team-addr="${v}" data-uid="${uid}">${salWord(v)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">${ad ? 'Set by you. The teacher cannot change it.' : (own ? `The teacher chose ${salWord(own)} earlier. This is used until you choose.` : 'Choose how to address this teacher.')}</div>`; })()}
         <div class="chips team-chips">
@@ -7209,6 +7217,8 @@ function renderPartChips() {
   }
   save(uid, { role, principal: false }, role === 'coordinator' ? `${name} is now a coordinator` : `${name} is now a teacher`);
     }));
+    el.querySelectorAll('[data-team-rep]').forEach((b) => b.addEventListener('click', () => { const uid = b.getAttribute('data-uid'); const hide = b.getAttribute('data-team-rep') === 'hide'; const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person'; if (hide) { if (state.team[uid] && state.team[uid].repHideFrom) return; save(uid, { repHideFrom: todayStr(), repShowFrom: '' }, `${name} is hidden in reports from today. Change the dates below.`); } else save(uid, { repHideFrom: '', repShowFrom: '' }, `${name} is shown in reports again`); }));
+    el.querySelectorAll('[data-team-repd]').forEach((inp) => inp.addEventListener('change', () => { const uid = inp.getAttribute('data-uid'); const k = inp.getAttribute('data-team-repd'); const v = inp.value || ''; const other = state.team[uid] || {}; if (k === 'repHideFrom' && !v) { showToast('Choose the date it is hidden from'); return; } if (k === 'repShowFrom' && v && other.repHideFrom && v <= other.repHideFrom) { showToast('"Show again from" must be after "Hidden from"'); inp.value = other.repShowFrom || ''; return; } save(uid, { [k]: v }, 'Saved'); }));
     el.querySelectorAll('[data-team-doubt]').forEach((b) => b.addEventListener('click', () => { const uid = b.getAttribute('data-team-doubt'); const on = !(state.team[uid] && state.team[uid].doubts === true); const name = (state.adminNames[uid] && state.adminNames[uid].name) || 'This person'; save(uid, { doubts: on }, on ? `${name} can now handle doubts` : `${name} can no longer handle doubts`); }));
     el.querySelectorAll('[data-team-mkid]').forEach((b) => b.addEventListener('click', () => createIdForExisting(b.getAttribute('data-team-mkid'))));
     el.querySelectorAll('[data-team-remove]').forEach((b) => b.addEventListener('click', async () => {
@@ -13096,7 +13106,8 @@ Rules:
     // Coordinators are staff, not teachers: they never appear in teacher lists or counts.
     const ids = (state.adminTeacherIds || []).filter((u) => !isPendingUid(u)).concat(Object.keys(state.adminCampus || {}), Object.keys(byTeacherAll))
       .filter((v, i, a) => v && v !== 'unknown' && a.indexOf(v) === i && !isCoordUid(v) && !isRemovedUid(v))
-      .filter((v) => { const tw = teamWings(v); const lw = leadWings(); return !tw.length || tw.some((x) => lw.indexOf(x) !== -1); });
+      .filter((v) => { const tw = teamWings(v); const lw = leadWings(); return !tw.length || tw.some((x) => lw.indexOf(x) !== -1); })
+      .filter((v) => !repHiddenFor(v, date, date) || (byTeacherAll[v] || []).length);
     loadAdminSlots(date, ids, false);
     loadAdminWeek(date, false);
     resolveAdminNames(ids);
@@ -14223,7 +14234,7 @@ Rules:
       if (idx.length > 1 && idx[idx.length - 1] - idx[0] === idx.length - 1) { (sSpans[l.t] = sSpans[l.t] || []).push({ a: idx[0], z: idx[idx.length - 1], v }); return; }
       sRows[l.t] = sRows[l.t] || {}; sRows[l.t][idx[0]] = (sRows[l.t][idx[0]] || 0) + v;
     });
-    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds(true).slice(); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u) && !isCoordUid(u)) ids.push(u); });
+    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds(true).filter((u) => !repHiddenFor(u, D.from, D.to)); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u) && !isCoordUid(u)) ids.push(u); });
     ids.sort(repCmp);
     const hasOther = Object.keys(other).length > 0;
     const list = ids.map((u) => {
