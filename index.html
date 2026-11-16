@@ -4628,7 +4628,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.21 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 15.22 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7870,12 +7870,13 @@ function renderPartChips() {
     if (state.tg.doc && state.tg.doc.sunday) days.push(shiftDateStr(ws, 6));
     return days;
   }
-  function tgCell(d, p, b) { return (state.tg.doc && state.tg.doc.cells || []).find((c) => c.d === d && c.p === p && c.b === b) || null; }
+  function sameBatch(cb, b) { return cb === b || (!!cb && canonBatch(cb) === b); } // a cell saved under an older name of a renamed batch
+  function tgCell(d, p, b) { return (state.tg.doc && state.tg.doc.cells || []).find((c) => c.d === d && c.p === p && sameBatch(c.b, b)) || null; }
   function tgSetCell(d, p, b, val) {
     tgRemember();
     const doc = state.tg.doc;
-    const old = (doc.cells || []).find((c) => c.d === d && c.p === p && c.b === b);
-    doc.cells = (doc.cells || []).filter((c) => !(c.d === d && c.p === p && c.b === b));
+    const old = (doc.cells || []).find((c) => c.d === d && c.p === p && sameBatch(c.b, b));
+    doc.cells = (doc.cells || []).filter((c) => !(c.d === d && c.p === p && sameBatch(c.b, b)));
     if (val) {
       const nc = Object.assign({ d, p, b }, val);
       // a combined class stays combined: subject, teacher and test change for every batch in it
@@ -8608,7 +8609,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
           const pvChg = state.tg.previewMarks && cell && state.tg.prevChg && state.tg.prevChg.keys && state.tg.prevChg.keys[`${d}|${p}|${b}`];
           box(o.x, ry, o.w, rH, pvChg ? '#FFF2B3' : shade);
           // a batch that has an exam this day: its empty periods show "–"
-          if (!cell && (doc.cells || []).some((c) => c.d === d && c.b === b && c.ex)) { txt('–', o.x + o.w / 2, ry + rowH / 2, 16, true); return; }
+          if (!cell && (doc.cells || []).some((c) => c.d === d && sameBatch(c.b, b) && c.ex)) { txt('–', o.x + o.w / 2, ry + rowH / 2, 16, true); return; }
           if (!cell) return;
           if (cell.ex) { fitLines(x, isNoteId(cell.ex) ? [[cell.s, '#000', 12]] : [[cell.s, '#C00000', 12], ...(examTimeTxt(cell) ? [[examTimeTxt(cell), '#C00000', 10]] : [])], o.x + o.w / 2, ry, o.w, rowH); return; }
           const chg = perD[p] && perD[p].changed && (perD[p].start !== o.c.pp.start || perD[p].end !== o.c.pp.end);
@@ -10187,7 +10188,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const g = tgGroup(); const doc = state.tg.doc; if (!g || !doc) return;
     if (tgPendingCount()) { showToast('Publish the changes first — the batch pictures show the published timetable', 'error'); return; }
     const days = ((doc.pubDays || []).length ? doc.pubDays : tgDays()).slice().sort();
-    const bats = g.batches.filter((b) => (doc.cells || []).some((c) => c.b === b && days.indexOf(c.d) !== -1));
+    const bats = g.batches.filter((b) => (doc.cells || []).some((c) => sameBatch(c.b, b) && days.indexOf(c.d) !== -1));
     if (!bats.length) { showToast('No classes published yet', 'error'); return; }
     const files = []; const urls = [];
     for (const b of bats) {
@@ -14366,7 +14367,10 @@ Rules:
     const wSN = 50, wName = 220, wC = 92; let wTot = 80;
     if (T.subOn) { const mc = document.createElement('canvas').getContext('2d'); mc.font = '700 13px Calibri, Arial, sans-serif'; T.list.forEach((r) => { if (r.sub) wTot = Math.max(wTot, Math.ceil(mc.measureText(trepTotText(r.total, r.sub)).width) + 22); }); }
     const W = wSN + wName + wC * nC + wTot + 2;
-    const hT = 36, hH = 28, hR = 26; const H = hT * 2 + hH * 2 + hR * (T.list.length + 1) + 2;
+    const wrapLab = (label, fits) => { const words = String(label).split(/\s+/).filter(Boolean); const out = []; let cur = ''; words.forEach((w) => { const t = cur ? cur + ' ' + w : w; if (!cur || fits(t)) cur = t; else { out.push(cur); cur = w; } }); if (cur) out.push(cur); return out; };
+    const mcx = document.createElement('canvas').getContext('2d'); mcx.font = '700 13px Calibri, Arial, sans-serif';
+    const labLines = T.cols.map((c) => wrapLab(c.label, (t) => mcx.measureText(t).width <= wC - 10));
+    const hT = 36, hH = 28, hR = 26; const hS = Math.max(hH, Math.max(1, ...labLines.map((l) => l.length)) * 16 + 10); const H = hT * 2 + hH + hS + hR * (T.list.length + 1) + 2;
     const cv = document.createElement('canvas'); const sc = 2; cv.width = W * sc; cv.height = H * sc;
     const x = cv.getContext('2d'); x.scale(sc, sc); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
     const box = (bx, by, bw, bh, fill) => { x.fillStyle = fill; x.fillRect(bx, by, bw, bh); x.strokeStyle = '#E1E1E5'; x.lineWidth = 1; x.strokeRect(bx + 0.5, by + 0.5, bw, bh); };
@@ -14385,15 +14389,15 @@ Rules:
     box(1, y, W - 2, hT, '#fff'); tx(trepTitleText(), W / 2, y + hT / 2, 20, true, 'center', 0, '#171717'); x.fillStyle = '#E63946'; x.fillRect(1, y + hT - 3, W - 2, 3); y += hT;
   box(1, y, W - 2, hT, '#FFF5F6'); tx(`${trepPer()}: ${trepTitle()}`, W / 2, y + hT / 2, 18, true, 'center', 0, '#5A5A60'); y += hT;
   const x0 = 1 + wSN + wName; const cx = (i) => x0 + wC * i;
-  box(1, y, wSN, hH * 2, TREP_TINT.plain[0]); tx('S.N', 1 + wSN / 2, y + hH, 13, true);
-  box(1 + wSN, y, wName, hH * 2, TREP_TINT.plain[0]); tx('NAME OF FACULTY', 1 + wSN + wName / 2, y + hH, 13, true);
+  box(1, y, wSN, hH + hS, TREP_TINT.plain[0]); tx('S.N', 1 + wSN / 2, y + (hH + hS) / 2, 13, true);
+  box(1 + wSN, y, wName, hH + hS, TREP_TINT.plain[0]); tx('NAME OF FACULTY', 1 + wSN + wName / 2, y + (hH + hS) / 2, 13, true);
   T.heads.forEach((hd) => { const tn = trepTint(hd.head, (T.cols[hd.start] || {}).label); box(cx(hd.start), y, wC * (hd.end - hd.start + 1), hH, tn[0]); tx(hd.head, cx(hd.start) + wC * (hd.end - hd.start + 1) / 2, y + hH / 2, 13, true, 'center', wC * (hd.end - hd.start + 1) - 6); });
   if (T.hasOther) { box(cx(T.cols.length), y, wC, hH, TREP_TINT.found[0]); tx('OTHER', cx(T.cols.length) + wC / 2, y + hH / 2, 13, true); }
-  T.cols.forEach((c, i) => { box(cx(i), y + hH, wC, hH, trepTint(c.head, c.label)[1]); tx(c.label, cx(i) + wC / 2, y + hH * 1.5, 13, true, 'center', wC - 6); });
-  if (T.hasOther) { box(cx(T.cols.length), y + hH, wC, hH, TREP_TINT.found[1]); tx('Batches', cx(T.cols.length) + wC / 2, y + hH * 1.5, 12, true); }
-  box(cx(nC), y, wTot, hH * 2, TREP_TINT.total[0]); tx('TOTAL', cx(nC) + wTot / 2, y + hH, 13, true);
+  T.cols.forEach((c, i) => { box(cx(i), y + hH, wC, hS, trepTint(c.head, c.label)[1]); const L = labLines[i]; L.forEach((ln, k) => tx(ln, cx(i) + wC / 2, y + hH + hS * (k + 1) / (L.length + 1), 13, true, 'center', wC - 6)); });
+  if (T.hasOther) { box(cx(T.cols.length), y + hH, wC, hS, TREP_TINT.found[1]); tx('Batches', cx(T.cols.length) + wC / 2, y + hH + hS / 2, 12, true); }
+  box(cx(nC), y, wTot, hH + hS, TREP_TINT.total[0]); tx('TOTAL', cx(nC) + wTot / 2, y + (hH + hS) / 2, 13, true);
     
-    y += hH * 2;
+    y += hH + hS;
     T.list.forEach((row, ri) => {
       box(1, y, wSN, hR, '#fff'); tx(String(ri + 1), 1 + wSN / 2, y + hR / 2, 13);
       box(1 + wSN, y, wName, hR, '#fff'); tx(row.name, 1 + wSN + 6, y + hR / 2, 13, false, 'left', wName - 10);
@@ -14421,14 +14425,16 @@ Rules:
     const header = () => {
       trowL([{ x: 0, w: full, t: trepTitleText(), bold: true, size: 14, fill: GOLD, color: [0.09, 0.09, 0.09] }], 22);
       trowL([{ x: 0, w: full, t: `${trepPer()}: ${trepTitle()}`, bold: true, size: 12, fill: ORG, color: [0.35, 0.35, 0.38] }], 20);
-      const r1 = [{ x: 0, w: wSN, t: 'S.N', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.plain[0]), rows: 2 }, { x: wSN, w: wName, t: 'NAME OF FACULTY', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.plain[0]), rows: 2 }];
+      const wrapP = (label) => { const words = String(label).split(/\s+/).filter(Boolean); const out = []; let cur = ''; words.forEach((wd) => { const t = cur ? cur + ' ' + wd : wd; if (!cur || pdfTextW(t, 7.5, true) <= wC - 6) cur = t; else { out.push(cur); cur = wd; } }); if (cur) out.push(cur); return out; };
+      const pl = T.cols.map((c) => wrapP(c.label)); const h2 = Math.max(hh, Math.max(1, ...pl.map((l) => l.length)) * 9.5 + 6);
+      const r1 = [{ x: 0, w: wSN, t: 'S.N', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.plain[0]), ch: hh + h2 }, { x: wSN, w: wName, t: 'NAME OF FACULTY', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.plain[0]), ch: hh + h2 }];
       T.heads.forEach((hd) => r1.push({ x: xc(hd.start), w: wC * (hd.end - hd.start + 1), t: hd.head, bold: true, size: 8.5, fill: rgbOf(trepTint(hd.head, (T.cols[hd.start] || {}).label)[0]) }));
       if (T.hasOther) r1.push({ x: xc(T.cols.length), w: wC, t: 'OTHER', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.found[0]) });
-      r1.push({ x: xc(nC), w: wTot, t: 'TOTAL', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.total[0]), rows: 2 });
+      r1.push({ x: xc(nC), w: wTot, t: 'TOTAL', bold: true, size: 8.5, fill: rgbOf(TREP_TINT.total[0]), ch: hh + h2 });
       trowL(r1, hh);
-      const r2 = T.cols.map((c, i) => ({ x: xc(i), w: wC, t: c.label, bold: true, size: 7.5, fill: rgbOf(trepTint(c.head, c.label)[1]) }));
+      const r2 = T.cols.map((c, i) => ({ x: xc(i), w: wC, lines: pl[i].map((t) => [{ t }]), bold: true, size: 7.5, fill: rgbOf(trepTint(c.head, c.label)[1]) }));
       if (T.hasOther) r2.push({ x: xc(T.cols.length), w: wC, t: 'Batches', bold: true, size: 7.5, fill: rgbOf(TREP_TINT.found[1]) });
-      trowL(r2, hh);
+      trowL(r2, h2);
     };
     header();
     T.list.forEach((row, ri) => {
@@ -17651,7 +17657,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     function trow(cells, h) {
       ensure(h + 8); const top = y + 4;
       cells.forEach((c) => {
-        const ch = h * (c.rows || 1); const cb = top - ch; const X = marginX + c.x;
+        const ch = c.ch || h * (c.rows || 1); const cb = top - ch; const X = marginX + c.x;
         if (c.fill) currentOps.push({ kind: 'rect', x: X, y: cb, w: c.w, h: ch, fill: c.fill });
         [[X, top, X + c.w, top], [X, cb, X + c.w, cb], [X, cb, X, top], [X + c.w, cb, X + c.w, top]].forEach((q) => currentOps.push({ kind: 'line', x1: q[0], y1: q[1], x2: q[2], y2: q[3], gray: c.lg != null ? c.lg : 0.55 }));
         const lines = c.lines || [c.parts || [{ t: c.t == null ? '' : String(c.t) }]]; let size = c.size || 9;
