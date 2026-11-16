@@ -2746,8 +2746,9 @@
   .mat-row .tx b { display: block; font-size: 13px; margin-bottom: 3px; }
   .mat-row .tx small { display: block; color: var(--muted-2); font-size: 12px; margin-top: 2px; }
   .mat-tag { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 8px; margin-right: 5px; color: rgb(var(--mcr)); background: rgba(var(--mcr), .12); }
-  #dbtPage { position: fixed; inset: 0; z-index: 85; background: var(--paper); display: none; flex-direction: column; }
+  #dbtPage { position: fixed; inset: 0 0 var(--nav-h, 66px) 0; z-index: 85; background: var(--paper); display: none; flex-direction: column; }
   #dbtPage.open { display: flex; }
+  @media (min-width: 1100px) and (min-height: 560px) { #dbtPage { left: 232px; bottom: 0; } }
   .dbt-top { display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 8px; }
   .dbt-title { font-size: 17px; font-weight: 700; }
   #dbtTabs { display: flex; gap: 6px; padding: 0 14px 8px; }
@@ -4627,7 +4628,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.17 · updated 16 Nov 2026</div>
+          <div class="dnote">Version 15.18 · updated 16 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11205,6 +11206,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   function dbtOpen(tab) {
     const D = state.dbt; if (!dbtCanOpen()) return; const pg = document.getElementById('dbtPage'); if (!pg) return;
     if (!D.date) D.date = todayStr(); if (tab) D.tab = tab;
+    try { syncNavH(); } catch (e) { /* ignore */ }
     D.open = true; pg.classList.add('open'); pg.setAttribute('aria-hidden', 'false'); document.body.classList.add('dbt-on');
     if (!D.pushed) { navPush({ tab: state.tab, sub: state.adminTab }); D.pushed = true; }
     dbtGo();
@@ -16380,6 +16382,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
   function switchTab(tab) {
     // a sheet left open (e.g. Notifications) closes when moving to another screen
     { const sh = document.getElementById('hvSheet'); if (sh && sh.classList.contains('open') && tab !== state.tab) closeHvSheet(); }
+    { const dp = document.getElementById('dbtPage'); if (dp && dp.classList.contains('open')) dbtClose(true); }
     if (!state.navBusy && state.tab && tab !== state.tab) navPush({ tab: state.tab, sub: state.adminTab });
     // Leaving History resets its filters and search, so they never stay stuck unnoticed.
     if (state.tab === 'history' && tab !== 'history' && state.hv && !(state.editingId || state.addTargetDate)) {
