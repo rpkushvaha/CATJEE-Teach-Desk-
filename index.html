@@ -4627,7 +4627,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.15 · updated 16 Nov 2026</div>
+          <div class="dnote">Version 15.16 · updated 16 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -10920,7 +10920,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       const rr = rows.filter((r) => String(r.cls) === cls); const map = {};
       rr.forEach((r) => { const k = r.grp + '|' + r.sub + '|' + r.fac; const a = map[k] = map[k] || { grp: r.grp, sub: r.sub, fac: r.fac, asked: 0, c24: 0, later: 0, pend: 0 }; a.asked += dbtN(r.asked); a.c24 += dbtN(r.c24); a.later += dbtLateSum(r); a.pend += dbtN(r.pend); });
       const lines = Object.keys(map).map((k) => map[k]).sort((a, b) => DBT_SUBJ.indexOf(a.sub) - DBT_SUBJ.indexOf(b.sub) || DBT_GRP.indexOf(a.grp) - DBT_GRP.indexOf(b.grp) || a.fac.localeCompare(b.fac));
-      const lateL = []; rr.forEach((r) => dbtLate(r).forEach((x) => lateL.push({ date: r.date, grp: r.grp, sub: r.sub, fac: r.fac, n: dbtN(x.n), on: x.on }))); lateL.sort((a, b) => a.date.localeCompare(b.date) || a.on.localeCompare(b.on));
+      const lateL = []; rr.forEach((r) => dbtLate(r).forEach((x) => lateL.push({ date: r.date, grp: r.grp, sub: r.sub, fac: r.fac, n: dbtN(x.n), on: x.on }))); { const mm = {}; const out = []; lateL.forEach((x) => { const k = [x.date, x.grp, x.sub, x.fac, x.on].join('|'); if (mm[k]) mm[k].n += x.n; else { mm[k] = x; out.push(x); } }); lateL.length = 0; out.forEach((x) => lateL.push(x)); } lateL.sort((a, b) => a.date.localeCompare(b.date) || a.on.localeCompare(b.on));
       const tot = lines.reduce((a, l) => ({ asked: a.asked + l.asked, c24: a.c24 + l.c24, later: a.later + l.later, pend: a.pend + l.pend }), { asked: 0, c24: 0, later: 0, pend: 0 });
       const sec = { cls, lines, lateL, tot, rows: rr }; sec.zeros = dbtZeroLines(sec, g); return sec;
     }).filter((s) => s.rows.length || s.zeros.length || R.cls !== 'all');
@@ -11104,7 +11104,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
         const a = ls.reduce((x, l) => x + l.asked, 0); const c = ls.reduce((x, l) => x + l.c24, 0); const lt = ls.reduce((x, l) => x + l.later, 0); const p = ls.reduce((x, l) => x + l.pend, 0);
         const names = ls.map((l) => l.fac).join(', ');
         L.push(`*${DBT_SUBTXT[sub]}(${gp})-${names ? ' ' + names : ''}*`, `*Pending – ${dbtP2(p)}*`, `Total no of Queries Asked-${dbtP2(a)}`, `Queries Solved-${dbtP2(c + lt)}`);
-        const ev = s.lateL.filter((x) => x.sub === sub && x.grp === gp); if (ev.length) L.push('(Answered later: ' + ev.map((x) => `${x.n} on ${dbtDot(x.on)}`).join(', ') + ')');
+        const ev = s.lateL.filter((x) => x.sub === sub && x.grp === gp); if (ev.length) { const byOn = {}; const ord = []; ev.forEach((x) => { if (byOn[x.on] == null) { byOn[x.on] = 0; ord.push(x.on); } byOn[x.on] += x.n; }); L.push('(Answered later: ' + ord.map((o) => `${byOn[o]} on ${dbtDot(o)}`).join(', ') + ')'); }
         L.push('');
       }));
       L.push(`Total Asked-${dbtP2(s.tot.asked)} | Cleared in 24h-${dbtP2(s.tot.c24)} | Answered later-${dbtP2(s.tot.later)} | Pending-${dbtP2(s.tot.pend)}`);
