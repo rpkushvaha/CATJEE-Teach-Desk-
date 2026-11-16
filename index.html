@@ -4628,7 +4628,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.20 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 15.21 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -8124,6 +8124,7 @@ function renderPartChips() {
   function gridBatchLabel(b) {
     const m = String(b).match(/class\s*(\d+)\s*[-–]?\s*(.*)$/i);
     if (!m) return b;
+    if (m.index > 0 && /\S/.test(String(b).slice(0, m.index))) return `${String(b).slice(0, m.index).replace(/[\s\-–]+$/, '')}\u00a0${m[1]}`; // e.g. "Remedial class 10" → "Remedial 10", not just "10"
     const rest = m[2].replace(/batch\s*/i, 'B').replace(/evening/i, 'Eve').trim();
     return rest ? `${m[1]}${rest.length <= 3 ? '\u00a0·\u00a0' : ' · '}${rest}` : m[1];
   }
