@@ -4627,7 +4627,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.16 · updated 16 Nov 2026</div>
+          <div class="dnote">Version 15.17 · updated 16 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -11123,6 +11123,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       s.lines.forEach((l) => blocks.push({ k: 'row', c: [`${l.sub} (${l.grp}) - ${l.fac}`, l.asked, l.c24, l.pend] }));
       blocks.push({ k: 'tot', c: ['Total', s.tot.asked, s.tot.c24, s.tot.pend] });
       if (s.lateL.length) { blocks.push({ k: 'lt', t: 'Answered later' }); blocks.push({ k: 'hd2', c: ['Original Date Asked', 'Subject / Faculty', 'No. Answered Later', 'Answered On'] }); s.lateL.forEach((l) => blocks.push({ k: 'row2', c: [dbtDmyLong(l.date), `${l.sub} (${l.grp}) - ${l.fac}`, `${l.n} Doubt${l.n === 1 ? '' : 's'}`, dbtDmyLong(l.on)] })); }
+      s.zeros.forEach((z) => blocks.push({ k: 'none', t: z }));
       blocks.push({ k: 'sum', t: `Total Doubts Asked ${s.tot.asked}   ·   Cleared Within 24 Hours ${s.tot.c24}   ·   Total Pending ${s.tot.pend}   ·   Total Answered Later ${s.tot.later}` });
     });
     const cw1 = [0.46, 0.14, 0.24, 0.16]; const cw2 = [0.24, 0.40, 0.18, 0.18]; const iw = W - pad * 2;
@@ -11165,6 +11166,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
         rows.forEach((r) => dbtLate(r).forEach((x) => L.push([r.date, r.cls, r.grp, r.sub, r.fac, dbtN(x.n), x.on])));
         const T = M.secs.reduce((a, s) => ({ asked: a.asked + s.tot.asked, c24: a.c24 + s.tot.c24, later: a.later + s.tot.later, pend: a.pend + s.tot.pend }), { asked: 0, c24: 0, later: 0, pend: 0 });
         L.push([], ['Total Doubts Asked', T.asked], ['Total Cleared Within 24 Hours', T.c24], ['Total Pending', T.pend], ['Total Answered Later', T.later]);
+        { const zl = []; M.secs.forEach((s) => s.zeros.forEach((z) => zl.push(['Class ' + s.cls + ' - ' + z]))); if (zl.length) { L.push([], ['No doubts (confirmed)']); zl.forEach((r) => L.push(r)); } }
         saveFile(base + '.csv', '﻿' + L.map((q) => q.map(csvEscape).join(',')).join('\n'), 'text/csv'); say(''); showToast('Excel file saved'); return;
       }
       if (kind === 'pic') {
@@ -11187,6 +11189,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
         if (!s.lines.length) { if (s.zeros.length) s.zeros.forEach((z) => w.bodyLine(z, { size: 10 })); else w.bodyLine('No doubts recorded.', { size: 10 }); return; }
         tbl([235, 80, 100, 84], ['Subject / Faculty', 'Total Asked', 'Cleared Within 24h', 'Pending'], s.lines.map((l) => [`${l.sub} (${l.grp}) - ${l.fac}`, String(l.asked), String(l.c24), String(l.pend)]).concat([Object.assign(['Total', String(s.tot.asked), String(s.tot.c24), String(s.tot.pend)], { tot: true })]), true);
         if (s.lateL.length) { w.addSpace(6); w.bodyLine('Answered later', { size: 11, bold: true }); tbl([100, 225, 74, 100], ['Original Date Asked', 'Subject / Faculty', 'No. Answered Later', 'Answered On'], s.lateL.map((l) => [dbtDmyLong(l.date), `${l.sub} (${l.grp}) - ${l.fac}`, `${l.n} Doubt${l.n === 1 ? '' : 's'}`, dbtDmyLong(l.on)]), false); }
+        if (s.zeros.length) { w.addSpace(4); s.zeros.forEach((z) => w.bodyLine(z, { size: 10 })); }
         w.addSpace(6); w.bodyLine(`Total Doubts Asked ${s.tot.asked}   Cleared Within 24 Hours ${s.tot.c24}   Total Pending ${s.tot.pend}   Total Answered Later ${s.tot.later}`, { size: 10, bold: true });
       });
       saveFile(base + '.pdf', w.finishBlob()); say(''); showToast('PDF saved');
