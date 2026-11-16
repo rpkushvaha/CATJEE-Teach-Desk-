@@ -1937,6 +1937,31 @@
   .sid-actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; }
   .sid-new { display: flex; flex-direction: column; gap: 8px; align-items: stretch; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 12px; }
   .sid-code { font-size: 26px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-align: center; }
+  /* Team sheet: grouped sections */
+  .tm { gap: 0 !important; }
+  .tm-sec { padding: 14px 0; border-top: 1px solid var(--line); }
+  .tm-sec:first-child { border-top: none; padding-top: 2px; }
+  .tm-st { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 10px; }
+  .tm-lb { display: block; font-size: 12.5px; font-weight: 500; color: var(--muted); margin: 12px 0 5px; }
+  .tm-st + .tm-lb { margin-top: 0; }
+  .tm .text-input { width: 100%; min-height: 42px; font-size: 14.5px; box-sizing: border-box; }
+  .tm-line { display: flex; gap: 8px; align-items: center; } .tm-line .text-input { flex: 1; min-width: 0; }
+  .tm-hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+  .tm-seg { display: flex; gap: 2px; padding: 3px; background: var(--neutral-soft); border-radius: 12px; }
+  .tm-seg button { flex: 1; border: none; background: none; font: inherit; font-size: 13.5px; font-weight: 500; color: var(--muted); padding: 9px 4px; border-radius: 9px; cursor: pointer; white-space: nowrap; min-width: 0; }
+  .tm-seg button.on { background: var(--card); color: var(--gold); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+  .tm-fold { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); font: inherit; font-size: 14.5px; color: var(--ink); cursor: pointer; text-align: left; }
+  .tm-fold-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; } .tm-fold-t.none { color: var(--muted); font-weight: 400; }
+  .tm-fold-c { display: inline-flex; color: var(--muted); transition: transform .2s; } .tm-fold-c.up { transform: rotate(180deg); }
+  .tm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tm-chip { font: inherit; font-size: 13px; font-weight: 500; padding: 6px 11px; border-radius: 99px; border: 1px solid var(--line); background: var(--card); color: var(--muted); cursor: pointer; }
+  .tm-chip.active { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); font-weight: 600; }
+  .tm-sw { width: 100%; display: flex; justify-content: space-between; align-items: center; border: none; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--ink); padding: 4px 0; cursor: pointer; }
+  .tm-sw i { width: 40px; height: 23px; border-radius: 99px; background: #C9CDD2; position: relative; transition: background .2s; flex-shrink: 0; }
+  .tm-sw i:after { content: ""; position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: left .2s; }
+  .tm-sw.on i { background: var(--switch-on); } .tm-sw.on i:after { left: 19px; }
+  .tm-two { display: flex; gap: 8px; margin-top: 10px; } .tm-two label { flex: 1; min-width: 0; } .tm-two .tm-lb { margin-top: 0; }
+  .tm-last { padding-bottom: 2px; } .tm-last .team-remove { align-self: auto; width: 100%; text-align: center; padding: 6px 0; font-size: 14px; }
   .team-remove { align-self: flex-start; border: none; background: none; padding: 2px 0; font: inherit; font-size: 13px; font-weight: 600; color: #B91C1C; cursor: pointer; }
   .team-removed { border-top: 1px dashed var(--line); margin-top: 6px; padding-top: 6px; }
   .team-rm-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; color: var(--muted); }
@@ -4630,7 +4655,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.23 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 15.25 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7169,23 +7194,20 @@ function renderPartChips() {
           <div class="team-id">${sid ? `Staff ID · <b>${escapeHtml(sid)}</b>` : `<button type="button" class="hv-back" data-team-mkid="${uid}" style="padding:0;">Generate Staff ID</button>`}</div><div class="team-info">${escapeHtml(teamMetaText(uid))}</div></div>
           <span class="team-chev" aria-hidden="true">${chevSvg(false)}</span>
         </div>
-        ${open ? `<div class="team-body">
-        <div class="team-phone"><span class="team-lbl">WhatsApp</span><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="10-digit number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}">${waNumber(uid) ? `<button type="button" class="bs-wa tg-chat" data-team-wa="${uid}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:4px;"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Chat</button>` : ''}</div>
-        ${(() => { const t = teamDeptOf(uid); return `<div class="team-phone"><span class="team-lbl">Department</span><input class="text-input" type="text" data-team-dept="${uid}" placeholder="e.g. Science, or Social Science and Reasoning" value="${escapeHtml(t.dept)}"></div><div class="chips team-chips"><span class="team-lbl">Subjects</span>${subjectsList().map((sj) => `<button type="button" class="chip${t.subjects.indexOf(sj) >= 0 ? ' active' : ''}" data-team-subj="${escapeHtml(sj)}" data-uid="${uid}">${escapeHtml(sj)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">Only you can set the Department and the subjects. Until you set them, the old Subject keeps working.</div>`; })()}
-  <div class="chips team-chips">
-  <button type="button" class="chip${(coord || prin) ? '' : ' active'}" data-team-role="teacher" data-uid="${uid}">Teacher</button>
-  <button type="button" class="chip${coord ? ' active' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button>
-  <button type="button" class="chip${prin ? ' active' : ''}" data-team-role="principal" data-uid="${uid}">Principal</button>
-  </div>
-  ${(() => { const tm = state.team[uid] || {}; const hid = !!tm.repHideFrom; return `<div class="chips team-chips"><span class="team-lbl">Reports</span><button type="button" class="chip${hid ? '' : ' active'}" data-team-rep="all" data-uid="${uid}">Always shown</button><button type="button" class="chip${hid ? ' active' : ''}" data-team-rep="hide" data-uid="${uid}">Hidden for a period</button></div>${hid ? `<div class="team-rep"><label>Hidden from<input type="date" class="text-input" data-team-repd="repHideFrom" data-uid="${uid}" value="${escapeHtml(tm.repHideFrom || '')}"></label><label>Show again from (optional)<input type="date" class="text-input" data-team-repd="repShowFrom" data-uid="${uid}" value="${escapeHtml(tm.repShowFrom || '')}"></label></div>` : ''}`; })()}
-  <div class="chips team-chips"><span class="team-lbl">Doubts</span><button type="button" class="chip${(state.team[uid] && state.team[uid].doubts === true) ? ' active' : ''}" data-team-doubt="${uid}">Can handle doubts</button></div>
-  ${(() => { const pend = isPendingUid(uid); const own = pend ? '' : ((state.adminNames[uid] && state.adminNames[uid].own) || ''); const ad = pend ? salNorm(state.team[uid] && state.team[uid].salutation) : addrOf(uid); return `<div class="chips team-chips"><span class="team-lbl">Address</span>${['sir', 'maam', 'ji'].map((v) => `<button type="button" class="chip${(ad || own) === v ? ' active' : ''}" data-team-addr="${v}" data-uid="${uid}">${salWord(v)}</button>`).join('')}</div><div class="sal-preview" style="margin:-2px 0 4px;">${ad ? 'Set by you. The teacher cannot change it.' : (own ? `The teacher chose ${salWord(own)} earlier. This is used until you choose.` : 'Choose how to address this teacher.')}</div>`; })()}
-        <div class="chips team-chips">
-          <span class="team-lbl">Wing</span>
-          <button type="button" class="chip${w.indexOf('Pre-Foundation') !== -1 ? ' active' : ''}" data-team-wing="Pre-Foundation" data-uid="${uid}">Pre-Foundation</button>
-          <button type="button" class="chip${w.indexOf('Foundation') !== -1 ? ' active' : ''}" data-team-wing="Foundation" data-uid="${uid}">Foundation</button>
-        </div>
-        ${uid !== state.teacherId ? `<button type="button" class="team-remove" data-team-remove="${uid}">Remove access</button>` : ''}
+        ${open ? `<div class="team-body tm">
+        <div class="tm-sec"><div class="tm-st">Contact</div>
+        <div class="tm-line"><input class="text-input" type="tel" inputmode="tel" data-team-phone="${uid}" placeholder="WhatsApp number (optional)" value="${escapeHtml((state.team[uid] && state.team[uid].phone) || '')}">${waNumber(uid) ? `<button type="button" class="bs-wa tg-chat" data-team-wa="${uid}"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:4px;"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>Chat</button>` : ''}</div></div>
+        ${(() => { const t = teamDeptOf(uid); const open2 = state.teamSubjOpen === uid; const sel = t.subjects.filter((x) => subjectsList().indexOf(x) !== -1); return `<div class="tm-sec"><div class="tm-st">Work</div><div class="tm-lb">Department</div><input class="text-input" type="text" data-team-dept="${uid}" placeholder="e.g. Science, or Social Science and Reasoning" value="${escapeHtml(t.dept)}"><div class="tm-lb">Subjects</div><button type="button" class="tm-fold" data-team-subjtog="${uid}" aria-expanded="${open2}"><span class="tm-fold-t${sel.length ? '' : ' none'}">${sel.length ? escapeHtml(sel.join(', ')) : 'None chosen'}</span><span class="tm-fold-c${open2 ? ' up' : ''}" aria-hidden="true">${chevSvg(false)}</span></button>${open2 ? `<div class="tm-chips">${subjectsList().map((sj) => `<button type="button" class="tm-chip${t.subjects.indexOf(sj) >= 0 ? ' active' : ''}" data-team-subj="${escapeHtml(sj)}" data-uid="${uid}">${escapeHtml(sj)}</button>`).join('')}</div>` : ''}<div class="tm-hint">Only you can set the Department and the subjects. Until you set them, the old Subject keeps working.</div></div>`; })()}
+        ${(() => { const pend = isPendingUid(uid); const own = pend ? '' : ((state.adminNames[uid] && state.adminNames[uid].own) || ''); const ad = pend ? salNorm(state.team[uid] && state.team[uid].salutation) : addrOf(uid); return `<div class="tm-sec"><div class="tm-st">Access</div>
+        <div class="tm-lb">Role</div><div class="tm-seg"><button type="button" class="${(coord || prin) ? '' : 'on'}" data-team-role="teacher" data-uid="${uid}">Teacher</button><button type="button" class="${coord ? 'on' : ''}" data-team-role="coordinator" data-uid="${uid}">Coordinator</button><button type="button" class="${prin ? 'on' : ''}" data-team-role="principal" data-uid="${uid}">Principal</button></div>
+        <div class="tm-lb">Wing</div><div class="tm-seg"><button type="button" class="${w.indexOf('Pre-Foundation') !== -1 ? 'on' : ''}" data-team-wing="Pre-Foundation" data-uid="${uid}">Pre-Foundation</button><button type="button" class="${w.indexOf('Foundation') !== -1 ? 'on' : ''}" data-team-wing="Foundation" data-uid="${uid}">Foundation</button></div>
+        <div class="tm-lb">Address as</div><div class="tm-seg">${['sir', 'maam', 'ji'].map((v) => `<button type="button" class="${(ad || own) === v ? 'on' : ''}" data-team-addr="${v}" data-uid="${uid}">${salWord(v)}</button>`).join('')}</div>
+        <div class="tm-hint">${ad ? 'Set by you. The teacher cannot change it.' : (own ? `The teacher chose ${salWord(own)} earlier. This is used until you choose.` : 'Choose how to address this teacher.')}</div></div>`; })()}
+        ${(() => { const tm = state.team[uid] || {}; const hid = !!tm.repHideFrom; const dOn = state.team[uid] && state.team[uid].doubts === true; return `<div class="tm-sec"><div class="tm-st">Permissions</div>
+        <button type="button" class="tm-sw${dOn ? ' on' : ''}" data-team-doubt="${uid}" role="switch" aria-checked="${dOn}"><span>Can handle doubts</span><i></i></button>
+        <div class="tm-lb">Show in reports</div><div class="tm-seg"><button type="button" class="${hid ? '' : 'on'}" data-team-rep="all" data-uid="${uid}">Always</button><button type="button" class="${hid ? 'on' : ''}" data-team-rep="hide" data-uid="${uid}">Hidden for a period</button></div>
+        ${hid ? `<div class="tm-two"><label><span class="tm-lb">Hidden from</span><input type="date" class="text-input" data-team-repd="repHideFrom" data-uid="${uid}" value="${escapeHtml(tm.repHideFrom || '')}"></label><label><span class="tm-lb">Show again from</span><input type="date" class="text-input" data-team-repd="repShowFrom" data-uid="${uid}" value="${escapeHtml(tm.repShowFrom || '')}"></label></div><div class="tm-hint">Show again is optional. Leave it empty to stay hidden until you choose Always.</div>` : ''}</div>`; })()}
+        ${uid !== state.teacherId ? `<div class="tm-sec tm-last"><button type="button" class="team-remove" data-team-remove="${uid}">Remove access</button></div>` : ''}
         </div>` : ''}
       </div>`;
     }) + (removed.length ? `<div class="team-removed"><div class="team-lbl" style="margin:6px 0 4px;">Removed (${removed.length})</div>${removed.map((uid) => `<div class="team-rm-row"><span>${escapeHtml((state.adminNames[uid] && state.adminNames[uid].name) || 'Unnamed')}</span><button type="button" class="hv-back" data-team-restore="${uid}" style="padding:0;">Restore</button></div>`).join('')}</div>` : '');
@@ -7202,6 +7224,7 @@ function renderPartChips() {
     el.querySelectorAll('[data-team-wa]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const n = waNumber(b.getAttribute('data-team-wa')); if (n) window.open('https://wa.me/' + n, '_blank'); }));
     el.querySelectorAll('[data-team-addr]').forEach((b) => b.addEventListener('click', () => addrSet(b.getAttribute('data-uid'), b.getAttribute('data-team-addr'))));
   el.querySelectorAll('[data-team-dept]').forEach((inp) => inp.addEventListener('change', () => teamDeptPatch(inp.getAttribute('data-team-dept'), { dept: inp.value.trim() }, 'Department saved')));
+  el.querySelectorAll('[data-team-subjtog]').forEach((b) => b.addEventListener('click', () => { const u = b.getAttribute('data-team-subjtog'); state.teamSubjOpen = state.teamSubjOpen === u ? null : u; renderTeamPanel(); }));
   el.querySelectorAll('[data-team-subj]').forEach((b) => b.addEventListener('click', () => { const u = b.getAttribute('data-uid'); const sj = b.getAttribute('data-team-subj'); const cur = teamDeptOf(u).subjects.filter((x) => subjectsList().indexOf(x) !== -1); const k = cur.indexOf(sj); if (k >= 0) cur.splice(k, 1); else cur.push(sj); teamDeptPatch(u, { subjects: cur }, 'Subjects saved'); }));
   el.querySelectorAll('[data-team-role]').forEach((b) => b.addEventListener('click', async () => {
       const uid = b.getAttribute('data-uid'); const role = b.getAttribute('data-team-role');
@@ -13105,7 +13128,7 @@ Rules:
     dayAll.forEach((c) => { const t = c.teacherId || 'unknown'; (byTeacherAll[t] = byTeacherAll[t] || []).push(c); });
     // Coordinators are staff, not teachers: they never appear in teacher lists or counts.
     const ids = (state.adminTeacherIds || []).filter((u) => !isPendingUid(u)).concat(Object.keys(state.adminCampus || {}), Object.keys(byTeacherAll))
-      .filter((v, i, a) => v && v !== 'unknown' && a.indexOf(v) === i && !isCoordUid(v) && !isRemovedUid(v))
+      .filter((v, i, a) => v && v !== 'unknown' && a.indexOf(v) === i && !isCoordUid(v) && (!isRemovedUid(v) || (byTeacherAll[v] || []).length))
       .filter((v) => { const tw = teamWings(v); const lw = leadWings(); return !tw.length || tw.some((x) => lw.indexOf(x) !== -1); })
       .filter((v) => !repHiddenFor(v, date, date) || (byTeacherAll[v] || []).length);
     loadAdminSlots(date, ids, false);
@@ -14234,7 +14257,7 @@ Rules:
       if (idx.length > 1 && idx[idx.length - 1] - idx[0] === idx.length - 1) { (sSpans[l.t] = sSpans[l.t] || []).push({ a: idx[0], z: idx[idx.length - 1], v }); return; }
       sRows[l.t] = sRows[l.t] || {}; sRows[l.t][idx[0]] = (sRows[l.t][idx[0]] || 0) + v;
     });
-    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds(true).filter((u) => !repHiddenFor(u, D.from, D.to)); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isRemovedUid(u) && !isCoordUid(u)) ids.push(u); });
+    const ids = state.trep.self ? [state.teacherId] : ttTeacherIds(true).filter((u) => !repHiddenFor(u, D.from, D.to)); Object.keys(rows).concat(Object.keys(spans), Object.keys(other), Object.keys(subU)).forEach((u) => { if (ids.indexOf(u) === -1 && !isCoordUid(u)) ids.push(u); });
     ids.sort(repCmp);
     const hasOther = Object.keys(other).length > 0;
     const list = ids.map((u) => {
