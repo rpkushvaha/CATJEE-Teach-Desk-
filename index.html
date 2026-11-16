@@ -4628,7 +4628,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.18 · updated 16 Nov 2026</div>
+          <div class="dnote">Version 15.20 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14119,6 +14119,14 @@ Rules:
     return '\ufeff' + L.map((r) => r.map(q).join(',')).join('\n');
   }
   function trepGroups() { if (!state.trep.self) return ttGroups(); const saved = state.previewCoord; state.previewCoord = { wings: ['Pre-Foundation', 'Foundation'] }; try { return ttGroups(); } finally { state.previewCoord = saved; } }
+  // Special shift: one column per batch, and only for the batches that really have classes in the period
+  // (an old batch that has closed shows only in the weeks it ran; a new one only from when it started)
+  function trepSpecialName(b) { if (/remedial/i.test(b)) return 'REMEDIAL CLASS'; const t = String(b).replace(/^\s*class\s*\d+\s*[-–]\s*/i, '').trim().toUpperCase(); return /CLASS$/.test(t) ? t : (t ? t + ' CLASS' : 'SPECIAL CLASS'); }
+  function trepSpecialBatches(batches) {
+    const D = state.trep.data; if (!D || D.error) return batches.slice();
+    const used = new Set(); (D.logs || []).concat(D.subs || []).forEach((l) => (l.bs || []).forEach((x) => used.add(x))); (D.missing || []).concat(D.upcoming || []).forEach((x) => (x.bs || [x.b]).forEach((y) => used.add(y)));
+    const on = batches.filter((x) => used.has(x)); return on.length ? on : batches.slice(-1);
+  }
   function trepColumns() {
     const cols = []; const heads = [];
     // school batches, then the remedial class (it is a school class too), then coaching, then foundation
@@ -14129,7 +14137,8 @@ Rules:
       const nth = (b) => { const n = classOfBatchNum(b); return n ? n + 'th' : ''; };
       if (fnd || sessType(g.session) === 'special') {
         const nums = g.batches.map(nth).filter((v, i, a) => v && a.indexOf(v) === i);
-        cols.push({ key: g.key, head, label: fnd ? (nums.join(' & ') || g.label) : 'REMEDIAL CLASS', batches: g.batches.slice() });
+        if (fnd) cols.push({ key: g.key, head, label: nums.join(' & ') || g.label, batches: g.batches.slice() });
+        else trepSpecialBatches(g.batches).forEach((b) => cols.push({ key: g.key + '#' + b, head, label: trepSpecialName(b), batches: [b] }));
       } else {
         g.batches.forEach((b) => { const m = String(b).match(/batch\s*(\d+)/i); cols.push({ key: g.key + '#' + b, head, label: `${nth(b)}${m ? ' B-' + m[1] : ''}` || b, batches: [b] }); });
       }
@@ -14150,7 +14159,7 @@ Rules:
           if ((doc.published || []).indexOf(T + '/' + slotIdFor(doc._id, c)) === -1) return;
           const tm = cellTimes(doc, c); if (!tm) return;
           if (c.cb) { const ms = tgComboOf(doc.cells, c); const g0 = ttGroups().find((x) => x.key === doc.group); if (ms.length > 1 && g0) { const lead = ms.slice().sort((a, b) => g0.batches.indexOf(a.b) - g0.batches.indexOf(b.b))[0]; if (lead.b !== c.b) return; } }
-          tt.push({ t: T, d: c.d, b: c.b, bs: c.cb ? tgComboOf(doc.cells, c).map((m0) => m0.b) : [c.b], a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p, sub: c.sub ? 1 : 0, f: c.sub ? (c.sub.for || c.t || '') : '', ct: (c.test && c.ctId) ? c.ctId : '' });
+          tt.push({ t: T, d: c.d, b: canonBatch(c.b), bs: canonList(c.cb ? tgComboOf(doc.cells, c).map((m0) => m0.b) : [c.b]), a: hhmmToMin(tm.start), z: hhmmToMin(tm.end), s: effS(c), p: c.p, sub: c.sub ? 1 : 0, f: c.sub ? (c.sub.for || c.t || '') : '', ct: (c.test && c.ctId) ? c.ctId : '' });
         }));
       }
       // "From the timetable": every published class counts (not the days that are a holiday in the calendar), for the teacher it is on; no need for the teacher to fill it in
@@ -14349,7 +14358,7 @@ Rules:
   }
   function trepEnsure() { state.trep.self = false; const r = trepRange(); if (state.trep.key !== state.trep.mode + '|' + r.from + '|' + (state.trep.basis || 'logged') || !state.trep.data) trepBuild(); else trepRender(); }
   const TREP_TINT = { school: ['#E8F0FF', '#F4F8FF'], rem: ['#F0EAFF', '#F8F5FF'], coach: ['#E3F5EA', '#F1FAF4'], found: ['#FFF1DC', '#FFF8EC'], total: ['#FCE6E9', '#FEF3F4'], plain: ['#F1F1F3', '#F7F7F9'] };
-  function trepTint(head, label) { return head === 'COACHING' ? TREP_TINT.coach : (head === 'FOUNDATION' || head === 'OTHER') ? TREP_TINT.found : /remedial/i.test(label || '') ? TREP_TINT.rem : TREP_TINT.school; }
+  function trepTint(head, label) { return head === 'COACHING' ? TREP_TINT.coach : (head === 'FOUNDATION' || head === 'OTHER') ? TREP_TINT.found : /remedial|revision/i.test(label || '') ? TREP_TINT.rem : TREP_TINT.school; }
   function trepCanvas() {
     const T = trepTable(); if (!T) return null;
     const nC = T.cols.length + (T.hasOther ? 1 : 0);
