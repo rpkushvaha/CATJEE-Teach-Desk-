@@ -1948,7 +1948,7 @@
   .tm-line { display: flex; gap: 8px; align-items: center; } .tm-line .text-input { flex: 1; min-width: 0; }
   .tm-hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
   .tm-seg { display: flex; gap: 2px; padding: 3px; background: var(--neutral-soft); border-radius: 12px; }
-  .tm-seg button { flex: 1; border: none; background: none; font: inherit; font-size: 13.5px; font-weight: 500; color: var(--muted); padding: 9px 4px; border-radius: 9px; cursor: pointer; white-space: nowrap; min-width: 0; }
+  .tm-seg button { flex: 1 1 auto; border: none; background: none; font: inherit; font-size: 13.5px; font-weight: 500; color: var(--muted); padding: 9px 6px; border-radius: 9px; cursor: pointer; white-space: nowrap; min-width: 0; flex: 1 1 auto; }
   .tm-seg button.on { background: var(--card); color: var(--gold); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.14); }
   .tm-fold { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); font: inherit; font-size: 14.5px; color: var(--ink); cursor: pointer; text-align: left; }
   .tm-fold-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; } .tm-fold-t.none { color: var(--muted); font-weight: 400; }
@@ -1960,7 +1960,10 @@
   .tm-sw i { width: 40px; height: 23px; border-radius: 99px; background: #C9CDD2; position: relative; transition: background .2s; flex-shrink: 0; }
   .tm-sw i:after { content: ""; position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: left .2s; }
   .tm-sw.on i { background: var(--switch-on); } .tm-sw.on i:after { left: 19px; }
-  .tm-two { display: flex; gap: 8px; margin-top: 10px; } .tm-two label { flex: 1; min-width: 0; } .tm-two .tm-lb { margin-top: 0; }
+  .tm-two { display: flex; gap: 8px; margin-top: 10px; } .tm-dt { flex: 1; min-width: 0; } .tm-dt .tm-lb { margin-top: 0; }
+  .tm-dbox { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); font-size: 14.5px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .tm-dbox.empty span { color: var(--muted); font-weight: 400; } .tm-dbox svg { flex-shrink: 0; color: var(--gold); }
+  .tm-dbox input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
   .tm-last { padding-bottom: 2px; } .tm-last .team-remove { align-self: auto; width: 100%; text-align: center; padding: 6px 0; font-size: 14px; }
   .team-remove { align-self: flex-start; border: none; background: none; padding: 2px 0; font: inherit; font-size: 13px; font-weight: 600; color: #B91C1C; cursor: pointer; }
   .team-removed { border-top: 1px dashed var(--line); margin-top: 6px; padding-top: 6px; }
@@ -4655,7 +4658,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.25 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 15.26 · updated 17 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7206,7 +7209,7 @@ function renderPartChips() {
         ${(() => { const tm = state.team[uid] || {}; const hid = !!tm.repHideFrom; const dOn = state.team[uid] && state.team[uid].doubts === true; return `<div class="tm-sec"><div class="tm-st">Permissions</div>
         <button type="button" class="tm-sw${dOn ? ' on' : ''}" data-team-doubt="${uid}" role="switch" aria-checked="${dOn}"><span>Can handle doubts</span><i></i></button>
         <div class="tm-lb">Show in reports</div><div class="tm-seg"><button type="button" class="${hid ? '' : 'on'}" data-team-rep="all" data-uid="${uid}">Always</button><button type="button" class="${hid ? 'on' : ''}" data-team-rep="hide" data-uid="${uid}">Hidden for a period</button></div>
-        ${hid ? `<div class="tm-two"><label><span class="tm-lb">Hidden from</span><input type="date" class="text-input" data-team-repd="repHideFrom" data-uid="${uid}" value="${escapeHtml(tm.repHideFrom || '')}"></label><label><span class="tm-lb">Show again from</span><input type="date" class="text-input" data-team-repd="repShowFrom" data-uid="${uid}" value="${escapeHtml(tm.repShowFrom || '')}"></label></div><div class="tm-hint">Show again is optional. Leave it empty to stay hidden until you choose Always.</div>` : ''}</div>`; })()}
+        ${hid ? `<div class="tm-two">${[['repHideFrom', 'Hidden from', 'dd/mm/yyyy'], ['repShowFrom', 'Show again from', 'Optional']].map((x) => { const v = tm[x[0]] || ''; return `<div class="tm-dt"><span class="tm-lb">${x[1]}</span><div class="tm-dbox${v ? '' : ' empty'}"><span>${v ? v.slice(8, 10) + '/' + v.slice(5, 7) + '/' + v.slice(0, 4) : x[2]}</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg><input type="date" data-team-repd="${x[0]}" data-uid="${uid}" value="${escapeHtml(v)}" aria-label="${x[1]}"></div></div>`; }).join('')}</div><div class="tm-hint">Show again is optional. Leave it empty to stay hidden until you choose Always.</div>` : ''}</div>`; })()}
         ${uid !== state.teacherId ? `<div class="tm-sec tm-last"><button type="button" class="team-remove" data-team-remove="${uid}">Remove access</button></div>` : ''}
         </div>` : ''}
       </div>`;
