@@ -1937,6 +1937,15 @@
   .sid-actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; }
   .sid-new { display: flex; flex-direction: column; gap: 8px; align-items: stretch; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 12px; }
   .sid-code { font-size: 26px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-align: center; }
+  /* Report order */
+  .ro-st { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); margin: 14px 0 6px; }
+  .ro-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+  .ro-n { width: 26px; height: 26px; border-radius: 50%; background: var(--gold-soft); color: var(--gold); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; } .ro-n.g { background: var(--neutral-soft); color: var(--muted); }
+  .ro-nm { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 500; }
+  .ro-a { display: flex; gap: 4px; }
+  .ro-btn { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; } .ro-btn.off { opacity: .35; }
+  .ro-reset { display: block; width: 100%; margin-top: 12px; padding: 8px; border: none; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--gold); cursor: pointer; }
+  .ro-hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
   /* Team sheet: grouped sections */
   .tm { gap: 0 !important; }
   .tm-sec { padding: 14px 0; border-top: 1px solid var(--line); }
@@ -4263,6 +4272,11 @@
           <button class="btn-secondary" id="saveDirectorContactBtn" style="border-color: var(--line);">Save</button>
         </div>
       </div>
+  <div class="panel set-acc" id="adminReportOrderPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Report order</div>
+        <div class="admin-sub" style="margin:0;">The order in which faculty appear in every report. People you do not place are listed A to Z after the fixed ones.</div>
+        <div id="reportOrderBody"></div>
+      </div>
   <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
         <button type="button" class="pv-row" id="pvToggle" aria-expanded="false"><span class="ico i-eye2" aria-hidden="true"></span><b>Preview as</b><span class="chev"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span></button>
         <div class="pv-body"><div class="admin-sub" style="margin:0 0 10px;">See what a Coordinator or the Principal sees. Changes you make here are real.</div>
@@ -4658,7 +4672,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.27 · updated 17 Nov 2026</div>
+          <div class="dnote">Version 15.28 · updated 20 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7177,7 +7191,42 @@ function renderPartChips() {
   const sum = mem.length ? `<div class="team-sum"><span><b>${nDoneW} of ${joinedW.length}</b> have added their WhatsApp number and birthday</span><div class="team-sum-btns">${nLackW ? `<button type="button" class="tg-mini tg-mini-gold" data-team-remind>Remind the ${nLackW}</button>` : ''}<button type="button" class="tg-mini" data-team-copy>Copy numbers</button></div></div>` : '';
   return `<div class="wing-sec"><div class="wing-sec-h">${wg} <small>· ${mem.length} ${mem.length === 1 ? 'person' : 'people'}</small></div>${sum}${mem.length ? mem.map(fn).join('') : '<div class="hv-note" style="text-align:left;">No one in this wing yet.</div>'}</div>`;
 }
+  // ---------- Report order (Admin > Settings) ----------
+  function reportOrderLists() {
+    const ids = (state.adminTeacherIds || []).filter((u, i, a) => a.indexOf(u) === i && !isCoordUid(u) && !isRemovedUid(u));
+    const byName = (a, b) => ttName(a).localeCompare(ttName(b));
+    let fixed = ids.filter((u) => repOrderOf(u) > 0).sort((a, b) => (repOrderOf(a) - repOrderOf(b)) || byName(a, b)); let virtual = false;
+    if (!fixed.length) { fixed = ids.filter((u) => repPriority(u) < 2).sort((a, b) => repPriority(a) - repPriority(b)); virtual = true; }
+    const others = ids.filter((u) => fixed.indexOf(u) === -1).sort(byName);
+    return { fixed, others, virtual };
+  }
+  async function reportOrderWrite(order) {
+    // order: the people who should hold places 1, 2, 3 ...; everyone else gets none
+    const patchOf = {}; (state.adminTeacherIds || []).forEach((u) => { const n = order.indexOf(u) + 1; if (repOrderOf(u) !== n) patchOf[u] = n; });
+    const keys = Object.keys(patchOf); if (!keys.length) return;
+    const prev = state.team; state.team = Object.assign({}, state.team); keys.forEach((u) => { state.team[u] = Object.assign({}, state.team[u] || {}, { repOrder: patchOf[u] }); });
+    renderReportOrder();
+    try { await Promise.all(keys.map((u) => state.db.doc('team/' + u).set({ repOrder: patchOf[u] }, { merge: true }))); showToast('Report order saved'); }
+    catch (err) { state.team = prev; renderReportOrder(); flashOffline(err); }
+  }
+  function renderReportOrder() {
+    const el = document.getElementById('reportOrderBody'); if (!el) return;
+    if (!(state.canAdmin || state.isCoordinator)) { el.innerHTML = ''; return; }
+    const L = reportOrderLists(); const arrow = (d, u, off) => `<button type="button" class="ro-btn${off ? ' off' : ''}" ${off ? 'disabled' : ''} data-ro-${d}="${u}" aria-label="Move ${d === 'up' ? 'up' : 'down'}">${d === 'up' ? '▲' : '▼'}</button>`;
+    let h = '<div class="ro-st">Fixed order</div>';
+    h += L.fixed.length ? L.fixed.map((u, i) => `<div class="ro-row"><span class="ro-n">${i + 1}</span><span class="ro-nm">${escapeHtml(ttName(u))}</span><span class="ro-a">${arrow('up', u, i === 0)}${arrow('dn', u, i === L.fixed.length - 1)}<button type="button" class="ro-btn" data-ro-x="${u}" aria-label="Remove from fixed order">✕</button></span></div>`).join('') : '<div class="admin-sub">Nobody is fixed. Everyone is listed A to Z.</div>';
+    h += '<div class="ro-st">Everyone else · A to Z</div>';
+    h += L.others.length ? L.others.map((u) => `<div class="ro-row"><span class="ro-n g">+</span><span class="ro-nm">${escapeHtml(ttName(u))}</span><span class="ro-a"><button type="button" class="ro-btn" data-ro-add="${u}" aria-label="Fix a place">＋</button></span></div>`).join('') : '<div class="admin-sub">Everybody has a fixed place.</div>';
+    h += `<button type="button" class="ro-reset" data-ro-reset>Reset to the default order</button><div class="ro-hint">${L.virtual ? 'Showing the default order now (S K Agarwal, Deepali Pandey, then A to Z). Change it and it is saved.' : 'Admin and coordinators can change this. Reset goes back to the default: S K Agarwal, Deepali Pandey, then A to Z.'}</div>`;
+    el.innerHTML = h;
+    const cur = () => reportOrderLists().fixed.slice();
+    el.querySelectorAll('[data-ro-up],[data-ro-dn]').forEach((b) => b.addEventListener('click', () => { const up = b.hasAttribute('data-ro-up'); const u = b.getAttribute(up ? 'data-ro-up' : 'data-ro-dn'); const l = cur(); const i = l.indexOf(u); const j = up ? i - 1 : i + 1; if (i < 0 || j < 0 || j >= l.length) return; const t = l[i]; l[i] = l[j]; l[j] = t; reportOrderWrite(l); }));
+    el.querySelectorAll('[data-ro-add]').forEach((b) => b.addEventListener('click', () => { const l = cur(); l.push(b.getAttribute('data-ro-add')); reportOrderWrite(l); }));
+    el.querySelectorAll('[data-ro-x]').forEach((b) => b.addEventListener('click', () => { const l = cur().filter((x) => x !== b.getAttribute('data-ro-x')); reportOrderWrite(l); }));
+    el.querySelectorAll('[data-ro-reset]').forEach((b) => b.addEventListener('click', () => reportOrderWrite([])));
+  }
   function renderTeamPanel() {
+    try { renderReportOrder(); } catch (e) { /* ignore */ }
     const el = document.getElementById('teamRows');
     if (!el) return;
     const all = (state.adminTeacherIds || []).slice().sort((a, b) => ((state.adminNames[a] && state.adminNames[a].name) || '').localeCompare((state.adminNames[b] && state.adminNames[b].name) || ''));
@@ -7471,7 +7520,14 @@ function renderPartChips() {
     if (t.length >= 2 && (t[0] === 'deepali' || t[0] === 'dipali') && /^pandey/.test(last)) return 1;
     return 2;
   }
-  function repCmp(a, b) { return (repPriority(a) - repPriority(b)) || ttName(a).localeCompare(ttName(b)); }
+  // Report order: a number on the team record (set in Admin > Settings > Report order). With no numbers set, the old default (S K Agarwal, Deepali Pandey, then A to Z) applies.
+  function repOrderOf(u) { const t = state.team && state.team[u]; const n = t ? Number(t.repOrder) : 0; return n > 0 ? n : 0; }
+  function repAnyOrder() { return Object.keys(state.team || {}).some((u) => repOrderOf(u) > 0 && !isRemovedUid(u)); }
+  function repCmp(a, b) {
+    const nm = () => ttName(a).localeCompare(ttName(b));
+    if (repAnyOrder()) { const oa = repOrderOf(a), ob = repOrderOf(b); if (oa && ob) return (oa - ob) || nm(); if (oa) return -1; if (ob) return 1; return nm(); }
+    return (repPriority(a) - repPriority(b)) || nm();
+  }
   function ttName(u) { return (state.adminNames[u] && state.adminNames[u].name) || 'Teacher'; }
   function ttBatches() {
     const lw = state.adminReportWing !== 'all' ? [state.adminReportWing] : leadWings();
@@ -11345,6 +11401,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     if (id === 'adminWeeklyOffPanel') return (state.weeklyOff || []).join(', ') || 'None';
     if (id === 'adminTeamPanel') { const ids = (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u)); const c = ids.filter(isCoordUid).length; return `${ids.length - c} teacher${ids.length - c === 1 ? '' : 's'} · ${c} coordinator${c === 1 ? '' : 's'}`; }
   if (id === 'adminCampusPanel') return /^Set/.test(document.getElementById('campusLocText').textContent) ? 'Set' : 'Not set';
+    if (id === 'adminReportOrderPanel') { const n = (state.adminTeacherIds || []).filter((u) => repOrderOf(u) > 0 && !isRemovedUid(u)).length; return n ? `${n} fixed` : 'Default'; }
     if (id === 'adminContactPanel') return (document.getElementById('directorPhoneInput').value || document.getElementById('directorEmailInput').value) ? 'Set' : 'Not set';
     return '';
   }
@@ -11353,6 +11410,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
     try {
       if (id === 'adminTeamPanel') { state.teamWingOpen = null; state.teamOpen = null; renderTeamPanel(); }
       else if (id === 'adminMappingPanel') { state.mapWingOpen = null; renderMappingPanel(); }
+      else if (id === 'adminReportOrderPanel') { renderReportOrder(); }
       else if (id === 'adminSubjectsPanel') { state.subjWingOpen = null; renderListManagers(); }
       else if (id === 'adminBatchPanel') { state.adminBatchListExpanded = null; state.adminBatchShift = null; renderBatchList(); }
       else if (id === 'adminShiftsPanel') { state.shiftWing = null; state.shiftEdit = null; renderShiftsPanel(); }
@@ -14706,7 +14764,7 @@ Rules:
     return (state.adminTeacherIds || []).filter((u) => !isRemovedUid(u) && !isPendingUid(u))
     
       .filter((u) => { const tw = teamWings(u); if (!tw.length) return true; if (wing !== 'all') return tw.indexOf(wing) !== -1; return tw.some((x) => lw.indexOf(x) !== -1); })
-      .sort((a, b) => ttName(a).localeCompare(ttName(b)));
+      .sort(repCmp);
   }
   // "Garima Sachdeva, Nancy Vishwakarma (break 11:05 AM – 11:20 AM)"
   function slotNames(sl, nameOf) {
@@ -21426,7 +21484,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   // Admin Settings: the same rows, in four small groups
   (function organiseAdminSettings() {
-    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
       const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
@@ -21436,7 +21494,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     new MutationObserver(() => { if (!busy) { busy = true; requestAnimationFrame(sync); } }).observe(par, { attributes: true, subtree: true, attributeFilter: ['hidden', 'style'] }); sync();
   })();
     // Admin Settings as tiles: every setting is its own tile under its group; a tap opens that setting as a page
-  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
   function setPanelLabel(id) { const p = document.getElementById(id); const h = p && p.querySelector('.panel-title'); let t = ''; if (h) { const c = h.cloneNode(true); c.querySelectorAll('.set-sum, svg, .ico').forEach((x) => x.remove()); t = (c.textContent || '').replace(/\s+/g, ' ').trim(); } return t || ({ adminPreviewPanel: 'Preview as', adminAiPanel: 'AI (beta)', adminPushPanel: 'Phone notifications' })[id] || ''; }
   function setPanelHidden(id) { const el = document.getElementById(id); return !el || el.hidden || el.style.display === 'none' || (document.body.classList.contains('coord-mode') && el.classList.contains('admin-only')); }
   function setsViewSync() { const v = document.getElementById('view-admin'); if (!v) return; const w = state.adminSetOpen ? '1' : '0'; if (v.getAttribute('data-spage') !== w) v.setAttribute('data-spage', w); }
