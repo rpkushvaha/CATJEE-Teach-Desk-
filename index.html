@@ -3080,7 +3080,7 @@
   .sum-grid.stack .sum-tile { align-items: center; }
   .sum-grid.stack .sum-tile::before { margin: 0 4px 0 0 !important; flex: none; }
   /* the Principal's screens: the buttons that change things are not shown */
-  body.principal-mode #adminTabs [data-atab-btn="settings"], body.principal-mode #adminTabs [data-atab-btn="mat"], body.principal-mode #tgEdit, body.principal-mode #tgPublish, body.principal-mode #tgPublishDay, body.principal-mode #tgMoreList, body.principal-mode #tgDiscard, body.principal-mode #adminNewExamBtn, body.principal-mode .ex-edit-main, body.principal-mode [data-force-checkout], body.principal-mode [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
+  body.principal-mode:not(.prin-set) #adminTabs [data-atab-btn="settings"], body.principal-mode #adminTabs [data-atab-btn="mat"], body.principal-mode #tgEdit, body.principal-mode #tgPublish, body.principal-mode #tgPublishDay, body.principal-mode #tgMoreList, body.principal-mode #tgDiscard, body.principal-mode #adminNewExamBtn, body.principal-mode .ex-edit-main, body.principal-mode [data-force-checkout], body.principal-mode [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
   /* Class entry record */
   .ent-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
   .ent-card.done { background: var(--neutral-soft); }
@@ -4688,7 +4688,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.29 · updated 21 Nov 2026</div>
+          <div class="dnote">Version 15.30 · updated 21 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7222,9 +7222,9 @@ function renderPartChips() {
   }
   function canSendNotice() { return !!((state.canAdmin && !state.previewCoord && !state.previewPrincipal) || ((state.isCoordinator || state.previewCoord || state.previewPrincipal) && can('notice'))); }
   const ROLE_ROWS = [
-    ['setup', 'Batches, subjects, test types, rooms', 'Settings', ['coordinator']],
-    ['periods', 'Periods and timings', 'Settings', ['coordinator']],
-    ['mapping', 'Teacher mapping', 'Settings', ['coordinator']],
+    ['setup', 'Batches, subjects, test types, rooms', 'Settings', ['coordinator', 'principal']],
+    ['periods', 'Periods and timings', 'Settings', ['coordinator', 'principal']],
+    ['mapping', 'Teacher mapping', 'Settings', ['coordinator', 'principal']],
     ['notice', 'Send a notice', 'Menu', ['coordinator', 'principal']]
   ];
   function rolesPerm(role, k) { const p = (state.perms || {})[role]; if (p && Object.prototype.hasOwnProperty.call(p, k)) return !!p[k]; return !!(PERM_DEF[role] && PERM_DEF[role][k]); }
@@ -7251,7 +7251,7 @@ function renderPartChips() {
     h += ROLE_ROWS.map((r) => `<div class="rl-r"><div class="rl-t">${escapeHtml(r[1])}<small>${escapeHtml(r[2])}</small></div><div class="rl-c">${r[3].indexOf('coordinator') !== -1 ? sw('coordinator', r[0]) : '<span class="rl-lock">—</span>'}</div><div class="rl-c">${r[3].indexOf('principal') !== -1 ? sw('principal', r[0]) : '<span class="rl-lock">—</span>'}</div></div>`).join('');
     h += '<div class="rl-st">Only you (Admin)</div>';
     h += ['Team, Staff IDs, Remove access', 'Report order, Show in reports', 'Roles, permissions and Admins'].map((t) => `<div class="rl-r"><div class="rl-t">${t}</div><div class="rl-c wide"><span class="rl-lock">Admin only</span></div></div>`).join('');
-    h += '<div class="tm-hint">The Principal has no Settings page. Timetable, exams and attendance rights are not in this list yet.</div>';
+    h += '<div class="tm-hint">The Principal sees a Settings page only for the rows you switch on. Timetable, exams and attendance rights are not in this list yet.</div>';
     // Admins
     h += '<div class="rl-sec">Admins</div><div class="admin-sub" style="margin:0 0 6px;">Only the Owner can add or remove an Admin.</div>';
     const list = state.adminsList;
@@ -10658,7 +10658,7 @@ state.mapSubj = null;
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
     try { dbtSyncAccess(); } catch (e) { /* ignore */ }
-    const coordOnly = coordView(); const prin = principalView(); document.body.classList.toggle('principal-mode', prin); if (prin && state.adminTab === 'settings') { state.adminTab = 'dash'; try { applyAdminTab(); } catch (e) { /* ignore */ } }
+    const coordOnly = coordView(); const prin = principalView(); document.body.classList.toggle('principal-mode', prin); const prinSet = !!(prin && (can('setup') || can('periods') || can('mapping'))); document.body.classList.toggle('prin-set', prinSet); if (prin && !prinSet && state.adminTab === 'settings') { state.adminTab = 'dash'; try { applyAdminTab(); } catch (e) { /* ignore */ } }
     const bar = document.getElementById('coordPreviewBar');
     if (bar) { bar.hidden = !(state.previewCoord || state.previewPrincipal); const pl = document.getElementById('coordPreviewLbl'); if (pl) pl.textContent = state.previewPrincipal ? 'Principal preview' : 'Coordinator preview'; if (state.previewCoord) document.getElementById('coordPreviewWing').textContent = state.previewCoord.wings.join(', '); else if (state.previewPrincipal) document.getElementById('coordPreviewWing').textContent = 'both wings'; }
     document.body.classList.toggle('coord-mode', coordOnly);
@@ -12647,7 +12647,7 @@ Rules:
       { const d0 = snap.exists ? (snap.data() || {}) : {}; state.ownerFlag = d0.owner === true; state.isOwner = snap.exists && d0.owner !== false; try { setsTilesRefresh(); } catch (e) { /* ignore */ } }
       const ad = snap.exists; if (ad === state.canAdmin) return; state.canAdmin = ad; roleFollow(ad ? 'You are now an Admin' : 'You are no longer an Admin');
     }, () => { /* the role is read again at the next sign-in */ }));
-    unsubscribers.push(db.doc('settings/permissions').onSnapshot((snap) => { state.perms = snap.exists ? (snap.data() || {}) : {}; try { setsTilesRefresh(); renderHolidayUi(); renderRolesPanel(); } catch (e) { /* ignore */ } }, () => { /* default permissions stay */ }));
+    unsubscribers.push(db.doc('settings/permissions').onSnapshot((snap) => { state.perms = snap.exists ? (snap.data() || {}) : {}; try { applyRoleUI(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); renderHolidayUi(); renderRolesPanel(); } catch (e) { /* ignore */ } }, () => { /* default permissions stay */ }));
   }
   // ---------- Phone notifications (Web Push): they arrive even when the app is closed ----------
   let pushKey = null; // null = not asked yet, '' = the Worker is not set up for it
@@ -21597,7 +21597,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     // Admin Settings as tiles: every setting is its own tile under its group; a tap opens that setting as a page
   const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
   function setPanelLabel(id) { const p = document.getElementById(id); const h = p && p.querySelector('.panel-title'); let t = ''; if (h) { const c = h.cloneNode(true); c.querySelectorAll('.set-sum, svg, .ico').forEach((x) => x.remove()); t = (c.textContent || '').replace(/\s+/g, ' ').trim(); } return t || ({ adminPreviewPanel: 'Preview as', adminAiPanel: 'AI (beta)', adminPushPanel: 'Phone notifications' })[id] || ''; }
-  function setPanelHidden(id) { const el = document.getElementById(id); if (id === 'adminRolesPanel' && !state.isOwner) return true; { const pk = PANEL_PERM[id]; if (pk && (!state.canAdmin || state.previewCoord) && !can(pk)) return true; } return !el || el.hidden || el.style.display === 'none' || (document.body.classList.contains('coord-mode') && el.classList.contains('admin-only')); }
+  function setPanelHidden(id) { const el = document.getElementById(id); if (id === 'adminRolesPanel' && !state.isOwner) return true; { const pk = PANEL_PERM[id]; if (principalView() && !pk) return true; if (pk && (!state.canAdmin || state.previewCoord || state.previewPrincipal) && !can(pk)) return true; } return !el || el.hidden || el.style.display === 'none' || (document.body.classList.contains('coord-mode') && el.classList.contains('admin-only')); }
   function setsViewSync() { const v = document.getElementById('view-admin'); if (!v) return; const w = state.adminSetOpen ? '1' : '0'; if (v.getAttribute('data-spage') !== w) v.setAttribute('data-spage', w); }
   function setsShowTiles() { state.adminSetOpen = null; renderSettingsAccordion(); setsViewSync(); }
   function setsTilesRefresh() {
