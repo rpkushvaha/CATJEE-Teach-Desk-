@@ -3081,7 +3081,7 @@
   .sum-grid.stack .sum-tile { align-items: center; }
   .sum-grid.stack .sum-tile::before { margin: 0 4px 0 0 !important; flex: none; }
   /* the Principal's screens: the buttons that change things are not shown */
-  body.principal-mode:not(.prin-set) #adminTabs [data-atab-btn="settings"], body.principal-mode #adminTabs [data-atab-btn="mat"], body.principal-mode #tgEdit, body.principal-mode #tgPublish, body.principal-mode #tgPublishDay, body.principal-mode #tgMoreList, body.principal-mode #tgDiscard, body.principal-mode #adminNewExamBtn, body.principal-mode .ex-edit-main, body.principal-mode [data-force-checkout], body.principal-mode [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
+  body.principal-mode:not(.prin-set) #adminTabs [data-atab-btn="settings"], body.principal-mode #adminTabs [data-atab-btn="mat"], body.no-tt #tgEdit, body.no-tt #tgPublish, body.no-tt #tgPublishDay, body.no-tt #tgMoreList, body.no-tt #tgDiscard, body.no-ex #adminNewExamBtn, body.no-ex .ex-edit-main, body.no-att [data-force-checkout], body.no-att [data-adm-sess], body.principal-mode #view-admin .del-btn[data-edit], body.principal-mode #view-admin .del-btn[data-del], body.principal-mode #galSelDel, body.principal-mode .dsp-pub { display: none !important; }
   /* Class entry record */
   .ent-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
   .ent-card.done { background: var(--neutral-soft); }
@@ -4304,6 +4304,11 @@
         <div class="admin-sub" style="margin:0;">The quick duration buttons on the Add Class page.</div>
         <div id="listBody_durations"></div>
       </div>
+  <div class="panel set-acc admin-only" id="adminListReportsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Reports</div>
+        <div class="admin-sub" style="margin:0;">Rename a report, change the small line under its name, put the reports in your order or hide one.</div>
+        <div id="listBody_reports"></div>
+      </div>
   <div class="panel set-acc admin-only" id="adminListNotePanel" data-atab="settings">
         <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Timetable notes</div>
         <div class="admin-sub" style="margin:0;">The quick notes offered when you mark periods in the timetable grid. A note already saved keeps its old text.</div>
@@ -4704,7 +4709,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.31 · updated 21 Nov 2026</div>
+          <div class="dnote">Version 15.32 · updated 21 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7226,7 +7231,7 @@ function renderPartChips() {
 }
   // ---------- Roles & permissions (Admin > Settings) ----------
   // What a Coordinator / the Principal may do. Not set = as the app has always worked. Only the Owner (the first Admin) changes it.
-  const PERM_DEF = { coordinator: { setup: true, periods: true, mapping: true, notice: true }, principal: { notice: true } };
+  const PERM_DEF = { coordinator: { setup: true, periods: true, mapping: true, notice: true, timetable: true, exams: true, attendance: true }, principal: { notice: true } };
   const PANEL_PERM = { adminBatchPanel: 'setup', adminSubjectsPanel: 'setup', adminRoomsPanel: 'setup', adminTestTypesPanel: 'setup', adminPeriodsPanel: 'periods', adminMappingPanel: 'mapping' };
   state.perms = state.perms || {};
   function permRoleNow() { return (state.previewPrincipal || (state.isPrincipal && !state.previewCoord)) ? 'principal' : 'coordinator'; }
@@ -7242,6 +7247,9 @@ function renderPartChips() {
     ['setup', 'Batches, subjects, test types, rooms', 'Settings', ['coordinator', 'principal']],
     ['periods', 'Periods and timings', 'Settings', ['coordinator', 'principal']],
     ['mapping', 'Teacher mapping', 'Settings', ['coordinator', 'principal']],
+    ['timetable', 'Timetable: edit and publish', 'Timetable page', ['coordinator', 'principal']],
+    ['exams', 'Exams: add and change', 'Exams', ['coordinator', 'principal']],
+    ['attendance', 'Attendance: change a teacher’s check-in and check-out', 'History and Reports', ['coordinator', 'principal']],
     ['notice', 'Send a notice', 'Menu', ['coordinator', 'principal']]
   ];
   function rolesPerm(role, k) { const p = (state.perms || {})[role]; if (p && Object.prototype.hasOwnProperty.call(p, k)) return !!p[k]; return !!(PERM_DEF[role] && PERM_DEF[role][k]); }
@@ -7268,7 +7276,7 @@ function renderPartChips() {
     h += ROLE_ROWS.map((r) => `<div class="rl-r"><div class="rl-t">${escapeHtml(r[1])}<small>${escapeHtml(r[2])}</small></div><div class="rl-c">${r[3].indexOf('coordinator') !== -1 ? sw('coordinator', r[0]) : '<span class="rl-lock">—</span>'}</div><div class="rl-c">${r[3].indexOf('principal') !== -1 ? sw('principal', r[0]) : '<span class="rl-lock">—</span>'}</div></div>`).join('');
     h += '<div class="rl-st">Only you (Admin)</div>';
     h += ['Team, Staff IDs, Remove access', 'Report order, Show in reports', 'Roles, permissions and Admins'].map((t) => `<div class="rl-r"><div class="rl-t">${t}</div><div class="rl-c wide"><span class="rl-lock">Admin only</span></div></div>`).join('');
-    h += '<div class="tm-hint">The Principal sees a Settings page only for the rows you switch on. Timetable, exams and attendance rights are not in this list yet.</div>';
+    h += '<div class="tm-hint">The Principal sees a Settings page only for the Settings rows you switch on. Without a switch, a Coordinator or the Principal can still see the page but cannot change it. A teacher always changes their own check-in and check-out.</div>';
     // Admins
     h += '<div class="rl-sec">Admins</div><div class="admin-sub" style="margin:0 0 6px;">Only the Owner can add or remove an Admin.</div>';
     const list = state.adminsList;
@@ -7313,6 +7321,7 @@ function renderPartChips() {
     activity: { title: 'Activity types', mode: 'alias', panel: 'adminListActivityPanel', base: () => ACTIVITY_TYPES.slice(), lab: (id) => activityLabelDefault(id), ph: 'New activity type', help: 'The types a teacher can choose when logging an activity.' },
     coordTags: { title: 'Coordinator work', mode: 'alias', panel: 'adminListCoordPanel', base: () => COORD_TAGS.slice(), lab: (id) => id, ph: 'New item', help: 'What a Coordinator can tick under “What did you handle?”.' },
     durations: { title: 'Class durations', mode: 'number', panel: 'adminListDurPanel', base: () => ['40', '50', '60', '65'], lab: durLabel, ph: 'Minutes, e.g. 45', help: 'The quick duration buttons on the Add Class page.' },
+    reports: { title: 'Reports', mode: 'report', panel: 'adminListReportsPanel', base: () => ['full', 'att', 'count', 'sub', 'duty', 'entry', 'deliv'], lab: (id) => REP_NAMES[id] || id, ph: '', help: 'Rename a report, change the small line under its name, put the reports in your order or hide one. The name shows on the Reports tile and the page title.' },
     noteChips: { title: 'Timetable notes', mode: 'text', panel: 'adminListNotePanel', base: () => NOTE_CHIPS.slice(), lab: (id) => id, ph: 'New note', help: 'The quick notes offered when you mark periods in the timetable grid. A note already saved keeps its old text.' }
   };
   const LIST_PANEL_KEY = {}; Object.keys(LIST_DEFS).forEach((k) => { LIST_PANEL_KEY[LIST_DEFS[k].panel] = k; });
@@ -7327,6 +7336,18 @@ function renderPartChips() {
   function listHidden(k, id) { return (listCfg(k).hidden || []).map(String).indexOf(String(id)) !== -1; }
   function listIds(k) { const v = listAll(k).filter((x) => !listHidden(k, x)); return v.length ? v : LIST_DEFS[k].base().map(String); }
   function listName(k, id) { const n = (listCfg(k).names || {})[id]; return n || LIST_DEFS[k].lab(id); }
+  const REP_SUB_DEF = { full: 'Classes, Tests, Work', att: 'Check-in · Check-out', count: 'Batch-wise', sub: 'Where · When · Whose', duty: 'Rooms and Timings', entry: 'Late entries', deliv: 'Batch, chapter, type' };
+  function repName(k) { return listName('reports', k); }
+  function repSub(k) { return ((listCfg('reports').subs || {})[k]) || REP_SUB_DEF[k] || ''; }
+  function applyReportNames() {
+    const box = document.getElementById('adminRepKind'); if (!box) return; const all = listAll('reports');
+    box.querySelectorAll('.rt-tile').forEach((t) => {
+      const k = t.getAttribute('data-rep-kind'); const i = all.indexOf(k);
+      if (!k || i < 0) { t.style.order = '100'; return; }
+      t.style.order = String(i); t.style.display = listHidden('reports', k) ? 'none' : '';
+      const a = t.querySelector('.qa-l'), b = t.querySelector('.qa-s'); if (a) a.textContent = repName(k); if (b) b.textContent = repSub(k);
+    });
+  }
   function noteChipNames() { return listIds('noteChips').map((id) => listName('noteChips', id)); }
   function renderDurChips() {
     const box = document.getElementById('durChips'); if (!box) return;
@@ -7338,23 +7359,24 @@ function renderPartChips() {
     try { await state.db.doc('settings/lists').set({ [k]: cfg }, { mergeFields: [k] }); showToast('Saved'); }
     catch (err) { state.lists = prev; listsRefresh(); flashOffline(err); }
   }
-  function listsRefresh() { Object.keys(LIST_DEFS).forEach((k) => { try { renderListPanel(k); } catch (e) { /* ignore */ } }); try { renderDurChips(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); } catch (e) { /* ignore */ } }
+  function listsRefresh() { Object.keys(LIST_DEFS).forEach((k) => { try { renderListPanel(k); } catch (e) { /* ignore */ } }); try { renderDurChips(); } catch (e) { /* ignore */ } try { applyReportNames(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); } catch (e) { /* ignore */ } }
   function renderListPanel(k) {
     const el = document.getElementById('listBody_' + k); if (!el) return;
     if (!state.canAdmin || state.previewCoord || state.previewPrincipal) { el.innerHTML = ''; return; }
-    const d = LIST_DEFS[k], all = listAll(k), base = d.base().map(String); const ed = (state.listEdit && state.listEdit.k === k) ? state.listEdit.id : null; const num = d.mode === 'number';
+    const d = LIST_DEFS[k], all = listAll(k), base = d.base().map(String); const rp = d.mode === 'report'; const ed = (state.listEdit && state.listEdit.k === k) ? state.listEdit.id : null; const num = d.mode === 'number';
     const btn = (a, id, t, lab, off) => `<button type="button" class="ro-btn${off ? ' off' : ''}" ${off ? 'disabled' : ''} data-li-${a}="${escapeHtml(id)}" aria-label="${lab}">${t}</button>`;
     let h = all.map((id, i) => {
       const hid = listHidden(k, id), cust = base.indexOf(id) === -1, nm = listName(k, id), def = d.lab(id);
+      if (ed === id && rp) return `<div class="ro-row" style="flex-wrap:wrap;"><div style="flex:1 1 100%;"><div class="sv-tlbl" style="margin:0 0 4px;">Report name</div><input class="text-input" data-li-input maxlength="40" value="${escapeHtml(nm)}"><div class="sv-tlbl" style="margin:8px 0 4px;">Small line under the name</div><input class="text-input" data-li-input2 maxlength="40" value="${escapeHtml(repSub(id))}"></div><button type="button" class="add-entry-btn" data-li-save="${escapeHtml(id)}">Save</button><button type="button" class="ro-btn" data-li-cancel aria-label="Cancel">✕</button></div>`;
       if (ed === id) return `<div class="ro-row"><input class="text-input" data-li-input maxlength="40" value="${escapeHtml(nm)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;"><button type="button" class="add-entry-btn" data-li-save="${escapeHtml(id)}" style="white-space:nowrap;">Save</button><button type="button" class="ro-btn" data-li-cancel aria-label="Cancel">✕</button></div>`;
-      const sub = hid ? 'Hidden from choices' : (cust ? 'Added by you' : ((!num && nm !== def) ? 'was: ' + def : ''));
+      const sub = hid ? (rp ? 'Hidden from Reports' : 'Hidden from choices') : (rp ? repSub(id) + (nm !== def ? ' · was: ' + def : '') : (cust ? 'Added by you' : ((!num && nm !== def) ? 'was: ' + def : '')));
       const last = btn(cust ? 'del' : (hid ? 'show' : 'hide'), id, cust ? '✕' : (hid ? '＋' : '✕'), cust ? 'Remove' : (hid ? 'Show again' : 'Hide'));
       return `<div class="ro-row${hid ? ' li-hid' : ''}"><span class="ro-n">${i + 1}</span><span class="ro-nm">${escapeHtml(nm)}${sub ? `<small class="li-sub">${escapeHtml(sub)}</small>` : ''}</span><span class="ro-a">${btn('up', id, '▲', 'Move up', i === 0)}${btn('dn', id, '▼', 'Move down', i === all.length - 1)}${num ? '' : btn('ed', id, '✎', 'Rename')}${last}</span></div>`;
     }).join('');
-    h += `<div class="ro-row"><input class="text-input" data-li-new ${num ? 'type="number" inputmode="numeric" min="5" max="300"' : 'maxlength="40"'} placeholder="${escapeHtml(d.ph)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;"><button type="button" class="add-entry-btn" data-li-add style="white-space:nowrap;">＋ Add</button></div>`;
-    h += `<button type="button" class="ro-reset" data-li-reset>Reset to the default list</button><div class="ro-hint">Hiding an item only removes it from the choices. Old records keep it.</div>`;
+    if (!rp) h += `<div class="ro-row"><input class="text-input" data-li-new ${num ? 'type="number" inputmode="numeric" min="5" max="300"' : 'maxlength="40"'} placeholder="${escapeHtml(d.ph)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;"><button type="button" class="add-entry-btn" data-li-add style="white-space:nowrap;">＋ Add</button></div>`;
+    h += `<button type="button" class="ro-reset" data-li-reset>Reset to the default list</button><div class="ro-hint">${rp ? 'Hiding a report only removes its tile. Nothing is deleted.' : 'Hiding an item only removes it from the choices. Old records keep it.'}</div>`;
     el.innerHTML = h;
-    const cur = () => { const c0 = listCfg(k); return { order: listAll(k).slice(), names: Object.assign({}, c0.names || {}), hidden: (c0.hidden || []).map(String).slice(), custom: (c0.custom || []).map(String).slice() }; };
+    const cur = () => { const c0 = listCfg(k); return { order: listAll(k).slice(), names: Object.assign({}, c0.names || {}), subs: Object.assign({}, c0.subs || {}), hidden: (c0.hidden || []).map(String).slice(), custom: (c0.custom || []).map(String).slice() }; };
     const g = (a) => el.querySelectorAll('[data-li-' + a + ']');
     const nameTaken = (v, except) => all.some((x) => x !== except && (String(x).toLowerCase() === v.toLowerCase() || String(listName(k, x)).toLowerCase() === v.toLowerCase()));
     g('up').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-up'), i = c.order.indexOf(id); if (i < 1) return; c.order.splice(i - 1, 0, c.order.splice(i, 1)[0]); listWrite(k, c); }));
@@ -7368,7 +7390,9 @@ function renderPartChips() {
       const id = b.getAttribute('data-li-save'); const v = ((el.querySelector('[data-li-input]') || {}).value || '').trim();
       if (!v) { showToast('Type a name', 'error'); return; }
       if (nameTaken(v, id)) { showToast('This name is already in the list', 'error'); return; }
-      const c = cur(); if (v === d.lab(id)) delete c.names[id]; else c.names[id] = v; state.listEdit = null; listWrite(k, c);
+      const c = cur(); if (v === d.lab(id)) delete c.names[id]; else c.names[id] = v;
+      if (rp) { const v2 = (((el.querySelector('[data-li-input2]') || {}).value) || '').trim(); if (!v2 || v2 === REP_SUB_DEF[id]) delete c.subs[id]; else c.subs[id] = v2; }
+      state.listEdit = null; listWrite(k, c);
     }));
     g('add').forEach((b) => b.addEventListener('click', () => {
       const inp = el.querySelector('[data-li-new]'); let v = (inp.value || '').trim(); if (!v) { showToast(num ? 'Type the minutes' : 'Type a name', 'error'); return; }
@@ -10750,7 +10774,7 @@ state.mapSubj = null;
   // Coordinator mode: the app opens on the Coordinator dashboard; teacher-only screens are hidden.
   function applyRoleUI() {
     try { dbtSyncAccess(); } catch (e) { /* ignore */ }
-    const coordOnly = coordView(); const prin = principalView(); document.body.classList.toggle('principal-mode', prin); const prinSet = !!(prin && (can('setup') || can('periods') || can('mapping'))); document.body.classList.toggle('prin-set', prinSet); if (prin && !prinSet && state.adminTab === 'settings') { state.adminTab = 'dash'; try { applyAdminTab(); } catch (e) { /* ignore */ } }
+    const coordOnly = coordView(); const prin = principalView(); document.body.classList.toggle('principal-mode', prin); const prinSet = !!(prin && (can('setup') || can('periods') || can('mapping'))); document.body.classList.toggle('prin-set', prinSet); { const ld = prin || coordOnly; document.body.classList.toggle('no-tt', ld && !can('timetable')); document.body.classList.toggle('no-ex', ld && !can('exams')); document.body.classList.toggle('no-att', ld && !can('attendance')); } if (prin && !prinSet && state.adminTab === 'settings') { state.adminTab = 'dash'; try { applyAdminTab(); } catch (e) { /* ignore */ } }
     const bar = document.getElementById('coordPreviewBar');
     if (bar) { bar.hidden = !(state.previewCoord || state.previewPrincipal); const pl = document.getElementById('coordPreviewLbl'); if (pl) pl.textContent = state.previewPrincipal ? 'Principal preview' : 'Coordinator preview'; if (state.previewCoord) document.getElementById('coordPreviewWing').textContent = state.previewCoord.wings.join(', '); else if (state.previewPrincipal) document.getElementById('coordPreviewWing').textContent = 'both wings'; }
     document.body.classList.toggle('coord-mode', coordOnly);
@@ -13247,7 +13271,7 @@ Rules:
     const v = document.getElementById('view-admin'); const t = document.getElementById('adminPgTitle'); const c = document.getElementById('adminCrumbs'); if (!v || !t || !c) return;
     const cur = v.getAttribute('data-atab-cur'); const rv = v.getAttribute('data-repv'); let title = ''; let path = [];
     if (cur === 'dash') { const k = state.homeSub === 'ov' ? state.homeTile : state.homeSub; if (k && k !== 'grid') { title = HT_TITLES[k] || ''; path = [['Admin', 'root'], [title]]; } }
-    else if (cur === 'reports') { if (rv === 'open') { title = REP_NAMES[state.adminRepKind || 'full'] || 'Report'; path = [['Admin', 'root'], ['Reports', 'reps'], [title]]; } else { title = 'Reports'; path = [['Admin', 'root'], ['Reports']]; } }
+    else if (cur === 'reports') { if (rv === 'open') { title = repName(state.adminRepKind || 'full') || 'Report'; path = [['Admin', 'root'], ['Reports', 'reps'], [title]]; } else { title = 'Reports'; path = [['Admin', 'root'], ['Reports']]; } }
     else if (cur === 'settings') { if (state.adminSetOpen) { title = setPanelLabel(state.adminSetOpen) || 'Setting'; path = [['Admin', 'root'], ['Settings', 'sets'], [title]]; } else { title = 'Settings'; path = [['Admin', 'root'], ['Settings']]; } }
     else { title = ({ tt: 'Timetable', exams: 'Exams', mat: 'Add deliverables' })[cur] || ''; if (title) path = [['Admin', 'root'], [title]]; }
     if (t.textContent !== title) t.textContent = title; v.setAttribute('data-pghead', title ? '1' : '0');
@@ -16952,7 +16976,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     showFormMsg('');
     syncDurChips();
   }); }
-  renderDurChips();
+  renderDurChips(); try { applyReportNames(); } catch (e) { /* ignore */ }
   let lastStartMin = null;
   document.getElementById('startTimeInput').addEventListener('focus', () => { lastStartMin = tMin(document.getElementById('startTimeInput').value); });
   document.getElementById('startTimeInput').addEventListener('change', () => {
@@ -21681,7 +21705,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   // Admin Settings: the same rows, in four small groups
   (function organiseAdminSettings() {
-    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Lists', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Lists', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel', 'adminListReportsPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
       const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
@@ -21691,7 +21715,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     new MutationObserver(() => { if (!busy) { busy = true; requestAnimationFrame(sync); } }).observe(par, { attributes: true, subtree: true, attributeFilter: ['hidden', 'style'] }); sync();
   })();
     // Admin Settings as tiles: every setting is its own tile under its group; a tap opens that setting as a page
-  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Lists', 'st-g3', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Lists', 'st-g3', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel', 'adminListReportsPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
   function setPanelLabel(id) { const p = document.getElementById(id); const h = p && p.querySelector('.panel-title'); let t = ''; if (h) { const c = h.cloneNode(true); c.querySelectorAll('.set-sum, svg, .ico').forEach((x) => x.remove()); t = (c.textContent || '').replace(/\s+/g, ' ').trim(); } return t || ({ adminPreviewPanel: 'Preview as', adminAiPanel: 'AI (beta)', adminPushPanel: 'Phone notifications' })[id] || ''; }
   function setPanelHidden(id) { const el = document.getElementById(id); if (id === 'adminRolesPanel' && !state.isOwner) return true; { const pk = PANEL_PERM[id]; if (principalView() && !pk) return true; if (pk && (!state.canAdmin || state.previewCoord || state.previewPrincipal) && !can(pk)) return true; } return !el || el.hidden || el.style.display === 'none' || (document.body.classList.contains('coord-mode') && el.classList.contains('admin-only')); }
   function setsViewSync() { const v = document.getElementById('view-admin'); if (!v) return; const w = state.adminSetOpen ? '1' : '0'; if (v.getAttribute('data-spage') !== w) v.setAttribute('data-spage', w); }
@@ -21802,8 +21826,18 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   new MutationObserver((list) => { list.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType === 1) tpMark(n); })); }).observe(document.documentElement, { childList: true, subtree: true });
   ['input', 'change'].forEach((ev) => document.addEventListener(ev, (e) => { const t = e.target; if (t && t.matches && t.matches('input[type="time"][data-ph]')) t.classList.toggle('tp-empty', !t.value); }, true));
   // ---------- Principal: view only (notices and the calendar stay open) ----------
-  const PRIN_BLOCK = ['#tgEdit', '#tgEditDone', '#tgPublish', '#tgPublishDay', '#tgMoreList', '#tgMoreList *', '#tgUndo', '#tgDiscard', '#tgFixTeachers', '#tgAddBatch', '#tgAddPer', '#tgSunday', '#tgDayNote', '#tgEditSubj', '.tg-paint', '.tg-paint *', '#tgWrap .tg-table td', '#adminNewExamBtn', '[data-ex-edit]', '[data-ex-photo]', '[data-ex-cancelduty]', '[data-ex-t]', '[data-ex-step]', '[data-force-checkout]', '[data-adm-sess]', '#view-admin .del-btn[data-edit]', '#view-admin .del-btn[data-del]', '#galSelDel', '.dsp-pub', '.entry-edit', '.entry-edit *', '#enSheet'].join(',');
-  document.addEventListener('click', (e) => { if (!principalView()) return; const t = e.target && e.target.closest && e.target.closest(PRIN_BLOCK); if (!t) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); showToast('Principal can only view this'); }, true);
+  const BLK_TT = ['#tgEdit', '#tgEditDone', '#tgPublish', '#tgPublishDay', '#tgMoreList', '#tgMoreList *', '#tgUndo', '#tgDiscard', '#tgFixTeachers', '#tgAddBatch', '#tgAddPer', '#tgSunday', '#tgDayNote', '#tgEditSubj', '.tg-paint', '.tg-paint *', '#tgWrap .tg-table td'].join(',');
+  const BLK_EX = ['#adminNewExamBtn', '[data-ex-edit]', '[data-ex-photo]', '[data-ex-cancelduty]', '[data-ex-t]', '[data-ex-step]'].join(',');
+  const BLK_ATT = ['[data-force-checkout]', '[data-adm-sess]'].join(',');
+  const PRIN_BLOCK = ['#view-admin .del-btn[data-edit]', '#view-admin .del-btn[data-del]', '#galSelDel', '.dsp-pub', '.entry-edit', '.entry-edit *', '#enSheet'].join(',');
+  // a Coordinator or the Principal is stopped here when the Admin has switched the right off (Roles & permissions)
+  document.addEventListener('click', (e) => {
+    const el = e.target && e.target.closest ? e.target : null; if (!el) return; const prin = principalView(); if (!(prin || coordView())) return;
+    let msg = null;
+    [['timetable', BLK_TT], ['exams', BLK_EX], ['attendance', BLK_ATT]].forEach((g) => { if (!msg && !can(g[0]) && el.closest(g[1])) msg = 'This is switched off for your role. Ask the Admin.'; });
+    if (!msg && prin && el.closest(PRIN_BLOCK)) msg = 'Principal can only view this';
+    if (!msg) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); showToast(msg);
+  }, true);
   // ---------- Text size and "Update app now" (Menu → Settings) ----------
   (function textSizeAndUpdate() {
     const KEY = 'ctd_text_size';
