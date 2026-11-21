@@ -1955,6 +1955,7 @@
   .ro-nm { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 500; }
   .ro-a { display: flex; gap: 4px; }
   .ro-btn { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; } .ro-btn.off { opacity: .35; }
+  .li-sub { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 1px; } .li-hid .ro-nm { opacity: .55; }
   .ro-reset { display: block; width: 100%; margin-top: 12px; padding: 8px; border: none; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--gold); cursor: pointer; }
   .ro-hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
   /* Team sheet: grouped sections */
@@ -3569,12 +3570,7 @@
             </div>
           </div>
           <div class="dur-row"><span class="dur-lbl">Duration</span>
-            <div class="chips" id="durChips">
-              <button type="button" class="chip" data-dur="40">40m</button>
-              <button type="button" class="chip" data-dur="50">50m</button>
-              <button type="button" class="chip" data-dur="60">1h</button>
-              <button type="button" class="chip" data-dur="65">1h 5m</button>
-            </div>
+            <div class="chips" id="durChips"></div>
           </div>
         </div>
 
@@ -4293,6 +4289,26 @@
         <div class="admin-sub" style="margin:0;">The order in which faculty appear in every report. People you do not place are listed A to Z after the fixed ones.</div>
         <div id="reportOrderBody"></div>
       </div>
+  <div class="panel set-acc admin-only" id="adminListActivityPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Activity types</div>
+        <div class="admin-sub" style="margin:0;">The types a teacher can choose when logging an activity.</div>
+        <div id="listBody_activity"></div>
+      </div>
+  <div class="panel set-acc admin-only" id="adminListCoordPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Coordinator work</div>
+        <div class="admin-sub" style="margin:0;">What a Coordinator can tick under “What did you handle?”.</div>
+        <div id="listBody_coordTags"></div>
+      </div>
+  <div class="panel set-acc admin-only" id="adminListDurPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Class durations</div>
+        <div class="admin-sub" style="margin:0;">The quick duration buttons on the Add Class page.</div>
+        <div id="listBody_durations"></div>
+      </div>
+  <div class="panel set-acc admin-only" id="adminListNotePanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Timetable notes</div>
+        <div class="admin-sub" style="margin:0;">The quick notes offered when you mark periods in the timetable grid. A note already saved keeps its old text.</div>
+        <div id="listBody_noteChips"></div>
+      </div>
   <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
         <button type="button" class="pv-row" id="pvToggle" aria-expanded="false"><span class="ico i-eye2" aria-hidden="true"></span><b>Preview as</b><span class="chev"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span></button>
         <div class="pv-body"><div class="admin-sub" style="margin:0 0 10px;">See what a Coordinator or the Principal sees. Changes you make here are real.</div>
@@ -4688,7 +4704,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.30 · updated 21 Nov 2026</div>
+          <div class="dnote">Version 15.31 · updated 21 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -4742,7 +4758,8 @@
   const DEFAULT_TEST_TYPES = ['Class Test', 'Unit Test', 'Half-Yearly', 'Pre-Board 1', 'Pre-Board 2', 'Annual Exam'];
   const DEFAULT_SUBJECTS = ['Maths', 'Physics', 'Chemistry', 'Biology', 'Science', 'English', 'Hindi', 'Social Science', 'Computer', 'Reasoning'];
   // Saved value stays 'Other Activity' (older records use it); it is shown as 'Other Work'.
-  function activityLabel(t) { return t === 'Extra Work / Holiday Duty' ? 'Holiday Duty' : t === 'Other Activity' ? 'Other Work' : (t === 'Coordination' ? 'Coordination Work' : (t || 'Activity')); }
+  function activityLabel(t) { const nn = (((state.lists || {}).activity || {}).names || {})[t]; return nn || activityLabelDefault(t); }
+  function activityLabelDefault(t) { return t === 'Extra Work / Holiday Duty' ? 'Holiday Duty' : t === 'Other Activity' ? 'Other Work' : (t === 'Coordination' ? 'Coordination Work' : (t || 'Activity')); }
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const REMINDER_PREF_KEY = 'catjee_reminders_enabled';
 
@@ -6910,7 +6927,7 @@ function renderPartChips() {
     });
 
     const actChipsEl = document.getElementById('activityChips');
-    const actTypes = ACTIVITY_TYPES.filter((t) => t !== 'Coordination' || isLeadNow());
+    const actTypes = listIds('activity').filter((t) => t !== 'Coordination' || isLeadNow()); { const cu = state.activityForm && state.activityForm.activityType; if (cu && actTypes.indexOf(cu) === -1 && (cu !== 'Coordination' || isLeadNow())) actTypes.push(cu); }
     actChipsEl.classList.toggle('act-4', actTypes.length > 3);
     actChipsEl.innerHTML = actTypes.map((t) => {
       const active = t === state.activityForm.activityType;
@@ -7287,6 +7304,81 @@ function renderPartChips() {
       if (!(await showConfirm(`${nm} will get the same powers as an Admin, except adding or removing Admins and changing this page. Only you keep those.`, 'Make an Admin?', 'Make Admin'))) return;
       try { await state.db.doc('admins/' + u).set({ owner: false, name: nm, addedBy: state.teacherId, at: Date.now() }); showToast(`${nm} is now an Admin`); loadAdminsList(); } catch (err) { flashOffline(err); }
     }));
+  }
+  // ---------- Lists (Admin > Settings): rename, reorder, hide and add ----------
+  // Old records keep the saved value. A rename only changes the name shown (the saved value stays the same).
+  state.lists = state.lists || {}; state.listEdit = null;
+  function durLabel(id) { const n = Number(id); if (!(n > 0)) return String(id); if (n < 60) return n + 'm'; return n % 60 ? Math.floor(n / 60) + 'h ' + (n % 60) + 'm' : (n / 60) + 'h'; }
+  const LIST_DEFS = {
+    activity: { title: 'Activity types', mode: 'alias', panel: 'adminListActivityPanel', base: () => ACTIVITY_TYPES.slice(), lab: (id) => activityLabelDefault(id), ph: 'New activity type', help: 'The types a teacher can choose when logging an activity.' },
+    coordTags: { title: 'Coordinator work', mode: 'alias', panel: 'adminListCoordPanel', base: () => COORD_TAGS.slice(), lab: (id) => id, ph: 'New item', help: 'What a Coordinator can tick under “What did you handle?”.' },
+    durations: { title: 'Class durations', mode: 'number', panel: 'adminListDurPanel', base: () => ['40', '50', '60', '65'], lab: durLabel, ph: 'Minutes, e.g. 45', help: 'The quick duration buttons on the Add Class page.' },
+    noteChips: { title: 'Timetable notes', mode: 'text', panel: 'adminListNotePanel', base: () => NOTE_CHIPS.slice(), lab: (id) => id, ph: 'New note', help: 'The quick notes offered when you mark periods in the timetable grid. A note already saved keeps its old text.' }
+  };
+  const LIST_PANEL_KEY = {}; Object.keys(LIST_DEFS).forEach((k) => { LIST_PANEL_KEY[LIST_DEFS[k].panel] = k; });
+  function listCfg(k) { const c = (state.lists || {})[k]; return (c && typeof c === 'object') ? c : {}; }
+  function listAll(k) {
+    const d = LIST_DEFS[k], c = listCfg(k); const base = d.base().map(String); const custom = (c.custom || []).map(String);
+    const have = base.concat(custom.filter((x) => base.indexOf(x) === -1)); const out = [];
+    (c.order || []).map(String).forEach((x) => { if (have.indexOf(x) !== -1 && out.indexOf(x) === -1) out.push(x); });
+    have.forEach((x) => { if (out.indexOf(x) === -1) out.push(x); });
+    return out;
+  }
+  function listHidden(k, id) { return (listCfg(k).hidden || []).map(String).indexOf(String(id)) !== -1; }
+  function listIds(k) { const v = listAll(k).filter((x) => !listHidden(k, x)); return v.length ? v : LIST_DEFS[k].base().map(String); }
+  function listName(k, id) { const n = (listCfg(k).names || {})[id]; return n || LIST_DEFS[k].lab(id); }
+  function noteChipNames() { return listIds('noteChips').map((id) => listName('noteChips', id)); }
+  function renderDurChips() {
+    const box = document.getElementById('durChips'); if (!box) return;
+    box.innerHTML = listIds('durations').map((id) => `<button type="button" class="chip" data-dur="${escapeHtml(id)}">${escapeHtml(listName('durations', id))}</button>`).join('');
+    box.querySelectorAll('[data-dur]').forEach(bindDurChip); try { syncDurChips(); } catch (e) { /* ignore */ }
+  }
+  async function listWrite(k, cfg) {
+    const prev = state.lists; state.lists = Object.assign({}, prev, { [k]: cfg }); listsRefresh();
+    try { await state.db.doc('settings/lists').set({ [k]: cfg }, { mergeFields: [k] }); showToast('Saved'); }
+    catch (err) { state.lists = prev; listsRefresh(); flashOffline(err); }
+  }
+  function listsRefresh() { Object.keys(LIST_DEFS).forEach((k) => { try { renderListPanel(k); } catch (e) { /* ignore */ } }); try { renderDurChips(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); } catch (e) { /* ignore */ } }
+  function renderListPanel(k) {
+    const el = document.getElementById('listBody_' + k); if (!el) return;
+    if (!state.canAdmin || state.previewCoord || state.previewPrincipal) { el.innerHTML = ''; return; }
+    const d = LIST_DEFS[k], all = listAll(k), base = d.base().map(String); const ed = (state.listEdit && state.listEdit.k === k) ? state.listEdit.id : null; const num = d.mode === 'number';
+    const btn = (a, id, t, lab, off) => `<button type="button" class="ro-btn${off ? ' off' : ''}" ${off ? 'disabled' : ''} data-li-${a}="${escapeHtml(id)}" aria-label="${lab}">${t}</button>`;
+    let h = all.map((id, i) => {
+      const hid = listHidden(k, id), cust = base.indexOf(id) === -1, nm = listName(k, id), def = d.lab(id);
+      if (ed === id) return `<div class="ro-row"><input class="text-input" data-li-input maxlength="40" value="${escapeHtml(nm)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;"><button type="button" class="add-entry-btn" data-li-save="${escapeHtml(id)}" style="white-space:nowrap;">Save</button><button type="button" class="ro-btn" data-li-cancel aria-label="Cancel">✕</button></div>`;
+      const sub = hid ? 'Hidden from choices' : (cust ? 'Added by you' : ((!num && nm !== def) ? 'was: ' + def : ''));
+      const last = btn(cust ? 'del' : (hid ? 'show' : 'hide'), id, cust ? '✕' : (hid ? '＋' : '✕'), cust ? 'Remove' : (hid ? 'Show again' : 'Hide'));
+      return `<div class="ro-row${hid ? ' li-hid' : ''}"><span class="ro-n">${i + 1}</span><span class="ro-nm">${escapeHtml(nm)}${sub ? `<small class="li-sub">${escapeHtml(sub)}</small>` : ''}</span><span class="ro-a">${btn('up', id, '▲', 'Move up', i === 0)}${btn('dn', id, '▼', 'Move down', i === all.length - 1)}${num ? '' : btn('ed', id, '✎', 'Rename')}${last}</span></div>`;
+    }).join('');
+    h += `<div class="ro-row"><input class="text-input" data-li-new ${num ? 'type="number" inputmode="numeric" min="5" max="300"' : 'maxlength="40"'} placeholder="${escapeHtml(d.ph)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;"><button type="button" class="add-entry-btn" data-li-add style="white-space:nowrap;">＋ Add</button></div>`;
+    h += `<button type="button" class="ro-reset" data-li-reset>Reset to the default list</button><div class="ro-hint">Hiding an item only removes it from the choices. Old records keep it.</div>`;
+    el.innerHTML = h;
+    const cur = () => { const c0 = listCfg(k); return { order: listAll(k).slice(), names: Object.assign({}, c0.names || {}), hidden: (c0.hidden || []).map(String).slice(), custom: (c0.custom || []).map(String).slice() }; };
+    const g = (a) => el.querySelectorAll('[data-li-' + a + ']');
+    const nameTaken = (v, except) => all.some((x) => x !== except && (String(x).toLowerCase() === v.toLowerCase() || String(listName(k, x)).toLowerCase() === v.toLowerCase()));
+    g('up').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-up'), i = c.order.indexOf(id); if (i < 1) return; c.order.splice(i - 1, 0, c.order.splice(i, 1)[0]); listWrite(k, c); }));
+    g('dn').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-dn'), i = c.order.indexOf(id); if (i < 0 || i >= c.order.length - 1) return; c.order.splice(i + 1, 0, c.order.splice(i, 1)[0]); listWrite(k, c); }));
+    g('hide').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-hide'); if (c.hidden.indexOf(id) === -1) c.hidden.push(id); listWrite(k, c); }));
+    g('show').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-show'); c.hidden = c.hidden.filter((x) => x !== id); listWrite(k, c); }));
+    g('del').forEach((b) => b.addEventListener('click', async () => { const id = b.getAttribute('data-li-del'); if (!(await showConfirm(`“${listName(k, id)}” will be removed from the choices. Records that already use it stay as they are.`, 'Remove this item?', 'Remove'))) return; const c = cur(); c.custom = c.custom.filter((x) => x !== id); c.order = c.order.filter((x) => x !== id); c.hidden = c.hidden.filter((x) => x !== id); delete c.names[id]; listWrite(k, c); }));
+    g('ed').forEach((b) => b.addEventListener('click', () => { state.listEdit = { k, id: b.getAttribute('data-li-ed') }; renderListPanel(k); const i = el.querySelector('[data-li-input]'); if (i) { i.focus(); i.select(); } }));
+    g('cancel').forEach((b) => b.addEventListener('click', () => { state.listEdit = null; renderListPanel(k); }));
+    g('save').forEach((b) => b.addEventListener('click', () => {
+      const id = b.getAttribute('data-li-save'); const v = ((el.querySelector('[data-li-input]') || {}).value || '').trim();
+      if (!v) { showToast('Type a name', 'error'); return; }
+      if (nameTaken(v, id)) { showToast('This name is already in the list', 'error'); return; }
+      const c = cur(); if (v === d.lab(id)) delete c.names[id]; else c.names[id] = v; state.listEdit = null; listWrite(k, c);
+    }));
+    g('add').forEach((b) => b.addEventListener('click', () => {
+      const inp = el.querySelector('[data-li-new]'); let v = (inp.value || '').trim(); if (!v) { showToast(num ? 'Type the minutes' : 'Type a name', 'error'); return; }
+      if (num) { const n = Math.round(Number(v)); if (!(n >= 5 && n <= 300)) { showToast('Minutes must be between 5 and 300', 'error'); return; } v = String(n); }
+      const c = cur();
+      if (all.indexOf(v) !== -1) { if (listHidden(k, v)) { c.hidden = c.hidden.filter((x) => x !== v); listWrite(k, c); } else showToast('Already in the list', 'error'); return; }
+      if (nameTaken(v, null)) { showToast('This name is already in the list', 'error'); return; }
+      c.custom.push(v); c.order.push(v); listWrite(k, c);
+    }));
+    g('reset').forEach((b) => b.addEventListener('click', async () => { if (!(await showConfirm('Go back to the default list? Your renames, hidden items and added items on this list are cleared. Records that already exist stay as they are.', 'Reset this list?', 'Reset'))) return; state.listEdit = null; listWrite(k, {}); }));
   }
   // ---------- Report order (Admin > Settings) ----------
   function reportOrderLists() {
@@ -9377,8 +9469,8 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
     const draw = () => {
       body.innerHTML = `<div class="hv-d-title">Note</div><div class="hv-d-wing">${escapeHtml(dayHeading(d))} · ${escapeHtml(bats.map(gridBatchLabel).join(', '))}</div>
         <div class="sv-tlbl" style="margin:12px 0 6px;">What happens in these periods?</div>
-        <div class="chips">${NOTE_CHIPS.map((t) => `<button type="button" class="chip${txt === t ? ' active' : ''}" data-nt="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
-        <input class="text-input" id="ntText" maxlength="40" placeholder="Or type your own" value="${escapeHtml(NOTE_CHIPS.indexOf(txt) === -1 ? txt : '')}" style="margin-top:8px;">
+        <div class="chips">${noteChipNames().map((t) => `<button type="button" class="chip${txt === t ? ' active' : ''}" data-nt="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div>
+        <input class="text-input" id="ntText" maxlength="40" placeholder="Or type your own" value="${escapeHtml(noteChipNames().indexOf(txt) === -1 ? txt : '')}" style="margin-top:8px;">
         <div class="hv-note" style="text-align:left; margin-top:8px;">These periods become one block with this note. No class goes to the teachers' schedules for them, and nothing is added to the Exams tab.</div>
         <div class="hv-d-btns"><button type="button" class="btn-secondary" id="ntCancel" style="border-color: var(--line);">Cancel</button><button type="button" class="save-btn" id="ntOk" style="margin:0;">Save</button></div>`;
       body.querySelectorAll('[data-nt]').forEach((x) => x.addEventListener('click', () => { txt = x.getAttribute('data-nt'); draw(); }));
@@ -11500,6 +11592,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
   if (id === 'adminCampusPanel') return /^Set/.test(document.getElementById('campusLocText').textContent) ? 'Set' : 'Not set';
     if (id === 'adminRolesPanel') return state.isOwner ? 'Owner' : '';
     if (id === 'adminReportOrderPanel') { const n = (state.adminTeacherIds || []).filter((u) => repOrderOf(u) > 0 && !isRemovedUid(u)).length; return n ? `${n} fixed` : 'Default'; }
+    if (LIST_PANEL_KEY[id]) return String(listIds(LIST_PANEL_KEY[id]).length);
     if (id === 'adminContactPanel') return (document.getElementById('directorPhoneInput').value || document.getElementById('directorEmailInput').value) ? 'Set' : 'Not set';
     return '';
   }
@@ -11509,6 +11602,7 @@ document.querySelectorAll('[data-preview-principal]').forEach((b) => b.addEventL
       if (id === 'adminTeamPanel') { state.teamWingOpen = null; state.teamOpen = null; renderTeamPanel(); }
       else if (id === 'adminMappingPanel') { state.mapWingOpen = null; renderMappingPanel(); }
       else if (id === 'adminReportOrderPanel') { renderReportOrder(); }
+      else if (LIST_PANEL_KEY[id]) { state.listEdit = null; renderListPanel(LIST_PANEL_KEY[id]); }
       else if (id === 'adminRolesPanel') { renderRolesPanel(); loadAdminsList(); }
       else if (id === 'adminSubjectsPanel') { state.subjWingOpen = null; renderListManagers(); }
       else if (id === 'adminBatchPanel') { state.adminBatchListExpanded = null; state.adminBatchShift = null; renderBatchList(); }
@@ -12647,6 +12741,7 @@ Rules:
       { const d0 = snap.exists ? (snap.data() || {}) : {}; state.ownerFlag = d0.owner === true; state.isOwner = snap.exists && d0.owner !== false; try { setsTilesRefresh(); } catch (e) { /* ignore */ } }
       const ad = snap.exists; if (ad === state.canAdmin) return; state.canAdmin = ad; roleFollow(ad ? 'You are now an Admin' : 'You are no longer an Admin');
     }, () => { /* the role is read again at the next sign-in */ }));
+    unsubscribers.push(db.doc('settings/lists').onSnapshot((snap) => { state.lists = snap.exists ? (snap.data() || {}) : {}; try { listsRefresh(); } catch (e) { /* ignore */ } }, () => { /* default lists stay */ }));
     unsubscribers.push(db.doc('settings/permissions').onSnapshot((snap) => { state.perms = snap.exists ? (snap.data() || {}) : {}; try { applyRoleUI(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); renderHolidayUi(); renderRolesPanel(); } catch (e) { /* ignore */ } }, () => { /* default permissions stay */ }));
   }
   // ---------- Phone notifications (Web Push): they arrive even when the app is closed ----------
@@ -16850,13 +16945,14 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     state.allBatchesOpen = !document.getElementById('allBatchesPanel').classList.contains('open');
     renderRecentAndAllBatches();
   });
-  document.querySelectorAll('#durChips [data-dur]').forEach((c) => c.addEventListener('click', () => {
+  function bindDurChip(c) { c.addEventListener('click', () => {
     const startEl = document.getElementById('startTimeInput');
     if (!startEl.value) { const n = new Date(); startEl.value = minToT(n.getHours() * 60 + n.getMinutes()); }
     document.getElementById('endTimeInput').value = minToT(tMin(startEl.value) + Number(c.getAttribute('data-dur')));
     showFormMsg('');
     syncDurChips();
-  }));
+  }); }
+  renderDurChips();
   let lastStartMin = null;
   document.getElementById('startTimeInput').addEventListener('focus', () => { lastStartMin = tMin(document.getElementById('startTimeInput').value); });
   document.getElementById('startTimeInput').addEventListener('change', () => {
@@ -19899,7 +19995,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       cbox.hidden = !isCoord;
       if (isCoord) {
         const selT = state.activityForm.coordTags || [];
-        document.getElementById('coordTags').innerHTML = COORD_TAGS.map((t) => `<button type="button" class="chip${selT.indexOf(t) !== -1 ? ' active' : ''}" data-ctag="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
+        document.getElementById('coordTags').innerHTML = listIds('coordTags').concat(selT.filter((x) => listIds('coordTags').indexOf(x) === -1)).map((t) => `<button type="button" class="chip${selT.indexOf(t) !== -1 ? ' active' : ''}" data-ctag="${escapeHtml(t)}">${escapeHtml(listName('coordTags', t))}</button>`).join('');
         document.querySelectorAll('#coordTags [data-ctag]').forEach((b) => b.addEventListener('click', () => {
           const t = b.getAttribute('data-ctag'); const cur = (state.activityForm.coordTags || []).slice(); const k = cur.indexOf(t);
           if (k === -1) cur.push(t); else cur.splice(k, 1);
@@ -21585,7 +21681,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   // Admin Settings: the same rows, in four small groups
   (function organiseAdminSettings() {
-    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Lists', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
       const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
@@ -21595,7 +21691,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     new MutationObserver(() => { if (!busy) { busy = true; requestAnimationFrame(sync); } }).observe(par, { attributes: true, subtree: true, attributeFilter: ['hidden', 'style'] }); sync();
   })();
     // Admin Settings as tiles: every setting is its own tile under its group; a tap opens that setting as a page
-  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Lists', 'st-g3', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
   function setPanelLabel(id) { const p = document.getElementById(id); const h = p && p.querySelector('.panel-title'); let t = ''; if (h) { const c = h.cloneNode(true); c.querySelectorAll('.set-sum, svg, .ico').forEach((x) => x.remove()); t = (c.textContent || '').replace(/\s+/g, ' ').trim(); } return t || ({ adminPreviewPanel: 'Preview as', adminAiPanel: 'AI (beta)', adminPushPanel: 'Phone notifications' })[id] || ''; }
   function setPanelHidden(id) { const el = document.getElementById(id); if (id === 'adminRolesPanel' && !state.isOwner) return true; { const pk = PANEL_PERM[id]; if (principalView() && !pk) return true; if (pk && (!state.canAdmin || state.previewCoord || state.previewPrincipal) && !can(pk)) return true; } return !el || el.hidden || el.style.display === 'none' || (document.body.classList.contains('coord-mode') && el.classList.contains('admin-only')); }
   function setsViewSync() { const v = document.getElementById('view-admin'); if (!v) return; const w = state.adminSetOpen ? '1' : '0'; if (v.getAttribute('data-spage') !== w) v.setAttribute('data-spage', w); }
