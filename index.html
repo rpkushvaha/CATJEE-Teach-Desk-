@@ -1955,6 +1955,7 @@
   .ro-nm { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 500; }
   .ro-a { display: flex; gap: 4px; }
   .ro-btn { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; } .ro-btn.off { opacity: .35; }
+  .li-icons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; } .li-icons button { height: 44px; border: 1px solid var(--line); background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--muted-2); font: inherit; font-size: 12px; font-weight: 600; padding: 0; } .li-icons button.sel { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); } .li-ico { display: inline-block; vertical-align: -4px; margin-right: 8px; color: var(--muted-2); } .li-ico .ic { width: 18px; height: 18px; }
   .li-sub { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 1px; } .li-hid .ro-nm { opacity: .55; }
   .ro-reset { display: block; width: 100%; margin-top: 12px; padding: 8px; border: none; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--gold); cursor: pointer; }
   .ro-hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
@@ -4709,7 +4710,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.32 · updated 21 Nov 2026</div>
+          <div class="dnote">Version 15.33 · updated 21 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -6936,7 +6937,7 @@ function renderPartChips() {
     actChipsEl.classList.toggle('act-4', actTypes.length > 3);
     actChipsEl.innerHTML = actTypes.map((t) => {
       const active = t === state.activityForm.activityType;
-      return `<button type="button" class="act-seg-btn${active ? ' active' : ''}" data-activity-type="${escapeHtml(t)}">${ACT_ICONS[t] || ''}<span>${escapeHtml(activityLabel(t))}</span></button>`;
+      return `<button type="button" class="act-seg-btn${active ? ' active' : ''}" data-activity-type="${escapeHtml(t)}">${actIcon(t)}<span>${escapeHtml(activityLabel(t))}</span></button>`;
     }).join('');
     actChipsEl.querySelectorAll('[data-activity-type]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -7318,12 +7319,55 @@ function renderPartChips() {
   state.lists = state.lists || {}; state.listEdit = null;
   function durLabel(id) { const n = Number(id); if (!(n > 0)) return String(id); if (n < 60) return n + 'm'; return n % 60 ? Math.floor(n / 60) + 'h ' + (n % 60) + 'm' : (n / 60) + 'h'; }
   const LIST_DEFS = {
-    activity: { title: 'Activity types', mode: 'alias', panel: 'adminListActivityPanel', base: () => ACTIVITY_TYPES.slice(), lab: (id) => activityLabelDefault(id), ph: 'New activity type', help: 'The types a teacher can choose when logging an activity.' },
+    activity: { title: 'Activity types', mode: 'alias', icons: true, panel: 'adminListActivityPanel', base: () => ACTIVITY_TYPES.slice(), lab: (id) => activityLabelDefault(id), ph: 'New activity type', help: 'The types a teacher can choose when logging an activity.' },
     coordTags: { title: 'Coordinator work', mode: 'alias', panel: 'adminListCoordPanel', base: () => COORD_TAGS.slice(), lab: (id) => id, ph: 'New item', help: 'What a Coordinator can tick under “What did you handle?”.' },
     durations: { title: 'Class durations', mode: 'number', panel: 'adminListDurPanel', base: () => ['40', '50', '60', '65'], lab: durLabel, ph: 'Minutes, e.g. 45', help: 'The quick duration buttons on the Add Class page.' },
     reports: { title: 'Reports', mode: 'report', panel: 'adminListReportsPanel', base: () => ['full', 'att', 'count', 'sub', 'duty', 'entry', 'deliv'], lab: (id) => REP_NAMES[id] || id, ph: '', help: 'Rename a report, change the small line under its name, put the reports in your order or hide one. The name shows on the Reports tile and the page title.' },
     noteChips: { title: 'Timetable notes', mode: 'text', panel: 'adminListNotePanel', base: () => NOTE_CHIPS.slice(), lab: (id) => id, ph: 'New note', help: 'The quick notes offered when you mark periods in the timetable grid. A note already saved keeps its old text.' }
   };
+  const ICON_LIB = {
+    users: ["Meeting", "<path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/>"],
+    presentation: ["Presentation", "<path d=\"M2 3h20\"/><path d=\"M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3\"/><path d=\"m7 21 5-5 5 5\"/>"],
+    usercheck: ["Parent meeting", "<path d=\"M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"8.5\" cy=\"7\" r=\"4\"/><path d=\"m17 11 2 2 4-4\"/>"],
+    message: ["Talk", "<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/>"],
+    phone: ["Phone call", "<path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z\"/>"],
+    calendarcheck: ["Event", "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/><path d=\"m9 16 2 2 4-4\"/>"],
+    calendar: ["Calendar", "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>"],
+    clock: ["Time", "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/>"],
+    book: ["Book", "<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/><path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>"],
+    bookopen: ["Lecture", "<path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"/><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"/>"],
+    pencil: ["Writing", "<path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z\"/>"],
+    filetext: ["Paper", "<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><path d=\"M14 2v6h6M16 13H8M16 17H8M10 9H8\"/>"],
+    clipcheck: ["Checking", "<path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/><rect x=\"8\" y=\"2\" width=\"8\" height=\"4\" rx=\"1\"/><path d=\"m9 14 2 2 4-4\"/>"],
+    checkcircle: ["Done", "<path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"/><path d=\"m9 11 3 3L22 4\"/>"],
+    star: ["Star", "<path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z\"/>"],
+    flag: ["Flag", "<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><path d=\"M4 22v-7\"/>"],
+    bell: ["Reminder", "<path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"/><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"/>"],
+    megaphone: ["Announcement", "<path d=\"M3 11v2a1 1 0 0 0 1 1h3l8 5V5L7 10H4a1 1 0 0 0-1 1z\"/><path d=\"M19 8a5 5 0 0 1 0 8\"/>"],
+    home: ["Home", "<path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><path d=\"M9 22V12h6v10\"/>"],
+    grad: ["Students", "<path d=\"M22 10 12 5 2 10l10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>"],
+    award: ["Award", "<circle cx=\"12\" cy=\"8\" r=\"6\"/><path d=\"M15.477 12.89 17 22l-5-3-5 3 1.523-9.11\"/>"],
+    coffee: ["Break", "<path d=\"M18 8h1a4 4 0 0 1 0 8h-1\"/><path d=\"M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z\"/><path d=\"M6 1v3M10 1v3M14 1v3\"/>"],
+    briefcase: ["Office work", "<rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"/>"],
+    mappin: ["Outside", "<path d=\"M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/>"],
+    video: ["Online class", "<path d=\"m23 7-7 5 7 5z\"/><rect x=\"1\" y=\"5\" width=\"15\" height=\"14\" rx=\"2\"/>"],
+    printer: ["Printing", "<path d=\"M6 9V2h12v7\"/><path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\"/><rect x=\"6\" y=\"14\" width=\"12\" height=\"8\"/>"],
+    chart: ["Result", "<path d=\"M18 20V10M12 20V4M6 20v-6\"/>"],
+    target: ["Target", "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>"],
+    heart: ["Heart", "<path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"/>"],
+    moon: ["Evening", "<path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"/>"],
+    shield: ["Duty", "<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/>"],
+    eye: ["Watching", "<path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>"],
+    grid: ["Grid", "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"/>"],
+    mail: ["Mail", "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 7-10 6L2 7\"/>"],
+    bulb: ["Idea", "<path d=\"M9 18h6M10 22h4\"/><path d=\"M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V18h6v-1.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z\"/>"],
+    wrench: ["Repair", "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z\"/>"],
+    user: ["Person", "<path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>"],
+    sun: ["Morning", "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"/>"],
+    camera: ["Photo", "<path d=\"M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z\"/><circle cx=\"12\" cy=\"13\" r=\"4\"/>"]
+  };
+  function iconSvg(id) { const e = ICON_LIB[id]; return e ? '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + e[1] + '</svg>' : ''; }
+  function actIcon(t) { const id = (listCfg('activity').icons || {})[t]; if (id && ICON_LIB[id]) return iconSvg(id); return ACT_ICONS[t] || ACT_ICONS['Other Activity'] || ''; }
   const LIST_PANEL_KEY = {}; Object.keys(LIST_DEFS).forEach((k) => { LIST_PANEL_KEY[LIST_DEFS[k].panel] = k; });
   function listCfg(k) { const c = (state.lists || {})[k]; return (c && typeof c === 'object') ? c : {}; }
   function listAll(k) {
@@ -7363,34 +7407,37 @@ function renderPartChips() {
   function renderListPanel(k) {
     const el = document.getElementById('listBody_' + k); if (!el) return;
     if (!state.canAdmin || state.previewCoord || state.previewPrincipal) { el.innerHTML = ''; return; }
-    const d = LIST_DEFS[k], all = listAll(k), base = d.base().map(String); const rp = d.mode === 'report'; const ed = (state.listEdit && state.listEdit.k === k) ? state.listEdit.id : null; const num = d.mode === 'number';
+    const d = LIST_DEFS[k], all = listAll(k), base = d.base().map(String); const rp = d.mode === 'report'; const ic = !!d.icons; const ed = (state.listEdit && state.listEdit.k === k) ? state.listEdit.id : null; const num = d.mode === 'number';
     const btn = (a, id, t, lab, off) => `<button type="button" class="ro-btn${off ? ' off' : ''}" ${off ? 'disabled' : ''} data-li-${a}="${escapeHtml(id)}" aria-label="${lab}">${t}</button>`;
     let h = all.map((id, i) => {
       const hid = listHidden(k, id), cust = base.indexOf(id) === -1, nm = listName(k, id), def = d.lab(id);
       if (ed === id && rp) return `<div class="ro-row" style="flex-wrap:wrap;"><div style="flex:1 1 100%;"><div class="sv-tlbl" style="margin:0 0 4px;">Report name</div><input class="text-input" data-li-input maxlength="40" value="${escapeHtml(nm)}"><div class="sv-tlbl" style="margin:8px 0 4px;">Small line under the name</div><input class="text-input" data-li-input2 maxlength="40" value="${escapeHtml(repSub(id))}"></div><button type="button" class="add-entry-btn" data-li-save="${escapeHtml(id)}">Save</button><button type="button" class="ro-btn" data-li-cancel aria-label="Cancel">✕</button></div>`;
+      if (ed === id && ic) { const cur0 = (state.listEdit && state.listEdit.icon) || ''; return `<div class="ro-row" style="flex-wrap:wrap;"><div style="flex:1 1 100%;"><div class="sv-tlbl" style="margin:0 0 4px;">Name</div><input class="text-input" data-li-input maxlength="40" value="${escapeHtml(nm)}"><div class="sv-tlbl" style="margin:10px 0 4px;">Icon</div><div class="li-icons"><button type="button" class="li-ic-def${cur0 ? '' : ' sel'}" data-li-icon="" aria-label="Default icon">Default</button>${Object.keys(ICON_LIB).map((ik) => `<button type="button" class="${cur0 === ik ? 'sel' : ''}" data-li-icon="${ik}" aria-label="${escapeHtml(ICON_LIB[ik][0])}" title="${escapeHtml(ICON_LIB[ik][0])}">${iconSvg(ik)}</button>`).join('')}</div></div><button type="button" class="add-entry-btn" data-li-save="${escapeHtml(id)}">Save</button><button type="button" class="ro-btn" data-li-cancel aria-label="Cancel">✕</button></div>`; }
       if (ed === id) return `<div class="ro-row"><input class="text-input" data-li-input maxlength="40" value="${escapeHtml(nm)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;"><button type="button" class="add-entry-btn" data-li-save="${escapeHtml(id)}" style="white-space:nowrap;">Save</button><button type="button" class="ro-btn" data-li-cancel aria-label="Cancel">✕</button></div>`;
       const sub = hid ? (rp ? 'Hidden from Reports' : 'Hidden from choices') : (rp ? repSub(id) + (nm !== def ? ' · was: ' + def : '') : (cust ? 'Added by you' : ((!num && nm !== def) ? 'was: ' + def : '')));
       const last = btn(cust ? 'del' : (hid ? 'show' : 'hide'), id, cust ? '✕' : (hid ? '＋' : '✕'), cust ? 'Remove' : (hid ? 'Show again' : 'Hide'));
-      return `<div class="ro-row${hid ? ' li-hid' : ''}"><span class="ro-n">${i + 1}</span><span class="ro-nm">${escapeHtml(nm)}${sub ? `<small class="li-sub">${escapeHtml(sub)}</small>` : ''}</span><span class="ro-a">${btn('up', id, '▲', 'Move up', i === 0)}${btn('dn', id, '▼', 'Move down', i === all.length - 1)}${num ? '' : btn('ed', id, '✎', 'Rename')}${last}</span></div>`;
+      return `<div class="ro-row${hid ? ' li-hid' : ''}"><span class="ro-n">${i + 1}</span><span class="ro-nm">${ic ? `<span class="li-ico">${actIcon(id)}</span>` : ''}${escapeHtml(nm)}${sub ? `<small class="li-sub">${escapeHtml(sub)}</small>` : ''}</span><span class="ro-a">${btn('up', id, '▲', 'Move up', i === 0)}${btn('dn', id, '▼', 'Move down', i === all.length - 1)}${num ? '' : btn('ed', id, '✎', 'Rename')}${last}</span></div>`;
     }).join('');
     if (!rp) h += `<div class="ro-row"><input class="text-input" data-li-new ${num ? 'type="number" inputmode="numeric" min="5" max="300"' : 'maxlength="40"'} placeholder="${escapeHtml(d.ph)}" style="flex:1; min-width:0; padding:8px 10px; font-size:15px;"><button type="button" class="add-entry-btn" data-li-add style="white-space:nowrap;">＋ Add</button></div>`;
     h += `<button type="button" class="ro-reset" data-li-reset>Reset to the default list</button><div class="ro-hint">${rp ? 'Hiding a report only removes its tile. Nothing is deleted.' : 'Hiding an item only removes it from the choices. Old records keep it.'}</div>`;
     el.innerHTML = h;
-    const cur = () => { const c0 = listCfg(k); return { order: listAll(k).slice(), names: Object.assign({}, c0.names || {}), subs: Object.assign({}, c0.subs || {}), hidden: (c0.hidden || []).map(String).slice(), custom: (c0.custom || []).map(String).slice() }; };
+    const cur = () => { const c0 = listCfg(k); return { order: listAll(k).slice(), names: Object.assign({}, c0.names || {}), subs: Object.assign({}, c0.subs || {}), icons: Object.assign({}, c0.icons || {}), hidden: (c0.hidden || []).map(String).slice(), custom: (c0.custom || []).map(String).slice() }; };
     const g = (a) => el.querySelectorAll('[data-li-' + a + ']');
     const nameTaken = (v, except) => all.some((x) => x !== except && (String(x).toLowerCase() === v.toLowerCase() || String(listName(k, x)).toLowerCase() === v.toLowerCase()));
     g('up').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-up'), i = c.order.indexOf(id); if (i < 1) return; c.order.splice(i - 1, 0, c.order.splice(i, 1)[0]); listWrite(k, c); }));
     g('dn').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-dn'), i = c.order.indexOf(id); if (i < 0 || i >= c.order.length - 1) return; c.order.splice(i + 1, 0, c.order.splice(i, 1)[0]); listWrite(k, c); }));
     g('hide').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-hide'); if (c.hidden.indexOf(id) === -1) c.hidden.push(id); listWrite(k, c); }));
     g('show').forEach((b) => b.addEventListener('click', () => { const c = cur(), id = b.getAttribute('data-li-show'); c.hidden = c.hidden.filter((x) => x !== id); listWrite(k, c); }));
-    g('del').forEach((b) => b.addEventListener('click', async () => { const id = b.getAttribute('data-li-del'); if (!(await showConfirm(`“${listName(k, id)}” will be removed from the choices. Records that already use it stay as they are.`, 'Remove this item?', 'Remove'))) return; const c = cur(); c.custom = c.custom.filter((x) => x !== id); c.order = c.order.filter((x) => x !== id); c.hidden = c.hidden.filter((x) => x !== id); delete c.names[id]; listWrite(k, c); }));
-    g('ed').forEach((b) => b.addEventListener('click', () => { state.listEdit = { k, id: b.getAttribute('data-li-ed') }; renderListPanel(k); const i = el.querySelector('[data-li-input]'); if (i) { i.focus(); i.select(); } }));
+    g('del').forEach((b) => b.addEventListener('click', async () => { const id = b.getAttribute('data-li-del'); if (!(await showConfirm(`“${listName(k, id)}” will be removed from the choices. Records that already use it stay as they are.`, 'Remove this item?', 'Remove'))) return; const c = cur(); c.custom = c.custom.filter((x) => x !== id); c.order = c.order.filter((x) => x !== id); c.hidden = c.hidden.filter((x) => x !== id); delete c.names[id]; delete c.icons[id]; listWrite(k, c); }));
+    g('ed').forEach((b) => b.addEventListener('click', () => { state.listEdit = { k, id: b.getAttribute('data-li-ed'), icon: (listCfg(k).icons || {})[b.getAttribute('data-li-ed')] || '' }; renderListPanel(k); const i = el.querySelector('[data-li-input]'); if (i) { i.focus(); i.select(); } }));
+    g('icon').forEach((b) => b.addEventListener('click', () => { if (state.listEdit) state.listEdit.icon = b.getAttribute('data-li-icon') || ''; el.querySelectorAll('[data-li-icon]').forEach((x) => x.classList.toggle('sel', x === b)); }));
     g('cancel').forEach((b) => b.addEventListener('click', () => { state.listEdit = null; renderListPanel(k); }));
     g('save').forEach((b) => b.addEventListener('click', () => {
       const id = b.getAttribute('data-li-save'); const v = ((el.querySelector('[data-li-input]') || {}).value || '').trim();
       if (!v) { showToast('Type a name', 'error'); return; }
       if (nameTaken(v, id)) { showToast('This name is already in the list', 'error'); return; }
       const c = cur(); if (v === d.lab(id)) delete c.names[id]; else c.names[id] = v;
+      if (ic) { const ik = (state.listEdit && state.listEdit.icon) || ''; if (ik && ICON_LIB[ik]) c.icons[id] = ik; else delete c.icons[id]; }
       if (rp) { const v2 = (((el.querySelector('[data-li-input2]') || {}).value) || '').trim(); if (!v2 || v2 === REP_SUB_DEF[id]) delete c.subs[id]; else c.subs[id] = v2; }
       state.listEdit = null; listWrite(k, c);
     }));
@@ -7400,7 +7447,7 @@ function renderPartChips() {
       const c = cur();
       if (all.indexOf(v) !== -1) { if (listHidden(k, v)) { c.hidden = c.hidden.filter((x) => x !== v); listWrite(k, c); } else showToast('Already in the list', 'error'); return; }
       if (nameTaken(v, null)) { showToast('This name is already in the list', 'error'); return; }
-      c.custom.push(v); c.order.push(v); listWrite(k, c);
+      c.custom.push(v); c.order.push(v); if (ic) state.listEdit = { k, id: v, icon: '' }; listWrite(k, c);
     }));
     g('reset').forEach((b) => b.addEventListener('click', async () => { if (!(await showConfirm('Go back to the default list? Your renames, hidden items and added items on this list are cleared. Records that already exist stay as they are.', 'Reset this list?', 'Reset'))) return; state.listEdit = null; listWrite(k, {}); }));
   }
