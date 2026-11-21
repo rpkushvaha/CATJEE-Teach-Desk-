@@ -4713,7 +4713,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.35 · updated 21 Nov 2026</div>
+          <div class="dnote">Version 15.36 · updated 21 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7394,6 +7394,9 @@ function renderPartChips() {
     camera: ["Photo", "<path d=\"M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z\"/><circle cx=\"12\" cy=\"13\" r=\"4\"/>"]
   };
   const ICON_GROUPS = [["Meeting and talk", ["users", "usersround", "messages", "messagedots", "usersearch", "presentation", "audio", "mic", "notebook", "notepen", "phone", "video", "message", "calendarcheck", "calclock"]], ["PTM and parents", ["handshake", "hearthand", "contact", "usercheck", "school", "grad", "bookuser", "clipboardlist", "trend", "bookcheck", "messagecircle", "heart", "home", "user"]], ["Reports and review", ["filetext", "filechart", "clipcheck", "chartsq", "chart", "pie", "listcheck", "notebooktext", "target", "checkcircle", "award", "star", "flag", "pencil"]], ["General", ["book", "bookopen", "calendar", "clock", "bell", "megaphone", "coffee", "briefcase", "mappin", "printer", "moon", "sun", "shield", "eye", "grid", "mail", "bulb", "wrench", "camera"]]];
+  const ICON_EMOJI = {"users": "👥", "usersround": "👥", "messages": "💬", "messagedots": "💬", "usersearch": "🔎", "presentation": "📊", "audio": "🎧", "mic": "🎤", "notebook": "📒", "notepen": "📝", "phone": "📞", "video": "🎥", "message": "💬", "calendarcheck": "📅", "calclock": "⏰", "handshake": "🤝", "hearthand": "🤲", "contact": "📇", "usercheck": "✅", "school": "🏫", "grad": "🎓", "bookuser": "📖", "clipboardlist": "📋", "trend": "📈", "bookcheck": "📘", "messagecircle": "💬", "heart": "❤️", "home": "🏠", "user": "👤", "filetext": "📄", "filechart": "📊", "clipcheck": "📋", "chartsq": "📊", "chart": "📊", "pie": "🥧", "listcheck": "✅", "notebooktext": "📓", "target": "🎯", "checkcircle": "✅", "award": "🏆", "star": "⭐", "flag": "🚩", "pencil": "✏️", "book": "📚", "bookopen": "📖", "calendar": "📅", "clock": "🕙", "bell": "🔔", "megaphone": "📣", "coffee": "☕", "briefcase": "💼", "mappin": "📍", "printer": "🖨️", "moon": "🌙", "sun": "☀️", "shield": "🛡️", "eye": "👁️", "grid": "🔲", "mail": "✉️", "bulb": "💡", "wrench": "🔧", "camera": "📷"};
+  function waActEmoji(t) { if (t === 'Coordination') return '🧭'; const id = (listCfg('activity').icons || {})[t]; return (id && ICON_EMOJI[id]) || '🗂'; }
+  function waActTitle(t) { if (t === 'Coordination') return 'COORDINATION WORK'; if (t === 'Other Activity' || t === 'Other') return 'OTHER WORK'; return String(activityLabel(t)).toUpperCase(); }
   function iconSvg(id) { const e = ICON_LIB[id]; return e ? '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + e[1] + '</svg>' : ''; }
   function actIcon(t) { const id = (listCfg('activity').icons || {})[t]; if (id && ICON_LIB[id]) return iconSvg(id); return ACT_ICONS[t] || ACT_ICONS['Other Activity'] || ''; }
   const LIST_PANEL_KEY = {}; Object.keys(LIST_DEFS).forEach((k) => { LIST_PANEL_KEY[LIST_DEFS[k].panel] = k; });
@@ -18450,7 +18453,10 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
       sections.push(L);
     }
     // Other work
-    [['🧭 *COORDINATION WORK*', others.filter((a) => a.activityType === 'Coordination')], ['🗂 *OTHER WORK*', others.filter((a) => a.activityType !== 'Coordination')]].forEach(([title, list]) => {
+    const waOrder = listIds('activity').map(String);
+    const waTypes = []; others.forEach((a) => { if (waTypes.indexOf(a.activityType) === -1) waTypes.push(a.activityType); });
+    waTypes.sort((x, y) => { const i = waOrder.indexOf(x), j = waOrder.indexOf(y); return (i < 0 ? 999 : i) - (j < 0 ? 999 : j); });
+    waTypes.map((t) => [`${waActEmoji(t)} *${waActTitle(t)}*`, others.filter((a) => a.activityType === t)]).forEach(([title, list]) => {
       if (!list.length) return;
       const L = [title];
       list.forEach((a) => {
