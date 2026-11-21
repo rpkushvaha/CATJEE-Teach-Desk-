@@ -1663,6 +1663,8 @@
   .hv-act-card.invig { border-left-color: rgba(124,58,237,.55); }
   .hv-act-title { display: inline-flex; align-items: center; gap: 6px; }
   .hv-act-title .ico { color: #1D4ED8; width: 16px; height: 16px; }
+  .hv-act-title .ico-sv { display: inline-flex; vertical-align: -3px; margin-right: 6px; color: #1D4ED8; } .hv-act-title .ico-sv svg { width: 16px; height: 16px; }
+  .hv-act-card.leave .hv-act-title .ico-sv { color: #B45309; } .hv-act-card.invig .hv-act-title .ico-sv { color: #6D28D9; }
   .hv-act-card.leave .hv-act-title .ico { color: #B45309; }
   .hv-act-card.invig .hv-act-title .ico { color: #6D28D9; }
   /* 4) empty states */
@@ -4711,7 +4713,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.34 · updated 21 Nov 2026</div>
+          <div class="dnote">Version 15.35 · updated 21 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5892,12 +5894,13 @@
     return escapeHtml(lines[0] || '');
   }
 
+  function actTitleIco(a, dflt) { const id = (listCfg('activity').icons || {})[a.activityType]; if (id && ICON_LIB[id]) return `<span class="ico-sv" aria-hidden="true">${iconSvg(id)}</span>`; return `<span class="ico i-${dflt}" aria-hidden="true"></span>`; }
   function todayActivityRowHtml(a) {
     const isLeave = a.activityType === 'Leave / Holiday';
     const aic = isLeave ? 'leave' : (isInvig(a) ? 'eye2' : 'brief');
     return `<div class="tl-item hv-rec" data-today-act="${escapeHtml(a.id)}" role="button" tabindex="0"><div class="tl-time"></div>
       <div class="hv-act-card${isLeave ? ' leave' : ''}${isInvig(a) ? ' invig' : ''}">
-        <div class="hv-act-top"><span class="hv-act-title"><span class="ico i-${aic}" aria-hidden="true"></span>${escapeHtml(isInvig(a) ? invigSummary(a).title : activityLabel(a.activityType))}</span>${isInvig(a) && a.examId ? '<span class="tl-pill done">Done</span>' : ''}</div>
+        <div class="hv-act-top"><span class="hv-act-title">${actTitleIco(a, aic)}${escapeHtml(isInvig(a) ? invigSummary(a).title : activityLabel(a.activityType))}</span>${isInvig(a) && a.examId ? '<span class="tl-pill done">Done</span>' : ''}</div>
         ${isInvig(a) ? `<div class="hv-act-note">${escapeHtml(invigSummary(a).sub)}</div>` : ''}
         ${a.note ? `<div class="hv-act-note">${noteHtml(a.note)}</div>` : ''}
       </div></div>`;
