@@ -1958,11 +1958,21 @@
   .ro-a { display: flex; gap: 4px; }
   .ro-btn { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; } .ro-btn.off { opacity: .35; }
   .li-icons { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; } .li-icons button { height: 58px; border: 1px solid var(--line); background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--muted-2); font: inherit; font-size: 12px; font-weight: 600; padding: 0; } .li-icons button.sel { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); } .li-igt { font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--muted); text-transform: uppercase; margin: 12px 0 6px; } .li-ib { display: flex; flex-direction: column; align-items: center; gap: 3px; } .li-ib small { font-size: 9.5px; font-weight: 600; line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ic-bar { grid-column: 1 / -1; margin: 14px 0 4px; } .ic-bar[hidden] { display: none; }
-  .ic-edit-btn { display: block; width: 100%; padding: 10px; border: 1.5px solid var(--gold); background: none; color: var(--gold); border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; } .ic-edit-btn.on { background: var(--gold); color: #fff; }
-  .ic-hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; } .ic-hint[hidden] { display: none; }
-  body.ic-edit #setTiles .st-tile, body.ic-edit #adminRepKind .rt-tile { cursor: pointer; }
-  body.ic-edit #setTiles .st-tile::before, body.ic-edit #adminRepKind .rt-tile::before { content: "\270E"; position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; z-index: 0; }
+  .icn-grp { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); margin: 14px 2px 6px; }
+  .icn-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; margin-bottom: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); text-align: left; cursor: pointer; }
+  .icn-row .icn-pv { display: inline-flex; width: 34px; height: 34px; border-radius: 9px; align-items: center; justify-content: center; flex: none; color: var(--gold); background: var(--gold-soft); }
+  .icn-row .icn-nm small { font-weight: 500; color: var(--muted); } .icn-row .icn-go { margin-left: auto; color: var(--muted); }
+  .ic-pvbox { border: 1px dashed var(--gold); border-radius: 12px; padding: 10px; margin: 6px 0 10px; }
+  .ic-pvt { font-size: 11px; font-weight: 700; color: var(--gold); margin-bottom: 8px; letter-spacing: .3px; }
+  .ic-pvr { display: flex; gap: 12px; justify-content: space-around; align-items: flex-start; } .ic-pvc { text-align: center; font-size: 11px; color: var(--muted); } .ic-pvc > div:first-child { margin-bottom: 4px; }
+  .ic-pt { display: flex; align-items: center; gap: 8px; width: 140px; padding: 10px; border-radius: 12px; border: 1px solid var(--line); font-size: 13px; font-weight: 700; color: var(--ink); box-sizing: border-box; text-align: left; }
+  .ic-pn { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--gold); width: 64px; }
+  .ic-lbl { font-size: 12px; font-weight: 700; margin: 10px 0 6px; color: var(--ink); }
+  .hue-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 16px; border-radius: 9px; outline: none; margin: 8px 0; background: linear-gradient(90deg, hsl(0,75%,82%), hsl(40,80%,80%), hsl(80,65%,80%), hsl(140,60%,80%), hsl(190,65%,80%), hsl(230,70%,84%), hsl(280,60%,84%), hsl(330,70%,84%), hsl(360,75%,82%)); }
+  .hue-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 3px solid var(--gold); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+  .hue-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--gold); }
+  .hue-slider.off::-webkit-slider-thumb { border-color: var(--line); opacity: .6; }
+  .ic-chips { display: flex; gap: 8px; } .ic-chips button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 16px; padding: 5px 12px; font: inherit; font-size: 12px; cursor: pointer; } .ic-chips button.sel { border-color: var(--gold); background: var(--gold-soft); color: var(--gold); font-weight: 700; }
   .ic-ov { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
   .ic-sheet { width: 100%; max-width: 560px; max-height: 86vh; background: var(--card); border-radius: 18px 18px 0 0; border-top: 3px solid var(--gold); display: flex; flex-direction: column; }
   .ic-h { padding: 14px 16px 6px; font-size: 16px; font-weight: 700; color: var(--ink); } .ic-sub { padding: 0 16px 6px; font-size: 12px; color: var(--muted); }
@@ -4327,6 +4337,11 @@
         <div class="admin-sub" style="margin:0;">The quick notes offered when you mark periods in the timetable grid. A note already saved keeps its old text.</div>
         <div id="listBody_noteChips"></div>
       </div>
+  <div class="panel set-acc admin-only" id="adminIconsPanel" data-atab="settings">
+        <div class="panel-title"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px; margin-right:6px; color:var(--gold);"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>Icons &amp; colours</div>
+        <div class="admin-sub" style="margin:0 0 6px;">Change the icon of any tile or bottom-bar item, and the colour of tiles. Everyone sees your choice.</div>
+        <div id="iconsBody"></div>
+      </div>
   <div class="panel admin-only" id="adminPreviewPanel" data-atab="settings">
         <button type="button" class="pv-row" id="pvToggle" aria-expanded="false"><span class="ico i-eye2" aria-hidden="true"></span><b>Preview as</b><span class="chev"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span></button>
         <div class="pv-body"><div class="admin-sub" style="margin:0 0 10px;">See what a Coordinator or the Principal sees. Changes you make here are real.</div>
@@ -4722,7 +4737,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.40 · updated 22 Nov 2026</div>
+          <div class="dnote">Version 15.41 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7441,6 +7456,11 @@ function renderPartChips() {
   async function listWrite(k, cfg) {
     const prev = state.lists; state.lists = Object.assign({}, prev, { [k]: cfg }); listsRefresh();
     try { await state.db.doc('settings/lists').set({ [k]: cfg }, { mergeFields: [k] }); showToast('Saved'); }
+    catch (err) { state.lists = prev; listsRefresh(); flashOffline(err); }
+  }
+  async function listWriteMany(obj) {
+    const prev = state.lists; state.lists = Object.assign({}, prev, obj); listsRefresh();
+    try { await state.db.doc('settings/lists').set(obj, { mergeFields: Object.keys(obj) }); showToast('Saved'); }
     catch (err) { state.lists = prev; listsRefresh(); flashOffline(err); }
   }
   function listsRefresh() { Object.keys(LIST_DEFS).forEach((k) => { try { renderListPanel(k); } catch (e) { /* ignore */ } }); try { renderDurChips(); } catch (e) { /* ignore */ } try { applyReportNames(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); } catch (e) { /* ignore */ } try { applyTileIcons(); } catch (e) { /* ignore */ } }
@@ -21799,7 +21819,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   })();
   // Admin Settings: the same rows, in four small groups
   (function organiseAdminSettings() {
-    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Lists', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel', 'adminListReportsPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+    const order = [['People', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Schedule Setup', ['adminShiftsPanel', 'adminBatchPanel', 'adminPeriodsPanel', 'adminSubjectsPanel', 'adminRoomsPanel', 'adminWeeklyOffPanel']], ['Test Setup', ['adminTestTypesPanel']], ['Lists', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel', 'adminListReportsPanel']], ['Tools', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminIconsPanel', 'adminPreviewPanel']]];
     const first = document.getElementById('adminTeamPanel'); if (!first || !first.parentElement) return; const par = first.parentElement; const anchor = first.previousElementSibling; let ref = anchor ? anchor.nextSibling : par.firstChild; const labels = [];
     order.forEach(([t, ids]) => {
       const lb = document.createElement('div'); lb.className = 'set-grp-lbl'; lb.setAttribute('data-atab', 'settings'); lb.textContent = t; labels.push([lb, ids]); par.insertBefore(lb, ref);
@@ -21809,13 +21829,12 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     new MutationObserver(() => { if (!busy) { busy = true; requestAnimationFrame(sync); } }).observe(par, { attributes: true, subtree: true, attributeFilter: ['hidden', 'style'] }); sync();
   })();
     // Admin Settings as tiles: every setting is its own tile under its group; a tap opens that setting as a page
-  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Lists', 'st-g3', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel', 'adminListReportsPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminPreviewPanel']]];
+  const SET_GROUPS = [['People', 'st-g1', ['adminTeamPanel', 'adminMappingPanel', 'adminReportOrderPanel', 'adminRolesPanel', 'adminContactPanel']], ['Batches & Rooms', 'st-g2', ['adminShiftsPanel', 'adminBatchPanel', 'adminRoomsPanel']], ['Timings & Subjects', 'st-g3', ['adminPeriodsPanel', 'adminSubjectsPanel', 'adminWeeklyOffPanel']], ['Test Setup', 'st-g4', ['adminTestTypesPanel']], ['Lists', 'st-g3', ['adminListActivityPanel', 'adminListCoordPanel', 'adminListDurPanel', 'adminListNotePanel', 'adminListReportsPanel']], ['Tools', 'st-g5', ['adminPushPanel', 'adminCampusPanel', 'adminAiPanel', 'adminIconsPanel', 'adminPreviewPanel']]];
   function setPanelLabel(id) { const p = document.getElementById(id); const h = p && p.querySelector('.panel-title'); let t = ''; if (h) { const c = h.cloneNode(true); c.querySelectorAll('.set-sum, svg, .ico').forEach((x) => x.remove()); t = (c.textContent || '').replace(/\s+/g, ' ').trim(); } return t || ({ adminPreviewPanel: 'Preview as', adminAiPanel: 'AI (beta)', adminPushPanel: 'Phone notifications' })[id] || ''; }
   function setPanelHidden(id) { const el = document.getElementById(id); if (id === 'adminRolesPanel' && !state.isOwner) return true; { const pk = PANEL_PERM[id]; if (principalView() && !pk) return true; if (pk && (!state.canAdmin || state.previewCoord || state.previewPrincipal) && !can(pk)) return true; } return !el || el.hidden || el.style.display === 'none' || (document.body.classList.contains('coord-mode') && el.classList.contains('admin-only')); }
   function setsViewSync() { const v = document.getElementById('view-admin'); if (!v) return; const w = state.adminSetOpen ? '1' : '0'; if (v.getAttribute('data-spage') !== w) v.setAttribute('data-spage', w); }
   function setsShowTiles() { state.adminSetOpen = null; renderSettingsAccordion(); setsViewSync(); }
   function setsTilesRefresh() {
-    try { syncIconBars(); } catch (e) { /* ignore */ }
     document.querySelectorAll('#setTiles [data-st]').forEach((b) => { const id = b.getAttribute('data-st'); const hid = setPanelHidden(id); if (b.hidden !== hid) b.hidden = hid; const sm = b.querySelector('.qa-s'); let sv = ''; try { sv = settingsSummary(id) || ''; } catch (e) { sv = ''; } if (sm && sm.textContent !== sv) sm.textContent = sv; });
     document.querySelectorAll('#setTiles [data-stl]').forEach((l) => { const ids = (l.getAttribute('data-stl') || '').split(','); const none = ids.every((i) => setPanelHidden(i)); if (l.hidden !== none) l.hidden = none; const g = l.nextElementSibling; if (g && g.hidden !== none) g.hidden = none; });
   }
@@ -21830,56 +21849,88 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     setsTilesRefresh(); setsViewSync();
   })();
 
-  // ---------- Change icons: Admin > Settings tiles and the Reports tiles ----------
-  state.iconEdit = false;
+  // ---------- Icons & colours (Admin > Settings > Tools) ----------
   function tileIconMap() { return listCfg('tileIcons'); }
-  function tileKeyOf(b) { if (b.hasAttribute('data-st')) return b.getAttribute('data-st'); const k = b.getAttribute('data-rep-kind'); if (b.id === 'doubtRepTile') return 'rep:doubt'; return k ? 'rep:' + k : ''; }
-  function tileEls() { return Array.prototype.slice.call(document.querySelectorAll('#setTiles [data-st], #adminRepKind .rt-tile')); }
-  function iconEditOn() { return !!state.iconEdit && !!state.canAdmin && !state.previewCoord && !state.previewPrincipal; }
+  function tileColorMap() { return listCfg('tileColors'); }
+  function isDarkNow() { const t = document.documentElement.getAttribute('data-theme'); return t === 'dark' || (t !== 'light' && !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)); }
+  function hueLook(h) {
+    const d = isDarkNow();
+    if (h === 'grey') return d ? { bg: '#262626', bd: '#3A3A3A', ic: '#C2C2C2' } : { bg: '#F3F4F6', bd: '#D4D4D8', ic: '#52525B' };
+    return d ? { bg: 'hsl(' + h + ',30%,17%)', bd: 'hsl(' + h + ',30%,30%)', ic: 'hsl(' + h + ',70%,72%)' } : { bg: 'hsl(' + h + ',80%,95%)', bd: 'hsl(' + h + ',60%,82%)', ic: 'hsl(' + h + ',65%,40%)' };
+  }
+  function iconTargets() {
+    const txt = (el, sel) => { const n = sel ? el.querySelector(sel) : el; return ((n && n.textContent) || '').replace(/\s+/g, ' ').trim(); };
+    const nav = Array.prototype.slice.call(document.querySelectorAll('.bottom-nav .nav-item')).filter((b) => b.style.display !== 'none').map((b) => ({ key: 'nav:' + b.getAttribute('data-tab'), el: b, label: txt(b, 'span'), kind: 'nav' }));
+    const home = Array.prototype.slice.call(document.querySelectorAll('#homeTiles [data-ht-go]')).map((b) => ({ key: 'home:' + b.getAttribute('data-ht-go'), el: b, label: txt(b, '.qa-l'), kind: 'tile' }));
+    const rep = Array.prototype.slice.call(document.querySelectorAll('#adminRepKind .rt-tile')).map((b) => ({ key: b.id === 'doubtRepTile' ? 'rep:doubt' : 'rep:' + b.getAttribute('data-rep-kind'), el: b, label: txt(b, '.qa-l'), kind: 'tile' }));
+    const set = Array.prototype.slice.call(document.querySelectorAll('#setTiles [data-st]')).filter((b) => !b.hidden).map((b) => ({ key: b.getAttribute('data-st'), el: b, label: txt(b, '.qa-l') || setPanelLabel(b.getAttribute('data-st')), kind: 'tile' }));
+    return [['Bottom bar', nav], ['Admin home', home], ['Reports', rep], ['Settings tiles', set]].filter((g) => g[1].length);
+  }
   function applyTileIcons() {
-    const m = tileIconMap();
-    tileEls().forEach((b) => {
-      const cur = b.querySelector(':scope > svg'); if (!cur) return;
+    const im = tileIconMap(), cm = tileColorMap();
+    iconTargets().forEach(([, items]) => items.forEach((t) => {
+      const b = t.el; let cur = b.querySelector(':scope > svg'); if (!cur) return;
       if (b.getAttribute('data-ic0') === null) b.setAttribute('data-ic0', cur.outerHTML);
-      const id = m[tileKeyOf(b)]; let want = b.getAttribute('data-ic0');
-      if (id && ICON_LIB[id]) { const w = cur.getAttribute('width') || '22'; const h = cur.getAttribute('height') || w; want = iconSvg(id).replace('width="18"', 'width="' + w + '"').replace('height="18"', 'height="' + h + '"'); }
-      if (cur.outerHTML !== want) cur.outerHTML = want;
-    });
-    syncIconBars();
+      const id = im[t.key]; let want = b.getAttribute('data-ic0');
+      if (id && ICON_LIB[id]) { const w = (want.match(/width="(\d+)"/) || [0, '22'])[1]; want = iconSvg(id).replace('width="18"', 'width="' + w + '"').replace('height="18"', 'height="' + w + '"'); }
+      if (cur.outerHTML !== want) { cur.outerHTML = want; cur = b.querySelector(':scope > svg'); }
+      if (t.kind === 'tile' && cur) {
+        const c = cm[t.key];
+        if (c === 'grey' || typeof c === 'number') { const L = hueLook(c); b.style.background = L.bg; b.style.borderColor = L.bd; cur.style.color = L.ic; }
+        else { b.style.removeProperty('background'); b.style.removeProperty('border-color'); cur.style.removeProperty('color'); }
+      }
+    }));
+    renderIconsPanel();
   }
-  function syncIconBars() {
-    const can = !!state.canAdmin && !state.previewCoord && !state.previewPrincipal;
-    if (!can && state.iconEdit) state.iconEdit = false;
-    document.body.classList.toggle('ic-edit', iconEditOn());
-    document.querySelectorAll('.ic-bar').forEach((bar) => { bar.hidden = !can; const bt = bar.querySelector('[data-icedit-btn]'); if (bt) { bt.textContent = iconEditOn() ? 'Done' : 'Change icons'; bt.classList.toggle('on', iconEditOn()); } const h = bar.querySelector('.ic-hint'); if (h) h.hidden = !iconEditOn(); });
-  }
-  function makeIconBar() {
-    const bar = document.createElement('div'); bar.className = 'ic-bar'; bar.hidden = true;
-    bar.innerHTML = '<button type="button" class="ic-edit-btn" data-icedit-btn>Change icons</button><div class="ic-hint" hidden>Tap a tile to choose its icon. Tiles do not open while this is on.</div>';
-    bar.querySelector('[data-icedit-btn]').addEventListener('click', () => { state.iconEdit = !state.iconEdit; syncIconBars(); });
-    return bar;
+  function renderIconsPanel() {
+    const host = document.getElementById('iconsBody'); if (!host) return;
+    const im = tileIconMap(), cm = tileColorMap();
+    host.innerHTML = iconTargets().map(([title, items]) => '<div class="icn-grp">' + escapeHtml(title) + '</div>' + items.map((t) => { const sv = t.el.querySelector(':scope > svg'); const ch = !!im[t.key] || cm[t.key] !== undefined; return '<button type="button" class="icn-row" data-icn="' + escapeHtml(t.key) + '"><span class="icn-pv">' + (sv ? sv.outerHTML.replace(/width="\d+"/, 'width="20"').replace(/height="\d+"/, 'height="20"').replace(/style="[^"]*"/, '') : '') + '</span><span class="icn-nm">' + escapeHtml(t.label) + (ch ? ' <small>· changed</small>' : '') + '</span><span class="icn-go">›</span></button>'; }).join('')).join('');
+    host.querySelectorAll('[data-icn]').forEach((b) => b.addEventListener('click', () => openIconPicker(b.getAttribute('data-icn'))));
   }
   function openIconPicker(key) {
-    const label = key.indexOf('rep:') === 0 ? (key === 'rep:doubt' ? 'Doubt clearing' : repName(key.slice(4))) : setPanelLabel(key);
-    let sel = tileIconMap()[key] || ''; const old = document.getElementById('icPickOv'); if (old) old.remove();
+    let tgt = null; iconTargets().forEach(([, items]) => items.forEach((t) => { if (t.key === key) tgt = t; })); if (!tgt) return;
+    const el = tgt.el, isTile = tgt.kind === 'tile', im = tileIconMap(), cm = tileColorMap();
+    let selIcon = im[key] || '', selCol = cm[key] === undefined ? '' : cm[key];
+    // the look of the item without our colour (its own original colour), read from the real element
+    const keep = [el.style.background, el.style.borderColor]; const svg0 = el.querySelector(':scope > svg'); const keepIc = svg0 ? svg0.style.color : '';
+    if (isTile) { el.style.removeProperty('background'); el.style.removeProperty('border-color'); if (svg0) svg0.style.removeProperty('color'); }
+    const cs = getComputedStyle(el); const orig = { bg: cs.backgroundColor, bd: cs.borderTopColor, ic: svg0 ? getComputedStyle(svg0).color : '' };
+    if (isTile) { el.style.background = keep[0]; el.style.borderColor = keep[1]; if (svg0 && keepIc) svg0.style.color = keepIc; }
+    const orig0 = el.getAttribute('data-ic0') || '';
+    const size = (orig0.match(/width="(\d+)"/) || [0, '22'])[1];
+    const sizedIcon = (id) => (id && ICON_LIB[id] ? iconSvg(id).replace('width="18"', 'width="' + size + '"').replace('height="18"', 'height="' + size + '"') : orig0);
+    const lookOf = (c) => (c === 'grey' || typeof c === 'number' ? hueLook(c) : orig);
+    const nowIcon = sizedIcon(im[key] || ''), nowLook = lookOf(cm[key] === undefined ? '' : cm[key]);
+    const pvHtml = (icon, look) => isTile ? '<div class="ic-pt" style="background:' + look.bg + ';border-color:' + look.bd + ';"><span style="display:inline-flex;color:' + look.ic + ';">' + icon + '</span><span>' + escapeHtml(tgt.label) + '</span></div>' : '<div class="ic-pn"><span style="display:inline-flex;">' + icon + '</span><span>' + escapeHtml(tgt.label) + '</span></div>';
+    const old = document.getElementById('icPickOv'); if (old) old.remove();
     const ov = document.createElement('div'); ov.id = 'icPickOv'; ov.className = 'ic-ov';
-    ov.innerHTML = `<div class="ic-sheet" role="dialog" aria-label="Choose icon"><div class="ic-h">Icon for “${escapeHtml(label)}”</div><div class="ic-sub">Same icon list as in Lists</div><div class="ic-body"><div class="li-icons"><button type="button" class="li-ic-def${sel ? '' : ' sel'}" data-ic-pick="">Original</button></div>${ICON_GROUPS.map((gp) => `<div class="li-igt">${escapeHtml(gp[0])}</div><div class="li-icons">${gp[1].map((ik) => `<button type="button" class="${sel === ik ? 'sel' : ''}" data-ic-pick="${ik}" aria-label="${escapeHtml(ICON_LIB[ik][0])}" title="${escapeHtml(ICON_LIB[ik][0])}"><span class="li-ib">${iconSvg(ik)}<small>${escapeHtml(ICON_LIB[ik][0])}</small></span></button>`).join('')}</div>`).join('')}</div><div class="ic-ft"><button type="button" class="btn-secondary" data-ic-cancel>Cancel</button><button type="button" class="add-entry-btn" data-ic-save>Save</button></div></div>`;
+    const colorHtml = isTile ? '<div class="ic-lbl">Colour</div><input type="range" class="hue-slider' + (typeof selCol === 'number' ? '' : ' off') + '" id="icHue" min="0" max="360" step="1" value="' + (typeof selCol === 'number' ? selCol : 210) + '" aria-label="Colour"><div class="ic-chips"><button type="button" data-ic-col="">Original colour</button><button type="button" data-ic-col="grey">Grey</button></div>' : '';
+    ov.innerHTML = '<div class="ic-sheet" role="dialog" aria-label="Choose icon"><div class="ic-h">“' + escapeHtml(tgt.label) + '”</div><div class="ic-body"><div class="ic-pvbox"><div class="ic-pvt">PREVIEW · ' + (isTile ? 'how this tile will look' : 'how it will look in the bottom bar') + '</div><div class="ic-pvr"><div class="ic-pvc"><div>' + pvHtml(nowIcon, nowLook) + '</div>Now</div><div class="ic-pvc"><div id="icAfter"></div>After</div></div></div>' + colorHtml + '<div class="ic-lbl">Icon</div><div class="li-icons"><button type="button" class="li-ic-def" data-ic-pick="">Original icon</button></div>' + ICON_GROUPS.map((gp) => '<div class="li-igt">' + escapeHtml(gp[0]) + '</div><div class="li-icons">' + gp[1].map((ik) => '<button type="button" data-ic-pick="' + ik + '" aria-label="' + escapeHtml(ICON_LIB[ik][0]) + '"><span class="li-ib">' + iconSvg(ik) + '<small>' + escapeHtml(ICON_LIB[ik][0]) + '</small></span></button>').join('') + '</div>').join('') + '</div><div class="ic-ft"><button type="button" class="btn-secondary" data-ic-cancel>Cancel</button><button type="button" class="add-entry-btn" data-ic-save>Save</button></div></div>';
     document.body.appendChild(ov);
+    const upd = () => {
+      const af = ov.querySelector('#icAfter'); if (af) af.innerHTML = pvHtml(sizedIcon(selIcon), lookOf(selCol));
+      ov.querySelectorAll('[data-ic-pick]').forEach((x) => x.classList.toggle('sel', (x.getAttribute('data-ic-pick') || '') === selIcon));
+      ov.querySelectorAll('[data-ic-col]').forEach((x) => x.classList.toggle('sel', x.getAttribute('data-ic-col') === (selCol === 'grey' ? 'grey' : (selCol === '' ? '' : '@'))));
+      const hs = ov.querySelector('#icHue'); if (hs) hs.classList.toggle('off', typeof selCol !== 'number');
+    };
+    upd();
     const close = () => ov.remove();
     ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
-    ov.querySelectorAll('[data-ic-pick]').forEach((b) => b.addEventListener('click', () => { sel = b.getAttribute('data-ic-pick') || ''; ov.querySelectorAll('[data-ic-pick]').forEach((x) => x.classList.toggle('sel', x === b)); }));
+    ov.querySelectorAll('[data-ic-pick]').forEach((b) => b.addEventListener('click', () => { selIcon = b.getAttribute('data-ic-pick') || ''; upd(); }));
+    ov.querySelectorAll('[data-ic-col]').forEach((b) => b.addEventListener('click', () => { selCol = b.getAttribute('data-ic-col') === 'grey' ? 'grey' : ''; upd(); }));
+    const hs = ov.querySelector('#icHue'); if (hs) hs.addEventListener('input', () => { selCol = Number(hs.value); upd(); });
     ov.querySelector('[data-ic-cancel]').addEventListener('click', close);
-    ov.querySelector('[data-ic-save]').addEventListener('click', async () => { const c = Object.assign({}, tileIconMap()); if (sel && ICON_LIB[sel]) c[key] = sel; else delete c[key]; close(); await listWrite('tileIcons', c); });
+    ov.querySelector('[data-ic-save]').addEventListener('click', async () => {
+      close();
+      const wasI = im[key] || '', wasC = cm[key] === undefined ? '' : cm[key]; const out = {};
+      if (selIcon !== wasI) { const c = Object.assign({}, tileIconMap()); if (selIcon && ICON_LIB[selIcon]) c[key] = selIcon; else delete c[key]; out.tileIcons = c; }
+      if (isTile && selCol !== wasC) { const c = Object.assign({}, tileColorMap()); if (selCol === '') delete c[key]; else c[key] = selCol; out.tileColors = c; }
+      if (Object.keys(out).length) await listWriteMany(out);
+    });
   }
-  document.addEventListener('click', (e) => {
-    if (!iconEditOn()) return; const b = e.target.closest && e.target.closest('#setTiles [data-st], #adminRepKind .rt-tile'); if (!b) return;
-    e.preventDefault(); e.stopImmediatePropagation(); const k = tileKeyOf(b); if (k) openIconPicker(k);
-  }, true);
-  (function buildIconBars() {
-    const st = document.getElementById('setTiles'); if (st) st.appendChild(makeIconBar());
-    const rk = document.getElementById('adminRepKind'); if (rk) { const rb = makeIconBar(); rb.style.order = '200'; rk.appendChild(rb); }
-    applyTileIcons();
-  })();
+  try { new MutationObserver(() => { try { applyTileIcons(); } catch (e) { /* ignore */ } }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { try { applyTileIcons(); } catch (e) { /* ignore */ } }); } catch (e) { /* ignore */ }
+  try { applyTileIcons(); } catch (e) { /* ignore */ }
   function openHelp() { const st = history.state && history.state.catjeeMenu; if (st === 'helpc') return; if (!st) { openMenu(); setTimeout(() => openMenuPanel('helpc'), 260); } else openMenuPanel('helpc'); }
   function openHelpSheetOld() {
     const lead = isLeadUser();
