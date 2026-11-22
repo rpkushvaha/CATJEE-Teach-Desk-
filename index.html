@@ -191,7 +191,7 @@
     store['settings/subjects'] = { list: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Reasoning'] };
     store['settings/rooms'] = { list: ['D1', 'D2', 'E3', 'F1', 'G2'] };
     store['settings/testTypes'] = { list: ['Class Test', 'Unit Test', 'Weekly Test', 'Half-Yearly'] };
-    store['settings/institute'] = { weeklyOff: ['Sun'], holidays: [], birthdays: [] };
+    store['settings/institute'] = { weeklyOff: ['Sun'], holidays: [{ id: 'hbig1', type: 'big', name: 'Genius 20', from: today, to: day(2), note: 'Open exam, all wings', logo: 'data:image/jpeg;base64,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' }], birthdays: [] };
     store['settings/campusLocation'] = { lat: 25.30358, lng: 82.97919, radius: 250 };
     store['settings/directorContact'] = { phone: '', email: '' };
     store['settings/staffTitles'] = { map: {} };
@@ -257,6 +257,8 @@
     // ---- exams today and tomorrow, with their invigilation duty ----
     var ctS = Math.max(nowMin + 40, 13 * 60), ctE = ctS + 65;
     store['exams/ex_ct'] = { type: 'Class Test', subject: 'Mathematics', name: '', date: today, start: hm(ctS), end: hm(ctE), room: 'F1, D1', scope: ['Class 10 - Batch 1', 'Class 10 - Batch 2'], invigilators: ['D1', 'D2'], ct: true, createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'F1', scope: ['Class 10 - Batch 1'], slots: [{ start: hm(ctS), end: hm(ctE), teachers: ['D1'] }] }, { room: 'D1', scope: ['Class 10 - Batch 2'], slots: [{ start: hm(ctS), end: hm(ctE), teachers: ['D2'] }] }] } };
+    store['exams/ex_go1'] = { type: 'Unit Test', subject: 'Genius 20', name: '', label: 'Morning batch', open: true, date: today, start: '09:00', end: '11:00', room: 'D1, D2', scope: [], invigilators: ['D0', 'D2'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'D1', scope: [], slots: [{ start: '09:00', end: '11:00', teachers: ['D0'] }] }, { room: 'D2', scope: [], slots: [{ start: '09:00', end: '11:00', teachers: ['D2'] }] }] } };
+    store['exams/ex_go2'] = { type: 'Unit Test', subject: 'Genius 20', name: '', label: 'Evening batch', open: true, date: today, start: '17:00', end: '19:00', room: 'D1', scope: [], invigilators: ['D3'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'D1', scope: [], slots: [{ start: '17:00', end: '19:00', teachers: ['D3'] }] }] } };
     store['exams/ex_ut'] = { type: 'Unit Test', subject: 'Physics / Chemistry', name: '', date: day(1), start: '10:00', end: '11:15', room: 'E3, G2', scope: ['Class 9 - Batch 1', 'Class 9 - Batch 2'], papers: [{ scope: ['Class 9 - Batch 1'], subject: 'Physics' }, { scope: ['Class 9 - Batch 2'], subject: 'Chemistry' }], invigilators: ['D3', 'D4', 'D5'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'E3', scope: ['Class 9 - Batch 1'], slots: [{ start: '10:00', end: '10:40', teachers: ['D3'] }, { start: '10:40', end: '11:15', teachers: ['D4'] }] }, { room: 'G2', scope: ['Class 9 - Batch 2'], slots: [{ start: '10:00', end: '11:15', teachers: ['D5'] }] }] } };
 
     store['exams/ex_ev'] = { type: 'Weekly Test', subject: 'Reasoning', name: '', date: today, start: '19:00', end: '20:15', room: 'D2', scope: ['Class 10 - Remedial'], invigilators: ['D4', 'D5'], createdAt: Date.now(), createdBy: 'D0', plan: { rooms: [{ room: 'D2', scope: ['Class 10 - Remedial'], slots: [{ start: '19:00', end: '19:40', teachers: ['D4'] }, { start: '19:40', end: '20:15', teachers: ['D5'] }] }] } };
@@ -2585,6 +2587,13 @@
   .cal-s { background: #EFE6FA !important; color: #6B3FA0 !important; font-weight: 700; }
   .cal-dot.cal-s { background: #EFE6FA !important; }
   .hol-s { background: #EFE6FA; color: #6B3FA0; }
+  .cal-b { background: #FDE8EC !important; color: #B4172F !important; font-weight: 700; } .cal-dot.cal-b { background: #FDE8EC !important; }
+  .hol-big { flex-direction: row !important; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .hol-big .hol-lg { width: 88px; flex: none; background: #fff; border-radius: 8px; padding: 3px 4px; display: block; }
+  .hol-big .hol-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .duty-lg { display: block; height: 32px; max-width: 150px; object-fit: contain; background: #fff; border-radius: 6px; padding: 2px 6px; margin-bottom: 8px; border: 1px solid var(--line); }
+  .tg-daynote .tg-lg { display: block; margin-left: auto; margin-right: auto; height: 38px; max-width: 160px; object-fit: contain; background: #fff; border-radius: 6px; padding: 2px 6px; margin-bottom: 4px; }
+  .cf-lg { display: block; max-width: 180px; max-height: 70px; object-fit: contain; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 4px 8px; margin: 6px 0; }
   /* CATJEE Calendar as a page */
   .cal-cols { display: block; } .cal-right { margin-top: 4px; }
   #calHost { padding-bottom: 24px; }
@@ -4027,8 +4036,8 @@
           </div>
           <div class="xw-steps" id="xwSteps"></div>
           <div class="xw-pane" data-xw="1">
-            <div class="xw-card"><div class="xw-ch">Exam</div><div class="sv-tlbl">Test type</div><div id="adminExamType"></div></div>
- <div class="xw-card"><div class="xw-ch">Classes</div><div id="adminExamScope"></div></div>
+            <div class="xw-card"><div class="xw-ch">Exam</div><div class="sv-tlbl">Test type</div><div id="adminExamType"></div><div class="sv-tlbl">Label <span class="xt-note">optional</span></div><input class="text-input" id="adminExamLabel" type="text" maxlength="40" placeholder="e.g. 9–11 batch" autocomplete="off"></div>
+ <div class="xw-card"><div class="xw-ch">Classes</div><label class="xw-sw" id="xwOpenRow" style="margin-bottom:8px;"><span><b>Open exam</b><small>No class needed. Duty can go to any teacher.</small></span><input type="checkbox" id="xwOpen"></label><div id="adminExamScope"></div></div>
  <div class="xw-card"><div class="xw-ch">Subject</div><div id="adminExamPapers"></div><div class="sv-tlbl">Subject <span class="xt-note">optional</span></div><div id="adminExamSubject"></div></div>
             <div class="xw-card">
               <div class="xw-ch">Paper &amp; timings</div>
@@ -4737,7 +4746,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.45 · updated 22 Nov 2026</div>
+          <div class="dnote">Version 15.49 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -5833,7 +5842,7 @@
   function plannedDutiesToday() {
     const today = todayStr();
     const logged = (state.classesToday || []).filter((c) => isInvig(c) && c.examId);
-    return myDuties(today).filter((d) => !logged.some((c) => c.examId === d.exam.id) && !ctMerged(d.exam));
+    return myDuties(today).filter((d) => !logged.some((c) => c.examId === d.exam.id) && !ctMerged(d.exam)).sort((x, y) => (hhmmToMin(x.slots[0].start) || 0) - (hhmmToMin(y.slots[0].start) || 0));
   }
   function dutyStatus(slots, date) {
     const now = new Date(); const nm = now.getHours() * 60 + now.getMinutes();
@@ -5850,8 +5859,9 @@
     let prev = null;
     const chips = d.slots.map((sl) => { const room = (sl.room && sl.room !== prev) ? `<span class="mchip">${I_DOOR}${escapeHtml(sl.room)}</span>` : ''; prev = sl.room;
       return `${room}<span class="mchip">${I_CLOCK}${escapeHtml(formatTimeStr(sl.start))} – ${escapeHtml(formatTimeStr(sl.end))}${sl.brk && sl.brk.start ? ` · break ${escapeHtml(formatTimeStr(sl.brk.start))} – ${escapeHtml(formatTimeStr(sl.brk.end))}` : ''}</span>`; }).join('');
+    const bgE = bigOn(d.exam.date || todayStr()); const dlg = bigLogoOk(bgE) ? `<img class="duty-lg" src="${bgE.logo}" alt="${escapeHtml(bgE.name)}">` : '';
     return `<div class="tl-item hv-rec" data-today-duty="${escapeHtml(d.exam.id)}" role="button" tabindex="0">${tlTimeHtml(first)}
-      <div class="tl-card ${st} tl-duty">
+      <div class="tl-card ${st} tl-duty">${dlg}
         <div class="tl-top"><div class="tl-batch">Invigilation${rooms.length ? ' · ' + escapeHtml(rooms.join(', ')) : ''}</div><span class="tl-pill ${st}">${DUTY_PILL[st]}</span></div>
         <div class="chiprow"><span class="schip"><span class="ico i-cbpen" aria-hidden="true"></span>${escapeHtml(examTitle(d.exam))}</span>${chips}</div>
         ${st === 'upcoming' ? '' : `<button type="button" class="tl-log" data-duty-log="${escapeHtml(d.exam.id)}">${st === 'live' ? 'Log this duty' : 'Log it now'}</button>`}
@@ -7393,7 +7403,7 @@ function renderPartChips() {
     notebooktext: ["Academic", "<path d=\"M2 6h4M2 10h4M2 14h4M2 18h4\"/><rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\"/><path d=\"M9.5 8h5M9.5 12H16M9.5 16H14\"/>"],
     target: ["Target", "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>"],
     checkcircle: ["Done", "<path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"/><path d=\"m9 11 3 3L22 4\"/>"],
-    award: ["Award", "<circle cx=\"12\" cy=\"8\" r=\"6\"/><path d=\"M15.477 12.89 17 22l-5-3-5 3 1.523-9.11\"/>"],
+    award: ["Award", "<circle cx=\"12\" cy=\"8\" r=\"6\"/><path d=\"M15.487 12.89 17 22l-5-3-5 3 1.523-9.11\"/>"],
     star: ["Star", "<path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z\"/>"],
     flag: ["Flag", "<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><path d=\"M4 22v-7\"/>"],
     pencil: ["Writing", "<path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z\"/>"],
@@ -7423,7 +7433,7 @@ function renderPartChips() {
     calrange: ["Day summary", "<rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M16 2v4\"/><path d=\"M3 10h18\"/><path d=\"M8 2v4\"/><path d=\"M17 14h-6\"/><path d=\"M13 18H7\"/><path d=\"M7 14h.01\"/><path d=\"M17 18h.01\"/>"],
     calsync: ["Shifts", "<path d=\"M11 10v4h4\"/><path d=\"m11 14 1.535-1.605a5 5 0 0 1 8 1.5\"/><path d=\"M16 2v4\"/><path d=\"m21 18-1.535 1.605a5 5 0 0 1-8-1.5\"/><path d=\"M21 22v-4h-4\"/><path d=\"M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3\"/><path d=\"M3 10h4\"/><path d=\"M8 2v4\"/>"],
     calx: ["Weekly off", "<path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/><path d=\"m14 14-4 4\"/><path d=\"m10 14 4 4\"/>"],
-    mappinned: ["On campus", "<path d=\"M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.459 6 11.613 6 8a6 6 0 0 1 12 0\"/><circle cx=\"12\" cy=\"8\" r=\"2\"/><path d=\"M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712\"/>"],
+    mappinned: ["On campus", "<path d=\"M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.489 6 11.613 6 8a6 6 0 0 1 12 0\"/><circle cx=\"12\" cy=\"8\" r=\"2\"/><path d=\"M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712\"/>"],
     alert: ["Alert", "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>"],
     table: ["Timetable", "<path d=\"M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18\"/>"],
     filecheck: ["Exam paper", "<path d=\"M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"m3 15 2 2 4-4\"/>"],
@@ -8464,7 +8474,8 @@ function renderPartChips() {
         <button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);" aria-label="Cancel selection">✕</button></span></div>`;
     } else if (sel) html += `<div class="tg-selbar"><span>Tap the exam's cells · <b>${sel.cells.length}</b> selected</span><span><button type="button" class="btn-secondary" id="tgSelCancel" style="border-color: var(--line);">Cancel</button> <button type="button" class="save-btn" id="tgSelNext" style="margin:0;">Next</button></span></div>`;
     const dNote = dayNoteOf(doc, d);
-    if (dNote) html += `<div class="tg-daynote"><span class="ico i-pin" aria-hidden="true"></span> ${escapeHtml(dNote)}${(doc.cells || []).some((c) => c.d === d) ? '' : ' · whole day'}</div>`;
+    { const bgN = bigOn(d); var dnLogo = (dNote && bgN && bgN.name === dNote && bigLogoOk(bgN)) ? `<img class="tg-lg" src="${bgN.logo}" alt="">` : ''; }
+    if (dNote) html += `<div class="tg-daynote">${dnLogo}<span class="ico i-pin" aria-hidden="true"></span> ${escapeHtml(dNote)}${(doc.cells || []).some((c) => c.d === d) ? '' : ' · whole day'}</div>`;
     
     html += `<div class="tg-scroll"><table class="tg-table${tgLblW(g.batches, perD.length).tight ? ' tg-tight' : ''}"><thead><tr><th style="width:${tgLblW(g.batches, perD.length).w}px">${escapeHtml(WD[dateObj(d).getDay()])}</th>${perD.map((pp, i) => pp.off ? '' : `<th class="tg-ph${pp.changed ? ' tg-chg' : ''}" data-tg-ph="${i}" role="button">P${tgDispNo(perD, i)}<br><span>${escapeHtml(formatTimeStr(pp.start).replace(/\s?(AM|PM)$/i, ''))}</span></th>`).join('')}</tr></thead><tbody>`;
     const rowSkip = {};
@@ -8540,6 +8551,7 @@ function renderPartChips() {
   function examSubjectFor(e, batch) { const P = examPapers(e); for (let i = 0; i < P.length; i++) { const sc = P[i].scope || []; if (sc.indexOf(batch) !== -1 || expandScope(sc).indexOf(batch) !== -1) return P[i].subject || ''; } return (e && e.subject) || ''; }
   // "9 · Eve (Physics) | 10 · Eve (Chemistry)" when the classes write different subjects; otherwise just the classes
   function scopeWithSubjects(e, short) {
+    if (e && e.open && !(e.scope || []).length) return 'Open exam';
     if (!examHasPapers(e)) return short ? scopeShort(e.scope) : scopeLabel(e.scope);
     return examPapers(e).map((p) => `${short ? scopeShort(p.scope) : scopeLabel(p.scope)}${p.subject ? ' (' + p.subject + ')' : ''}`).join(short ? ' | ' : ', ');
   }
@@ -9090,7 +9102,7 @@ The exam is removed everywhere: the Exams tab, its rooms and invigilation duties
       if (note) {
         const hasCls = (doc.cells || []).some((c) => c.d === d);
         const pc = colX.filter((o) => !o.c.br);
-        if (!hasCls && pc.length) { const xa = colX[0].x, xz = colX[colX.length - 1].x + colX[colX.length - 1].w; const ro = runOf[d]; if (!ro) { box(xa, y, xz - xa, dh, shade); fitLines(x, noteLines(x, note, xz - xa, 20, 3).map((l) => [l, '#000', 20]), xa + (xz - xa) / 2, y, xz - xa, dh); } else { if (d === ro.first) { runY[ro.first] = y; runShade[ro.first] = shade; } if (d === ro.last) { const y0 = runY[ro.first], hh = y + dh - y0; box(xa, y0, xz - xa, hh, runShade[ro.first]); fitLines(x, noteLines(x, note, xz - xa, 20, 3).map((l) => [l, '#000', 20]), xa + (xz - xa) / 2, y0, xz - xa, hh); } } }
+        if (!hasCls && pc.length) { const xa = colX[0].x, xz = colX[colX.length - 1].x + colX[colX.length - 1].w; const ro = runOf[d]; if (!ro) { box(xa, y, xz - xa, dh, shade); const bgX = bigOn(d); const lgI = (bgX && bgX.name === note) ? bigImgFor(bgX) : null; let ly = y, lh = dh; if (lgI && lgI.complete && lgI.naturalWidth) { const ih = Math.min(dh * 0.5, 64), iw = Math.min(ih * lgI.naturalWidth / lgI.naturalHeight, (xz - xa) * 0.6), ih2 = iw * lgI.naturalHeight / lgI.naturalWidth; x.drawImage(lgI, xa + (xz - xa) / 2 - iw / 2, y + 6, iw, ih2); ly = y + ih2 + 8; lh = dh - ih2 - 8; } fitLines(x, noteLines(x, note, xz - xa, 20, 3).map((l) => [l, '#000', 20]), xa + (xz - xa) / 2, ly, xz - xa, lh); } else { if (d === ro.first) { runY[ro.first] = y; runShade[ro.first] = shade; } if (d === ro.last) { const y0 = runY[ro.first], hh = y + dh - y0; box(xa, y0, xz - xa, hh, runShade[ro.first]); fitLines(x, noteLines(x, note, xz - xa, 20, 3).map((l) => [l, '#000', 20]), xa + (xz - xa) / 2, y0, xz - xa, hh); } } }
         else { const nl = noteLines(x, note, colDate - 8, 11, 4); nl.forEach((l, i) => txt(l, 20 + colDate / 2, y + dh - 14 - (nl.length - 1 - i) * 13, 11, true, '#C00000', colDate - 8)); }
       }
       y += dh;
@@ -12226,18 +12238,34 @@ Rules:
   function tpOpenSheet() { const root = document.getElementById('hvSheet'); root.classList.add('open'); root.setAttribute('aria-hidden', 'false'); }
   // ---------- CATJEE Calendar: holidays, Sunday working, half days ----------
   state.holidays = state.holidays || []; state.cal = null;
-  const HOL_TYPES = { holiday: 'Holiday', working: 'Sunday working', special: 'Special day', half: 'Half day', vac: "Students' vacation", note: 'Note' };
-  const HOL_CLS = { holiday: 'cal-h', working: 'cal-w', special: 'cal-s', half: 'cal-f', vac: 'cal-v', note: 'cal-n' };
+  const HOL_TYPES = { holiday: 'Holiday', working: 'Sunday working', special: 'Special day', big: 'Big event', half: 'Half day', vac: "Students' vacation", note: 'Note' };
+  const HOL_CLS = { holiday: 'cal-h', working: 'cal-w', special: 'cal-s', big: 'cal-b', half: 'cal-f', vac: 'cal-v', note: 'cal-n' };
   const HOL_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const holEnd = (h) => (h.to && h.to >= h.from ? h.to : h.from);
   const holOn = (date) => (state.holidays || []).filter((h) => h.from <= date && date <= holEnd(h));
-  function holDay(date) { const L = holOn(date); const pick = (t) => L.find((h) => h.type === t); return pick('holiday') || pick('working') || pick('special') || pick('half') || pick('vac') || pick('note') || null; }
+  function holDay(date) { const L = holOn(date); const pick = (t) => L.find((h) => h.type === t); return pick('holiday') || pick('working') || pick('special') || pick('half') || pick('big') || pick('vac') || pick('note') || null; }
   const holRange = (h) => (holEnd(h) !== h.from ? `${slotWhen(h.from)} – ${slotWhen(holEnd(h))}` : slotWhen(h.from));
+  const bigOn = (date) => (state.holidays || []).find((h) => h.type === 'big' && h.from <= date && date <= holEnd(h)) || null;
+  const bigLogoOk = (h) => !!(h && typeof h.logo === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(h.logo));
+  const bigImgCache = {};
+  function bigImgFor(h) { if (!bigLogoOk(h)) return null; let c = bigImgCache[h.id]; if (!c || c.src0 !== h.logo) { const im = new Image(); im.src = h.logo; c = bigImgCache[h.id] = { im, src0: h.logo }; } return c.im; }
+  function bigCardHtml(h, days, today) {
+    const lg = bigLogoOk(h) ? `<img class="hol-lg" src="${h.logo}" alt="">` : '';
+    const tail = today ? '' : ` · ${escapeHtml(slotWhen(h.from))} · ${days === 1 ? 'tomorrow' : 'in ' + days + ' days'}`;
+    return `<button type="button" class="hol-card hol-n hol-big" data-cal-open="${h.from}">${lg}<span class="hol-tx"><b>${today ? 'Big event today' : 'Big event'}</b><span>${escapeHtml(h.name)}${tail}${h.note ? ' · ' + escapeHtml(h.note) : ''}</span></span></button>`;
+  }
   const holPair = (h) => (!h.pair ? '' : (h.type === 'working' ? `In lieu of ${slotWhen(h.pair)}` : (h.type === 'holiday' ? `Made up by working on ${slotWhen(h.pair)}` : '')));
   const calId = () => 'h' + Math.random().toString(36).slice(2, 8);
   function holCardHtml() {
+    const t = todayStr(); let big = '';
+    const bt = bigOn(t);
+    if (bt) big = bigCardHtml(bt, 0, true);
+    else { const nb = (state.holidays || []).filter((h) => h.type === 'big' && h.from > t).sort((a, b) => a.from.localeCompare(b.from))[0]; if (nb) big = bigCardHtml(nb, Math.round((dateObj(nb.from) - dateObj(t)) / 86400000), false); }
+    return big + holCardBase();
+  }
+  function holCardBase() {
     const t = todayStr(); const d = holDay(t);
-    if (d && d.type !== 'vac') {
+    if (d && d.type !== 'vac' && d.type !== 'big') {
       const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f', note: 'hol-n2' }[d.type]; const head = { holiday: 'Holiday today', working: 'Sunday working today', special: 'Special day today', half: 'Half day today', note: 'Note for today' }[d.type];
       const extra = [(d.type === 'half' || d.type === 'special') && d.evening === 'off' ? 'Evening classes off' : '', d.type === 'special' && d.evening === 'off' ? 'Morning classes run' : '', d.type === 'special' ? 'Special working hours for teachers' : '', d.type === 'working' ? holPair(d) : '', d.type === 'note' && d.note ? d.note : '', d.tentative ? 'Date may change' : ''].filter(Boolean).join(' · ');
       return `<button type="button" class="hol-card ${cls}" data-cal-open="${t}"><b>${head}</b><span>${escapeHtml(d.name)}${extra ? ' · ' + escapeHtml(extra) : ''}</span></button>${d.type === 'holiday' ? '<button type="button" class="hol-duty" data-hol-duty>Working today? Record holiday duty</button>' : ''}`;
@@ -12290,7 +12318,7 @@ Rules:
     return `<div id="calRoot"><div class="cal-cols"><div class="cal-left">
       <div class="cal-nav"><button type="button" class="chip" id="calPrev" aria-label="Previous month">‹</button><b>${escapeHtml(calMonthLabel(m))}</b><button type="button" class="chip" id="calNext" aria-label="Next month">›</button></div>
       ${calGridHtml(m)}
-      <div class="cal-legend"><span><i class="cal-dot cal-h"></i>Holiday</span><span><i class="cal-dot cal-w"></i>Sunday working</span><span><i class="cal-dot cal-s"></i>Special day</span><span><i class="cal-dot cal-f"></i>Half day</span><span><i class="cal-dot cal-v"></i>Students' vacation</span><span><i class="cal-dot cal-n"></i>Note</span><span><i class="cal-dot cal-o"></i>Weekly off</span><span><i class="cal-dot cal-t"></i>Date may change</span><span>🎂 Birthday</span></div>
+      <div class="cal-legend"><span><i class="cal-dot cal-h"></i>Holiday</span><span><i class="cal-dot cal-w"></i>Sunday working</span><span><i class="cal-dot cal-s"></i>Special day</span><span><i class="cal-dot cal-b"></i>Big event</span><span><i class="cal-dot cal-f"></i>Half day</span><span><i class="cal-dot cal-v"></i>Students' vacation</span><span><i class="cal-dot cal-n"></i>Note</span><span><i class="cal-dot cal-o"></i>Weekly off</span><span><i class="cal-dot cal-t"></i>Date may change</span><span>🎂 Birthday</span></div>
       ${editor ? '<div class="hv-note" style="text-align:left;">Tap a date to add a holiday, working day, birthday or note.</div>' : ''}
       </div><div class="cal-right">
       ${det}
@@ -12307,8 +12335,9 @@ Rules:
       <div class="sv-tlbl">Name</div><input class="text-input" id="cfName" type="text" value="${escapeHtml(f.name)}" placeholder="e.g. Diwali">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"><div><div class="sv-tlbl">From</div><input class="text-input" id="cfFrom" type="date" value="${escapeHtml(f.from)}"></div><div><div class="sv-tlbl">To (optional)</div><input class="text-input" id="cfTo" type="date" value="${escapeHtml(f.to)}"></div></div>
       <div class="sv-tlbl">Note (optional)</div><input class="text-input" id="cfNote" type="text" value="${escapeHtml(f.note)}">
-      <div class="sv-tlbl">Linked day (optional)</div><input class="text-input" id="cfPair" type="date" value="${escapeHtml(f.pair)}"><div class="hv-note" style="text-align:left;">A holiday: the Sunday worked instead. A working Sunday: the holiday it is in lieu of.</div>
-      <label class="xw-sw" style="margin-top:8px;"><span><b>This date may change</b><small>For dates that depend on the moon</small></span><input type="checkbox" id="cfTent"${f.tentative ? ' checked' : ''}></label>
+      ${f.type === 'big' ? `<div class="sv-tlbl">Logo (optional)</div>${f.logo && /^data:image\//.test(f.logo) ? `<img class="cf-lg" src="${f.logo}" alt="">` : ''}<button type="button" class="btn-secondary" id="cfLogoPick" style="border-color: var(--line); width:100%;">${f.logo ? 'Change picture' : 'Choose a picture'}</button>${f.logo ? '<button type="button" class="btn-secondary" id="cfLogoRm" style="border-color: var(--line); width:100%; margin-top:8px;">Remove logo</button>' : ''}<input type="file" id="cfLogoFile" accept="image/*" hidden><div class="hv-note" style="text-align:left;">The picture is made small automatically. It shows on the Today page and in the timetable.</div>` : ''}
+      <div${f.type === 'big' ? ' style="display:none"' : ''}><div class="sv-tlbl">Linked day (optional)</div><input class="text-input" id="cfPair" type="date" value="${escapeHtml(f.pair)}"><div class="hv-note" style="text-align:left;">A holiday: the Sunday worked instead. A working Sunday: the holiday it is in lieu of.</div></div>
+      <label class="xw-sw" style="margin-top:8px;${f.type === 'big' ? ' display:none;' : ''}"><span><b>This date may change</b><small>For dates that depend on the moon</small></span><input type="checkbox" id="cfTent"${f.tentative ? ' checked' : ''}></label>
       ${(f.type === 'half' || f.type === 'special') ? `<label class="xw-sw" style="margin-top:8px;"><span><b>Evening classes off</b><small>Morning classes run as usual</small></span><input type="checkbox" id="cfEve"${f.evening === 'off' ? ' checked' : ''}></label>` : ''}
       <button type="button" class="save-btn" id="cfSave" style="margin-top:12px;">Save</button>
       <button type="button" class="btn-secondary" id="cfCancel" style="border-color: var(--line); margin-top:8px; width:100%;">Cancel</button>
@@ -12352,9 +12381,21 @@ Rules:
       <button type="button" class="save-btn" id="calAiSave" style="margin-top:12px;"${n ? '' : ' disabled'}>Add ${n} to the calendar</button>
       <button type="button" class="btn-secondary" id="calBack" style="border-color: var(--line); margin-top:8px; width:100%;">Cancel</button></div>`;
   }
+  function calLogoShrink(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file); const im = new Image();
+      im.onload = () => { try {
+        const w0 = im.naturalWidth || im.width, h0 = im.naturalHeight || im.height; if (!w0 || !h0) throw new Error('empty');
+        const k = Math.min(1, 440 / w0); const cv = document.createElement('canvas'); cv.width = Math.round(w0 * k); cv.height = Math.round(h0 * k);
+        const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height);
+        let q = 0.86, out = cv.toDataURL('image/jpeg', q); while (out.length > 45000 && q > 0.45) { q -= 0.08; out = cv.toDataURL('image/jpeg', q); }
+        URL.revokeObjectURL(url); resolve(out); } catch (e) { URL.revokeObjectURL(url); reject(e); } };
+      im.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad')); }; im.src = url;
+    });
+  }
   async function calSave(list) {
     list.sort((a, b) => a.from.localeCompare(b.from) || a.type.localeCompare(b.type));
-    try { await state.db.doc('settings/institute').set({ holidays: list }, { merge: true }); state.holidays = list; renderHolidayUi(); return true; } catch (err) { if (err && err.code === 'permission-denied') showToast('The database did not allow this. Ask the admin to let Coordinators change the calendar.', 'error'); else flashOffline(err); return false; } }
+    try { await state.db.doc('settings/institute').set({ holidays: list }, { merge: true }); state.holidays = list; list.forEach((h) => { try { bigImgFor(h); } catch (e) { /* ignore */ } }); renderHolidayUi(); return true; } catch (err) { if (err && err.code === 'permission-denied') showToast('The database did not allow this. Ask the admin to let Coordinators change the calendar.', 'error'); else flashOffline(err); return false; } }
   function calOpen(date) {
     state.cal = { m: (date || todayStr()).slice(0, 7), sel: date || null, mode: 'cal', lastMode: '' };
     if (state.tab !== 'calendar') switchTab('calendar'); calRender();
@@ -12374,7 +12415,7 @@ Rules:
       q('#calPrev').addEventListener('click', () => { c.m = calShift(c.m, -1); c.sel = null; calRender(); });
       q('#calNext').addEventListener('click', () => { c.m = calShift(c.m, 1); c.sel = null; calRender(); });
       qa('[data-cal-d]').forEach((b) => b.addEventListener('click', () => { c.sel = b.getAttribute('data-cal-d'); calRender(); }));
-      qa('[data-cal-edit]').forEach((b) => b.addEventListener('click', () => { const h = (state.holidays || []).find((x) => x.id === b.getAttribute('data-cal-edit')); if (!h) return; c.form = { id: h.id, type: h.type, name: h.name, from: h.from, to: h.to && h.to !== h.from ? h.to : '', note: h.note || '', pair: h.pair || '', tentative: !!h.tentative, evening: h.evening || '' }; c.mode = 'form'; calRender(); }));
+      qa('[data-cal-edit]').forEach((b) => b.addEventListener('click', () => { const h = (state.holidays || []).find((x) => x.id === b.getAttribute('data-cal-edit')); if (!h) return; c.form = { id: h.id, type: h.type, name: h.name, from: h.from, to: h.to && h.to !== h.from ? h.to : '', note: h.note || '', pair: h.pair || '', tentative: !!h.tentative, evening: h.evening || '', logo: h.logo || '' }; c.mode = 'form'; calRender(); }));
       qa('[data-cal-wish]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-wish')); const n = x && calWa(x); if (n) window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(`Happy Birthday, ${bdName(x)}! 🎂🎉 Wishing you a wonderful year ahead. Team CATJEE`), '_blank'); }));
       qa('[data-cal-quick]').forEach((b) => b.addEventListener('click', () => calQuick(b.getAttribute('data-cal-quick'), c.sel)));
       qa('[data-cal-bedit]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-bedit')); if (!x) return; c.bform = { id: x.id, uid: x.uid || '', name: x.name, sal: x.sal || '', date: (c.sel || todayStr()).slice(0, 4) + '-' + x.md, md: x.md, y: x.uid ? teacherBirthY(x.uid) : (x.y || ''), ownY: !!(x.uid && (state.adminNames[x.uid] || {}).by), other: !x.uid }; c.mode = 'bform'; calRender(); }));
@@ -12384,10 +12425,15 @@ Rules:
       const f = c.form;
       qa('[data-cf-type]').forEach((b) => b.addEventListener('click', () => { f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; const nt = b.getAttribute('data-cf-type'); if (nt === 'birthday') { c.bform = calNewBd(from0(f.from)); c.mode = 'bform'; calRender(); return; } f.type = nt; calRender(); }));
       q('#cfCancel').addEventListener('click', () => { c.mode = 'cal'; calRender(); });
+      const lgSync = () => { f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; };
+      { const pk = q('#cfLogoPick'), fi = q('#cfLogoFile'), rm = q('#cfLogoRm');
+        if (pk && fi) { pk.addEventListener('click', () => fi.click()); fi.addEventListener('change', async () => { const file = fi.files && fi.files[0]; if (!file) return; try { const url = await calLogoShrink(file); lgSync(); f.logo = url; calRender(); } catch (e) { showToast('Could not read this picture', 'error'); } }); }
+        if (rm) rm.addEventListener('click', () => { lgSync(); f.logo = ''; calRender(); }); }
       q('#cfSave').addEventListener('click', async () => {
         const name = q('#cfName').value.trim() || (f.type === 'working' ? 'Sunday working' : ''); const from = q('#cfFrom').value, to = q('#cfTo').value;
         if (!name) { showToast('Write the name of the holiday', 'error'); return; } if (!from) { showToast('Choose the date', 'error'); return; } if (to && to < from) { showToast('The last date is before the first date', 'error'); return; }
         const rec = { id: f.id || calId(), type: f.type, name: name.slice(0, 80), from, to: to && to !== from ? to : '', note: q('#cfNote').value.trim().slice(0, 600), pair: q('#cfPair').value, tentative: q('#cfTent').checked, evening: ((f.type === 'half' || f.type === 'special') && q('#cfEve') && q('#cfEve').checked) ? 'off' : '' };
+        if (f.type === 'big' && f.logo && /^data:image\//.test(f.logo)) rec.logo = f.logo;
         const list = (state.holidays || []).filter((x) => x.id !== rec.id).concat(rec);
         if (await calSave(list)) { showToast(f.id ? 'Holiday updated' : 'Holiday added'); c.mode = 'cal'; c.m = from.slice(0, 7); c.sel = from; calRender(); }
       });
@@ -12675,10 +12721,10 @@ Rules:
   // ---------- Holidays from the calendar, in the Timetable and in the teacher's Schedule ----------
   const holNoteText = (h) => (h.type === 'holiday' ? `Holiday (${h.name})` : `Evening classes off (${h.name})`);
   function tgHolInfo(days, session) {
-    const hol = [], eve = [], work = []; const ws = state.tt.weekStart; const week7 = datesBetween(ws, shiftDateStr(ws, 6));
+    const hol = [], eve = [], work = [], big = []; const ws = state.tt.weekStart; const week7 = datesBetween(ws, shiftDateStr(ws, 6));
     days.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'holiday') hol.push({ d, h }); else if ((h.type === 'special' || h.type === 'half') && h.evening === 'off' && sessType(session) === 'evening') eve.push({ d, h }); }));
-    week7.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'working') work.push({ d, h }); }));
-    return { hol, eve, work };
+    week7.forEach((d) => holOn(d).forEach((h) => { if (h.type === 'working') work.push({ d, h }); else if (h.type === 'big') big.push({ d, h }); }));
+    return { hol, eve, work, big };
   }
   const tgDayCls = (d) => { const h = holDay(d); return h ? ({ holiday: ' tg-hol', working: ' tg-wrk', special: ' tg-spc', half: ' tg-hlf' }[h.type] || '') : ''; };
   function tgHolidayCards(doc, days, editable) {
@@ -12694,7 +12740,17 @@ Rules:
       const isSun = WD[dateObj(x.d).getDay()] === 'Sun'; const on = isSun && doc.sunday;
       out += `<div class="tg-holcard hol-w"><b>${escapeHtml(slotWhen(x.d))} is a working day</b><div class="tg-hol-ln">${escapeHtml(holPair(x.h) || x.h.name)}</div>${isSun ? (on ? '<div class="tg-hol-ln"><span class="tg-hol-ok">Sunday is on in this timetable</span></div>' : (editable ? '<button type="button" class="tg-mini tg-mini-gold" data-tg-holsun>Turn on Sunday</button>' : '')) : ''}</div>`;
     });
+    info.big.forEach((x) => {
+      const isSun = WD[dateObj(x.d).getDay()] === 'Sun'; const dt0 = doc.dayTimes || {}; const has = (dt0[x.d] || {}).note === x.h.name; const sunOff = isSun && !doc.sunday;
+      out += `<div class="tg-holcard hol-s"><b>${escapeHtml(slotWhen(x.d))} · ${escapeHtml(x.h.name)}</b><div class="tg-hol-ln">Big event from CATJEE Calendar${has ? ' · <span class="tg-hol-ok">box added</span>' : ''}${sunOff ? ' · Sunday is off in this timetable' : ''}</div>${(editable && (!has || sunOff)) ? `<button type="button" class="tg-mini tg-mini-gold" data-tg-bigfill="${x.d}">Add ${escapeHtml(x.h.name)} box</button>` : ''}</div>`;
+    });
     return out;
+  }
+  function tgBigFill(d) {
+    const doc = state.tg.doc; const h = bigOn(d); if (!doc || !h) return;
+    tgRemember(); if (WD[dateObj(d).getDay()] === 'Sun') doc.sunday = true;
+    const dt = Object.assign({}, doc.dayTimes || {}); dt[d] = Object.assign({}, dt[d] || {}, { note: h.name }); doc.dayTimes = dt;
+    tgSave(); renderTgGrid(); showToast(`${h.name} box added · Undo is above the grid`);
   }
   function tgHolFill() {
     const doc = state.tg.doc; if (!doc) return; const g = tgGroup(); const info = tgHolInfo(tgDays(), g ? g.session : '');
@@ -12705,11 +12761,12 @@ Rules:
   }
   function tgHolBind(box) {
     box.querySelectorAll('[data-tg-holfill]').forEach((b) => b.addEventListener('click', tgHolFill));
+    box.querySelectorAll('[data-tg-bigfill]').forEach((b) => b.addEventListener('click', () => tgBigFill(b.getAttribute('data-tg-bigfill'))));
     box.querySelectorAll('[data-tg-holsun]').forEach((b) => b.addEventListener('click', () => { if (!state.tg.doc) return; state.tg.doc.sunday = true; tgSave(); renderTgGrid(); showToast('Sunday is on for this week'); }));
   }
   function svHolChip(d) {
     const h = holDay(d); if (!h || h.type === 'vac') return '';
-    const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f', note: 'hol-n2' }[h.type];
+    const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', big: 'hol-s', half: 'hol-f', note: 'hol-n2' }[h.type];
     const txt = h.type === 'holiday' ? `Holiday · ${h.name}` : (h.type === 'working' ? `Sunday working · ${holPair(h) || h.name}` : `${HOL_TYPES[h.type]} · ${h.name}${h.evening === 'off' ? ' · Evening off' : ''}`);
     return `<button type="button" class="sv-holchip ${cls}" data-cal-open="${d}">${escapeHtml(txt)}</button>`;
   }
@@ -15156,7 +15213,7 @@ Rules:
   const xwPlain = (name) => `<span class="xw-av plain" aria-hidden="true">${escapeHtml(xwInitials(name))}</span>`;
   const xwFmt = (v) => (v ? formatTimeStr(v) : '');
   const xwClone = (o) => JSON.parse(JSON.stringify(o || {}));
-  const xwSnap = (f) => JSON.stringify({ type: f.type, subject: f.subject, diff: !!f.diff, paperSub: f.diff ? f.paperSub : null, name: f.name, scope: f.scope, ptype: f.ptype, times: Object.assign({}, f.times, { _auto: undefined }), rooms: f.rooms });
+  const xwSnap = (f) => JSON.stringify({ type: f.type, subject: f.subject, diff: !!f.diff, paperSub: f.diff ? f.paperSub : null, name: f.name, label: (f.label || '').trim(), openEx: !!f.openEx, scope: f.scope, ptype: f.ptype, times: Object.assign({}, f.times, { _auto: undefined }), rooms: f.rooms });
   const xwRoomUsed = (r) => !!((r.staff || 0) || (r.others || []).length || (r.slots || []).some((sl) => sl.start || sl.end || (sl.teachers || []).length));
   function syncNavH() { const n = document.querySelector('.bottom-nav'); if (n) document.documentElement.style.setProperty('--nav-h', n.offsetHeight + 'px'); }
   window.addEventListener('resize', syncNavH); syncNavH();
@@ -15624,11 +15681,13 @@ Rules:
     document.body.classList.toggle('xw-open', !!f);
     if (!f) return;
     document.getElementById('adminExamFormTitle').textContent = f.id ? 'Edit Exam' : 'New Exam';
+    { const lb = document.getElementById('adminExamLabel'); if (lb) { if (document.activeElement !== lb) lb.value = f.label || ''; lb.oninput = () => { f.label = lb.value; }; } }
     selectRow(document.getElementById('adminExamType'), testTypesList(), f.type, (v) => { f.type = v; renderAdminExamForm(ids, nameOf); });
     selectRow(document.getElementById('adminExamSubject'), subjectsList(), f.subject, (v) => { f.subject = v; renderAdminExamForm(ids, nameOf); }, 'No subject');
     renderExamPapers(f, () => renderAdminExamForm(ids, nameOf));
     const sc = document.getElementById('adminExamScope');
-    renderExamClasses(sc, f, () => renderAdminExamForm(ids, nameOf));
+    { const ox = document.getElementById('xwOpen'); if (ox) { ox.checked = !!f.openEx; ox.onchange = () => { f.openEx = ox.checked; if (f.openEx) { f.scope = []; f.diff = false; } renderAdminExamForm(ids, nameOf); }; } }
+    if (f.openEx) { sc.innerHTML = ''; sc.hidden = true; } else { sc.hidden = false; renderExamClasses(sc, f, () => renderAdminExamForm(ids, nameOf)); }
     if (false) sc.innerHTML = scopeChipsHtml(f.scope, 'data-exscope');
     sc.querySelectorAll('[data-exscope]').forEach((el) => el.addEventListener('click', () => {
       const v = el.getAttribute('data-exscope');
@@ -15646,11 +15705,11 @@ Rules:
   }
   function openAdminExamForm(exam, step) {
     state.adminExamForm = exam
-      ? { id: exam.id, ct: !!exam.ct, papers: (exam.papers || []), type: exam.type || '', subject: exam.subject || '', name: exam.name || '', scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
+      ? { id: exam.id, ct: !!exam.ct, papers: (exam.papers || []), type: exam.type || '', subject: exam.subject || '', name: exam.name || '', label: exam.label || '', openEx: !!exam.open, scope: (exam.scope || []).slice(), invigilators: (exam.invigilators || []).slice(),
           ptype: exam.ptype === 'mcq' ? 'mcq' : 'sub', times: Object.assign({}, exam.times || {}, (exam.times && exam.times.report) ? {} : { report: exam.start || '', writeTo: exam.end || '' }),
           rooms: planOf(exam).length ? planOf(exam).map((r) => ({ room: r.room || '', staff: r.staff || 0, others: (r.others || []).map((o) => Object.assign({}, o)), slots: (r.slots || []).map((sl) => ({ start: sl.start, end: sl.end, teachers: (sl.teachers || []).slice(), breaks: JSON.parse(JSON.stringify(sl.breaks || {})) })) }))
             : (exam.room ? [{ room: exam.room, slots: [{ start: exam.start, end: exam.end, teachers: (exam.invigilators || []).slice() }] }] : []) }
-      : { id: null, type: '', subject: '', name: '', scope: [], invigilators: [], rooms: [], ptype: 'sub', times: {} };
+      : { id: null, type: '', subject: '', name: '', label: '', openEx: false, scope: [], invigilators: [], rooms: [], ptype: 'sub', times: {} };
     state.adminExamForm.key = 'x' + Date.now();
     state.adminExamForm.step = step || 1; state.adminExamForm._snap = xwSnap(state.adminExamForm);
     document.getElementById('adminExamStart').value = exam ? exam.start || '' : '';
@@ -15705,7 +15764,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
     { const xw = planExtraWarnings(f); if (xw.length) { fail(xw[0], 3); return; } }
     f.rooms.forEach((r) => { r.slots = r.slots.filter((sl) => sl.start || sl.end || (sl.teachers || []).length); });
     { const miss = f.rooms.find((r) => r.slots.some((sl) => !sl.start || !sl.end)); if (miss) { fail(`Fill the duty time in ${miss.room || 'every room'}`, 3); renderExamPlanSection(); return; } }
-    if (!f.scope.length) { fail('Choose the class or batches', 1); return; }
+    if (!f.scope.length && !f.openEx) { fail('Choose the class or batches, or tick Open exam', 1); return; }
     const rooms = f.rooms.map((r) => ({ room: r.room, scope: f.scope.slice(), staff: Math.max(0, Math.min(9, r.staff || 0)),
       others: (r.others || []).filter((o) => (o.name || '').trim()).map((o) => ({ name: o.name.trim(), start: o.start || start, end: o.end || end, bStart: o.bStart || '', bEnd: o.bEnd || '' })),
       slots: r.slots.map((sl) => { const br = {}; Object.keys(sl.breaks || {}).forEach((u) => { const b = sl.breaks[u]; if ((sl.teachers || []).indexOf(u) !== -1 && b && b.start && b.end) br[u] = { start: b.start, end: b.end }; }); return { start: sl.start || start, end: sl.end || end, teachers: sl.teachers.slice(), breaks: br }; }) }));
@@ -15724,7 +15783,7 @@ Removed everywhere: Exams tab, rooms, invigilation duties and the timetable grid
       const ok = await showConfirm(`${pw.slice(0, 5).join('\n')}${pw.length > 5 ? `\n+${pw.length - 5} more` : ''}\n\nSave anyway?`, '⚠️ Please check', 'Save');
       if (!ok) return;
     }
-    const data = { name, type: f.type || '', subject: f.subject || '', papers: examFormPapers(f), date: state.adminDate, start, end, ptype: f.ptype === 'mcq' ? 'mcq' : 'sub', times: cleanExamTimes(f), room: rooms.map((r) => r.room).join(', '), scope: f.scope.slice(), invigilators: planTeachers(rooms), plan: { rooms } };
+    const data = { name, type: f.type || '', subject: f.subject || '', papers: examFormPapers(f), date: state.adminDate, start, end, ptype: f.ptype === 'mcq' ? 'mcq' : 'sub', times: cleanExamTimes(f), room: rooms.map((r) => r.room).join(', '), label: (f.label || '').trim().slice(0, 40), open: !!f.openEx, scope: f.scope.slice(), invigilators: planTeachers(rooms), plan: { rooms } };
     // each invigilator is told about their duty
     rooms.forEach((r) => (r.slots || []).forEach((sl) => (sl.teachers || []).forEach((u) => notify(u, { type: 'duty', title: `${f.id ? 'Exam duty updated' : 'Exam duty'}: ${examTitle(data)} · ${r.room}`, body: slotWhen(state.adminDate, sl.start) + ` – ${formatTimeStr(sl.end)}`, link: { tab: 'today' } }))));
     try {
@@ -19992,7 +20051,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     if (state.tab === 'add') renderInvig();
   }
   function invigDate() { return state.addTargetDate || (state.editingId && state.invigEditDate) || todayStr(); }
-  function examTitle(e) { return e.type ? `${e.type}${e.subject ? ' · ' + e.subject : ''}` : (e.name || 'Exam'); }
+  function examTitle(e) { return (e.type ? `${e.type}${e.subject ? ' · ' + e.subject : ''}` : (e.name || 'Exam')) + (e.label ? ' · ' + e.label : ''); }
   function scopeChipsHtml(sel, attr) {
     return allClassNames().map((c) => `<button type="button" class="chip${sel.indexOf(c) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')
       + allBatchesFlat().map((b) => `<button type="button" class="chip${sel.indexOf(b) !== -1 ? ' active' : ''}" ${attr}="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
@@ -21264,7 +21323,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
 
     unsubscribers.push(db.doc('settings/institute').onSnapshot((snap) => {
       const data = snap.data() || {};
-      state.weeklyOff = Array.isArray(data.weeklyOff) ? data.weeklyOff : ['Sun']; state.holidays = Array.isArray(data.holidays) ? data.holidays : []; state.birthdays = Array.isArray(data.birthdays) ? data.birthdays : []; try { renderHolidayUi(); if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ }
+      state.weeklyOff = Array.isArray(data.weeklyOff) ? data.weeklyOff : ['Sun']; state.holidays = Array.isArray(data.holidays) ? data.holidays : []; try { state.holidays.forEach((h) => bigImgFor(h)); } catch (e) { /* ignore */ } state.birthdays = Array.isArray(data.birthdays) ? data.birthdays : []; try { renderHolidayUi(); if (state.cal && document.getElementById('calRoot') && state.cal.mode === 'cal') calRender(); } catch (e) { /* ignore */ }
       renderWeeklyOffChips();
       if (state.tab === 'admin') renderAdmin();
     }, () => {}));
@@ -21597,6 +21656,11 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
         ['**Admin** kholo, phir **Exams**.', '**+ New Exam** dabao.', 'Menu se **Test type** (jaise Half-Yearly ya Weekly Test) aur **Subject** chuno, phir tareekh aur samay.', 'Classes (batch) chuno aur save karo.', 'Phir exam card se rooms aur invigilators lagao.']],
     n: ['Tests and exams are made in the same place. Only the Test type is different. The list of test types is in **Settings → Test Types**.', 'Test aur exam ek hi jagah bante hain. Sirf Test type alag hota hai. Test type ki list **Settings → Test Types** me hai.'],
     m: [['admin', '[data-ht-go="exams"]'], ['admin:exams', '#adminNewExamBtn'], ['admin:exams+newexam', '#adminExamType'], ['admin:exams+newexam', '#adminExamScope'], ['admin:exams+newexam', '#xwBar']] },
+  { id: 'bigevent', t: ['Big event and Open exam (Genius 20)', 'Big event aur Open exam (Genius 20)'], who: 'lead', k: 'big event open exam genius label logo बड़ा इवेंट ओपन एग्जाम',
+    s: [['Open **Admin**, then **Exams**, and tap **+ New Exam**.', 'Tick **Open exam**. No class is needed.', 'Write a **Label** such as Morning batch. Make one exam for each time slot.', 'Add the rooms and the teachers for the duty, then save.', 'The **Big event** card with the logo shows on Today. It is added in the **Calendar** (type **Big event**, with an optional logo).'],
+        ['**Admin** kholo, phir **Exams**, aur **+ New Exam** dabao.', '**Open exam** tick karo. Class chunne ki zaroorat nahi.', '**Label** likho jaise Morning batch. Har time slot ka alag exam banao.', 'Rooms aur duty ke teachers lagao, phir save karo.', 'Today par logo wala **Big event** card aata hai. Ye **Calendar** me banta hai (type **Big event**, logo optional).']],
+    n: ['Open exam duty counts as Invigilation, not as a class.', 'Open exam ki duty Invigilation ginti hai, class nahi.'],
+    m: [['admin', '[data-ht-go="exams"]'], ['admin:exams', '#adminNewExamBtn'], ['admin:exams+newexam', '#adminExamLabel'], ['admin:exams+newexam', '#xwBar'], ['admin:exams+newexam', '#xwOpenRow']] },
   { id: 'classtest', t: ['Make a class test (in the Timetable)', 'Class test banana (Timetable me)'], who: 'lead', k: 'class test timetable exam test cell क्लास टेस्ट',
     s: [['Open **Admin**, then **Timetable**, and tap **Edit timetable**.', 'Tap the cell of the class.', 'Open **Exam / Test** and choose **Class Test** and the subject.', 'If each class has a different subject, choose **Yes** for **Different subject for each class?**', 'Tap **Publish**. The class test also shows in **Admin → Exams**, where you set the duty.'],
         ['**Admin** kholo, phir **Timetable**, aur **Edit timetable** dabao.', 'Class ka cell dabao.', '**Exam / Test** kholo aur **Class Test** aur subject chuno.', 'Har class ka subject alag ho to **Different subject for each class?** me **Yes** chuno.', '**Publish** dabao. Class test **Admin → Exams** me bhi dikhta hai, wahan duty lagao.']],
