@@ -4713,7 +4713,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.38 · updated 22 Nov 2026</div>
+          <div class="dnote">Version 15.39 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -18226,7 +18226,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     f = f || reportFilter(false);
     const rows = [];
     if (f.showClasses) rows.push([['Classes taken', fmtUnits(t.classes)], ['Teaching time', reportHm(t.mins)]]);
-    rows.push([['On-campus time', reportCampus(t.campusSec)], f.showActivities ? ['Invigilation', `${reportHm(t.invigMin)}${t.invig ? ` (${t.invig} dut${t.invig === 1 ? 'y' : 'ies'})` : ''}`] : null]);
+    rows.push([['On-campus time', reportCampus(t.campusSec)], f.showActivities ? ['Invigilation', `${reportHm(t.invigMin)}${t.invig ? ` (${t.invig} dut${t.invig === 1 ? 'y' : 'ies'})` : ''}${f.showClasses && t.tests > 0 ? ' *' : ''}`] : null]);
     if (f.showClasses) {
       rows.push([['Worksheet / DPP given', t.ws], ['Other material given', t.mat || 0]]);
       rows.push([['Class tests conducted', t.tests], ['Homework given', t.hw]]);
@@ -18234,7 +18234,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     if (f.showActivities) rows.push([['Other work', t.other], ['Leave', `${t.leave} day${t.leave === 1 ? '' : 's'}`]]);
     rows.forEach((r) => w.pairRow(r));
     // a class test taken in the teacher's own class counts as teaching time, so say it once under the summary
-    if (f.showClasses && f.showActivities && t.tests > 0) w.bodyLine(t.invigMin > 0 ? `Invigilation is separate duties only. Own class tests (${t.tests}) are counted in Teaching time.` : 'Invigilation is 0m because class test duty is counted in Teaching time.', { size: 9 });
+    if (f.showClasses && f.showActivities && t.tests > 0) w.bodyLine(t.invigMin > 0 ? `* Own class tests (${t.tests}) are counted in Teaching time.` : '* Class test duty is counted in Teaching time.', { size: 9 });
     if (f.label) w.bodyLine('On-campus time is not affected by filters.', { size: 9 });
   }
 
