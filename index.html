@@ -4713,7 +4713,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.36 · updated 21 Nov 2026</div>
+          <div class="dnote">Version 15.37 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -14143,6 +14143,8 @@ Rules:
       logs.forEach((x) => used.add(x.id));
       const loggedBy = {};
       logs.forEach((x) => { loggedBy[x.teacherId] = (loggedBy[x.teacherId] || 0) + invigMinutes(x); });
+      // a class teacher who is on duty and filled in the class test: the duty is written inside the class entry, so it counts as logged
+      if (e.ct) { const prE = planTeachers(planOf(e)); ctAll.filter((c) => ctMatch(c, e)).forEach((c) => { if (prE.indexOf(c.teacherId) !== -1 && loggedBy[c.teacherId] === undefined) { const m = hhmmToMin(c.endTimeStr) - hhmmToMin(c.startTimeStr); loggedBy[c.teacherId] = m > 0 ? m : 0; } }); }
       const missing = (e.invigilators || []).filter((t) => loggedBy[t] === undefined);
       if (missing.length && ended(e)) alerts.push({ t: `${examTitle(e)}: invigilation not logged`, lines: [missing.map(nameOf).join(', ')] });
       const batches = expandScope(e.scope);
