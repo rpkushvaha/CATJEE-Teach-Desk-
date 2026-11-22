@@ -4737,7 +4737,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.44 · updated 22 Nov 2026</div>
+          <div class="dnote">Version 15.45 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7423,7 +7423,7 @@ function renderPartChips() {
     calrange: ["Day summary", "<rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M16 2v4\"/><path d=\"M3 10h18\"/><path d=\"M8 2v4\"/><path d=\"M17 14h-6\"/><path d=\"M13 18H7\"/><path d=\"M7 14h.01\"/><path d=\"M17 18h.01\"/>"],
     calsync: ["Shifts", "<path d=\"M11 10v4h4\"/><path d=\"m11 14 1.535-1.605a5 5 0 0 1 8 1.5\"/><path d=\"M16 2v4\"/><path d=\"m21 18-1.535 1.605a5 5 0 0 1-8-1.5\"/><path d=\"M21 22v-4h-4\"/><path d=\"M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3\"/><path d=\"M3 10h4\"/><path d=\"M8 2v4\"/>"],
     calx: ["Weekly off", "<path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/><path d=\"m14 14-4 4\"/><path d=\"m10 14 4 4\"/>"],
-    mappinned: ["On campus", "<path d=\"M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.449 6 11.613 6 8a6 6 0 0 1 12 0\"/><circle cx=\"12\" cy=\"8\" r=\"2\"/><path d=\"M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712\"/>"],
+    mappinned: ["On campus", "<path d=\"M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.459 6 11.613 6 8a6 6 0 0 1 12 0\"/><circle cx=\"12\" cy=\"8\" r=\"2\"/><path d=\"M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712\"/>"],
     alert: ["Alert", "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>"],
     table: ["Timetable", "<path d=\"M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18\"/>"],
     filecheck: ["Exam paper", "<path d=\"M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"m3 15 2 2 4-4\"/>"],
@@ -21921,7 +21921,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   function renderIconsPanel() {
     const host = document.getElementById('iconsBody'); if (!host) return;
     const im = tileIconMap(), cm = tileColorMap();
-    host.innerHTML = iconTargets().map(([title, items]) => '<div class="icn-grp">' + escapeHtml(title) + '</div>' + items.map((t) => { const sv = t.el.querySelector(':scope > svg'); const ch = !!im[t.key] || cm[t.key] !== undefined; return '<button type="button" class="icn-row" data-icn="' + escapeHtml(t.key) + '"><span class="icn-pv">' + (sv ? sv.outerHTML.replace(/width="\d+"/, 'width="20"').replace(/height="\d+"/, 'height="20"').replace(/style="[^"]*"/, '') : '') + '</span><span class="icn-nm">' + escapeHtml(t.label) + (ch ? ' <small>· changed</small>' : '') + '</span><span class="icn-go">›</span></button>'; }).join('')).join('');
+    host.innerHTML = iconTargets().map(([title, items]) => '<div class="icn-grp">' + escapeHtml(title) + '</div>' + items.map((t) => { const sv = t.el.querySelector(':scope > svg'); const ch = !!im[t.key] || cm[t.key] !== undefined; return '<button type="button" class="icn-row" data-icn="' + escapeHtml(t.key) + '"><span class="icn-pv">' + (sv ? sv.outerHTML.replace(/width="\d+"/, 'width="20"').replace(/height="\d+"/, 'height="20"').replace(/style="[^"]*"/, '') : '') + '</span><span class="icn-nm">' + escapeHtml(t.label) + '</span><span class="icn-go">›</span></button>'; }).join('')).join('');
     host.querySelectorAll('[data-icn]').forEach((b) => b.addEventListener('click', () => openIconPicker(b.getAttribute('data-icn'))));
   }
   function openIconPicker(key) {
