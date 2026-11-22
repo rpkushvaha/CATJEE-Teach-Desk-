@@ -1958,6 +1958,15 @@
   .ro-a { display: flex; gap: 4px; }
   .ro-btn { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; } .ro-btn.off { opacity: .35; }
   .li-icons { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; } .li-icons button { height: 58px; border: 1px solid var(--line); background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--muted-2); font: inherit; font-size: 12px; font-weight: 600; padding: 0; } .li-icons button.sel { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); } .li-igt { font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--muted); text-transform: uppercase; margin: 12px 0 6px; } .li-ib { display: flex; flex-direction: column; align-items: center; gap: 3px; } .li-ib small { font-size: 9.5px; font-weight: 600; line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ic-bar { grid-column: 1 / -1; margin: 14px 0 4px; } .ic-bar[hidden] { display: none; }
+  .ic-edit-btn { display: block; width: 100%; padding: 10px; border: 1.5px solid var(--gold); background: none; color: var(--gold); border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; } .ic-edit-btn.on { background: var(--gold); color: #fff; }
+  .ic-hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; } .ic-hint[hidden] { display: none; }
+  body.ic-edit #setTiles .st-tile, body.ic-edit #adminRepKind .rt-tile { cursor: pointer; }
+  body.ic-edit #setTiles .st-tile::before, body.ic-edit #adminRepKind .rt-tile::before { content: "\270E"; position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; z-index: 0; }
+  .ic-ov { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
+  .ic-sheet { width: 100%; max-width: 560px; max-height: 86vh; background: var(--card); border-radius: 18px 18px 0 0; border-top: 3px solid var(--gold); display: flex; flex-direction: column; }
+  .ic-h { padding: 14px 16px 6px; font-size: 16px; font-weight: 700; color: var(--ink); } .ic-sub { padding: 0 16px 6px; font-size: 12px; color: var(--muted); }
+  .ic-body { padding: 0 16px 8px; overflow-y: auto; flex: 1; } .ic-ft { display: flex; gap: 10px; padding: 10px 16px 14px; border-top: 1px solid var(--line); } .ic-ft button { flex: 1; }
   .li-ico { display: inline-block; vertical-align: -4px; margin-right: 8px; color: var(--muted-2); } .li-ico .ic { width: 18px; height: 18px; }
   .li-sub { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 1px; } .li-hid .ro-nm { opacity: .55; }
   .ro-reset { display: block; width: 100%; margin-top: 12px; padding: 8px; border: none; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--gold); cursor: pointer; }
@@ -4713,7 +4722,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.39 · updated 22 Nov 2026</div>
+          <div class="dnote">Version 15.40 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -7434,7 +7443,7 @@ function renderPartChips() {
     try { await state.db.doc('settings/lists').set({ [k]: cfg }, { mergeFields: [k] }); showToast('Saved'); }
     catch (err) { state.lists = prev; listsRefresh(); flashOffline(err); }
   }
-  function listsRefresh() { Object.keys(LIST_DEFS).forEach((k) => { try { renderListPanel(k); } catch (e) { /* ignore */ } }); try { renderDurChips(); } catch (e) { /* ignore */ } try { applyReportNames(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); } catch (e) { /* ignore */ } }
+  function listsRefresh() { Object.keys(LIST_DEFS).forEach((k) => { try { renderListPanel(k); } catch (e) { /* ignore */ } }); try { renderDurChips(); } catch (e) { /* ignore */ } try { applyReportNames(); } catch (e) { /* ignore */ } try { setsTilesRefresh(); } catch (e) { /* ignore */ } try { applyTileIcons(); } catch (e) { /* ignore */ } }
   function renderListPanel(k) {
     const el = document.getElementById('listBody_' + k); if (!el) return;
     if (!state.canAdmin || state.previewCoord || state.previewPrincipal) { el.innerHTML = ''; return; }
@@ -21806,6 +21815,7 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
   function setsViewSync() { const v = document.getElementById('view-admin'); if (!v) return; const w = state.adminSetOpen ? '1' : '0'; if (v.getAttribute('data-spage') !== w) v.setAttribute('data-spage', w); }
   function setsShowTiles() { state.adminSetOpen = null; renderSettingsAccordion(); setsViewSync(); }
   function setsTilesRefresh() {
+    try { syncIconBars(); } catch (e) { /* ignore */ }
     document.querySelectorAll('#setTiles [data-st]').forEach((b) => { const id = b.getAttribute('data-st'); const hid = setPanelHidden(id); if (b.hidden !== hid) b.hidden = hid; const sm = b.querySelector('.qa-s'); let sv = ''; try { sv = settingsSummary(id) || ''; } catch (e) { sv = ''; } if (sm && sm.textContent !== sv) sm.textContent = sv; });
     document.querySelectorAll('#setTiles [data-stl]').forEach((l) => { const ids = (l.getAttribute('data-stl') || '').split(','); const none = ids.every((i) => setPanelHidden(i)); if (l.hidden !== none) l.hidden = none; const g = l.nextElementSibling; if (g && g.hidden !== none) g.hidden = none; });
   }
@@ -21818,6 +21828,57 @@ document.getElementById('navReports').addEventListener('click', () => switchTab(
     first.parentElement.insertBefore(box, first);
     box.querySelectorAll('[data-st]').forEach((b) => b.addEventListener('click', () => { const id = b.getAttribute('data-st'); navPush({ tab: 'admin', sub: 'settings', spage: 'tiles' }); state.adminSetOpen = id; try { settingsFreshOpen(id); } catch (e) { /* ignore */ } renderSettingsAccordion(); setsViewSync(); window.scrollTo(0, 0); }));
     setsTilesRefresh(); setsViewSync();
+  })();
+
+  // ---------- Change icons: Admin > Settings tiles and the Reports tiles ----------
+  state.iconEdit = false;
+  function tileIconMap() { return listCfg('tileIcons'); }
+  function tileKeyOf(b) { if (b.hasAttribute('data-st')) return b.getAttribute('data-st'); const k = b.getAttribute('data-rep-kind'); if (b.id === 'doubtRepTile') return 'rep:doubt'; return k ? 'rep:' + k : ''; }
+  function tileEls() { return Array.prototype.slice.call(document.querySelectorAll('#setTiles [data-st], #adminRepKind .rt-tile')); }
+  function iconEditOn() { return !!state.iconEdit && !!state.canAdmin && !state.previewCoord && !state.previewPrincipal; }
+  function applyTileIcons() {
+    const m = tileIconMap();
+    tileEls().forEach((b) => {
+      const cur = b.querySelector(':scope > svg'); if (!cur) return;
+      if (b.getAttribute('data-ic0') === null) b.setAttribute('data-ic0', cur.outerHTML);
+      const id = m[tileKeyOf(b)]; let want = b.getAttribute('data-ic0');
+      if (id && ICON_LIB[id]) { const w = cur.getAttribute('width') || '22'; const h = cur.getAttribute('height') || w; want = iconSvg(id).replace('width="18"', 'width="' + w + '"').replace('height="18"', 'height="' + h + '"'); }
+      if (cur.outerHTML !== want) cur.outerHTML = want;
+    });
+    syncIconBars();
+  }
+  function syncIconBars() {
+    const can = !!state.canAdmin && !state.previewCoord && !state.previewPrincipal;
+    if (!can && state.iconEdit) state.iconEdit = false;
+    document.body.classList.toggle('ic-edit', iconEditOn());
+    document.querySelectorAll('.ic-bar').forEach((bar) => { bar.hidden = !can; const bt = bar.querySelector('[data-icedit-btn]'); if (bt) { bt.textContent = iconEditOn() ? 'Done' : 'Change icons'; bt.classList.toggle('on', iconEditOn()); } const h = bar.querySelector('.ic-hint'); if (h) h.hidden = !iconEditOn(); });
+  }
+  function makeIconBar() {
+    const bar = document.createElement('div'); bar.className = 'ic-bar'; bar.hidden = true;
+    bar.innerHTML = '<button type="button" class="ic-edit-btn" data-icedit-btn>Change icons</button><div class="ic-hint" hidden>Tap a tile to choose its icon. Tiles do not open while this is on.</div>';
+    bar.querySelector('[data-icedit-btn]').addEventListener('click', () => { state.iconEdit = !state.iconEdit; syncIconBars(); });
+    return bar;
+  }
+  function openIconPicker(key) {
+    const label = key.indexOf('rep:') === 0 ? (key === 'rep:doubt' ? 'Doubt clearing' : repName(key.slice(4))) : setPanelLabel(key);
+    let sel = tileIconMap()[key] || ''; const old = document.getElementById('icPickOv'); if (old) old.remove();
+    const ov = document.createElement('div'); ov.id = 'icPickOv'; ov.className = 'ic-ov';
+    ov.innerHTML = `<div class="ic-sheet" role="dialog" aria-label="Choose icon"><div class="ic-h">Icon for “${escapeHtml(label)}”</div><div class="ic-sub">Same icon list as in Lists</div><div class="ic-body"><div class="li-icons"><button type="button" class="li-ic-def${sel ? '' : ' sel'}" data-ic-pick="">Original</button></div>${ICON_GROUPS.map((gp) => `<div class="li-igt">${escapeHtml(gp[0])}</div><div class="li-icons">${gp[1].map((ik) => `<button type="button" class="${sel === ik ? 'sel' : ''}" data-ic-pick="${ik}" aria-label="${escapeHtml(ICON_LIB[ik][0])}" title="${escapeHtml(ICON_LIB[ik][0])}"><span class="li-ib">${iconSvg(ik)}<small>${escapeHtml(ICON_LIB[ik][0])}</small></span></button>`).join('')}</div>`).join('')}</div><div class="ic-ft"><button type="button" class="btn-secondary" data-ic-cancel>Cancel</button><button type="button" class="add-entry-btn" data-ic-save>Save</button></div></div>`;
+    document.body.appendChild(ov);
+    const close = () => ov.remove();
+    ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
+    ov.querySelectorAll('[data-ic-pick]').forEach((b) => b.addEventListener('click', () => { sel = b.getAttribute('data-ic-pick') || ''; ov.querySelectorAll('[data-ic-pick]').forEach((x) => x.classList.toggle('sel', x === b)); }));
+    ov.querySelector('[data-ic-cancel]').addEventListener('click', close);
+    ov.querySelector('[data-ic-save]').addEventListener('click', async () => { const c = Object.assign({}, tileIconMap()); if (sel && ICON_LIB[sel]) c[key] = sel; else delete c[key]; close(); await listWrite('tileIcons', c); });
+  }
+  document.addEventListener('click', (e) => {
+    if (!iconEditOn()) return; const b = e.target.closest && e.target.closest('#setTiles [data-st], #adminRepKind .rt-tile'); if (!b) return;
+    e.preventDefault(); e.stopImmediatePropagation(); const k = tileKeyOf(b); if (k) openIconPicker(k);
+  }, true);
+  (function buildIconBars() {
+    const st = document.getElementById('setTiles'); if (st) st.appendChild(makeIconBar());
+    const rk = document.getElementById('adminRepKind'); if (rk) { const rb = makeIconBar(); rb.style.order = '200'; rk.appendChild(rb); }
+    applyTileIcons();
   })();
   function openHelp() { const st = history.state && history.state.catjeeMenu; if (st === 'helpc') return; if (!st) { openMenu(); setTimeout(() => openMenuPanel('helpc'), 260); } else openMenuPanel('helpc'); }
   function openHelpSheetOld() {
