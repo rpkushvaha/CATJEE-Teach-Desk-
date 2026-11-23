@@ -4746,7 +4746,7 @@
       <div class="dscroll dbody">
         <div class="dcard">
           <div class="dfield-value">CATJEE Teach Desk</div>
-          <div class="dnote">Version 15.51 · updated 22 Nov 2026</div>
+          <div class="dnote">Version 15.52 · updated 22 Nov 2026</div>
           <p class="dtext" style="margin:10px 0 0;">A daily activity tracker built for CATJEE's teachers and admin team.</p>
         </div>
         <div class="dcard" style="display:flex; gap:10px; align-items:flex-start;">
@@ -12255,6 +12255,9 @@ Rules:
     return `<button type="button" class="hol-card hol-n hol-big" data-cal-open="${h.from}">${lg}<span class="hol-tx"><b>${today ? 'Big event today' : 'Big event'}</b><span>${escapeHtml(h.name)}${tail}${h.note ? ' · ' + escapeHtml(h.note) : ''}</span></span></button>`;
   }
   const holPair = (h) => (!h.pair ? '' : (h.type === 'working' ? `In lieu of ${slotWhen(h.pair)}` : (h.type === 'holiday' ? `Made up by working on ${slotWhen(h.pair)}` : '')));
+  const LN_A_DEF = 'Evening classes off, morning classes run', LN_B_DEF = 'Teachers have special working hours';
+  const calLnA = (h) => (typeof h.lnA === 'string' ? h.lnA : ((h.type === 'half' || h.type === 'special') && h.evening === 'off' ? LN_A_DEF : ''));
+  const calLnB = (h) => (typeof h.lnB === 'string' ? h.lnB : (h.type === 'special' ? LN_B_DEF : ''));
   const calId = () => 'h' + Math.random().toString(36).slice(2, 8);
   function holCardHtml() {
     const t = todayStr(); let big = '';
@@ -12267,7 +12270,7 @@ Rules:
     const t = todayStr(); const d = holDay(t);
     if (d && d.type !== 'vac' && d.type !== 'big') {
       const cls = { holiday: 'hol-h', working: 'hol-w', special: 'hol-s', half: 'hol-f', note: 'hol-n2' }[d.type]; const head = { holiday: 'Holiday today', working: 'Sunday working today', special: 'Special day today', half: 'Half day today', note: 'Note for today' }[d.type];
-      const extra = [(d.type === 'half' || d.type === 'special') && d.evening === 'off' ? 'Evening classes off' : '', d.type === 'special' && d.evening === 'off' ? 'Morning classes run' : '', d.type === 'special' ? 'Special working hours for teachers' : '', d.type === 'working' ? holPair(d) : '', d.type === 'note' && d.note ? d.note : '', d.tentative ? 'Date may change' : ''].filter(Boolean).join(' · ');
+      const extra = [typeof d.lnA === 'string' ? d.lnA : ((d.type === 'half' || d.type === 'special') && d.evening === 'off' ? 'Evening classes off' : ''), typeof d.lnA === 'string' ? '' : (d.type === 'special' && d.evening === 'off' ? 'Morning classes run' : ''), typeof d.lnB === 'string' ? d.lnB : (d.type === 'special' ? 'Special working hours for teachers' : ''), d.type === 'working' ? holPair(d) : '', d.type === 'note' && d.note ? d.note : '', d.tentative ? 'Date may change' : ''].filter(Boolean).join(' · ');
       return `<button type="button" class="hol-card ${cls}" data-cal-open="${t}"><b>${head}</b><span>${escapeHtml(d.name)}${extra ? ' · ' + escapeHtml(extra) : ''}</span></button>${d.type === 'holiday' ? '<button type="button" class="hol-duty" data-hol-duty>Working today? Record holiday duty</button>' : ''}`;
     }
     const next = (state.holidays || []).filter((h) => (h.type === 'holiday' || h.type === 'special' || h.type === 'half') && h.from > t).sort((a, b) => a.from.localeCompare(b.from))[0];
@@ -12299,7 +12302,7 @@ Rules:
     return h + '</div>';
   }
   function calEntryHtml(h, admin) {
-    const lines = [holRange(h), holPair(h), (h.type === 'half' || h.type === 'special') && h.evening === 'off' ? 'Evening classes off, morning classes run' : '', h.type === 'special' ? 'Teachers have special working hours' : '', h.tentative ? 'This date may change' : '', h.note || ''].filter(Boolean);
+    const lines = [holRange(h), holPair(h), calLnA(h), calLnB(h), h.tentative ? 'This date may change' : '', h.note || ''].filter(Boolean);
     return `<div class="cal-det"><div class="cal-dh"><span class="cal-pill ${HOL_CLS[h.type]}">${HOL_TYPES[h.type]}</span><b>${escapeHtml(h.name)}</b></div>${lines.map((l) => `<div class="cal-ln">${escapeHtml(l)}</div>`).join('')}${admin ? `<button type="button" class="btn-secondary cal-edit" data-cal-edit="${escapeHtml(h.id)}" style="border-color: var(--line);">Edit</button>` : ''}</div>`;
   }
   function calHtml() {
@@ -12338,7 +12341,7 @@ Rules:
       ${f.type === 'big' ? `<div class="sv-tlbl">Logo (optional)</div>${f.logo && /^data:image\//.test(f.logo) ? `<img class="cf-lg" src="${f.logo}" alt="">` : ''}<button type="button" class="btn-secondary" id="cfLogoPick" style="border-color: var(--line); width:100%;">${f.logo ? 'Change picture' : 'Choose a picture'}</button>${f.logo ? '<button type="button" class="btn-secondary" id="cfLogoRm" style="border-color: var(--line); width:100%; margin-top:8px;">Remove logo</button>' : ''}<input type="file" id="cfLogoFile" accept="image/*" hidden><div class="hv-note" style="text-align:left;">The picture is made small automatically. It shows on the Today page and in the timetable.</div>` : ''}
       <div${f.type === 'big' ? ' style="display:none"' : ''}><div class="sv-tlbl">Linked day (optional)</div><input class="text-input" id="cfPair" type="date" value="${escapeHtml(f.pair)}"><div class="hv-note" style="text-align:left;">A holiday: the Sunday worked instead. A working Sunday: the holiday it is in lieu of.</div></div>
       <label class="xw-sw" style="margin-top:8px;${f.type === 'big' ? ' display:none;' : ''}"><span><b>This date may change</b><small>For dates that depend on the moon</small></span><input type="checkbox" id="cfTent"${f.tentative ? ' checked' : ''}></label>
-      ${(f.type === 'half' || f.type === 'special') ? `<label class="xw-sw" style="margin-top:8px;"><span><b>Evening classes off</b><small>Morning classes run as usual</small></span><input type="checkbox" id="cfEve"${f.evening === 'off' ? ' checked' : ''}></label>` : ''}
+      ${(f.type === 'half' || f.type === 'special') ? `<label class="xw-sw" style="margin-top:8px;"><span><b>Evening classes off</b><small>Morning classes run as usual</small></span><input type="checkbox" id="cfEve"${f.evening === 'off' ? ' checked' : ''}></label><div class="sv-tlbl">Classes line <span class="xt-note">shown on the card</span></div><input class="text-input" id="cfLnA" type="text" maxlength="160" value="${escapeHtml(typeof f.lnA === 'string' ? f.lnA : (f.evening === 'off' ? LN_A_DEF : ''))}" placeholder="e.g. Morning classes run, evening classes off">${f.type === 'special' ? `<div class="sv-tlbl">Teachers line <span class="xt-note">shown on the card</span></div><input class="text-input" id="cfLnB" type="text" maxlength="160" value="${escapeHtml(typeof f.lnB === 'string' ? f.lnB : LN_B_DEF)}" placeholder="e.g. Teachers have special working hours"><div class="hv-note" style="text-align:left;">Clear a box to hide that line. Leave it as it is to keep the usual line.</div>` : '<div class="hv-note" style="text-align:left;">Clear the box to hide this line.</div>'}` : ''}
       <button type="button" class="save-btn" id="cfSave" style="margin-top:12px;">Save</button>
       <button type="button" class="btn-secondary" id="cfCancel" style="border-color: var(--line); margin-top:8px; width:100%;">Cancel</button>
       ${f.id ? '<button type="button" class="btn-secondary" id="cfDelete" style="border-color: var(--line); margin-top:8px; width:100%; color:#B42318;">Delete</button>' : ''}</div>`;
@@ -12415,7 +12418,7 @@ Rules:
       q('#calPrev').addEventListener('click', () => { c.m = calShift(c.m, -1); c.sel = null; calRender(); });
       q('#calNext').addEventListener('click', () => { c.m = calShift(c.m, 1); c.sel = null; calRender(); });
       qa('[data-cal-d]').forEach((b) => b.addEventListener('click', () => { c.sel = b.getAttribute('data-cal-d'); calRender(); }));
-      qa('[data-cal-edit]').forEach((b) => b.addEventListener('click', () => { const h = (state.holidays || []).find((x) => x.id === b.getAttribute('data-cal-edit')); if (!h) return; c.form = { id: h.id, type: h.type, name: h.name, from: h.from, to: h.to && h.to !== h.from ? h.to : '', note: h.note || '', pair: h.pair || '', tentative: !!h.tentative, evening: h.evening || '', logo: h.logo || '' }; c.mode = 'form'; calRender(); }));
+      qa('[data-cal-edit]').forEach((b) => b.addEventListener('click', () => { const h = (state.holidays || []).find((x) => x.id === b.getAttribute('data-cal-edit')); if (!h) return; c.form = { id: h.id, type: h.type, name: h.name, from: h.from, to: h.to && h.to !== h.from ? h.to : '', note: h.note || '', pair: h.pair || '', tentative: !!h.tentative, evening: h.evening || '', lnA: (typeof h.lnA === 'string' ? h.lnA : undefined), lnB: (typeof h.lnB === 'string' ? h.lnB : undefined), logo: h.logo || '' }; c.mode = 'form'; calRender(); }));
       qa('[data-cal-wish]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-wish')); const n = x && calWa(x); if (n) window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(`Happy Birthday, ${bdName(x)}! 🎂🎉 Wishing you a wonderful year ahead. Team CATJEE`), '_blank'); }));
       qa('[data-cal-quick]').forEach((b) => b.addEventListener('click', () => calQuick(b.getAttribute('data-cal-quick'), c.sel)));
       qa('[data-cal-bedit]').forEach((b) => b.addEventListener('click', () => { const x = (state.birthdays || []).find((y) => y.id === b.getAttribute('data-cal-bedit')); if (!x) return; c.bform = { id: x.id, uid: x.uid || '', name: x.name, sal: x.sal || '', date: (c.sel || todayStr()).slice(0, 4) + '-' + x.md, md: x.md, y: x.uid ? teacherBirthY(x.uid) : (x.y || ''), ownY: !!(x.uid && (state.adminNames[x.uid] || {}).by), other: !x.uid }; c.mode = 'bform'; calRender(); }));
@@ -12423,9 +12426,11 @@ Rules:
     } else if (c.mode === 'bform') { calBindBform(body, c);
     } else if (c.mode === 'form') {
       const f = c.form;
-      qa('[data-cf-type]').forEach((b) => b.addEventListener('click', () => { f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; const nt = b.getAttribute('data-cf-type'); if (nt === 'birthday') { c.bform = calNewBd(from0(f.from)); c.mode = 'bform'; calRender(); return; } f.type = nt; calRender(); }));
+      qa('[data-cf-type]').forEach((b) => b.addEventListener('click', () => { { const a = q('#cfLnA'), b2 = q('#cfLnB'); if (a && typeof f.lnA !== 'string') { const def = q('#cfEve') && q('#cfEve').checked ? LN_A_DEF : ''; if (a.value !== def) f.lnA = a.value; } else if (a) f.lnA = a.value; if (b2 && (typeof f.lnB === 'string' || b2.value !== LN_B_DEF)) f.lnB = b2.value; } f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; const nt = b.getAttribute('data-cf-type'); if (nt === 'birthday') { c.bform = calNewBd(from0(f.from)); c.mode = 'bform'; calRender(); return; } f.type = nt; calRender(); }));
+      { const ev = q('#cfEve'), la = q('#cfLnA'); if (ev && la) { la.addEventListener('input', () => { f.lnA = la.value; }); ev.addEventListener('change', () => { if (typeof f.lnA !== 'string' || f.lnA === LN_A_DEF || f.lnA === '') { la.value = ev.checked ? LN_A_DEF : ''; delete f.lnA; } }); } const lb = q('#cfLnB'); if (lb) lb.addEventListener('input', () => { f.lnB = lb.value; }); }
       q('#cfCancel').addEventListener('click', () => { c.mode = 'cal'; calRender(); });
-      const lgSync = () => { f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; };
+      const lnSync = () => { const a = q('#cfLnA'), b2 = q('#cfLnB'); if (a) { const def = q('#cfEve') && q('#cfEve').checked ? LN_A_DEF : ''; if (a.value !== def || typeof f.lnA === 'string') f.lnA = a.value; } if (b2 && (b2.value !== LN_B_DEF || typeof f.lnB === 'string')) f.lnB = b2.value; };
+      const lgSync = () => { lnSync(); f.name = q('#cfName').value; f.from = q('#cfFrom').value; f.to = q('#cfTo').value; f.note = q('#cfNote').value; f.pair = q('#cfPair').value; f.tentative = q('#cfTent').checked; };
       { const pk = q('#cfLogoPick'), fi = q('#cfLogoFile'), rm = q('#cfLogoRm');
         if (pk && fi) { pk.addEventListener('click', () => fi.click()); fi.addEventListener('change', async () => { const file = fi.files && fi.files[0]; if (!file) return; try { const url = await calLogoShrink(file); lgSync(); f.logo = url; calRender(); } catch (e) { showToast('Could not read this picture', 'error'); } }); }
         if (rm) rm.addEventListener('click', () => { lgSync(); f.logo = ''; calRender(); }); }
@@ -12434,6 +12439,7 @@ Rules:
         if (!name) { showToast('Write the name of the holiday', 'error'); return; } if (!from) { showToast('Choose the date', 'error'); return; } if (to && to < from) { showToast('The last date is before the first date', 'error'); return; }
         const rec = { id: f.id || calId(), type: f.type, name: name.slice(0, 80), from, to: to && to !== from ? to : '', note: q('#cfNote').value.trim().slice(0, 600), pair: q('#cfPair').value, tentative: q('#cfTent').checked, evening: ((f.type === 'half' || f.type === 'special') && q('#cfEve') && q('#cfEve').checked) ? 'off' : '' };
         if (f.type === 'big' && f.logo && /^data:image\//.test(f.logo)) rec.logo = f.logo;
+        if (f.type === 'half' || f.type === 'special') { const la = q('#cfLnA'), lb = q('#cfLnB'); if (la) { const def = rec.evening === 'off' ? LN_A_DEF : ''; if (la.value.trim() !== def) rec.lnA = la.value.trim().slice(0, 160); } if (lb && lb.value.trim() !== LN_B_DEF) rec.lnB = lb.value.trim().slice(0, 160); }
         const list = (state.holidays || []).filter((x) => x.id !== rec.id).concat(rec);
         if (await calSave(list)) { showToast(f.id ? 'Holiday updated' : 'Holiday added'); c.mode = 'cal'; c.m = from.slice(0, 7); c.sel = from; calRender(); }
       });
